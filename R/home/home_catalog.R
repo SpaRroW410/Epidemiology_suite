@@ -89,7 +89,22 @@ calculator_catalog <- list(
   list(key = "means_k", label = "Three or more group means",
        answers = "Answers: \"How many subjects per group do I need to detect any difference across 3+ group means?\"",
        outcome_type = "mean", groups = "3plus", dependency = NA, reference_based = NA,
-       built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA)
+       built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
+
+  list(key = "diagnostic_sens_spec",
+       label = "Sensitivity & specificity — given prevalence (Buderer's method)",
+       answers = paste(
+         "Answers: \"How many subjects (diseased + non-diseased) do I need",
+         "to estimate my test's sensitivity and specificity to a desired",
+         "precision, given the condition's prevalence?\""
+       ),
+       # outcome_type/groups don't apply to this design (one sample serving
+       # both estimates, not a "how many groups" comparison), so this entry
+       # is only reachable via the "by study design" finder, not "by groups
+       # & data type" -- that's fine, the groups finder just never matches it.
+       outcome_type = "diagnostic", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Diagnostic Accuracy",
+       module_input_id = NA, design_value = NA)
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -111,7 +126,7 @@ study_design_families <- list(
        catalog_keys = character(0)),
   list(id = "diagnostic", label = "Diagnostic Accuracy",
        hint = "Estimating sensitivity/specificity given expected prevalence.",
-       catalog_keys = character(0)),
+       catalog_keys = c("diagnostic_sens_spec")),
   list(id = "correlation", label = "Correlation",
        hint = "Detecting a Pearson correlation between two continuous variables.",
        catalog_keys = character(0)),

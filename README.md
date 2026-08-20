@@ -7,7 +7,7 @@ design rationale: [`docs/project-brief.md`](docs/project-brief.md) and
 [`docs/SDD.md`](docs/SDD.md).
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: two complete calculator modules --
+of Phase 2: three complete calculator modules --
 
 - **Proportions** (`R/modules/mod_proportion.R`) -- single proportion
   (precision-based, Cochran's formula, with optional finite population
@@ -15,11 +15,14 @@ of Phase 2: two complete calculator modules --
   proportions
 - **Means** (`R/modules/mod_means.R`) -- single mean vs. known value, two
   independent means, two paired means (before-after / matched pairs)
+- **Diagnostic Accuracy** (`R/modules/mod_diagnostic.R`) -- sensitivity &
+  specificity given disease prevalence (Buderer's method), per Buderer
+  (1996) and Akoglu (2022)'s practical guide to this literature
 
 Everything else in `docs/SDD.md` §7's catalog (case-control, cohort/RR,
-diagnostic accuracy, correlation, precision-based CI-width, survival,
-post-hoc power, and 3+ group comparisons for both proportions and means)
-remains "coming soon" in the Home finder, per the phase plan.
+correlation, precision-based CI-width, survival, post-hoc power, and 3+
+group comparisons for both proportions and means) remains "coming soon" in
+the Home finder, per the phase plan.
 
 ## Requirements
 
@@ -99,6 +102,13 @@ outside those three files changes when you add a calculator.
      inside a `reactive()` + `tryCatch()`, and renders the result or a
      validation message
    - a small metadata list (`id`, `nav_title`) for the registry
+
+   If the family has more than one design (e.g. Proportions' precision/
+   known-value/two-sample split), add a `design` `radioButtons()` +
+   `conditionalPanel()` per design, as in `mod_proportion.R`. A
+   single-design family doesn't need one — `mod_diagnostic.R` has no
+   `design` input at all, since it's one calculation with no variants to
+   switch between.
 
 ### Wiring it in
 
