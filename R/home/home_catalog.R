@@ -163,7 +163,43 @@ calculator_catalog <- list(
        ),
        outcome_type = "agreement", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Agreement / Reliability",
-       module_input_id = "agreement-design", design_value = "icc")
+       module_input_id = "agreement-design", design_value = "icc"),
+
+  # Case-Control / Cohort entries: same reasoning as Diagnostic Accuracy
+  # above -- these compare exposure vs. outcome status, not "groups" in the
+  # proportion/mean sense, so only reachable via "by study design".
+  list(key = "case_control_unmatched",
+       label = "Unmatched case-control study",
+       answers = paste(
+         "Answers: \"How many cases and controls do I need to detect a",
+         "given odds ratio, sampling cases and controls independently",
+         "(not matched to each other)?\""
+       ),
+       outcome_type = "case_control", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Case-Control",
+       module_input_id = "case_control-design", design_value = "unmatched"),
+
+  list(key = "case_control_matched",
+       label = "Matched case-control study (1:1 or 1:m)",
+       answers = paste(
+         "Answers: \"How many matched case-control pairs (or sets) do I",
+         "need to detect a given odds ratio, when each case is",
+         "individually matched to one or more controls?\""
+       ),
+       outcome_type = "case_control", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Case-Control",
+       module_input_id = "case_control-design", design_value = "matched"),
+
+  list(key = "cohort_rr",
+       label = "Cohort study (relative risk)",
+       answers = paste(
+         "Answers: \"How many exposed and unexposed subjects do I need to",
+         "detect a given relative risk, following both groups forward to",
+         "see who develops the outcome?\""
+       ),
+       outcome_type = "cohort", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Cohort / RR",
+       module_input_id = NA, design_value = NA)
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -178,11 +214,11 @@ study_design_families <- list(
        hint = "Comparing a continuous measurement within or between groups.",
        catalog_keys = c("means_single", "means_two_indep", "means_two_dep", "means_k")),
   list(id = "case_control", label = "Case-Control",
-       hint = "Unmatched case-control study, odds ratio based.",
-       catalog_keys = character(0)),
+       hint = "Case-control study (unmatched or matched), odds ratio based.",
+       catalog_keys = c("case_control_unmatched", "case_control_matched")),
   list(id = "cohort", label = "Cohort / Relative Risk",
        hint = "Cohort or cross-sectional study estimating relative risk.",
-       catalog_keys = character(0)),
+       catalog_keys = c("cohort_rr")),
   list(id = "diagnostic", label = "Diagnostic Accuracy",
        hint = "Estimating sensitivity/specificity given expected prevalence.",
        catalog_keys = c("diagnostic_precision", "diagnostic_vs_reference",

@@ -191,8 +191,8 @@ for what to build next):
 | Means | One-sample, two-sample, paired t-test based | `pwr::pwr.t.test` | Live |
 | Diagnostic accuracy | Precision-based (Buderer); vs. reference value; two tests, unpaired/paired | closed-form (Buderer; Casagrande-Pike; Connor), all + Yates' correction | Live |
 | Agreement / reliability | Cohen's kappa; ICC | `presize::prec_kappa()` (→ `kappaSize`); `presize::prec_icc()` (Bonett 2002) | Live |
-| Case-control | Unmatched, odds ratio based | `epiR::epi.sscc` | Not started |
-| Cohort / RR | Cohort, cross-sectional, relative risk | `epiR::epi.sscohortc` | Not started |
+| Case-control | Unmatched; matched (1:1 or 1:m) | `epiR::epi.sscc()` | Live |
+| Cohort / RR | Cohort, cross-sectional, relative risk | `epiR::epi.sscohortc()` | Live |
 | Correlation | Pearson correlation | `pwr::pwr.r.test` | Not started |
 | One-way ANOVA | k-group means | `pwr::pwr.anova.test` | Not started |
 | Precision-based (generic) | CI-width driven (risk diff/ratio, rate) | `presize`, `precisely` | Not started |
@@ -307,7 +307,7 @@ maintained backlog. Summary:
 
 | Stage | Scope | Status |
 |---|---|---|
-| 1 — v1 CORE (~25 modules) | Single proportion, single mean, two means, two proportions, unmatched case-control, cohort/RR, one-way ANOVA, correlation, chi-square, diagnostic Se/Sp, ICC, kappa, log-rank, Simon two-stage, pilot rules-of-thumb, TOST equivalence | Proportions, Means, Diagnostic Accuracy, Agreement/Reliability (kappa+ICC) live; rest not started |
+| 1 — v1 CORE (~25 modules) | Single proportion, single mean, two means, two proportions, unmatched case-control, cohort/RR, one-way ANOVA, correlation, chi-square, diagnostic Se/Sp, ICC, kappa, log-rank, Simon two-stage, pilot rules-of-thumb, TOST equivalence | Proportions, Means, Diagnostic Accuracy, Agreement/Reliability (kappa+ICC), Case-Control (unmatched+matched), Cohort/RR live; one-way ANOVA, correlation, chi-square, log-rank, Simon two-stage, pilot rules-of-thumb, TOST equivalence not started |
 | 2 — analytical depth | F-family completeness (factorial/RM-ANOVA, ANCOVA, MANOVA), full correlation/regression suite, matched case-control, ROC comparison, Bland-Altman/CCC/Cronbach, prediction-model development (`pmsampsize`) | Not started |
 | 3 — advanced trial designs | Cluster-randomized/stepped-wedge, group-sequential/adaptive, survival extensions, bioequivalence replicate designs, longitudinal/MMRM, post-hoc/achieved-power module | Not started |
 | 4 — niche/simulation & non-formula | Genetic (`genpwr`), SEM (`semPower`), trial sequential analysis, `simr`-based simulation, guidance-only qualitative/animal-study panels | Not started |

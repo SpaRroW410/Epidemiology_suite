@@ -154,8 +154,8 @@
 |One-way ANOVA                 |f, k, α, power                |`pwr::pwr.anova.test`                         |Yes    |Cohen (1988)                      |not built|
 |Pearson correlation           |r, α, power                   |`pwr::pwr.r.test`                             |Yes    |Cohen (1988)                      |not built|
 |Multiple regression           |f², #predictors               |`pwr::pwr.f2.test`                            |Yes    |Cohen (1988)                      |not built|
-|Unmatched case-control        |%exposed controls, OR, ratio  |`epiR::epi.sscc`                              |No     |Schlesselman (1982)               |not built|
-|Cohort/RR                     |p0, RR, ratio                 |`epiR::epi.sscohortc`                         |No     |Kelsey; Fleiss                    |not built|
+|Unmatched case-control        |%exposed controls, OR, ratio  |`epiR::epi.sscc`                              |No     |Schlesselman (1982)               |✅ built|
+|Cohort/RR                     |p0, RR, ratio                 |`epiR::epi.sscohortc`                         |No     |Kelsey; Fleiss                    |✅ built|
 |Log-rank / survival           |HR, accrual, follow-up        |`powerSurvEpi`; `gsDesign::nSurv`             |No     |Schoenfeld (1983); Freedman (1982)|not built|
 |Cohen's kappa                 |κ0, κ1, proportions, #raters  |`kappaSize`                                   |No     |Rotondi; Flack                    |✅ built|
 |ICC (reliability)             |ICC, #raters, CI/power        |`ICC.Sample.Size`                             |No     |Zou (2012)                        |✅ built (via `presize`/Bonett 2002, not `ICC.Sample.Size`/Zou)|

@@ -11,7 +11,7 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: four complete calculator modules --
+of Phase 2: six complete calculator modules --
 
 - **Proportions** (`R/modules/mod_proportion.R`) -- single proportion
   (precision-based, Cochran's formula, with optional finite population
@@ -31,11 +31,18 @@ of Phase 2: four complete calculator modules --
   Donner & Eliasziw 1987, Rotondi & Donner 2012) and the intraclass
   correlation coefficient (continuous, wraps `presize::prec_icc()` / Bonett
   2002)
+- **Case-Control** (`R/modules/mod_case_control.R`) -- unmatched and matched
+  (1:1 or 1:m) case-control studies, both wrapping `epiR::epi.sscc()`
+  (Dupont 1988; Woodward 2014)
+- **Cohort / RR** (`R/modules/mod_cohort.R`) -- cohort/cross-sectional
+  relative-risk studies, wrapping `epiR::epi.sscohortc()` (Kelsey,
+  Thompson & Evans 1986; Woodward 2014)
 
-Everything else in `docs/SDD.md` §7's catalog (case-control, cohort/RR,
-correlation, precision-based CI-width, survival, post-hoc power, and 3+
-group comparisons for both proportions and means) remains "coming soon" in
-the Home finder, per the phase plan.
+Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
+(correlation, one-way ANOVA, chi-square, precision-based CI-width, survival,
+post-hoc power, and 3+ group comparisons for both proportions and means, plus
+the much larger backlog in those two files) remains "coming soon" in the Home
+finder, per the staged build plan.
 
 ## Requirements
 

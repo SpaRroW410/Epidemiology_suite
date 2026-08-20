@@ -58,9 +58,9 @@ Two complementary, copy-pasteable markdown files for your R Shiny sample size ca
 
 ### 3. Analytical observational studies
 
-- [ ] **[CORE]** Cohort / cross-sectional (RR, risk difference, incidence) — inputs: p0 (unexposed risk), RR or p1, ratio unexposed:exposed, power, conf — `epiR::epi.sscohortc` (count), `epiR::epi.sscohortt` (time) — *Kelsey et al.; Fleiss (OpenEpi methods)*
-- [ ] **[CORE]** Unmatched case-control — inputs: % controls exposed, OR (or % cases exposed), controls:cases ratio, power, conf — `epiR::epi.sscc`  — *Schlesselman (1982); Kelsey; Fleiss with/without correction (OpenEpi/Epi Info StatCalc)*
-- [ ] **[CORE]** Matched case-control 1:1 and 1:m — inputs: exposure prevalence in controls, OR, correlation of exposure, m controls/case — `epiR::epi.sscc(method="matched")` — *Dupont (1988); PS software (Dupont & Plummer)*
+- [x] **[CORE]** Cohort / cross-sectional (RR, risk difference, incidence) — inputs: p0 (unexposed risk), RR or p1, ratio unexposed:exposed, power, conf — `epiR::epi.sscohortc` (count), `epiR::epi.sscohortt` (time) — *Kelsey et al.; Fleiss (OpenEpi methods)* — *(implemented: Cohort / RR module, `calc_cohort()`, wraps `epiR::epi.sscohortc()`; person-time variant `epi.sscohortt` not built)*
+- [x] **[CORE]** Unmatched case-control — inputs: % controls exposed, OR (or % cases exposed), controls:cases ratio, power, conf — `epiR::epi.sscc`  — *Schlesselman (1982); Kelsey; Fleiss with/without correction (OpenEpi/Epi Info StatCalc)* — *(implemented: Case-Control → "Unmatched", `calc_case_control_unmatched()`, wraps `epiR::epi.sscc(method="unmatched")`)*
+- [x] **[CORE]** Matched case-control 1:1 and 1:m — inputs: exposure prevalence in controls, OR, correlation of exposure, m controls/case — `epiR::epi.sscc(method="matched")` — *Dupont (1988); PS software (Dupont & Plummer)* — *(implemented: Case-Control → "Matched", `calc_case_control_matched()`, wraps `epiR::epi.sscc(method="matched")`)*
 - [ ] **[ADV]** Frequency-matched design
 - [ ] **[ADV]** Nested case-control / case-cohort — *Prentice; efficiency vs full cohort*
 - [ ] **[ADV]** Case-crossover
