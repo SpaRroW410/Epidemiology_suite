@@ -156,20 +156,51 @@ sample-size-app/
 
 ## 7. Functional Design — Calculator Catalog
 
-| Family | Designs covered | Backend package/function | Phase |
-|---|---|---|---|
-| Proportions | Single proportion vs. known value; two independent proportions | `pwr::pwr.p.test`, `pwr::pwr.2p.test` | 1 |
-| Means | One-sample, two-sample, paired t-test based | `pwr::pwr.t.test`, `pwr::pwr.t2n.test` | 2 |
-| Case-control | Unmatched, odds ratio based | `epiR::epi.sscc` | 2 |
-| Cohort / RR | Cohort, cross-sectional, relative risk | `epiR::epi.sscohortc` | 2 |
-| Diagnostic accuracy | Sensitivity, specificity, given prevalence | `presize` or custom formula | 2 |
-| Correlation | Pearson correlation | `pwr::pwr.r.test` | 2 |
-| Precision-based | CI-width driven (risk diff/ratio, rate, proportion) | `presize`, `precisely` | 3 |
-| Survival | Log-rank, accrual/follow-up designs | `WebPower` or reference `rashnu` approach | 3 (stretch) |
-| Post-hoc / achieved power | Given n and observed effect, compute achieved power | `pwr` (reverse call) | 4 |
+The full, detailed calculator backlog — ~90 scenarios across both a study-design
+view and a statistical-test view (mirroring and extending G*Power's catalog) —
+lives in two living checklist documents, not in this table:
 
-Each row above becomes exactly one `mod_*.R` + `calc_*.R` + `content_*.R` file
-set, following the module contract in §8.
+- **[`checklist_by_design.md`](checklist_by_design.md)** — organized the way a
+  medical researcher thinks ("I'm doing a case-control study"): 17 sections
+  from descriptive/estimation studies through repeated-measures/longitudinal
+  designs, each item tagged **[CORE]** (v1) or **[ADV]** (later), with typical
+  inputs, the suggested R package/function, and the original citation.
+- **[`checklist_by_test.md`](checklist_by_test.md)** — the same catalog
+  organized by statistical test family (t / z / F / χ² / Exact, plus
+  non-parametric, survival, agreement, equivalence, multilevel, Bayesian, and
+  simulation-based methods), explicitly cross-referenced against G*Power's own
+  test families and analysis types (Faul et al. 2007, 2009).
+
+Every calculator should be reachable from *both* files (a researcher lands via
+design, a statistician via test) — the same Shiny module serves both entry
+points, and both files' checkboxes are ticked with a `*(implemented: ...)*`
+note as each module goes live, so either file alone shows current build
+status. Both files also carry a shared 4-stage build plan (Stage 1 CORE
+release through Stage 4 niche/simulation) and a set of caveats (version-
+dependent vendor procedure counts, ARE-based non-parametric power, bio-
+equivalence input conventions, packages with no confirmed CRAN presence,
+etc.) — see those files rather than duplicating them here.
+
+The table below is now just a snapshot of what's *actually live*, kept in
+sync with the two checklists above (do not treat it as the source of truth
+for what to build next):
+
+| Family | Designs covered | Backend package/function | Status |
+|---|---|---|---|
+| Proportions | Precision-based (Cochran, +FPC); vs. known value; two independent | closed-form (Cochran); `pwr::pwr.p.test`, `pwr::pwr.2p.test` | Live |
+| Means | One-sample, two-sample, paired t-test based | `pwr::pwr.t.test` | Live |
+| Diagnostic accuracy | Precision-based (Buderer); vs. reference value; two tests, unpaired/paired | closed-form (Buderer; Casagrande-Pike; Connor), all + Yates' correction | Live |
+| Agreement / reliability | Cohen's kappa; ICC | `presize::prec_kappa()` (→ `kappaSize`); `presize::prec_icc()` (Bonett 2002) | Live |
+| Case-control | Unmatched, odds ratio based | `epiR::epi.sscc` | Not started |
+| Cohort / RR | Cohort, cross-sectional, relative risk | `epiR::epi.sscohortc` | Not started |
+| Correlation | Pearson correlation | `pwr::pwr.r.test` | Not started |
+| One-way ANOVA | k-group means | `pwr::pwr.anova.test` | Not started |
+| Precision-based (generic) | CI-width driven (risk diff/ratio, rate) | `presize`, `precisely` | Not started |
+| Survival | Log-rank, accrual/follow-up designs | `powerSurvEpi`, `gsDesign::nSurv` | Not started |
+| Post-hoc / achieved power | Given n and observed effect, compute achieved power | reuse each module's engine, solve for power | Not started |
+
+Each row above is (or will be) exactly one `mod_*.R` + `calc_*.R` +
+`content_*.R` file set, following the module contract in §8.
 
 ---
 
@@ -270,14 +301,21 @@ appending to the registry.
 
 ## 14. Development Roadmap
 
-| Phase | Scope |
-|---|---|
-| 1 | App shell (navbar) + 1 complete module (proportions) as template |
-| 2 | Means, case-control, cohort/RR, diagnostic accuracy, correlation modules |
-| 3 | Precision-based (CI-width) module |
-| 4 | Post-hoc power module, with methodological caveat content |
-| 5 | Deployment polish; evaluate Shinylive |
-| 6 (stretch) | Survival module; possible OSPE/teaching-mode with guided walkthroughs |
+Superseded by the 4-stage plan in `checklist_by_design.md` / `checklist_by_test.md`
+("Recommendations (staged build plan)"), which is the authoritative, actively
+maintained backlog. Summary:
+
+| Stage | Scope | Status |
+|---|---|---|
+| 1 — v1 CORE (~25 modules) | Single proportion, single mean, two means, two proportions, unmatched case-control, cohort/RR, one-way ANOVA, correlation, chi-square, diagnostic Se/Sp, ICC, kappa, log-rank, Simon two-stage, pilot rules-of-thumb, TOST equivalence | Proportions, Means, Diagnostic Accuracy, Agreement/Reliability (kappa+ICC) live; rest not started |
+| 2 — analytical depth | F-family completeness (factorial/RM-ANOVA, ANCOVA, MANOVA), full correlation/regression suite, matched case-control, ROC comparison, Bland-Altman/CCC/Cronbach, prediction-model development (`pmsampsize`) | Not started |
+| 3 — advanced trial designs | Cluster-randomized/stepped-wedge, group-sequential/adaptive, survival extensions, bioequivalence replicate designs, longitudinal/MMRM, post-hoc/achieved-power module | Not started |
+| 4 — niche/simulation & non-formula | Genetic (`genpwr`), SEM (`semPower`), trial sequential analysis, `simr`-based simulation, guidance-only qualitative/animal-study panels | Not started |
+| — | Deployment polish; evaluate Shinylive | Not started |
+
+The original Phase 1-6 table (superseded) is preserved in git history for
+reference; Phase 1 (app shell + Proportions template) and most of Phase 2
+(Means, diagnostic accuracy) are complete under the new numbering above.
 
 ---
 
@@ -296,9 +334,23 @@ appending to the registry.
 - Public GitHub repo from the start, or private until Phase 2–3 complete?
 - Any interest in `renv` for dependency locking given multi-month timeline?
 - Should the Reference sub-tab link out to DOIs where available, or citation text only?
+- **Backend reconciliation:** three already-live calculators use a closed-form
+  formula where `checklist_by_design.md`/`checklist_by_test.md` name a
+  specific CRAN package instead (Proportions' precision-based design: Cochran
+  formula vs. `presize::prec_prop`/`epiR::epi.sssimpleestb`; Diagnostic
+  Accuracy's precision-based design: Buderer formula vs.
+  `presize::prec_sens`/`prec_spec`). Both are verified correct against
+  published worked examples, so this is a style question, not a correctness
+  one: reconcile to the named packages for consistency with the "wrap, don't
+  reimplement" principle, or leave as-is since they predate the checklist and
+  already work? See `checklist_by_design.md`'s "Backend deviations" section.
+- **Checklist maintenance:** `checklist_by_design.md` / `checklist_by_test.md`
+  are meant to be ticked off as modules go live (per their own legend) — needs
+  a habit/reminder (e.g. as a step in each new module's PR/commit) so they
+  don't drift out of sync with the codebase the way this table (§7) briefly did.
 
 ---
 
 ## Appendix: Core Dependencies
 `shiny`, `bslib`, `pwr`, `presize`, `precisely`, `epiR`, `WebPower`, `pwrss`,
-`TrialSize`, `testthat`, `renv` (optional)
+`TrialSize`, `kappaSize`, `testthat`, `renv` (optional)

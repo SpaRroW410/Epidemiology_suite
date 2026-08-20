@@ -4,7 +4,11 @@ An R Shiny web app for sample size and power calculations for community
 medicine, epidemiology, and clinical research, with an explained-formula help
 tab and original-source citation for every calculator. Background and full
 design rationale: [`docs/project-brief.md`](docs/project-brief.md) and
-[`docs/SDD.md`](docs/SDD.md).
+[`docs/SDD.md`](docs/SDD.md). The full calculator backlog (~90 scenarios,
+by study design and by statistical test, staged into a 4-phase build plan)
+lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
+[`docs/checklist_by_test.md`](docs/checklist_by_test.md) — check those,
+not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
 of Phase 2: four complete calculator modules --

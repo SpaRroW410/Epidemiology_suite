@@ -1,0 +1,219 @@
+# Sample Size Calculator — Master Checklist (by Study Design)
+
+> **Status note (cross-referenced against the codebase 2026-08-20):** boxes below
+> are ticked only where a live Shiny module already implements that exact
+> calculator, with a short `*(implemented: ...)*` note pointing at the module.
+> Where our implementation uses a different backend than the one this checklist
+> names (closed-form formula instead of the suggested package, or vice versa),
+> that's flagged explicitly rather than silently ticked — see
+> `docs/SDD.md` §7 and the "Backend deviations" note at the end of this file.
+> A handful of already-built calculators don't fit either file's row shape
+> exactly (e.g. our Proportions module's *"single proportion vs. known
+> value"* hypothesis test, and its optional finite-population correction);
+> those are cross-referenced inline too.
+
+Two complementary, copy-pasteable markdown files for your R Shiny sample size calculator. **File 1** is organized by study design (how a medical researcher thinks). **File 2** is organized by statistical test and explicitly mirrors G*Power's catalog, then extends beyond it. Save each block as its own `.md` file in the repository (e.g. `checklist_by_design.md` and `checklist_by_test.md`).
+
+**How the two files relate:** every calculator should be reachable from *both* files — a researcher lands via File 1 ("I'm doing a case-control study"), a statistician via File 2 ("I'll run a Mann-Whitney U"). Cross-reference module IDs when you build them so the same Shiny module serves both entry points.
+
+**Scope framing (verified):** G*Power organizes tests into five test families (Exact, F, t, χ², z) and offers five analysis types per test — a priori, post hoc, compromise, criterion, sensitivity — per Faul, Erdfelder, Lang & Buchner (2007, *Behavior Research Methods* 39:175–191) and Faul, Erdfelder, Buchner & Lang (2009, *Behavior Research Methods* 41:1149–1160). Commercial breadth for benchmarking: PASS covers "over 1200 statistical test and confidence interval scenarios" per NCSS.com (the PASS 2025 procedure-list page instead cites "over 680," so the figure is version-dependent); nQuery "includes calculations for over 1,000 sample sizes and power scenarios" per Statsols/Wikipedia. nMaster 2.0 (CMC Vellore) covers means (incl. ANCOVA, repeated measures), proportions, agreement (kappa, ICC), diagnostic tests, correlation/regression, survival (log-rank, Cox, exponential), cluster designs, equivalence/bioequivalence, epidemiological (cohort, matched/unmatched case-control) and clinical-trial designs, plus sign/Wilcoxon/Mann-Whitney tests.
+
+-----
+
+## ============================================================
+
+## FILE 1 — STUDY-DESIGN-BASED CHECKLIST
+
+## ============================================================
+
+### Legend / How to use
+
+- `- [ ]` = calculator not yet implemented; tick when the Shiny module is live.
+- **[CORE]** = build for v1 (high-frequency in Indian community-medicine/public-health/clinical research). **[ADV]** = advanced/stretch for later phases.
+- Each item lists: *scenario → typical inputs → R package/function → original citation*.
+- Architecture note (already decided by you): one Shiny module per calculator, wrapping the named R package rather than reimplementing formulas; per-calculator help tab renders the formula + the cited original source.
+- Where a calculator has no closed-form R package, fall back to **simulation** (`simr`, custom Monte Carlo) and flag it in the UI.
+
+-----
+
+### 1. Descriptive / Estimation studies
+
+- [x] **[CORE]** Single proportion / prevalence — inputs: expected p, absolute (or relative) precision, confidence level, optional population size N (FPC) — `epiR::epi.sssimpleestb`,  `presize::prec_prop` — *Fleiss, Levin & Paik; Lwanga & Lemeshow (WHO 1991)* — *(implemented: Proportions → "Single proportion — precision-based", `calc_proportion_precision()`; backend is a closed-form Cochran/Naing-Winn-Rusli formula, not `presize::prec_prop`/`epiR` — see deviations note)*
+- [ ] **[CORE]** Single mean — inputs: SD, precision (CI half-width), confidence — `presize::prec_mean` — *Bland (2009) BMJ 339:b3985 (CI-width rationale)* — *gap: Means module only has the hypothesis-test "vs. known value" design (`pwr::pwr.t.test`), not a precision/CI-width single-mean estimator*
+- [ ] **[CORE]** Incidence rate estimation — inputs: expected rate, person-time, precision — `presize::prec_rate` — *Rothman & Greenland, Modern Epidemiology*
+- [ ] **[ADV]** Ratio estimation (precision of RR / OR / rate ratio) — `presize::prec_riskratio`, `presize::prec_or`, `presize::prec_rateratio`
+- [ ] **[CORE]** Precision / CI-width framework (Rothman–Greenland) — generic engine feeding many estimation modules
+- [x] **[CORE]** Finite population correction — inputs: N, computed n → corrected n = n/(1+n/N) — *(implemented: inside `calc_proportion_precision()`'s optional `N` argument)*
+- [ ] **[ADV]** Variance / SD estimation precision
+
+### 2. Cross-sectional / Survey designs
+
+- [x] **[CORE]** Simple random sample for a proportion — as §1 with survey framing — *(implemented: same module as §1's single-proportion precision calculator)*
+- [ ] **[CORE]** Stratified sampling — inputs: strata sizes, within-stratum variances, allocation (proportional/Neyman)
+- [ ] **[CORE]** Cluster / multistage with design effect — inputs: ICC (ρ), average cluster size m; DEFF = 1 + (m − 1)ρ; effective n = n×DEFF — *Kish; Killip et al.*
+- [ ] **[ADV]** Complex/multistage survey (PPS) — DEFF depends on ρ and take b, not on number of PSUs (DHS WP30)
+- [ ] **[ADV]** Lot Quality Assurance Sampling (LQAS) — inputs: upper/lower thresholds, decision rule, α/β — *Robertson & Valadez (2006); cluster-LQAS: Hedt-Gauthier et al. (2013) Emerg Themes Epidemiol 10:11*
+- [ ] **[ADV]** Two-stage cluster survey (WHO EPI 30×7 / 30×30) — *Henderson & Sundaresan (1982)*
+- [ ] **[ADV]** Capture–recapture — `Rcapture` (analysis); planning via WinPepi — *Chapman estimator*
+
+### 3. Analytical observational studies
+
+- [ ] **[CORE]** Cohort / cross-sectional (RR, risk difference, incidence) — inputs: p0 (unexposed risk), RR or p1, ratio unexposed:exposed, power, conf — `epiR::epi.sscohortc` (count), `epiR::epi.sscohortt` (time) — *Kelsey et al.; Fleiss (OpenEpi methods)*
+- [ ] **[CORE]** Unmatched case-control — inputs: % controls exposed, OR (or % cases exposed), controls:cases ratio, power, conf — `epiR::epi.sscc`  — *Schlesselman (1982); Kelsey; Fleiss with/without correction (OpenEpi/Epi Info StatCalc)*
+- [ ] **[CORE]** Matched case-control 1:1 and 1:m — inputs: exposure prevalence in controls, OR, correlation of exposure, m controls/case — `epiR::epi.sscc(method="matched")` — *Dupont (1988); PS software (Dupont & Plummer)*
+- [ ] **[ADV]** Frequency-matched design
+- [ ] **[ADV]** Nested case-control / case-cohort — *Prentice; efficiency vs full cohort*
+- [ ] **[ADV]** Case-crossover
+- [ ] **[ADV]** Self-controlled case series — `SCCS`
+- [ ] **[ADV]** Ecological studies (note confounding/aggregation caveats)
+- [ ] **[CORE]** Comparison of two incidence rates (person-time) — `epiR::epi.sscompc` — Epi Info Poisson
+
+### 4. Diagnostic & screening studies
+
+- [x] **[CORE]** Sensitivity / specificity given prevalence — inputs: expected Se (or Sp), disease prevalence, precision, total n — `presize::prec_sens`, `presize::prec_spec` — nMaster; *Buderer (1996)* — *(implemented: Diagnostic Accuracy → "precision-based", `calc_diagnostic_accuracy()`; backend is a closed-form Buderer formula, not `presize::prec_sens`/`prec_spec` — see deviations note. Module also has 3 designs beyond this checklist row: vs. known/reference value, two independent tests, two paired tests — see `checklist_by_test.md`'s Agreement/Diagnostic sections and `docs/SDD.md` §7)*
+- [ ] **[CORE]** PPV / NPV — inputs: Se, Sp, prevalence, precision — `presize` (derive from 2×2) — *easy near-term add: reuses the same Se/Sp/prevalence inputs already in the Diagnostic Accuracy module*
+- [ ] **[ADV]** Likelihood ratios (LR+, LR−) — `presize::prec_lr`
+- [ ] **[CORE]** Single ROC AUC vs null (0.5) — inputs: expected AUC, allocation ratio neg:pos, α, power — `pROC::power.roc.test` — *Hanley & McNeil (1982) Radiology 143:29–36; Obuchowski (1994)*
+- [ ] **[ADV]** Compare two AUCs, paired or unpaired — inputs: AUC1, AUC2, correlation, allocation — `pROC::power.roc.test` — *Hanley & McNeil (1983, correlated); Obuchowski & McClish (1997) Stat Med 16:1529–1542*
+- [ ] **[ADV]** Diagnostic odds ratio
+- [ ] **[ADV]** Multi-reader multi-case (MRMC) — *Obuchowski & Rockette; Dorfman-Berbaum-Metz* (simulation/`iMRMC`)
+- [ ] **[ADV]** Index-test vs reference-standard accuracy study
+
+### 5. Agreement / reliability studies
+
+- [x] **[CORE]** Cohen's kappa — inputs: expected κ, null κ, category proportions, #raters — `kappaSize` (binary/multinomial, 2–6 raters) — *Rotondi & Donner; Flack et al.* — *(implemented: Agreement/Reliability → "Cohen's kappa", `calc_kappa()`, wraps `presize::prec_kappa()` → `kappaSize`)*
+- [ ] **[ADV]** Weighted kappa; Fleiss kappa (>2 raters) — `kappaSize` — *partially covered: our kappa calculator already supports 2-6 raters and 2-5 categories via the same `kappaSize::CIBinary/CI3Cats/CI4Cats/CI5Cats` backend (the multi-rater generalization), but this hasn't been separately tested/labeled for the >2-rater case, and weighted kappa (differential penalty for near-miss categories) is not covered at all — left unticked pending that*
+- [x] **[CORE]** Intraclass correlation coefficient (ICC) — inputs: expected ICC, #raters/measurements, CI width or power — `ICC.Sample.Size` (*Zou 2012, Stat Med, doi:10.1002/sim.5466*), `presize::prec_icc` — *(implemented: Agreement/Reliability → "ICC", `calc_icc()`, wraps `presize::prec_icc()` / Bonett 2002 — a different formula from Zou (2012); see deviations note)*
+- [ ] **[ADV]** Bland–Altman limits of agreement — inputs: expected SD of differences, CI width — `presize::prec_lim_agree` — *Bland & Altman (1986)*
+- [ ] **[ADV]** Lin's concordance correlation coefficient (CCC)
+- [ ] **[ADV]** Cronbach's alpha (internal consistency) — `presize::prec_cronb`
+- [ ] **[ADV]** Test-retest / inter- & intra-rater reliability — WinPepi PAIRSetc
+
+### 6. Clinical trials
+
+- [x] **[CORE]** Parallel 2-arm superiority — means: `stats::power.t.test`, `pwr::pwr.t.test`; proportions: `stats::power.prop.test`, `pwr::pwr.2p.test` — OpenEpi, nMaster — *Cohen (1988)* — *(implemented: Means → "Two independent means", Proportions → "Two independent proportions" — covered across two outcome-type modules rather than a single unified "Clinical Trials" module)*
+- [ ] **[ADV]** Multi-arm superiority (with multiplicity)
+- [ ] **[CORE]** Non-inferiority (means / proportions) — inputs: NI margin, expected difference, one-sided α — `SampleSize4ClinicalTrials`, `TrialSize`
+- [ ] **[CORE]** Equivalence (TOST) — inputs: equivalence bounds, expected difference — `PowerTOST`, `TOSTER`
+- [ ] **[ADV]** Bioequivalence crossover 2×2 & replicate (2×2×4, 2×3×3), RSABE/ABEL — inputs: CV (within-subject), GMR (T/R ratio), BE limits 0.80–1.25, design — `PowerTOST::sampleN.TOST` — *Diletti, Hauschke & Steinijans (1991); Owen's Q exact*
+- [ ] **[ADV]** Cluster-randomized trials (ICC/DEFF, variable cluster size) — `clusterPower`, `CRTSize` — *Donner & Klar*
+- [ ] **[ADV]** Stepped-wedge CRT — `swCRTdesign`, `SWSamp`, `clusterPower` — *Hussey & Hughes (2007) Contemp Clin Trials 28:182–191; Hemming & Taljaard (2016) J Clin Epidemiol 69:137–146*
+- [ ] **[ADV]** Factorial designs (main effects ± interaction)
+- [ ] **[CORE]** Crossover trials (2×2, continuous) — `PowerTOST`, nMaster
+- [ ] **[ADV]** N-of-1 trials
+- [ ] **[CORE]** Pilot / feasibility (rules of thumb) — Julious (2005) *Pharmaceutical Statistics* 4:287–291: "the recommendation is a sample size of 12 per group… justifications… based on rationale about feasibility; precision about the mean and variance; and regulatory considerations"; stepped rules Whitehead et al. (2016); Lancaster et al. (2004) — PASS "Pilot Study Rules of Thumb" (flat vs stepped, Machin et al. 2018)
+- [ ] **[ADV]** Dose-finding / phase I (3+3, CRM) — `dfcrm`, `bcrm`
+- [ ] **[ADV]** Phase II single-arm — Simon (1989) *Controlled Clinical Trials* 10:1–10 two-stage designs "optimal in the sense that the expected sample size is minimized if the regimen has low activity subject to constraints upon… type 1 and type 2 errors"; also A'Hern, Gehan, Fleming — `clinfun::ph2simon`, `ph2mult`, `gen2stage`
+- [ ] **[ADV]** Group sequential & adaptive designs — `gsDesign`, `rpact` — *Jennison & Turnbull; O'Brien-Fleming; Pocock; Lan-DeMets alpha spending*
+- [ ] **[ADV]** Blinded/unblinded sample size re-estimation — `gsDesign::ssrCP`, `spass`
+- [ ] **[ADV]** Platform / basket / umbrella trials (simulation)
+
+### 7. Survival / time-to-event studies
+
+- [ ] **[CORE]** Log-rank test — inputs: HR (or median survivals), accrual + follow-up, allocation, α, power → **required number of events** then total N — `powerSurvEpi::ssizeCT`, `gsDesign::nSurv` — *Schoenfeld (1981) Biometrika 68:316–319; Schoenfeld (1983) Biometrics 39:499–503; Freedman (1982) Stat Med 1:121–129*
+- [ ] **[CORE]** Cox proportional hazards (binary & non-binary covariate) — `powerSurvEpi::ssizeEpi`, `powerSurvEpi::powerEpi` — *Schoenfeld (1983); Latouche et al. (2004) Stat Med 23:3263–3274*
+- [ ] **[ADV]** Exponential survival (parametric) — `gsDesign::nSurv` — *Lachin & Foulkes (1986) Biometrics 42:507–519; Rubinstein, Gail & Santner (1981)*
+- [ ] **[ADV]** Accrual + follow-up designs (non-uniform entry) — *Lakatos (1988) * — `gsDesign::nSurv`, `npsurvSS`
+- [ ] **[ADV]** Competing risks — *Latouche et al. (2004)*; Gray's test — `powerCompRisk`
+- [ ] **[ADV]** Restricted mean survival time (RMST) — `SSRMST` — *Uno et al.; Yung & Liu*
+- [ ] **[ADV]** Non-proportional hazards / weighted log-rank — *Yung & Liu (2020)*
+- [ ] **[ADV]** One-sample survival vs historical control
+
+### 8. Prediction / prognostic model studies
+
+- [ ] **[CORE]** Model development — binary, continuous, or time-to-event — inputs: #candidate predictor parameters, anticipated R²/C-statistic, outcome prevalence or rate, mean follow-up — `pmsampsize` — *Riley et al. Part I continuous (2019 Stat Med 38:1262–1275, doi:10.1002/sim.7993), Part II binary/time-to-event (2019 Stat Med 38:1276–1296, doi:10.1002/sim.7992), BMJ 2020;368:m441.* Part I criteria (verbatim): the minimum n should give "(i) small optimism… global shrinkage factor of ≥0.9; (ii) small absolute difference of ≤0.05 in the apparent and adjusted R²; (iii) precise estimation… of the residual standard deviation; and (iv) precise estimation of the mean predicted outcome value."
+- [ ] **[ADV]** External validation — binary outcome — `pmvalsampsize` — *Riley et al. (2021) Stat Med 40:4230–4251*
+- [ ] **[ADV]** External validation — time-to-event — *Riley et al. (2022)  Stat Med*
+- [ ] **[ADV]** Model updating / recalibration; ML model sample size; calibration-assessment sample size
+
+### 9. Genetic / omics & high-dimensional
+
+- [ ] **[ADV]** GWAS / candidate-gene association — inputs: MAF, OR/GRR, disease prevalence, genetic model, genome-wide α (e.g. 5×10⁻⁸) — `genpwr` (*Moore, Jacobson & Fingerlin 2019, Hum Hered 84:256–271*), Quanto, `Haplin` (family triads)
+- [ ] **[ADV]** Gene–environment interaction — `genpwr`, Quanto
+- [ ] **[ADV]** Microarray / RNA-seq differential expression, FDR-controlled — `ssize`, `RNASeqPower`, `PROPER`
+- [ ] **[ADV]** Multiple-testing (FDR/Bonferroni) sample-size inflation
+
+### 10. Psychometric / questionnaire / scale development
+
+- [ ] **[ADV]** EFA/CFA subjects-per-item rules of thumb
+- [ ] **[ADV]** CFA/SEM via RMSEA — inputs: df (from model), null vs alternative RMSEA, α, power — `semPower` (*Moshagen & Bader 2024, Behavior Research Methods 56:2901–2922*), `WebPower::wp.sem.rmsea`, `semTools::findRMSEAsamplesize` — *MacCallum, Browne & Sugawara (1996) Psychological Methods 1:130–149*
+- [ ] **[ADV]** IRT calibration; validation studies
+
+### 11. Qualitative & mixed methods (non-formula — acknowledge, don't fake precision)
+
+- [ ] **[ADV]** Saturation-based guidance — *Guest, Bunce & Johnson (2006) Field Methods 18:59–82: "saturation occurred within the first twelve interviews, although basic elements for metathemes were present as early as six interviews."*
+- [ ] **[ADV]** Information power — *Malterud, Siersma & Guassora (2016) Qual Health Res 26:1753–1760* (n depends on aim, sample specificity, theory, dialogue quality, analysis strategy)
+- [ ] **[ADV]** Purposive/theoretical sampling narrative guidance (present as guidance panel, no numeric output)
+
+### 12. Health economics / outcomes
+
+- [ ] **[ADV]** Cost-effectiveness study sample size (net-benefit framework)
+- [ ] **[ADV]** Value of information (EVPI/EVSI) — `voi`
+
+### 13. Pharmacovigilance / surveillance
+
+- [ ] **[CORE]** Rule of three — inputs: n → upper 95% bound on unseen AE ≈ 3/n; or n to detect ≥1 event given incidence — *Hanley & Lippman-Hand (1983)* — *easy near-term add: a one-line closed-form calculator*
+- [ ] **[ADV]** Detecting rare adverse events (binomial/Poisson); signal detection thresholds
+
+### 14. Laboratory / animal / preclinical
+
+- [ ] **[ADV]** Resource equation method (E between 10–20) — *Mead; Charan & Kantharia*
+- [ ] **[ADV]** Animal-study rank tests — `clinfun` (*Heller 2006, K-sample rank test, Lehmann alternative*)
+- [ ] **[ADV]** Method-comparison studies (Deming/Passing-Bablok) — `presize` LoA
+
+### 15. Meta-analysis
+
+- [ ] **[ADV]** Trial sequential analysis / (diversity-adjusted) optimal information size — inputs: control event rate, RRR/effect, α, β, heterogeneity D² — `RTSA` — *Wetterslev, Thorlund, Brok & Gluud (2008) J Clin Epidemiol 61:64–75; Wetterslev et al. (2017) BMC Med Res Methodol 17:39; Lan-DeMets boundaries*
+- [ ] **[ADV]** Power / effective sample size for (network) meta-analysis — `metapower`
+
+### 16. Real-world evidence / advanced observational
+
+- [ ] **[ADV]** Propensity-score-matched designs (account for matching efficiency)
+- [ ] **[ADV]** RWE database studies (large-N, precision-driven)
+- [ ] **[ADV]** Subgroup & interaction testing — note the **"4× rule"**: detecting an interaction of the same magnitude as a main effect needs ~4× the sample size (Brookes et al. 2004)
+
+### 17. Repeated measures / longitudinal designs
+
+- [ ] **[ADV]** Linear mixed models, rate of change — inputs: visit times, random intercept/slope variances, residual variance, slope difference δ — `longpower::lmmpower` (methods: diggle, liuliang, edland, hu) — *Diggle, Heagerty, Liang & Zeger (2002) Analysis of Longitudinal Data 2nd ed.; Ard & Edland (2011) J Alzheimers Dis 26(S3):369–377* (package: *Iddi & Donohue 2022, R Journal 14(1):264–282, doi:10.32614/RJ-2022-022*)
+- [ ] **[ADV]** MMRM (mixed model repeated measures) with missing data — inputs: correlation matrix or AR(1) ρ, per-visit retention, SD, allocation, δ — `longpower::power.mmrm`, `longpower::power.mmrm.ar1` — *Lu, Luo & Chen (2008) Int J Biostatistics 4(1), doi:10.2202/1557-4679.1098*
+- [ ] **[ADV]** Multilevel (2- and 3-level, with dropout) — inputs: n1 time points, n2 subjects/cluster, n3 clusters, ICCs, slope variance ratio, dropout — `powerlmm::study_parameters` + `get_power` (+ `shiny_powerlmm`) — *extends Galbraith & Marschner (2002) Control Clin Trials 23:257–271*
+- [ ] **[ADV]** GEE-based (marginal models) — `longpower::liu.liang.linear.power` — *Liu & Liang (1997) Biometrics 53:937–947; Rochon (1998) Stat Med 17:1643–1658 (Wald χ², damped-exponential correlation — no confirmed dedicated CRAN package, use Liu-Liang route or custom code)*
+- [ ] **[ADV]** Time-varying exposure — inputs: exposure ICC, per-time prevalence, CS/damped-exponential correlation — **OPTITXS / OPTITXS.r** (Yale CMIPS; not on CRAN) — *Basagaña & Spiegelman (2010) Stat Med 29:181–192 (rates of change); Basagaña, Liao & Spiegelman (2011) Stat Methods Med Res 20:471–487 (main effect)* — flag: using time-invariant formulas overestimates required N
+- [ ] **[ADV]** Growth curve models (simulation) — `simr`
+
+-----
+
+## Recommendations (staged build plan)
+
+**Stage 1 — v1 CORE release (target ~25 modules).** Build everything tagged **[CORE]** in both files. These map almost 1:1 to what OpenEpi, Epi Info StatCalc, nMaster and the `pwr`/`epiR`/`presize`/`pROC` packages already cover, so wrapping is fast and validation is easy (cross-check outputs against OpenEpi/G*Power). Prioritize, in order: single proportion, single mean, two means (t), two proportions, unmatched case-control, cohort/RR, one-way ANOVA, correlation, chi-square (GoF + independence), diagnostic Se/Sp, ICC, kappa, log-rank, Simon two-stage, pilot rules-of-thumb, TOST equivalence. This set answers the large majority of Indian community-medicine/public-health protocol needs.
+
+**Stage 2 — analytical depth.** Add the G*Power F-family completeness (factorial/RM-ANOVA, ANCOVA, MANOVA, regression R² increase), the full correlation/regression suite (`WebPower`), matched case-control variants, ROC comparison (`pROC`), Bland-Altman/CCC/Cronbach (`presize`), and prediction-model development (`pmsampsize`) — the latter is increasingly demanded by journals and is a differentiator versus OpenEpi.
+
+**Stage 3 — advanced/trial designs.** Cluster-randomized and stepped-wedge (`clusterPower`/`swCRTdesign`), group-sequential/adaptive (`gsDesign`/`rpact`), survival extensions (RMST, competing risks), bioequivalence replicate designs (`PowerTOST`), longitudinal/MMRM (`longpower`/`powerlmm`), and the **post-hoc/achieved-power module** you already planned (reuse each Stage-1/2 module's engine, solving for power instead of N).
+
+**Stage 4 — niche/simulation & non-formula.** Genetic (`genpwr`), SEM (`semPower`), trial sequential analysis (`RTSA`), simulation engine (`simr`) for designs with no closed form, and guidance-only panels for qualitative (Guest; Malterud) and resource-equation animal studies.
+
+**Benchmarks that should change the plan:**
+
+- If a wrapped package is unmaintained or its results diverge from G*Power/PASS by >1 unit on validation cases, either pin a version or reimplement the single formula (your "wrap not reimplement" rule should bend here).
+- If usage analytics show heavy traffic to any **[ADV]** module (e.g. stepped-wedge, prediction models), promote it into the next release ahead of remaining CORE items.
+- For any calculator lacking a CRAN package (LQAS cluster, time-varying exposure/OPTITXS, MRMC ROC, platform trials), default to a documented simulation module and label it clearly as approximate.
+
+## Caveats
+
+- **Version-dependent counts.** The "PASS >1200 / >680" and "nQuery >1000" figures vary by product version and page; treat them as ballpark benchmarks, not fixed targets. Your value proposition is free + open-source + Indian-context help tabs + original citations, not raw procedure count.
+- **G*Power menu paths** are given from the published manuals/papers; verify the exact string in G*Power 3.1.9.7 when you write each help tab, as some wording differs between distribution-based and design-based entry.
+- **Non-parametric power** in G*Power and most R packages uses asymptotic relative efficiency (ARE) inflation or parent-distribution assumptions, not exact rank-test power; state the method and its assumptions in-app. Simulation is the honest fallback.
+- **`epiR` / OpenEpi** report several methods (Kelsey, Fleiss with/without continuity correction) that give different n for the same case-control inputs; expose the method choice and cite each, as OpenEpi does.
+- **Bioequivalence** inputs must be entered as ratios (0.80–1.25), not percentages, in `PowerTOST`; `sampleN.TOST` returns *total* (even) N, not per-arm — a common user error to guard against in the UI.
+- **`pwr` returns per-group n** for two-sample tests; multiply by #arms and adjust for dropout — surface an explicit "inflate for attrition" field in every trial module.
+- **Rochon (1998) GEE** and **Basagaña/Spiegelman time-varying-exposure** methods have **no confirmed dedicated CRAN package**; implement via `longpower` (Liu-Liang) or the authors' standalone OPTITXS program respectively, and flag as such.
+- **`genpwr` CRAN status:** the package page notes issues needing fixing before an early-2026 deadline; confirm it still installs before committing to it, or wrap Quanto logic instead.
+- **Qualitative "sample size"** items are guidance, not formulas — render them as advisory panels (information power dimensions; Guest's 6–12 finding) with no numeric "N" output, to avoid false precision.
+- **Post-hoc power** on observed effects is statistically controversial (it is a deterministic function of the p-value); your planned achieved-power module should compute power for *pre-specified* meaningful effect sizes and warn against "observed-effect" post-hoc power in the help tab.
+
+## Backend deviations from this checklist (already-built calculators)
+
+- **Single proportion precision / Simple random sample for a proportion** — this checklist names `epiR::epi.sssimpleestb` / `presize::prec_prop`; the app uses a closed-form Cochran (1977) formula instead (same math, verified against the well-known n=385 default), since it predates this checklist and no CRAN package was substituted in afterward. Candidate for reconciliation in Stage 1 cleanup — see the open question in the chat reply.
+- **Diagnostic Se/Sp precision-based** — this checklist names `presize::prec_sens`/`prec_spec`; the app uses a closed-form Buderer (1996) formula instead, verified exactly against the source article's own worked example (n=1383). Same reconciliation question applies.
+- **ICC** — this checklist names `ICC.Sample.Size` (Zou 2012); the app wraps `presize::prec_icc()` (Bonett 2002) instead — a different but also well-established formula for the same problem, already the plan's own alternate suggestion in the Agreement/reliability row. No change needed unless Zou (2012)'s method is specifically wanted.
