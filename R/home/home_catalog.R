@@ -137,7 +137,33 @@ calculator_catalog <- list(
        ),
        outcome_type = "diagnostic", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Diagnostic Accuracy",
-       module_input_id = "diagnostic-design", design_value = "two_paired")
+       module_input_id = "diagnostic-design", design_value = "two_paired"),
+
+  # Agreement/Reliability entries: same reasoning as Diagnostic Accuracy
+  # above -- not a "how many groups" comparison, so only reachable via "by
+  # study design".
+  list(key = "agreement_kappa",
+       label = "Cohen's kappa (categorical agreement, no gold standard)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate agreement",
+         "between two raters/methods (categorical rating) to a desired",
+         "precision, when there's no reference standard to compare",
+         "either one against?\""
+       ),
+       outcome_type = "agreement", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Agreement / Reliability",
+       module_input_id = "agreement-design", design_value = "kappa"),
+
+  list(key = "agreement_icc",
+       label = "Intraclass correlation - ICC (continuous agreement, no gold standard)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate agreement",
+         "between two raters/methods (continuous measurement) to a",
+         "desired precision, when there's no reference standard?\""
+       ),
+       outcome_type = "agreement", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Agreement / Reliability",
+       module_input_id = "agreement-design", design_value = "icc")
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -164,6 +190,9 @@ study_design_families <- list(
   list(id = "correlation", label = "Correlation",
        hint = "Detecting a Pearson correlation between two continuous variables.",
        catalog_keys = character(0)),
+  list(id = "agreement", label = "Agreement / Reliability",
+       hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC).",
+       catalog_keys = c("agreement_kappa", "agreement_icc")),
   list(id = "precision", label = "Precision-based (CI-width)",
        hint = "Estimating with a target confidence-interval width rather than testing a hypothesis.",
        catalog_keys = character(0)),

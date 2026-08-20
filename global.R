@@ -1,7 +1,7 @@
 # Libraries + sourcing for all R/ files. app.R sources this before building the UI.
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(shiny, bslib, pwr)
+pacman::p_load(shiny, bslib, pwr, presize)
 
 for (f in list.files("R/calc", pattern = "\\.R$", full.names = TRUE)) source(f)
 for (f in list.files("R/content", pattern = "\\.R$", full.names = TRUE)) source(f)
@@ -16,5 +16,7 @@ module_registry <- list(
   list(id = means_meta$id, title = means_meta$nav_title,
        ui = mod_means_ui, server = mod_means_server),
   list(id = diagnostic_meta$id, title = diagnostic_meta$nav_title,
-       ui = mod_diagnostic_ui, server = mod_diagnostic_server)
+       ui = mod_diagnostic_ui, server = mod_diagnostic_server),
+  list(id = agreement_meta$id, title = agreement_meta$nav_title,
+       ui = mod_agreement_ui, server = mod_agreement_server)
 )

@@ -1,0 +1,96 @@
+# Pure calculation functions for agreement/reliability studies -- i.e. when
+# there is no gold standard/reference test to compare against, so instead of
+# sensitivity/specificity (R/calc/calc_diagnostic.R) you assess how well two
+# raters or methods *agree* with each other.
+#
+# Both functions wrap validated presize:: functions rather than reimplementing
+# the underlying math (project convention -- see docs/project-brief.md), so
+# there is no local re-derivation of the confidence-interval formulas here.
+
+#' Sample size for Cohen's kappa (categorical agreement, no gold standard)
+#'
+#' Wraps presize::prec_kappa(), which itself wraps the kappaSize package's
+#' CI-width-based functions (Donner & Eliasziw 1987 for the 2-category case;
+#' Rotondi & Donner 2012 for multi-category/multi-rater). Precision-based: no
+#' hypothesis test, no power target -- just an expected kappa, a desired
+#' confidence-interval width, and how the categories are expected to split.
+#'
+#' @param kappa Expected value of Cohen's kappa (-1, 1) -- in practice
+#'   almost always reported as 0 to 1.
+#' @param n_category Number of outcome categories (2-5)
+#' @param raters Number of raters (2-6)
+#' @param props Expected proportion of subjects in each category; length
+#'   must equal n_category and sum to 1
+#' @param conf_width Desired full width of the confidence interval for kappa
+#' @param conf_level Confidence level (0,1), e.g. 0.95
+#' @return list(n, inputs)
+calc_kappa <- function(kappa, n_category = 2, raters = 2, props,
+                        conf_width = 0.15, conf_level = 0.95) {
+  if (!is.numeric(kappa) || length(kappa) != 1 || is.na(kappa) || kappa <= -1 || kappa >= 1) {
+    stop("kappa must be a single number strictly between -1 and 1.")
+  }
+  if (!is.numeric(n_category) || length(n_category) != 1 || !(n_category %in% 2:5)) {
+    stop("n_category must be a single whole number between 2 and 5.")
+  }
+  if (!is.numeric(raters) || length(raters) != 1 || !(raters %in% 2:6)) {
+    stop("raters must be a single whole number between 2 and 6.")
+  }
+  if (!is.numeric(props) || length(props) != n_category) {
+    stop(sprintf("props must have exactly %d value(s), one per category.", n_category))
+  }
+  if (any(is.na(props)) || any(props <= 0) || any(props >= 1)) {
+    stop("each value in props must be strictly between 0 and 1.")
+  }
+  if (abs(sum(props) - 1) > 1e-6) {
+    stop("props must sum to 1.")
+  }
+  if (!is.numeric(conf_width) || length(conf_width) != 1 || is.na(conf_width) ||
+        conf_width <= 0 || conf_width >= 2) {
+    stop("conf_width must be a single number strictly between 0 and 2.")
+  }
+  .validate_unit_interval(conf_level, "conf_level")
+
+  res <- presize::prec_kappa(kappa = kappa, conf.width = conf_width,
+                              raters = raters, n_category = n_category,
+                              props = props, conf.level = conf_level)
+
+  list(
+    n = ceiling(res$n),
+    lwr = res$lwr,
+    upr = res$upr,
+    inputs = list(kappa = kappa, n_category = n_category, raters = raters,
+                  props = props, conf_width = conf_width, conf_level = conf_level)
+  )
+}
+
+#' Sample size for the intraclass correlation coefficient (continuous
+#' agreement/reliability, no gold standard)
+#'
+#' Wraps presize::prec_icc() (Bonett 2002). Precision-based: no hypothesis
+#' test, no power target -- just an expected ICC, the number of raters or
+#' repeated measurements per subject, and a desired confidence-interval width.
+#'
+#' @param rho Expected intraclass correlation (0, 1)
+#' @param k Number of raters/measurements per subject (>= 2)
+#' @param conf_width Desired full width of the confidence interval for the ICC
+#' @param conf_level Confidence level (0,1), e.g. 0.95
+#' @return list(n, inputs)
+calc_icc <- function(rho, k, conf_width = 0.2, conf_level = 0.95) {
+  .validate_unit_interval(rho, "rho")
+  if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 2 || k != round(k)) {
+    stop("k must be a single whole number >= 2.")
+  }
+  if (!is.numeric(conf_width) || length(conf_width) != 1 || is.na(conf_width) ||
+        conf_width <= 0 || conf_width >= 2) {
+    stop("conf_width must be a single number strictly between 0 and 2.")
+  }
+  .validate_unit_interval(conf_level, "conf_level")
+
+  res <- presize::prec_icc(rho = rho, k = k, conf.width = conf_width,
+                            conf.level = conf_level)
+
+  list(
+    n = ceiling(res$n),
+    inputs = list(rho = rho, k = k, conf_width = conf_width, conf_level = conf_level)
+  )
+}

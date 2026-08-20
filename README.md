@@ -7,7 +7,7 @@ design rationale: [`docs/project-brief.md`](docs/project-brief.md) and
 [`docs/SDD.md`](docs/SDD.md).
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: three complete calculator modules --
+of Phase 2: four complete calculator modules --
 
 - **Proportions** (`R/modules/mod_proportion.R`) -- single proportion
   (precision-based, Cochran's formula, with optional finite population
@@ -21,6 +21,12 @@ of Phase 2: three complete calculator modules --
   (2022)'s practical guide -- see that module's own doc comments and
   `R/content/content_diagnostic.R` for the full formula set and citations
   (Buderer 1996, Casagrande & Pike 1978, Connor 1987, Obuchowski 1998)
+- **Agreement / Reliability** (`R/modules/mod_agreement.R`) -- for when
+  there's *no* gold standard at all, only two raters/methods being compared
+  to each other: Cohen's kappa (categorical, wraps `presize::prec_kappa()` /
+  Donner & Eliasziw 1987, Rotondi & Donner 2012) and the intraclass
+  correlation coefficient (continuous, wraps `presize::prec_icc()` / Bonett
+  2002)
 
 Everything else in `docs/SDD.md` §7's catalog (case-control, cohort/RR,
 correlation, precision-based CI-width, survival, post-hoc power, and 3+
@@ -31,8 +37,8 @@ the Home finder, per the phase plan.
 
 - R (>= 4.1)
 - `pacman` (installed automatically by `global.R` if missing), which in turn
-  installs/loads `shiny`, `bslib`, `pwr`. `testthat` is only needed to run
-  the test suite:
+  installs/loads `shiny`, `bslib`, `pwr`, `presize` (which itself pulls in
+  `kappaSize`). `testthat` is only needed to run the test suite:
   ```r
   install.packages("testthat")
   ```
@@ -212,6 +218,18 @@ since they're easy to miss when skimming the module code.
   user-cleared field comes back as `NULL` or `NA` respectively; the server
   code normalizes both to `NULL` before calling `calc_proportion_precision()`,
   which treats `N = NULL` as "no correction."
+
+- **`session$ns()` for dynamically created inputs.** `mod_agreement.R`'s
+  kappa design needs one proportion input per category, and the number of
+  categories is itself a user choice (2-5) -- so those inputs can't be
+  written statically in `mod_agreement_ui()`. Instead, `mod_agreement_server()`
+  builds them inside a `renderUI()` on the server side, and namespaces each
+  one with `session$ns("prop_1")` rather than the `ns()` closure the static
+  UI function uses. Both produce the identical namespaced id -- `ns()` is
+  just `session$ns()` captured once at UI-build time and handed to the UI
+  function as a convenience; server-side code reaches the same namespace
+  through the session object directly, since it doesn't have that closure
+  in scope.
 
 ## Adding the next module
 
