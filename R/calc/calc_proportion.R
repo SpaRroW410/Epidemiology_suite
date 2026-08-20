@@ -15,8 +15,8 @@ calc_proportion_1s <- function(p0, p1, alpha = 0.05, power = 0.8,
                                 alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
 
-  .validate_prop(p0, "p0")
-  .validate_prop(p1, "p1")
+  .validate_unit_interval(p0, "p0")
+  .validate_unit_interval(p1, "p1")
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
   if (isTRUE(all.equal(p0, p1))) {
@@ -49,8 +49,8 @@ calc_proportion_2s <- function(p1, p2, alpha = 0.05, power = 0.8,
                                 alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
 
-  .validate_prop(p1, "p1")
-  .validate_prop(p2, "p2")
+  .validate_unit_interval(p1, "p1")
+  .validate_unit_interval(p2, "p2")
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
   if (isTRUE(all.equal(p1, p2))) {
@@ -88,7 +88,7 @@ calc_proportion_2s <- function(p1, p2, alpha = 0.05, power = 0.8,
 #'   correction, i.e. an effectively infinite population.
 #' @return list(n, n_unadjusted, z, N, inputs)
 calc_proportion_precision <- function(p, d, conf_level = 0.95, N = NULL) {
-  .validate_prop(p, "p")
+  .validate_unit_interval(p, "p")
   .validate_unit_interval(conf_level, "conf_level")
   if (!is.numeric(d) || length(d) != 1 || is.na(d) || d <= 0 || d >= 1) {
     stop("d must be a single number strictly between 0 and 1.")
@@ -108,23 +108,5 @@ calc_proportion_precision <- function(p, d, conf_level = 0.95, N = NULL) {
   )
 }
 
-.validate_prop <- function(x, label) {
-  if (!is.numeric(x) || length(x) != 1 || is.na(x) || x <= 0 || x >= 1) {
-    stop(sprintf("%s must be a single number strictly between 0 and 1.", label))
-  }
-}
-
-.validate_unit_interval <- function(x, label) {
-  if (!is.numeric(x) || length(x) != 1 || is.na(x) || x <= 0 || x >= 1) {
-    stop(sprintf("%s must be a single number strictly between 0 and 1.", label))
-  }
-}
-
-.validate_population <- function(N, label = "N") {
-  if (!is.numeric(N) || length(N) != 1 || is.na(N) || N < 1) {
-    stop(sprintf(
-      "%s must be a single number >= 1 (or left blank for an effectively infinite population).",
-      label
-    ))
-  }
-}
+# Shared .validate_unit_interval() / .validate_population() live in
+# calc_utils.R (sourced alongside every file in R/calc/).

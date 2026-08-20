@@ -71,17 +71,20 @@ calculator_catalog <- list(
   list(key = "means_single", label = "Single mean vs. known value",
        answers = "Answers: \"How many subjects do I need to detect that my population's mean differs from a known/reference value?\"",
        outcome_type = "mean", groups = "1", dependency = NA, reference_based = NA,
-       built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
+       built = TRUE, nav_target = "Means",
+       module_input_id = "means-design", design_value = "single"),
 
   list(key = "means_two_indep", label = "Two independent means",
        answers = "Answers: \"How many subjects per group do I need to detect a difference between two independent groups' means?\"",
        outcome_type = "mean", groups = "2", dependency = "independent", reference_based = NA,
-       built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
+       built = TRUE, nav_target = "Means",
+       module_input_id = "means-design", design_value = "two_sample"),
 
   list(key = "means_two_dep", label = "Two paired means (e.g. pre-post)",
        answers = "Answers: \"How many subjects do I need to detect a change in mean within the same subjects (pre-post)?\"",
        outcome_type = "mean", groups = "2", dependency = "dependent", reference_based = NA,
-       built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
+       built = TRUE, nav_target = "Means",
+       module_input_id = "means-design", design_value = "paired"),
 
   list(key = "means_k", label = "Three or more group means",
        answers = "Answers: \"How many subjects per group do I need to detect any difference across 3+ group means?\"",

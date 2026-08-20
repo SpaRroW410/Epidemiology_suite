@@ -1,3 +1,4 @@
+source(file.path("..", "..", "R", "calc", "calc_utils.R"))
 source(file.path("..", "..", "R", "calc", "calc_proportion.R"))
 
 test_that("calc_proportion_1s matches Cohen (1988) published one-sample tables", {

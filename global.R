@@ -12,5 +12,7 @@ for (f in list.files("R/modules", pattern = "\\.R$", full.names = TRUE)) source(
 # editing the navbar-building code in app.R (SDD #8).
 module_registry <- list(
   list(id = proportion_meta$id, title = proportion_meta$nav_title,
-       ui = mod_proportion_ui, server = mod_proportion_server)
+       ui = mod_proportion_ui, server = mod_proportion_server),
+  list(id = means_meta$id, title = means_meta$nav_title,
+       ui = mod_means_ui, server = mod_means_server)
 )

@@ -6,10 +6,20 @@ tab and original-source citation for every calculator. Background and full
 design rationale: [`docs/project-brief.md`](docs/project-brief.md) and
 [`docs/SDD.md`](docs/SDD.md).
 
-This is Phase 1: the navbar app shell, a Home page with two calculator
-finders, and one complete calculator module (proportions, with three
-sub-calculators) that serves as the template for every calculator added
-later.
+This is Phase 1 (app shell, Home finders, Proportions module) plus the start
+of Phase 2: two complete calculator modules --
+
+- **Proportions** (`R/modules/mod_proportion.R`) -- single proportion
+  (precision-based, Cochran's formula, with optional finite population
+  correction), single proportion vs. known value, two independent
+  proportions
+- **Means** (`R/modules/mod_means.R`) -- single mean vs. known value, two
+  independent means, two paired means (before-after / matched pairs)
+
+Everything else in `docs/SDD.md` §7's catalog (case-control, cohort/RR,
+diagnostic accuracy, correlation, precision-based CI-width, survival,
+post-hoc power, and 3+ group comparisons for both proportions and means)
+remains "coming soon" in the Home finder, per the phase plan.
 
 ## Requirements
 
@@ -64,7 +74,11 @@ outside those three files changes when you add a calculator.
    `epiR`, `WebPower`, `pwrss`, or `TrialSize` over reimplementing formulas),
    and return a plain list of results. Because these have no Shiny
    dependency, they're directly unit-testable — see
-   `tests/testthat/test-calc_proportion.R` for the pattern.
+   `tests/testthat/test-calc_proportion.R` for the pattern. Generic input
+   validators (`.validate_number()`, `.validate_positive()`,
+   `.validate_unit_interval()`, `.validate_population()`) live in the shared
+   `R/calc/calc_utils.R` rather than being redefined per file — reuse those
+   instead of writing a new one with the same check.
 
 2. **`R/content/content_<name>.R`** — a plain R list (or one list per
    sub-design, as in `content_proportion.R`) with:
