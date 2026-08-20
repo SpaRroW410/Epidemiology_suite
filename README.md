@@ -16,8 +16,11 @@ of Phase 2: three complete calculator modules --
 - **Means** (`R/modules/mod_means.R`) -- single mean vs. known value, two
   independent means, two paired means (before-after / matched pairs)
 - **Diagnostic Accuracy** (`R/modules/mod_diagnostic.R`) -- sensitivity &
-  specificity given disease prevalence (Buderer's method), per Buderer
-  (1996) and Akoglu (2022)'s practical guide to this literature
+  specificity, precision-based or vs. a known/reference value, and
+  comparing two diagnostic tests (unpaired or paired), all per Akoglu
+  (2022)'s practical guide -- see that module's own doc comments and
+  `R/content/content_diagnostic.R` for the full formula set and citations
+  (Buderer 1996, Casagrande & Pike 1978, Connor 1987, Obuchowski 1998)
 
 Everything else in `docs/SDD.md` §7's catalog (case-control, cohort/RR,
 correlation, precision-based CI-width, survival, post-hoc power, and 3+

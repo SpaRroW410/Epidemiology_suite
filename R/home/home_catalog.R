@@ -91,20 +91,53 @@ calculator_catalog <- list(
        outcome_type = "mean", groups = "3plus", dependency = NA, reference_based = NA,
        built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
 
-  list(key = "diagnostic_sens_spec",
-       label = "Sensitivity & specificity — given prevalence (Buderer's method)",
+  # Diagnostic Accuracy entries: outcome_type/groups don't apply to this
+  # family (it's not a "how many groups" comparison in the usual sense), so
+  # these are only reachable via the "by study design" finder, not "by
+  # groups & data type" -- the groups finder just never matches them.
+  list(key = "diagnostic_precision",
+       label = "Sensitivity & specificity — precision-based (no reference value)",
        answers = paste(
          "Answers: \"How many subjects (diseased + non-diseased) do I need",
          "to estimate my test's sensitivity and specificity to a desired",
          "precision, given the condition's prevalence?\""
        ),
-       # outcome_type/groups don't apply to this design (one sample serving
-       # both estimates, not a "how many groups" comparison), so this entry
-       # is only reachable via the "by study design" finder, not "by groups
-       # & data type" -- that's fine, the groups finder just never matches it.
        outcome_type = "diagnostic", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Diagnostic Accuracy",
-       module_input_id = NA, design_value = NA)
+       module_input_id = "diagnostic-design", design_value = "precision"),
+
+  list(key = "diagnostic_vs_reference",
+       label = "Sensitivity & specificity vs. known/reference value",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect that my test's",
+         "sensitivity/specificity differs from a known/reference value?\"",
+         "-- needs reference and expected Sn/Sp, prevalence, and a power target."
+       ),
+       outcome_type = "diagnostic", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Diagnostic Accuracy",
+       module_input_id = "diagnostic-design", design_value = "vs_reference"),
+
+  list(key = "diagnostic_two_indep",
+       label = "Two independent (unpaired) diagnostic tests",
+       answers = paste(
+         "Answers: \"How many subjects per test do I need to detect a",
+         "difference in sensitivity (or specificity) between two",
+         "different tests run on two independent groups of subjects?\""
+       ),
+       outcome_type = "diagnostic", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Diagnostic Accuracy",
+       module_input_id = "diagnostic-design", design_value = "two_indep"),
+
+  list(key = "diagnostic_two_paired",
+       label = "Two paired diagnostic tests (same subjects)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a difference in",
+         "sensitivity (or specificity) between two tests both run on the",
+         "same subjects?\" -- returns a range rather than a single number."
+       ),
+       outcome_type = "diagnostic", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Diagnostic Accuracy",
+       module_input_id = "diagnostic-design", design_value = "two_paired")
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -126,7 +159,8 @@ study_design_families <- list(
        catalog_keys = character(0)),
   list(id = "diagnostic", label = "Diagnostic Accuracy",
        hint = "Estimating sensitivity/specificity given expected prevalence.",
-       catalog_keys = c("diagnostic_sens_spec")),
+       catalog_keys = c("diagnostic_precision", "diagnostic_vs_reference",
+                         "diagnostic_two_indep", "diagnostic_two_paired")),
   list(id = "correlation", label = "Correlation",
        hint = "Detecting a Pearson correlation between two continuous variables.",
        catalog_keys = character(0)),
