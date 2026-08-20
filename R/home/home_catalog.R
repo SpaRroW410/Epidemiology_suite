@@ -6,6 +6,10 @@
 # Each entry:
 #   key          - unique id
 #   label        - shown to the user
+#   answers      - plain-language "what question does this calculator
+#                   answer?" sentence, shown alongside the label so someone
+#                   who doesn't yet know which calculator they need can tell
+#                   two similar-looking options apart before clicking.
 #   outcome_type - "proportion" | "mean" (used by the groups/data-type finder)
 #   groups       - "1" | "2" | "3plus"  (used by the groups/data-type finder)
 #   dependency   - "independent" | "dependent" | NA (only meaningful when groups == "2")
@@ -22,41 +26,65 @@
 calculator_catalog <- list(
   list(key = "proportion_single_precision",
        label = "Single proportion — precision-based (no reference value)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate my own",
+         "prevalence to within +/-d%?\" -- no benchmark, no power, no",
+         "hypothesis, just a precision target and a confidence level."
+       ),
        outcome_type = "proportion", groups = "1", dependency = NA, reference_based = FALSE,
        built = TRUE, nav_target = "Proportions",
        module_input_id = "proportion-design", design_value = "precision"),
 
   list(key = "proportion_single", label = "Single proportion vs. known/reference value",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect that my",
+         "population differs from some external benchmark?\" -- needs a",
+         "null value, an expected value, and a power target."
+       ),
        outcome_type = "proportion", groups = "1", dependency = NA, reference_based = TRUE,
        built = TRUE, nav_target = "Proportions",
        module_input_id = "proportion-design", design_value = "single"),
 
   list(key = "proportion_two_indep", label = "Two independent proportions",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to detect a",
+         "difference between two independent groups' proportions?\" --",
+         "needs both groups' expected proportions and a power target."
+       ),
        outcome_type = "proportion", groups = "2", dependency = "independent", reference_based = NA,
        built = TRUE, nav_target = "Proportions",
        module_input_id = "proportion-design", design_value = "two_sample"),
 
   list(key = "proportion_two_dep", label = "Two paired/dependent proportions (e.g. before-after, matched pairs)",
+       answers = paste(
+         "Answers: \"How many matched pairs do I need to detect a change",
+         "in proportion within the same subjects (or matched pairs)?\""
+       ),
        outcome_type = "proportion", groups = "2", dependency = "dependent", reference_based = NA,
        built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
 
   list(key = "proportion_k", label = "Three or more group proportions",
+       answers = "Answers: \"How many subjects per group do I need to detect any difference across 3+ group proportions?\"",
        outcome_type = "proportion", groups = "3plus", dependency = NA, reference_based = NA,
        built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
 
   list(key = "means_single", label = "Single mean vs. known value",
+       answers = "Answers: \"How many subjects do I need to detect that my population's mean differs from a known/reference value?\"",
        outcome_type = "mean", groups = "1", dependency = NA, reference_based = NA,
        built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
 
   list(key = "means_two_indep", label = "Two independent means",
+       answers = "Answers: \"How many subjects per group do I need to detect a difference between two independent groups' means?\"",
        outcome_type = "mean", groups = "2", dependency = "independent", reference_based = NA,
        built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
 
   list(key = "means_two_dep", label = "Two paired means (e.g. pre-post)",
+       answers = "Answers: \"How many subjects do I need to detect a change in mean within the same subjects (pre-post)?\"",
        outcome_type = "mean", groups = "2", dependency = "dependent", reference_based = NA,
        built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
 
   list(key = "means_k", label = "Three or more group means",
+       answers = "Answers: \"How many subjects per group do I need to detect any difference across 3+ group means?\"",
        outcome_type = "mean", groups = "3plus", dependency = NA, reference_based = NA,
        built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA)
 )

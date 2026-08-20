@@ -119,11 +119,18 @@ home_finder_server <- function(input, output, session) {
 }
 
 .render_catalog_entry <- function(entry, prefix) {
+  answers_p <- if (!is.null(entry$answers) && !is.na(entry$answers)) {
+    p(class = "text-muted small mb-1", entry$answers)
+  }
   if (isTRUE(entry$built)) {
-    actionButton(paste0("jump_", prefix, "_", entry$key), entry$label,
-                 class = "btn-primary me-2 mb-2")
+    div(class = "mb-3",
+        answers_p,
+        actionButton(paste0("jump_", prefix, "_", entry$key), entry$label,
+                     class = "btn-primary"))
   } else {
-    div(class = "text-muted mb-2", paste(entry$label, "— coming soon"))
+    div(class = "mb-3",
+        answers_p,
+        div(class = "text-muted", paste(entry$label, "— coming soon")))
   }
 }
 

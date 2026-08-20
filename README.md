@@ -176,6 +176,16 @@ since they're easy to miss when skimming the module code.
   "jump to calculator" buttons) instead of the user clicking the tab
   themselves.
 
+- **`numericInput(..., value = NA)` for an optional field.** The precision
+  calculator's population size `N` is optional (no finite population
+  correction if omitted). `numericInput(ns("N_precision"), ..., value =
+  NA)` renders as an empty field in the browser rather than showing a
+  literal `NA` — an HTML `<input type="number">` can't hold non-numeric
+  text, so it just displays blank. Server-side, an untouched or
+  user-cleared field comes back as `NULL` or `NA` respectively; the server
+  code normalizes both to `NULL` before calling `calc_proportion_precision()`,
+  which treats `N = NULL` as "no correction."
+
 ## Adding the next module
 
 Copy `R/calc/calc_proportion.R`, `R/content/content_proportion.R`, and

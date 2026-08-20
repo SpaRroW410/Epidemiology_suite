@@ -44,7 +44,8 @@ proportion_content <- list(
   precision = list(
     title = "Single Proportion — Precision-Based (No Reference Value)",
     formula_latex = paste0(
-      "$$n = \\frac{Z_{1-\\alpha/2}^2 \\, p(1-p)}{d^2}$$"
+      "$$n_0 = \\frac{Z_{1-\\alpha/2}^2 \\, p(1-p)}{d^2}$$",
+      "$$n = \\frac{n_0}{1 + \\dfrac{n_0 - 1}{N}} \\quad \\text{(finite population correction, if } N \\text{ known)}$$"
     ),
     explanation = paste(
       "This calculator finds the sample size needed to estimate a single",
@@ -60,6 +61,13 @@ proportion_content <- list(
       "- **d** - the desired absolute precision (margin of error), e.g. 0.05",
       "  for a result reported as \"prevalence +/- 5 percentage points\".",
       "- **Confidence level** - typically 0.95 (95%), giving Z = 1.96.",
+      "- **N (optional)** - the total size of the finite population you are",
+      "  sampling from (e.g. total students in one college, total",
+      "  households in one village). If provided, the finite population",
+      "  correction (FPC) reduces the required sample size, since sampling",
+      "  a larger fraction of a small population yields proportionally more",
+      "  information. Leave blank for a community-level survey where the",
+      "  population is effectively unlimited relative to the sample.",
       "",
       "Unlike the *vs. known value* calculator above, this formula does not",
       "test a hypothesis or require a power target -- there is no effect",
@@ -69,15 +77,22 @@ proportion_content <- list(
     worked_example = paste(
       "The best-known example: with no prior estimate (p = 0.5), a desired",
       "precision of d = 0.05, and 95% confidence (Z = 1.96), this calculator",
-      "returns n = 385 -- the widely-quoted default sample size for a",
+      "returns n0 = 385 -- the widely-quoted default sample size for a",
       "prevalence survey with no other information available.",
+      "",
+      "Now suppose that survey is actually confined to a single college with",
+      "N = 1000 eligible students. Applying the finite population correction",
+      "to the same n0 = 385 gives an adjusted n = 278 -- fewer subjects",
+      "needed, because 385 would already have been over a third of the",
+      "entire population.",
       sep = "\n"
     ),
     citation = paste(
       "Cochran WG. Sampling Techniques. 3rd ed. New York: John Wiley & Sons;",
-      "1977. (original formula); Naing L, Winn T, Rusli BN. Practical issues",
-      "in calculating the sample size for prevalence studies. Arch Orofac",
-      "Sci. 2006;1:9-14. (applied to health prevalence studies)."
+      "1977. (original formula and finite population correction);",
+      "Naing L, Winn T, Rusli BN. Practical issues in calculating the",
+      "sample size for prevalence studies. Arch Orofac Sci. 2006;1:9-14.",
+      "(applied to health prevalence studies)."
     ),
     backend = "Closed-form (Cochran's formula); no external package required"
   ),

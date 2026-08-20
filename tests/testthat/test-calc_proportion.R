@@ -59,3 +59,24 @@ test_that("calc_proportion_precision rejects invalid inputs", {
   expect_error(calc_proportion_precision(p = 0.5, d = 1), "between 0 and 1")
   expect_error(calc_proportion_precision(p = 0.5, d = 0.05, conf_level = 1), "between 0 and 1")
 })
+
+test_that("calc_proportion_precision applies the finite population correction", {
+  # Cochran (1977) FPC: n = n0 / (1 + (n0-1)/N). n0 = 385 (p=.5, d=.05, 95% CI),
+  # N = 1000 -> adjusted n = 278 (manually cross-checked).
+  res <- calc_proportion_precision(p = 0.5, d = 0.05, conf_level = 0.95, N = 1000)
+  expect_equal(res$n_unadjusted, 385)
+  expect_equal(res$n, 278)
+  expect_equal(res$N, 1000)
+})
+
+test_that("calc_proportion_precision: FPC is a no-op as N grows large", {
+  res_no_fpc <- calc_proportion_precision(p = 0.5, d = 0.05, conf_level = 0.95)
+  res_huge_n <- calc_proportion_precision(p = 0.5, d = 0.05, conf_level = 0.95, N = 1e9)
+  expect_equal(res_no_fpc$n, res_huge_n$n)
+})
+
+test_that("calc_proportion_precision rejects invalid N", {
+  expect_error(calc_proportion_precision(p = 0.5, d = 0.05, N = 0), ">= 1")
+  expect_error(calc_proportion_precision(p = 0.5, d = 0.05, N = -10), ">= 1")
+  expect_error(calc_proportion_precision(p = 0.5, d = 0.05, N = NA), ">= 1")
+})

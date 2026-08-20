@@ -40,7 +40,10 @@ mod_proportion_ui <- function(id) {
         numericInput(ns("d_precision"), "d (desired precision / margin of error)",
                      value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("conf_level"), "Confidence level",
-                     value = 0.95, min = 0.5, max = 0.999, step = 0.01)
+                     value = 0.95, min = 0.5, max = 0.999, step = 0.01),
+        numericInput(ns("N_precision"),
+                     "Population size N (optional; leave blank for a large/community population)",
+                     value = NA, min = 1)
       ),
       conditionalPanel(
         condition = design_is("single"),
@@ -111,10 +114,15 @@ mod_proportion_server <- function(id) {
 
       if (input$design == "precision") {
         req(input$p_precision, input$d_precision, input$conf_level)
+        # N_precision is optional: numericInput(value = NA) renders an empty
+        # field, which Shiny reports as NULL (untouched) or NA (cleared) --
+        # either means "no finite population correction".
+        N <- input$N_precision
+        if (is.null(N) || is.na(N)) N <- NULL
         tryCatch(
           list(ok = TRUE, value = calc_proportion_precision(
             p = input$p_precision, d = input$d_precision,
-            conf_level = input$conf_level
+            conf_level = input$conf_level, N = N
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -151,6 +159,10 @@ mod_proportion_server <- function(id) {
       if (input$design == "precision") {
         tagList(
           p(strong("Required sample size: "), v$n),
+          if (!is.null(v$N)) {
+            p(sprintf("(before finite population correction: %d, for population N = %s)",
+                      v$n_unadjusted, v$N))
+          },
           p(sprintf("Z = %.4f", v$z))
         )
       } else if (input$design == "single") {

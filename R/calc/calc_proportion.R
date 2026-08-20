@@ -76,26 +76,35 @@ calc_proportion_2s <- function(p1, p2, alpha = 0.05, power = 0.8,
 #' Cochran's formula: estimates a proportion to within a desired absolute
 #' precision (margin of error), with no hypothesis test and no comparison
 #' group or reference value -- just "how many do I need to estimate my own
-#' prevalence within +/- d?".
+#' prevalence within +/- d?". Optionally applies the finite population
+#' correction (FPC) when sampling from a population of known, limited size N
+#' (e.g. all students in one college) rather than an effectively unlimited
+#' community.
 #'
 #' @param p Expected proportion (0,1). Use 0.5 if unknown (most conservative).
 #' @param d Desired absolute precision / margin of error (0,1), e.g. 0.05
 #' @param conf_level Confidence level (0,1), e.g. 0.95
-#' @return list(n, z, inputs)
-calc_proportion_precision <- function(p, d, conf_level = 0.95) {
+#' @param N Optional finite population size (>= 1). NULL (default) = no
+#'   correction, i.e. an effectively infinite population.
+#' @return list(n, n_unadjusted, z, N, inputs)
+calc_proportion_precision <- function(p, d, conf_level = 0.95, N = NULL) {
   .validate_prop(p, "p")
   .validate_unit_interval(conf_level, "conf_level")
   if (!is.numeric(d) || length(d) != 1 || is.na(d) || d <= 0 || d >= 1) {
     stop("d must be a single number strictly between 0 and 1.")
   }
+  if (!is.null(N)) .validate_population(N)
 
   z <- stats::qnorm(1 - (1 - conf_level) / 2)
   n0 <- (z^2 * p * (1 - p)) / d^2
+  n_adj <- if (is.null(N)) n0 else n0 / (1 + (n0 - 1) / N)
 
   list(
-    n = ceiling(n0),
+    n = ceiling(n_adj),
+    n_unadjusted = ceiling(n0),
     z = z,
-    inputs = list(p = p, d = d, conf_level = conf_level)
+    N = N,
+    inputs = list(p = p, d = d, conf_level = conf_level, N = N)
   )
 }
 
@@ -108,5 +117,14 @@ calc_proportion_precision <- function(p, d, conf_level = 0.95) {
 .validate_unit_interval <- function(x, label) {
   if (!is.numeric(x) || length(x) != 1 || is.na(x) || x <= 0 || x >= 1) {
     stop(sprintf("%s must be a single number strictly between 0 and 1.", label))
+  }
+}
+
+.validate_population <- function(N, label = "N") {
+  if (!is.numeric(N) || length(N) != 1 || is.na(N) || N < 1) {
+    stop(sprintf(
+      "%s must be a single number >= 1 (or left blank for an effectively infinite population).",
+      label
+    ))
   }
 }
