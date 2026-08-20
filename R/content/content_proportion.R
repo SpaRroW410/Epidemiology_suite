@@ -41,6 +41,46 @@ proportion_content <- list(
     ),
     backend = "pwr::pwr.p.test (effect size via pwr::ES.h)"
   ),
+  precision = list(
+    title = "Single Proportion — Precision-Based (No Reference Value)",
+    formula_latex = paste0(
+      "$$n = \\frac{Z_{1-\\alpha/2}^2 \\, p(1-p)}{d^2}$$"
+    ),
+    explanation = paste(
+      "This calculator finds the sample size needed to estimate a single",
+      "proportion (e.g. a disease prevalence) to within a desired margin of",
+      "error, when there is **no known reference value and no comparison",
+      "group** -- you are simply estimating your own population's",
+      "proportion as precisely as you choose. This is usually what is",
+      "needed for a straightforward prevalence/frequency survey.",
+      "",
+      "- **p** - the expected proportion. If you have no prior estimate,",
+      "  use 0.5 -- it maximizes p(1-p) and so gives the largest, safest",
+      "  sample size.",
+      "- **d** - the desired absolute precision (margin of error), e.g. 0.05",
+      "  for a result reported as \"prevalence +/- 5 percentage points\".",
+      "- **Confidence level** - typically 0.95 (95%), giving Z = 1.96.",
+      "",
+      "Unlike the *vs. known value* calculator above, this formula does not",
+      "test a hypothesis or require a power target -- there is no effect",
+      "size and no comparison, only an estimation precision target.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "The best-known example: with no prior estimate (p = 0.5), a desired",
+      "precision of d = 0.05, and 95% confidence (Z = 1.96), this calculator",
+      "returns n = 385 -- the widely-quoted default sample size for a",
+      "prevalence survey with no other information available.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Cochran WG. Sampling Techniques. 3rd ed. New York: John Wiley & Sons;",
+      "1977. (original formula); Naing L, Winn T, Rusli BN. Practical issues",
+      "in calculating the sample size for prevalence studies. Arch Orofac",
+      "Sci. 2006;1:9-14. (applied to health prevalence studies)."
+    ),
+    backend = "Closed-form (Cochran's formula); no external package required"
+  ),
   two_sample = list(
     title = "Two Independent Proportions",
     formula_latex = paste0(

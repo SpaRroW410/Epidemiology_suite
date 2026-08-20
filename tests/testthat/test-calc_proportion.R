@@ -39,3 +39,23 @@ test_that("calc_proportion_2s rejects invalid inputs", {
   expect_error(calc_proportion_2s(p1 = -0.1, p2 = 0.25), "between 0 and 1")
   expect_error(calc_proportion_2s(p1 = 0.10, p2 = 0.25, alpha = 0), "between 0 and 1")
 })
+
+test_that("calc_proportion_precision matches the well-known n=385 default", {
+  # Cochran (1977): p = 0.5 (unknown/most conservative), d = 0.05, 95% CI ->
+  # the widely-quoted default prevalence-survey sample size of 385.
+  res <- calc_proportion_precision(p = 0.5, d = 0.05, conf_level = 0.95)
+  expect_equal(res$n, 385)
+  expect_equal(round(res$z, 4), 1.9600)
+})
+
+test_that("calc_proportion_precision: worked example from content_proportion.R", {
+  res <- calc_proportion_precision(p = 0.5, d = 0.05, conf_level = 0.95)
+  expect_equal(res$n, 385)
+})
+
+test_that("calc_proportion_precision rejects invalid inputs", {
+  expect_error(calc_proportion_precision(p = 0, d = 0.05), "between 0 and 1")
+  expect_error(calc_proportion_precision(p = 0.5, d = 0), "between 0 and 1")
+  expect_error(calc_proportion_precision(p = 0.5, d = 1), "between 0 and 1")
+  expect_error(calc_proportion_precision(p = 0.5, d = 0.05, conf_level = 1), "between 0 and 1")
+})

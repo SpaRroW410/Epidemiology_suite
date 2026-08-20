@@ -6,15 +6,19 @@ tab and original-source citation for every calculator. Background and full
 design rationale: [`docs/project-brief.md`](docs/project-brief.md) and
 [`docs/SDD.md`](docs/SDD.md).
 
-This is Phase 1: the navbar app shell plus one complete calculator module
-(proportions) that serves as the template for every calculator added later.
+This is Phase 1: the navbar app shell, a Home page with two calculator
+finders, and one complete calculator module (proportions, with three
+sub-calculators) that serves as the template for every calculator added
+later.
 
 ## Requirements
 
 - R (>= 4.1)
-- Packages: `shiny`, `bslib`, `pwr`, `testthat`
+- `pacman` (installed automatically by `global.R` if missing), which in turn
+  installs/loads `shiny`, `bslib`, `pwr`. `testthat` is only needed to run
+  the test suite:
   ```r
-  install.packages(c("shiny", "bslib", "pwr", "testthat"))
+  install.packages("testthat")
   ```
 
 ## Running the app
@@ -38,12 +42,13 @@ testthat::test_dir("tests/testthat")
 ## Repository structure
 
 ```
-app.R                      # entry point: builds navbar, wires modules
-global.R                   # library() calls, source()s R/, defines module_registry
+app.R                      # entry point: builds navbar, wires modules + Home finder
+global.R                   # pacman::p_load(), source()s R/, defines module_registry
 R/
 ├── modules/                # UI + server per calculator (mod_*.R)
 ├── calc/                   # pure calculation functions, no Shiny (calc_*.R)
-└── content/                 # per-module metadata: formula, text, citation (content_*.R)
+├── content/                 # per-module metadata: formula, text, citation (content_*.R)
+└── home/                    # Home page calculator finders (see below)
 tests/testthat/            # unit tests on calc_*.R functions
 docs/                       # project brief and software design document
 www/                         # custom CSS/JS/logo, if added later
@@ -97,6 +102,28 @@ module_registry <- list(
 `app.R` builds the navbar by iterating this list — it does not need to
 change when you add a calculator.
 
+## Home page calculator finders
+
+The Home tab offers two ways to find the right calculator, both driven by
+the catalog in `R/home/home_catalog.R`:
+
+- **By study design** — pick the calculator family that matches your study
+  (Proportions, Means, Case-Control, ...); matches `docs/SDD.md` §7's
+  catalog table.
+- **By groups & data type** — pick your outcome type (proportion/mean),
+  number of groups (1, 2, or 3+), and — for 2 groups — whether they're
+  independent or dependent (paired/matched); for 1 group, whether you have a
+  known/reference value to test against or are just estimating with a
+  desired precision.
+
+Both finders resolve to an entry in `calculator_catalog` (in
+`home_catalog.R`). An entry with `built = TRUE` renders as a button that
+jumps to the right nav tab and presets that module's internal design
+selector; `built = FALSE` renders a "coming soon" note. **When you add a new
+calculator module, also add its catalog entry/entries** (and, if it starts a
+new family, an entry in `study_design_families`) — otherwise the finders
+will describe it as not yet implemented even after you've built it.
+
 ## Non-idiomatic-for-plain-R patterns used here
 
 A couple of things in this codebase aren't standard base-R idiom; noted here
@@ -125,11 +152,42 @@ since they're easy to miss when skimming the module code.
   session) {...})` gives the server function a matching, isolated input/output
   scope. Every `mod_*.R` file must use both.
 
+- **`pacman::p_load()` instead of `library()`.** `global.R` installs
+  `pacman` itself if missing (`if (!requireNamespace("pacman", quietly =
+  TRUE)) install.packages("pacman")`), then calls
+  `pacman::p_load(shiny, bslib, pwr)`. Unlike `library()`, `p_load()`
+  installs a package automatically if it isn't already present, so a fresh
+  clone of this repo doesn't need a separate "install these packages" step
+  before `shiny::runApp()` works.
+
+- **Updating a module's input from outside the module.** `home_finder.R`'s
+  server logic runs at the top level (not inside `moduleServer()`), and on a
+  finder button click it calls `updateRadioButtons(session,
+  "proportion-design", selected = ...)` using the module's fully-namespaced
+  input id directly, rather than `ns("design")`. This works because
+  `update*Input()` functions address inputs by their raw, on-the-page DOM id
+  — namespacing (`ns()`) is only needed *inside* a module, to build that
+  same id from the bare name. Called from the root session, the
+  already-namespaced string is exactly what's needed.
+
+- **`bslib::nav_select()`.** `page_navbar(id = "main_nav", ...)` gives the
+  navbar an id; `nav_select("main_nav", "Proportions", session = session)`
+  then switches the active tab programmatically (used by the Home finder's
+  "jump to calculator" buttons) instead of the user clicking the tab
+  themselves.
+
 ## Adding the next module
 
 Copy `R/calc/calc_proportion.R`, `R/content/content_proportion.R`, and
 `R/modules/mod_proportion.R`, rename to the new calculator, swap the formula
-and stats-package call, then add one entry to `module_registry` in
-`global.R`. See `docs/SDD.md` §7 for the full calculator catalog and phase
-plan (means, case-control, cohort/RR, diagnostic accuracy, correlation,
-precision-based, post-hoc power).
+and stats-package call, then:
+
+1. Add one entry to `module_registry` in `global.R`.
+2. Flip (or add) its entry/entries in `calculator_catalog` in
+   `R/home/home_catalog.R` from `built = FALSE` to `built = TRUE`, with the
+   right `nav_target`/`module_input_id`/`design_value`, so the Home finders
+   pick it up.
+
+See `docs/SDD.md` §7 for the full calculator catalog and phase plan (means,
+case-control, cohort/RR, diagnostic accuracy, correlation, precision-based,
+post-hoc power).

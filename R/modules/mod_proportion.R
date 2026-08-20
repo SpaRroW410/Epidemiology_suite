@@ -15,7 +15,10 @@ mod_proportion_ui <- function(id) {
   # expression in the browser, so a module input id must be referenced as
   # input['<namespaced id>'] rather than the bare R variable name. ns("design")
   # returns the namespaced id (e.g. "proportion-design") as a string.
-  design_is <- function(value) sprintf("input['%s'] == '%s'", ns("design"), value)
+  design_is <- function(...) {
+    values <- c(...)
+    paste(sprintf("input['%s'] == '%s'", ns("design"), values), collapse = " || ")
+  }
 
   tabsetPanel(
     tabPanel(
@@ -24,9 +27,20 @@ mod_proportion_ui <- function(id) {
       radioButtons(
         ns("design"), "Design",
         choices = c(
-          "Single proportion vs. known value" = "single",
+          "Single proportion - precision-based (no reference value)" = "precision",
+          "Single proportion vs. known/reference value (hypothesis test)" = "single",
           "Two independent proportions" = "two_sample"
-        )
+        ),
+        selected = "precision"
+      ),
+      conditionalPanel(
+        condition = design_is("precision"),
+        numericInput(ns("p_precision"), "p (expected proportion; use 0.5 if unknown)",
+                     value = 0.5, min = 0, max = 1, step = 0.01),
+        numericInput(ns("d_precision"), "d (desired precision / margin of error)",
+                     value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("conf_level"), "Confidence level",
+                     value = 0.95, min = 0.5, max = 0.999, step = 0.01)
       ),
       conditionalPanel(
         condition = design_is("single"),
@@ -38,11 +52,14 @@ mod_proportion_ui <- function(id) {
         numericInput(ns("p1_two"), "p1 (group 1 proportion)", value = 0.10, min = 0, max = 1, step = 0.01),
         numericInput(ns("p2_two"), "p2 (group 2 proportion)", value = 0.25, min = 0, max = 1, step = 0.01)
       ),
-      numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
-      numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-      selectInput(
-        ns("alternative"), "Alternative hypothesis",
-        choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+      conditionalPanel(
+        condition = design_is("single", "two_sample"),
+        numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
+        selectInput(
+          ns("alternative"), "Alternative hypothesis",
+          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+        )
       ),
       hr(),
       h5("Result"),
@@ -51,13 +68,19 @@ mod_proportion_ui <- function(id) {
     tabPanel(
       "Formula / Help",
       br(),
-      h4("Single proportion vs. known value"),
+      h4(proportion_content$precision$title),
+      withMathJax(HTML(proportion_content$precision$formula_latex)),
+      shiny::markdown(proportion_content$precision$explanation),
+      h5("Worked example"),
+      shiny::markdown(proportion_content$precision$worked_example),
+      hr(),
+      h4(proportion_content$single$title),
       withMathJax(HTML(proportion_content$single$formula_latex)),
       shiny::markdown(proportion_content$single$explanation),
       h5("Worked example"),
       shiny::markdown(proportion_content$single$worked_example),
       hr(),
-      h4("Two independent proportions"),
+      h4(proportion_content$two_sample$title),
       withMathJax(HTML(proportion_content$two_sample$formula_latex)),
       shiny::markdown(proportion_content$two_sample$explanation),
       h5("Worked example"),
@@ -66,6 +89,10 @@ mod_proportion_ui <- function(id) {
     tabPanel(
       "Reference",
       br(),
+      h4(proportion_content$precision$title),
+      p(strong("Citation: "), proportion_content$precision$citation),
+      p(strong("Implemented via: "), code(proportion_content$precision$backend)),
+      hr(),
       h4(proportion_content$single$title),
       p(strong("Citation: "), proportion_content$single$citation),
       p(strong("Implemented via: "), code(proportion_content$single$backend)),
@@ -80,10 +107,19 @@ mod_proportion_ui <- function(id) {
 mod_proportion_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     result <- reactive({
-      req(input$design, input$alpha, input$power, input$alternative)
+      req(input$design)
 
-      if (input$design == "single") {
-        req(input$p0, input$p1_single)
+      if (input$design == "precision") {
+        req(input$p_precision, input$d_precision, input$conf_level)
+        tryCatch(
+          list(ok = TRUE, value = calc_proportion_precision(
+            p = input$p_precision, d = input$d_precision,
+            conf_level = input$conf_level
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else if (input$design == "single") {
+        req(input$p0, input$p1_single, input$alpha, input$power, input$alternative)
         tryCatch(
           list(ok = TRUE, value = calc_proportion_1s(
             p0 = input$p0, p1 = input$p1_single,
@@ -93,7 +129,7 @@ mod_proportion_server <- function(id) {
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
       } else {
-        req(input$p1_two, input$p2_two)
+        req(input$p1_two, input$p2_two, input$alpha, input$power, input$alternative)
         tryCatch(
           list(ok = TRUE, value = calc_proportion_2s(
             p1 = input$p1_two, p2 = input$p2_two,
@@ -112,7 +148,12 @@ mod_proportion_server <- function(id) {
       }
 
       v <- res$value
-      if (input$design == "single") {
+      if (input$design == "precision") {
+        tagList(
+          p(strong("Required sample size: "), v$n),
+          p(sprintf("Z = %.4f", v$z))
+        )
+      } else if (input$design == "single") {
         tagList(
           p(strong("Required sample size: "), v$n),
           p(sprintf("Effect size h = %.4f", v$h))
