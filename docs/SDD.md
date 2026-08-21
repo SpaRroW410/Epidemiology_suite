@@ -200,11 +200,36 @@ for what to build next):
 | Equivalence (TOST) | Two one-sided tests for means, raw/untransformed scale | `PowerTOST::sampleN.TOST(logscale=FALSE)` | Live |
 | Log-rank / survival | Two-arm time-to-event, cumulative event probabilities | `powerSurvEpi::ssizeCT()` | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio, rate) | `presize`, `precisely` | Not started |
-| Survival | Log-rank, accrual/follow-up designs | `powerSurvEpi`, `gsDesign::nSurv` | Not started |
+| Survival (advanced) | Cox PH, exponential, accrual/follow-up, competing risks | `powerSurvEpi`, `gsDesign::nSurv` | Not started |
 | Post-hoc / achieved power | Given n and observed effect, compute achieved power | reuse each module's engine, solve for power | Not started |
 
 Each row above is (or will be) exactly one `mod_*.R` + `calc_*.R` +
 `content_*.R` file set, following the module contract in §8.
+
+### 7.1 "Which calculator?" — the study design identification wizard
+
+A third way into the app, alongside the two Home finders in §7 above: a
+guided-questionnaire wizard (its own top-level nav panel, "Which calculator?")
+that walks a researcher through Stage 1–5 of
+[`docs/design_identification_algorithm.md`](design_identification_algorithm.md)
+— primary aim, allocation/directionality, outcome type, groups/dependence
+structure — one question at a time, showing the reasoning trace as it goes,
+and ending on either a jump button into a live module (reusing the Home
+finders' `nav_select()` + `updateRadioButtons()` mechanism) or an honest
+"not yet built" note naming the module/backend/citation the checklists
+already call for. It never silently decides, and a "start over" control is
+always present.
+
+Implementation: `R/home/design_tree.R` (a flat node registry — question
+nodes with `options`, terminal nodes with either a `catalog_key` into
+`calculator_catalog` or a `would_use`/`citation` pair) and
+`R/home/design_wizard.R` (the UI/server, structured the same
+non-Shiny-module way as `home_finder.R`, for the same reason: it needs to
+jump the top-level navbar from the root session). Scope is deliberately
+"guided tree only, routing to what's built" for v1 — no free-text/PICO
+parsing yet (Stage 0 of the source document); every branch that reaches a
+calculator this app hasn't built yet degrades to the honest placeholder
+rather than a broken link or a guess.
 
 ---
 

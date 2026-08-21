@@ -66,10 +66,23 @@ from the master checklists are now built --
   `powerSurvEpi::ssizeCT()` (Freedman 1982; Rosner 2006)
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
-(precision-based CI-width, survival, post-hoc power, log-rank, TOST
-equivalence, and 3+ group proportions/means beyond what ANOVA/chi-square
-already cover, plus the much larger backlog in those two files) remains
-"coming soon" in the Home finder, per the staged build plan.
+(precision-based CI-width, advanced survival designs, post-hoc power, and
+the much larger Stage 2-4 backlog in those two files) remains "coming soon"
+in the Home finder, per the staged build plan.
+
+### Which calculator? (guided wizard)
+
+A third way into the app, alongside the two Home finders: a "Which
+calculator?" nav tab that asks one question at a time (primary aim,
+experimental vs. observational, selection basis, outcome type, groups) per
+[`docs/design_identification_algorithm.md`](docs/design_identification_algorithm.md),
+shows its reasoning trace as you answer, and ends on a jump button into a
+live module -- or an honest "not yet built" note (naming the module/backend/
+citation the checklists already call for) if that branch isn't implemented
+yet. `R/home/design_tree.R` holds the question/terminal node registry;
+`R/home/design_wizard.R` is the UI/server (same non-module, top-level
+pattern as `home_finder.R`, since it also needs to jump the navbar from the
+root session). v1 scope is guided-tree only -- no free-text/PICO parsing yet.
 
 ## Requirements
 

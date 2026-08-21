@@ -9,6 +9,7 @@ nav_panels <- lapply(module_registry, function(m) {
 })
 
 home_panel <- nav_panel("Home", home_panel_ui())
+design_wizard_panel <- nav_panel("Which calculator?", design_wizard_ui())
 
 # do.call() lets us pass a variable-length, dynamically built list of nav
 # panels as page_navbar()'s "..." argument -- equivalent to calling
@@ -18,12 +19,13 @@ home_panel <- nav_panel("Home", home_panel_ui())
 # bslib::nav_select("main_nav", ...) -- see home_finder.R.
 ui <- do.call(page_navbar, c(
   list(id = "main_nav", title = "Sample Size Calculator", theme = bs_theme(version = 5)),
-  list(home_panel),
+  list(home_panel, design_wizard_panel),
   nav_panels
 ))
 
 server <- function(input, output, session) {
   home_finder_server(input, output, session)
+  design_wizard_server(input, output, session)
   for (m in module_registry) {
     m$server(m$id)
   }
