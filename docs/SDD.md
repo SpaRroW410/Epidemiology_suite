@@ -175,8 +175,9 @@ Every calculator should be reachable from *both* files (a researcher lands via
 design, a statistician via test) — the same Shiny module serves both entry
 points, and both files' checkboxes are ticked with a `*(implemented: ...)*`
 note as each module goes live, so either file alone shows current build
-status. Both files also carry a shared 4-stage build plan (Stage 1 CORE
-release through Stage 4 niche/simulation) and a set of caveats (version-
+status. Both files also carry a shared staged build plan (Stage 1 CORE
+release through Stage 4 niche/simulation, plus Stage 1.5 and Stage 5 for the
+design-identification wizard's two halves — see §7.1) and a set of caveats (version-
 dependent vendor procedure counts, ARE-based non-parametric power, bio-
 equivalence input conventions, packages with no confirmed CRAN presence,
 etc.) — see those files rather than duplicating them here.
@@ -225,11 +226,17 @@ nodes with `options`, terminal nodes with either a `catalog_key` into
 `calculator_catalog` or a `would_use`/`citation` pair) and
 `R/home/design_wizard.R` (the UI/server, structured the same
 non-Shiny-module way as `home_finder.R`, for the same reason: it needs to
-jump the top-level navbar from the root session). Scope is deliberately
-"guided tree only, routing to what's built" for v1 — no free-text/PICO
-parsing yet (Stage 0 of the source document); every branch that reaches a
-calculator this app hasn't built yet degrades to the honest placeholder
-rather than a broken link or a guess.
+jump the top-level navbar from the root session).
+
+This is only the guided-tree half of the source document (its Stages 1–5;
+build-plan **Stage 1.5**, done). Its Stage 0 — free-text/PICO input parsing
+(keyword heuristics and/or an LLM layer that pre-fills the wizard's answers
+instead of clicking through every question) — is the other half, and is
+deliberately deferred to build-plan **Stage 5**, after Stage 4, rather than
+bundled in here: every branch that reaches a calculator this app hasn't
+built yet degrades to an honest "not yet built" placeholder for now, and
+free-text parsing is worth adding once most of those placeholders have
+flipped to live modules, not before.
 
 ---
 
@@ -337,10 +344,11 @@ maintained backlog. Summary:
 | Stage | Scope | Status |
 |---|---|---|
 | 1 — v1 CORE (~25 modules) | Single proportion, single mean, two means, two proportions, unmatched case-control, cohort/RR, one-way ANOVA, correlation, chi-square, diagnostic Se/Sp, ICC, kappa, log-rank, Simon two-stage, pilot rules-of-thumb, TOST equivalence | All Stage-1 CORE items live: Proportions, Means (incl. ANOVA), Diagnostic Accuracy, Agreement/Reliability (kappa+ICC), Case-Control (unmatched+matched), Cohort/RR, Correlation, Chi-Square Tests (GoF+independence), Pilot/Feasibility, Simon Two-Stage, Equivalence (TOST), Log-Rank/Survival |
-| 1.5 — study design identification wizard | "Which calculator?" guided Q&A routing a research question to the right Stage-1 module (or an honest not-built note for anything later); see §7.1 and `docs/design_identification_algorithm.md` | Live — built deliberately right after Stage 1 finished and before Stage 2 starts, so every CORE module is reachable both by name and by guided description before the backlog grows further |
+| 1.5 — study design identification wizard, guided-tree half | "Which calculator?" guided Q&A routing a research question to the right Stage-1 module (or an honest not-built note for anything later); see §7.1 and `docs/design_identification_algorithm.md` Stages 1-5 | Live — built deliberately right after Stage 1 finished and before Stage 2 starts, so every CORE module is reachable both by name and by guided description before the backlog grows further |
 | 2 — analytical depth | F-family completeness (factorial/RM-ANOVA, ANCOVA, MANOVA), full correlation/regression suite, matched case-control, ROC comparison, Bland-Altman/CCC/Cronbach, prediction-model development (`pmsampsize`) | Not started |
 | 3 — advanced trial designs | Cluster-randomized/stepped-wedge, group-sequential/adaptive, survival extensions, bioequivalence replicate designs, longitudinal/MMRM | Not started |
 | 4 — niche/simulation & non-formula | Genetic (`genpwr`), SEM (`semPower`), trial sequential analysis, `simr`-based simulation, guidance-only qualitative/animal-study panels | Not started |
+| 5 — study design identification wizard, free-text half | Stage 0 of `docs/design_identification_algorithm.md`: free-text/PICO input parsing (keyword heuristics and/or an LLM parsing layer) that pre-fills the guided wizard's answers instead of requiring every question to be clicked through manually. Deliberately deferred until after Stage 4, once the guided tree's terminals mostly point at live modules rather than "not yet built" notes | Not started |
 | — (last, maybe cut) | Post-hoc/achieved-power module | Deliberately deprioritized to the very end of the build order; may be dropped entirely if the app's scope grows large enough that it's not worth the added surface area (see the Post-hoc power caveat in §10 and the checklists) |
 | — | Deployment polish; evaluate Shinylive | Not started |
 
