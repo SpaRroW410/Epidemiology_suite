@@ -189,7 +189,9 @@ Two complementary, copy-pasteable markdown files for your R Shiny sample size ca
 
 **Stage 2 — analytical depth.** Add the G*Power F-family completeness (factorial/RM-ANOVA, ANCOVA, MANOVA, regression R² increase), the full correlation/regression suite (`WebPower`), matched case-control variants, ROC comparison (`pROC`), Bland-Altman/CCC/Cronbach (`presize`), and prediction-model development (`pmsampsize`) — the latter is increasingly demanded by journals and is a differentiator versus OpenEpi.
 
-**Stage 3 — advanced/trial designs.** Cluster-randomized and stepped-wedge (`clusterPower`/`swCRTdesign`), group-sequential/adaptive (`gsDesign`/`rpact`), survival extensions (RMST, competing risks), bioequivalence replicate designs (`PowerTOST`), longitudinal/MMRM (`longpower`/`powerlmm`), and the **post-hoc/achieved-power module** you already planned (reuse each Stage-1/2 module's engine, solving for power instead of N).
+**Stage 3 — advanced/trial designs.** Cluster-randomized and stepped-wedge (`clusterPower`/`swCRTdesign`), group-sequential/adaptive (`gsDesign`/`rpact`), survival extensions (RMST, competing risks), bioequivalence replicate designs (`PowerTOST`), longitudinal/MMRM (`longpower`/`powerlmm`).
+
+**Post-hoc/achieved-power module — deliberately last, possibly cut.** Originally planned as part of Stage 3 (reuse each Stage-1/2 module's engine, solving for power instead of N). Decision (2026-08-21): build this only after everything else above is done, not alongside it — and reconsider whether to build it at all once the app's calculator surface is large, given the methodological controversy noted in the Caveats section below.
 
 **Stage 4 — niche/simulation & non-formula.** Genetic (`genpwr`), SEM (`semPower`), trial sequential analysis (`RTSA`), simulation engine (`simr`) for designs with no closed form, and guidance-only panels for qualitative (Guest; Malterud) and resource-equation animal studies.
 

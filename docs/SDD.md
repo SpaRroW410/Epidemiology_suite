@@ -338,8 +338,9 @@ maintained backlog. Summary:
 |---|---|---|
 | 1 — v1 CORE (~25 modules) | Single proportion, single mean, two means, two proportions, unmatched case-control, cohort/RR, one-way ANOVA, correlation, chi-square, diagnostic Se/Sp, ICC, kappa, log-rank, Simon two-stage, pilot rules-of-thumb, TOST equivalence | All Stage-1 CORE items live: Proportions, Means (incl. ANOVA), Diagnostic Accuracy, Agreement/Reliability (kappa+ICC), Case-Control (unmatched+matched), Cohort/RR, Correlation, Chi-Square Tests (GoF+independence), Pilot/Feasibility, Simon Two-Stage, Equivalence (TOST), Log-Rank/Survival |
 | 2 — analytical depth | F-family completeness (factorial/RM-ANOVA, ANCOVA, MANOVA), full correlation/regression suite, matched case-control, ROC comparison, Bland-Altman/CCC/Cronbach, prediction-model development (`pmsampsize`) | Not started |
-| 3 — advanced trial designs | Cluster-randomized/stepped-wedge, group-sequential/adaptive, survival extensions, bioequivalence replicate designs, longitudinal/MMRM, post-hoc/achieved-power module | Not started |
+| 3 — advanced trial designs | Cluster-randomized/stepped-wedge, group-sequential/adaptive, survival extensions, bioequivalence replicate designs, longitudinal/MMRM | Not started |
 | 4 — niche/simulation & non-formula | Genetic (`genpwr`), SEM (`semPower`), trial sequential analysis, `simr`-based simulation, guidance-only qualitative/animal-study panels | Not started |
+| — (last, maybe cut) | Post-hoc/achieved-power module | Deliberately deprioritized to the very end of the build order; may be dropped entirely if the app's scope grows large enough that it's not worth the added surface area (see the Post-hoc power caveat in §10 and the checklists) |
 | — | Deployment polish; evaluate Shinylive | Not started |
 
 The original Phase 1-6 table (superseded) is preserved in git history for
