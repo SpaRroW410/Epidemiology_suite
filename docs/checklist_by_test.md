@@ -95,7 +95,7 @@
 
 ### Survival tests
 
-- [ ] **[CORE]** Log-rank — Schoenfeld / Freedman / Lakatos — `powerSurvEpi`, `gsDesign::nSurv`
+- [x] **[CORE]** Log-rank — Schoenfeld / Freedman / Lakatos — `powerSurvEpi`, `gsDesign::nSurv` — *(implemented: Log-Rank / Survival module, `calc_logrank()` wrapping `powerSurvEpi::ssizeCT.default()`; verified against Rosner (2006) Example 14.42 → nE=nC=294, total=588, exact match)*
 - [ ] **[ADV]** Cox PH — `powerSurvEpi`
 - [ ] **[ADV]** Gray's test (competing risks) — `powerCompRisk`
 - [ ] **[ADV]** RMST comparison — `SSRMST`
@@ -114,8 +114,8 @@
 
 ### Equivalence / non-inferiority test forms
 
-- [ ] **[CORE]** TOST for means — `PowerTOST`, `TOSTER::power_t_TOST`
-- [ ] **[CORE]** TOST for proportions — `TOSTER`, `PowerTOST`
+- [x] **[CORE]** TOST for means — `PowerTOST`, `TOSTER::power_t_TOST` — *(implemented: Equivalence (TOST) module, `calc_tost_means()` wrapping `PowerTOST::sampleN.TOST(logscale=FALSE, design="parallel")`; verified against the package's own documented example → n=48, achieved power=0.815435)*
+- [ ] **[CORE]** TOST for proportions — `TOSTER`, `PowerTOST` — *(not built: no lightweight verified package found with a dedicated proportions-TOST function; left open per the "verify against a real source" discipline rather than hand-deriving)*
 - [ ] **[ADV]** Non-inferiority margins for RR / OR / HR / difference — `TrialSize`, `SampleSize4ClinicalTrials`
 
 ### Multilevel / mixed-model / GEE tests
@@ -156,16 +156,16 @@
 |Multiple regression           |f², #predictors               |`pwr::pwr.f2.test`                            |Yes    |Cohen (1988)                      |not built|
 |Unmatched case-control        |%exposed controls, OR, ratio  |`epiR::epi.sscc`                              |No     |Schlesselman (1982)               |✅ built|
 |Cohort/RR                     |p0, RR, ratio                 |`epiR::epi.sscohortc`                         |No     |Kelsey; Fleiss                    |✅ built|
-|Log-rank / survival           |HR, accrual, follow-up        |`powerSurvEpi`; `gsDesign::nSurv`             |No     |Schoenfeld (1983); Freedman (1982)|not built|
+|Log-rank / survival           |HR, accrual, follow-up        |`powerSurvEpi`; `gsDesign::nSurv`             |No     |Schoenfeld (1983); Freedman (1982)|✅ built|
 |Cohen's kappa                 |κ0, κ1, proportions, #raters  |`kappaSize`                                   |No     |Rotondi; Flack                    |✅ built|
 |ICC (reliability)             |ICC, #raters, CI/power        |`ICC.Sample.Size`                             |No     |Zou (2012)                        |✅ built (via `presize`/Bonett 2002, not `ICC.Sample.Size`/Zou)|
 |Diagnostic Se/Sp              |Se, prevalence, precision     |`presize::prec_sens`                          |No     |Buderer (1996)                    |✅ built (closed-form, not `presize`)|
 |Single ROC AUC                |AUC, ratio, α, power          |`pROC::power.roc.test`                        |No     |Hanley & McNeil (1982)            |not built|
 |Prediction model              |R²/C-stat, #params, prevalence|`pmsampsize`                                  |No     |Riley et al. (2019)               |not built|
 |Bioequivalence (2×2)          |CV, GMR, BE limits            |`PowerTOST::sampleN.TOST`                     |No     |Diletti et al. (1991)             |not built|
-|Equivalence/NI means          |margin, difference            |`PowerTOST`; `TrialSize`                      |No     |Julious (2004)                    |not built|
-|Simon phase II                |p0, p1, α, β                  |`clinfun::ph2simon`                           |No     |Simon (1989)                      |not built|
-|Pilot rule-of-thumb           |(none / expected effect)      |rule: n=12/arm                                |No     |Julious (2005)                    |not built|
+|Equivalence/NI means          |margin, difference            |`PowerTOST`; `TrialSize`                      |No     |Julious (2004)                    |✅ built (raw-units `PowerTOST::sampleN.TOST`, not `TrialSize`)|
+|Simon phase II                |p0, p1, α, β                  |`clinfun::ph2simon`                           |No     |Simon (1989)                      |✅ built|
+|Pilot rule-of-thumb           |(none / expected effect)      |rule: n=12/arm                                |No     |Julious (2005)                    |✅ built|
 
 -----
 

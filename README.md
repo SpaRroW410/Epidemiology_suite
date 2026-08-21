@@ -11,7 +11,8 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: nine complete calculator modules --
+of Phase 2: thirteen complete calculator modules -- all Stage-1 CORE items
+from the master checklists are now built --
 
 - **Proportions** (`R/modules/mod_proportion.R`) -- single proportion
   (precision-based, Cochran's formula, with optional finite population
@@ -47,6 +48,22 @@ of Phase 2: nine complete calculator modules --
   `pwr::ES.w1()`/`ES.w2()` (Cohen 1988); the independence design also serves
   as the Proportions module's "3+ group proportions" entry in the Home
   finder
+- **Pilot / Feasibility** (`R/modules/mod_pilot.R`) -- the flat 12/arm
+  rule-of-thumb (Julious 2005) plus an interactive tool showing how precise
+  a pilot's estimated SD is at a given n (95% CI multipliers on the observed
+  SD), from chi-square CI-for-variance theory; no formal power calculation
+  since pilots aren't powered studies
+- **Simon Two-Stage** (`R/modules/mod_simon.R`) -- Phase II single-arm
+  designs, wrapping `clinfun::ph2simon()` (Simon 1989), reporting both the
+  minimax (smallest maximum n) and optimal (smallest expected n under the
+  null) designs
+- **Equivalence (TOST)** (`R/modules/mod_tost.R`) -- two one-sided tests for
+  a mean difference on the raw/untransformed scale, wrapping
+  `PowerTOST::sampleN.TOST(logscale = FALSE, design = "parallel")` (Phillips
+  1990; Diletti, Hauschke & Steinijans 1991)
+- **Log-Rank / Survival** (`R/modules/mod_logrank.R`) -- two-arm
+  time-to-event studies (required N from event probabilities), wrapping
+  `powerSurvEpi::ssizeCT()` (Freedman 1982; Rosner 2006)
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (precision-based CI-width, survival, post-hoc power, log-rank, TOST

@@ -241,7 +241,52 @@ calculator_catalog <- list(
        ),
        outcome_type = "chisq", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Chi-Square Tests",
-       module_input_id = "chisq-design", design_value = "independence")
+       module_input_id = "chisq-design", design_value = "independence"),
+
+  list(key = "logrank",
+       label = "Log-rank test (comparing two survival curves)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a given hazard",
+         "ratio between two groups' survival curves over a fixed",
+         "follow-up period?\""
+       ),
+       outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Log-Rank / Survival",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "pilot_feasibility",
+       label = "Pilot / feasibility study",
+       answers = paste(
+         "Answers: \"Roughly how many subjects do I need for a pilot",
+         "study, and how precisely will that pilot estimate the",
+         "variance I'll use to plan my main trial?\" -- guidance, not a",
+         "hypothesis-test formula."
+       ),
+       outcome_type = "pilot", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Pilot / Feasibility",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "simon_two_stage",
+       label = "Simon two-stage Phase II design",
+       answers = paste(
+         "Answers: \"How many patients do I need for a single-arm Phase",
+         "II trial that can stop early if the treatment looks",
+         "ineffective?\""
+       ),
+       outcome_type = "phase2", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Simon Two-Stage",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "tost_means",
+       label = "Equivalence of two means (TOST)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to show two group means",
+         "are practically equivalent (within a margin), rather than to",
+         "detect a difference?\""
+       ),
+       outcome_type = "equivalence", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Equivalence (TOST)",
+       module_input_id = NA, design_value = NA)
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -279,7 +324,10 @@ study_design_families <- list(
        catalog_keys = character(0)),
   list(id = "survival", label = "Survival",
        hint = "Log-rank or accrual/follow-up based survival study designs.",
-       catalog_keys = character(0)),
+       catalog_keys = c("logrank")),
+  list(id = "clinical_trials", label = "Clinical Trials",
+       hint = "Pilot/feasibility studies, Phase II designs, and equivalence testing.",
+       catalog_keys = c("pilot_feasibility", "simon_two_stage", "tost_means")),
   list(id = "posthoc_power", label = "Post-hoc / Achieved Power",
        hint = "Achieved power for planning a replication study.",
        catalog_keys = character(0))

@@ -1,7 +1,7 @@
 # Libraries + sourcing for all R/ files. app.R sources this before building the UI.
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(shiny, bslib, pwr, presize, epiR)
+pacman::p_load(shiny, bslib, pwr, presize, epiR, clinfun, powerSurvEpi, PowerTOST)
 
 for (f in list.files("R/calc", pattern = "\\.R$", full.names = TRUE)) source(f)
 for (f in list.files("R/content", pattern = "\\.R$", full.names = TRUE)) source(f)
@@ -26,5 +26,13 @@ module_registry <- list(
   list(id = correlation_meta$id, title = correlation_meta$nav_title,
        ui = mod_correlation_ui, server = mod_correlation_server),
   list(id = chisq_meta$id, title = chisq_meta$nav_title,
-       ui = mod_chisq_ui, server = mod_chisq_server)
+       ui = mod_chisq_ui, server = mod_chisq_server),
+  list(id = pilot_meta$id, title = pilot_meta$nav_title,
+       ui = mod_pilot_ui, server = mod_pilot_server),
+  list(id = simon_meta$id, title = simon_meta$nav_title,
+       ui = mod_simon_ui, server = mod_simon_server),
+  list(id = tost_meta$id, title = tost_meta$nav_title,
+       ui = mod_tost_ui, server = mod_tost_server),
+  list(id = logrank_meta$id, title = logrank_meta$nav_title,
+       ui = mod_logrank_ui, server = mod_logrank_server)
 )
