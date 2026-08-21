@@ -145,5 +145,96 @@ calc_means_anova <- function(group_means, sd, alpha = 0.05, power = 0.8) {
   )
 }
 
+#' Sample size for a single mean, precision-based (no hypothesis test)
+#'
+#' Wraps epiR::epi.sssimpleestc() rather than reimplementing the underlying
+#' math (project convention). Note this formula is built around a
+#' *relative*-variance framing (Vsq = sigma^2/mean^2) and so requires a
+#' non-zero mean -- appropriate for physical/clinical measurements that are
+#' inherently positive (BP, Hb, BMI, weight), not for values that can
+#' legitimately be zero or negative (e.g. a symmetric change score).
+#'
+#' @param mean Expected mean of the variable to be estimated (!= 0)
+#' @param sd Expected standard deviation of the variable (> 0)
+#' @param epsilon Desired precision: the maximum acceptable difference
+#'   between the estimate and the true population value, in absolute or
+#'   relative terms per `error`
+#' @param error "relative" (epsilon as a fraction of mean) or "absolute"
+#' @param conf_level Confidence level (0,1)
+#' @param N Optional finite eligible-population size. NULL (default) =
+#'   effectively infinite population.
+#' @return list(n, N, inputs)
+calc_means_single_precision <- function(mean, sd, epsilon,
+                                         error = c("relative", "absolute"),
+                                         conf_level = 0.95, N = NULL) {
+  error <- match.arg(error)
+  .validate_number(mean, "mean")
+  if (isTRUE(all.equal(mean, 0))) {
+    stop("mean must not be zero (this method's relative-variance formulation requires mean != 0).")
+  }
+  .validate_positive(sd, "sd")
+  .validate_positive(epsilon, "epsilon")
+  .validate_unit_interval(conf_level, "conf_level")
+  if (!is.null(N)) .validate_population(N)
+
+  n <- epiR::epi.sssimpleestc(
+    N = if (is.null(N)) NA else N,
+    xbar = mean, sigma = sd, epsilon = epsilon, error = error,
+    nfractional = FALSE, conf.level = conf_level
+  )
+
+  list(
+    n = n,
+    N = N,
+    inputs = list(mean = mean, sd = sd, epsilon = epsilon, error = error,
+                  conf_level = conf_level, N = N)
+  )
+}
+
+#' Sample size for two independent means with unequal group sizes
+#'
+#' Solves the required size of group 2 given group 1's size is already
+#' fixed (e.g. a constrained comparison group) -- wraps
+#' pwr::pwr.t2n.test().
+#'
+#' @param mu1 Expected mean in group 1
+#' @param mu2 Expected mean in group 2
+#' @param sd Common/pooled standard deviation (> 0)
+#' @param n1 Fixed size of group 1 (whole number >= 2)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided", "less", or "greater"
+#' @return list(n1, n2, n_total, d, inputs)
+calc_means_2s_unequal_n <- function(mu1, mu2, sd, n1, alpha = 0.05, power = 0.8,
+                                     alternative = c("two.sided", "less", "greater")) {
+  alternative <- match.arg(alternative)
+
+  .validate_number(mu1, "mu1")
+  .validate_number(mu2, "mu2")
+  .validate_positive(sd, "sd")
+  if (!is.numeric(n1) || length(n1) != 1 || is.na(n1) || n1 < 2 || n1 != round(n1)) {
+    stop("n1 must be a single whole number >= 2.")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (isTRUE(all.equal(mu1, mu2))) {
+    stop("mu1 and mu2 must differ (no effect to detect).")
+  }
+
+  d <- (mu1 - mu2) / sd
+  fit <- pwr::pwr.t2n.test(n1 = n1, n2 = NULL, d = d, sig.level = alpha,
+                            power = power, alternative = alternative)
+  n2 <- ceiling(fit$n2)
+
+  list(
+    n1 = n1,
+    n2 = n2,
+    n_total = n1 + n2,
+    d = d,
+    inputs = list(mu1 = mu1, mu2 = mu2, sd = sd, n1 = n1, alpha = alpha,
+                  power = power, alternative = alternative)
+  )
+}
+
 # Shared .validate_number() / .validate_positive() / .validate_unit_interval()
 # live in calc_utils.R (sourced alongside every file in R/calc/).

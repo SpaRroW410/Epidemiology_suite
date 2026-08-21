@@ -34,5 +34,13 @@ module_registry <- list(
   list(id = tost_meta$id, title = tost_meta$nav_title,
        ui = mod_tost_ui, server = mod_tost_server),
   list(id = logrank_meta$id, title = logrank_meta$nav_title,
-       ui = mod_logrank_ui, server = mod_logrank_server)
+       ui = mod_logrank_ui, server = mod_logrank_server),
+  list(id = rate_meta$id, title = rate_meta$nav_title,
+       ui = mod_rate_ui, server = mod_rate_server),
+  list(id = regression_meta$id, title = regression_meta$nav_title,
+       ui = mod_regression_ui, server = mod_regression_server),
+  list(id = noninferiority_meta$id, title = noninferiority_meta$nav_title,
+       ui = mod_noninferiority_ui, server = mod_noninferiority_server),
+  list(id = rule_of_three_meta$id, title = rule_of_three_meta$nav_title,
+       ui = mod_rule_of_three_ui, server = mod_rule_of_three_server)
 )

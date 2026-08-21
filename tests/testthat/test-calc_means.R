@@ -80,3 +80,41 @@ test_that("calc_means_anova rejects invalid inputs", {
   expect_error(calc_means_anova(group_means = c(5, 5, 5), sd = 1), "must not all be equal")
   expect_error(calc_means_anova(group_means = c(1, 2, 3), sd = 0), "positive")
 })
+
+test_that("calc_means_single_precision matches epiR's own documented example (clinics)", {
+  # Levy & Lemeshow (1999): 20 clinics, mean 75 (=1500*0.05), sd 15 (=300*0.05),
+  # relative epsilon 0.20 -> epiR's own printed answer: n = 4 clinics.
+  res <- calc_means_single_precision(mean = 1500 * 0.05, sd = 300 * 0.05,
+                                      epsilon = 0.20, error = "relative",
+                                      conf_level = 0.95, N = 20)
+  expect_equal(res$n, 4)
+})
+
+test_that("calc_means_single_precision rejects invalid inputs", {
+  expect_error(calc_means_single_precision(mean = 0, sd = 30, epsilon = 10), "must not be zero")
+  expect_error(calc_means_single_precision(mean = 200, sd = -1, epsilon = 10), "positive")
+  expect_error(calc_means_single_precision(mean = 200, sd = 30, epsilon = -5), "positive")
+})
+
+test_that("calc_means_2s_unequal_n solves n2 given a fixed n1", {
+  # mu1=10, mu2=9.4, sd=1 -> d=0.6 (Cohen's own Exercise 2.3 effect size).
+  # n1=90 fixed, alpha=.05 (two-sided), power=.8 -> n2=30, n_total=120.
+  res <- calc_means_2s_unequal_n(mu1 = 10, mu2 = 9.4, sd = 1, n1 = 90,
+                                  alpha = 0.05, power = 0.8, alternative = "two.sided")
+  expect_equal(res$n1, 90)
+  expect_equal(res$n2, 30)
+  expect_equal(res$n_total, 120)
+  expect_equal(res$d, 0.6)
+})
+
+test_that("pwr::pwr.t2n.test backend reproduces Cohen (1988) Exercise 2.3 exactly", {
+  # n1=90, n2=60, d=0.6, one-sided ("greater") -> achieved power = 0.9737262.
+  fit <- pwr::pwr.t2n.test(d = 0.6, n1 = 90, n2 = 60, alternative = "greater")
+  expect_equal(round(fit$power, 7), 0.9737262)
+})
+
+test_that("calc_means_2s_unequal_n rejects invalid inputs", {
+  expect_error(calc_means_2s_unequal_n(mu1 = 5, mu2 = 5, sd = 1, n1 = 90), "must differ")
+  expect_error(calc_means_2s_unequal_n(mu1 = 5, mu2 = 4, sd = 1, n1 = 1), ">= 2")
+  expect_error(calc_means_2s_unequal_n(mu1 = 5, mu2 = 4, sd = -1, n1 = 90), "positive")
+})

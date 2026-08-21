@@ -58,5 +58,50 @@ tost_content <- list(
       "Int J Clin Pharmacol Ther Toxicol. 1991;29(1):1-8."
     ),
     backend = "PowerTOST::sampleN.TOST(logscale = FALSE, design = \"parallel\")"
+  ),
+
+  proportions = list(
+    title = "Equivalence of Two Proportions (Two One-Sided Tests, TOST)",
+    formula_latex = paste0(
+      "$$H_0: |P_n - P_s| \\ge \\Delta \\quad \\text{vs.} \\quad ",
+      "H_1: |P_n - P_s| < \\Delta$$"
+    ),
+    explanation = paste(
+      "The proportions counterpart of \"Equivalence of Two Means\" above --",
+      "use this to show two groups' proportions/response rates are",
+      "*practically the same*, rather than to detect a difference.",
+      "",
+      "- **New / standard proportion** - the expected proportion of",
+      "  successes in the new and standard groups; for a genuine",
+      "  equivalence claim these are usually close.",
+      "- **Equivalence margin** - the largest absolute difference that",
+      "  would still be considered practically equivalent (symmetric:",
+      "  +/- this value).",
+      "- **alpha** - the one-sided significance level.",
+      "- **power** - the desired probability of concluding equivalence.",
+      "- **ratio** - the new-group size divided by the standard-group size",
+      "  (1 = equal allocation).",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Bennett, Dismukes, Duma et al. (1979), as reproduced in Machin,",
+      "Campbell, Tan & Tan (2009, p. 113): a trial of shorter combination",
+      "chemotherapy vs. conventional therapy for cryptococcal meningitis,",
+      "where a difference of less than 20 percentage points in response",
+      "rate (both expected at 50%) would indicate equivalence. At a",
+      "one-sided alpha of 0.10 and 80% power, this calculator returns n =",
+      "83 per group (166 total) -- exactly the textbook's own printed",
+      "answer.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Bennett JE, Dismukes WE, Duma RJ, et al. A comparison of",
+      "amphotericin B alone and combined with flucytosine in the treatment",
+      "of cryptococcal meningitis. N Engl J Med. 1979;301:126-131;",
+      "Machin D, Campbell MJ, Tan SB, Tan SH. Sample Size Tables for",
+      "Clinical Studies. 3rd ed. Wiley-Blackwell; 2009, p. 113.",
+      "(as implemented by epiR::epi.ssequb)."
+    ),
+    backend = "epiR::epi.ssequb(type = \"equivalence\")"
   )
 )

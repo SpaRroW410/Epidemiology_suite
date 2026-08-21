@@ -26,7 +26,7 @@
 
 - [x] **[CORE]** One-sample t (mean vs constant) — d — `pwr::pwr.t.test(type="one.sample")` — GP: t → Means: one sample — *(implemented: Means → "Single mean vs. known value", `calc_means_1s()`)*
 - [x] **[CORE]** Two independent means, equal n — d — `pwr::pwr.t.test(type="two.sample")` — GP: t → Means: two independent groups — *(implemented: Means → "Two independent means", `calc_means_2s_indep()`)*
-- [ ] **[CORE]** Two independent means, unequal n — d, n ratio — `pwr::pwr.t2n.test`  — GP: Yes
+- [x] **[CORE]** Two independent means, unequal n — d, n ratio — `pwr::pwr.t2n.test`  — GP: Yes — *(implemented: Means module's new "Two independent means, unequal group sizes" design, `calc_means_2s_unequal_n()`; verified backend against Cohen (1988) Exercise 2.3 p.437 (d=0.6, n1=90, n2=60 -> power=0.9737 exactly))*
 - [ ] **[ADV]** Welch t (unequal variances) — SD1, SD2, ratio — `MESS::power_t_test` / simulation — GP: Partial
 - [x] **[CORE]** Paired t — dz (mean & SD of differences) — `pwr::pwr.t.test(type="paired")` — GP: t → Means: two dependent (matched pairs) — *(implemented: Means → "Two paired means", `calc_means_paired()`)*
 - [ ] **[ADV]** Point-biserial correlation — r — GP: t → Correlation: point biserial
@@ -47,7 +47,7 @@
 - [ ] **[ADV]** ANCOVA — f, #covariates, #groups — `WebPower::wp.rmanova`-family / GP: F → ANCOVA — nMaster
 - [ ] **[ADV]** MANOVA (global & special effects, incl. Hotelling's T²) — GP: F → MANOVA
 - [ ] **[ADV]** Mixed (split-plot) ANOVA — GP: F → ANOVA: repeated measures, within-between
-- [ ] **[CORE]** Multiple linear regression, R² deviation from zero — f² — `pwr::pwr.f2.test` — GP: F → Linear multiple regression: fixed model R² deviation from zero
+- [x] **[CORE]** Multiple linear regression, R² deviation from zero — f² — `pwr::pwr.f2.test` — GP: F → Linear multiple regression: fixed model R² deviation from zero — *(implemented: new Multiple Regression module, `calc_regression_f2()`; backend verified against Cohen (1988) Exercise 9.1 p.424 (u=5, v=89, f2=0.1111 -> power=0.6736 exactly))*
 - [ ] **[ADV]** Multiple regression, R² increase (hierarchical) — f² for added set — GP: F → …R² increase
 - [ ] **[ADV]** Random-model multiple regression — GP: F (Faul 2009)
 - [ ] **[ADV]** Planned contrasts; post-hoc comparisons with multiplicity adjustment
@@ -115,7 +115,7 @@
 ### Equivalence / non-inferiority test forms
 
 - [x] **[CORE]** TOST for means — `PowerTOST`, `TOSTER::power_t_TOST` — *(implemented: Equivalence (TOST) module, `calc_tost_means()` wrapping `PowerTOST::sampleN.TOST(logscale=FALSE, design="parallel")`; verified against the package's own documented example → n=48, achieved power=0.815435)*
-- [ ] **[CORE]** TOST for proportions — `TOSTER`, `PowerTOST` — *(not built: no lightweight verified package found with a dedicated proportions-TOST function; left open per the "verify against a real source" discipline rather than hand-deriving)*
+- [x] **[CORE]** TOST for proportions — `TOSTER`, `PowerTOST` — *(implemented: Equivalence (TOST) module's new "Two proportions" design, `calc_tost_proportions()` wrapping `epiR::epi.ssequb(type="equivalence")` rather than `TOSTER`/`PowerTOST` -- neither has a dedicated proportions-TOST function, but epiR's equivalence family covers it; verified against Machin/Campbell/Tan/Tan (2009) p.113 (Bennett et al. 1979 cryptococcal meningitis trial) -> n=166 total, exact textbook match)*
 - [ ] **[ADV]** Non-inferiority margins for RR / OR / HR / difference — `TrialSize`, `SampleSize4ClinicalTrials`
 
 ### Multilevel / mixed-model / GEE tests
@@ -153,7 +153,7 @@
 |Two proportions               |h, α, power, ratio            |`pwr::pwr.2p.test`                            |Yes    |Cohen (1988)                      |✅ built|
 |One-way ANOVA                 |f, k, α, power                |`pwr::pwr.anova.test`                         |Yes    |Cohen (1988)                      |✅ built|
 |Pearson correlation           |r, α, power                   |`pwr::pwr.r.test`                             |Yes    |Cohen (1988)                      |✅ built|
-|Multiple regression           |f², #predictors               |`pwr::pwr.f2.test`                            |Yes    |Cohen (1988)                      |not built|
+|Multiple regression           |f², #predictors               |`pwr::pwr.f2.test`                            |Yes    |Cohen (1988)                      |✅ built|
 |Unmatched case-control        |%exposed controls, OR, ratio  |`epiR::epi.sscc`                              |No     |Schlesselman (1982)               |✅ built|
 |Cohort/RR                     |p0, RR, ratio                 |`epiR::epi.sscohortc`                         |No     |Kelsey; Fleiss                    |✅ built|
 |Log-rank / survival           |HR, accrual, follow-up        |`powerSurvEpi`; `gsDesign::nSurv`             |No     |Schoenfeld (1983); Freedman (1982)|✅ built|

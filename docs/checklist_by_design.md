@@ -39,8 +39,8 @@ Two complementary, copy-pasteable markdown files for your R Shiny sample size ca
 ### 1. Descriptive / Estimation studies
 
 - [x] **[CORE]** Single proportion / prevalence — inputs: expected p, absolute (or relative) precision, confidence level, optional population size N (FPC) — `epiR::epi.sssimpleestb`,  `presize::prec_prop` — *Fleiss, Levin & Paik; Lwanga & Lemeshow (WHO 1991)* — *(implemented: Proportions → "Single proportion — precision-based", `calc_proportion_precision()`; backend is a closed-form Cochran/Naing-Winn-Rusli formula, not `presize::prec_prop`/`epiR` — see deviations note)*
-- [ ] **[CORE]** Single mean — inputs: SD, precision (CI half-width), confidence — `presize::prec_mean` — *Bland (2009) BMJ 339:b3985 (CI-width rationale)* — *gap: Means module only has the hypothesis-test "vs. known value" design (`pwr::pwr.t.test`), not a precision/CI-width single-mean estimator*
-- [ ] **[CORE]** Incidence rate estimation — inputs: expected rate, person-time, precision — `presize::prec_rate` — *Rothman & Greenland, Modern Epidemiology*
+- [x] **[CORE]** Single mean — inputs: SD, precision (CI half-width), confidence — `presize::prec_mean` — *Bland (2009) BMJ 339:b3985 (CI-width rationale)* — *(implemented: Means module's new "Single mean, precision-based" design, `calc_means_single_precision()` wrapping `epiR::epi.sssimpleestc()` rather than `presize::prec_mean` -- verified against epiR's own documented example, N=20, mean=75, sd=15, relative epsilon=0.20 -> n=4)*
+- [x] **[CORE]** Incidence rate estimation — inputs: expected rate, person-time, precision — `presize::prec_rate` — *Rothman & Greenland, Modern Epidemiology* — *(implemented: new Incidence Rate module, `calc_rate_precision()` wrapping `presize::prec_rate()`; verified against presize's own documented example, rate=2.5, conf.width=2.243 -> 21 events, ~8.4 person-time)*
 - [ ] **[ADV]** Ratio estimation (precision of RR / OR / rate ratio) — `presize::prec_riskratio`, `presize::prec_or`, `presize::prec_rateratio`
 - [ ] **[CORE]** Precision / CI-width framework (Rothman–Greenland) — generic engine feeding many estimation modules
 - [x] **[CORE]** Finite population correction — inputs: N, computed n → corrected n = n/(1+n/N) — *(implemented: inside `calc_proportion_precision()`'s optional `N` argument)*
@@ -93,7 +93,7 @@ Two complementary, copy-pasteable markdown files for your R Shiny sample size ca
 
 - [x] **[CORE]** Parallel 2-arm superiority — means: `stats::power.t.test`, `pwr::pwr.t.test`; proportions: `stats::power.prop.test`, `pwr::pwr.2p.test` — OpenEpi, nMaster — *Cohen (1988)* — *(implemented: Means → "Two independent means", Proportions → "Two independent proportions" — covered across two outcome-type modules rather than a single unified "Clinical Trials" module)*
 - [ ] **[ADV]** Multi-arm superiority (with multiplicity)
-- [ ] **[CORE]** Non-inferiority (means / proportions) — inputs: NI margin, expected difference, one-sided α — `SampleSize4ClinicalTrials`, `TrialSize`
+- [x] **[CORE]** Non-inferiority (means / proportions) — inputs: NI margin, expected difference, one-sided α — `SampleSize4ClinicalTrials`, `TrialSize` — *(implemented: new Non-Inferiority module, `calc_noninferiority_means()`/`calc_noninferiority_proportions()` wrapping `epiR::epi.ssninfc()`/`epi.ssninfb()` rather than the suggested packages; verified against Chow/Shao/Wang (2008) p.61-62 (means -> n=100) and p.90 (proportions -> n=50), both exact textbook matches)*
 - [x] **[CORE]** Equivalence (TOST) — inputs: equivalence bounds, expected difference — `PowerTOST`, `TOSTER` — *(implemented: Equivalence (TOST) module, `calc_tost_means()` wrapping `PowerTOST::sampleN.TOST(logscale=FALSE, design="parallel")`; verified against the package's own documented example (mean_diff=-0.05, margin=0.2, sd=0.2 → n=48, achieved power=0.815435))*
 - [ ] **[ADV]** Bioequivalence crossover 2×2 & replicate (2×2×4, 2×3×3), RSABE/ABEL — inputs: CV (within-subject), GMR (T/R ratio), BE limits 0.80–1.25, design — `PowerTOST::sampleN.TOST` — *Diletti, Hauschke & Steinijans (1991); Owen's Q exact*
 - [ ] **[ADV]** Cluster-randomized trials (ICC/DEFF, variable cluster size) — `clusterPower`, `CRTSize` — *Donner & Klar*
@@ -152,7 +152,7 @@ Two complementary, copy-pasteable markdown files for your R Shiny sample size ca
 
 ### 13. Pharmacovigilance / surveillance
 
-- [ ] **[CORE]** Rule of three — inputs: n → upper 95% bound on unseen AE ≈ 3/n; or n to detect ≥1 event given incidence — *Hanley & Lippman-Hand (1983)* — *easy near-term add: a one-line closed-form calculator*
+- [x] **[CORE]** Rule of three — inputs: n → upper 95% bound on unseen AE ≈ 3/n; or n to detect ≥1 event given incidence — *Hanley & Lippman-Hand (1983)* — *(implemented: new Rule of Three module, `calc_rule_of_three_bound()` + `calc_rule_of_three_n()`, closed-form; verified against the classic n=30 illustration -> approx 3/30=0.0999, exact 0.0950)*
 - [ ] **[ADV]** Detecting rare adverse events (binomial/Poisson); signal detection thresholds
 
 ### 14. Laboratory / animal / preclinical

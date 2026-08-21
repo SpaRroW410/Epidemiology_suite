@@ -169,5 +169,88 @@ means_content <- list(
       "implemented by pwr::pwr.anova.test)."
     ),
     backend = "pwr::pwr.anova.test()"
+  ),
+
+  single_precision = list(
+    title = "Single Mean, Precision-Based (No Reference Value)",
+    formula_latex = paste0(
+      "$$V^2 = \\sigma^2/\\bar{x}^2, \\quad ",
+      "n = \\frac{Z_{1-\\alpha/2}^2 \\, V^2}{Z_{1-\\alpha/2}^2 \\, V^2 / N_\\infty + \\epsilon_r^2}$$"
+    ),
+    explanation = paste(
+      "This calculator finds the sample size needed to estimate a mean to a",
+      "desired precision, with no hypothesis test and no reference value --",
+      "just a target margin of error and a confidence level (the estimation",
+      "counterpart of the Proportions module's precision-based design).",
+      "",
+      "- **mean** - the anticipated mean of the variable (must be non-zero:",
+      "  the underlying formula works in relative-variance terms, so it",
+      "  suits inherently-positive measurements like BP, Hb, BMI, or",
+      "  bodyweight, not values that can legitimately be zero or negative).",
+      "- **sd** - the expected standard deviation.",
+      "- **epsilon** - the desired precision: how close the estimate should",
+      "  land to the true value, either as an absolute amount or as a",
+      "  fraction of the mean (`error = \"relative\"` vs `\"absolute\"`).",
+      "- **conf_level** - the confidence level, typically 0.95.",
+      "- **N** - optional finite population size; leave blank for an",
+      "  effectively infinite population (a finite population correction is",
+      "  applied automatically when supplied).",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "epiR's own documented example (Levy & Lemeshow 1999): a city has 20",
+      "neighbourhood clinics, each seeing an average of 1500 patients/year",
+      "(SD 300), of whom ~5% get a particular new prescription. Wanting an",
+      "estimate within 20% of the true value (relative error), this",
+      "calculator returns n = 4 clinics -- exactly epiR's own printed",
+      "answer.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Levy PS, Lemeshow S. Sampling of Populations: Methods and",
+      "Applications. Wiley Series in Probability and Statistics; 1999,",
+      "pp. 70-75. (as implemented by epiR::epi.sssimpleestc)."
+    ),
+    backend = "epiR::epi.sssimpleestc()"
+  ),
+
+  two_sample_unequal_n = list(
+    title = "Two Independent Means, Unequal Group Sizes",
+    formula_latex = paste0(
+      "$$d = \\frac{\\mu_1 - \\mu_2}{\\sigma}$$",
+      "$$\\text{solve } n_2 \\text{ from } d, n_1, \\alpha, \\text{power (Cohen 1988)}$$"
+    ),
+    explanation = paste(
+      "This calculator finds the size of a *second* group needed to reach a",
+      "target power, when the *first* group's size is already fixed (e.g. a",
+      "comparison group constrained by how many archived samples/records",
+      "are available) -- a two-sample t-test with unequal allocation.",
+      "",
+      "- **mu1, mu2** - the expected means in group 1 and group 2.",
+      "- **sd** - the common/pooled standard deviation shared by both groups.",
+      "- **n1** - the already-fixed size of group 1.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "If both groups can be freely sized, use \"Two independent means\"",
+      "(equal allocation) instead -- it needs a smaller total n for the",
+      "same power.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Suppose group 1 is fixed at n1 = 90 (mu1 = 10, mu2 = 9.4, sd = 1, so",
+      "d = 0.6 -- Cohen's own example effect size, Exercise 2.3 p. 437). At",
+      "alpha = 0.05 (two-sided) and 80% power, this calculator returns n2 =",
+      "30 (n_total = 120). As a check on the underlying method: Cohen's own",
+      "textbook example with n1 = 90, n2 = 60 and this same d = 0.6 (one-",
+      "sided) gives an achieved power of 0.9737 -- reproduced exactly by",
+      "pwr::pwr.t2n.test().",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Cohen J. Statistical Power Analysis for the Behavioral Sciences.",
+      "2nd ed. Hillsdale, NJ: Lawrence Erlbaum Associates; 1988, Exercise",
+      "2.3 p. 437. (as implemented by pwr::pwr.t2n.test)."
+    ),
+    backend = "pwr::pwr.t2n.test()"
   )
 )

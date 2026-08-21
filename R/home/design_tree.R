@@ -111,7 +111,7 @@ design_nodes <- list(
     question = "What is the comparison intent of the trial?",
     options = list(
       list(label = "Show one arm is better (superiority)", next_id = "outcome_type"),
-      list(label = "Show it's not unacceptably worse (non-inferiority)", next_id = "term_noninferiority"),
+      list(label = "Show it's not unacceptably worse (non-inferiority)", next_id = "noninf_outcome"),
       list(label = "Show both arms are practically equivalent (equivalence)", next_id = "equiv_outcome"),
       list(label = "Show pharmacokinetic equivalence of formulations (bioequivalence)", next_id = "term_bioequivalence"),
       list(label = "Single-arm, response rate vs. a historical control (Phase II)", next_id = "term_simon"),
@@ -124,7 +124,16 @@ design_nodes <- list(
     question = "Is the outcome continuous (a mean) or a proportion?",
     options = list(
       list(label = "Continuous (means)", next_id = "term_tost_means"),
-      list(label = "Proportion", next_id = "term_equivalence_prop")
+      list(label = "Proportion", next_id = "term_tost_proportions")
+    )
+  ),
+
+  noninf_outcome = list(
+    id = "noninf_outcome", stage = 2,
+    question = "Is the outcome continuous (a mean) or a proportion?",
+    options = list(
+      list(label = "Continuous (means)", next_id = "term_noninferiority_means"),
+      list(label = "Proportion", next_id = "term_noninferiority_proportions")
     )
   ),
 
@@ -289,11 +298,9 @@ design_nodes <- list(
     would_use = "presize::prec_cronb", citation = "Bonett (2002) Stat Med 21:1331-1335"),
 
   term_mean_precision = list(id = "term_mean_precision", terminal = TRUE,
-    design = "Single mean, precision-based",
-    would_use = "presize::prec_mean", citation = "-"),
+    design = "Single mean, precision-based", catalog_key = "means_single_precision"),
   term_rate_precision = list(id = "term_rate_precision", terminal = TRUE,
-    design = "Incidence rate, precision-based",
-    would_use = "presize::prec_rate", citation = "-"),
+    design = "Incidence rate, precision-based", catalog_key = "incidence_rate_precision"),
   term_ratio_precision = list(id = "term_ratio_precision", terminal = TRUE,
     design = "Ratio (RR/OR/rate ratio), precision-based",
     would_use = "presize::prec_riskratio and related presize functions", citation = "-"),
@@ -308,12 +315,12 @@ design_nodes <- list(
   term_n_of_1 = list(id = "term_n_of_1", terminal = TRUE,
     design = "N-of-1 trial", would_use = "no lightweight verified package identified yet", citation = "-"),
 
-  term_noninferiority = list(id = "term_noninferiority", terminal = TRUE,
-    design = "Non-inferiority trial (means or proportions)",
-    would_use = "SampleSize4ClinicalTrials; TrialSize", citation = "-"),
-  term_equivalence_prop = list(id = "term_equivalence_prop", terminal = TRUE,
-    design = "Equivalence (TOST) for proportions",
-    would_use = "TOSTER; PowerTOST (no dedicated proportions-TOST function found in either yet)", citation = "-"),
+  term_noninferiority_means = list(id = "term_noninferiority_means", terminal = TRUE,
+    design = "Non-inferiority trial, two means", catalog_key = "noninferiority_means"),
+  term_noninferiority_proportions = list(id = "term_noninferiority_proportions", terminal = TRUE,
+    design = "Non-inferiority trial, two proportions", catalog_key = "noninferiority_proportions"),
+  term_tost_proportions = list(id = "term_tost_proportions", terminal = TRUE,
+    design = "Equivalence of two proportions (TOST)", catalog_key = "tost_proportions"),
   term_bioequivalence = list(id = "term_bioequivalence", terminal = TRUE,
     design = "Bioequivalence crossover (2x2 / replicate designs)",
     would_use = "PowerTOST::sampleN.TOST (crossover/replicate designs)",

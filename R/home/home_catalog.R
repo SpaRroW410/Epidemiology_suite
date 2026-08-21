@@ -73,9 +73,20 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Chi-Square Tests",
        module_input_id = "chisq-design", design_value = "independence"),
 
+  list(key = "means_single_precision",
+       label = "Single mean — precision-based (no reference value)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate my own mean",
+         "to within a desired precision?\" -- no benchmark, no power, no",
+         "hypothesis, just a precision target and a confidence level."
+       ),
+       outcome_type = "mean", groups = "1", dependency = NA, reference_based = FALSE,
+       built = TRUE, nav_target = "Means",
+       module_input_id = "means-design", design_value = "single_precision"),
+
   list(key = "means_single", label = "Single mean vs. known value",
        answers = "Answers: \"How many subjects do I need to detect that my population's mean differs from a known/reference value?\"",
-       outcome_type = "mean", groups = "1", dependency = NA, reference_based = NA,
+       outcome_type = "mean", groups = "1", dependency = NA, reference_based = TRUE,
        built = TRUE, nav_target = "Means",
        module_input_id = "means-design", design_value = "single"),
 
@@ -84,6 +95,21 @@ calculator_catalog <- list(
        outcome_type = "mean", groups = "2", dependency = "independent", reference_based = NA,
        built = TRUE, nav_target = "Means",
        module_input_id = "means-design", design_value = "two_sample"),
+
+  list(key = "means_two_indep_unequal_n",
+       label = "Two independent means, unequal group sizes",
+       answers = paste(
+         "Answers: \"I already have a fixed number of subjects in one",
+         "group -- how many do I need in the other to reach my desired",
+         "power?\""
+       ),
+       # Distinct outcome_type sentinel (not "mean") so this never collides
+       # with means_two_indep in the groups/data-type finder -- only
+       # reachable via "by study design", same reasoning as Diagnostic
+       # Accuracy/Agreement/Case-Control/Cohort/Correlation/Chi-square above.
+       outcome_type = "means_unequal_n", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Means",
+       module_input_id = "means-design", design_value = "two_sample_unequal_n"),
 
   list(key = "means_two_dep", label = "Two paired means (e.g. pre-post)",
        answers = "Answers: \"How many subjects do I need to detect a change in mean within the same subjects (pre-post)?\"",
@@ -286,7 +312,83 @@ calculator_catalog <- list(
        ),
        outcome_type = "equivalence", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Equivalence (TOST)",
-       module_input_id = NA, design_value = NA)
+       module_input_id = "tost-design", design_value = "means"),
+
+  list(key = "tost_proportions",
+       label = "Equivalence of two proportions (TOST)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to show two group",
+         "proportions are practically equivalent (within a margin),",
+         "rather than to detect a difference?\""
+       ),
+       outcome_type = "equivalence", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Equivalence (TOST)",
+       module_input_id = "tost-design", design_value = "proportions"),
+
+  list(key = "noninferiority_means",
+       label = "Non-inferiority trial, two means",
+       answers = paste(
+         "Answers: \"How many subjects do I need to show a new",
+         "treatment's mean outcome isn't worse than a standard",
+         "treatment's by more than an acceptable margin?\""
+       ),
+       outcome_type = "noninferiority", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Non-Inferiority",
+       module_input_id = "noninferiority-design", design_value = "means"),
+
+  list(key = "noninferiority_proportions",
+       label = "Non-inferiority trial, two proportions",
+       answers = paste(
+         "Answers: \"How many subjects do I need to show a new",
+         "treatment's success rate isn't worse than a standard",
+         "treatment's by more than an acceptable margin?\""
+       ),
+       outcome_type = "noninferiority", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Non-Inferiority",
+       module_input_id = "noninferiority-design", design_value = "proportions"),
+
+  list(key = "incidence_rate_precision",
+       label = "Incidence rate, precision-based",
+       answers = paste(
+         "Answers: \"How many events (and how much person-time) do I need",
+         "to estimate an incidence rate to a desired precision?\" -- no",
+         "comparison group, just a precision target."
+       ),
+       outcome_type = "rate", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Incidence Rate",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "regression_r2",
+       label = "Multiple linear regression, R-squared deviation from zero",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect that my",
+         "regression model's overall R-squared is significantly greater",
+         "than zero, given a fixed number of predictors?\""
+       ),
+       outcome_type = "regression", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Multiple Regression",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "rule_of_three_bound",
+       label = "Upper bound on an unseen event rate (rule of three)",
+       answers = paste(
+         "Answers: \"I observed zero events in n subjects -- what's the",
+         "worst-case true event rate that's still consistent with that?\""
+       ),
+       outcome_type = "safety", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Rule of Three",
+       module_input_id = "rule_of_three-design", design_value = "bound"),
+
+  list(key = "rule_of_three_n_required",
+       label = "Sample size to detect at least one event",
+       answers = paste(
+         "Answers: \"Given an assumed true event rate, how many subjects",
+         "do I need to have a good chance of observing at least one",
+         "event?\""
+       ),
+       outcome_type = "safety", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Rule of Three",
+       module_input_id = "rule_of_three-design", design_value = "n_required")
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -299,7 +401,8 @@ study_design_families <- list(
                          "proportion_two_indep", "proportion_two_dep", "proportion_k")),
   list(id = "means", label = "Means",
        hint = "Comparing a continuous measurement within or between groups.",
-       catalog_keys = c("means_single", "means_two_indep", "means_two_dep", "means_k")),
+       catalog_keys = c("means_single_precision", "means_single", "means_two_indep",
+                         "means_two_indep_unequal_n", "means_two_dep", "means_k")),
   list(id = "case_control", label = "Case-Control",
        hint = "Case-control study (unmatched or matched), odds ratio based.",
        catalog_keys = c("case_control_unmatched", "case_control_matched")),
@@ -321,13 +424,22 @@ study_design_families <- list(
        catalog_keys = c("chisq_gof", "chisq_independence")),
   list(id = "precision", label = "Precision-based (CI-width)",
        hint = "Estimating with a target confidence-interval width rather than testing a hypothesis.",
-       catalog_keys = character(0)),
+       catalog_keys = c("proportion_single_precision", "means_single_precision",
+                         "incidence_rate_precision")),
   list(id = "survival", label = "Survival",
        hint = "Log-rank or accrual/follow-up based survival study designs.",
        catalog_keys = c("logrank")),
   list(id = "clinical_trials", label = "Clinical Trials",
-       hint = "Pilot/feasibility studies, Phase II designs, and equivalence testing.",
-       catalog_keys = c("pilot_feasibility", "simon_two_stage", "tost_means")),
+       hint = "Pilot/feasibility studies, Phase II designs, equivalence, and non-inferiority testing.",
+       catalog_keys = c("pilot_feasibility", "simon_two_stage", "tost_means",
+                         "tost_proportions", "noninferiority_means",
+                         "noninferiority_proportions")),
+  list(id = "regression", label = "Regression",
+       hint = "Testing whether a multiple regression model explains more variance than chance.",
+       catalog_keys = c("regression_r2")),
+  list(id = "safety_surveillance", label = "Safety / Surveillance",
+       hint = "Bounding an unseen adverse-event rate, or planning to catch a rare event.",
+       catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required")),
   list(id = "posthoc_power", label = "Post-hoc / Achieved Power",
        hint = "Achieved power for planning a replication study.",
        catalog_keys = character(0))

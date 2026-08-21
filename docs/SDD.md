@@ -189,7 +189,7 @@ for what to build next):
 | Family | Designs covered | Backend package/function | Status |
 |---|---|---|---|
 | Proportions | Precision-based (Cochran, +FPC); vs. known value; two independent | closed-form (Cochran); `pwr::pwr.p.test`, `pwr::pwr.2p.test` | Live |
-| Means | One-sample, two-sample, paired, one-way ANOVA (3+ groups) | `pwr::pwr.t.test`, `pwr::pwr.anova.test` | Live |
+| Means | Precision-based; one-sample, two-sample (equal + unequal n), paired, one-way ANOVA (3+ groups) | `epiR::epi.sssimpleestc()`; `pwr::pwr.t.test`, `pwr::pwr.t2n.test`, `pwr::pwr.anova.test` | Live |
 | Diagnostic accuracy | Precision-based (Buderer); vs. reference value; two tests, unpaired/paired | closed-form (Buderer; Casagrande-Pike; Connor), all + Yates' correction | Live |
 | Agreement / reliability | Cohen's kappa; ICC | `presize::prec_kappa()` (→ `kappaSize`); `presize::prec_icc()` (Bonett 2002) | Live |
 | Case-control | Unmatched; matched (1:1 or 1:m) | `epiR::epi.sscc()` | Live |
@@ -198,9 +198,13 @@ for what to build next):
 | Chi-square tests | Goodness of fit; test of independence (R×C) | `pwr::pwr.chisq.test()` (`ES.w1`/`ES.w2`) | Live |
 | Pilot / feasibility | Flat 12/arm rule-of-thumb; interactive CI-for-SD precision | rule-of-thumb (Julious 2005); closed-form chi-square CI theory | Live |
 | Simon two-stage | Phase II single-arm (minimax + optimal designs) | `clinfun::ph2simon()` | Live |
-| Equivalence (TOST) | Two one-sided tests for means, raw/untransformed scale | `PowerTOST::sampleN.TOST(logscale=FALSE)` | Live |
+| Equivalence (TOST) | Two one-sided tests, means and proportions | `PowerTOST::sampleN.TOST(logscale=FALSE)`; `epiR::epi.ssequb()` | Live |
 | Log-rank / survival | Two-arm time-to-event, cumulative event probabilities | `powerSurvEpi::ssizeCT()` | Live |
-| Precision-based (generic) | CI-width driven (risk diff/ratio, rate) | `presize`, `precisely` | Not started |
+| Incidence Rate | Precision-based, events + person-time | `presize::prec_rate()` | Live |
+| Multiple Regression | R-squared deviation from zero | `pwr::pwr.f2.test()` | Live |
+| Non-Inferiority | Means and proportions | `epiR::epi.ssninfc()`, `epi.ssninfb()` | Live |
+| Rule of Three | Upper bound on unseen event rate; n to detect >= 1 event | closed-form (Hanley & Lippman-Hand 1983) | Live |
+| Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
 | Survival (advanced) | Cox PH, exponential, accrual/follow-up, competing risks | `powerSurvEpi`, `gsDesign::nSurv` | Not started |
 | Post-hoc / achieved power | Given n and observed effect, compute achieved power | reuse each module's engine, solve for power | Not started |
 

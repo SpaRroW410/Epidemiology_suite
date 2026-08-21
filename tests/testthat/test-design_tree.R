@@ -147,7 +147,7 @@ test_that("single-arm Phase II -> Simon two-stage", {
   expect_equal(res$node$catalog_key, "simon_two_stage")
 })
 
-test_that("equivalence, continuous outcome -> TOST means; proportion outcome -> not built", {
+test_that("equivalence, continuous outcome -> TOST means; proportion outcome -> TOST proportions", {
   res_cont <- .walk(c("Compare groups / test an association or hypothesis",
                        "I (the investigator) assign it",
                        "Individual subjects",
@@ -161,9 +161,37 @@ test_that("equivalence, continuous outcome -> TOST means; proportion outcome -> 
                        "Show both arms are practically equivalent (equivalence)",
                        "Proportion"))
   expect_true(isTRUE(res_prop$node$terminal))
-  expect_null(res_prop$node$catalog_key)
-  expect_false(isTRUE(res_prop$node$guidance))
-  expect_true(!is.null(res_prop$node$would_use))
+  expect_equal(res_prop$node$catalog_key, "tost_proportions")
+  expect_true(isTRUE(catalog_entry(res_prop$node$catalog_key)$built))
+})
+
+test_that("non-inferiority, continuous outcome -> means; proportion outcome -> proportions", {
+  res_cont <- .walk(c("Compare groups / test an association or hypothesis",
+                       "I (the investigator) assign it",
+                       "Individual subjects",
+                       "Show it's not unacceptably worse (non-inferiority)",
+                       "Continuous (means)"))
+  expect_equal(res_cont$node$catalog_key, "noninferiority_means")
+
+  res_prop <- .walk(c("Compare groups / test an association or hypothesis",
+                       "I (the investigator) assign it",
+                       "Individual subjects",
+                       "Show it's not unacceptably worse (non-inferiority)",
+                       "Proportion"))
+  expect_equal(res_prop$node$catalog_key, "noninferiority_proportions")
+  expect_true(isTRUE(catalog_entry(res_prop$node$catalog_key)$built))
+})
+
+test_that("estimation -> single mean precision and incidence rate precision now route to built modules", {
+  res_mean <- .walk(c("Estimate a parameter with precision (prevalence, mean, rate...)",
+                      "A mean"))
+  expect_equal(res_mean$node$catalog_key, "means_single_precision")
+  expect_true(isTRUE(catalog_entry(res_mean$node$catalog_key)$built))
+
+  res_rate <- .walk(c("Estimate a parameter with precision (prevalence, mean, rate...)",
+                      "An incidence rate"))
+  expect_equal(res_rate$node$catalog_key, "incidence_rate_precision")
+  expect_true(isTRUE(catalog_entry(res_rate$node$catalog_key)$built))
 })
 
 test_that("qualitative branch is a guidance terminal with no catalog_key", {
