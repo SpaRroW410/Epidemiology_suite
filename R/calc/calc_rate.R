@@ -46,3 +46,69 @@ calc_rate_precision <- function(rate, conf_width, conf_level = 0.95,
                   conf_level = conf_level, method = method)
   )
 }
+
+#' Sample size to compare two incidence rates (Poisson regression, single
+#' binary predictor)
+#'
+#' Comparing two group incidence rates via person-time is algebraically a
+#' Poisson regression with one Bernoulli-distributed predictor (the group
+#' indicator) -- Demidenko (2007)'s Wald-test power formula for Poisson
+#' regression, specialised to that one-predictor case. This closed-form
+#' implementation reproduces the WebPower::wp.poisson(family = "Bernoulli")
+#' formula exactly (verified against its own documented example) without
+#' taking a dependency on the WebPower package, whose Depends: (lme4,
+#' lavaan, dplyr, PearsonDS) are far heavier than this one formula needs --
+#' consistent with this project's "wrap a real package, but not at the cost
+#' of a disproportionate dependency tree" practice (see e.g. PowerTOST over
+#' TOSTER, powerSurvEpi over gsDesign elsewhere in this app).
+#'
+#' @param rate_ref Expected incidence rate in the reference (unexposed) group
+#'   (events per unit person-time, > 0)
+#' @param rate_ratio Expected rate ratio (exposed group's rate divided by
+#'   the reference group's rate, > 0, != 1)
+#' @param prop_exposed Proportion of the total sample in the exposed group
+#'   (0,1); 0.5 = equal allocation
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided", "less", or "greater"
+#' @return list(n_total, n_exposed, n_reference, inputs)
+calc_rate_comparison <- function(rate_ref, rate_ratio, prop_exposed = 0.5,
+                                  alpha = 0.05, power = 0.8,
+                                  alternative = c("two.sided", "less", "greater")) {
+  alternative <- match.arg(alternative)
+  .validate_positive(rate_ref, "rate_ref")
+  .validate_positive(rate_ratio, "rate_ratio")
+  if (isTRUE(all.equal(rate_ratio, 1))) stop("rate_ratio must differ from 1 (no effect to detect).")
+  .validate_unit_interval(prop_exposed, "prop_exposed")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  beta0 <- log(rate_ref)
+  beta1 <- log(rate_ratio)
+  B <- prop_exposed
+  a <- (1 - B) * exp(beta0) + B * exp(beta0 + beta1)
+  b <- B * exp(beta0 + beta1)
+  v1 <- a / (a * b - b^2)
+
+  tside <- switch(alternative, less = 1, two.sided = 2, greater = 3)
+  if (tside == 1) { s <- 1; t <- 0; a_used <- alpha }
+  if (tside == 2) { s <- 1; t <- 1; a_used <- alpha / 2 }
+  if (tside == 3) { s <- 0; t <- 1; a_used <- alpha }
+
+  power_at_n <- function(n) {
+    s * stats::pnorm(-stats::qnorm(1 - a_used) - sqrt(n) / sqrt(v1) * beta1) +
+      t * stats::pnorm(-stats::qnorm(1 - a_used) + sqrt(n) / sqrt(v1) * beta1)
+  }
+
+  n_solved <- stats::uniroot(function(n) power_at_n(n) - power, c(4 + 1e-8, 1e7))$root
+  n_total <- ceiling(n_solved)
+  n_exposed <- ceiling(n_total * prop_exposed)
+
+  list(
+    n_total = n_total,
+    n_exposed = n_exposed,
+    n_reference = n_total - n_exposed,
+    inputs = list(rate_ref = rate_ref, rate_ratio = rate_ratio, prop_exposed = prop_exposed,
+                  alpha = alpha, power = power, alternative = alternative)
+  )
+}

@@ -11,8 +11,8 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: seventeen complete calculator modules -- all Stage-1 CORE items
-from the master checklists are now built, plus a first "quick wins" batch of
+of Phase 2: eighteen complete calculator modules -- all Stage-1 CORE items
+from the master checklists are now built, plus two "quick wins" batches of
 further CORE items --
 
 - **Proportions** (`R/modules/mod_proportion.R`) -- single proportion
@@ -26,11 +26,14 @@ further CORE items --
   and three or more independent groups (one-way ANOVA, wraps
   `pwr::pwr.anova.test()`, converting raw group means to Cohen's f)
 - **Diagnostic Accuracy** (`R/modules/mod_diagnostic.R`) -- sensitivity &
-  specificity, precision-based or vs. a known/reference value, and
-  comparing two diagnostic tests (unpaired or paired), all per Akoglu
-  (2022)'s practical guide -- see that module's own doc comments and
+  specificity, precision-based or vs. a known/reference value, comparing
+  two diagnostic tests (unpaired or paired), all per Akoglu (2022)'s
+  practical guide, plus predictive values (PPV/NPV, precision-based --
+  Buderer's prevalence-adjustment logic extended to Altman & Bland 1994's
+  PPV/NPV formulas) -- see that module's own doc comments and
   `R/content/content_diagnostic.R` for the full formula set and citations
-  (Buderer 1996, Casagrande & Pike 1978, Connor 1987, Obuchowski 1998)
+  (Buderer 1996, Casagrande & Pike 1978, Connor 1987, Obuchowski 1998,
+  Altman & Bland 1994)
 - **Agreement / Reliability** (`R/modules/mod_agreement.R`) -- for when
   there's *no* gold standard at all, only two raters/methods being compared
   to each other: Cohen's kappa (categorical, wraps `presize::prec_kappa()` /
@@ -70,8 +73,11 @@ further CORE items --
   time-to-event studies (required N from event probabilities), wrapping
   `powerSurvEpi::ssizeCT()` (Freedman 1982; Rosner 2006)
 - **Incidence Rate** (`R/modules/mod_rate.R`) -- precision-based estimation
-  of an incidence rate (number of events, then person-time), wrapping
-  `presize::prec_rate()`
+  of an incidence rate (number of events, then person-time, wrapping
+  `presize::prec_rate()`), plus comparison of two rates via person-time
+  (closed-form Demidenko 2007 Poisson-regression formula, reproducing
+  WebPower's `wp.poisson()` exactly without that package's heavy
+  dependency chain)
 - **Multiple Regression** (`R/modules/mod_regression.R`) -- R-squared
   deviation from zero for a multiple linear regression model, wrapping
   `pwr::pwr.f2.test()` (Cohen 1988)
@@ -82,10 +88,17 @@ further CORE items --
   an unseen adverse-event rate given zero events observed, or the sample
   size needed to have a good chance of observing at least one event of an
   assumed rate; closed-form (Hanley & Lippman-Hand 1983)
+- **Exact Tests** (`R/modules/mod_exact_tests.R`) -- the binomial test
+  (single proportion) and Fisher's exact test (two independent
+  proportions), both more accurate than the normal-approximation designs
+  elsewhere in this app for small samples. Both search upward over n
+  (via `stats::binom.test()` and `Exact::power.exact.test()` respectively)
+  rather than solving a closed-form equation, since exact-test power is
+  genuinely non-monotonic in n (Chernick & Liu 2002) -- a stability check
+  guards against recommending a fragile single-n spike
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
-(comparison of two incidence rates, PPV/NPV, Fisher's exact, binomial test,
-prediction models, advanced survival designs, post-hoc power, and the much
+(prediction models, advanced survival designs, post-hoc power, and the much
 larger Stage 2-4 backlog in those two files) remains "coming soon" in the
 Home finder, per the staged build plan.
 

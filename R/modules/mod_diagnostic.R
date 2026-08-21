@@ -27,7 +27,8 @@ mod_diagnostic_ui <- function(id) {
           "Sensitivity & specificity - precision-based (no reference value)" = "precision",
           "Sensitivity & specificity vs. known/reference value (hypothesis test)" = "vs_reference",
           "Two independent (unpaired) diagnostic tests" = "two_indep",
-          "Two paired diagnostic tests (same subjects)" = "two_paired"
+          "Two paired diagnostic tests (same subjects)" = "two_paired",
+          "Predictive values (PPV/NPV), precision-based" = "ppv_npv"
         ),
         selected = "precision"
       ),
@@ -62,6 +63,19 @@ mod_diagnostic_ui <- function(id) {
         condition = design_is("two_paired"),
         numericInput(ns("p1_paired"), "P1 (test 1's expected Sn or Sp)", value = 0.80, min = 0, max = 1, step = 0.01),
         numericInput(ns("p2_paired"), "P2 (test 2's expected Sn or Sp)", value = 0.70, min = 0, max = 1, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("ppv_npv"),
+        numericInput(ns("sens_ppv"), "Expected sensitivity (Sn)", value = 0.90, min = 0, max = 1, step = 0.01),
+        numericInput(ns("spec_ppv"), "Expected specificity (Sp)", value = 0.85, min = 0, max = 1, step = 0.01),
+        numericInput(ns("prevalence_ppv"), "Expected prevalence of the target condition (P)",
+                     value = 0.20, min = 0, max = 1, step = 0.01),
+        numericInput(ns("prec_ppv"), "Desired precision for PPV (W_PPV)",
+                     value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("prec_npv"), "Desired precision for NPV (W_NPV)",
+                     value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("conf_level_ppv"), "Confidence level",
+                     value = 0.95, min = 0.5, max = 0.999, step = 0.01)
       ),
       conditionalPanel(
         condition = design_is("vs_reference", "two_indep", "two_paired"),
@@ -110,7 +124,13 @@ mod_diagnostic_ui <- function(id) {
       withMathJax(HTML(diagnostic_content$two_paired$formula_latex)),
       shiny::markdown(diagnostic_content$two_paired$explanation),
       h5("Worked example"),
-      shiny::markdown(diagnostic_content$two_paired$worked_example)
+      shiny::markdown(diagnostic_content$two_paired$worked_example),
+      hr(),
+      h4(diagnostic_content$ppv_npv$title),
+      withMathJax(HTML(diagnostic_content$ppv_npv$formula_latex)),
+      shiny::markdown(diagnostic_content$ppv_npv$explanation),
+      h5("Worked example"),
+      shiny::markdown(diagnostic_content$ppv_npv$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -129,7 +149,11 @@ mod_diagnostic_ui <- function(id) {
       hr(),
       h4(diagnostic_content$two_paired$title),
       p(strong("Citation: "), diagnostic_content$two_paired$citation),
-      p(strong("Implemented via: "), code(diagnostic_content$two_paired$backend))
+      p(strong("Implemented via: "), code(diagnostic_content$two_paired$backend)),
+      hr(),
+      h4(diagnostic_content$ppv_npv$title),
+      p(strong("Citation: "), diagnostic_content$ppv_npv$citation),
+      p(strong("Implemented via: "), code(diagnostic_content$ppv_npv$backend))
     )
   )
 }
@@ -171,12 +195,22 @@ mod_diagnostic_server <- function(id) {
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
-      } else {
+      } else if (input$design == "two_paired") {
         req(input$p1_paired, input$p2_paired, input$alpha, input$power, input$alternative)
         tryCatch(
           list(ok = TRUE, value = calc_diagnostic_two_paired(
             p1 = input$p1_paired, p2 = input$p2_paired,
             alpha = input$alpha, power = input$power, alternative = input$alternative
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$sens_ppv, input$spec_ppv, input$prevalence_ppv,
+            input$prec_ppv, input$prec_npv, input$conf_level_ppv)
+        tryCatch(
+          list(ok = TRUE, value = calc_diagnostic_ppv_npv(
+            sens = input$sens_ppv, spec = input$spec_ppv, prevalence = input$prevalence_ppv,
+            prec_ppv = input$prec_ppv, prec_npv = input$prec_npv, conf_level = input$conf_level_ppv
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -203,12 +237,19 @@ mod_diagnostic_server <- function(id) {
           p(strong("Required sample size per test/pathway: "), v$n_per_group),
           p(strong("Total sample size: "), v$n_total)
         )
-      } else {
+      } else if (input$design == "two_paired") {
         tagList(
           p(strong("Sample size range: "), sprintf("%d (Psi_min) to %d (Psi_max)", v$n_min, v$n_max)),
           p(sprintf("Psi_min = %.4f, Psi_max = %.4f", v$psi_min, v$psi_max)),
           p("Choose based on how correlated you expect the two tests' results to be; ",
             "the upper bound is the conservative default.")
+        )
+      } else {
+        tagList(
+          p(strong("Required total sample size: "), v$n,
+            sprintf(" (%s binds)", v$binding)),
+          p(sprintf("PPV requires n = %d; NPV requires n = %d", v$n_ppv, v$n_npv)),
+          p(sprintf("PPV = %.4f, NPV = %.4f at these inputs", v$ppv, v$npv))
         )
       }
     })

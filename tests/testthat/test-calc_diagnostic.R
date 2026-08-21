@@ -88,3 +88,19 @@ test_that("calc_diagnostic_two_paired (Eq 3b): paired range sits well below the 
 test_that("calc_diagnostic_two_paired (Eq 3b) rejects invalid inputs", {
   expect_error(calc_diagnostic_two_paired(p1 = 0.7, p2 = 0.7), "must differ")
 })
+
+test_that("calc_diagnostic_ppv_npv: worked example (sens=.9, spec=.85, prevalence=.2)", {
+  res <- calc_diagnostic_ppv_npv(sens = 0.9, spec = 0.85, prevalence = 0.2,
+                                  prec_ppv = 0.05, prec_npv = 0.05, conf_level = 0.95)
+  expect_equal(round(res$ppv, 4), 0.6)
+  expect_equal(round(res$npv, 4), 0.9714)
+  expect_equal(res$n, 1230)
+  expect_equal(res$n_ppv, 1230)
+  expect_equal(res$n_npv, 61)
+  expect_equal(res$binding, "PPV")
+})
+
+test_that("calc_diagnostic_ppv_npv rejects invalid inputs", {
+  expect_error(calc_diagnostic_ppv_npv(sens = 1.5, spec = 0.85, prevalence = 0.2), "between 0 and 1")
+  expect_error(calc_diagnostic_ppv_npv(sens = 0.9, spec = 0.85, prevalence = 0.2, prec_ppv = -1), "between 0 and 1")
+})

@@ -64,8 +64,8 @@
 
 ### Exact tests — G*Power **Exact** family
 
-- [ ] **[CORE]** Fisher's exact (2×2) — p1, p2, allocation — GP: Exact → Proportions: inequality, two independent (Fisher)
-- [ ] **[CORE]** Binomial test (single proportion) — p, p0 — GP: Exact → Proportion: difference from constant
+- [x] **[CORE]** Fisher's exact (2×2) — p1, p2, allocation — GP: Exact → Proportions: inequality, two independent (Fisher) — *(implemented: new Exact Tests module's "Fisher's exact test" design, `calc_fisher_exact()` wrapping `Exact::power.exact.test(method="fisher")`, searching n1 upward for the first n1 whose exact power clears the target and stays there for 2 more steps -- exact-test power is non-monotonic in n (Chernick & Liu 2002), so a naive single-n search can land on a fragile spike. Verified: package's own doc example (p1=.15, p2=.60, n1=15, n2=30) reproduces power=0.8049 exactly; our search at ratio=2 finds n1=14 (achieved power 0.8195), one step earlier than the package's illustrative n1=15 -- a real instance of that non-monotonicity, not a discrepancy)*
+- [x] **[CORE]** Binomial test (single proportion) — p, p0 — GP: Exact → Proportion: difference from constant — *(implemented: new Exact Tests module's "Binomial test" design, `calc_binomial_exact()`, searching n via base R's own `stats::binom.test()` (no external package needed) with the same stability-window search as Fisher's exact above. Verified: p0=.1, p1=.3, alpha=.05, power=.8 -> n=25, achieved exact power=0.8065, confirmed stable through n=27)*
 - [ ] **[ADV]** Exact Poisson (rare event vs standard) — Epi Info StatCalc (Poisson)
 - [ ] **[ADV]** Correlation, bivariate normal (exact) — r — GP: Exact → Correlation: bivariate normal
 - [ ] **[ADV]** Proportions difference, unconditional exact — GP: Exact → Proportions: inequality, unconditional

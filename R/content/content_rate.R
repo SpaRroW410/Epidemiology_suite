@@ -43,5 +43,51 @@ rate_content <- list(
       "2002;56(2):85-89. (as implemented by presize::prec_rate)."
     ),
     backend = "presize::prec_rate()"
+  ),
+
+  comparison = list(
+    title = "Comparison of Two Incidence Rates",
+    formula_latex = paste0(
+      "$$\\log(\\lambda) = \\beta_0 + \\beta_1 x, \\quad x \\sim \\text{Bernoulli}(B)$$",
+      "$$n \\text{ solved from a Wald-test power equation (Demidenko 2007)}$$"
+    ),
+    explanation = paste(
+      "Comparing two groups' incidence rates via person-time is",
+      "algebraically a Poisson regression with one Bernoulli-distributed",
+      "predictor (the group indicator) -- this calculator uses Demidenko",
+      "(2007)'s Wald-test power formula for that one-predictor case.",
+      "",
+      "- **rate_ref** - the expected rate in the reference (unexposed)",
+      "  group, in events per unit person-time.",
+      "- **rate_ratio** - the rate ratio you expect (exposed group's rate",
+      "  divided by the reference group's rate); must differ from 1.",
+      "- **prop_exposed** - the proportion of the total sample in the",
+      "  exposed group (0.5 = equal allocation).",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "This is implemented as a direct closed-form calculation (matching",
+      "the WebPower package's own `wp.poisson(family = \"Bernoulli\")`",
+      "formula exactly) rather than depending on WebPower itself, whose",
+      "package-level dependencies (lme4, lavaan, dplyr, PearsonDS) are far",
+      "heavier than this one formula needs.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "WebPower's own documented example: a reference rate of 2.798 events",
+      "per unit person-time, an expected rate ratio of 0.8938, with 53% of",
+      "the sample in the exposed group. At alpha = 0.05 (two-sided) and 80%",
+      "power, this calculator returns n_total = 944 (501 exposed, 443",
+      "reference) -- matching WebPower's own printed n = 943.26 (ceiling",
+      "944) exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Demidenko E. Sample size determination for logistic regression",
+      "revisited. Stat Med. 2007;26(18):3385-97. (Wald-test power formula",
+      "this calculator implements); Zhang Z, Yuan KH. Practical",
+      "Statistical Power Analysis Using WebPower and R. ISDSA Press;",
+      "2018. (parameterization/worked example this was verified against)."
+    ),
+    backend = "Closed-form (Demidenko 2007's Poisson-regression Wald-test formula, as documented by WebPower::wp.poisson); no external package required"
   )
 )

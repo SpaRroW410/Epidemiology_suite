@@ -190,7 +190,7 @@ for what to build next):
 |---|---|---|---|
 | Proportions | Precision-based (Cochran, +FPC); vs. known value; two independent | closed-form (Cochran); `pwr::pwr.p.test`, `pwr::pwr.2p.test` | Live |
 | Means | Precision-based; one-sample, two-sample (equal + unequal n), paired, one-way ANOVA (3+ groups) | `epiR::epi.sssimpleestc()`; `pwr::pwr.t.test`, `pwr::pwr.t2n.test`, `pwr::pwr.anova.test` | Live |
-| Diagnostic accuracy | Precision-based (Buderer); vs. reference value; two tests, unpaired/paired | closed-form (Buderer; Casagrande-Pike; Connor), all + Yates' correction | Live |
+| Diagnostic accuracy | Precision-based (Buderer); vs. reference value; two tests, unpaired/paired; PPV/NPV | closed-form (Buderer; Casagrande-Pike; Connor; Altman & Bland), all + Yates' correction | Live |
 | Agreement / reliability | Cohen's kappa; ICC | `presize::prec_kappa()` (→ `kappaSize`); `presize::prec_icc()` (Bonett 2002) | Live |
 | Case-control | Unmatched; matched (1:1 or 1:m) | `epiR::epi.sscc()` | Live |
 | Cohort / RR | Cohort, cross-sectional, relative risk | `epiR::epi.sscohortc()` | Live |
@@ -200,7 +200,8 @@ for what to build next):
 | Simon two-stage | Phase II single-arm (minimax + optimal designs) | `clinfun::ph2simon()` | Live |
 | Equivalence (TOST) | Two one-sided tests, means and proportions | `PowerTOST::sampleN.TOST(logscale=FALSE)`; `epiR::epi.ssequb()` | Live |
 | Log-rank / survival | Two-arm time-to-event, cumulative event probabilities | `powerSurvEpi::ssizeCT()` | Live |
-| Incidence Rate | Precision-based, events + person-time | `presize::prec_rate()` | Live |
+| Incidence Rate | Precision-based, events + person-time; comparison of two rates | `presize::prec_rate()`; closed-form (Demidenko 2007) | Live |
+| Exact Tests | Binomial test (single proportion); Fisher's exact (two proportions) | `stats::binom.test()` search; `Exact::power.exact.test()` search | Live |
 | Multiple Regression | R-squared deviation from zero | `pwr::pwr.f2.test()` | Live |
 | Non-Inferiority | Means and proportions | `epiR::epi.ssninfc()`, `epi.ssninfb()` | Live |
 | Rule of Three | Upper bound on unseen event rate; n to detect >= 1 event | closed-form (Hanley & Lippman-Hand 1983) | Live |

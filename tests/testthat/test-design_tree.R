@@ -200,3 +200,20 @@ test_that("qualitative branch is a guidance terminal with no catalog_key", {
   expect_true(isTRUE(res$node$guidance))
   expect_null(res$node$catalog_key)
 })
+
+test_that("diagnostic -> PPV/NPV now routes to a built module", {
+  res <- .walk(c("Assess the accuracy of a diagnostic test",
+                 "Predictive values (PPV/NPV)"))
+  expect_equal(res$node$catalog_key, "diagnostic_ppv_npv")
+  expect_true(isTRUE(catalog_entry(res$node$catalog_key)$built))
+})
+
+test_that("comparison, count/rate outcome -> comparison of two incidence rates, now built", {
+  res <- .walk(c("Compare groups / test an association or hypothesis",
+                 "I (the investigator) assign it",
+                 "Individual subjects",
+                 "Show one arm is better (superiority)",
+                 "Count / rate (e.g. episodes per person-time)"))
+  expect_equal(res$node$catalog_key, "rate_comparison")
+  expect_true(isTRUE(catalog_entry(res$node$catalog_key)$built))
+})

@@ -215,3 +215,61 @@ calc_diagnostic_two_paired <- function(p1, p2, alpha = 0.05, power = 0.8,
                   alternative = alternative)
   )
 }
+
+#' Sample size for predictive values (PPV/NPV), precision-based
+#'
+#' Extends Buderer's method (already used by calc_diagnostic_accuracy()) to
+#' predictive values: PPV and NPV are themselves proportions (P(disease |
+#' test positive) and P(no disease | test negative) respectively -- Altman &
+#' Bland 1994), so the number of test-positive (or test-negative) subjects
+#' needed for a target CI half-width follows the same z^2*p(1-p)/d^2 formula
+#' as any other proportion. Since only a `P(test positive)` (or negative)
+#' fraction of everyone screened actually tests positive (or negative), the
+#' *total* number needed to screen is that per-outcome count divided by the
+#' probability of that outcome -- exactly the same prevalence-adjustment
+#' logic Buderer (1996) uses for sensitivity/specificity, just applied to
+#' the predictive values instead.
+#'
+#' @param sens Expected sensitivity (0,1)
+#' @param spec Expected specificity (0,1)
+#' @param prevalence Expected prevalence of the target condition (0,1)
+#' @param prec_ppv Desired precision (CI half-width) for PPV (0,1)
+#' @param prec_npv Desired precision (CI half-width) for NPV (0,1)
+#' @param conf_level Confidence level (0,1), e.g. 0.95
+#' @return list(n, n_ppv, n_npv, binding, ppv, npv, z, inputs)
+calc_diagnostic_ppv_npv <- function(sens, spec, prevalence,
+                                     prec_ppv = 0.05, prec_npv = 0.05,
+                                     conf_level = 0.95) {
+  .validate_unit_interval(sens, "sens")
+  .validate_unit_interval(spec, "spec")
+  .validate_unit_interval(prevalence, "prevalence")
+  .validate_unit_interval(prec_ppv, "prec_ppv")
+  .validate_unit_interval(prec_npv, "prec_npv")
+  .validate_unit_interval(conf_level, "conf_level")
+
+  p_pos <- sens * prevalence + (1 - spec) * (1 - prevalence)
+  p_neg <- (1 - sens) * prevalence + spec * (1 - prevalence)
+  ppv <- (sens * prevalence) / p_pos
+  npv <- (spec * (1 - prevalence)) / p_neg
+
+  z <- stats::qnorm(1 - (1 - conf_level) / 2)
+  n_pos <- (z^2 * ppv * (1 - ppv)) / prec_ppv^2
+  n_neg <- (z^2 * npv * (1 - npv)) / prec_npv^2
+
+  n_ppv_total <- ceiling(n_pos / p_pos)
+  n_npv_total <- ceiling(n_neg / p_neg)
+  n <- max(n_ppv_total, n_npv_total)
+  binding <- if (n_ppv_total >= n_npv_total) "PPV" else "NPV"
+
+  list(
+    n = n,
+    n_ppv = n_ppv_total,
+    n_npv = n_npv_total,
+    binding = binding,
+    ppv = ppv,
+    npv = npv,
+    z = z,
+    inputs = list(sens = sens, spec = spec, prevalence = prevalence,
+                  prec_ppv = prec_ppv, prec_npv = prec_npv, conf_level = conf_level)
+  )
+}

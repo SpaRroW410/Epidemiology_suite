@@ -356,7 +356,53 @@ calculator_catalog <- list(
        ),
        outcome_type = "rate", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Incidence Rate",
-       module_input_id = NA, design_value = NA),
+       module_input_id = "rate-design", design_value = "precision"),
+
+  list(key = "rate_comparison",
+       label = "Comparison of two incidence rates",
+       answers = paste(
+         "Answers: \"How many subjects (or how much person-time) do I need",
+         "to detect a given rate ratio between an exposed and a reference",
+         "group?\""
+       ),
+       outcome_type = "rate", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Incidence Rate",
+       module_input_id = "rate-design", design_value = "comparison"),
+
+  list(key = "diagnostic_ppv_npv",
+       label = "Predictive values (PPV/NPV), precision-based",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate my test's",
+         "positive and negative predictive values to a desired precision,",
+         "given its sensitivity, specificity, and the condition's",
+         "prevalence?\""
+       ),
+       outcome_type = "diagnostic", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Diagnostic Accuracy",
+       module_input_id = "diagnostic-design", design_value = "ppv_npv"),
+
+  list(key = "exact_binomial",
+       label = "Binomial test, single proportion (exact)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect that my",
+         "proportion differs from a reference value, using the exact",
+         "binomial distribution instead of the normal approximation?\""
+       ),
+       outcome_type = "exact", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Exact Tests",
+       module_input_id = "exact_tests-design", design_value = "binomial"),
+
+  list(key = "exact_fisher",
+       label = "Fisher's exact test, two independent proportions",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to detect a",
+         "difference between two independent groups' proportions, using",
+         "Fisher's exact test (better than the normal approximation for",
+         "small samples)?\""
+       ),
+       outcome_type = "exact", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Exact Tests",
+       module_input_id = "exact_tests-design", design_value = "fisher"),
 
   list(key = "regression_r2",
        label = "Multiple linear regression, R-squared deviation from zero",
@@ -412,7 +458,8 @@ study_design_families <- list(
   list(id = "diagnostic", label = "Diagnostic Accuracy",
        hint = "Estimating sensitivity/specificity given expected prevalence.",
        catalog_keys = c("diagnostic_precision", "diagnostic_vs_reference",
-                         "diagnostic_two_indep", "diagnostic_two_paired")),
+                         "diagnostic_two_indep", "diagnostic_two_paired",
+                         "diagnostic_ppv_npv")),
   list(id = "correlation", label = "Correlation",
        hint = "Detecting a Pearson correlation between two continuous variables.",
        catalog_keys = c("correlation_pearson")),
@@ -426,6 +473,12 @@ study_design_families <- list(
        hint = "Estimating with a target confidence-interval width rather than testing a hypothesis.",
        catalog_keys = c("proportion_single_precision", "means_single_precision",
                          "incidence_rate_precision")),
+  list(id = "incidence_rate", label = "Incidence Rate",
+       hint = "Estimating or comparing incidence rates from person-time data.",
+       catalog_keys = c("incidence_rate_precision", "rate_comparison")),
+  list(id = "exact_tests", label = "Exact Tests",
+       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact).",
+       catalog_keys = c("exact_binomial", "exact_fisher")),
   list(id = "survival", label = "Survival",
        hint = "Log-rank or accrual/follow-up based survival study designs.",
        catalog_keys = c("logrank")),

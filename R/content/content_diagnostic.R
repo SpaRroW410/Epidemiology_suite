@@ -245,5 +245,60 @@ diagnostic_content <- list(
       "Emerg Med. 2022;22(4):177-185. (Table 2, Equation 3b)."
     ),
     backend = "Closed-form (Connor's method + Yates' correction); no external package required"
+  ),
+
+  ppv_npv = list(
+    title = "Predictive Values (PPV/NPV), Precision-Based",
+    formula_latex = paste0(
+      "$$PPV = \\frac{Sn \\times P}{Sn \\times P + (1-Sp)(1-P)}, \\quad ",
+      "NPV = \\frac{Sp(1-P)}{(1-Sn)P + Sp(1-P)}$$",
+      "$$n_{PPV} = \\frac{Z_{1-\\alpha/2}^2 \\, PPV(1-PPV)}{W_{PPV}^2 \\times P(\\text{test+})}, \\quad ",
+      "n_{NPV} = \\frac{Z_{1-\\alpha/2}^2 \\, NPV(1-NPV)}{W_{NPV}^2 \\times P(\\text{test-})}$$"
+    ),
+    explanation = paste(
+      "PPV (the probability a positive test result is a true positive) and",
+      "NPV (the probability a negative result is a true negative) are",
+      "themselves just proportions -- computed from sensitivity,",
+      "specificity, and prevalence per Altman & Bland (1994) -- so their",
+      "own precision-based sample size follows the same",
+      "Z^2\\*p(1-p)/W^2 formula as any proportion. This calculator extends",
+      "Buderer's prevalence-adjustment insight (already used by the",
+      "sensitivity/specificity design above) to PPV and NPV: only subjects",
+      "who *test positive* inform the PPV estimate, and only subjects who",
+      "*test negative* inform the NPV estimate, so the total number needed",
+      "to screen is the per-outcome count divided by the probability of",
+      "that test outcome (not by disease prevalence directly).",
+      "",
+      "- **Sn, Sp, P** - same as the precision-based Se/Sp design above.",
+      "- **W_PPV, W_NPV** - desired precision (CI half-width) for PPV and",
+      "  NPV respectively.",
+      "- **Confidence level** - typically 0.95.",
+      "",
+      "Take N = the larger of the two implied totals, same logic as the",
+      "sensitivity/specificity design. Note PPV and NPV both depend",
+      "heavily on prevalence (unlike Se/Sp themselves) -- a test with",
+      "excellent Se/Sp can still have a low PPV in a low-prevalence",
+      "population, which is exactly why this calculator asks for a",
+      "separate precision target for each.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Worked from raw values: a test with 90% sensitivity and 85%",
+      "specificity used in a population with 20% prevalence has PPV = 0.60",
+      "and NPV = 0.9714. Wanting +/-5 percentage points of precision on",
+      "both (95% confidence), this calculator returns n_PPV = 1230",
+      "(binding) and n_NPV = 61 -- so N = 1230 subjects need to be",
+      "screened, of whom about 30% (369) are expected to test positive.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Altman DG, Bland JM. Diagnostic tests 2: predictive values. BMJ.",
+      "1994;309(6947):102. (PPV/NPV formulas from Se/Sp/prevalence);",
+      "Buderer NM. Statistical methodology: I. Incorporating the",
+      "prevalence of disease into the sample size calculation for",
+      "sensitivity and specificity. Acad Emerg Med. 1996;3(9):895-900.",
+      "(prevalence-adjustment logic, extended here to PPV/NPV)."
+    ),
+    backend = "Closed-form (Buderer-style prevalence adjustment applied to Altman & Bland's PPV/NPV formulas); no external package required"
   )
 )

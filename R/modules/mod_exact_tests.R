@@ -1,0 +1,133 @@
+# Exact Tests module: Calculate / Formula-Help / Reference sub-tabs.
+# Follows the same design-radio pattern as mod_tost.R (docs/SDD.md #8).
+
+exact_tests_meta <- list(
+  id = "exact_tests",
+  nav_title = "Exact Tests"
+)
+
+mod_exact_tests_ui <- function(id) {
+  ns <- NS(id)
+
+  design_is <- function(...) {
+    values <- c(...)
+    paste(sprintf("input['%s'] == '%s'", ns("design"), values), collapse = " || ")
+  }
+
+  tabsetPanel(
+    tabPanel(
+      "Calculate",
+      br(),
+      radioButtons(
+        ns("design"), "Design",
+        choices = c(
+          "Binomial test, single proportion" = "binomial",
+          "Fisher's exact test, two independent proportions" = "fisher"
+        )
+      ),
+      conditionalPanel(
+        condition = design_is("binomial"),
+        numericInput(ns("p0"), "p0 (reference proportion)", value = 0.10, min = 0, max = 1, step = 0.01),
+        numericInput(ns("p1_bin"), "p1 (expected proportion)", value = 0.30, min = 0, max = 1, step = 0.01),
+        numericInput(ns("alpha_bin"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_bin"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
+        selectInput(
+          ns("alternative_bin"), "Alternative hypothesis",
+          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+        )
+      ),
+      conditionalPanel(
+        condition = design_is("fisher"),
+        numericInput(ns("p1_fisher"), "p1 (group 1 proportion)", value = 0.15, min = 0, max = 1, step = 0.01),
+        numericInput(ns("p2_fisher"), "p2 (group 2 proportion)", value = 0.60, min = 0, max = 1, step = 0.01),
+        numericInput(ns("alpha_fisher"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_fisher"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
+        numericInput(ns("ratio_fisher"), "Allocation ratio (group 2 : group 1)", value = 2, min = 0.1, step = 0.1),
+        selectInput(
+          ns("alternative_fisher"), "Alternative hypothesis",
+          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+        )
+      ),
+      hr(),
+      h5("Result"),
+      uiOutput(ns("result"))
+    ),
+    tabPanel(
+      "Formula / Help",
+      br(),
+      h4(exact_tests_content$binomial$title),
+      withMathJax(HTML(exact_tests_content$binomial$formula_latex)),
+      shiny::markdown(exact_tests_content$binomial$explanation),
+      h5("Worked example"),
+      shiny::markdown(exact_tests_content$binomial$worked_example),
+      hr(),
+      h4(exact_tests_content$fisher$title),
+      withMathJax(HTML(exact_tests_content$fisher$formula_latex)),
+      shiny::markdown(exact_tests_content$fisher$explanation),
+      h5("Worked example"),
+      shiny::markdown(exact_tests_content$fisher$worked_example)
+    ),
+    tabPanel(
+      "Reference",
+      br(),
+      h4(exact_tests_content$binomial$title),
+      p(strong("Citation: "), exact_tests_content$binomial$citation),
+      p(strong("Implemented via: "), code(exact_tests_content$binomial$backend)),
+      hr(),
+      h4(exact_tests_content$fisher$title),
+      p(strong("Citation: "), exact_tests_content$fisher$citation),
+      p(strong("Implemented via: "), code(exact_tests_content$fisher$backend))
+    )
+  )
+}
+
+mod_exact_tests_server <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    result <- reactive({
+      req(input$design)
+
+      if (input$design == "binomial") {
+        req(input$p0, input$p1_bin, input$alpha_bin, input$power_bin, input$alternative_bin)
+        tryCatch(
+          list(ok = TRUE, value = calc_binomial_exact(
+            p0 = input$p0, p1 = input$p1_bin, alpha = input$alpha_bin,
+            power = input$power_bin, alternative = input$alternative_bin
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$p1_fisher, input$p2_fisher, input$alpha_fisher, input$power_fisher,
+            input$ratio_fisher, input$alternative_fisher)
+        tryCatch(
+          list(ok = TRUE, value = calc_fisher_exact(
+            p1 = input$p1_fisher, p2 = input$p2_fisher, alpha = input$alpha_fisher,
+            power = input$power_fisher, ratio = input$ratio_fisher,
+            alternative = input$alternative_fisher
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      }
+    })
+
+    output$result <- renderUI({
+      res <- result()
+      if (!res$ok) {
+        return(div(class = "text-danger", res$message))
+      }
+
+      v <- res$value
+      if (input$design == "binomial") {
+        tagList(
+          p(strong("Required sample size: "), v$n),
+          p(sprintf("Achieved exact power at this n: %.4f", v$achieved_power))
+        )
+      } else {
+        tagList(
+          p(strong("Required sample size per group: "), sprintf("n1 = %d, n2 = %d", v$n1, v$n2)),
+          p(strong("Total sample size: "), v$n_total),
+          p(sprintf("Achieved exact power at this n: %.4f", v$achieved_power))
+        )
+      }
+    })
+  })
+}
