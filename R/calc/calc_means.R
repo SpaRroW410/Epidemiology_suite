@@ -107,5 +107,43 @@ calc_means_paired <- function(mean_diff, sd_diff, alpha = 0.05, power = 0.8,
   )
 }
 
+#' Sample size for three or more independent group means (one-way ANOVA)
+#'
+#' Wraps pwr::pwr.anova.test() (Cohen 1988). Converts raw group means and a
+#' common/pooled SD to Cohen's f -- the population SD of the group means
+#' divided by the common SD -- same pattern as calc_means_2s_indep()
+#' converting raw means to Cohen's d.
+#'
+#' @param group_means Numeric vector of expected means, one per group (length >= 3)
+#' @param sd Common/pooled standard deviation shared by all groups (> 0)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n_per_group, n_total, f, inputs)
+calc_means_anova <- function(group_means, sd, alpha = 0.05, power = 0.8) {
+  if (!is.numeric(group_means) || length(group_means) < 3 || anyNA(group_means)) {
+    stop("group_means must be a numeric vector of at least 3 values.")
+  }
+  .validate_positive(sd, "sd")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (isTRUE(all.equal(stats::sd(group_means), 0))) {
+    stop("group_means must not all be equal (no effect to detect).")
+  }
+
+  k <- length(group_means)
+  sigma_m <- sqrt(sum((group_means - mean(group_means))^2) / k)
+  f <- sigma_m / sd
+
+  fit <- pwr::pwr.anova.test(k = k, f = f, sig.level = alpha, power = power)
+  n_per_group <- ceiling(fit$n)
+
+  list(
+    n_per_group = n_per_group,
+    n_total = n_per_group * k,
+    f = f,
+    inputs = list(group_means = group_means, sd = sd, alpha = alpha, power = power)
+  )
+}
+
 # Shared .validate_number() / .validate_positive() / .validate_unit_interval()
 # live in calc_utils.R (sourced alongside every file in R/calc/).

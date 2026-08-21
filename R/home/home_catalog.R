@@ -65,8 +65,13 @@ calculator_catalog <- list(
 
   list(key = "proportion_k", label = "Three or more group proportions",
        answers = "Answers: \"How many subjects per group do I need to detect any difference across 3+ group proportions?\"",
+       # Cross-referenced to the Chi-Square Tests module's independence
+       # design (a k-groups x outcome-categories table), per the master
+       # checklists' "every calculator reachable from both files" principle
+       # -- not a separate implementation.
        outcome_type = "proportion", groups = "3plus", dependency = NA, reference_based = NA,
-       built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
+       built = TRUE, nav_target = "Chi-Square Tests",
+       module_input_id = "chisq-design", design_value = "independence"),
 
   list(key = "means_single", label = "Single mean vs. known value",
        answers = "Answers: \"How many subjects do I need to detect that my population's mean differs from a known/reference value?\"",
@@ -87,9 +92,10 @@ calculator_catalog <- list(
        module_input_id = "means-design", design_value = "paired"),
 
   list(key = "means_k", label = "Three or more group means",
-       answers = "Answers: \"How many subjects per group do I need to detect any difference across 3+ group means?\"",
+       answers = "Answers: \"How many subjects per group do I need to detect any difference across 3+ group means (one-way ANOVA)?\"",
        outcome_type = "mean", groups = "3plus", dependency = NA, reference_based = NA,
-       built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
+       built = TRUE, nav_target = "Means",
+       module_input_id = "means-design", design_value = "anova"),
 
   # Diagnostic Accuracy entries: outcome_type/groups don't apply to this
   # family (it's not a "how many groups" comparison in the usual sense), so
@@ -199,7 +205,43 @@ calculator_catalog <- list(
        ),
        outcome_type = "cohort", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Cohort / RR",
-       module_input_id = NA, design_value = NA)
+       module_input_id = NA, design_value = NA),
+
+  list(key = "correlation_pearson",
+       label = "Pearson correlation",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a correlation",
+         "of a given size between two continuous variables?\""
+       ),
+       outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Correlation",
+       module_input_id = NA, design_value = NA),
+
+  # Chi-Square Tests entries: not a "how many groups" comparison in the
+  # proportion/mean sense, so only reachable via "by study design" -- except
+  # "independence" is also cross-referenced from proportion_k above, since
+  # a k-group proportion comparison IS a chi-square independence test.
+  list(key = "chisq_gof",
+       label = "Chi-square goodness of fit",
+       answers = paste(
+         "Answers: \"How many subjects do I need to test whether a",
+         "categorical variable's distribution matches an expected/",
+         "hypothesized distribution?\""
+       ),
+       outcome_type = "chisq", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Chi-Square Tests",
+       module_input_id = "chisq-design", design_value = "gof"),
+
+  list(key = "chisq_independence",
+       label = "Chi-square test of independence / association (R x C table)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect an association",
+         "between two categorical variables (e.g. group and outcome",
+         "category) in an R x C contingency table?\""
+       ),
+       outcome_type = "chisq", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Chi-Square Tests",
+       module_input_id = "chisq-design", design_value = "independence")
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -225,10 +267,13 @@ study_design_families <- list(
                          "diagnostic_two_indep", "diagnostic_two_paired")),
   list(id = "correlation", label = "Correlation",
        hint = "Detecting a Pearson correlation between two continuous variables.",
-       catalog_keys = character(0)),
+       catalog_keys = c("correlation_pearson")),
   list(id = "agreement", label = "Agreement / Reliability",
        hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC).",
        catalog_keys = c("agreement_kappa", "agreement_icc")),
+  list(id = "chi_square", label = "Chi-Square Tests",
+       hint = "Categorical distribution/association testing (goodness of fit, R x C tables).",
+       catalog_keys = c("chisq_gof", "chisq_independence")),
   list(id = "precision", label = "Precision-based (CI-width)",
        hint = "Estimating with a target confidence-interval width rather than testing a hypothesis.",
        catalog_keys = character(0)),

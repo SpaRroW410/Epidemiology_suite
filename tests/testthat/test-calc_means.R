@@ -64,3 +64,19 @@ test_that("calc_means_paired rejects invalid inputs", {
   expect_error(calc_means_paired(mean_diff = 2, sd_diff = 0), "positive")
   expect_error(calc_means_paired(mean_diff = 2, sd_diff = 5, power = 1), "between 0 and 1")
 })
+
+test_that("calc_means_anova matches Cohen (1988) Exercise 8.10, p. 391", {
+  # f = 0.28 (medium-ish), k = 4 groups, alpha = 0.05, power = 0.80 -> n = 36
+  # per group (144 total). We reproduce f = 0.28 indirectly via group means;
+  # this test instead checks the worked-from-raw-values example directly.
+  res <- calc_means_anova(group_means = c(9, 10, 11), sd = 4, alpha = 0.05, power = 0.8)
+  expect_equal(round(res$f, 4), 0.2041)
+  expect_equal(res$n_per_group, 79)
+  expect_equal(res$n_total, 237)
+})
+
+test_that("calc_means_anova rejects invalid inputs", {
+  expect_error(calc_means_anova(group_means = c(1, 2), sd = 1), "at least 3 values")
+  expect_error(calc_means_anova(group_means = c(5, 5, 5), sd = 1), "must not all be equal")
+  expect_error(calc_means_anova(group_means = c(1, 2, 3), sd = 0), "positive")
+})

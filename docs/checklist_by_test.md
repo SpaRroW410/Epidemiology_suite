@@ -41,7 +41,7 @@
 
 ### F tests — G*Power **F** family
 
-- [ ] **[CORE]** One-way ANOVA — f, k groups — `pwr::pwr.anova.test` , `WebPower::wp.anova` — GP: F → ANOVA: fixed effects, omnibus
+- [x] **[CORE]** One-way ANOVA — f, k groups — `pwr::pwr.anova.test` , `WebPower::wp.anova` — GP: F → ANOVA: fixed effects, omnibus — *(implemented: Means → "Three or more independent groups (one-way ANOVA)", `calc_means_anova()`, converts raw group means + SD to Cohen's f)*
 - [ ] **[ADV]** Two-way / factorial ANOVA (main effects & interactions) — f, numerator df — GP: F → ANOVA: fixed effects, special
 - [ ] **[ADV]** Repeated-measures ANOVA (between, within, interaction) — f, #measurements, correlation, nonsphericity ε — `WebPower::wp.rmanova` — GP: F → ANOVA: repeated measures
 - [ ] **[ADV]** ANCOVA — f, #covariates, #groups — `WebPower::wp.rmanova`-family / GP: F → ANCOVA — nMaster
@@ -54,8 +54,8 @@
 
 ### χ² tests — G*Power **χ²** family
 
-- [ ] **[CORE]** Goodness of fit — w, df — `pwr::pwr.chisq.test` (`ES.w1`) — GP: χ² → Goodness-of-fit
-- [ ] **[CORE]** Test of independence / association (R×C) — w, df — `pwr::pwr.chisq.test` (`ES.w2`) — GP: χ² → contingency tables
+- [x] **[CORE]** Goodness of fit — w, df — `pwr::pwr.chisq.test` (`ES.w1`) — GP: χ² → Goodness-of-fit — *(implemented: Chi-Square Tests → "Goodness of fit", `calc_chisq_gof()`)*
+- [x] **[CORE]** Test of independence / association (R×C) — w, df — `pwr::pwr.chisq.test` (`ES.w2`) — GP: χ² → contingency tables — *(implemented: Chi-Square Tests → "Test of independence", `calc_chisq_independence()`, dynamic R×C proportion-matrix UI (rows/cols 2-5); also cross-referenced as the "3+ group proportions" catalog entry)*
 - [ ] **[ADV]** McNemar's (paired proportions) — OR, proportion discordant — GP: χ² → McNemar (exact)
 - [ ] **[ADV]** Cochran's Q (k paired proportions)
 - [ ] **[ADV]** Mantel–Haenszel (stratified OR) — PASS CMH
@@ -72,7 +72,7 @@
 
 ### Correlation & regression
 
-- [ ] **[CORE]** Pearson correlation — r — `pwr::pwr.r.test` — GP: Exact/t → Correlation
+- [x] **[CORE]** Pearson correlation — r — `pwr::pwr.r.test` — GP: Exact/t → Correlation — *(implemented: Correlation module, `calc_correlation()`)*
 - [ ] **[ADV]** Spearman / Kendall's tau — via ARE inflation of Pearson
 - [ ] **[ADV]** Partial correlation — r, #controlled variables — GP: Yes
 - [ ] **[ADV]** Compare two independent correlations — q (Fisher r-to-z) — `pwr` (manual) — GP: z → Correlations: two independent Pearson r's
@@ -151,8 +151,8 @@
 |Single proportion (prevalence)|p, precision, conf, N         |`epiR::epi.sssimpleestb`; `presize::prec_prop`|Partial|Fleiss; Lwanga-Lemeshow           |✅ built (closed-form Cochran, not the named package)|
 |Two independent means         |d, α, power                   |`pwr::pwr.t.test`                             |Yes    |Cohen (1988)                      |✅ built|
 |Two proportions               |h, α, power, ratio            |`pwr::pwr.2p.test`                            |Yes    |Cohen (1988)                      |✅ built|
-|One-way ANOVA                 |f, k, α, power                |`pwr::pwr.anova.test`                         |Yes    |Cohen (1988)                      |not built|
-|Pearson correlation           |r, α, power                   |`pwr::pwr.r.test`                             |Yes    |Cohen (1988)                      |not built|
+|One-way ANOVA                 |f, k, α, power                |`pwr::pwr.anova.test`                         |Yes    |Cohen (1988)                      |✅ built|
+|Pearson correlation           |r, α, power                   |`pwr::pwr.r.test`                             |Yes    |Cohen (1988)                      |✅ built|
 |Multiple regression           |f², #predictors               |`pwr::pwr.f2.test`                            |Yes    |Cohen (1988)                      |not built|
 |Unmatched case-control        |%exposed controls, OR, ratio  |`epiR::epi.sscc`                              |No     |Schlesselman (1982)               |✅ built|
 |Cohort/RR                     |p0, RR, ratio                 |`epiR::epi.sscohortc`                         |No     |Kelsey; Fleiss                    |✅ built|

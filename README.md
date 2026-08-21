@@ -11,14 +11,16 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: six complete calculator modules --
+of Phase 2: nine complete calculator modules --
 
 - **Proportions** (`R/modules/mod_proportion.R`) -- single proportion
   (precision-based, Cochran's formula, with optional finite population
   correction), single proportion vs. known value, two independent
   proportions
 - **Means** (`R/modules/mod_means.R`) -- single mean vs. known value, two
-  independent means, two paired means (before-after / matched pairs)
+  independent means, two paired means (before-after / matched pairs), and
+  three or more independent groups (one-way ANOVA, wraps
+  `pwr::pwr.anova.test()`, converting raw group means to Cohen's f)
 - **Diagnostic Accuracy** (`R/modules/mod_diagnostic.R`) -- sensitivity &
   specificity, precision-based or vs. a known/reference value, and
   comparing two diagnostic tests (unpaired or paired), all per Akoglu
@@ -37,12 +39,20 @@ of Phase 2: six complete calculator modules --
 - **Cohort / RR** (`R/modules/mod_cohort.R`) -- cohort/cross-sectional
   relative-risk studies, wrapping `epiR::epi.sscohortc()` (Kelsey,
   Thompson & Evans 1986; Woodward 2014)
+- **Correlation** (`R/modules/mod_correlation.R`) -- Pearson correlation,
+  wrapping `pwr::pwr.r.test()` (Cohen 1988)
+- **Chi-Square Tests** (`R/modules/mod_chisq.R`) -- goodness of fit and test
+  of independence/association for an R x C table (dynamic 2-5 x 2-5
+  proportion-matrix UI), both wrapping `pwr::pwr.chisq.test()` +
+  `pwr::ES.w1()`/`ES.w2()` (Cohen 1988); the independence design also serves
+  as the Proportions module's "3+ group proportions" entry in the Home
+  finder
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
-(correlation, one-way ANOVA, chi-square, precision-based CI-width, survival,
-post-hoc power, and 3+ group comparisons for both proportions and means, plus
-the much larger backlog in those two files) remains "coming soon" in the Home
-finder, per the staged build plan.
+(precision-based CI-width, survival, post-hoc power, log-rank, TOST
+equivalence, and 3+ group proportions/means beyond what ANOVA/chi-square
+already cover, plus the much larger backlog in those two files) remains
+"coming soon" in the Home finder, per the staged build plan.
 
 ## Requirements
 

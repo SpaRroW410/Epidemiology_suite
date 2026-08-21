@@ -121,5 +121,53 @@ means_content <- list(
       "implemented by pwr::pwr.t.test)."
     ),
     backend = "pwr::pwr.t.test(type = \"paired\")"
+  ),
+
+  anova = list(
+    title = "Three or More Independent Groups (One-Way ANOVA)",
+    formula_latex = paste0(
+      "$$f = \\frac{\\sigma_m}{\\sigma}, \\quad ",
+      "\\sigma_m = \\sqrt{\\frac{1}{k}\\sum_{i=1}^{k}(\\mu_i - \\bar\\mu)^2}$$",
+      "$$n_{\\text{per group}} = \\text{solved from } f, k, \\alpha, \\text{power (Cohen 1988)}$$"
+    ),
+    explanation = paste(
+      "This calculator finds the per-group sample size needed to detect",
+      "*any* difference among three or more independent group means",
+      "(a one-way, between-subjects ANOVA design), using Cohen's",
+      "standardized effect size *f*.",
+      "",
+      "- **Group means** - the mean you expect in each of the k groups",
+      "  (k >= 3).",
+      "- **sd** - the common/pooled standard deviation shared by all",
+      "  groups.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "f is the population standard deviation of the k group means,",
+      "divided by the common SD (small ~0.10, medium ~0.25, large ~0.40,",
+      "per Cohen's conventions). This omnibus test only tells you *some*",
+      "pair of groups differs, not *which* pair -- planned pairwise",
+      "contrasts or post-hoc comparisons (not covered by this calculator)",
+      "would be needed to localize the difference.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Cohen (1988)'s own example (Exercise 8.10, p. 391): with a medium",
+      "conventional effect size (f = 0.28) and k = 4 groups, at alpha =",
+      "0.05 and 80% power, this calculator returns n = 36 per group (144",
+      "total).",
+      "",
+      "Worked from raw values: suppose you expect three group means of 9,",
+      "10, and 11 with a common SD of 4. That implies f ~ 0.204, and at",
+      "alpha = 0.05 and 80% power, a required sample size of n = 79 per",
+      "group (237 total).",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Cohen J. Statistical Power Analysis for the Behavioral Sciences.",
+      "2nd ed. Hillsdale, NJ: Lawrence Erlbaum Associates; 1988.",
+      "(standardized effect size f, and one-way ANOVA power analysis, as",
+      "implemented by pwr::pwr.anova.test)."
+    ),
+    backend = "pwr::pwr.anova.test()"
   )
 )

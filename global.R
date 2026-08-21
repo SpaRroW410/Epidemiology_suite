@@ -22,5 +22,9 @@ module_registry <- list(
   list(id = case_control_meta$id, title = case_control_meta$nav_title,
        ui = mod_case_control_ui, server = mod_case_control_server),
   list(id = cohort_meta$id, title = cohort_meta$nav_title,
-       ui = mod_cohort_ui, server = mod_cohort_server)
+       ui = mod_cohort_ui, server = mod_cohort_server),
+  list(id = correlation_meta$id, title = correlation_meta$nav_title,
+       ui = mod_correlation_ui, server = mod_correlation_server),
+  list(id = chisq_meta$id, title = chisq_meta$nav_title,
+       ui = mod_chisq_ui, server = mod_chisq_server)
 )

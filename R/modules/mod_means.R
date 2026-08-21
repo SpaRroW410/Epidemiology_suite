@@ -27,7 +27,8 @@ mod_means_ui <- function(id) {
         choices = c(
           "Single mean vs. known/reference value (hypothesis test)" = "single",
           "Two independent means" = "two_sample",
-          "Two paired means (before-after, matched pairs)" = "paired"
+          "Two paired means (before-after, matched pairs)" = "paired",
+          "Three or more independent groups (one-way ANOVA)" = "anova"
         )
       ),
       conditionalPanel(
@@ -50,11 +51,24 @@ mod_means_ui <- function(id) {
         numericInput(ns("sd_diff"), "SD of the paired differences",
                      value = 5, min = 0.0001)
       ),
+      conditionalPanel(
+        condition = design_is("anova"),
+        selectInput(ns("k"), "Number of groups (k)", choices = 3:8, selected = 3),
+        # Dynamically rendered below: one mean input per group, since the
+        # number of inputs depends on k -- see props_ui in mod_agreement.R
+        # for the same pattern.
+        uiOutput(ns("group_means_ui")),
+        numericInput(ns("sd_anova"), "Common/pooled standard deviation",
+                     value = 4, min = 0.0001)
+      ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-      selectInput(
-        ns("alternative"), "Alternative hypothesis",
-        choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+      conditionalPanel(
+        condition = design_is("single", "two_sample", "paired"),
+        selectInput(
+          ns("alternative"), "Alternative hypothesis",
+          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+        )
       ),
       hr(),
       h5("Result"),
@@ -79,7 +93,13 @@ mod_means_ui <- function(id) {
       withMathJax(HTML(means_content$paired$formula_latex)),
       shiny::markdown(means_content$paired$explanation),
       h5("Worked example"),
-      shiny::markdown(means_content$paired$worked_example)
+      shiny::markdown(means_content$paired$worked_example),
+      hr(),
+      h4(means_content$anova$title),
+      withMathJax(HTML(means_content$anova$formula_latex)),
+      shiny::markdown(means_content$anova$explanation),
+      h5("Worked example"),
+      shiny::markdown(means_content$anova$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -94,15 +114,47 @@ mod_means_ui <- function(id) {
       hr(),
       h4(means_content$paired$title),
       p(strong("Citation: "), means_content$paired$citation),
-      p(strong("Implemented via: "), code(means_content$paired$backend))
+      p(strong("Implemented via: "), code(means_content$paired$backend)),
+      hr(),
+      h4(means_content$anova$title),
+      p(strong("Citation: "), means_content$anova$citation),
+      p(strong("Implemented via: "), code(means_content$anova$backend))
     )
   )
 }
 
 mod_means_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    output$group_means_ui <- renderUI({
+      req(input$k)
+      k <- as.integer(input$k)
+      defaults <- seq(9, by = 1, length.out = k)
+      tagList(lapply(seq_len(k), function(i) {
+        numericInput(session$ns(paste0("group_mean_", i)),
+                     sprintf("Mean of group %d", i), value = defaults[i])
+      }))
+    })
+
     result <- reactive({
-      req(input$design, input$alpha, input$power, input$alternative)
+      req(input$design, input$alpha, input$power)
+
+      if (input$design == "anova") {
+        req(input$k, input$sd_anova)
+        k <- as.integer(input$k)
+        mean_vals <- lapply(seq_len(k), function(i) input[[paste0("group_mean_", i)]])
+        req(!any(vapply(mean_vals, is.null, logical(1))))
+        group_means <- as.numeric(unlist(mean_vals))
+
+        return(tryCatch(
+          list(ok = TRUE, value = calc_means_anova(
+            group_means = group_means, sd = input$sd_anova,
+            alpha = input$alpha, power = input$power
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        ))
+      }
+
+      req(input$alternative)
 
       if (input$design == "single") {
         req(input$mu0, input$mu1_single, input$sd_single)
@@ -149,6 +201,12 @@ mod_means_server <- function(id) {
           p(strong("Required sample size per group: "), v$n_per_group),
           p(strong("Total sample size: "), v$n_total),
           p(sprintf("Effect size d = %.4f", v$d))
+        )
+      } else if (input$design == "anova") {
+        tagList(
+          p(strong("Required sample size per group: "), v$n_per_group),
+          p(strong("Total sample size: "), v$n_total),
+          p(sprintf("Effect size f = %.4f", v$f))
         )
       } else {
         tagList(
