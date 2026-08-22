@@ -49,5 +49,7 @@ module_registry <- list(
   list(id = prediction_meta$id, title = prediction_meta$nav_title,
        ui = mod_prediction_ui, server = mod_prediction_server),
   list(id = roc_meta$id, title = roc_meta$nav_title,
-       ui = mod_roc_ui, server = mod_roc_server)
+       ui = mod_roc_ui, server = mod_roc_server),
+  list(id = cluster_meta$id, title = cluster_meta$nav_title,
+       ui = mod_cluster_ui, server = mod_cluster_server)
 )

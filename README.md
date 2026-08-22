@@ -11,7 +11,7 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: twenty complete calculator modules -- all Stage-1 CORE items
+of Phase 2: twenty-one complete calculator modules -- all Stage-1 CORE items
 from the master checklists are now built, plus two "quick wins" batches of
 further CORE items, and the start of Stage 2 (analytical depth) --
 
@@ -75,7 +75,11 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   dedicated proportions-TOST function was found)
 - **Log-Rank / Survival** (`R/modules/mod_logrank.R`) -- two-arm
   time-to-event studies (required N from event probabilities), wrapping
-  `powerSurvEpi::ssizeCT()` (Freedman 1982; Rosner 2006)
+  `powerSurvEpi::ssizeCT()` (Freedman 1982; Rosner 2006), plus Cox
+  proportional-hazards regression for a binary or continuous covariate of
+  interest (optionally adjusting for a correlated covariate), wrapping
+  `powerSurvEpi::ssizeEpi()`/`ssizeEpiCont()` (Latouche et al. 2004;
+  Hsieh & Lavori 2000)
 - **Incidence Rate** (`R/modules/mod_rate.R`) -- precision-based estimation
   of an incidence rate (number of events, then person-time, wrapping
   `presize::prec_rate()`), plus comparison of two rates via person-time
@@ -112,6 +116,10 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   AUCs was deliberately left out of scope for now, since that case needs
   either fitted `roc` objects on real data or a full set of binormal
   parameters rather than simple summary statistics
+- **Cluster / Design Effect** (`R/modules/mod_cluster.R`) -- inflates an
+  already-computed simple-random-sample size for cluster/multistage
+  sampling (villages, schools, health facilities), closed-form DEFF = 1 +
+  (m-1)*rho (Kish 1965), no package needed
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

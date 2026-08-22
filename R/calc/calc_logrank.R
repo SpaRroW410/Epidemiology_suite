@@ -42,3 +42,74 @@ calc_logrank <- function(pE, pC, hr, ratio = 1, alpha = 0.05, power = 0.8) {
     inputs = list(pE = pE, pC = pC, hr = hr, ratio = ratio, alpha = alpha, power = power)
   )
 }
+
+#' Sample size for Cox proportional-hazards regression, binary covariate
+#' of interest
+#'
+#' Wraps powerSurvEpi::ssizeEpi.default() (Latouche et al. 2004, reducing to
+#' Schoenfeld 1983 when rho2 = 0). Accounts for competing risks (via psi,
+#' the overall event probability) and, optionally, confounding/adjustment
+#' for another covariate correlated with the covariate of interest (rho2).
+#'
+#' @param power Desired power (0,1)
+#' @param theta Postulated hazard ratio for the covariate of interest, > 0, != 1
+#' @param p Proportion of subjects with the covariate of interest = 1 (0,1)
+#' @param psi Proportion of subjects who experience the event of interest (0,1)
+#' @param rho2 Squared correlation between the covariate of interest and
+#'   any other adjustment covariate, [0, 1); 0 = unadjusted/randomized
+#' @param alpha Significance level, two-sided (0,1)
+#' @return list(n, inputs)
+calc_cox_binary <- function(power, theta, p, psi, rho2 = 0, alpha = 0.05) {
+  .validate_unit_interval(power, "power")
+  .validate_positive(theta, "theta")
+  if (isTRUE(all.equal(theta, 1))) stop("theta must differ from 1 (no effect to detect).")
+  .validate_unit_interval(p, "p")
+  .validate_unit_interval(psi, "psi")
+  if (!is.numeric(rho2) || length(rho2) != 1 || is.na(rho2) || rho2 < 0 || rho2 >= 1) {
+    stop("rho2 must be a single number in [0, 1).")
+  }
+  .validate_unit_interval(alpha, "alpha")
+
+  n <- powerSurvEpi::ssizeEpi.default(power = power, theta = theta, p = p,
+                                      psi = psi, rho2 = rho2, alpha = alpha)
+
+  list(
+    n = ceiling(n),
+    inputs = list(power = power, theta = theta, p = p, psi = psi, rho2 = rho2, alpha = alpha)
+  )
+}
+
+#' Sample size for Cox proportional-hazards regression, continuous (or
+#' other non-binary) covariate of interest
+#'
+#' Wraps powerSurvEpi::ssizeEpiCont.default() (Hsieh & Lavori 2000).
+#'
+#' @param power Desired power (0,1)
+#' @param theta Postulated hazard ratio per one-unit increase in the
+#'   covariate of interest, > 0, != 1
+#' @param sigma2 Variance of the covariate of interest, > 0
+#' @param psi Proportion of subjects who experience the event of interest (0,1)
+#' @param rho2 Squared multiple correlation between the covariate of
+#'   interest and other adjustment covariates, [0, 1); 0 = unadjusted
+#' @param alpha Significance level, two-sided (0,1)
+#' @return list(n, inputs)
+calc_cox_continuous <- function(power, theta, sigma2, psi, rho2 = 0, alpha = 0.05) {
+  .validate_unit_interval(power, "power")
+  .validate_positive(theta, "theta")
+  if (isTRUE(all.equal(theta, 1))) stop("theta must differ from 1 (no effect to detect).")
+  .validate_positive(sigma2, "sigma2")
+  .validate_unit_interval(psi, "psi")
+  if (!is.numeric(rho2) || length(rho2) != 1 || is.na(rho2) || rho2 < 0 || rho2 >= 1) {
+    stop("rho2 must be a single number in [0, 1).")
+  }
+  .validate_unit_interval(alpha, "alpha")
+
+  n <- powerSurvEpi::ssizeEpiCont.default(power = power, theta = theta, sigma2 = sigma2,
+                                          psi = psi, rho2 = rho2, alpha = alpha)
+
+  list(
+    n = ceiling(n),
+    inputs = list(power = power, theta = theta, sigma2 = sigma2, psi = psi,
+                  rho2 = rho2, alpha = alpha)
+  )
+}

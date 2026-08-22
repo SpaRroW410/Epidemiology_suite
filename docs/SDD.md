@@ -199,7 +199,7 @@ for what to build next):
 | Pilot / feasibility | Flat 12/arm rule-of-thumb; interactive CI-for-SD precision | rule-of-thumb (Julious 2005); closed-form chi-square CI theory | Live |
 | Simon two-stage | Phase II single-arm (minimax + optimal designs) | `clinfun::ph2simon()` | Live |
 | Equivalence (TOST) | Two one-sided tests, means and proportions | `PowerTOST::sampleN.TOST(logscale=FALSE)`; `epiR::epi.ssequb()` | Live |
-| Log-rank / survival | Two-arm time-to-event, cumulative event probabilities | `powerSurvEpi::ssizeCT()` | Live |
+| Log-rank / survival | Two-arm time-to-event, cumulative event probabilities; Cox PH regression (binary or continuous covariate) | `powerSurvEpi::ssizeCT()`; `ssizeEpi.default()`; `ssizeEpiCont.default()` | Live |
 | Incidence Rate | Precision-based, events + person-time; comparison of two rates | `presize::prec_rate()`; closed-form (Demidenko 2007) | Live |
 | Exact Tests | Binomial test (single proportion); Fisher's exact (two proportions) | `stats::binom.test()` search; `Exact::power.exact.test()` search | Live |
 | Multiple Regression | R-squared deviation from zero | `pwr::pwr.f2.test()` | Live |
@@ -207,6 +207,7 @@ for what to build next):
 | Rule of Three | Upper bound on unseen event rate; n to detect >= 1 event | closed-form (Hanley & Lippman-Hand 1983) | Live |
 | Prediction Model | Model development — binary, continuous, survival | `pmsampsize::pmsampsize()` (Riley et al. 2019/2020/2021) | Live |
 | ROC / AUC | Single ROC AUC vs. chance (0.5) | `pROC::power.roc.test()` (Obuchowski et al. 2004) | Live |
+| Cluster / design effect | Design-effect inflation of an existing base sample size | closed-form (Kish 1965) | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
 | Survival (advanced) | Cox PH, exponential, accrual/follow-up, competing risks | `powerSurvEpi`, `gsDesign::nSurv` | Not started |
 | Post-hoc / achieved power | Given n and observed effect, compute achieved power | reuse each module's engine, solve for power | Not started |

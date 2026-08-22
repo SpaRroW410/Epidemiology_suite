@@ -58,5 +58,95 @@ logrank_content <- list(
       "Thomson Brooks/Cole; 2006. Section 14.12, p. 807."
     ),
     backend = "powerSurvEpi::ssizeCT.default()"
+  ),
+  cox_binary = list(
+    title = "Cox Proportional-Hazards Regression (Binary Covariate of Interest)",
+    formula_latex = paste0(
+      "$$n = \\frac{\\left(Z_{1-\\alpha/2}+Z_{1-\\beta}\\right)^2}",
+      "{[\\log(\\theta)]^2\\, p(1-p)\\, \\psi\\, (1-\\rho^2)}$$"
+    ),
+    explanation = paste(
+      "Use this to size a study where the primary analysis is a Cox",
+      "proportional-hazards regression with a **binary** exposure/",
+      "predictor of interest (X1), optionally adjusting for one other",
+      "covariate (X2, binary or continuous) that may be correlated with it.",
+      "",
+      "- **power, alpha** - as elsewhere (two-sided test).",
+      "- **theta** - the postulated hazard ratio for X1=1 vs. X1=0",
+      "  (adjusted for X2, if any).",
+      "- **p** - the proportion of subjects with X1=1 (the exposure",
+      "  prevalence).",
+      "- **psi** - the overall proportion of subjects expected to",
+      "  experience the event of interest during the study (accounts for",
+      "  competing risks/censoring -- not everyone need have the event).",
+      "- **rho2** - the squared correlation between X1 and X2. Leave at 0",
+      "  for a randomized trial or an unadjusted/univariate analysis; a",
+      "  nonzero value inflates n to account for the loss of precision",
+      "  from adjusting for a correlated covariate.",
+      "",
+      "When rho2 = 0 this reduces to the classic Schoenfeld (1983)",
+      "formula; the general (adjusted) version is Latouche, Porcher &",
+      "Chevret (2004)'s extension for competing-risks/adjusted models.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Latouche, Porcher & Chevret (2004), Section 5.2: a cohort study",
+      "with a binary covariate of interest present in 39% of subjects",
+      "(p = 0.39), an overall event probability of 50.5% (psi = 0.505), a",
+      "postulated hazard ratio of 2 (theta = 2), a correlation of 0.132",
+      "with an adjustment covariate (rho2 = 0.132^2), 80% power and",
+      "alpha = 0.05 (two-sided). This calculator returns n = 139,",
+      "matching the paper's own worked example exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Latouche A, Porcher R, Chevret S. Sample size formula for",
+      "proportional hazards modelling of competing risks. Stat Med.",
+      "2004;23(20):3263-3274; Schoenfeld DA. Sample-size formula for the",
+      "proportional-hazards regression model. Biometrics. 1983;39:499-503."
+    ),
+    backend = "powerSurvEpi::ssizeEpi.default()"
+  ),
+  cox_continuous = list(
+    title = "Cox Proportional-Hazards Regression (Continuous Covariate of Interest)",
+    formula_latex = paste0(
+      "$$n = \\frac{\\left(Z_{1-\\alpha/2}+Z_{1-\\beta}\\right)^2}",
+      "{[\\log(\\theta)]^2\\, \\sigma^2\\, \\psi\\, (1-\\rho^2)}$$"
+    ),
+    explanation = paste(
+      "Use this to size a study where the primary analysis is a Cox",
+      "proportional-hazards regression with a **continuous (or other",
+      "non-binary)** exposure/predictor of interest, optionally adjusting",
+      "for other covariates.",
+      "",
+      "- **power, alpha** - as elsewhere (two-sided test).",
+      "- **theta** - the postulated hazard ratio per one-unit increase in",
+      "  the covariate of interest.",
+      "- **sigma^2** - the variance of the covariate of interest in the",
+      "  study population.",
+      "- **psi** - the overall proportion of subjects expected to",
+      "  experience the event of interest during the study.",
+      "- **rho2** - the squared multiple correlation between the covariate",
+      "  of interest and any other adjustment covariates (R-squared of",
+      "  regressing it on them). Leave at 0 for an unadjusted analysis.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Hsieh & Lavori (2000)'s own worked example (their p. 557; the",
+      "authors' formula assumes a one-sided test, so their one-sided",
+      "alpha = 0.05 corresponds to two-sided alpha = 0.1 as used here): a",
+      "continuous covariate with variance sigma^2 = 0.3126^2, a postulated",
+      "hazard ratio of e (theta = exp(1)), an overall event probability of",
+      "73.8% (psi = 0.738), rho2 = 0.1837, and 80.6% power. This",
+      "calculator returns n = 107, matching the paper's own worked example",
+      "exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Hsieh FY, Lavori PW. Sample-size calculation for the Cox",
+      "proportional hazards regression model with nonbinary covariates.",
+      "Control Clin Trials. 2000;21(6):552-560."
+    ),
+    backend = "powerSurvEpi::ssizeEpiCont.default()"
   )
 )

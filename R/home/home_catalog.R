@@ -299,6 +299,39 @@ calculator_catalog <- list(
        ),
        outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Log-Rank / Survival",
+       module_input_id = "logrank-design", design_value = "logrank"),
+
+  list(key = "cox_binary",
+       label = "Cox proportional-hazards regression -- binary covariate",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a Cox regression",
+         "analysis where the predictor of interest is binary (e.g.",
+         "exposed vs. unexposed)?\""
+       ),
+       outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Log-Rank / Survival",
+       module_input_id = "logrank-design", design_value = "cox_binary"),
+
+  list(key = "cox_continuous",
+       label = "Cox proportional-hazards regression -- continuous covariate",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a Cox regression",
+         "analysis where the predictor of interest is continuous (e.g.",
+         "age, biomarker level)?\""
+       ),
+       outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Log-Rank / Survival",
+       module_input_id = "logrank-design", design_value = "cox_continuous"),
+
+  list(key = "cluster_deff",
+       label = "Cluster / multistage sampling -- design effect (DEFF)",
+       answers = paste(
+         "Answers: \"I already have a simple-random-sample size -- how much",
+         "bigger does it need to be if I'm sampling in clusters (villages,",
+         "schools, facilities) rather than individuals?\""
+       ),
+       outcome_type = "cluster", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Cluster / Design Effect",
        module_input_id = NA, design_value = NA),
 
   list(key = "pilot_feasibility",
@@ -555,8 +588,11 @@ study_design_families <- list(
        hint = "Small-sample exact tests for proportions (binomial, Fisher's exact).",
        catalog_keys = c("exact_binomial", "exact_fisher")),
   list(id = "survival", label = "Survival",
-       hint = "Log-rank or accrual/follow-up based survival study designs.",
-       catalog_keys = c("logrank")),
+       hint = "Log-rank, Cox regression, or accrual/follow-up based survival study designs.",
+       catalog_keys = c("logrank", "cox_binary", "cox_continuous")),
+  list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
+       hint = "Inflating an existing sample size for cluster-sampled (rather than individually-sampled) surveys.",
+       catalog_keys = c("cluster_deff")),
   list(id = "clinical_trials", label = "Clinical Trials",
        hint = "Pilot/feasibility studies, Phase II designs, equivalence, and non-inferiority testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "tost_means",

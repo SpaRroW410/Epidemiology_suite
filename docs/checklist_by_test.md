@@ -80,7 +80,7 @@
 - [ ] **[ADV]** Simple/multiple linear regression (fixed & random model) — see F family
 - [ ] **[ADV]** Logistic regression (with/without covariate adjustment) — see z family — `WebPower::wp.logistic`
 - [ ] **[ADV]** Poisson / negative binomial regression — `WebPower::wp.poisson`
-- [ ] **[ADV]** Cox regression — HR, event proportion, covariate SD/correlation — `powerSurvEpi`
+- [x] **[ADV]** Cox regression — HR, event proportion, covariate SD/correlation — `powerSurvEpi` — *(implemented: see Survival tests section below — Log-Rank / Survival module's Cox regression designs)*
 - [ ] **[ADV]** Ordinal (proportional odds) / multinomial regression — PASS proportional-odds; Whitehead (1993)
 
 ### Non-parametric tests (handled via ARE inflation / Noether / simulation)
@@ -96,7 +96,7 @@
 ### Survival tests
 
 - [x] **[CORE]** Log-rank — Schoenfeld / Freedman / Lakatos — `powerSurvEpi`, `gsDesign::nSurv` — *(implemented: Log-Rank / Survival module, `calc_logrank()` wrapping `powerSurvEpi::ssizeCT.default()`; verified against Rosner (2006) Example 14.42 → nE=nC=294, total=588, exact match)*
-- [ ] **[ADV]** Cox PH — `powerSurvEpi`
+- [x] **[ADV]** Cox PH — `powerSurvEpi` — *(implemented: Log-Rank / Survival module's new "Cox regression -- binary covariate" and "Cox regression -- continuous covariate" designs, `calc_cox_binary()`/`calc_cox_continuous()` wrapping `powerSurvEpi::ssizeEpi.default()`/`ssizeEpiCont.default()`; verified against the packages' own documented examples — Latouche et al. (2004) binary example → n=139; Hsieh & Lavori (2000) continuous example → n=107)*
 - [ ] **[ADV]** Gray's test (competing risks) — `powerCompRisk`
 - [ ] **[ADV]** RMST comparison — `SSRMST`
 - [ ] **[ADV]** Weighted log-rank (non-PH) — `npsurvSS`/simulation
