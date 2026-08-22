@@ -435,6 +435,49 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Exact Tests",
        module_input_id = "exact_tests-design", design_value = "fisher"),
 
+  list(key = "prediction_binary",
+       label = "Prediction model development -- binary outcome",
+       answers = paste(
+         "Answers: \"How many subjects do I need to develop a new",
+         "multivariable prediction model for a binary outcome, without",
+         "excessive overfitting?\""
+       ),
+       outcome_type = "prediction", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Prediction Model",
+       module_input_id = "prediction-design", design_value = "binary"),
+
+  list(key = "prediction_continuous",
+       label = "Prediction model development -- continuous outcome",
+       answers = paste(
+         "Answers: \"How many subjects do I need to develop a new",
+         "multivariable prediction model for a continuous outcome,",
+         "without excessive overfitting?\""
+       ),
+       outcome_type = "prediction", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Prediction Model",
+       module_input_id = "prediction-design", design_value = "continuous"),
+
+  list(key = "prediction_survival",
+       label = "Prediction model development -- survival outcome",
+       answers = paste(
+         "Answers: \"How many subjects do I need to develop a new",
+         "multivariable prediction model for a time-to-event outcome,",
+         "without excessive overfitting?\""
+       ),
+       outcome_type = "prediction", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Prediction Model",
+       module_input_id = "prediction-design", design_value = "survival"),
+
+  list(key = "roc_single_auc",
+       label = "Single ROC AUC vs. chance (0.5)",
+       answers = paste(
+         "Answers: \"How many cases and controls do I need to show my",
+         "test's AUC is significantly better than chance?\""
+       ),
+       outcome_type = "roc", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "ROC / AUC",
+       module_input_id = NA, design_value = NA),
+
   list(key = "regression_r2",
        label = "Multiple linear regression, R-squared deviation from zero",
        answers = paste(
@@ -525,6 +568,12 @@ study_design_families <- list(
   list(id = "safety_surveillance", label = "Safety / Surveillance",
        hint = "Bounding an unseen adverse-event rate, or planning to catch a rare event.",
        catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required")),
+  list(id = "prediction", label = "Prediction Model Development",
+       hint = "Developing a new multivariable prediction/diagnostic model without excessive overfitting.",
+       catalog_keys = c("prediction_binary", "prediction_continuous", "prediction_survival")),
+  list(id = "roc", label = "ROC / AUC",
+       hint = "Diagnostic test discrimination via the area under the ROC curve.",
+       catalog_keys = c("roc_single_auc")),
   list(id = "posthoc_power", label = "Post-hoc / Achieved Power",
        hint = "Achieved power for planning a replication study.",
        catalog_keys = character(0))

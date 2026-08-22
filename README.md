@@ -11,7 +11,7 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: eighteen complete calculator modules -- all Stage-1 CORE items
+of Phase 2: twenty complete calculator modules -- all Stage-1 CORE items
 from the master checklists are now built, plus two "quick wins" batches of
 further CORE items, and the start of Stage 2 (analytical depth) --
 
@@ -100,11 +100,23 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   rather than solving a closed-form equation, since exact-test power is
   genuinely non-monotonic in n (Chernick & Liu 2002) -- a stability check
   guards against recommending a fragile single-n spike
+- **Prediction Model** (`R/modules/mod_prediction.R`) -- minimum sample
+  size for developing a binary, continuous, or time-to-event prediction/
+  prognostic model, wrapping `pmsampsize::pmsampsize()` (Riley et al. 2019
+  Stat Med Parts I & II; Riley et al. 2020 BMJ 368:m441); the binary design
+  additionally accepts either a Cox-Snell R² or a reported C-statistic
+  (converted via Riley et al. 2021 Stat Med 40:859-864's seeded simulation)
+- **ROC / AUC** (`R/modules/mod_roc.R`) -- sample size for a single ROC
+  curve's AUC against the chance diagonal (0.5), wrapping
+  `pROC::power.roc.test()` (Obuchowski, Lieber & Wians 2004); comparing two
+  AUCs was deliberately left out of scope for now, since that case needs
+  either fitted `roc` objects on real data or a full set of binormal
+  parameters rather than simple summary statistics
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
-(prediction models, advanced survival designs, post-hoc power, and the much
-larger Stage 2-4 backlog in those two files) remains "coming soon" in the
-Home finder, per the staged build plan.
+(advanced survival designs, post-hoc power, and the much larger Stage 2-4
+backlog in those two files) remains "coming soon" in the Home finder, per
+the staged build plan.
 
 ### Which calculator? (guided wizard)
 

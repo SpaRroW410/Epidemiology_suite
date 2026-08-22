@@ -1,7 +1,8 @@
 # Libraries + sourcing for all R/ files. app.R sources this before building the UI.
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
-pacman::p_load(shiny, bslib, pwr, presize, epiR, clinfun, powerSurvEpi, PowerTOST, Exact)
+pacman::p_load(shiny, bslib, pwr, presize, epiR, clinfun, powerSurvEpi, PowerTOST, Exact,
+               pmsampsize, pROC)
 
 for (f in list.files("R/calc", pattern = "\\.R$", full.names = TRUE)) source(f)
 for (f in list.files("R/content", pattern = "\\.R$", full.names = TRUE)) source(f)
@@ -44,5 +45,9 @@ module_registry <- list(
   list(id = rule_of_three_meta$id, title = rule_of_three_meta$nav_title,
        ui = mod_rule_of_three_ui, server = mod_rule_of_three_server),
   list(id = exact_tests_meta$id, title = exact_tests_meta$nav_title,
-       ui = mod_exact_tests_ui, server = mod_exact_tests_server)
+       ui = mod_exact_tests_ui, server = mod_exact_tests_server),
+  list(id = prediction_meta$id, title = prediction_meta$nav_title,
+       ui = mod_prediction_ui, server = mod_prediction_server),
+  list(id = roc_meta$id, title = roc_meta$nav_title,
+       ui = mod_roc_ui, server = mod_roc_server)
 )
