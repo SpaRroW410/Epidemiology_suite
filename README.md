@@ -11,7 +11,7 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: twenty-one complete calculator modules -- all Stage-1 CORE items
+of Phase 2: twenty-three complete calculator modules -- all Stage-1 CORE items
 from the master checklists are now built, plus two "quick wins" batches of
 further CORE items, and the start of Stage 2 (analytical depth) --
 
@@ -120,6 +120,18 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   already-computed simple-random-sample size for cluster/multistage
   sampling (villages, schools, health facilities), closed-form DEFF = 1 +
   (m-1)*rho (Kish 1965), no package needed
+- **Stratified Sampling** (`R/modules/mod_stratified.R`) -- total sample
+  size and per-stratum allocation (proportional or optimal/Neyman) for a
+  population divided into strata, closed-form (Cochran 1977; Kauermann &
+  Kuechenhoff 2011) rather than a runtime dependency on `samplingbook`,
+  whose `Depends: pps, sampling, survey` chain is far heavier than this
+  one formula needs -- verified to reproduce that package's own
+  documented examples exactly
+- **Crossover Trial (2x2)** (`R/modules/mod_crossover.R`) -- a 2x2
+  crossover trial's sample size for a continuous outcome, testing for a
+  difference (not equivalence -- see the Equivalence (TOST) module for
+  that), wrapping `TrialSize::TwoSampleCrossOver.Equality()` (Chow, Shao
+  & Wang 2003); `TrialSize` has zero package dependencies
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

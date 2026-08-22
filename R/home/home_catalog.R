@@ -334,6 +334,28 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Cluster / Design Effect",
        module_input_id = NA, design_value = NA),
 
+  list(key = "stratified_sampling",
+       label = "Stratified sampling -- total size and per-stratum allocation",
+       answers = paste(
+         "Answers: \"My population is split into strata (urban/rural, age",
+         "groups, departments) -- how many subjects do I need overall, and",
+         "how should they be split across strata?\""
+       ),
+       outcome_type = "stratified", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Stratified Sampling",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "crossover_2x2",
+       label = "2x2 crossover trial (continuous outcome) -- test for a difference",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a 2x2 crossover trial",
+         "(each subject gets both treatments, in one of two sequences)",
+         "comparing mean outcomes between treatments?\""
+       ),
+       outcome_type = "continuous", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Crossover Trial (2x2)",
+       module_input_id = NA, design_value = NA),
+
   list(key = "pilot_feasibility",
        label = "Pilot / feasibility study",
        answers = paste(
@@ -593,10 +615,13 @@ study_design_families <- list(
   list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
        hint = "Inflating an existing sample size for cluster-sampled (rather than individually-sampled) surveys.",
        catalog_keys = c("cluster_deff")),
+  list(id = "stratified_sampling", label = "Stratified Sampling",
+       hint = "Surveys where the population is divided into strata, sampled independently within each.",
+       catalog_keys = c("stratified_sampling")),
   list(id = "clinical_trials", label = "Clinical Trials",
-       hint = "Pilot/feasibility studies, Phase II designs, equivalence, and non-inferiority testing.",
-       catalog_keys = c("pilot_feasibility", "simon_two_stage", "tost_means",
-                         "tost_proportions", "noninferiority_means",
+       hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, and non-inferiority testing.",
+       catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",
+                         "tost_means", "tost_proportions", "noninferiority_means",
                          "noninferiority_proportions")),
   list(id = "regression", label = "Regression",
        hint = "Testing whether a multiple regression model explains more variance than chance.",

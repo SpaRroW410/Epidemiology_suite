@@ -2,7 +2,7 @@
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(shiny, bslib, pwr, presize, epiR, clinfun, powerSurvEpi, PowerTOST, Exact,
-               pmsampsize, pROC)
+               pmsampsize, pROC, TrialSize)
 
 for (f in list.files("R/calc", pattern = "\\.R$", full.names = TRUE)) source(f)
 for (f in list.files("R/content", pattern = "\\.R$", full.names = TRUE)) source(f)
@@ -51,5 +51,9 @@ module_registry <- list(
   list(id = roc_meta$id, title = roc_meta$nav_title,
        ui = mod_roc_ui, server = mod_roc_server),
   list(id = cluster_meta$id, title = cluster_meta$nav_title,
-       ui = mod_cluster_ui, server = mod_cluster_server)
+       ui = mod_cluster_ui, server = mod_cluster_server),
+  list(id = stratified_meta$id, title = stratified_meta$nav_title,
+       ui = mod_stratified_ui, server = mod_stratified_server),
+  list(id = crossover_meta$id, title = crossover_meta$nav_title,
+       ui = mod_crossover_ui, server = mod_crossover_server)
 )

@@ -208,8 +208,10 @@ for what to build next):
 | Prediction Model | Model development — binary, continuous, survival | `pmsampsize::pmsampsize()` (Riley et al. 2019/2020/2021) | Live |
 | ROC / AUC | Single ROC AUC vs. chance (0.5) | `pROC::power.roc.test()` (Obuchowski et al. 2004) | Live |
 | Cluster / design effect | Design-effect inflation of an existing base sample size | closed-form (Kish 1965) | Live |
+| Stratified Sampling | Total size + per-stratum allocation (proportional/Neyman) | closed-form (Cochran 1977; Kauermann & Kuechenhoff 2011) | Live |
+| Crossover Trial (2x2) | Continuous outcome, test for a difference (not equivalence) | `TrialSize::TwoSampleCrossOver.Equality()` (Chow, Shao & Wang 2003) | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
-| Survival (advanced) | Cox PH, exponential, accrual/follow-up, competing risks | `powerSurvEpi`, `gsDesign::nSurv` | Not started |
+| Survival (advanced) | Exponential, accrual/follow-up, competing risks | `gsDesign::nSurv` | Not started |
 | Post-hoc / achieved power | Given n and observed effect, compute achieved power | reuse each module's engine, solve for power | Not started |
 
 Each row above is (or will be) exactly one `mod_*.R` + `calc_*.R` +
