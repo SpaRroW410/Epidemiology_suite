@@ -273,3 +273,47 @@ calc_diagnostic_ppv_npv <- function(sens, spec, prevalence,
                   prec_ppv = prec_ppv, prec_npv = prec_npv, conf_level = conf_level)
   )
 }
+
+#' Sample size for a likelihood ratio (LR+ or LR-), precision-based
+#'
+#' Wraps presize::prec_pos_lr() / prec_neg_lr() (Simel, Samsa & Matchar
+#' 1991, formula 10). Precision-based: no hypothesis test, just an expected
+#' Se/Sp/prevalence and a desired confidence-interval width for whichever
+#' likelihood ratio is requested.
+#'
+#' @param sens Expected sensitivity (0,1)
+#' @param spec Expected specificity (0,1)
+#' @param prevalence Expected prevalence of the target condition (0,1)
+#' @param type "positive" for LR+ or "negative" for LR-
+#' @param conf_width Desired full width of the confidence interval for the LR
+#' @param conf_level Confidence level (0,1), e.g. 0.95
+#' @return list(n, n_diseased, n_healthy, lr, lwr, upr, inputs)
+calc_diagnostic_likelihood_ratio <- function(sens, spec, prevalence,
+                                              type = c("positive", "negative"),
+                                              conf_width, conf_level = 0.95) {
+  type <- match.arg(type)
+  .validate_unit_interval(sens, "sens")
+  .validate_unit_interval(spec, "spec")
+  .validate_unit_interval(prevalence, "prevalence")
+  .validate_positive(conf_width, "conf_width")
+  .validate_unit_interval(conf_level, "conf_level")
+
+  res <- if (type == "positive") {
+    presize::prec_pos_lr(prev = prevalence, sens = sens, spec = spec,
+                          n = NULL, conf.width = conf_width, conf.level = conf_level)
+  } else {
+    presize::prec_neg_lr(prev = prevalence, sens = sens, spec = spec,
+                          n = NULL, conf.width = conf_width, conf.level = conf_level)
+  }
+
+  list(
+    n = ceiling(res$n),
+    n_diseased = ceiling(res$n1),
+    n_healthy = ceiling(res$n2),
+    lr = res$lr,
+    lwr = res$lwr,
+    upr = res$upr,
+    inputs = list(sens = sens, spec = spec, prevalence = prevalence, type = type,
+                  conf_width = conf_width, conf_level = conf_level)
+  )
+}

@@ -300,5 +300,58 @@ diagnostic_content <- list(
       "(prevalence-adjustment logic, extended here to PPV/NPV)."
     ),
     backend = "Closed-form (Buderer-style prevalence adjustment applied to Altman & Bland's PPV/NPV formulas); no external package required"
+  ),
+
+  likelihood_ratio = list(
+    title = "Likelihood Ratios (LR+/LR-), Precision-Based",
+    formula_latex = paste0(
+      "$$LR^+ = \\frac{Sn}{1-Sp}, \\quad LR^- = \\frac{1-Sn}{Sp}$$",
+      "$$n \\text{ solved so the CI for the chosen LR has the desired width (Simel et al. 1991, Eq. 10)}$$"
+    ),
+    explanation = paste(
+      "Likelihood ratios express how much a test result shifts the odds",
+      "of disease -- LR+ for a positive result, LR- for a negative one --",
+      "and, unlike predictive values, don't depend on prevalence (though",
+      "the sample *size* to estimate them still does, since prevalence",
+      "determines how many diseased vs. non-diseased subjects you'll",
+      "enroll).",
+      "",
+      "- **Sn, Sp** - expected sensitivity and specificity.",
+      "- **Prevalence** - expected prevalence of the target condition in",
+      "  the population you will sample from.",
+      "- **LR type** - positive (LR+, for interpreting a positive result)",
+      "  or negative (LR-, for interpreting a negative result).",
+      "- **Desired CI width** - the full width of the confidence interval",
+      "  for the chosen LR -- note this is on the ratio scale (LRs are",
+      "  analysed on the log scale internally but reported on the",
+      "  original scale, so the interval is asymmetric around the point",
+      "  estimate).",
+      "",
+      "This calculator returns the *total* sample size and its 1:1",
+      "diseased/non-diseased split (implied by the prevalence and the",
+      "chosen allocation) -- same precision-based logic as the other",
+      "Diagnostic Accuracy designs.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Simel, Samsa & Matchar (1991), Problem 1: a new test has 80%",
+      "sensitivity and 73% specificity (LR+ = 2.96), sampled with as many",
+      "diseased as non-diseased subjects (prevalence = 0.5). Wanting a",
+      "95% CI width of 2.2 for LR+, this calculator returns n = 173 (87",
+      "diseased, 87 non-diseased) -- matching the article's own worked",
+      "solution (~172-173) for this problem.",
+      "",
+      "Problem 2 (LR-): sensitivity 90%, specificity 50% (LR- = 0.2),",
+      "prevalence 0.5. This calculator's own forward check (given n =",
+      "160) reproduces a CI width of ~0.30, and n = 160 is exactly the",
+      "article's own answer for this problem.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Simel DL, Samsa GP, Matchar DB. Likelihood ratios with confidence:",
+      "Sample size estimation for diagnostic test studies. J Clin",
+      "Epidemiol. 1991;44(8):763-770."
+    ),
+    backend = "presize::prec_pos_lr() / presize::prec_neg_lr()"
   )
 )

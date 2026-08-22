@@ -13,7 +13,7 @@ not the SDD, for what's built and what's next.
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
 of Phase 2: eighteen complete calculator modules -- all Stage-1 CORE items
 from the master checklists are now built, plus two "quick wins" batches of
-further CORE items --
+further CORE items, and the start of Stage 2 (analytical depth) --
 
 - **Proportions** (`R/modules/mod_proportion.R`) -- single proportion
   (precision-based, Cochran's formula, with optional finite population
@@ -30,16 +30,20 @@ further CORE items --
   two diagnostic tests (unpaired or paired), all per Akoglu (2022)'s
   practical guide, plus predictive values (PPV/NPV, precision-based --
   Buderer's prevalence-adjustment logic extended to Altman & Bland 1994's
-  PPV/NPV formulas) -- see that module's own doc comments and
+  PPV/NPV formulas) and likelihood ratios (LR+/LR-, wrapping
+  `presize::prec_pos_lr()`/`prec_neg_lr()`, Simel, Samsa & Matchar 1991)
+  -- see that module's own doc comments and
   `R/content/content_diagnostic.R` for the full formula set and citations
   (Buderer 1996, Casagrande & Pike 1978, Connor 1987, Obuchowski 1998,
-  Altman & Bland 1994)
+  Altman & Bland 1994, Simel et al 1991)
 - **Agreement / Reliability** (`R/modules/mod_agreement.R`) -- for when
   there's *no* gold standard at all, only two raters/methods being compared
   to each other: Cohen's kappa (categorical, wraps `presize::prec_kappa()` /
-  Donner & Eliasziw 1987, Rotondi & Donner 2012) and the intraclass
+  Donner & Eliasziw 1987, Rotondi & Donner 2012), the intraclass
   correlation coefficient (continuous, wraps `presize::prec_icc()` / Bonett
-  2002)
+  2002), Cronbach's alpha (scale internal consistency, wraps
+  `presize::prec_cronb()` / Bonett & Wright 2015), and Bland-Altman limits
+  of agreement (wraps `presize::prec_lim_agree()` / Bland & Altman 1986)
 - **Case-Control** (`R/modules/mod_case_control.R`) -- unmatched and matched
   (1:1 or 1:m) case-control studies, both wrapping `epiR::epi.sscc()`
   (Dupont 1988; Woodward 2014)

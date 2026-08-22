@@ -197,6 +197,27 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Agreement / Reliability",
        module_input_id = "agreement-design", design_value = "icc"),
 
+  list(key = "agreement_cronbach",
+       label = "Cronbach's alpha (scale internal consistency)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate my scale's",
+         "Cronbach's alpha to a desired precision?\""
+       ),
+       outcome_type = "agreement", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Agreement / Reliability",
+       module_input_id = "agreement-design", design_value = "cronbach"),
+
+  list(key = "agreement_bland_altman",
+       label = "Bland-Altman limits of agreement",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate the limits",
+         "of agreement between two measurement methods to a desired",
+         "precision?\""
+       ),
+       outcome_type = "agreement", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Agreement / Reliability",
+       module_input_id = "agreement-design", design_value = "bland_altman"),
+
   # Case-Control / Cohort entries: same reasoning as Diagnostic Accuracy
   # above -- these compare exposure vs. outcome status, not "groups" in the
   # proportion/mean sense, so only reachable via "by study design".
@@ -381,6 +402,16 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Diagnostic Accuracy",
        module_input_id = "diagnostic-design", design_value = "ppv_npv"),
 
+  list(key = "diagnostic_likelihood_ratio",
+       label = "Likelihood ratios (LR+/LR-), precision-based",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate my test's",
+         "positive or negative likelihood ratio to a desired precision?\""
+       ),
+       outcome_type = "diagnostic", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Diagnostic Accuracy",
+       module_input_id = "diagnostic-design", design_value = "likelihood_ratio"),
+
   list(key = "exact_binomial",
        label = "Binomial test, single proportion (exact)",
        answers = paste(
@@ -459,13 +490,14 @@ study_design_families <- list(
        hint = "Estimating sensitivity/specificity given expected prevalence.",
        catalog_keys = c("diagnostic_precision", "diagnostic_vs_reference",
                          "diagnostic_two_indep", "diagnostic_two_paired",
-                         "diagnostic_ppv_npv")),
+                         "diagnostic_ppv_npv", "diagnostic_likelihood_ratio")),
   list(id = "correlation", label = "Correlation",
        hint = "Detecting a Pearson correlation between two continuous variables.",
        catalog_keys = c("correlation_pearson")),
   list(id = "agreement", label = "Agreement / Reliability",
-       hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC).",
-       catalog_keys = c("agreement_kappa", "agreement_icc")),
+       hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman).",
+       catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
+                         "agreement_bland_altman")),
   list(id = "chi_square", label = "Chi-Square Tests",
        hint = "Categorical distribution/association testing (goodness of fit, R x C tables).",
        catalog_keys = c("chisq_gof", "chisq_independence")),

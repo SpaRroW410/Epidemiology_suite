@@ -44,3 +44,28 @@ test_that("calc_kappa rejects invalid inputs", {
   expect_error(calc_kappa(kappa = 0.5, props = c(0.5, 0.6)), "sum to 1")
   expect_error(calc_kappa(kappa = 0.5, n_category = 3, props = c(0.5, 0.5)), "must have exactly 3")
 })
+
+test_that("calc_agreement_cronbach matches presize::prec_cronb()'s own documented example", {
+  # k=5, calpha=0.7, conf.width=0.1, conf.level=0.95 -> presize's own n=349.
+  res <- calc_agreement_cronbach(k = 5, calpha = 0.7, conf_width = 0.1, conf_level = 0.95)
+  expect_equal(res$n, 349)
+})
+
+test_that("calc_agreement_cronbach rejects invalid inputs", {
+  expect_error(calc_agreement_cronbach(k = 1, calpha = 0.7), ">= 2")
+  expect_error(calc_agreement_cronbach(k = 5, calpha = 1.5), "between 0 and 1")
+  expect_error(calc_agreement_cronbach(k = 5, calpha = 0.7, conf_width = -1), "positive")
+})
+
+test_that("calc_agreement_bland_altman: self-consistent against presize::prec_lim_agree()", {
+  res <- calc_agreement_bland_altman(conf_width = 1, conf_level = 0.95)
+  expect_equal(res$n, 47)
+  # presize's own documented example (a much tighter width).
+  res2 <- calc_agreement_bland_altman(conf_width = 0.1, conf_level = 0.95)
+  expect_equal(res2$n, 4610)
+})
+
+test_that("calc_agreement_bland_altman rejects invalid inputs", {
+  expect_error(calc_agreement_bland_altman(conf_width = -1), "positive")
+  expect_error(calc_agreement_bland_altman(conf_width = 1, conf_level = 1), "between 0 and 1")
+})

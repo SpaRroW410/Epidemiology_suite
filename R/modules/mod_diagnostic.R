@@ -28,7 +28,8 @@ mod_diagnostic_ui <- function(id) {
           "Sensitivity & specificity vs. known/reference value (hypothesis test)" = "vs_reference",
           "Two independent (unpaired) diagnostic tests" = "two_indep",
           "Two paired diagnostic tests (same subjects)" = "two_paired",
-          "Predictive values (PPV/NPV), precision-based" = "ppv_npv"
+          "Predictive values (PPV/NPV), precision-based" = "ppv_npv",
+          "Likelihood ratios (LR+/LR-), precision-based" = "likelihood_ratio"
         ),
         selected = "precision"
       ),
@@ -75,6 +76,18 @@ mod_diagnostic_ui <- function(id) {
         numericInput(ns("prec_npv"), "Desired precision for NPV (W_NPV)",
                      value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("conf_level_ppv"), "Confidence level",
+                     value = 0.95, min = 0.5, max = 0.999, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("likelihood_ratio"),
+        numericInput(ns("sens_lr"), "Expected sensitivity (Sn)", value = 0.80, min = 0, max = 1, step = 0.01),
+        numericInput(ns("spec_lr"), "Expected specificity (Sp)", value = 0.73, min = 0, max = 1, step = 0.01),
+        numericInput(ns("prevalence_lr"), "Expected prevalence of the target condition (P)",
+                     value = 0.50, min = 0, max = 1, step = 0.01),
+        selectInput(ns("lr_type"), "Likelihood ratio type",
+                    choices = c("Positive (LR+)" = "positive", "Negative (LR-)" = "negative")),
+        numericInput(ns("conf_width_lr"), "Desired CI width for the LR", value = 2.2, min = 0.01, step = 0.1),
+        numericInput(ns("conf_level_lr"), "Confidence level",
                      value = 0.95, min = 0.5, max = 0.999, step = 0.01)
       ),
       conditionalPanel(
@@ -130,7 +143,13 @@ mod_diagnostic_ui <- function(id) {
       withMathJax(HTML(diagnostic_content$ppv_npv$formula_latex)),
       shiny::markdown(diagnostic_content$ppv_npv$explanation),
       h5("Worked example"),
-      shiny::markdown(diagnostic_content$ppv_npv$worked_example)
+      shiny::markdown(diagnostic_content$ppv_npv$worked_example),
+      hr(),
+      h4(diagnostic_content$likelihood_ratio$title),
+      withMathJax(HTML(diagnostic_content$likelihood_ratio$formula_latex)),
+      shiny::markdown(diagnostic_content$likelihood_ratio$explanation),
+      h5("Worked example"),
+      shiny::markdown(diagnostic_content$likelihood_ratio$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -153,7 +172,11 @@ mod_diagnostic_ui <- function(id) {
       hr(),
       h4(diagnostic_content$ppv_npv$title),
       p(strong("Citation: "), diagnostic_content$ppv_npv$citation),
-      p(strong("Implemented via: "), code(diagnostic_content$ppv_npv$backend))
+      p(strong("Implemented via: "), code(diagnostic_content$ppv_npv$backend)),
+      hr(),
+      h4(diagnostic_content$likelihood_ratio$title),
+      p(strong("Citation: "), diagnostic_content$likelihood_ratio$citation),
+      p(strong("Implemented via: "), code(diagnostic_content$likelihood_ratio$backend))
     )
   )
 }
@@ -204,13 +227,23 @@ mod_diagnostic_server <- function(id) {
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
-      } else {
+      } else if (input$design == "ppv_npv") {
         req(input$sens_ppv, input$spec_ppv, input$prevalence_ppv,
             input$prec_ppv, input$prec_npv, input$conf_level_ppv)
         tryCatch(
           list(ok = TRUE, value = calc_diagnostic_ppv_npv(
             sens = input$sens_ppv, spec = input$spec_ppv, prevalence = input$prevalence_ppv,
             prec_ppv = input$prec_ppv, prec_npv = input$prec_npv, conf_level = input$conf_level_ppv
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$sens_lr, input$spec_lr, input$prevalence_lr, input$lr_type,
+            input$conf_width_lr, input$conf_level_lr)
+        tryCatch(
+          list(ok = TRUE, value = calc_diagnostic_likelihood_ratio(
+            sens = input$sens_lr, spec = input$spec_lr, prevalence = input$prevalence_lr,
+            type = input$lr_type, conf_width = input$conf_width_lr, conf_level = input$conf_level_lr
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -244,12 +277,18 @@ mod_diagnostic_server <- function(id) {
           p("Choose based on how correlated you expect the two tests' results to be; ",
             "the upper bound is the conservative default.")
         )
-      } else {
+      } else if (input$design == "ppv_npv") {
         tagList(
           p(strong("Required total sample size: "), v$n,
             sprintf(" (%s binds)", v$binding)),
           p(sprintf("PPV requires n = %d; NPV requires n = %d", v$n_ppv, v$n_npv)),
           p(sprintf("PPV = %.4f, NPV = %.4f at these inputs", v$ppv, v$npv))
+        )
+      } else {
+        tagList(
+          p(strong("Required total sample size: "), v$n),
+          p(sprintf("Diseased: %d, Non-diseased: %d", v$n_diseased, v$n_healthy)),
+          p(sprintf("LR = %.4f, expected CI [%.4f, %.4f]", v$lr, v$lwr, v$upr))
         )
       }
     })

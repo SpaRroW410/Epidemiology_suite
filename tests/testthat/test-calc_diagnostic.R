@@ -104,3 +104,29 @@ test_that("calc_diagnostic_ppv_npv rejects invalid inputs", {
   expect_error(calc_diagnostic_ppv_npv(sens = 1.5, spec = 0.85, prevalence = 0.2), "between 0 and 1")
   expect_error(calc_diagnostic_ppv_npv(sens = 0.9, spec = 0.85, prevalence = 0.2, prec_ppv = -1), "between 0 and 1")
 })
+
+test_that("calc_diagnostic_likelihood_ratio (LR+) matches Simel et al (1991), Problem 1", {
+  res <- calc_diagnostic_likelihood_ratio(sens = 0.8, spec = 0.73, prevalence = 0.5,
+                                           type = "positive", conf_width = 2.2, conf_level = 0.95)
+  expect_equal(res$n, 173)
+  expect_equal(res$n_diseased, 87)
+  expect_equal(res$n_healthy, 87)
+  expect_equal(round(res$lr, 4), 2.963)
+})
+
+test_that("calc_diagnostic_likelihood_ratio (LR-) matches Simel et al (1991), Problem 2 exactly", {
+  # prec_neg_lr's own forward example: n=160 -> conf.width=0.2999024.
+  res <- calc_diagnostic_likelihood_ratio(sens = 0.9, spec = 0.5, prevalence = 0.5,
+                                           type = "negative", conf_width = 0.2999024, conf_level = 0.95)
+  expect_equal(res$n, 160)
+  expect_equal(res$n_diseased, 80)
+  expect_equal(res$n_healthy, 80)
+  expect_equal(round(res$lr, 1), 0.2)
+})
+
+test_that("calc_diagnostic_likelihood_ratio rejects invalid inputs", {
+  expect_error(calc_diagnostic_likelihood_ratio(sens = 1.5, spec = 0.73, prevalence = 0.5,
+                                                 type = "positive", conf_width = 2.2), "between 0 and 1")
+  expect_error(calc_diagnostic_likelihood_ratio(sens = 0.8, spec = 0.73, prevalence = 0.5,
+                                                 type = "positive", conf_width = -1), "positive")
+})

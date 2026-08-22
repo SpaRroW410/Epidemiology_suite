@@ -105,7 +105,7 @@
 
 - [x] **[CORE]** Kappa — `kappaSize` — *(implemented: Agreement/Reliability → "Cohen's kappa", `calc_kappa()`, wraps `presize::prec_kappa()` → `kappaSize`)*
 - [x] **[CORE]** ICC (forms 1,1 / 2,1 / 3,1 …) — `ICC.Sample.Size`, `presize::prec_icc` — *(implemented: Agreement/Reliability → "ICC", `calc_icc()`, wraps `presize::prec_icc()` (Bonett 2002); form-specific (1,1 vs 2,1 vs 3,1) distinctions per Zou 2012 not separately exposed)*
-- [ ] **[ADV]** CCC; Bland–Altman LoA — `presize`
+- [ ] **[ADV]** CCC; Bland–Altman LoA — `presize` — *(partially implemented: Bland-Altman LoA now built — Agreement/Reliability module's "Bland-Altman limits of agreement" design, `calc_agreement_bland_altman()` wrapping `presize::prec_lim_agree()`; Lin's CCC still not built — no lightweight verified package with a dedicated sample-size function identified yet)*
 
 ### Multiple-comparison procedures
 

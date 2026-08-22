@@ -108,5 +108,85 @@ agreement_content <- list(
       "1335."
     ),
     backend = "presize::prec_icc()"
+  ),
+
+  cronbach = list(
+    title = "Cronbach's Alpha - Scale Internal Consistency",
+    formula_latex = paste0(
+      "$$n \\text{ solved so the } (1-\\alpha)\\text{ CI for Cronbach's alpha has the desired width (Bonett \\& Wright 2015)}$$"
+    ),
+    explanation = paste(
+      "Use this when developing or validating a multi-item scale or",
+      "questionnaire, and you want to estimate its internal consistency",
+      "(how well the items \"hang together\") to a target precision.",
+      "Cronbach's alpha is the most commonly reported reliability",
+      "coefficient for this purpose.",
+      "",
+      "- **k** - the number of items/questions in the scale.",
+      "- **calpha** - the Cronbach's alpha value you expect to find (0-1;",
+      "  conventionally, >=0.7 acceptable, >=0.8 good, >=0.9 excellent",
+      "  for a research scale).",
+      "- **Desired CI width** - the full width of the confidence interval",
+      "  you want for the estimated alpha.",
+      "",
+      "This is a precision-based design, same logic as the kappa/ICC",
+      "calculators above: no hypothesis test, no power target, just an",
+      "estimation-precision target.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "presize's own documented example: a 5-item scale (k = 5) expected",
+      "to have Cronbach's alpha = 0.7. For a 95% CI of width 0.1, this",
+      "calculator returns n = 349 -- matching presize's own printed",
+      "answer exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Bonett DG, Wright TA. Cronbach's alpha reliability: Interval",
+      "estimation, hypothesis testing, and sample size planning. J",
+      "Organiz Behav. 2015;36(1):3-15."
+    ),
+    backend = "presize::prec_cronb()"
+  ),
+
+  bland_altman = list(
+    title = "Bland-Altman Limits of Agreement",
+    formula_latex = paste0(
+      "$$n \\text{ solved so the CI for the limit of agreement has the desired width (SD-units)}$$"
+    ),
+    explanation = paste(
+      "Use this when comparing two measurement methods on a continuous",
+      "scale (e.g. a new device vs. a reference device) via a",
+      "Bland-Altman plot, and you want to know how many subjects are",
+      "needed to estimate the *limits of agreement* (the range within",
+      "which most differences between the two methods are expected to",
+      "fall) to a target precision.",
+      "",
+      "- **Desired CI width** - the full width of the confidence interval",
+      "  for the limit of agreement, expressed in SD-units of the paired",
+      "  differences (not the original measurement units) -- e.g. 1 means",
+      "  the CI around the limit of agreement spans +/-0.5 SD.",
+      "- **Confidence level** - typically 0.95.",
+      "",
+      "Unlike the mean-difference precision calculators elsewhere in this",
+      "app, this targets the precision of the *limit of agreement itself*",
+      "-- the number that actually gets reported and interpreted on a",
+      "Bland-Altman plot.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Worked from presize's own formula: wanting a 95% CI of width 1",
+      "SD-unit around the limit of agreement, this calculator returns",
+      "n = 47 subjects. (For a much tighter width of 0.1 SD-units,",
+      "presize's own documented example returns n = 4610 -- illustrating",
+      "how sharply required n grows as the desired precision tightens.)",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Bland JM, Altman DG. Statistical methods for assessing agreement",
+      "between two methods of clinical measurement. Lancet.",
+      "1986;327(8476):307-310."
+    ),
+    backend = "presize::prec_lim_agree()"
   )
 )

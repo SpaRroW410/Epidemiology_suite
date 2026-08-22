@@ -94,3 +94,54 @@ calc_icc <- function(rho, k, conf_width = 0.2, conf_level = 0.95) {
     inputs = list(rho = rho, k = k, conf_width = conf_width, conf_level = conf_level)
   )
 }
+
+#' Sample size for Cronbach's alpha (scale internal consistency)
+#'
+#' Wraps presize::prec_cronb() (Bonett & Wright 2015).
+#'
+#' @param k Number of items/measurements in the scale (>= 2)
+#' @param calpha Desired/expected Cronbach's alpha (0, 1)
+#' @param conf_width Desired full width of the confidence interval for alpha
+#' @param conf_level Confidence level (0,1), e.g. 0.95
+#' @return list(n, inputs)
+calc_agreement_cronbach <- function(k, calpha, conf_width = 0.1, conf_level = 0.95) {
+  if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 2 || k != round(k)) {
+    stop("k must be a single whole number >= 2.")
+  }
+  .validate_unit_interval(calpha, "calpha")
+  .validate_positive(conf_width, "conf_width")
+  .validate_unit_interval(conf_level, "conf_level")
+
+  res <- presize::prec_cronb(k = k, calpha = calpha, n = NULL,
+                              conf.level = conf_level, conf.width = conf_width)
+
+  list(
+    n = ceiling(res$n),
+    lwr = res$lwr,
+    upr = res$upr,
+    inputs = list(k = k, calpha = calpha, conf_width = conf_width, conf_level = conf_level)
+  )
+}
+
+#' Sample size for Bland-Altman limits of agreement
+#'
+#' Wraps presize::prec_lim_agree() (Bland & Altman 1986). Precision is
+#' expressed in SD-units of the paired differences, not the original
+#' measurement units -- the confidence interval width for the *limit of
+#' agreement itself*, not for the mean difference.
+#'
+#' @param conf_width Desired full width of the confidence interval for the
+#'   limit of agreement, in SD-units of the paired differences
+#' @param conf_level Confidence level (0,1), e.g. 0.95
+#' @return list(n, inputs)
+calc_agreement_bland_altman <- function(conf_width = 1, conf_level = 0.95) {
+  .validate_positive(conf_width, "conf_width")
+  .validate_unit_interval(conf_level, "conf_level")
+
+  res <- presize::prec_lim_agree(n = NULL, conf.width = conf_width, conf.level = conf_level)
+
+  list(
+    n = ceiling(res$n),
+    inputs = list(conf_width = conf_width, conf_level = conf_level)
+  )
+}
