@@ -356,6 +356,37 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Crossover Trial (2x2)",
        module_input_id = NA, design_value = NA),
 
+  list(key = "anova_general",
+       label = "Factorial ANOVA / ANCOVA (general F-test)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a main effect,",
+         "interaction, or covariate-adjusted group effect in a factorial",
+         "ANOVA or ANCOVA?\""
+       ),
+       outcome_type = "continuous", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Factorial ANOVA / ANCOVA",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "logistic_binary",
+       label = "Logistic regression -- binary predictor",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a logistic regression",
+         "with a binary predictor (exposed vs. unexposed)?\""
+       ),
+       outcome_type = "binary", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Logistic Regression",
+       module_input_id = "logistic-design", design_value = "binary"),
+
+  list(key = "logistic_continuous",
+       label = "Logistic regression -- continuous predictor",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a logistic regression",
+         "with a continuous predictor (e.g. age, a biomarker level)?\""
+       ),
+       outcome_type = "binary", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Logistic Regression",
+       module_input_id = "logistic-design", design_value = "continuous"),
+
   list(key = "pilot_feasibility",
        label = "Pilot / feasibility study",
        answers = paste(
@@ -624,8 +655,11 @@ study_design_families <- list(
                          "tost_means", "tost_proportions", "noninferiority_means",
                          "noninferiority_proportions")),
   list(id = "regression", label = "Regression",
-       hint = "Testing whether a multiple regression model explains more variance than chance.",
-       catalog_keys = c("regression_r2")),
+       hint = "Testing whether a multiple regression model explains more variance than chance, or a logistic regression predictor's effect.",
+       catalog_keys = c("regression_r2", "logistic_binary", "logistic_continuous")),
+  list(id = "anova_general", label = "Factorial ANOVA / ANCOVA",
+       hint = "Main effects, interactions, or covariate-adjusted group effects via the general linear model F-test.",
+       catalog_keys = c("anova_general")),
   list(id = "safety_surveillance", label = "Safety / Surveillance",
        hint = "Bounding an unseen adverse-event rate, or planning to catch a rare event.",
        catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required")),

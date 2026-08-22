@@ -210,6 +210,8 @@ for what to build next):
 | Cluster / design effect | Design-effect inflation of an existing base sample size | closed-form (Kish 1965) | Live |
 | Stratified Sampling | Total size + per-stratum allocation (proportional/Neyman) | closed-form (Cochran 1977; Kauermann & Kuechenhoff 2011) | Live |
 | Crossover Trial (2x2) | Continuous outcome, test for a difference (not equivalence) | `TrialSize::TwoSampleCrossOver.Equality()` (Chow, Shao & Wang 2003) | Live |
+| Factorial ANOVA / ANCOVA | Main effects, interactions, ANCOVA group effects (general F-test) | `pwr::pwr.f2.test()` (Cohen 1988) | Live |
+| Logistic Regression | Simple logistic regression, binary or continuous predictor | `powerMediation::SSizeLogisticBin()`/`SSizeLogisticCon()` (Hsieh et al. 1998) | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
 | Survival (advanced) | Exponential, accrual/follow-up, competing risks | `gsDesign::nSurv` | Not started |
 | Post-hoc / achieved power | Given n and observed effect, compute achieved power | reuse each module's engine, solve for power | Not started |

@@ -2,7 +2,7 @@
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(shiny, bslib, pwr, presize, epiR, clinfun, powerSurvEpi, PowerTOST, Exact,
-               pmsampsize, pROC, TrialSize)
+               pmsampsize, pROC, TrialSize, powerMediation)
 
 for (f in list.files("R/calc", pattern = "\\.R$", full.names = TRUE)) source(f)
 for (f in list.files("R/content", pattern = "\\.R$", full.names = TRUE)) source(f)
@@ -55,5 +55,9 @@ module_registry <- list(
   list(id = stratified_meta$id, title = stratified_meta$nav_title,
        ui = mod_stratified_ui, server = mod_stratified_server),
   list(id = crossover_meta$id, title = crossover_meta$nav_title,
-       ui = mod_crossover_ui, server = mod_crossover_server)
+       ui = mod_crossover_ui, server = mod_crossover_server),
+  list(id = anova_general_meta$id, title = anova_general_meta$nav_title,
+       ui = mod_anova_general_ui, server = mod_anova_general_server),
+  list(id = logistic_meta$id, title = logistic_meta$nav_title,
+       ui = mod_logistic_ui, server = mod_logistic_server)
 )

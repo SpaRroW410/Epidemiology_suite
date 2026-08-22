@@ -11,7 +11,7 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: twenty-three complete calculator modules -- all Stage-1 CORE items
+of Phase 2: twenty-five complete calculator modules -- all Stage-1 CORE items
 from the master checklists are now built, plus two "quick wins" batches of
 further CORE items, and the start of Stage 2 (analytical depth) --
 
@@ -132,6 +132,18 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   difference (not equivalence -- see the Equivalence (TOST) module for
   that), wrapping `TrialSize::TwoSampleCrossOver.Equality()` (Chow, Shao
   & Wang 2003); `TrialSize` has zero package dependencies
+- **Factorial ANOVA / ANCOVA** (`R/modules/mod_anova_general.R`) -- a
+  general linear-model F-test for a factorial ANOVA main effect or
+  interaction, or an ANCOVA group effect, wrapping `pwr::pwr.f2.test()`
+  (Cohen 1988) -- the same engine already used by the Multiple Regression
+  module, since Cohen treats ANOVA/ANCOVA and regression as one unified
+  "F tests" family; effect size accepted as either Cohen's f-squared or
+  partial eta-squared
+- **Logistic Regression** (`R/modules/mod_logistic.R`) -- simple logistic
+  regression with a binary or continuous predictor, wrapping
+  `powerMediation::SSizeLogisticBin()`/`SSizeLogisticCon()` (Hsieh, Bloch
+  & Larsen 1998) rather than `WebPower::wp.logistic`; `powerMediation`
+  has zero package dependencies
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

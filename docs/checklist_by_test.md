@@ -42,9 +42,9 @@
 ### F tests — G*Power **F** family
 
 - [x] **[CORE]** One-way ANOVA — f, k groups — `pwr::pwr.anova.test` , `WebPower::wp.anova` — GP: F → ANOVA: fixed effects, omnibus — *(implemented: Means → "Three or more independent groups (one-way ANOVA)", `calc_means_anova()`, converts raw group means + SD to Cohen's f)*
-- [ ] **[ADV]** Two-way / factorial ANOVA (main effects & interactions) — f, numerator df — GP: F → ANOVA: fixed effects, special
+- [x] **[ADV]** Two-way / factorial ANOVA (main effects & interactions) — f, numerator df — GP: F → ANOVA: fixed effects, special — *(implemented: new Factorial ANOVA / ANCOVA module, `calc_anova_general()` wrapping `pwr::pwr.f2.test()` -- the same general linear-model F-test engine already used by the Multiple Regression module, since Cohen (1988) treats ANOVA/ANCOVA and multiple regression as one "F tests" family; user supplies the effect's own numerator df (u) directly. Cross-validated against `pwr::pwr.anova.test()`'s one-way-ANOVA special case (u=k-1): k=4, f=0.25 -> 180 total (dedicated formula) vs. 179 total (general engine), agreeing to within the expected per-group-vs-total-df rounding difference)*
 - [ ] **[ADV]** Repeated-measures ANOVA (between, within, interaction) — f, #measurements, correlation, nonsphericity ε — `WebPower::wp.rmanova` — GP: F → ANOVA: repeated measures
-- [ ] **[ADV]** ANCOVA — f, #covariates, #groups — `WebPower::wp.rmanova`-family / GP: F → ANCOVA — nMaster
+- [x] **[ADV]** ANCOVA — f, #covariates, #groups — `WebPower::wp.rmanova`-family / GP: F → ANCOVA — nMaster — *(implemented: same Factorial ANOVA / ANCOVA module and `calc_anova_general()` backend as the factorial-ANOVA item above -- an ANCOVA group effect is the same general F-test with u = (a-1) for a groups, just a different denominator-df context; not `WebPower`, avoiding its heavy `lme4`/`lavaan`/`dplyr`/`PearsonDS` dependency chain)*
 - [ ] **[ADV]** MANOVA (global & special effects, incl. Hotelling's T²) — GP: F → MANOVA
 - [ ] **[ADV]** Mixed (split-plot) ANOVA — GP: F → ANOVA: repeated measures, within-between
 - [x] **[CORE]** Multiple linear regression, R² deviation from zero — f² — `pwr::pwr.f2.test` — GP: F → Linear multiple regression: fixed model R² deviation from zero — *(implemented: new Multiple Regression module, `calc_regression_f2()`; backend verified against Cohen (1988) Exercise 9.1 p.424 (u=5, v=89, f2=0.1111 -> power=0.6736 exactly))*
@@ -78,7 +78,7 @@
 - [ ] **[ADV]** Compare two independent correlations — q (Fisher r-to-z) — `pwr` (manual) — GP: z → Correlations: two independent Pearson r's
 - [ ] **[ADV]** Compare two dependent correlations (common / non-common index) — GP: z (Faul 2009)
 - [ ] **[ADV]** Simple/multiple linear regression (fixed & random model) — see F family
-- [ ] **[ADV]** Logistic regression (with/without covariate adjustment) — see z family — `WebPower::wp.logistic`
+- [x] **[ADV]** Logistic regression (with/without covariate adjustment) — see z family — `WebPower::wp.logistic` — *(implemented: new Logistic Regression module, `calc_logistic_binary()`/`calc_logistic_continuous()` wrapping `powerMediation::SSizeLogisticBin()`/`SSizeLogisticCon()` (Hsieh, Bloch & Larsen 1998) rather than `WebPower::wp.logistic` -- `powerMediation` has zero package dependencies (`Depends: R, stats` only) versus WebPower's heavy dependency chain. Verified against the paper's own published tables exactly: binary predictor (p1=0.4, p2=0.5, B=0.5, alpha=0.05, power=0.95) → n=1281 (Table I); continuous predictor (p1=0.5, OR=exp(0.405), alpha=0.05, power=0.95) → n=317 (Table II). "With covariate adjustment" is not covered -- only the simple (single-predictor) case)*
 - [ ] **[ADV]** Poisson / negative binomial regression — `WebPower::wp.poisson`
 - [x] **[ADV]** Cox regression — HR, event proportion, covariate SD/correlation — `powerSurvEpi` — *(implemented: see Survival tests section below — Log-Rank / Survival module's Cox regression designs)*
 - [ ] **[ADV]** Ordinal (proportional odds) / multinomial regression — PASS proportional-odds; Whitehead (1993)
