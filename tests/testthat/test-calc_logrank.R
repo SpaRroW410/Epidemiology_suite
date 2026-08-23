@@ -42,3 +42,22 @@ test_that("calc_cox_continuous rejects invalid inputs", {
   expect_error(calc_cox_continuous(power = 0.8, theta = 2, sigma2 = -1, psi = 0.5), "positive")
   expect_error(calc_cox_continuous(power = 0.8, theta = 2, sigma2 = 0.1, psi = 0.5, rho2 = 1), "\\[0, 1\\)")
 })
+
+test_that("calc_survival_stratified matches powerSurvEpi::ssize.stratify()'s own documented example (Palta & Amini 1985, p.803) exactly", {
+  res <- calc_survival_stratified(power = 0.9, timeUnit = 1.25, gVec = c(0.5, 0.5),
+                                   pVec = c(0.5, 0.5), hr = 1 / 1.91,
+                                   lambda0Vec = c(2.303, 1.139), alpha = 0.05)
+  expect_equal(res$n_total, 146)
+})
+
+test_that("calc_survival_stratified rejects invalid inputs", {
+  expect_error(calc_survival_stratified(power = 0.9, timeUnit = 1.25, gVec = c(0.5, 0.5),
+                                         pVec = c(0.5, 0.5), hr = 1, lambda0Vec = c(2.303, 1.139)),
+               "must differ")
+  expect_error(calc_survival_stratified(power = 0.9, timeUnit = 1.25, gVec = c(0.5, 0.6),
+                                         pVec = c(0.5, 0.5), hr = 0.5, lambda0Vec = c(2.303, 1.139)),
+               "sum to 1")
+  expect_error(calc_survival_stratified(power = 0.9, timeUnit = 1.25, gVec = c(0.5),
+                                         pVec = c(0.5, 0.5), hr = 0.5, lambda0Vec = c(2.303, 1.139)),
+               "same length")
+})

@@ -113,3 +113,50 @@ calc_cox_continuous <- function(power, theta, sigma2, psi, rho2 = 0, alpha = 0.0
                   rho2 = rho2, alpha = alpha)
   )
 }
+
+#' Sample size for a stratified log-rank test, exponential survival,
+#' binary predictor
+#'
+#' Wraps powerSurvEpi::ssize.stratify() (Palta & Amini 1985). Sizes a study
+#' with m strata (e.g. sites, age bands) where the hazard is exponential
+#' within each stratum, the treatment effect (hazard ratio) is constant
+#' across strata (proportional hazards), and the analysis will be a
+#' stratified log-rank test. Reduces to a single unstratified exponential
+#' log-rank test when m = 1.
+#'
+#' @param power Desired power (0,1)
+#' @param timeUnit Total study length (accrual + follow-up), > 0
+#' @param gVec Proportion of the total sample size in each stratum (sums to 1)
+#' @param pVec Proportion of subjects in treatment group 1 within each
+#'   stratum (0,1), same length as gVec
+#' @param hr Postulated hazard ratio (treatment group 1 vs. group 0), > 0, != 1
+#' @param lambda0Vec Hazard for treatment group 0 (reference) in each
+#'   stratum, > 0, same length as gVec
+#' @param alpha Significance level, two-sided (0,1)
+#' @return list(n_total, inputs)
+calc_survival_stratified <- function(power, timeUnit, gVec, pVec, hr, lambda0Vec, alpha = 0.05) {
+  .validate_unit_interval(power, "power")
+  .validate_positive(timeUnit, "timeUnit")
+  .validate_positive(hr, "hr")
+  if (isTRUE(all.equal(hr, 1))) stop("hr must differ from 1 (no effect to detect).")
+  .validate_unit_interval(alpha, "alpha")
+
+  m <- length(gVec)
+  if (m < 1 || length(pVec) != m || length(lambda0Vec) != m) {
+    stop("gVec, pVec, and lambda0Vec must all be the same length (one entry per stratum).")
+  }
+  if (any(gVec <= 0) || any(gVec >= 1)) stop("Each entry of gVec must be strictly between 0 and 1.")
+  if (!isTRUE(all.equal(sum(gVec), 1))) stop("gVec must sum to 1 (proportions across strata).")
+  if (any(pVec <= 0) || any(pVec >= 1)) stop("Each entry of pVec must be strictly between 0 and 1.")
+  if (any(lambda0Vec <= 0)) stop("Each entry of lambda0Vec must be positive.")
+
+  n <- powerSurvEpi::ssize.stratify(power = power, timeUnit = timeUnit, gVec = gVec,
+                                    PVec = pVec, HR = hr, lambda0Vec = lambda0Vec,
+                                    alpha = alpha, verbose = FALSE)
+
+  list(
+    n_total = ceiling(n),
+    inputs = list(power = power, timeUnit = timeUnit, gVec = gVec, pVec = pVec,
+                  hr = hr, lambda0Vec = lambda0Vec, alpha = alpha)
+  )
+}

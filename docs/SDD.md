@@ -199,7 +199,7 @@ for what to build next):
 | Pilot / feasibility | Flat 12/arm rule-of-thumb; interactive CI-for-SD precision | rule-of-thumb (Julious 2005); closed-form chi-square CI theory | Live |
 | Simon two-stage | Phase II single-arm (minimax + optimal designs) | `clinfun::ph2simon()` | Live |
 | Equivalence (TOST) | Two one-sided tests, means and proportions | `PowerTOST::sampleN.TOST(logscale=FALSE)`; `epiR::epi.ssequb()` | Live |
-| Log-rank / survival | Two-arm time-to-event, cumulative event probabilities; Cox PH regression (binary or continuous covariate) | `powerSurvEpi::ssizeCT()`; `ssizeEpi.default()`; `ssizeEpiCont.default()` | Live |
+| Log-rank / survival | Two-arm time-to-event, cumulative event probabilities; Cox PH regression (binary or continuous covariate); stratified log-rank (exponential survival) | `powerSurvEpi::ssizeCT()`; `ssizeEpi.default()`; `ssizeEpiCont.default()`; `ssize.stratify()` (Palta & Amini 1985) | Live |
 | Incidence Rate | Precision-based, events + person-time; comparison of two rates | `presize::prec_rate()`; closed-form (Demidenko 2007) | Live |
 | Exact Tests | Binomial test (single proportion); Fisher's exact (two proportions) | `stats::binom.test()` search; `Exact::power.exact.test()` search | Live |
 | Multiple Regression | R-squared deviation from zero | `pwr::pwr.f2.test()` | Live |
@@ -212,8 +212,9 @@ for what to build next):
 | Crossover Trial (2x2) | Continuous outcome, test for a difference (not equivalence) | `TrialSize::TwoSampleCrossOver.Equality()` (Chow, Shao & Wang 2003) | Live |
 | Factorial ANOVA / ANCOVA | Main effects, interactions, ANCOVA group effects (general F-test) | `pwr::pwr.f2.test()` (Cohen 1988) | Live |
 | Logistic Regression | Simple logistic regression, binary or continuous predictor | `powerMediation::SSizeLogisticBin()`/`SSizeLogisticCon()` (Hsieh et al. 1998) | Live |
+| Self-Controlled Case Series | Cases-only design, risk-period vs. own-time comparison, optional age effects | closed-form (Musonda, Farrington & Whitaker 2006) | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
-| Survival (advanced) | Exponential, accrual/follow-up, competing risks | `gsDesign::nSurv` | Not started |
+| Survival (advanced) | Accrual/follow-up (non-uniform entry), competing risks, RMST | `gsDesign::nSurv`; `SSRMST` (simulation-based, not yet wrapped) | Not started |
 | Post-hoc / achieved power | Given n and observed effect, compute achieved power | reuse each module's engine, solve for power | Not started |
 
 Each row above is (or will be) exactly one `mod_*.R` + `calc_*.R` +

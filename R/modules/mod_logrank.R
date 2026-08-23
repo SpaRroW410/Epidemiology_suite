@@ -1,6 +1,9 @@
 # Log-Rank / Survival module: Calculate / Formula-Help / Reference sub-tabs.
 # Follows the same design-radio pattern as mod_tost.R (docs/SDD.md #8) --
-# outer radio for "which method", with a conditionalPanel per design.
+# outer radio for "which method", with a conditionalPanel per design. The
+# "stratified" design additionally follows mod_stratified.R's dynamic-inputs
+# pattern (renderUI() + session$ns()) since its number of strata is itself a
+# user choice.
 
 logrank_meta <- list(
   id = "logrank",
@@ -24,7 +27,8 @@ mod_logrank_ui <- function(id) {
         choices = c(
           "Log-rank test (two survival curves)" = "logrank",
           "Cox regression -- binary covariate" = "cox_binary",
-          "Cox regression -- continuous covariate" = "cox_continuous"
+          "Cox regression -- continuous covariate" = "cox_continuous",
+          "Stratified log-rank, exponential survival" = "stratified"
         )
       ),
       conditionalPanel(
@@ -63,6 +67,15 @@ mod_logrank_ui <- function(id) {
         numericInput(ns("alpha_c"), "Significance level (alpha)", value = 0.1, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_c"), "Desired power", value = 0.806, min = 0.5, max = 0.999, step = 0.001)
       ),
+      conditionalPanel(
+        condition = design_is("stratified"),
+        numericInput(ns("timeUnit"), "Total study length (accrual + follow-up)", value = 1.25, min = 0.0001, step = 0.1),
+        numericInput(ns("hr_strat"), "Postulated hazard ratio (HR)", value = 1 / 1.91, min = 0.01, step = 0.05),
+        selectInput(ns("m_strata"), "Number of strata", choices = 2:6, selected = 2),
+        uiOutput(ns("strata_ui")),
+        numericInput(ns("alpha_strat"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_strat"), "Desired power", value = 0.9, min = 0.5, max = 0.999, step = 0.01)
+      ),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -86,7 +99,13 @@ mod_logrank_ui <- function(id) {
       render_formula_block(logrank_content$cox_continuous$formula_latex),
       shiny::markdown(logrank_content$cox_continuous$explanation),
       h5("Worked example"),
-      shiny::markdown(logrank_content$cox_continuous$worked_example)
+      shiny::markdown(logrank_content$cox_continuous$worked_example),
+      hr(),
+      h4(logrank_content$stratified$title),
+      render_formula_block(logrank_content$stratified$formula_latex),
+      shiny::markdown(logrank_content$stratified$explanation),
+      h5("Worked example"),
+      shiny::markdown(logrank_content$stratified$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -101,13 +120,32 @@ mod_logrank_ui <- function(id) {
       hr(),
       h4(logrank_content$cox_continuous$title),
       p(strong("Citation: "), logrank_content$cox_continuous$citation),
-      p(strong("Implemented via: "), code(logrank_content$cox_continuous$backend))
+      p(strong("Implemented via: "), code(logrank_content$cox_continuous$backend)),
+      hr(),
+      h4(logrank_content$stratified$title),
+      p(strong("Citation: "), logrank_content$stratified$citation),
+      p(strong("Implemented via: "), code(logrank_content$stratified$backend))
     )
   )
 }
 
 mod_logrank_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    output$strata_ui <- renderUI({
+      req(input$m_strata)
+      m <- as.integer(input$m_strata)
+      tagList(lapply(seq_len(m), function(i) {
+        fluidRow(
+          column(4, numericInput(session$ns(paste0("g_", i)), sprintf("Stratum %d: share of total n", i),
+                                  value = round(1 / m, 3), min = 0.001, max = 0.999, step = 0.01)),
+          column(4, numericInput(session$ns(paste0("p_", i)), sprintf("Stratum %d: proportion treated", i),
+                                  value = 0.5, min = 0.001, max = 0.999, step = 0.01)),
+          column(4, numericInput(session$ns(paste0("lambda0_", i)), sprintf("Stratum %d: baseline hazard", i),
+                                  value = 1, min = 0.0001, step = 0.1))
+        )
+      }))
+    })
+
     result <- reactive({
       req(input$design)
 
@@ -129,12 +167,31 @@ mod_logrank_server <- function(id) {
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
-      } else {
+      } else if (input$design == "cox_continuous") {
         req(input$power_c, input$theta_c, input$sigma2_c, input$psi_c, input$rho2_c, input$alpha_c)
         tryCatch(
           list(ok = TRUE, value = calc_cox_continuous(
             power = input$power_c, theta = input$theta_c, sigma2 = input$sigma2_c,
             psi = input$psi_c, rho2 = input$rho2_c, alpha = input$alpha_c
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$m_strata, input$timeUnit, input$hr_strat, input$alpha_strat, input$power_strat)
+        m <- as.integer(input$m_strata)
+        g_vals <- lapply(seq_len(m), function(i) input[[paste0("g_", i)]])
+        p_vals <- lapply(seq_len(m), function(i) input[[paste0("p_", i)]])
+        lambda0_vals <- lapply(seq_len(m), function(i) input[[paste0("lambda0_", i)]])
+        req(!any(vapply(g_vals, is.null, logical(1))),
+            !any(vapply(p_vals, is.null, logical(1))),
+            !any(vapply(lambda0_vals, is.null, logical(1))))
+
+        tryCatch(
+          list(ok = TRUE, value = calc_survival_stratified(
+            power = input$power_strat, timeUnit = input$timeUnit,
+            gVec = as.numeric(unlist(g_vals)), pVec = as.numeric(unlist(p_vals)),
+            hr = input$hr_strat, lambda0Vec = as.numeric(unlist(lambda0_vals)),
+            alpha = input$alpha_strat
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -152,6 +209,10 @@ mod_logrank_server <- function(id) {
         tagList(
           p(strong("Total sample size: "), v$n_total),
           p(sprintf("Experimental group: %d, Control group: %d", v$n_exp, v$n_control))
+        )
+      } else if (input$design == "stratified") {
+        tagList(
+          p(strong("Total sample size: "), v$n_total)
         )
       } else {
         tagList(

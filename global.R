@@ -59,7 +59,9 @@ module_registry <- list(
   list(id = anova_general_meta$id, title = anova_general_meta$nav_title,
        ui = mod_anova_general_ui, server = mod_anova_general_server),
   list(id = logistic_meta$id, title = logistic_meta$nav_title,
-       ui = mod_logistic_ui, server = mod_logistic_server)
+       ui = mod_logistic_ui, server = mod_logistic_server),
+  list(id = sccs_meta$id, title = sccs_meta$nav_title,
+       ui = mod_sccs_ui, server = mod_sccs_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -76,7 +78,7 @@ module_groups <- list(
   list(title = "Survey & Cross-Sectional",
        module_ids = c("stratified", "cluster")),
   list(title = "Observational Studies",
-       module_ids = c("case_control", "cohort")),
+       module_ids = c("case_control", "cohort", "sccs")),
   list(title = "Diagnostic & Screening",
        module_ids = c("diagnostic", "roc")),
   list(title = "Agreement & Reliability",

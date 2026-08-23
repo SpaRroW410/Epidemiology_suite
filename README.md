@@ -11,7 +11,7 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: twenty-five complete calculator modules -- all Stage-1 CORE items
+of Phase 2: twenty-six complete calculator modules -- all Stage-1 CORE items
 from the master checklists are now built, plus two "quick wins" batches of
 further CORE items, and the start of Stage 2 (analytical depth) --
 
@@ -75,11 +75,14 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   dedicated proportions-TOST function was found)
 - **Log-Rank / Survival** (`R/modules/mod_logrank.R`) -- two-arm
   time-to-event studies (required N from event probabilities), wrapping
-  `powerSurvEpi::ssizeCT()` (Freedman 1982; Rosner 2006), plus Cox
+  `powerSurvEpi::ssizeCT()` (Freedman 1982; Rosner 2006); Cox
   proportional-hazards regression for a binary or continuous covariate of
   interest (optionally adjusting for a correlated covariate), wrapping
   `powerSurvEpi::ssizeEpi()`/`ssizeEpiCont()` (Latouche et al. 2004;
-  Hsieh & Lavori 2000)
+  Hsieh & Lavori 2000); and a stratified log-rank test under exponential
+  survival (per-stratum allocation, event rates under the null, and a
+  common hazard ratio), wrapping `powerSurvEpi::ssize.stratify()` (Palta
+  & Amini 1985)
 - **Incidence Rate** (`R/modules/mod_rate.R`) -- precision-based estimation
   of an incidence rate (number of events, then person-time, wrapping
   `presize::prec_rate()`), plus comparison of two rates via person-time
@@ -144,6 +147,14 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   `powerMediation::SSizeLogisticBin()`/`SSizeLogisticCon()` (Hsieh, Bloch
   & Larsen 1998) rather than `WebPower::wp.logistic`; `powerMediation`
   has zero package dependencies
+- **Self-Controlled Case Series** (`R/modules/mod_sccs.R`) -- sample size
+  for an SCCS study of a transient exposure's association with an event,
+  with an optional age-effect stratification (Musonda, Farrington &
+  Whitaker 2006); closed-form reimplementation of `SCCS::samplesize()`'s
+  algorithm rather than a runtime dependency on `SCCS`, whose
+  `Imports: survival, splines, corpcor, fda, R.methodsS3, gnm` chain is
+  far heavier than this one formula needs -- verified to reproduce all
+  three of that package's documented examples exactly
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

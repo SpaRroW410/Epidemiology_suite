@@ -148,5 +148,50 @@ logrank_content <- list(
       "Control Clin Trials. 2000;21(6):552-560."
     ),
     backend = "powerSurvEpi::ssizeEpiCont.default()"
+  ),
+  stratified = list(
+    title = "Stratified Log-Rank Test, Exponential Survival",
+    formula_latex = paste0(
+      "$$n = \\frac{\\left(Z_{1-\\alpha/2}+Z_{1-\\beta}\\sqrt{B}\\right)^2}{A}$$",
+      "$$A = 2\\sum_{s=1}^{m} g_s P_s(1-P_s)V_s, \\qquad ",
+      "V_s = P_s\\left[1-\\frac{e^{-\\lambda_{1s}(T-1)}-e^{-\\lambda_{1s}T}}{\\lambda_{1s}}\\right] + ",
+      "(1-P_s)\\left[1-\\frac{e^{-\\lambda_{0s}(T-1)}-e^{-\\lambda_{0s}T}}{\\lambda_{0s}}\\right]$$"
+    ),
+    explanation = paste(
+      "Use this for a randomized or observational study with **m strata**",
+      "(e.g. clinical sites, age bands) where within each stratum the",
+      "survival time is exponential, the treatment hazard ratio is the",
+      "same across all strata (proportional hazards), and the planned",
+      "analysis is a **stratified log-rank test**. With a single stratum",
+      "(m = 1) this reduces to an unstratified exponential log-rank test.",
+      "",
+      "- **timeUnit** - total study length (accrual + follow-up).",
+      "- **gVec** - the proportion of the TOTAL sample size allocated to",
+      "  each stratum (must sum to 1).",
+      "- **pVec** - within each stratum, the proportion of subjects in the",
+      "  treatment group (vs. the reference group).",
+      "- **HR** - the postulated hazard ratio, treatment vs. reference,",
+      "  assumed constant across all strata.",
+      "- **lambda0Vec** - the baseline (reference-group) hazard in each",
+      "  stratum -- this is what lets strata have different underlying",
+      "  event rates while sharing one hazard ratio.",
+      "- **alpha, power** - as elsewhere (two-sided test).",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Palta & Amini (1985), p. 803: a 2-stratum study, timeUnit = 1.25,",
+      "equal-sized strata (gVec = c(0.5, 0.5)) each with a 50/50 treatment",
+      "split (PVec = c(0.5, 0.5)), a hazard ratio of 1/1.91, and stratum",
+      "baseline hazards lambda0Vec = c(2.303, 1.139), 90% power and",
+      "alpha = 0.05 (two-sided). This calculator returns n = 146, matching",
+      "the paper's own worked example exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Palta M, Amini SB. Consideration of covariates and stratification",
+      "in sample size determination for survival time studies. J Chronic",
+      "Dis. 1985;38(9):801-809."
+    ),
+    backend = "powerSurvEpi::ssize.stratify()"
   )
 )

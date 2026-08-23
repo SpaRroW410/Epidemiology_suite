@@ -254,6 +254,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Cohort / RR",
        module_input_id = NA, design_value = NA),
 
+  list(key = "sccs_samplesize",
+       label = "Self-controlled case series (SCCS)",
+       answers = paste(
+         "Answers: \"How many cases do I need for a self-controlled case",
+         "series study -- comparing each case's own event rate during a",
+         "risk period (e.g. after a vaccine) to their own rate at other",
+         "times, with no separate control group?\""
+       ),
+       outcome_type = "sccs", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Self-Controlled Case Series",
+       module_input_id = NA, design_value = NA),
+
   list(key = "correlation_pearson",
        label = "Pearson correlation",
        answers = paste(
@@ -322,6 +334,17 @@ calculator_catalog <- list(
        outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Log-Rank / Survival",
        module_input_id = "logrank-design", design_value = "cox_continuous"),
+
+  list(key = "survival_stratified",
+       label = "Stratified log-rank test, exponential survival",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a stratified log-rank",
+         "test (e.g. across multiple sites or age bands) with exponential",
+         "survival and a hazard ratio constant across strata?\""
+       ),
+       outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Log-Rank / Survival",
+       module_input_id = "logrank-design", design_value = "stratified"),
 
   list(key = "cluster_deff",
        label = "Cluster / multistage sampling -- design effect (DEFF)",
@@ -615,6 +638,9 @@ study_design_families <- list(
   list(id = "cohort", label = "Cohort / Relative Risk",
        hint = "Cohort or cross-sectional study estimating relative risk.",
        catalog_keys = c("cohort_rr")),
+  list(id = "sccs", label = "Self-Controlled Case Series",
+       hint = "Cases only, comparing each case's own event rate during a risk period to their own rate at other times.",
+       catalog_keys = c("sccs_samplesize")),
   list(id = "diagnostic", label = "Diagnostic Accuracy",
        hint = "Estimating sensitivity/specificity given expected prevalence.",
        catalog_keys = c("diagnostic_precision", "diagnostic_vs_reference",
@@ -641,8 +667,8 @@ study_design_families <- list(
        hint = "Small-sample exact tests for proportions (binomial, Fisher's exact).",
        catalog_keys = c("exact_binomial", "exact_fisher")),
   list(id = "survival", label = "Survival",
-       hint = "Log-rank, Cox regression, or accrual/follow-up based survival study designs.",
-       catalog_keys = c("logrank", "cox_binary", "cox_continuous")),
+       hint = "Log-rank, Cox regression, stratified log-rank, or accrual/follow-up based survival study designs.",
+       catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
   list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
        hint = "Inflating an existing sample size for cluster-sampled (rather than individually-sampled) surveys.",
        catalog_keys = c("cluster_deff")),
@@ -707,8 +733,8 @@ test_families <- list(
        hint = "Pearson correlation and multiple linear regression.",
        catalog_keys = c("correlation_pearson", "regression_r2")),
   list(id = "survival_tests", label = "Survival Tests",
-       hint = "Log-rank test and Cox proportional-hazards regression for time-to-event outcomes.",
-       catalog_keys = c("logrank", "cox_binary", "cox_continuous")),
+       hint = "Log-rank test, Cox proportional-hazards regression, and stratified log-rank for time-to-event outcomes.",
+       catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
   list(id = "agreement_statistics", label = "Agreement Statistics",
        hint = "Cohen's kappa, ICC, Cronbach's alpha, and Bland-Altman limits of agreement.",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
