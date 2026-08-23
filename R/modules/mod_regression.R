@@ -26,7 +26,7 @@ mod_regression_ui <- function(id) {
       "Formula / Help",
       br(),
       h4(regression_content$r2$title),
-      withMathJax(HTML(regression_content$r2$formula_latex)),
+      render_formula_block(regression_content$r2$formula_latex),
       shiny::markdown(regression_content$r2$explanation),
       h5("Worked example"),
       shiny::markdown(regression_content$r2$worked_example)

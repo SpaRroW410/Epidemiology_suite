@@ -27,7 +27,7 @@ mod_simon_ui <- function(id) {
       "Formula / Help",
       br(),
       h4(simon_content$ph2simon$title),
-      withMathJax(HTML(simon_content$ph2simon$formula_latex)),
+      render_formula_block(simon_content$ph2simon$formula_latex),
       shiny::markdown(simon_content$ph2simon$explanation),
       h5("Worked example"),
       shiny::markdown(simon_content$ph2simon$worked_example)

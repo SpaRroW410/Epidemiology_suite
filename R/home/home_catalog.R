@@ -674,6 +674,51 @@ study_design_families <- list(
        catalog_keys = character(0))
 )
 
+# Second index over the SAME calculator_catalog entries, grouped by
+# statistical-test family instead of study design -- mirrors "Part 2 -- By
+# Statistical Test" of the project's scope-review checklist (the source
+# document docs/checklist_by_design.md and checklist_by_test.md were built
+# from), the same way G*Power organizes its own test catalog. This is purely
+# a second browsing lens for the Home hub's "Browse calculators" toggle: it
+# points at the same built catalog_keys as study_design_families above, never
+# duplicates a calculator. Only families with at least one already-built key
+# are included; a calculator with no natural single-test-family home (e.g.
+# most observational-study designs) simply doesn't appear here, only under
+# study_design_families.
+test_families <- list(
+  list(id = "t_tests", label = "t Tests",
+       hint = "Comparing one or two means (Student's t framework).",
+       catalog_keys = c("means_single", "means_two_indep",
+                         "means_two_indep_unequal_n", "means_two_dep")),
+  list(id = "z_tests", label = "z Tests",
+       hint = "Comparing proportions, or a logistic-regression predictor's effect (normal-approximation framework).",
+       catalog_keys = c("proportion_single", "proportion_two_indep",
+                         "logistic_binary", "logistic_continuous")),
+  list(id = "f_tests", label = "F Tests",
+       hint = "One-way/factorial ANOVA, ANCOVA, and multiple regression (general linear model F-test framework).",
+       catalog_keys = c("means_k", "regression_r2", "anova_general")),
+  list(id = "chi_square_tests", label = "Chi-Square Tests",
+       hint = "Goodness of fit and tests of independence/association for categorical data.",
+       catalog_keys = c("chisq_gof", "chisq_independence")),
+  list(id = "exact_tests", label = "Exact Tests",
+       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact) where the normal approximation is unreliable.",
+       catalog_keys = c("exact_binomial", "exact_fisher")),
+  list(id = "correlation_regression", label = "Correlation & Regression",
+       hint = "Pearson correlation and multiple linear regression.",
+       catalog_keys = c("correlation_pearson", "regression_r2")),
+  list(id = "survival_tests", label = "Survival Tests",
+       hint = "Log-rank test and Cox proportional-hazards regression for time-to-event outcomes.",
+       catalog_keys = c("logrank", "cox_binary", "cox_continuous")),
+  list(id = "agreement_statistics", label = "Agreement Statistics",
+       hint = "Cohen's kappa, ICC, Cronbach's alpha, and Bland-Altman limits of agreement.",
+       catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
+                         "agreement_bland_altman")),
+  list(id = "equivalence_noninferiority", label = "Equivalence / Non-Inferiority Test Forms",
+       hint = "Two one-sided tests (TOST) for equivalence, non-inferiority margins, and crossover designs.",
+       catalog_keys = c("tost_means", "tost_proportions", "noninferiority_means",
+                         "noninferiority_proportions", "crossover_2x2"))
+)
+
 catalog_entry <- function(key) {
   Find(function(e) identical(e$key, key), calculator_catalog)
 }

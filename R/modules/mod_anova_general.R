@@ -41,7 +41,7 @@ mod_anova_general_ui <- function(id) {
       "Formula / Help",
       br(),
       h4(anova_general_content$anova_general$title),
-      withMathJax(HTML(anova_general_content$anova_general$formula_latex)),
+      render_formula_block(anova_general_content$anova_general$formula_latex),
       shiny::markdown(anova_general_content$anova_general$explanation),
       h5("Worked example"),
       shiny::markdown(anova_general_content$anova_general$worked_example)

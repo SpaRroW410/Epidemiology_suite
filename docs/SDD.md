@@ -219,11 +219,30 @@ for what to build next):
 Each row above is (or will be) exactly one `mod_*.R` + `calc_*.R` +
 `content_*.R` file set, following the module contract in §8.
 
+**Top navbar.** With 24 modules live, one flat top-level nav tab per
+calculator became unworkably crowded (26 items: Home, the wizard, and 24
+modules). `app.R` now groups modules into `bslib::nav_menu()` dropdowns via
+`global.R`'s `module_groups` list, ordered to match
+`checklist_by_design.md`'s own Part-1 section numbers (already simple ->
+difficult): Descriptive & Estimation, Survey & Cross-Sectional,
+Observational Studies, Diagnostic & Screening, Agreement & Reliability,
+Clinical Trials, Survival Analysis, Prediction Models, Surveillance, and
+General Statistical Tests (the handful of modules — Correlation,
+Chi-Square, Multiple Regression, Factorial ANOVA/ANCOVA, Logistic
+Regression, Exact Tests — with no single natural study-design home).
+Total: Home + 10 dropdowns = 11 top-level items. This is a navigation-layer
+change only; `nav_select()` still targets a module by its nav title exactly
+as before, whether that `nav_panel` sits directly on the navbar or nested
+in a dropdown (see §8's registry-wiring note and the `home_finder.R`/
+`design_wizard.R` mechanism in §7.1).
+
 ### 7.1 "Which calculator?" — the study design identification wizard
 
-A third way into the app, alongside the two Home finders in §7 above: a
-guided-questionnaire wizard (its own top-level nav panel, "Which calculator?")
-that walks a researcher through Stage 1–5 of
+A third way into the app, alongside the Home finder in §7 above: a
+guided-questionnaire wizard (a tab inside the Home hub, "Which calculator?
+(guided wizard)" — folded in during the navbar/Home reorg once the module
+count made a separate top-level nav panel for it too crowded) that walks a
+researcher through Stage 1–5 of
 [`docs/design_identification_algorithm.md`](design_identification_algorithm.md)
 — primary aim, allocation/directionality, outcome type, groups/dependence
 structure — one question at a time, showing the reasoning trace as it goes,
@@ -238,7 +257,12 @@ nodes with `options`, terminal nodes with either a `catalog_key` into
 `calculator_catalog` or a `would_use`/`citation` pair) and
 `R/home/design_wizard.R` (the UI/server, structured the same
 non-Shiny-module way as `home_finder.R`, for the same reason: it needs to
-jump the top-level navbar from the root session).
+jump the top-level navbar from the root session). `design_wizard.R` exposes
+a `design_wizard_body()` UI-fragment function (not a full page) plus its
+existing `design_wizard_server()`; `R/home/home_hub.R` composes it alongside
+`home_finder.R`'s dual-taxonomy browser and a formula/LaTeX helper into one
+"Home" nav panel — see §7 above and the top-navbar note there for why (26
+flat top-level tabs became unworkable once the module count reached 24).
 
 This is only the guided-tree half of the source document (its Stages 1–5;
 build-plan **Stage 1.5**, done). Its Stage 0 — free-text/PICO input parsing
@@ -261,7 +285,7 @@ copy-paste-modify for new additions.
 ```r
 proportion_content <- list(
   title = "Single Proportion vs. Known Value",
-  formula_latex = "n = \\frac{Z_{\\alpha/2}^2 \\, p(1-p)}{d^2}",
+  formula_latex = "$$n = \\frac{Z_{\\alpha/2}^2 \\, p(1-p)}{d^2}$$",
   explanation = "Where p is the expected proportion, d is the precision...",
   worked_example = "...",
   citation = "Naing L, Winn T, Rusli BN. Practical issues in calculating
@@ -288,12 +312,20 @@ mod_proportion_server <- function(id) { moduleServer(id, function(input, output,
 
 `app.R` wires modules into the navbar by iterating a registry list — adding a
 calculator to the nav does not require editing `app.R`'s structure, only
-appending to the registry.
+appending to `module_registry` and placing its id in the appropriate
+`module_groups` entry (both in `global.R`; see §7's "Top navbar" note).
 
 ---
 
 ## 9. Help / Reference Content Design
-- Formula rendered via `withMathJax(helpText(module_content$formula_latex))`
+- Formula rendered via `render_formula_block(module_content$formula_latex)`
+  (`R/modules/mod_shared_ui.R`) — wraps `withMathJax(HTML(...))` plus a
+  collapsible raw-LaTeX view with a copy-to-clipboard button, so every
+  formula's LaTeX source is visible/copyable without a separate feature per
+  module. `formula_latex` itself is one or more `$$...$$` display-math
+  blocks (concatenated with `paste0()` when there's more than one — see §8's
+  example and `README.md`'s module-contract section for the exact
+  convention, including the doubled-backslash escaping an R string needs).
 - Explanation and worked example as plain markdown-rendered text
   (`shiny::markdown()` or `includeMarkdown()`)
 - Reference sub-tab always shows: full citation, and which package/function

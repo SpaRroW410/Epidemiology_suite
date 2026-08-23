@@ -61,3 +61,35 @@ module_registry <- list(
   list(id = logistic_meta$id, title = logistic_meta$nav_title,
        ui = mod_logistic_ui, server = mod_logistic_server)
 )
+
+# Top-navbar grouping: which module ids collapse under which dropdown menu, in
+# which order. Mirrors docs/checklist_by_design.md's own Part-1 study-design
+# section numbers (already simple -> difficult) so the navbar doesn't invent a
+# second taxonomy on top of the checklist's. Modules with no single natural
+# study-design home (general G*Power-style test families) are grouped together
+# in the last entry; they remain individually discoverable by test family via
+# the Home hub's "Browse calculators" toggle (R/home/home_catalog.R's
+# test_families), which points at these same module ids.
+module_groups <- list(
+  list(title = "Descriptive & Estimation",
+       module_ids = c("proportion", "means", "rate")),
+  list(title = "Survey & Cross-Sectional",
+       module_ids = c("stratified", "cluster")),
+  list(title = "Observational Studies",
+       module_ids = c("case_control", "cohort")),
+  list(title = "Diagnostic & Screening",
+       module_ids = c("diagnostic", "roc")),
+  list(title = "Agreement & Reliability",
+       module_ids = c("agreement")),
+  list(title = "Clinical Trials",
+       module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover")),
+  list(title = "Survival Analysis",
+       module_ids = c("logrank")),
+  list(title = "Prediction Models",
+       module_ids = c("prediction")),
+  list(title = "Surveillance",
+       module_ids = c("rule_of_three")),
+  list(title = "General Statistical Tests",
+       module_ids = c("correlation", "chisq", "regression", "anova_general",
+                       "logistic", "exact_tests"))
+)

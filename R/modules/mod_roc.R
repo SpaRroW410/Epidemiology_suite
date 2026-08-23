@@ -26,7 +26,7 @@ mod_roc_ui <- function(id) {
       "Formula / Help",
       br(),
       h4(roc_content$single_auc$title),
-      withMathJax(HTML(roc_content$single_auc$formula_latex)),
+      render_formula_block(roc_content$single_auc$formula_latex),
       shiny::markdown(roc_content$single_auc$explanation),
       h5("Worked example"),
       shiny::markdown(roc_content$single_auc$worked_example)

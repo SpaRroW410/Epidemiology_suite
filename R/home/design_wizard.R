@@ -8,9 +8,8 @@
 # logic, not a Shiny module, because it needs to jump the top-level navbar
 # and update another module's input from the root session.
 
-design_wizard_ui <- function() {
+design_wizard_body <- function() {
   tagList(
-    h2("Which calculator do I need?"),
     p(paste(
       "Answer a few questions about your study and this points you to the",
       "right calculator -- showing its reasoning as it goes, so you can",

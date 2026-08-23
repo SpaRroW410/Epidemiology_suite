@@ -29,7 +29,7 @@ mod_correlation_ui <- function(id) {
       "Formula / Help",
       br(),
       h4(correlation_content$pearson$title),
-      withMathJax(HTML(correlation_content$pearson$formula_latex)),
+      render_formula_block(correlation_content$pearson$formula_latex),
       shiny::markdown(correlation_content$pearson$explanation),
       h5("Worked example"),
       shiny::markdown(correlation_content$pearson$worked_example)

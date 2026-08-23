@@ -30,7 +30,7 @@ mod_cluster_ui <- function(id) {
       "Formula / Help",
       br(),
       h4(cluster_content$deff$title),
-      withMathJax(HTML(cluster_content$deff$formula_latex)),
+      render_formula_block(cluster_content$deff$formula_latex),
       shiny::markdown(cluster_content$deff$explanation),
       h5("Worked example"),
       shiny::markdown(cluster_content$deff$worked_example)

@@ -147,22 +147,81 @@ further CORE items, and the start of Stage 2 (analytical depth) --
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4
-backlog in those two files) remains "coming soon" in the Home finder, per
+backlog in those two files) remains "coming soon" in the Home hub, per
 the staged build plan.
 
-### Which calculator? (guided wizard)
+### Top navbar: grouped by study design, simple to difficult
 
-A third way into the app, alongside the two Home finders: a "Which
-calculator?" nav tab that asks one question at a time (primary aim,
-experimental vs. observational, selection basis, outcome type, groups) per
-[`docs/design_identification_algorithm.md`](docs/design_identification_algorithm.md),
-shows its reasoning trace as you answer, and ends on a jump button into a
-live module -- or an honest "not yet built" note (naming the module/backend/
-citation the checklists already call for) if that branch isn't implemented
-yet. `R/home/design_tree.R` holds the question/terminal node registry;
-`R/home/design_wizard.R` is the UI/server (same non-module, top-level
-pattern as `home_finder.R`, since it also needs to jump the navbar from the
-root session). v1 scope is guided-tree only -- no free-text/PICO parsing yet.
+With 24 calculator modules, one flat top-level tab per module became
+unworkably crowded, so `app.R` groups them into 10 `bslib::nav_menu()`
+dropdowns instead of listing them flat, ordered to match
+`docs/checklist_by_design.md`'s own Part-1 study-design section numbers
+(already simple -> difficult): Descriptive & Estimation, Survey &
+Cross-Sectional, Observational Studies, Diagnostic & Screening, Agreement &
+Reliability, Clinical Trials, Survival Analysis, Prediction Models,
+Surveillance, and General Statistical Tests (the handful of modules with no
+single natural study-design home -- Correlation, Chi-Square, Multiple
+Regression, Factorial ANOVA/ANCOVA, Logistic Regression, Exact Tests -- kept
+together here, same duality as `checklist_by_design.md` vs.
+`checklist_by_test.md`). The grouping itself lives in `global.R`'s
+`module_groups` list (which module ids collapse under which dropdown title,
+in what order) -- `app.R` just builds one `nav_menu()` per entry; adding a
+calculator to the *navbar* still only means appending to `module_registry`
+plus placing its id in the right `module_groups` entry, nothing about
+`app.R`'s structure changes. Total top-level nav items: Home + 10 dropdowns
+= 11, down from 26 flat tabs (Home, "Which calculator?", and 24 modules).
+
+### Home hub: welcome + three ways to find/understand a calculator
+
+The Home tab is a short welcome, then one "Helper" area (`R/home/home_hub.R`)
+bundling three tabs so none of them need their own crowding top-level nav
+item:
+
+- **"Browse calculators"** (`R/home/home_finder.R`) -- a single toggle
+  ("By study design" / "By test family") over an accordion of every
+  built calculator at once (collapsed by default so ~20-21 family panels
+  stay scannable), rather than the old one-family-at-a-time dropdown. "By
+  study design" uses `study_design_families`; "By test family" is a second,
+  parallel index, `test_families` (both in `home_catalog.R`), mirroring
+  G*Power/the scope-review checklist's "Part 2 -- By Statistical Test"
+  groupings (t/z/F/chi-square/exact tests, correlation & regression,
+  survival tests, agreement statistics, equivalence/non-inferiority forms).
+  Toggling never duplicates a calculator -- both axes point at the same
+  `calculator_catalog` entries and the same jump-button mechanism (below);
+  it's purely a second browsing lens over one set of live modules.
+- **"Which calculator? (guided wizard)"** (`R/home/design_wizard.R`) -- asks
+  one question at a time (primary aim, experimental vs. observational,
+  selection basis, outcome type, groups) per
+  [`docs/design_identification_algorithm.md`](docs/design_identification_algorithm.md),
+  shows its reasoning trace as you answer, and ends on a jump button into a
+  live module -- or an honest "not yet built" note (naming the module/
+  backend/citation the checklists already call for) if that branch isn't
+  implemented yet. `R/home/design_tree.R` holds the question/terminal node
+  registry. v1 scope is guided-tree only -- no free-text/PICO parsing yet.
+- **"Formulas & LaTeX"** (`home_hub.R`'s `home_sandbox_ui()`) -- a short
+  explainer of this app's `$$...$$`/MathJax formula convention, plus a live
+  sandbox: type LaTeX and see it rendered instantly. See "Formula LaTeX
+  source + copy button" below for the matching feature on every calculator's
+  own formula display.
+
+Both `home_finder.R` and `design_wizard.R` expose a `*_body()` UI-fragment
+function (not a full page) plus their existing `*_server()`, composed
+together by `home_hub.R`'s `home_panel_ui()`/`home_server()` -- same
+non-module, top-level pattern as before (see "Non-idiomatic patterns"
+below), just assembled from three pieces instead of mounted as separate nav
+panels.
+
+### Look & feel
+
+`app.R`'s `bs_theme()` uses the "litera" Bootswatch preset with the
+"Source Serif 4" Google Font for both body and heading text (a clean,
+academic look, and a serif companion to the widely-used Source Sans family
+used across scientific publishing). Google Fonts load client-side at the
+browser, not server-side -- no new R package -- so this needs the end user's
+browser to reach `fonts.googleapis.com`; it degrades gracefully to a system
+serif font if that's blocked, same as `withMathJax()`'s formula rendering
+degrading gracefully (no crash, just unstyled/untypeset content) if
+`mathjax.rstudio.com` is unreachable.
 
 ## Requirements
 
@@ -195,13 +254,13 @@ testthat::test_dir("tests/testthat")
 ## Repository structure
 
 ```
-app.R                      # entry point: builds navbar, wires modules + Home finder
-global.R                   # pacman::p_load(), source()s R/, defines module_registry
+app.R                      # entry point: builds grouped navbar, wires modules + Home hub
+global.R                   # pacman::p_load(), source()s R/, module_registry + module_groups
 R/
-├── modules/                # UI + server per calculator (mod_*.R)
+├── modules/                # UI + server per calculator (mod_*.R), + mod_shared_ui.R
 ├── calc/                   # pure calculation functions, no Shiny (calc_*.R)
 ├── content/                 # per-module metadata: formula, text, citation (content_*.R)
-└── home/                    # Home page calculator finders (see below)
+└── home/                    # Home hub: finder, wizard, catalog (see below)
 tests/testthat/            # unit tests on calc_*.R functions
 docs/                       # project brief and software design document
 www/                         # custom CSS/JS/logo, if added later
@@ -226,7 +285,14 @@ outside those three files changes when you add a calculator.
 2. **`R/content/content_<name>.R`** — a plain R list (or one list per
    sub-design, as in `content_proportion.R`) with:
    - `title`
-   - `formula_latex` — MathJax-renderable string(s), wrapped in `$$...$$`
+   - `formula_latex` — one or more MathJax display-math blocks, each wrapped
+     in `$$...$$` and typically built with `paste0()` when there's more than
+     one (e.g. `paste0("$$h = ...$$", "$$n = ...$$")`) — no separator needed,
+     consecutive `$$...$$` blocks just render as consecutive equations. Since
+     this is an R string, every LaTeX backslash has to be doubled (`\\frac`,
+     `\\alpha`) — R itself treats a single `\` as an escape character. The
+     in-app "Formulas & LaTeX" tab on the Home page explains this same
+     convention to end users and has a live sandbox to experiment in.
    - `explanation` — markdown, plain-language description of each parameter
    - `worked_example` — markdown, a worked numeric example
    - `citation` — full citation of the original methodological source
@@ -237,7 +303,14 @@ outside those three files changes when you add a calculator.
 
 3. **`R/modules/mod_<name>.R`** — the Shiny module:
    - `mod_<name>_ui(id)` — a `tabsetPanel()` with **Calculate** / **Formula /
-     Help** / **Reference** sub-tabs, following `mod_proportion.R`
+     Help** / **Reference** sub-tabs, following `mod_proportion.R`. On the
+     Formula/Help tab, render each formula with
+     `render_formula_block(<content>$formula_latex)` (from the shared
+     `R/modules/mod_shared_ui.R`, sourced automatically like every other
+     `mod_*.R` file) rather than a bare `withMathJax(HTML(...))` call — it
+     renders the same MathJax output plus a collapsible "Show LaTeX source"
+     block with a copy-to-clipboard button, so this is a drop-in replacement,
+     not an alternative.
    - `mod_<name>_server(id)` — reads inputs, calls the `calc_*` function
      inside a `reactive()` + `tryCatch()`, and renders the result or a
      validation message
@@ -266,27 +339,28 @@ module_registry <- list(
 `app.R` builds the navbar by iterating this list — it does not need to
 change when you add a calculator.
 
-## Home page calculator finders
+## Home page calculator finder
 
-The Home tab offers two ways to find the right calculator, both driven by
-the catalog in `R/home/home_catalog.R`:
+The Home tab's "Browse calculators" section offers one toggle over two
+parallel indexes, both driven by `R/home/home_catalog.R`:
 
-- **By study design** — pick the calculator family that matches your study
-  (Proportions, Means, Case-Control, ...); matches `docs/SDD.md` §7's
-  catalog table.
-- **By groups & data type** — pick your outcome type (proportion/mean),
-  number of groups (1, 2, or 3+), and — for 2 groups — whether they're
-  independent or dependent (paired/matched); for 1 group, whether you have a
-  known/reference value to test against or are just estimating with a
-  desired precision.
+- **By study design** — `study_design_families`, matching
+  `docs/checklist_by_design.md`'s own sections (Proportions, Means,
+  Case-Control, ...); also mirrors `docs/SDD.md` §7's catalog table.
+- **By test family** — `test_families`, matching
+  `docs/checklist_by_test.md`'s G*Power-style groupings (t tests, z tests, F
+  tests, chi-square tests, exact tests, correlation & regression, survival
+  tests, agreement statistics, equivalence/non-inferiority forms).
 
-Both finders resolve to an entry in `calculator_catalog` (in
-`home_catalog.R`). An entry with `built = TRUE` renders as a button that
-jumps to the right nav tab and presets that module's internal design
+Both resolve to entries in `calculator_catalog` (in `home_catalog.R`) and
+render as one accordion (collapsed by default) of family panels via
+`.render_catalog_entry()`. An entry with `built = TRUE` renders as a button
+that jumps to the right nav tab and presets that module's internal design
 selector; `built = FALSE` renders a "coming soon" note. **When you add a new
 calculator module, also add its catalog entry/entries** (and, if it starts a
-new family, an entry in `study_design_families`) — otherwise the finders
-will describe it as not yet implemented even after you've built it.
+new family, an entry in `study_design_families` and/or `test_families`) —
+otherwise the finder will describe it as not yet implemented even after
+you've built it.
 
 ## Non-idiomatic-for-plain-R patterns used here
 
@@ -301,14 +375,18 @@ since they're easy to miss when skimming the module code.
   condition string is built with `ns("design")` rather than hardcoded, so it
   stays correct if the module is ever mounted under a different id.
 
-- **`do.call()` to build `page_navbar()`'s tabs dynamically.** `app.R` builds
-  the list of nav panels from `module_registry` in a loop, then calls
-  `do.call(page_navbar, c(list(title = ..., theme = ...), list(home_panel),
-  nav_panels))` instead of writing `page_navbar(title = ..., home_panel,
-  nav_panel_1, nav_panel_2, ...)` by hand. `do.call()` is base R (not
-  Shiny/JS-specific) but is worth flagging if you haven't used it before:
-  it calls a function with an argument list assembled at runtime, which is
-  how a variable number of calculator tabs gets passed into `...`.
+- **`do.call()` to build `page_navbar()`'s (and `nav_menu()`'s) tabs
+  dynamically.** `app.R` builds one `nav_menu()` per `module_groups` entry
+  (each via `do.call(nav_menu, c(list(title = g$title), panels))`, since a
+  group's member-module list is itself built at runtime from
+  `module_groups`), then passes the whole list of `nav_menu()`s to
+  `do.call(page_navbar, c(list(id = ..., title = ..., theme = ...),
+  list(home_panel), group_menus))` instead of writing
+  `page_navbar(title = ..., home_panel, nav_menu_1, nav_menu_2, ...)` by
+  hand. `do.call()` is base R (not Shiny/JS-specific) but is worth flagging
+  if you haven't used it before: it calls a function with an argument list
+  assembled at runtime, which is how a variable number of dropdowns (and
+  variable number of modules within each) gets passed into `...`.
 
 - **`moduleServer()` / `NS()`.** Standard Shiny modules pattern: `NS(id)`
   namespaces UI element ids so multiple instances of a module (or multiple
@@ -336,9 +414,12 @@ since they're easy to miss when skimming the module code.
 
 - **`bslib::nav_select()`.** `page_navbar(id = "main_nav", ...)` gives the
   navbar an id; `nav_select("main_nav", "Proportions", session = session)`
-  then switches the active tab programmatically (used by the Home finder's
-  "jump to calculator" buttons) instead of the user clicking the tab
-  themselves.
+  then switches the active tab programmatically (used by the Home hub's
+  "jump to calculator" buttons and the guided wizard) instead of the user
+  clicking the tab themselves. Targets by nav title regardless of whether
+  that `nav_panel` sits directly on the navbar or nested inside a
+  `nav_menu()` dropdown (see "Top navbar" above) -- grouping modules into
+  dropdowns didn't require any change to this jump mechanism.
 
 - **`numericInput(..., value = NA)` for an optional field.** The precision
   calculator's population size `N` is optional (no finite population

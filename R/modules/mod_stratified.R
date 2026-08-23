@@ -31,7 +31,7 @@ mod_stratified_ui <- function(id) {
       "Formula / Help",
       br(),
       h4(stratified_content$stratified$title),
-      withMathJax(HTML(stratified_content$stratified$formula_latex)),
+      render_formula_block(stratified_content$stratified$formula_latex),
       shiny::markdown(stratified_content$stratified$explanation),
       h5("Worked example"),
       shiny::markdown(stratified_content$stratified$worked_example)

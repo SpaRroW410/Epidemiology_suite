@@ -36,7 +36,7 @@ mod_cohort_ui <- function(id) {
       "Formula / Help",
       br(),
       h4(cohort_content$cohort$title),
-      withMathJax(HTML(cohort_content$cohort$formula_latex)),
+      render_formula_block(cohort_content$cohort$formula_latex),
       shiny::markdown(cohort_content$cohort$explanation),
       h5("Worked example"),
       shiny::markdown(cohort_content$cohort$worked_example)

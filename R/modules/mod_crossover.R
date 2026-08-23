@@ -27,7 +27,7 @@ mod_crossover_ui <- function(id) {
       "Formula / Help",
       br(),
       h4(crossover_content$crossover_2x2$title),
-      withMathJax(HTML(crossover_content$crossover_2x2$formula_latex)),
+      render_formula_block(crossover_content$crossover_2x2$formula_latex),
       shiny::markdown(crossover_content$crossover_2x2$explanation),
       h5("Worked example"),
       shiny::markdown(crossover_content$crossover_2x2$worked_example)

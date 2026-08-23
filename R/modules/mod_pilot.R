@@ -32,7 +32,7 @@ mod_pilot_ui <- function(id) {
       "Formula / Help",
       br(),
       h4(pilot_content$rule_of_thumb$title),
-      withMathJax(HTML(pilot_content$rule_of_thumb$formula_latex)),
+      render_formula_block(pilot_content$rule_of_thumb$formula_latex),
       shiny::markdown(pilot_content$rule_of_thumb$explanation),
       h5("Worked example"),
       shiny::markdown(pilot_content$rule_of_thumb$worked_example)
