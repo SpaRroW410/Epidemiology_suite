@@ -96,5 +96,105 @@ case_control_content <- list(
       "Biometrics. 1988;44(4):1157-1168."
     ),
     backend = "epiR::epi.sscc(method = \"matched\")"
+  ),
+
+  nested = list(
+    title = "Nested Case-Control Study",
+    formula_latex = paste0(
+      "$$N = \\frac{(Z_{1-\\alpha/2} + Z_{1-\\beta})^2}{\\theta^2\\, p_E(1-p_E)(1-R^2)\\, ",
+      "\\dfrac{n_D\\, n_H}{n_D+n_H}} \\quad \\text{(binary exposure; Lachin 2008, \\S3.3)}$$",
+      "$$N = \\frac{(Z_{1-\\alpha/2} + Z_{1-\\beta})^2}{\\theta^2\\, \\sigma^2\\, n_D\\, ",
+      "\\left(1-\\dfrac{1}{\\binom{n_D+n_H}{n_D}}\\right)(1-R^2)} ",
+      "\\quad \\text{(continuous exposure; Lachin 2008, \\S3.1)}$$",
+      "$$\\theta = \\log(OR)$$"
+    ),
+    explanation = paste(
+      "In a nested case-control study, cases and a sample of matched",
+      "controls are drawn from within an existing cohort (rather than",
+      "assembled separately), and their exposure histories are compared",
+      "using conditional logistic regression -- much cheaper than",
+      "measuring exposure on the whole cohort, at a small efficiency",
+      "cost relative to a full-cohort analysis.",
+      "",
+      "- **OR** - the odds ratio you want to be able to detect (per unit",
+      "  change in a continuous exposure, or between exposed/unexposed for",
+      "  a binary exposure).",
+      "- **pE (binary only)** - prevalence of exposure among the matched sets.",
+      "- **sigma (continuous only)** - the standard deviation of the exposure.",
+      "- **nD, nH** - number of cases and controls per matched set (e.g.",
+      "  nD = 1, nH = 2 for 1:2 matching).",
+      "- **R2** - proportion of variation in exposure already explained by",
+      "  other covariates in the conditional logistic model; 0 if the",
+      "  exposure of interest is the only covariate.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "The result is the number of matched sets required; total subjects",
+      "= sets x (nD + nH).",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Binary exposure -- Lachin (2008), §3.3: to detect OR = 3.5 with",
+      "exposure prevalence pE = 0.15 in a 1:2 matched nested case-control",
+      "study (nD = 1, nH = 2), with no adjustment covariates (R2 = 0),",
+      "alpha = 0.05, and 80% power, this calculator returns 59 matched",
+      "sets (177 subjects total).",
+      "",
+      "Continuous exposure -- Lachin (2008), §3.1: to detect OR = 1.39",
+      "per SD of a continuous exposure (sigma = 1) with the same 1:2",
+      "matching, alpha = 0.05, and 85% power, this calculator returns",
+      "125 matched sets (375 subjects total).",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Lachin JM. Biostatistical Methods: The Assessment of Relative",
+      "Risks. 2nd ed. Wiley; 2008. §3.1 (continuous exposure, formulas",
+      "24-25), §3.3 (binary exposure, formula 38)."
+    ),
+    backend = "powerSurvEpi::powerConLogistic.bin() / powerConLogistic.con()"
+  ),
+
+  case_cohort = list(
+    title = "Case-Cohort Study",
+    formula_latex = paste0(
+      "$$B = \\frac{(Z_{1-\\alpha} + Z_{1-\\beta})^2}{\\theta^2\\, p_1(1-p_1)\\, p_D}, ",
+      "\\quad m = \\left\\lceil \\frac{n\\,B\\,p_D}{n - B(1-p_D)} \\right\\rceil$$",
+      "$$\\theta = \\log(HR)$$"
+    ),
+    explanation = paste(
+      "In a case-cohort study, a random subcohort is sampled once from an",
+      "already-assembled cohort of known size, and exposure/covariates are",
+      "measured only in that subcohort plus all cases that occur anywhere",
+      "in the full cohort -- cheaper than measuring covariates on everyone,",
+      "and (unlike a nested case-control design) the same subcohort can be",
+      "reused to study multiple outcomes.",
+      "",
+      "- **n** - the full cohort size (already fixed/known).",
+      "- **pD** - the proportion of the full cohort expected to fail",
+      "  (experience the event) over the study period.",
+      "- **p1** - the proportion of the cohort in exposure/covariate",
+      "  group 1 (group 2 is 1 - p1).",
+      "- **hr** - the hazard ratio you want to be able to detect between",
+      "  the two groups.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "The result is the required random subcohort size (a subset of the",
+      "full cohort n).",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Cai & Zeng (2004), ARIC study example: a full cohort of n = 15,792",
+      "has an expected 3% failure proportion (pD = 0.03) and 25% of the",
+      "cohort in the exposed group (p1 = 0.25). To detect a hazard ratio",
+      "of 1.35 with a one-sided alpha = 0.05 and 80% power, this",
+      "calculator returns a required subcohort size of 1,463. At HR =",
+      "1.40 the required subcohort drops to 722, and at HR = 1.45 to 468",
+      "-- all three reproduce the paper's own worked table exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Cai J, Zeng D. Sample size/power calculation for case-cohort",
+      "studies. Biometrics. 2004;60(4):1015-1024."
+    ),
+    backend = "closed-form (Cai & Zeng 2004)"
   )
 )

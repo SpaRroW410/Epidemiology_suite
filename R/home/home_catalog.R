@@ -243,6 +243,28 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Case-Control",
        module_input_id = "case_control-design", design_value = "matched"),
 
+  list(key = "case_control_nested",
+       label = "Nested case-control study",
+       answers = paste(
+         "Answers: \"How many matched sets (cases + controls) do I need,",
+         "sampling cases and controls from within an existing cohort and",
+         "comparing them via conditional logistic regression?\""
+       ),
+       outcome_type = "case_control", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Case-Control",
+       module_input_id = "case_control-design", design_value = "nested"),
+
+  list(key = "case_control_case_cohort",
+       label = "Case-cohort study",
+       answers = paste(
+         "Answers: \"How large a random subcohort do I need to sample from",
+         "my already-assembled cohort, so that it plus all eventual cases",
+         "gives me enough power to detect a given hazard ratio?\""
+       ),
+       outcome_type = "case_control", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Case-Control",
+       module_input_id = "case_control-design", design_value = "case_cohort"),
+
   list(key = "cohort_rr",
        label = "Cohort study (relative risk)",
        answers = paste(
@@ -409,6 +431,37 @@ calculator_catalog <- list(
        outcome_type = "binary", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Logistic Regression",
        module_input_id = "logistic-design", design_value = "continuous"),
+
+  list(key = "rm_anova_between",
+       label = "Repeated-measures ANOVA -- between-subjects effect",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect an overall",
+         "between-group effect in a repeated-measures design?\""
+       ),
+       outcome_type = "continuous", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "RM-ANOVA / Mixed ANOVA",
+       module_input_id = "rm_anova-design", design_value = "between"),
+
+  list(key = "rm_anova_within",
+       label = "Repeated-measures ANOVA -- within-subjects effect",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a",
+         "within-subjects (e.g. change-over-time) effect in a",
+         "repeated-measures design?\""
+       ),
+       outcome_type = "continuous", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "RM-ANOVA / Mixed ANOVA",
+       module_input_id = "rm_anova-design", design_value = "within"),
+
+  list(key = "rm_anova_interaction",
+       label = "Mixed (split-plot) ANOVA -- group x time interaction",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a group-by-time",
+         "interaction (does the change over time differ between groups)?\""
+       ),
+       outcome_type = "continuous", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "RM-ANOVA / Mixed ANOVA",
+       module_input_id = "rm_anova-design", design_value = "interaction"),
 
   list(key = "pilot_feasibility",
        label = "Pilot / feasibility study",
@@ -633,8 +686,9 @@ study_design_families <- list(
        catalog_keys = c("means_single_precision", "means_single", "means_two_indep",
                          "means_two_indep_unequal_n", "means_two_dep", "means_k")),
   list(id = "case_control", label = "Case-Control",
-       hint = "Case-control study (unmatched or matched), odds ratio based.",
-       catalog_keys = c("case_control_unmatched", "case_control_matched")),
+       hint = "Case-control study (unmatched, matched, nested, or case-cohort), odds ratio or hazard ratio based.",
+       catalog_keys = c("case_control_unmatched", "case_control_matched",
+                         "case_control_nested", "case_control_case_cohort")),
   list(id = "cohort", label = "Cohort / Relative Risk",
        hint = "Cohort or cross-sectional study estimating relative risk.",
        catalog_keys = c("cohort_rr")),
@@ -686,6 +740,9 @@ study_design_families <- list(
   list(id = "anova_general", label = "Factorial ANOVA / ANCOVA",
        hint = "Main effects, interactions, or covariate-adjusted group effects via the general linear model F-test.",
        catalog_keys = c("anova_general")),
+  list(id = "rm_anova", label = "Repeated-Measures / Mixed ANOVA",
+       hint = "Between-subjects, within-subjects, or group-by-time interaction effects in a repeated-measures or split-plot design.",
+       catalog_keys = c("rm_anova_between", "rm_anova_within", "rm_anova_interaction")),
   list(id = "safety_surveillance", label = "Safety / Surveillance",
        hint = "Bounding an unseen adverse-event rate, or planning to catch a rare event.",
        catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required")),
@@ -721,8 +778,9 @@ test_families <- list(
        catalog_keys = c("proportion_single", "proportion_two_indep",
                          "logistic_binary", "logistic_continuous")),
   list(id = "f_tests", label = "F Tests",
-       hint = "One-way/factorial ANOVA, ANCOVA, and multiple regression (general linear model F-test framework).",
-       catalog_keys = c("means_k", "regression_r2", "anova_general")),
+       hint = "One-way/factorial ANOVA, ANCOVA, multiple regression, and repeated-measures/mixed ANOVA (general linear model F-test framework).",
+       catalog_keys = c("means_k", "regression_r2", "anova_general",
+                         "rm_anova_between", "rm_anova_within", "rm_anova_interaction")),
   list(id = "chi_square_tests", label = "Chi-Square Tests",
        hint = "Goodness of fit and tests of independence/association for categorical data.",
        catalog_keys = c("chisq_gof", "chisq_independence")),

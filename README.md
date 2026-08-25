@@ -46,7 +46,12 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   of agreement (wraps `presize::prec_lim_agree()` / Bland & Altman 1986)
 - **Case-Control** (`R/modules/mod_case_control.R`) -- unmatched and matched
   (1:1 or 1:m) case-control studies, both wrapping `epiR::epi.sscc()`
-  (Dupont 1988; Woodward 2014)
+  (Dupont 1988; Woodward 2014); nested case-control (binary or continuous
+  exposure), wrapping `powerSurvEpi::powerConLogistic.bin()`/`.con()`
+  (Lachin 2008 §3.1/§3.3); and case-cohort, closed-form reimplementation
+  of `gap::ccsize()`'s sample-size equation (Cai & Zeng 2004) rather than
+  a runtime dependency on `gap`, whose `dplyr`/`ggplot2`/`plotly`/`Rdpack`
+  imports are far heavier than this one formula needs
 - **Cohort / RR** (`R/modules/mod_cohort.R`) -- cohort/cross-sectional
   relative-risk studies, wrapping `epiR::epi.sscohortc()` (Kelsey,
   Thompson & Evans 1986; Woodward 2014)
@@ -155,6 +160,15 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   `Imports: survival, splines, corpcor, fda, R.methodsS3, gnm` chain is
   far heavier than this one formula needs -- verified to reproduce all
   three of that package's documented examples exactly
+- **RM-ANOVA / Mixed ANOVA** (`R/modules/mod_rm_anova.R`) -- sample size
+  for a between-subjects group effect, a within-subjects (repeated-
+  measures) effect, or their interaction (the classic mixed/split-plot
+  ANOVA test), closed-form reimplementation of
+  `WebPower::wp.rmanova()`'s noncentral-F algorithm (Cohen 1988) rather
+  than a runtime dependency on `WebPower`, whose `MASS`/`lme4`/`lavaan`/
+  `PearsonDS` dependencies are far heavier than this one function needs
+  and which that function itself never calls into; the between-effect
+  design reproduces the package's own documented example exactly
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4
