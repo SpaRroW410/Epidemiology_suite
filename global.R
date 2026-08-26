@@ -61,7 +61,9 @@ module_registry <- list(
   list(id = logistic_meta$id, title = logistic_meta$nav_title,
        ui = mod_logistic_ui, server = mod_logistic_server),
   list(id = sccs_meta$id, title = sccs_meta$nav_title,
-       ui = mod_sccs_ui, server = mod_sccs_server)
+       ui = mod_sccs_ui, server = mod_sccs_server),
+  list(id = rm_anova_meta$id, title = rm_anova_meta$nav_title,
+       ui = mod_rm_anova_ui, server = mod_rm_anova_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -93,5 +95,5 @@ module_groups <- list(
        module_ids = c("rule_of_three")),
   list(title = "General Statistical Tests",
        module_ids = c("correlation", "chisq", "regression", "anova_general",
-                       "logistic", "exact_tests"))
+                       "logistic", "exact_tests", "rm_anova"))
 )

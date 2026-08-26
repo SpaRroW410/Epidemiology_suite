@@ -192,7 +192,7 @@ for what to build next):
 | Means | Precision-based; one-sample, two-sample (equal + unequal n), paired, one-way ANOVA (3+ groups) | `epiR::epi.sssimpleestc()`; `pwr::pwr.t.test`, `pwr::pwr.t2n.test`, `pwr::pwr.anova.test` | Live |
 | Diagnostic accuracy | Precision-based (Buderer); vs. reference value; two tests, unpaired/paired; PPV/NPV; likelihood ratios (LR+/LR-) | closed-form (Buderer; Casagrande-Pike; Connor; Altman & Bland), all + Yates' correction; `presize::prec_pos_lr()`/`prec_neg_lr()` (Simel et al 1991) | Live |
 | Agreement / reliability | Cohen's kappa; ICC; Cronbach's alpha; Bland-Altman LoA | `presize::prec_kappa()` (→ `kappaSize`); `presize::prec_icc()` (Bonett 2002); `presize::prec_cronb()` (Bonett & Wright 2015); `presize::prec_lim_agree()` (Bland & Altman 1986) | Live |
-| Case-control | Unmatched; matched (1:1 or 1:m) | `epiR::epi.sscc()` | Live |
+| Case-control | Unmatched; matched (1:1 or 1:m); nested (binary/continuous exposure); case-cohort | `epiR::epi.sscc()`; `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed-form (Cai & Zeng 2004) | Live |
 | Cohort / RR | Cohort, cross-sectional, relative risk | `epiR::epi.sscohortc()` | Live |
 | Correlation | Pearson correlation | `pwr::pwr.r.test()` | Live |
 | Chi-square tests | Goodness of fit; test of independence (R×C) | `pwr::pwr.chisq.test()` (`ES.w1`/`ES.w2`) | Live |
@@ -213,8 +213,10 @@ for what to build next):
 | Factorial ANOVA / ANCOVA | Main effects, interactions, ANCOVA group effects (general F-test) | `pwr::pwr.f2.test()` (Cohen 1988) | Live |
 | Logistic Regression | Simple logistic regression, binary or continuous predictor | `powerMediation::SSizeLogisticBin()`/`SSizeLogisticCon()` (Hsieh et al. 1998) | Live |
 | Self-Controlled Case Series | Cases-only design, risk-period vs. own-time comparison, optional age effects | closed-form (Musonda, Farrington & Whitaker 2006) | Live |
+| RM-ANOVA / Mixed ANOVA | Between-subjects, within-subjects, and group x time interaction effects | closed-form (Cohen 1988; `WebPower::wp.rmanova()` algorithm) | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
 | Survival (advanced) | Accrual/follow-up (non-uniform entry), competing risks, RMST | `gsDesign::nSurv`; `SSRMST` (simulation-based, not yet wrapped) | Not started |
+| MANOVA | Global & special effects, Hotelling's T² | Vonesh & Schork (1986) closed-form; not yet wrapped | Not started |
 | Post-hoc / achieved power | Given n and observed effect, compute achieved power | reuse each module's engine, solve for power | Not started |
 
 Each row above is (or will be) exactly one `mod_*.R` + `calc_*.R` +
