@@ -191,11 +191,11 @@ for what to build next):
 | Proportions | Precision-based (Cochran, +FPC); vs. known value; two independent | closed-form (Cochran); `pwr::pwr.p.test`, `pwr::pwr.2p.test` | Live |
 | Means | Precision-based; one-sample, two-sample (equal + unequal n), paired, one-way ANOVA (3+ groups) | `epiR::epi.sssimpleestc()`; `pwr::pwr.t.test`, `pwr::pwr.t2n.test`, `pwr::pwr.anova.test` | Live |
 | Diagnostic accuracy | Precision-based (Buderer); vs. reference value; two tests, unpaired/paired; PPV/NPV; likelihood ratios (LR+/LR-) | closed-form (Buderer; Casagrande-Pike; Connor; Altman & Bland), all + Yates' correction; `presize::prec_pos_lr()`/`prec_neg_lr()` (Simel et al 1991) | Live |
-| Agreement / reliability | Cohen's kappa; ICC; Cronbach's alpha; Bland-Altman LoA | `presize::prec_kappa()` (→ `kappaSize`); `presize::prec_icc()` (Bonett 2002); `presize::prec_cronb()` (Bonett & Wright 2015); `presize::prec_lim_agree()` (Bland & Altman 1986) | Live |
+| Agreement / reliability | Cohen's kappa; ICC; Cronbach's alpha; Bland-Altman LoA; Lin's CCC | `presize::prec_kappa()` (→ `kappaSize`); `presize::prec_icc()` (Bonett 2002); `presize::prec_cronb()` (Bonett & Wright 2015); `presize::prec_lim_agree()` (Bland & Altman 1986); closed-form (Lin 1989/2000, formula as used internally by `epiR::epi.ccc()`) | Live |
 | Case-control | Unmatched; matched (1:1 or 1:m); nested (binary/continuous exposure); case-cohort | `epiR::epi.sscc()`; `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed-form (Cai & Zeng 2004) | Live |
 | Cohort / RR | Cohort, cross-sectional, relative risk | `epiR::epi.sscohortc()` | Live |
 | Correlation | Pearson correlation | `pwr::pwr.r.test()` | Live |
-| Chi-square tests | Goodness of fit; test of independence (R×C) | `pwr::pwr.chisq.test()` (`ES.w1`/`ES.w2`) | Live |
+| Chi-square tests | Goodness of fit; test of independence (R×C); McNemar's (paired proportions) | `pwr::pwr.chisq.test()` (`ES.w1`/`ES.w2`); `TrialSize::McNemar.Test()` | Live |
 | Pilot / feasibility | Flat 12/arm rule-of-thumb; interactive CI-for-SD precision | rule-of-thumb (Julious 2005); closed-form chi-square CI theory | Live |
 | Simon two-stage | Phase II single-arm (minimax + optimal designs) | `clinfun::ph2simon()` | Live |
 | Equivalence (TOST) | Two one-sided tests, means and proportions | `PowerTOST::sampleN.TOST(logscale=FALSE)`; `epiR::epi.ssequb()` | Live |
@@ -214,6 +214,7 @@ for what to build next):
 | Logistic Regression | Simple logistic regression, binary or continuous predictor | `powerMediation::SSizeLogisticBin()`/`SSizeLogisticCon()` (Hsieh et al. 1998) | Live |
 | Self-Controlled Case Series | Cases-only design, risk-period vs. own-time comparison, optional age effects | closed-form (Musonda, Farrington & Whitaker 2006) | Live |
 | RM-ANOVA / Mixed ANOVA | Between-subjects, within-subjects, and group x time interaction effects | closed-form (Cohen 1988; `WebPower::wp.rmanova()` algorithm) | Live |
+| Nonparametric Tests | Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau | `TrialSize::Nonpara.Two.Sample()`/`Nonpara.One.Sample()`/`Nonpara.Independ()` (Chow, Shao & Wang 2003) | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
 | Survival (advanced) | Accrual/follow-up (non-uniform entry), competing risks, RMST | `gsDesign::nSurv`; `SSRMST` (simulation-based, not yet wrapped) | Not started |
 | MANOVA | Global & special effects, Hotelling's T² | Vonesh & Schork (1986) closed-form; not yet wrapped | Not started |

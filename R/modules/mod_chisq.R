@@ -23,7 +23,8 @@ mod_chisq_ui <- function(id) {
         ns("design"), "Design",
         choices = c(
           "Goodness of fit" = "gof",
-          "Test of independence / association (R x C table)" = "independence"
+          "Test of independence / association (R x C table)" = "independence",
+          "McNemar's test (paired proportions)" = "mcnemar"
         ),
         selected = "gof"
       ),
@@ -41,6 +42,13 @@ mod_chisq_ui <- function(id) {
         p(class = "text-muted",
           "Enter the proportion of the TOTAL sample expected in each cell (all cells sum to 1)."),
         uiOutput(ns("indep_props_ui"))
+      ),
+      conditionalPanel(
+        condition = design_is("mcnemar"),
+        numericInput(ns("p10"), "p10 (proportion switching positive -> negative)",
+                     value = 0.5, min = 0.001, max = 0.999, step = 0.01),
+        numericInput(ns("p01"), "p01 (proportion switching negative -> positive)",
+                     value = 0.2, min = 0.001, max = 0.999, step = 0.01)
       ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
@@ -61,7 +69,13 @@ mod_chisq_ui <- function(id) {
       render_formula_block(chisq_content$independence$formula_latex),
       shiny::markdown(chisq_content$independence$explanation),
       h5("Worked example"),
-      shiny::markdown(chisq_content$independence$worked_example)
+      shiny::markdown(chisq_content$independence$worked_example),
+      hr(),
+      h4(chisq_content$mcnemar$title),
+      render_formula_block(chisq_content$mcnemar$formula_latex),
+      shiny::markdown(chisq_content$mcnemar$explanation),
+      h5("Worked example"),
+      shiny::markdown(chisq_content$mcnemar$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -72,7 +86,11 @@ mod_chisq_ui <- function(id) {
       hr(),
       h4(chisq_content$independence$title),
       p(strong("Citation: "), chisq_content$independence$citation),
-      p(strong("Implemented via: "), code(chisq_content$independence$backend))
+      p(strong("Implemented via: "), code(chisq_content$independence$backend)),
+      hr(),
+      h4(chisq_content$mcnemar$title),
+      p(strong("Citation: "), chisq_content$mcnemar$citation),
+      p(strong("Implemented via: "), code(chisq_content$mcnemar$backend))
     )
   )
 }
@@ -116,7 +134,15 @@ mod_chisq_server <- function(id) {
     result <- reactive({
       req(input$design, input$alpha, input$power)
 
-      if (input$design == "gof") {
+      if (input$design == "mcnemar") {
+        req(input$p10, input$p01)
+        tryCatch(
+          list(ok = TRUE, value = calc_mcnemar(
+            p10 = input$p10, p01 = input$p01, alpha = input$alpha, power = input$power
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else if (input$design == "gof") {
         req(input$k_gof)
         k <- as.integer(input$k_gof)
         p0_vals <- lapply(seq_len(k), function(i) input[[paste0("p0_", i)]])
@@ -157,10 +183,16 @@ mod_chisq_server <- function(id) {
       }
 
       v <- res$value
-      tagList(
-        p(strong("Required total sample size (N): "), v$N),
-        p(sprintf("Effect size w = %.4f, df = %d", v$w, v$df))
-      )
+      if (input$design == "mcnemar") {
+        tagList(
+          p(strong("Required number of pairs: "), v$n)
+        )
+      } else {
+        tagList(
+          p(strong("Required total sample size (N): "), v$N),
+          p(sprintf("Effect size w = %.4f, df = %d", v$w, v$df))
+        )
+      }
     })
   })
 }

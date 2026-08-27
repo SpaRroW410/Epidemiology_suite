@@ -218,6 +218,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Agreement / Reliability",
        module_input_id = "agreement-design", design_value = "bland_altman"),
 
+  list(key = "agreement_ccc",
+       label = "Lin's concordance correlation coefficient (CCC)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate a combined",
+         "precision-and-accuracy agreement coefficient between two",
+         "continuous measurement methods, to a desired precision?\""
+       ),
+       outcome_type = "agreement", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Agreement / Reliability",
+       module_input_id = "agreement-design", design_value = "ccc"),
+
   # Case-Control / Cohort entries: same reasoning as Diagnostic Accuracy
   # above -- these compare exposure vs. outcome status, not "groups" in the
   # proportion/mean sense, so only reachable via "by study design".
@@ -323,6 +334,17 @@ calculator_catalog <- list(
        outcome_type = "chisq", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Chi-Square Tests",
        module_input_id = "chisq-design", design_value = "independence"),
+
+  list(key = "chisq_mcnemar",
+       label = "McNemar's test (paired proportions)",
+       answers = paste(
+         "Answers: \"How many pairs do I need to detect an asymmetry in",
+         "how a binary outcome switches, when the same subjects are",
+         "measured twice (before/after, or two raters)?\""
+       ),
+       outcome_type = "chisq", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Chi-Square Tests",
+       module_input_id = "chisq-design", design_value = "mcnemar"),
 
   list(key = "logrank",
        label = "Log-rank test (comparing two survival curves)",
@@ -452,6 +474,39 @@ calculator_catalog <- list(
        outcome_type = "continuous", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "RM-ANOVA / Mixed ANOVA",
        module_input_id = "rm_anova-design", design_value = "within"),
+
+  list(key = "wilcoxon_rank_sum",
+       label = "Wilcoxon rank-sum test (Mann-Whitney U)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to compare two",
+         "independent groups on a continuous/ordinal outcome, without",
+         "assuming normality?\""
+       ),
+       outcome_type = "continuous", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Nonparametric Tests",
+       module_input_id = "nonparametric-design", design_value = "rank_sum"),
+
+  list(key = "wilcoxon_signed_rank",
+       label = "Wilcoxon signed-rank test (one sample / paired)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to test whether a",
+         "median (or paired-difference median) differs from zero,",
+         "without assuming normality?\""
+       ),
+       outcome_type = "continuous", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Nonparametric Tests",
+       module_input_id = "nonparametric-design", design_value = "signed_rank"),
+
+  list(key = "kendall_tau",
+       label = "Kendall's tau (nonparametric association)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect an association",
+         "between two continuous variables, without assuming bivariate",
+         "normality?\""
+       ),
+       outcome_type = "continuous", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Nonparametric Tests",
+       module_input_id = "nonparametric-design", design_value = "kendall"),
 
   list(key = "rm_anova_interaction",
        label = "Mixed (split-plot) ANOVA -- group x time interaction",
@@ -704,12 +759,12 @@ study_design_families <- list(
        hint = "Detecting a Pearson correlation between two continuous variables.",
        catalog_keys = c("correlation_pearson")),
   list(id = "agreement", label = "Agreement / Reliability",
-       hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman).",
+       hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman, Lin's CCC).",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
-                         "agreement_bland_altman")),
+                         "agreement_bland_altman", "agreement_ccc")),
   list(id = "chi_square", label = "Chi-Square Tests",
-       hint = "Categorical distribution/association testing (goodness of fit, R x C tables).",
-       catalog_keys = c("chisq_gof", "chisq_independence")),
+       hint = "Categorical distribution/association testing (goodness of fit, R x C tables, paired proportions).",
+       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar")),
   list(id = "precision", label = "Precision-based (CI-width)",
        hint = "Estimating with a target confidence-interval width rather than testing a hypothesis.",
        catalog_keys = c("proportion_single_precision", "means_single_precision",
@@ -743,6 +798,9 @@ study_design_families <- list(
   list(id = "rm_anova", label = "Repeated-Measures / Mixed ANOVA",
        hint = "Between-subjects, within-subjects, or group-by-time interaction effects in a repeated-measures or split-plot design.",
        catalog_keys = c("rm_anova_between", "rm_anova_within", "rm_anova_interaction")),
+  list(id = "nonparametric", label = "Nonparametric Tests",
+       hint = "Distribution-free alternatives to the t-test and correlation test, when normality can't be assumed.",
+       catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau")),
   list(id = "safety_surveillance", label = "Safety / Surveillance",
        hint = "Bounding an unseen adverse-event rate, or planning to catch a rare event.",
        catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required")),
@@ -782,8 +840,8 @@ test_families <- list(
        catalog_keys = c("means_k", "regression_r2", "anova_general",
                          "rm_anova_between", "rm_anova_within", "rm_anova_interaction")),
   list(id = "chi_square_tests", label = "Chi-Square Tests",
-       hint = "Goodness of fit and tests of independence/association for categorical data.",
-       catalog_keys = c("chisq_gof", "chisq_independence")),
+       hint = "Goodness of fit, tests of independence/association, and paired-proportions (McNemar's) testing for categorical data.",
+       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar")),
   list(id = "exact_tests", label = "Exact Tests",
        hint = "Small-sample exact tests for proportions (binomial, Fisher's exact) where the normal approximation is unreliable.",
        catalog_keys = c("exact_binomial", "exact_fisher")),
@@ -794,13 +852,16 @@ test_families <- list(
        hint = "Log-rank test, Cox proportional-hazards regression, and stratified log-rank for time-to-event outcomes.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
   list(id = "agreement_statistics", label = "Agreement Statistics",
-       hint = "Cohen's kappa, ICC, Cronbach's alpha, and Bland-Altman limits of agreement.",
+       hint = "Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman limits of agreement, and Lin's CCC.",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
-                         "agreement_bland_altman")),
+                         "agreement_bland_altman", "agreement_ccc")),
   list(id = "equivalence_noninferiority", label = "Equivalence / Non-Inferiority Test Forms",
        hint = "Two one-sided tests (TOST) for equivalence, non-inferiority margins, and crossover designs.",
        catalog_keys = c("tost_means", "tost_proportions", "noninferiority_means",
-                         "noninferiority_proportions", "crossover_2x2"))
+                         "noninferiority_proportions", "crossover_2x2")),
+  list(id = "nonparametric_tests", label = "Nonparametric Tests",
+       hint = "Distribution-free rank-based tests: Wilcoxon rank-sum, Wilcoxon signed-rank, and Kendall's tau.",
+       catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau"))
 )
 
 catalog_entry <- function(key) {

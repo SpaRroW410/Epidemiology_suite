@@ -35,3 +35,17 @@ test_that("calc_chisq_independence rejects invalid inputs", {
   # A table exactly consistent with independence (rows/cols proportional) has w = 0.
   expect_error(calc_chisq_independence(rbind(c(0.25, 0.25), c(0.25, 0.25))), "must not imply independence")
 })
+
+test_that("calc_mcnemar matches Chow, Shao & Wang (2003) Example 6.4.3", {
+  # p10 = 0.5, p01 = 0.2 (psai = 0.4, paid = 0.7), alpha = 0.05, power = 0.80
+  # -> n = 58.63, ceiling -> 59 pairs.
+  res <- calc_mcnemar(p10 = 0.5, p01 = 0.2, alpha = 0.05, power = 0.80)
+  expect_equal(res$n, 59)
+})
+
+test_that("calc_mcnemar rejects invalid inputs", {
+  expect_error(calc_mcnemar(p10 = 0.3, p01 = 0.3), "must differ")
+  expect_error(calc_mcnemar(p10 = 0.6, p01 = 0.5), "must be less than 1")
+  expect_error(calc_mcnemar(p10 = 0, p01 = 0.2), "between 0 and 1")
+  expect_error(calc_mcnemar(p10 = 0.5, p01 = 0.2, alpha = 0), "between 0 and 1")
+})

@@ -23,7 +23,8 @@ mod_agreement_ui <- function(id) {
           "Cohen's kappa (categorical agreement)" = "kappa",
           "Intraclass correlation - ICC (continuous agreement)" = "icc",
           "Cronbach's alpha (scale internal consistency)" = "cronbach",
-          "Bland-Altman limits of agreement" = "bland_altman"
+          "Bland-Altman limits of agreement" = "bland_altman",
+          "Lin's concordance correlation coefficient (CCC)" = "ccc"
         ),
         selected = "kappa"
       ),
@@ -59,6 +60,16 @@ mod_agreement_ui <- function(id) {
                      value = 1, min = 0.01, step = 0.1),
         numericInput(ns("conf_level_ba"), "Confidence level", value = 0.95, min = 0.5, max = 0.999, step = 0.01)
       ),
+      conditionalPanel(
+        condition = design_is("ccc"),
+        numericInput(ns("rho_c"), "Expected CCC (rho_c)", value = 0.8, min = -0.99, max = 0.99, step = 0.01),
+        numericInput(ns("rho_ccc"), "Expected underlying Pearson correlation (rho)",
+                     value = 0.85, min = -0.99, max = 0.99, step = 0.01),
+        numericInput(ns("u_ccc"), "Location-shift bias (u; 0 = no systematic bias)",
+                     value = 0, step = 0.05),
+        numericInput(ns("conf_width_ccc"), "Desired CI width", value = 0.2, min = 0.001, max = 1.99, step = 0.01),
+        numericInput(ns("conf_level_ccc"), "Confidence level", value = 0.95, min = 0.5, max = 0.999, step = 0.01)
+      ),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -88,7 +99,13 @@ mod_agreement_ui <- function(id) {
       render_formula_block(agreement_content$bland_altman$formula_latex),
       shiny::markdown(agreement_content$bland_altman$explanation),
       h5("Worked example"),
-      shiny::markdown(agreement_content$bland_altman$worked_example)
+      shiny::markdown(agreement_content$bland_altman$worked_example),
+      hr(),
+      h4(agreement_content$ccc$title),
+      render_formula_block(agreement_content$ccc$formula_latex),
+      shiny::markdown(agreement_content$ccc$explanation),
+      h5("Worked example"),
+      shiny::markdown(agreement_content$ccc$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -107,7 +124,11 @@ mod_agreement_ui <- function(id) {
       hr(),
       h4(agreement_content$bland_altman$title),
       p(strong("Citation: "), agreement_content$bland_altman$citation),
-      p(strong("Implemented via: "), code(agreement_content$bland_altman$backend))
+      p(strong("Implemented via: "), code(agreement_content$bland_altman$backend)),
+      hr(),
+      h4(agreement_content$ccc$title),
+      p(strong("Citation: "), agreement_content$ccc$citation),
+      p(strong("Implemented via: "), code(agreement_content$ccc$backend))
     )
   )
 }
@@ -165,11 +186,20 @@ mod_agreement_server <- function(id) {
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
-      } else {
+      } else if (input$design == "bland_altman") {
         req(input$conf_width_ba, input$conf_level_ba)
         tryCatch(
           list(ok = TRUE, value = calc_agreement_bland_altman(
             conf_width = input$conf_width_ba, conf_level = input$conf_level_ba
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$rho_c, input$rho_ccc, input$u_ccc, input$conf_width_ccc, input$conf_level_ccc)
+        tryCatch(
+          list(ok = TRUE, value = calc_agreement_ccc(
+            rho_c = input$rho_c, rho = input$rho_ccc, u = input$u_ccc,
+            conf_width = input$conf_width_ccc, conf_level = input$conf_level_ccc
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -192,6 +222,11 @@ mod_agreement_server <- function(id) {
         tagList(
           p(strong("Required sample size: "), v$n),
           p(sprintf("Expected CI at that n: alpha in [%.3f, %.3f]", v$lwr, v$upr))
+        )
+      } else if (input$design == "ccc") {
+        tagList(
+          p(strong("Required sample size: "), v$n),
+          p(sprintf("Achieved CI width at that n: %.4f", v$achieved_width))
         )
       } else {
         p(strong("Required sample size: "), v$n)

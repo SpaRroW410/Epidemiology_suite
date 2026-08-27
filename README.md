@@ -11,7 +11,7 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: twenty-six complete calculator modules -- all Stage-1 CORE items
+of Phase 2: twenty-seven complete calculator modules -- all Stage-1 CORE items
 from the master checklists are now built, plus two "quick wins" batches of
 further CORE items, and the start of Stage 2 (analytical depth) --
 
@@ -42,8 +42,13 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   Donner & Eliasziw 1987, Rotondi & Donner 2012), the intraclass
   correlation coefficient (continuous, wraps `presize::prec_icc()` / Bonett
   2002), Cronbach's alpha (scale internal consistency, wraps
-  `presize::prec_cronb()` / Bonett & Wright 2015), and Bland-Altman limits
-  of agreement (wraps `presize::prec_lim_agree()` / Bland & Altman 1986)
+  `presize::prec_cronb()` / Bonett & Wright 2015), Bland-Altman limits
+  of agreement (wraps `presize::prec_lim_agree()` / Bland & Altman 1986),
+  and Lin's concordance correlation coefficient (closed-form, Lin 1989/
+  2000 -- no CRAN package implements a dedicated CCC sample-size
+  function, so this reimplements the exact asymptotic variance formula
+  that `epiR::epi.ccc()` itself already uses internally for its own
+  confidence interval; epiR is already a project dependency)
 - **Case-Control** (`R/modules/mod_case_control.R`) -- unmatched and matched
   (1:1 or 1:m) case-control studies, both wrapping `epiR::epi.sscc()`
   (Dupont 1988; Woodward 2014); nested case-control (binary or continuous
@@ -62,7 +67,10 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   proportion-matrix UI), both wrapping `pwr::pwr.chisq.test()` +
   `pwr::ES.w1()`/`ES.w2()` (Cohen 1988); the independence design also serves
   as the Proportions module's "3+ group proportions" entry in the Home
-  finder
+  finder; plus McNemar's test for paired/matched proportions (the same
+  subjects measured twice), wrapping `TrialSize::McNemar.Test()` (Chow,
+  Shao & Wang 2003) -- `TrialSize` already a zero-dependency project
+  dependency
 - **Pilot / Feasibility** (`R/modules/mod_pilot.R`) -- the flat 12/arm
   rule-of-thumb (Julious 2005) plus an interactive tool showing how precise
   a pilot's estimated SD is at a given n (95% CI multipliers on the observed
@@ -169,6 +177,15 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   `PearsonDS` dependencies are far heavier than this one function needs
   and which that function itself never calls into; the between-effect
   design reproduces the package's own documented example exactly
+- **Nonparametric Tests** (`R/modules/mod_nonparametric.R`) -- Wilcoxon
+  rank-sum (Mann-Whitney U, two independent groups), Wilcoxon
+  signed-rank (one sample / paired differences), and Kendall's tau
+  (nonparametric association), all wrapping `TrialSize::Nonpara.Two.Sample()`/
+  `Nonpara.One.Sample()`/`Nonpara.Independ()` (Chow, Shao & Wang 2003) --
+  genuine distribution-free closed forms using rank/concordance
+  probabilities directly, not an ARE-inflation shortcut on top of a
+  parametric calculation; `TrialSize` already a zero-dependency project
+  dependency
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

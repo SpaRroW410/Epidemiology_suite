@@ -188,5 +188,65 @@ agreement_content <- list(
       "1986;327(8476):307-310."
     ),
     backend = "presize::prec_lim_agree()"
+  ),
+
+  ccc = list(
+    title = "Lin's Concordance Correlation Coefficient (CCC)",
+    formula_latex = paste0(
+      "$$\\mathrm{Var}(\\hat\\rho_c) \\approx \\frac{1}{n-2}\\left[",
+      "\\frac{(1-\\rho^2)\\rho_c^2(1-\\rho_c^2)}{\\rho^2} + ",
+      "\\frac{2\\rho_c^3(1-\\rho_c)u^2}{\\rho} - \\frac{0.5\\,\\rho_c^4 u^4}{\\rho^2}\\right]$$",
+      "$$n = 2 + \\frac{4Z_{1-\\alpha/2}^2\\,\\mathrm{Var}(\\hat\\rho_c)(n-2)}{w^2}$$"
+    ),
+    explanation = paste(
+      "Use this when comparing two continuous measurement methods (e.g. a",
+      "new device vs. a reference device, or two raters) and you want a",
+      "*single number* summarizing both how tightly they correlate and",
+      "whether they agree on the same scale (unlike a plain Pearson",
+      "correlation, which only measures the first). Lin's CCC combines",
+      "precision (correlation) and accuracy (closeness to the line of",
+      "perfect agreement, y = x) into one coefficient.",
+      "",
+      "- **rho_c** - the CCC value you expect to find (-1 to 1; in",
+      "  practice almost always reported as 0 to 1). Must not exceed",
+      "  |rho| in magnitude.",
+      "- **rho** - the expected underlying Pearson correlation between",
+      "  the two measurements -- CCC can never exceed this, since CCC is",
+      "  the correlation discounted by any systematic bias.",
+      "- **u (location-shift bias)** - the standardized mean difference",
+      "  between the two methods; 0 (the default) means no systematic",
+      "  bias, so CCC is driven purely by the correlation -- a reasonable",
+      "  planning default when no pilot data exist to estimate bias.",
+      "- **Desired CI width** - the full width of the confidence interval",
+      "  you want for the estimated CCC.",
+      "",
+      "This is a precision-based design, like the kappa/ICC/Cronbach",
+      "calculators above: no hypothesis test, no power target, just an",
+      "estimation-precision target. No CRAN package implements a dedicated",
+      "CCC sample-size function; this reimplements the asymptotic variance",
+      "formula that `epiR::epi.ccc()` itself uses for its own",
+      "\"asymptotic\" confidence interval, since epiR is already a project",
+      "dependency and its own installed source is a directly-verifiable,",
+      "citable implementation of Lin's formula.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Cross-checked against real output from the installed",
+      "`epiR::epi.ccc()`: a generated paired dataset with an underlying",
+      "correlation of about 0.83 and a modest systematic bias produced an",
+      "observed CCC of about 0.80 at n = 500, with a 95% CI about 0.061",
+      "wide -- feeding those same (rho_c, rho, u) values back into this",
+      "calculator, with the same target CI width, returns essentially the",
+      "same n. A second check with negligible bias (rho_c = rho = 0.90 at",
+      "n = 300) matched the same way.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Lin LI. A concordance correlation coefficient to evaluate",
+      "reproducibility. Biometrics. 1989;45(1):255-268; Lin LI. A note on",
+      "the concordance correlation coefficient. Biometrics.",
+      "2000;56(1):324-325 (correction to the 1989 variance formula)."
+    ),
+    backend = "closed-form (Lin 1989/2000; formula as implemented in epiR::epi.ccc())"
   )
 )

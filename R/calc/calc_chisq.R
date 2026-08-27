@@ -72,6 +72,40 @@ calc_chisq_independence <- function(P, alpha = 0.05, power = 0.8) {
   )
 }
 
+#' Sample size for McNemar's test (paired/matched proportions)
+#'
+#' Wraps TrialSize::McNemar.Test() -- TrialSize has zero package
+#' dependencies, already used elsewhere in this app (Crossover Trial
+#' module).
+#'
+#' @param p10 Expected proportion of pairs that switch from positive
+#'   (before/exposed) to negative (after/unexposed) (0,1)
+#' @param p01 Expected proportion of pairs that switch from negative to
+#'   positive (0,1); p10 and p01 are the two off-diagonal ("discordant")
+#'   cells of the 2x2 paired table, and must differ (p10 != p01) for
+#'   there to be an effect to detect
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n, inputs)
+calc_mcnemar <- function(p10, p01, alpha = 0.05, power = 0.8) {
+  .validate_unit_interval(p10, "p10")
+  .validate_unit_interval(p01, "p01")
+  if (p10 + p01 >= 1) stop("p10 + p01 (the discordant-pair proportion) must be less than 1.")
+  if (isTRUE(all.equal(p10, p01))) stop("p10 and p01 must differ (no effect to detect).")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  psai <- p01 / p10
+  paid <- p10 + p01
+
+  n <- TrialSize::McNemar.Test(alpha = alpha, beta = 1 - power, psai = psai, paid = paid)
+
+  list(
+    n = ceiling(n),
+    inputs = list(p10 = p10, p01 = p01, alpha = alpha, power = power)
+  )
+}
+
 .validate_prob_vector <- function(P, label) {
   if (!is.numeric(P) || length(P) < 2 || anyNA(P)) {
     stop(sprintf("%s must be a numeric vector of at least 2 values.", label))
