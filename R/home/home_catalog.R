@@ -307,7 +307,18 @@ calculator_catalog <- list(
        ),
        outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Correlation",
-       module_input_id = NA, design_value = NA),
+       module_input_id = "correlation-design", design_value = "single"),
+
+  list(key = "correlation_two_independent",
+       label = "Compare two independent correlations",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to detect a",
+         "difference in correlation strength between two independent",
+         "groups?\""
+       ),
+       outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Correlation",
+       module_input_id = "correlation-design", design_value = "two_independent"),
 
   # Chi-Square Tests entries: not a "how many groups" comparison in the
   # proportion/mean sense, so only reachable via "by study design" -- except
@@ -756,8 +767,8 @@ study_design_families <- list(
                          "diagnostic_two_indep", "diagnostic_two_paired",
                          "diagnostic_ppv_npv", "diagnostic_likelihood_ratio")),
   list(id = "correlation", label = "Correlation",
-       hint = "Detecting a Pearson correlation between two continuous variables.",
-       catalog_keys = c("correlation_pearson")),
+       hint = "Detecting a Pearson correlation between two continuous variables, or comparing correlation strength between two independent groups.",
+       catalog_keys = c("correlation_pearson", "correlation_two_independent")),
   list(id = "agreement", label = "Agreement / Reliability",
        hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman, Lin's CCC).",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
@@ -846,8 +857,8 @@ test_families <- list(
        hint = "Small-sample exact tests for proportions (binomial, Fisher's exact) where the normal approximation is unreliable.",
        catalog_keys = c("exact_binomial", "exact_fisher")),
   list(id = "correlation_regression", label = "Correlation & Regression",
-       hint = "Pearson correlation and multiple linear regression.",
-       catalog_keys = c("correlation_pearson", "regression_r2")),
+       hint = "Pearson correlation (single or comparing two independent groups) and multiple linear regression.",
+       catalog_keys = c("correlation_pearson", "correlation_two_independent", "regression_r2")),
   list(id = "survival_tests", label = "Survival Tests",
        hint = "Log-rank test, Cox proportional-hazards regression, and stratified log-rank for time-to-event outcomes.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),

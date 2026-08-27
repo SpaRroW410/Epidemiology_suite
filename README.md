@@ -61,7 +61,10 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   relative-risk studies, wrapping `epiR::epi.sscohortc()` (Kelsey,
   Thompson & Evans 1986; Woodward 2014)
 - **Correlation** (`R/modules/mod_correlation.R`) -- Pearson correlation,
-  wrapping `pwr::pwr.r.test()` (Cohen 1988)
+  wrapping `pwr::pwr.r.test()` (Cohen 1988); plus comparing two
+  independent correlations via Cohen's q effect size (Fisher z),
+  closed-form since `pwr` has no dedicated two-sample function for this
+  case
 - **Chi-Square Tests** (`R/modules/mod_chisq.R`) -- goodness of fit and test
   of independence/association for an R x C table (dynamic 2-5 x 2-5
   proportion-matrix UI), both wrapping `pwr::pwr.chisq.test()` +

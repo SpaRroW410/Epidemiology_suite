@@ -194,7 +194,7 @@ for what to build next):
 | Agreement / reliability | Cohen's kappa; ICC; Cronbach's alpha; Bland-Altman LoA; Lin's CCC | `presize::prec_kappa()` (→ `kappaSize`); `presize::prec_icc()` (Bonett 2002); `presize::prec_cronb()` (Bonett & Wright 2015); `presize::prec_lim_agree()` (Bland & Altman 1986); closed-form (Lin 1989/2000, formula as used internally by `epiR::epi.ccc()`) | Live |
 | Case-control | Unmatched; matched (1:1 or 1:m); nested (binary/continuous exposure); case-cohort | `epiR::epi.sscc()`; `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed-form (Cai & Zeng 2004) | Live |
 | Cohort / RR | Cohort, cross-sectional, relative risk | `epiR::epi.sscohortc()` | Live |
-| Correlation | Pearson correlation | `pwr::pwr.r.test()` | Live |
+| Correlation | Pearson correlation; comparing two independent correlations | `pwr::pwr.r.test()`; closed-form (Cohen 1988) | Live |
 | Chi-square tests | Goodness of fit; test of independence (R×C); McNemar's (paired proportions) | `pwr::pwr.chisq.test()` (`ES.w1`/`ES.w2`); `TrialSize::McNemar.Test()` | Live |
 | Pilot / feasibility | Flat 12/arm rule-of-thumb; interactive CI-for-SD precision | rule-of-thumb (Julious 2005); closed-form chi-square CI theory | Live |
 | Simon two-stage | Phase II single-arm (minimax + optimal designs) | `clinfun::ph2simon()` | Live |
