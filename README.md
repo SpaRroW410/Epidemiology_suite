@@ -11,7 +11,7 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: twenty-six complete calculator modules -- all Stage-1 CORE items
+of Phase 2: twenty-seven complete calculator modules -- all Stage-1 CORE items
 from the master checklists are now built, plus two "quick wins" batches of
 further CORE items, and the start of Stage 2 (analytical depth) --
 
@@ -177,6 +177,15 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   `PearsonDS` dependencies are far heavier than this one function needs
   and which that function itself never calls into; the between-effect
   design reproduces the package's own documented example exactly
+- **Nonparametric Tests** (`R/modules/mod_nonparametric.R`) -- Wilcoxon
+  rank-sum (Mann-Whitney U, two independent groups), Wilcoxon
+  signed-rank (one sample / paired differences), and Kendall's tau
+  (nonparametric association), all wrapping `TrialSize::Nonpara.Two.Sample()`/
+  `Nonpara.One.Sample()`/`Nonpara.Independ()` (Chow, Shao & Wang 2003) --
+  genuine distribution-free closed forms using rank/concordance
+  probabilities directly, not an ARE-inflation shortcut on top of a
+  parametric calculation; `TrialSize` already a zero-dependency project
+  dependency
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

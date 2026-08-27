@@ -73,7 +73,7 @@
 ### Correlation & regression
 
 - [x] **[CORE]** Pearson correlation — r — `pwr::pwr.r.test` — GP: Exact/t → Correlation — *(implemented: Correlation module, `calc_correlation()`)*
-- [ ] **[ADV]** Spearman / Kendall's tau — via ARE inflation of Pearson
+- [ ] **[ADV]** Spearman / Kendall's tau — via ARE inflation of Pearson — *(partially implemented: Kendall's tau now built -- new Nonparametric Tests module → "Kendall's tau (nonparametric association)", `calc_kendall_tau()`, wraps `TrialSize::Nonpara.Independ()`, a direct closed-form using concordance probabilities (tau = 2*p1 - 1) rather than ARE-inflation of a Pearson-correlation n; verified exactly against Chow, Shao & Wang (2003) Example 14.4: p1=0.6, p2=0.7, alpha=0.05, power=0.80 -> n=135. Spearman's rho still not built -- no equivalent direct closed form identified yet, would still need the ARE-inflation route or its own dedicated formula)*
 - [ ] **[ADV]** Partial correlation — r, #controlled variables — GP: Yes
 - [ ] **[ADV]** Compare two independent correlations — q (Fisher r-to-z) — `pwr` (manual) — GP: z → Correlations: two independent Pearson r's
 - [ ] **[ADV]** Compare two dependent correlations (common / non-common index) — GP: z (Faul 2009)
@@ -85,8 +85,8 @@
 
 ### Non-parametric tests (handled via ARE inflation / Noether / simulation)
 
-- [ ] **[ADV]** Mann–Whitney U / Wilcoxon rank-sum — d then ×ARE (≈1.05 for normal) — GP: t → Means (Wilcoxon option) — nMaster; *Noether (1987)*
-- [ ] **[ADV]** Wilcoxon signed-rank — GP: Yes (parent distribution options) — nMaster
+- [x] **[ADV]** Mann–Whitney U / Wilcoxon rank-sum — d then ×ARE (≈1.05 for normal) — GP: t → Means (Wilcoxon option) — nMaster; *Noether (1987)* — *(implemented: new Nonparametric Tests module → "Wilcoxon rank-sum (Mann-Whitney U, two independent groups)", `calc_wilcoxon_rank_sum()`, wraps `TrialSize::Nonpara.Two.Sample()` -- a direct distribution-free closed form (Chow, Shao & Wang 2003) using rank-concordance probabilities, rather than the checklist's suggested ARE-inflation-of-Cohen's-d shortcut; `TrialSize` already a zero-dependency project dependency. Verified exactly against that package's own documented example: k=1, p1=0.7, p2=0.8, p3=0.8, alpha=0.05, power=0.80 -> n=54)*
+- [x] **[ADV]** Wilcoxon signed-rank — GP: Yes (parent distribution options) — nMaster — *(implemented: same Nonparametric Tests module → "Wilcoxon signed-rank (one sample / paired differences)", `calc_wilcoxon_signed_rank()`, wraps `TrialSize::Nonpara.One.Sample()`, same closed-form-not-ARE approach as above. Verified exactly: p2=0.3, p3=0.4, p4=0.05, alpha=0.05, power=0.80 -> n=383)*
 - [ ] **[ADV]** Kruskal–Wallis — ANOVA n ×ARE / simulation
 - [ ] **[ADV]** Friedman — RM-ANOVA basis / simulation
 - [ ] **[ADV]** Sign test — `pwr`/exact binomial — nMaster
