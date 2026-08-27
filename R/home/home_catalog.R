@@ -218,6 +218,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Agreement / Reliability",
        module_input_id = "agreement-design", design_value = "bland_altman"),
 
+  list(key = "agreement_ccc",
+       label = "Lin's concordance correlation coefficient (CCC)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate a combined",
+         "precision-and-accuracy agreement coefficient between two",
+         "continuous measurement methods, to a desired precision?\""
+       ),
+       outcome_type = "agreement", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Agreement / Reliability",
+       module_input_id = "agreement-design", design_value = "ccc"),
+
   # Case-Control / Cohort entries: same reasoning as Diagnostic Accuracy
   # above -- these compare exposure vs. outcome status, not "groups" in the
   # proportion/mean sense, so only reachable via "by study design".
@@ -704,9 +715,9 @@ study_design_families <- list(
        hint = "Detecting a Pearson correlation between two continuous variables.",
        catalog_keys = c("correlation_pearson")),
   list(id = "agreement", label = "Agreement / Reliability",
-       hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman).",
+       hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman, Lin's CCC).",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
-                         "agreement_bland_altman")),
+                         "agreement_bland_altman", "agreement_ccc")),
   list(id = "chi_square", label = "Chi-Square Tests",
        hint = "Categorical distribution/association testing (goodness of fit, R x C tables).",
        catalog_keys = c("chisq_gof", "chisq_independence")),
@@ -794,9 +805,9 @@ test_families <- list(
        hint = "Log-rank test, Cox proportional-hazards regression, and stratified log-rank for time-to-event outcomes.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
   list(id = "agreement_statistics", label = "Agreement Statistics",
-       hint = "Cohen's kappa, ICC, Cronbach's alpha, and Bland-Altman limits of agreement.",
+       hint = "Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman limits of agreement, and Lin's CCC.",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
-                         "agreement_bland_altman")),
+                         "agreement_bland_altman", "agreement_ccc")),
   list(id = "equivalence_noninferiority", label = "Equivalence / Non-Inferiority Test Forms",
        hint = "Two one-sided tests (TOST) for equivalence, non-inferiority margins, and crossover designs.",
        catalog_keys = c("tost_means", "tost_proportions", "noninferiority_means",

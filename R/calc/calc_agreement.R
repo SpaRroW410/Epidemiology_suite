@@ -123,6 +123,65 @@ calc_agreement_cronbach <- function(k, calpha, conf_width = 0.1, conf_level = 0.
   )
 }
 
+#' Sample size for Lin's Concordance Correlation Coefficient (CCC)
+#'
+#' Closed-form, rather than a package wrap: no CRAN package implements a
+#' dedicated CCC sample-size function (DescTools::CCC() and
+#' epiR::epi.ccc() are estimation-only). Reimplements the asymptotic
+#' variance formula for CCC that epiR::epi.ccc() itself uses internally
+#' for its "asymptotic" confidence interval (Lin 1989; correction Lin
+#' 2000) -- epiR is already a project dependency, so this formula was
+#' extracted from, and cross-verified numerically against, its own
+#' installed source (see tests/testthat) rather than reimplemented from
+#' a secondary description.
+#'
+#' @param rho_c Expected/target CCC (-1, 1); |rho_c| must not exceed |rho|
+#' @param rho Expected underlying Pearson correlation between the two
+#'   measurements (-1, 1, and != 0)
+#' @param u Expected location-shift parameter, i.e. the standardized mean
+#'   difference between the two measurements: (mean2 - mean1) /
+#'   (sd1 * sd2)^0.25. 0 (default) means no systematic bias between the
+#'   two methods -- CCC driven purely by precision (correlation), the
+#'   most common planning assumption when no pilot data exist.
+#' @param conf_width Desired full width of the (symmetric, raw-scale)
+#'   confidence interval for the CCC
+#' @param conf_level Confidence level (0,1), e.g. 0.95
+#' @return list(n, inputs)
+calc_agreement_ccc <- function(rho_c, rho, u = 0, conf_width = 0.2, conf_level = 0.95) {
+  if (!is.numeric(rho_c) || length(rho_c) != 1 || is.na(rho_c) || rho_c <= -1 || rho_c >= 1) {
+    stop("rho_c must be a single number strictly between -1 and 1.")
+  }
+  if (!is.numeric(rho) || length(rho) != 1 || is.na(rho) || rho <= -1 || rho >= 1 || rho == 0) {
+    stop("rho must be a single number strictly between -1 and 1, and not 0.")
+  }
+  if (abs(rho_c) > abs(rho)) {
+    stop("|rho_c| cannot exceed |rho| (the CCC can never exceed the underlying Pearson correlation in magnitude).")
+  }
+  if (!is.numeric(u) || length(u) != 1 || is.na(u)) {
+    stop("u must be a single number.")
+  }
+  .validate_positive(conf_width, "conf_width")
+  .validate_unit_interval(conf_level, "conf_level")
+
+  A <- (1 - rho^2) * rho_c^2 * (1 - rho_c^2) / rho^2 +
+    2 * rho_c^3 * (1 - rho_c) * u^2 / rho -
+    0.5 * rho_c^4 * u^4 / rho^2
+
+  if (!is.finite(A) || A <= 0) {
+    stop("No feasible sample size for this combination of rho_c, rho, and u (the implied variance is non-positive) -- try a smaller u or check rho_c/rho.")
+  }
+
+  zv <- qnorm(1 - (1 - conf_level) / 2)
+  n <- ceiling(2 + 4 * zv^2 * A / conf_width^2)
+  achieved_width <- 2 * zv * sqrt(A / (n - 2))
+
+  list(
+    n = n,
+    achieved_width = achieved_width,
+    inputs = list(rho_c = rho_c, rho = rho, u = u, conf_width = conf_width, conf_level = conf_level)
+  )
+}
+
 #' Sample size for Bland-Altman limits of agreement
 #'
 #' Wraps presize::prec_lim_agree() (Bland & Altman 1986). Precision is

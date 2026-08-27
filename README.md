@@ -42,8 +42,13 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   Donner & Eliasziw 1987, Rotondi & Donner 2012), the intraclass
   correlation coefficient (continuous, wraps `presize::prec_icc()` / Bonett
   2002), Cronbach's alpha (scale internal consistency, wraps
-  `presize::prec_cronb()` / Bonett & Wright 2015), and Bland-Altman limits
-  of agreement (wraps `presize::prec_lim_agree()` / Bland & Altman 1986)
+  `presize::prec_cronb()` / Bonett & Wright 2015), Bland-Altman limits
+  of agreement (wraps `presize::prec_lim_agree()` / Bland & Altman 1986),
+  and Lin's concordance correlation coefficient (closed-form, Lin 1989/
+  2000 -- no CRAN package implements a dedicated CCC sample-size
+  function, so this reimplements the exact asymptotic variance formula
+  that `epiR::epi.ccc()` itself already uses internally for its own
+  confidence interval; epiR is already a project dependency)
 - **Case-Control** (`R/modules/mod_case_control.R`) -- unmatched and matched
   (1:1 or 1:m) case-control studies, both wrapping `epiR::epi.sscc()`
   (Dupont 1988; Woodward 2014); nested case-control (binary or continuous
