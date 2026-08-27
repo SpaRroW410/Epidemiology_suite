@@ -195,7 +195,7 @@ for what to build next):
 | Case-control | Unmatched; matched (1:1 or 1:m); nested (binary/continuous exposure); case-cohort | `epiR::epi.sscc()`; `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed-form (Cai & Zeng 2004) | Live |
 | Cohort / RR | Cohort, cross-sectional, relative risk | `epiR::epi.sscohortc()` | Live |
 | Correlation | Pearson correlation | `pwr::pwr.r.test()` | Live |
-| Chi-square tests | Goodness of fit; test of independence (R×C) | `pwr::pwr.chisq.test()` (`ES.w1`/`ES.w2`) | Live |
+| Chi-square tests | Goodness of fit; test of independence (R×C); McNemar's (paired proportions) | `pwr::pwr.chisq.test()` (`ES.w1`/`ES.w2`); `TrialSize::McNemar.Test()` | Live |
 | Pilot / feasibility | Flat 12/arm rule-of-thumb; interactive CI-for-SD precision | rule-of-thumb (Julious 2005); closed-form chi-square CI theory | Live |
 | Simon two-stage | Phase II single-arm (minimax + optimal designs) | `clinfun::ph2simon()` | Live |
 | Equivalence (TOST) | Two one-sided tests, means and proportions | `PowerTOST::sampleN.TOST(logscale=FALSE)`; `epiR::epi.ssequb()` | Live |

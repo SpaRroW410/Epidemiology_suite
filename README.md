@@ -67,7 +67,10 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   proportion-matrix UI), both wrapping `pwr::pwr.chisq.test()` +
   `pwr::ES.w1()`/`ES.w2()` (Cohen 1988); the independence design also serves
   as the Proportions module's "3+ group proportions" entry in the Home
-  finder
+  finder; plus McNemar's test for paired/matched proportions (the same
+  subjects measured twice), wrapping `TrialSize::McNemar.Test()` (Chow,
+  Shao & Wang 2003) -- `TrialSize` already a zero-dependency project
+  dependency
 - **Pilot / Feasibility** (`R/modules/mod_pilot.R`) -- the flat 12/arm
   rule-of-thumb (Julious 2005) plus an interactive tool showing how precise
   a pilot's estimated SD is at a given n (95% CI multipliers on the observed

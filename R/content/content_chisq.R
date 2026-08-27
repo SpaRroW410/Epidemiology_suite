@@ -84,5 +84,53 @@ chisq_content <- list(
       "analysis, as implemented by pwr::ES.w2 and pwr::pwr.chisq.test)."
     ),
     backend = "pwr::ES.w2() + pwr::pwr.chisq.test()"
+  ),
+
+  mcnemar = list(
+    title = "McNemar's Test (Paired/Matched Proportions)",
+    formula_latex = paste0(
+      "$$n = \\frac{\\left(Z_{1-\\alpha/2}(\\psi+1) + Z_{1-\\beta}\\sqrt{(\\psi+1)^2 - (\\psi-1)^2 p_d}\\right)^2}",
+      "{(\\psi-1)^2 p_d}$$",
+      "$$\\psi = \\frac{p_{01}}{p_{10}}, \\quad p_d = p_{10} + p_{01}$$"
+    ),
+    explanation = paste(
+      "Use this when the SAME subjects are measured twice (before/after,",
+      "or two raters/tests on the same subjects) for a binary outcome,",
+      "and you want to test whether the proportion switching one",
+      "direction differs from the proportion switching the other --",
+      "e.g. \"does treatment change more patients from disease-positive",
+      "to disease-negative than the reverse?\" This is the paired-data",
+      "analog of the two-independent-proportions test in the Proportions",
+      "module, and only the *discordant* (switching) pairs carry",
+      "information -- concordant pairs (no change either way) don't",
+      "affect the test.",
+      "",
+      "- **p10** - expected proportion of pairs that switch from",
+      "  positive to negative (or from the first condition's \"yes\" to",
+      "  the second condition's \"no\").",
+      "- **p01** - expected proportion of pairs that switch the other",
+      "  direction. p10 and p01 must differ -- if they're equal, there's",
+      "  no asymmetry for McNemar's test to detect.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "p10 + p01 is the total discordant-pair proportion; concordant",
+      "pairs (both positive or both negative at both time points) are",
+      "not counted here since they don't inform the test.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Chow, Shao & Wang (2003), Example 6.4.3: a paired before/after",
+      "study expects 50% of pairs to switch from positive to negative",
+      "(p10 = 0.5) and 20% to switch from negative to positive",
+      "(p01 = 0.2) -- a 2.5-fold asymmetry. At alpha = 0.05 and 80%",
+      "power, this calculator returns n = 59 pairs, matching the",
+      "textbook's own worked answer exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
+      "Research. New York: Marcel Dekker; 2003. Section 6.4."
+    ),
+    backend = "TrialSize::McNemar.Test()"
   )
 )

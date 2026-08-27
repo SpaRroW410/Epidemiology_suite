@@ -56,7 +56,7 @@
 
 - [x] **[CORE]** Goodness of fit — w, df — `pwr::pwr.chisq.test` (`ES.w1`) — GP: χ² → Goodness-of-fit — *(implemented: Chi-Square Tests → "Goodness of fit", `calc_chisq_gof()`)*
 - [x] **[CORE]** Test of independence / association (R×C) — w, df — `pwr::pwr.chisq.test` (`ES.w2`) — GP: χ² → contingency tables — *(implemented: Chi-Square Tests → "Test of independence", `calc_chisq_independence()`, dynamic R×C proportion-matrix UI (rows/cols 2-5); also cross-referenced as the "3+ group proportions" catalog entry)*
-- [ ] **[ADV]** McNemar's (paired proportions) — OR, proportion discordant — GP: χ² → McNemar (exact)
+- [x] **[ADV]** McNemar's (paired proportions) — OR, proportion discordant — GP: χ² → McNemar (exact) — *(implemented: Chi-Square Tests → "McNemar's test (paired proportions)", `calc_mcnemar()`, wraps `TrialSize::McNemar.Test()` -- `TrialSize` already a zero-dependency project dependency, no new package. Verified exactly against Chow, Shao & Wang (2003) Example 6.4.3: p10=0.5, p01=0.2 (psai=0.4, paid=0.7), alpha=0.05, power=0.80 -> n=59 pairs)*
 - [ ] **[ADV]** Cochran's Q (k paired proportions)
 - [ ] **[ADV]** Mantel–Haenszel (stratified OR) — PASS CMH
 - [ ] **[ADV]** Cochran–Armitage trend — dose-response proportions — Epi Info StatCalc (χ² for trend)
