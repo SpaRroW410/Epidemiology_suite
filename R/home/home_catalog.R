@@ -663,6 +663,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Exact Tests",
        module_input_id = "exact_tests-design", design_value = "fisher"),
 
+  list(key = "sign_test",
+       label = "Sign test (paired data / one-sample median)",
+       answers = paste(
+         "Answers: \"How many pairs do I need to detect that differences",
+         "tend to be positive more often than negative, without assuming",
+         "a symmetric distribution of differences?\""
+       ),
+       outcome_type = "exact", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Exact Tests",
+       module_input_id = "exact_tests-design", design_value = "sign"),
+
   list(key = "prediction_binary",
        label = "Prediction model development -- binary outcome",
        answers = paste(
@@ -784,8 +795,8 @@ study_design_families <- list(
        hint = "Estimating or comparing incidence rates from person-time data.",
        catalog_keys = c("incidence_rate_precision", "rate_comparison")),
   list(id = "exact_tests", label = "Exact Tests",
-       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact).",
-       catalog_keys = c("exact_binomial", "exact_fisher")),
+       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, sign test).",
+       catalog_keys = c("exact_binomial", "exact_fisher", "sign_test")),
   list(id = "survival", label = "Survival",
        hint = "Log-rank, Cox regression, stratified log-rank, or accrual/follow-up based survival study designs.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
@@ -854,8 +865,8 @@ test_families <- list(
        hint = "Goodness of fit, tests of independence/association, and paired-proportions (McNemar's) testing for categorical data.",
        catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar")),
   list(id = "exact_tests", label = "Exact Tests",
-       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact) where the normal approximation is unreliable.",
-       catalog_keys = c("exact_binomial", "exact_fisher")),
+       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, sign test) where the normal approximation is unreliable.",
+       catalog_keys = c("exact_binomial", "exact_fisher", "sign_test")),
   list(id = "correlation_regression", label = "Correlation & Regression",
        hint = "Pearson correlation (single or comparing two independent groups) and multiple linear regression.",
        catalog_keys = c("correlation_pearson", "correlation_two_independent", "regression_r2")),

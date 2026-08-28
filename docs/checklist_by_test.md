@@ -89,7 +89,7 @@
 - [x] **[ADV]** Wilcoxon signed-rank — GP: Yes (parent distribution options) — nMaster — *(implemented: same Nonparametric Tests module → "Wilcoxon signed-rank (one sample / paired differences)", `calc_wilcoxon_signed_rank()`, wraps `TrialSize::Nonpara.One.Sample()`, same closed-form-not-ARE approach as above. Verified exactly: p2=0.3, p3=0.4, p4=0.05, alpha=0.05, power=0.80 -> n=383)*
 - [ ] **[ADV]** Kruskal–Wallis — ANOVA n ×ARE / simulation
 - [ ] **[ADV]** Friedman — RM-ANOVA basis / simulation
-- [ ] **[ADV]** Sign test — `pwr`/exact binomial — nMaster
+- [x] **[ADV]** Sign test — `pwr`/exact binomial — nMaster — *(implemented: Exact Tests module → "Sign test (paired data / one-sample median)", `calc_sign_test()`, a thin wrapper around the existing `calc_binomial_exact()` design with p0 fixed at 0.5 -- the sign test IS an exact binomial test against 0.5 (Conover 1999), so no new math or dependency, just the same verified `stats::binom.test()`-based search exposed under the sign test's own framing)*
 - [ ] **[ADV]** Jonckheere–Terpstra (ordered alternatives) — `clinfun` (odds ratios per group)
 - [ ] **[ADV]** Kolmogorov–Smirnov; runs test; general permutation — simulation (`simr`/custom Monte Carlo)
 

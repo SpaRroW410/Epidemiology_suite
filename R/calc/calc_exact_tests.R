@@ -115,3 +115,33 @@ calc_binomial_exact <- function(p0, p1, alpha = 0.05, power = 0.8,
     inputs = list(p0 = p0, p1 = p1, alpha = alpha, power = power, alternative = alternative)
   )
 }
+
+#' Sample size for the sign test (paired data, or one-sample median test)
+#'
+#' The sign test asks whether the population proportion of positive
+#' differences (or values above a hypothesized median) is 0.5 -- which is
+#' exactly an exact binomial test with p0 = 0.5. Rather than duplicating
+#' the search logic, this is a thin wrapper around calc_binomial_exact()
+#' with p0 fixed at 0.5, so it inherits that function's exact correctness
+#' (base R's own stats::binom.test()) automatically -- no new math, just a
+#' fixed special case exposed under the sign test's own name/framing
+#' (project convention: don't duplicate an existing calculation under a
+#' different label).
+#'
+#' @param p_pos Expected proportion of pairs with a positive difference
+#'   (or values above the hypothesized median), (0,1), != 0.5
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided", "less", or "greater"
+#' @param n_max Upper search bound on n
+#' @return list(n, achieved_power, inputs)
+calc_sign_test <- function(p_pos, alpha = 0.05, power = 0.8,
+                            alternative = c("two.sided", "less", "greater"),
+                            n_max = 2000) {
+  alternative <- match.arg(alternative)
+  if (isTRUE(all.equal(p_pos, 0.5))) stop("p_pos must differ from 0.5 (no effect to detect).")
+  res <- calc_binomial_exact(p0 = 0.5, p1 = p_pos, alpha = alpha, power = power,
+                              alternative = alternative, n_max = n_max)
+  res$inputs <- list(p_pos = p_pos, alpha = alpha, power = power, alternative = alternative)
+  res
+}

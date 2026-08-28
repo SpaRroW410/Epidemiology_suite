@@ -201,7 +201,7 @@ for what to build next):
 | Equivalence (TOST) | Two one-sided tests, means and proportions | `PowerTOST::sampleN.TOST(logscale=FALSE)`; `epiR::epi.ssequb()` | Live |
 | Log-rank / survival | Two-arm time-to-event, cumulative event probabilities; Cox PH regression (binary or continuous covariate); stratified log-rank (exponential survival) | `powerSurvEpi::ssizeCT()`; `ssizeEpi.default()`; `ssizeEpiCont.default()`; `ssize.stratify()` (Palta & Amini 1985) | Live |
 | Incidence Rate | Precision-based, events + person-time; comparison of two rates | `presize::prec_rate()`; closed-form (Demidenko 2007) | Live |
-| Exact Tests | Binomial test (single proportion); Fisher's exact (two proportions) | `stats::binom.test()` search; `Exact::power.exact.test()` search | Live |
+| Exact Tests | Binomial test (single proportion); Fisher's exact (two proportions); sign test | `stats::binom.test()` search; `Exact::power.exact.test()` search; `stats::binom.test()` search (p0 = 0.5) | Live |
 | Multiple Regression | R-squared deviation from zero | `pwr::pwr.f2.test()` | Live |
 | Non-Inferiority | Means and proportions | `epiR::epi.ssninfc()`, `epi.ssninfb()` | Live |
 | Rule of Three | Upper bound on unseen event rate; n to detect >= 1 event | closed-form (Hanley & Lippman-Hand 1983) | Live |

@@ -36,3 +36,20 @@ test_that("calc_binomial_exact rejects invalid inputs", {
   expect_error(calc_binomial_exact(p0 = 0.3, p1 = 0.3), "must differ")
   expect_error(calc_binomial_exact(p0 = 1.5, p1 = 0.3), "between 0 and 1")
 })
+
+test_that("calc_sign_test matches calc_binomial_exact(p0 = 0.5) exactly", {
+  # The sign test is exactly a binomial test against 0.5 -- verify the thin
+  # wrapper reproduces calc_binomial_exact()'s own result bit-for-bit for
+  # the same p_pos, and returns its own (not the internal p0/p1) inputs.
+  wrapped <- calc_sign_test(p_pos = 0.7, alpha = 0.05, power = 0.8)
+  direct <- calc_binomial_exact(p0 = 0.5, p1 = 0.7, alpha = 0.05, power = 0.8)
+  expect_equal(wrapped$n, direct$n)
+  expect_equal(wrapped$achieved_power, direct$achieved_power)
+  expect_equal(wrapped$inputs, list(p_pos = 0.7, alpha = 0.05, power = 0.8, alternative = "two.sided"))
+  expect_equal(wrapped$n, 54)
+})
+
+test_that("calc_sign_test rejects invalid inputs", {
+  expect_error(calc_sign_test(p_pos = 0.5), "must differ from 0.5")
+  expect_error(calc_sign_test(p_pos = 1.5), "between 0 and 1")
+})
