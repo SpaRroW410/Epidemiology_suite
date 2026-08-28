@@ -11,7 +11,7 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: twenty-seven complete calculator modules -- all Stage-1 CORE items
+of Phase 2: twenty-eight complete calculator modules -- all Stage-1 CORE items
 from the master checklists are now built, plus two "quick wins" batches of
 further CORE items, and the start of Stage 2 (analytical depth) --
 
@@ -105,6 +105,12 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   (closed-form Demidenko 2007 Poisson-regression formula, reproducing
   WebPower's `wp.poisson()` exactly without that package's heavy
   dependency chain)
+- **Ratio Estimation** (`R/modules/mod_ratio.R`) -- precision-based
+  estimation of a risk ratio, odds ratio, or rate ratio (a target
+  confidence-interval width rather than a power target), wrapping
+  `presize::prec_riskratio()` (Koopman 1984; Katz et al. 1978),
+  `presize::prec_or()` (Gart & Zweifel 1967; Woolf 1955), and
+  `presize::prec_rateratio()` (Rothman & Greenland 2018)
 - **Multiple Regression** (`R/modules/mod_regression.R`) -- R-squared
   deviation from zero for a multiple linear regression model, wrapping
   `pwr::pwr.f2.test()` (Cohen 1988)

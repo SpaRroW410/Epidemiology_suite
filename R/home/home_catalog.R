@@ -618,6 +618,39 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Incidence Rate",
        module_input_id = "rate-design", design_value = "comparison"),
 
+  list(key = "ratio_risk_ratio",
+       label = "Risk ratio -- precision-based",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate a risk ratio",
+         "to a target confidence-interval width, rather than to test a",
+         "specific hypothesis?\""
+       ),
+       outcome_type = "ratio", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Ratio Estimation",
+       module_input_id = "ratio-design", design_value = "risk_ratio"),
+
+  list(key = "ratio_odds_ratio",
+       label = "Odds ratio -- precision-based",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate an odds ratio",
+         "to a target confidence-interval width, rather than to test a",
+         "specific hypothesis?\""
+       ),
+       outcome_type = "ratio", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Ratio Estimation",
+       module_input_id = "ratio-design", design_value = "odds_ratio"),
+
+  list(key = "ratio_rate_ratio",
+       label = "Rate ratio -- precision-based",
+       answers = paste(
+         "Answers: \"How many subjects (or how much person-time) do I need",
+         "to estimate a rate ratio to a target precision level, rather",
+         "than to test a specific hypothesis?\""
+       ),
+       outcome_type = "ratio", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Ratio Estimation",
+       module_input_id = "ratio-design", design_value = "rate_ratio"),
+
   list(key = "diagnostic_ppv_npv",
        label = "Predictive values (PPV/NPV), precision-based",
        answers = paste(
@@ -790,7 +823,11 @@ study_design_families <- list(
   list(id = "precision", label = "Precision-based (CI-width)",
        hint = "Estimating with a target confidence-interval width rather than testing a hypothesis.",
        catalog_keys = c("proportion_single_precision", "means_single_precision",
-                         "incidence_rate_precision")),
+                         "incidence_rate_precision", "ratio_risk_ratio",
+                         "ratio_odds_ratio", "ratio_rate_ratio")),
+  list(id = "ratio_estimation", label = "Ratio Estimation",
+       hint = "Precision-based estimation of a risk ratio, odds ratio, or rate ratio.",
+       catalog_keys = c("ratio_risk_ratio", "ratio_odds_ratio", "ratio_rate_ratio")),
   list(id = "incidence_rate", label = "Incidence Rate",
        hint = "Estimating or comparing incidence rates from person-time data.",
        catalog_keys = c("incidence_rate_precision", "rate_comparison")),

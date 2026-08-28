@@ -65,7 +65,9 @@ module_registry <- list(
   list(id = rm_anova_meta$id, title = rm_anova_meta$nav_title,
        ui = mod_rm_anova_ui, server = mod_rm_anova_server),
   list(id = nonparametric_meta$id, title = nonparametric_meta$nav_title,
-       ui = mod_nonparametric_ui, server = mod_nonparametric_server)
+       ui = mod_nonparametric_ui, server = mod_nonparametric_server),
+  list(id = ratio_meta$id, title = ratio_meta$nav_title,
+       ui = mod_ratio_ui, server = mod_ratio_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -78,7 +80,7 @@ module_registry <- list(
 # test_families), which points at these same module ids.
 module_groups <- list(
   list(title = "Descriptive & Estimation",
-       module_ids = c("proportion", "means", "rate")),
+       module_ids = c("proportion", "means", "rate", "ratio")),
   list(title = "Survey & Cross-Sectional",
        module_ids = c("stratified", "cluster")),
   list(title = "Observational Studies",

@@ -215,6 +215,7 @@ for what to build next):
 | Self-Controlled Case Series | Cases-only design, risk-period vs. own-time comparison, optional age effects | closed-form (Musonda, Farrington & Whitaker 2006) | Live |
 | RM-ANOVA / Mixed ANOVA | Between-subjects, within-subjects, and group x time interaction effects | closed-form (Cohen 1988; `WebPower::wp.rmanova()` algorithm) | Live |
 | Nonparametric Tests | Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau | `TrialSize::Nonpara.Two.Sample()`/`Nonpara.One.Sample()`/`Nonpara.Independ()` (Chow, Shao & Wang 2003) | Live |
+| Ratio Estimation | Precision-based risk ratio, odds ratio, rate ratio | `presize::prec_riskratio()`/`prec_or()`/`prec_rateratio()` | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
 | Survival (advanced) | Accrual/follow-up (non-uniform entry), competing risks, RMST | `gsDesign::nSurv`; `SSRMST` (simulation-based, not yet wrapped) | Not started |
 | MANOVA | Global & special effects, Hotelling's T² | Vonesh & Schork (1986) closed-form; not yet wrapped | Not started |
