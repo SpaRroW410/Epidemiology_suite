@@ -116,7 +116,12 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   `pwr::pwr.f2.test()` (Cohen 1988)
 - **Non-Inferiority** (`R/modules/mod_noninferiority.R`) -- means or
   proportions, wrapping `epiR::epi.ssninfc()` / `epi.ssninfb()` (Chow, Shao
-  & Wang 2008)
+  & Wang 2008); plus odds ratio and hazard ratio (Cox PH), wrapping
+  `TrialSize::RelativeRisk.NIS()` / `Cox.NIS()` (Chow, Shao & Wang 2003)
+  -- despite its name, `RelativeRisk.NIS()`'s formula (confirmed from its
+  source, shared with its `RelativeRisk.Equality()` sibling) is built on
+  the log odds ratio, not the relative risk, so this app labels the
+  design by what it actually computes
 - **Rule of Three** (`R/modules/mod_rule_of_three.R`) -- the upper bound on
   an unseen adverse-event rate given zero events observed, or the sample
   size needed to have a good chance of observing at least one event of an

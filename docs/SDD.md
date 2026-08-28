@@ -203,7 +203,7 @@ for what to build next):
 | Incidence Rate | Precision-based, events + person-time; comparison of two rates | `presize::prec_rate()`; closed-form (Demidenko 2007) | Live |
 | Exact Tests | Binomial test (single proportion); Fisher's exact (two proportions); sign test | `stats::binom.test()` search; `Exact::power.exact.test()` search; `stats::binom.test()` search (p0 = 0.5) | Live |
 | Multiple Regression | R-squared deviation from zero | `pwr::pwr.f2.test()` | Live |
-| Non-Inferiority | Means and proportions | `epiR::epi.ssninfc()`, `epi.ssninfb()` | Live |
+| Non-Inferiority | Means, proportions, odds ratio, hazard ratio (Cox PH) | `epiR::epi.ssninfc()`, `epi.ssninfb()`; `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
 | Rule of Three | Upper bound on unseen event rate; n to detect >= 1 event | closed-form (Hanley & Lippman-Hand 1983) | Live |
 | Prediction Model | Model development — binary, continuous, survival | `pmsampsize::pmsampsize()` (Riley et al. 2019/2020/2021) | Live |
 | ROC / AUC | Single ROC AUC vs. chance (0.5) | `pROC::power.roc.test()` (Obuchowski et al. 2004) | Live |

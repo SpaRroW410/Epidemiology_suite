@@ -596,6 +596,30 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Non-Inferiority",
        module_input_id = "noninferiority-design", design_value = "proportions"),
 
+  list(key = "noninferiority_or",
+       label = "Non-inferiority trial, odds ratio",
+       answers = paste(
+         "Answers: \"How many subjects do I need to show a new",
+         "treatment's odds of a binary outcome aren't worse than a",
+         "standard treatment's by more than an acceptable margin,",
+         "expressed as an odds ratio?\""
+       ),
+       outcome_type = "noninferiority", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Non-Inferiority",
+       module_input_id = "noninferiority-design", design_value = "odds_ratio"),
+
+  list(key = "noninferiority_hr",
+       label = "Non-inferiority trial, hazard ratio (Cox PH)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to show a new",
+         "treatment's hazard (event) rate isn't worse than a standard",
+         "treatment's by more than an acceptable margin, for a",
+         "time-to-event outcome?\""
+       ),
+       outcome_type = "noninferiority", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Non-Inferiority",
+       module_input_id = "noninferiority-design", design_value = "hazard_ratio"),
+
   list(key = "incidence_rate_precision",
        label = "Incidence rate, precision-based",
        answers = paste(
@@ -847,7 +871,7 @@ study_design_families <- list(
        hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, and non-inferiority testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",
                          "tost_means", "tost_proportions", "noninferiority_means",
-                         "noninferiority_proportions")),
+                         "noninferiority_proportions", "noninferiority_or", "noninferiority_hr")),
   list(id = "regression", label = "Regression",
        hint = "Testing whether a multiple regression model explains more variance than chance, or a logistic regression predictor's effect.",
        catalog_keys = c("regression_r2", "logistic_binary", "logistic_continuous")),
@@ -917,7 +941,8 @@ test_families <- list(
   list(id = "equivalence_noninferiority", label = "Equivalence / Non-Inferiority Test Forms",
        hint = "Two one-sided tests (TOST) for equivalence, non-inferiority margins, and crossover designs.",
        catalog_keys = c("tost_means", "tost_proportions", "noninferiority_means",
-                         "noninferiority_proportions", "crossover_2x2")),
+                         "noninferiority_proportions", "noninferiority_or",
+                         "noninferiority_hr", "crossover_2x2")),
   list(id = "nonparametric_tests", label = "Nonparametric Tests",
        hint = "Distribution-free rank-based tests: Wilcoxon rank-sum, Wilcoxon signed-rank, and Kendall's tau.",
        catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau"))
