@@ -73,7 +73,14 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   finder; plus McNemar's test for paired/matched proportions (the same
   subjects measured twice), wrapping `TrialSize::McNemar.Test()` (Chow,
   Shao & Wang 2003) -- `TrialSize` already a zero-dependency project
-  dependency
+  dependency; and a Mantel-Haenszel design for comparing two proportions
+  across J confounding strata (age bands, severity categories,
+  propensity-score strata), wrapping `TrialSize::Propensity.Score.strata()`
+  (the weighted Mantel-Haenszel test) alongside
+  `TrialSize::Propensity.Score.nostrata()` (the naive pooled comparison,
+  shown side by side to illustrate the cost of ignoring confounding
+  strata) -- verified exactly against Chow, Shao & Wang (2003) Example
+  15.2.3 (stratified n=447 vs. pooled n=1151)
 - **Pilot / Feasibility** (`R/modules/mod_pilot.R`) -- the flat 12/arm
   rule-of-thumb (Julious 2005) plus an interactive tool showing how precise
   a pilot's estimated SD is at a given n (95% CI multipliers on the observed

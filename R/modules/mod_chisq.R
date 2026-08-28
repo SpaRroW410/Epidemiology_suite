@@ -24,7 +24,8 @@ mod_chisq_ui <- function(id) {
         choices = c(
           "Goodness of fit" = "gof",
           "Test of independence / association (R x C table)" = "independence",
-          "McNemar's test (paired proportions)" = "mcnemar"
+          "McNemar's test (paired proportions)" = "mcnemar",
+          "Mantel-Haenszel (stratified proportions)" = "mantelhaenszel"
         ),
         selected = "gof"
       ),
@@ -49,6 +50,16 @@ mod_chisq_ui <- function(id) {
                      value = 0.5, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("p01"), "p01 (proportion switching negative -> positive)",
                      value = 0.2, min = 0.001, max = 0.999, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("mantelhaenszel"),
+        selectInput(ns("J_mh"), "Number of strata (J)", choices = 2:8, selected = 5),
+        numericInput(ns("phi_mh"), "Assumed odds ratio (phi, group 2 vs group 1)",
+                     value = 2, min = 0.001, step = 0.1),
+        p(class = "text-muted",
+          "For each stratum: a = share of the total sample, b = share of that",
+          "stratum allocated to group 1, p1 = group-1 response probability."),
+        uiOutput(ns("mh_strata_ui"))
       ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
@@ -75,7 +86,13 @@ mod_chisq_ui <- function(id) {
       render_formula_block(chisq_content$mcnemar$formula_latex),
       shiny::markdown(chisq_content$mcnemar$explanation),
       h5("Worked example"),
-      shiny::markdown(chisq_content$mcnemar$worked_example)
+      shiny::markdown(chisq_content$mcnemar$worked_example),
+      hr(),
+      h4(chisq_content$mantelhaenszel$title),
+      render_formula_block(chisq_content$mantelhaenszel$formula_latex),
+      shiny::markdown(chisq_content$mantelhaenszel$explanation),
+      h5("Worked example"),
+      shiny::markdown(chisq_content$mantelhaenszel$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -90,7 +107,11 @@ mod_chisq_ui <- function(id) {
       hr(),
       h4(chisq_content$mcnemar$title),
       p(strong("Citation: "), chisq_content$mcnemar$citation),
-      p(strong("Implemented via: "), code(chisq_content$mcnemar$backend))
+      p(strong("Implemented via: "), code(chisq_content$mcnemar$backend)),
+      hr(),
+      h4(chisq_content$mantelhaenszel$title),
+      p(strong("Citation: "), chisq_content$mantelhaenszel$citation),
+      p(strong("Implemented via: "), code(chisq_content$mantelhaenszel$backend))
     )
   )
 }
@@ -131,10 +152,44 @@ mod_chisq_server <- function(id) {
       }))
     })
 
+    output$mh_strata_ui <- renderUI({
+      req(input$J_mh)
+      J <- as.integer(input$J_mh)
+      default_a <- round(1 / J, 3)
+      tagList(lapply(seq_len(J), function(j) {
+        fluidRow(
+          column(4, numericInput(session$ns(paste0("mh_a_", j)), sprintf("Stratum %d: a", j),
+                                  value = default_a, min = 0.001, max = 0.999, step = 0.01)),
+          column(4, numericInput(session$ns(paste0("mh_b_", j)), sprintf("Stratum %d: b", j),
+                                  value = 0.5, min = 0.001, max = 0.999, step = 0.01)),
+          column(4, numericInput(session$ns(paste0("mh_p1_", j)), sprintf("Stratum %d: p1", j),
+                                  value = 0.5, min = 0.001, max = 0.999, step = 0.01))
+        )
+      }))
+    })
+
     result <- reactive({
       req(input$design, input$alpha, input$power)
 
-      if (input$design == "mcnemar") {
+      if (input$design == "mantelhaenszel") {
+        req(input$J_mh, input$phi_mh)
+        J <- as.integer(input$J_mh)
+        a_vals <- lapply(seq_len(J), function(j) input[[paste0("mh_a_", j)]])
+        b_vals <- lapply(seq_len(J), function(j) input[[paste0("mh_b_", j)]])
+        p1_vals <- lapply(seq_len(J), function(j) input[[paste0("mh_p1_", j)]])
+        req(!any(vapply(a_vals, is.null, logical(1))),
+            !any(vapply(b_vals, is.null, logical(1))),
+            !any(vapply(p1_vals, is.null, logical(1))))
+
+        tryCatch(
+          list(ok = TRUE, value = calc_mantelhaenszel(
+            alpha = input$alpha, power = input$power,
+            a = as.numeric(unlist(a_vals)), b = as.numeric(unlist(b_vals)),
+            p1 = as.numeric(unlist(p1_vals)), phi = input$phi_mh
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else if (input$design == "mcnemar") {
         req(input$p10, input$p01)
         tryCatch(
           list(ok = TRUE, value = calc_mcnemar(
@@ -183,7 +238,12 @@ mod_chisq_server <- function(id) {
       }
 
       v <- res$value
-      if (input$design == "mcnemar") {
+      if (input$design == "mantelhaenszel") {
+        tagList(
+          p(strong("Stratified (Mantel-Haenszel) sample size: "), v$n_stratified),
+          p(strong("Naive pooled sample size (ignoring strata): "), v$n_pooled)
+        )
+      } else if (input$design == "mcnemar") {
         tagList(
           p(strong("Required number of pairs: "), v$n)
         )

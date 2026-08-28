@@ -132,5 +132,63 @@ chisq_content <- list(
       "Research. New York: Marcel Dekker; 2003. Section 6.4."
     ),
     backend = "TrialSize::McNemar.Test()"
+  ),
+
+  mantelhaenszel = list(
+    title = "Mantel-Haenszel Test for Stratified Proportions",
+    formula_latex = paste0(
+      "$$n_{\\text{stratified}} = \\frac{\\left(\\sqrt{\\sigma_0}\\,Z_{1-\\alpha/2} + \\sqrt{\\sigma_1}\\,Z_{1-\\beta}\\right)^2}{\\Delta^2}, \\quad ",
+      "\\Delta = \\sum_j a_j b_j (1-b_j)(p_{1j}-p_{2j})$$",
+      "$$n_{\\text{pooled}} = \\frac{\\left(\\sqrt{\\sigma_0^*}\\,Z_{1-\\alpha/2} + \\sqrt{\\sigma_1^*}\\,Z_{1-\\beta}\\right)^2}{(p_1^* - p_2^*)^2}$$"
+    ),
+    explanation = paste(
+      "Use this when comparing two groups' response proportions while",
+      "adjusting for one or more confounding strata -- e.g. age bands,",
+      "disease-severity categories, or propensity-score strata -- rather",
+      "than pooling everyone together. This is the sample-size analog of",
+      "the (weighted) Mantel-Haenszel / Cochran-Mantel-Haenszel test for a",
+      "stratified 2x2xJ table, and it's what a matched or stratified",
+      "case-control/cohort analysis, or a propensity-score-stratified",
+      "comparison, actually analyzes.",
+      "",
+      "For each of the J strata, enter:",
+      "- **a_j** - the proportion of the *total* sample that falls in",
+      "  stratum j (all strata's a_j must sum to 1).",
+      "- **b_j** - the proportion of stratum j's subjects allocated to",
+      "  group 1 (the reference/control group); 1-b_j go to group 2.",
+      "- **p1_j** - the expected response probability for group 1 in",
+      "  stratum j.",
+      "",
+      "**phi** is the assumed common odds ratio of group 2 vs. group 1,",
+      "applied identically in every stratum to derive that stratum's",
+      "group-2 response probability from p1_j (so the effect is assumed",
+      "constant across strata, the usual Mantel-Haenszel assumption of",
+      "homogeneous/non-interacting strata).",
+      "",
+      "The calculator reports two sample sizes side by side: the correct",
+      "**stratified (Mantel-Haenszel-weighted)** figure, and the **naive",
+      "pooled** figure you'd get by ignoring the strata entirely and just",
+      "comparing the two groups' overall proportions -- illustrating how",
+      "much larger a sample an unadjusted analysis can need when a real",
+      "confounding structure is ignored.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Chow, Shao & Wang (2003), Example 15.2.3 (a propensity-score",
+      "stratified analysis with J=5 strata): stratum allocations",
+      "a = (0.15, 0.15, 0.20, 0.25, 0.25), group-1 shares",
+      "b = (0.4, 0.4, 0.5, 0.6, 0.6), group-1 response probabilities",
+      "p1 = (0.5, 0.6, 0.7, 0.8, 0.9), assumed odds ratio phi = 2, at",
+      "alpha = 0.05 and 80% power. This calculator returns a stratified",
+      "(Mantel-Haenszel) sample size of n = 447, versus n = 1151 for the",
+      "naive pooled comparison that ignores the strata -- both matching",
+      "the textbook's own two worked answers exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
+      "Research. New York: Marcel Dekker; 2003. Section 15.2.3."
+    ),
+    backend = "TrialSize::Propensity.Score.strata() + TrialSize::Propensity.Score.nostrata()"
   )
 )

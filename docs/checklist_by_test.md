@@ -58,7 +58,7 @@
 - [x] **[CORE]** Test of independence / association (R×C) — w, df — `pwr::pwr.chisq.test` (`ES.w2`) — GP: χ² → contingency tables — *(implemented: Chi-Square Tests → "Test of independence", `calc_chisq_independence()`, dynamic R×C proportion-matrix UI (rows/cols 2-5); also cross-referenced as the "3+ group proportions" catalog entry)*
 - [x] **[ADV]** McNemar's (paired proportions) — OR, proportion discordant — GP: χ² → McNemar (exact) — *(implemented: Chi-Square Tests → "McNemar's test (paired proportions)", `calc_mcnemar()`, wraps `TrialSize::McNemar.Test()` -- `TrialSize` already a zero-dependency project dependency, no new package. Verified exactly against Chow, Shao & Wang (2003) Example 6.4.3: p10=0.5, p01=0.2 (psai=0.4, paid=0.7), alpha=0.05, power=0.80 -> n=59 pairs)*
 - [ ] **[ADV]** Cochran's Q (k paired proportions)
-- [ ] **[ADV]** Mantel–Haenszel (stratified OR) — PASS CMH
+- [x] **[ADV]** Mantel–Haenszel (stratified OR) — PASS CMH — *(implemented: Chi-Square Tests → "Mantel-Haenszel (stratified proportions)", `calc_mantelhaenszel()`, wrapping `TrialSize::Propensity.Score.strata()` (weighted Mantel-Haenszel test) and `TrialSize::Propensity.Score.nostrata()` (naive pooled comparison, shown side by side) -- `TrialSize` already a zero-dependency project dependency. Verified exactly against Chow, Shao & Wang (2003) Example 15.2.3: J=5 strata, phi=2, alpha=0.05, power=0.80 -> stratified n=447 vs. naive pooled n=1151, both matching the textbook's own two worked answers)*
 - [ ] **[ADV]** Cochran–Armitage trend — dose-response proportions — Epi Info StatCalc (χ² for trend)
 - [ ] **[ADV]** Single-variance χ² test
 

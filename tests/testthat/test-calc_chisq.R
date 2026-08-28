@@ -49,3 +49,32 @@ test_that("calc_mcnemar rejects invalid inputs", {
   expect_error(calc_mcnemar(p10 = 0, p01 = 0.2), "between 0 and 1")
   expect_error(calc_mcnemar(p10 = 0.5, p01 = 0.2, alpha = 0), "between 0 and 1")
 })
+
+test_that("calc_mantelhaenszel matches Chow, Shao & Wang (2003) Example 15.2.3", {
+  # J=5 strata: a=(0.15,0.15,0.20,0.25,0.25), b=(0.4,0.4,0.5,0.6,0.6),
+  # p1=(0.5,0.6,0.7,0.8,0.9), phi=2, alpha=0.05, power=0.80 -> stratified
+  # (Mantel-Haenszel) n=447, naive pooled n=1151 (the textbook's own two
+  # worked answers).
+  a <- c(0.15, 0.15, 0.20, 0.25, 0.25)
+  b <- c(0.4, 0.4, 0.5, 0.6, 0.6)
+  p1 <- c(0.5, 0.6, 0.7, 0.8, 0.9)
+  res <- calc_mantelhaenszel(alpha = 0.05, power = 0.80, a = a, b = b, p1 = p1, phi = 2)
+  expect_equal(res$n_stratified, 447)
+  expect_equal(res$n_pooled, 1151)
+})
+
+test_that("calc_mantelhaenszel: stratified n is smaller than the naive pooled n here", {
+  a <- c(0.15, 0.15, 0.20, 0.25, 0.25)
+  b <- c(0.4, 0.4, 0.5, 0.6, 0.6)
+  p1 <- c(0.5, 0.6, 0.7, 0.8, 0.9)
+  res <- calc_mantelhaenszel(alpha = 0.05, power = 0.80, a = a, b = b, p1 = p1, phi = 2)
+  expect_lt(res$n_stratified, res$n_pooled)
+})
+
+test_that("calc_mantelhaenszel rejects invalid inputs", {
+  a <- c(0.5, 0.5); b <- c(0.5, 0.5); p1 <- c(0.5, 0.5)
+  expect_error(calc_mantelhaenszel(a = a, b = b, p1 = p1, phi = 1), "must differ from 1")
+  expect_error(calc_mantelhaenszel(a = c(0.5, 0.6), b = b, p1 = p1, phi = 2), "sum to 1")
+  expect_error(calc_mantelhaenszel(a = a, b = c(0.5, 0.5, 0.5), p1 = p1, phi = 2), "same length")
+  expect_error(calc_mantelhaenszel(a = 0.5, b = 0.5, p1 = 0.5, phi = 2), "at least 2 strata")
+})

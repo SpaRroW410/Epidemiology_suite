@@ -357,6 +357,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Chi-Square Tests",
        module_input_id = "chisq-design", design_value = "mcnemar"),
 
+  list(key = "chisq_mantelhaenszel",
+       label = "Mantel-Haenszel test (stratified proportions)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to compare two groups'",
+         "response proportions while adjusting for confounding strata",
+         "(age bands, severity categories, propensity-score strata), via",
+         "a Mantel-Haenszel-weighted test?\""
+       ),
+       outcome_type = "chisq", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Chi-Square Tests",
+       module_input_id = "chisq-design", design_value = "mantelhaenszel"),
+
   list(key = "logrank",
        label = "Log-rank test (comparing two survival curves)",
        answers = paste(
@@ -854,8 +866,8 @@ study_design_families <- list(
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
                          "agreement_bland_altman", "agreement_ccc")),
   list(id = "chi_square", label = "Chi-Square Tests",
-       hint = "Categorical distribution/association testing (goodness of fit, R x C tables, paired proportions).",
-       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar")),
+       hint = "Categorical distribution/association testing (goodness of fit, R x C tables, paired proportions, stratified/Mantel-Haenszel).",
+       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar", "chisq_mantelhaenszel")),
   list(id = "precision", label = "Precision-based (CI-width)",
        hint = "Estimating with a target confidence-interval width rather than testing a hypothesis.",
        catalog_keys = c("proportion_single_precision", "means_single_precision",
@@ -936,8 +948,8 @@ test_families <- list(
        catalog_keys = c("means_k", "regression_r2", "anova_general",
                          "rm_anova_between", "rm_anova_within", "rm_anova_interaction")),
   list(id = "chi_square_tests", label = "Chi-Square Tests",
-       hint = "Goodness of fit, tests of independence/association, and paired-proportions (McNemar's) testing for categorical data.",
-       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar")),
+       hint = "Goodness of fit, tests of independence/association, paired-proportions (McNemar's), and stratified/Mantel-Haenszel testing for categorical data.",
+       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar", "chisq_mantelhaenszel")),
   list(id = "exact_tests", label = "Exact Tests",
        hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, sign test) where the normal approximation is unreliable.",
        catalog_keys = c("exact_binomial", "exact_fisher", "sign_test")),
