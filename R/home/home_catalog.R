@@ -873,7 +873,19 @@ calculator_catalog <- list(
        ),
        outcome_type = "safety", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Rule of Three",
-       module_input_id = "rule_of_three-design", design_value = "n_required")
+       module_input_id = "rule_of_three-design", design_value = "n_required"),
+
+  list(key = "rule_of_three_detect_imperfect",
+       label = "Detect at least one case, imperfect test (finite population)",
+       answers = paste(
+         "Answers: \"How many units do I need to sample from a known-size",
+         "population to be confident of detecting at least one case, if",
+         "present, using a test with imperfect sensitivity/specificity",
+         "(one test, or two combined in series/parallel)?\""
+       ),
+       outcome_type = "safety", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Rule of Three",
+       module_input_id = "rule_of_three-design", design_value = "detect_imperfect")
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -957,8 +969,9 @@ study_design_families <- list(
        hint = "Distribution-free alternatives to the t-test and correlation test, when normality can't be assumed.",
        catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau")),
   list(id = "safety_surveillance", label = "Safety / Surveillance",
-       hint = "Bounding an unseen adverse-event rate, or planning to catch a rare event.",
-       catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required")),
+       hint = "Bounding an unseen adverse-event rate, planning to catch a rare event, or proving disease/defect freedom in a finite population with an imperfect test.",
+       catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required",
+                         "rule_of_three_detect_imperfect")),
   list(id = "prediction", label = "Prediction Model Development",
        hint = "Developing a new multivariable prediction/diagnostic model without excessive overfitting.",
        catalog_keys = c("prediction_binary", "prediction_continuous", "prediction_survival")),

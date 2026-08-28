@@ -154,7 +154,13 @@ further CORE items, and the start of Stage 2 (analytical depth) --
 - **Rule of Three** (`R/modules/mod_rule_of_three.R`) -- the upper bound on
   an unseen adverse-event rate given zero events observed, or the sample
   size needed to have a good chance of observing at least one event of an
-  assumed rate; closed-form (Hanley & Lippman-Hand 1983)
+  assumed rate; closed-form (Hanley & Lippman-Hand 1983); plus a more
+  realistic "prove disease/defect freedom" design for a known finite
+  population and an imperfect test (single test, or two combined in
+  series/parallel), wrapping `epiR::epi.ssdetect()` -- verified against
+  the package's own worked examples (n=65, n=15) and, for the two-test
+  case, against independently hand-derived series/parallel test-
+  combination formulas (n=44 series, n=38 parallel)
 - **Exact Tests** (`R/modules/mod_exact_tests.R`) -- the binomial test
   (single proportion) and Fisher's exact test (two independent
   proportions), both more accurate than the normal-approximation designs
