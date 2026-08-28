@@ -182,7 +182,16 @@ further CORE items, and the start of Stage 2 (analytical depth) --
 - **Cluster / Design Effect** (`R/modules/mod_cluster.R`) -- inflates an
   already-computed simple-random-sample size for cluster/multistage
   sampling (villages, schools, health facilities), closed-form DEFF = 1 +
-  (m-1)*rho (Kish 1965), no package needed
+  (m-1)*rho (Kish 1965), no package needed; plus a cluster survey
+  precision design (WHO EPI-style) that solves the full two-stage design
+  -- number of clusters (PSUs) and total individuals (SSUs) -- in one
+  step for a target proportion precision, wrapping
+  `epiR::epi.ssclus2estb()` -- verified against Levy & Lemeshow (1999)'s
+  own worked example (67 clusters, rising to 81 with variable cluster
+  size, or falling to 60 with a finite population of 220 clusters).
+  Note: `epiR::epi.ssclus1estb()` ("one-stage") is, on inspection of its
+  source, byte-for-byte identical to `epi.ssclus2estb()` ("two-stage"),
+  so this one design covers both cases
 - **Stratified Sampling** (`R/modules/mod_stratified.R`) -- total sample
   size and per-stratum allocation (proportional or optimal/Neyman) for a
   population divided into strata, closed-form (Cochran 1977; Kauermann &

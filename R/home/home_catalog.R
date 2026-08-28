@@ -455,7 +455,19 @@ calculator_catalog <- list(
        ),
        outcome_type = "cluster", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Cluster / Design Effect",
-       module_input_id = NA, design_value = NA),
+       module_input_id = "cluster-design", design_value = "deff"),
+
+  list(key = "cluster_survey",
+       label = "Cluster survey precision (WHO EPI-style, proportion)",
+       answers = paste(
+         "Answers: \"How many clusters and how many individuals do I",
+         "need for a cluster survey (e.g. a WHO EPI-style immunization-",
+         "coverage survey) estimating a proportion to a target",
+         "precision?\""
+       ),
+       outcome_type = "cluster", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Cluster / Design Effect",
+       module_input_id = "cluster-design", design_value = "survey"),
 
   list(key = "stratified_sampling",
        label = "Stratified sampling -- total size and per-stratum allocation",
@@ -921,8 +933,8 @@ study_design_families <- list(
        hint = "Log-rank, Cox regression, stratified log-rank, or accrual/follow-up based survival study designs.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
   list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
-       hint = "Inflating an existing sample size for cluster-sampled (rather than individually-sampled) surveys.",
-       catalog_keys = c("cluster_deff")),
+       hint = "Inflating an existing sample size for cluster-sampled surveys, or solving a full cluster survey design (WHO EPI-style) directly.",
+       catalog_keys = c("cluster_deff", "cluster_survey")),
   list(id = "stratified_sampling", label = "Stratified Sampling",
        hint = "Surveys where the population is divided into strata, sampled independently within each.",
        catalog_keys = c("stratified_sampling")),
