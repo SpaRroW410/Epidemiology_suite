@@ -46,6 +46,56 @@ calc_tost_means <- function(mean_diff, margin, sd, alpha = 0.05, power = 0.8) {
   )
 }
 
+#' Sample size for a pharmacokinetic bioequivalence crossover trial
+#'
+#' Wraps PowerTOST::sampleN.TOST() on the *log-transformed* scale
+#' (logscale = TRUE) -- the classic pharmacokinetic bioequivalence
+#' framing (comparing a test and reference formulation's AUC or Cmax via
+#' a ratio, not a raw difference), for a standard 2x2 crossover or a
+#' replicate design (2x2x4 or the partial-replicate 2x3x3), used to
+#' support reference-scaled average bioequivalence (RSABE) / average
+#' bioequivalence with expanding limits (ABEL) approaches that need
+#' repeated within-subject measurements of the reference product.
+#'
+#' @param cv Expected intra-subject coefficient of variation (> 0), on
+#'   the log scale (e.g. 0.3 for 30% CV)
+#' @param theta0 Assumed true ratio of test/reference (e.g. 0.95); must
+#'   fall strictly within (theta1, theta2)
+#' @param theta1 Lower bioequivalence limit (default 0.8, i.e. 80%)
+#' @param theta2 Upper bioequivalence limit (default 1.25, i.e. 125%)
+#' @param alpha Significance level, one-sided (0,1)
+#' @param power Desired power (0,1)
+#' @param design One of "2x2" (classical 2x2x2 crossover), "2x2x4"
+#'   (full replicate), or "2x3x3" (partial replicate)
+#' @return list(n_total, achieved_power, inputs)
+calc_tost_bioequivalence <- function(cv, theta0 = 0.95, theta1 = 0.8, theta2 = 1.25,
+                                      alpha = 0.05, power = 0.8,
+                                      design = c("2x2", "2x2x4", "2x3x3")) {
+  design <- match.arg(design)
+  .validate_positive(cv, "cv")
+  .validate_positive(theta0, "theta0")
+  .validate_positive(theta1, "theta1")
+  .validate_positive(theta2, "theta2")
+  if (!(theta0 > theta1 && theta0 < theta2)) {
+    stop("theta0 must fall strictly within (theta1, theta2) -- otherwise bioequivalence can't be shown even with infinite sample size.")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  fit <- PowerTOST::sampleN.TOST(
+    alpha = alpha, targetpower = power, logscale = TRUE,
+    theta0 = theta0, theta1 = theta1, theta2 = theta2,
+    CV = cv, design = design, print = FALSE
+  )
+
+  list(
+    n_total = fit[["Sample size"]],
+    achieved_power = fit[["Achieved power"]],
+    inputs = list(cv = cv, theta0 = theta0, theta1 = theta1, theta2 = theta2,
+                  alpha = alpha, power = power, design = design)
+  )
+}
+
 #' Sample size for a two one-sided tests (TOST) equivalence trial on proportions
 #'
 #' Wraps epiR::epi.ssequb(type = "equivalence") rather than reimplementing

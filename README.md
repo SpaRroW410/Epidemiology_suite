@@ -86,9 +86,15 @@ further CORE items, and the start of Stage 2 (analytical depth) --
 - **Equivalence (TOST)** (`R/modules/mod_tost.R`) -- two one-sided tests, for
   a mean difference on the raw/untransformed scale (wraps
   `PowerTOST::sampleN.TOST(logscale = FALSE, design = "parallel")`; Phillips
-  1990; Diletti, Hauschke & Steinijans 1991) or for two proportions (wraps
+  1990; Diletti, Hauschke & Steinijans 1991), for two proportions (wraps
   `epiR::epi.ssequb(type = "equivalence")` -- no lightweight package with a
-  dedicated proportions-TOST function was found)
+  dedicated proportions-TOST function was found), or for a pharmacokinetic
+  bioequivalence crossover on the log-ratio scale -- classical 2x2, or the
+  2x2x4 full-replicate/2x3x3 partial-replicate designs used for RSABE/ABEL
+  approaches (wraps `PowerTOST::sampleN.TOST(logscale = TRUE)`, same
+  package/citations, verified exactly against its own documented example:
+  CV=30%, theta0=0.95, 80-125% limits -> n=40 for 2x2, n=20 for 2x2x4, n=30
+  for 2x3x3)
 - **Log-Rank / Survival** (`R/modules/mod_logrank.R`) -- two-arm
   time-to-event studies (required N from event probabilities), wrapping
   `powerSurvEpi::ssizeCT()` (Freedman 1982; Rosner 2006); Cox

@@ -574,6 +574,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Equivalence (TOST)",
        module_input_id = "tost-design", design_value = "proportions"),
 
+  list(key = "tost_bioequivalence",
+       label = "Pharmacokinetic bioequivalence crossover (TOST)",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a bioequivalence",
+         "crossover study (classical 2x2, or a full/partial replicate",
+         "design), comparing a test and reference formulation's exposure",
+         "via a log-scale ratio?\""
+       ),
+       outcome_type = "equivalence", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Equivalence (TOST)",
+       module_input_id = "tost-design", design_value = "bioequivalence"),
+
   list(key = "noninferiority_means",
        label = "Non-inferiority trial, two means",
        answers = paste(
@@ -870,8 +882,9 @@ study_design_families <- list(
   list(id = "clinical_trials", label = "Clinical Trials",
        hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, and non-inferiority testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",
-                         "tost_means", "tost_proportions", "noninferiority_means",
-                         "noninferiority_proportions", "noninferiority_or", "noninferiority_hr")),
+                         "tost_means", "tost_proportions", "tost_bioequivalence",
+                         "noninferiority_means", "noninferiority_proportions",
+                         "noninferiority_or", "noninferiority_hr")),
   list(id = "regression", label = "Regression",
        hint = "Testing whether a multiple regression model explains more variance than chance, or a logistic regression predictor's effect.",
        catalog_keys = c("regression_r2", "logistic_binary", "logistic_continuous")),
@@ -940,9 +953,9 @@ test_families <- list(
                          "agreement_bland_altman", "agreement_ccc")),
   list(id = "equivalence_noninferiority", label = "Equivalence / Non-Inferiority Test Forms",
        hint = "Two one-sided tests (TOST) for equivalence, non-inferiority margins, and crossover designs.",
-       catalog_keys = c("tost_means", "tost_proportions", "noninferiority_means",
-                         "noninferiority_proportions", "noninferiority_or",
-                         "noninferiority_hr", "crossover_2x2")),
+       catalog_keys = c("tost_means", "tost_proportions", "tost_bioequivalence",
+                         "noninferiority_means", "noninferiority_proportions",
+                         "noninferiority_or", "noninferiority_hr", "crossover_2x2")),
   list(id = "nonparametric_tests", label = "Nonparametric Tests",
        hint = "Distribution-free rank-based tests: Wilcoxon rank-sum, Wilcoxon signed-rank, and Kendall's tau.",
        catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau"))

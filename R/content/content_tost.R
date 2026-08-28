@@ -37,8 +37,8 @@ tost_content <- list(
       "parallel-group design comparing raw units (e.g. exam scores, blood",
       "pressure). Pharmacokinetic bioequivalence studies conventionally",
       "use a log-transformed ratio (T/R) with a 0.80-1.25 margin and a",
-      "crossover design instead -- the same backend package supports that",
-      "framing too, but it isn't exposed by this calculator.",
+      "crossover design instead -- see the \"Bioequivalence crossover\"",
+      "design below, using the same backend package.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -103,5 +103,62 @@ tost_content <- list(
       "(as implemented by epiR::epi.ssequb)."
     ),
     backend = "epiR::epi.ssequb(type = \"equivalence\")"
+  ),
+
+  bioequivalence = list(
+    title = "Pharmacokinetic Bioequivalence Crossover (Log-Scale Ratio)",
+    formula_latex = paste0(
+      "$$H_0: \\theta \\notin (\\theta_1, \\theta_2) \\quad \\text{vs.} \\quad ",
+      "H_1: \\theta_1 < \\theta < \\theta_2, \\quad \\theta = \\mu_T/\\mu_R$$",
+      "$$n \\text{ solved iteratively so both one-sided tests reject at } \\alpha ",
+      "\\text{ with the desired power (Owen's Q; Phillips 1990)}$$"
+    ),
+    explanation = paste(
+      "The classic pharmacokinetic bioequivalence design: comparing a",
+      "test and reference formulation's exposure (e.g. AUC or Cmax) via",
+      "their *ratio* on a log scale, rather than a raw difference --",
+      "PowerTOST's more common use case, with intra-subject variability",
+      "expressed as a coefficient of variation (CV) from a crossover",
+      "design instead of a between-subjects standard deviation.",
+      "",
+      "- **CV (intra-subject)** - the expected within-subject coefficient",
+      "  of variation on the log scale (e.g. 0.3 for 30%).",
+      "- **theta0** - the assumed true test/reference ratio (e.g. 0.95 =",
+      "  test averages 95% of reference); must fall strictly within the",
+      "  bioequivalence limits below.",
+      "- **theta1, theta2** - the bioequivalence limits (regulatory",
+      "  default 0.80-1.25, i.e. 80%-125%).",
+      "- **alpha, power** - as elsewhere (alpha is one-sided, per TOST).",
+      "- **Design** - \"2x2\" (classical 2x2x2 crossover, one measurement",
+      "  of each formulation per subject); \"2x2x4\" (full replicate, each",
+      "  formulation measured twice, needed for reference-scaled average",
+      "  bioequivalence / RSABE and average bioequivalence with expanding",
+      "  limits / ABEL approaches for highly variable drugs); \"2x3x3\"",
+      "  (partial replicate, reference measured twice, test once).",
+      "",
+      "Replicate designs need substantially fewer subjects than the",
+      "classical 2x2 crossover for the same CV and power, since each",
+      "subject contributes more within-subject information.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "PowerTOST's own documented example: CV = 30%, assumed ratio",
+      "theta0 = 0.95, standard 80-125% limits, alpha = 0.05 (one-sided),",
+      "80% power. For the classical 2x2 crossover, this calculator",
+      "returns n = 40 (achieved power 0.8158), matching the package's",
+      "own worked answer exactly. For the same CV and power, the 2x2x4",
+      "full-replicate design needs only n = 20, and the 2x3x3",
+      "partial-replicate design needs n = 30 -- illustrating how much a",
+      "replicate design can reduce sample size for the same precision.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Phillips KF. Power of the two one-sided tests procedure in",
+      "bioequivalence. J Pharmacokin Biopharm. 1990;18(2):137-144;",
+      "Diletti D, Hauschke D, Steinijans VW. Sample size determination",
+      "for bioequivalence assessment by means of confidence intervals.",
+      "Int J Clin Pharmacol Ther Toxicol. 1991;29(1):1-8."
+    ),
+    backend = "PowerTOST::sampleN.TOST(logscale = TRUE, design = \"2x2\"/\"2x2x4\"/\"2x3x3\")"
   )
 )

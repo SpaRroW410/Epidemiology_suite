@@ -162,7 +162,7 @@
 |Diagnostic Se/Sp              |Se, prevalence, precision     |`presize::prec_sens`                          |No     |Buderer (1996)                    |✅ built (closed-form, not `presize`)|
 |Single ROC AUC                |AUC, ratio, α, power          |`pROC::power.roc.test`                        |No     |Hanley & McNeil (1982)            |✅ built|
 |Prediction model              |R²/C-stat, #params, prevalence|`pmsampsize`                                  |No     |Riley et al. (2019)               |✅ built|
-|Bioequivalence (2×2)          |CV, GMR, BE limits            |`PowerTOST::sampleN.TOST`                     |No     |Diletti et al. (1991)             |not built|
+|Bioequivalence (2×2)          |CV, GMR, BE limits            |`PowerTOST::sampleN.TOST`                     |No     |Diletti et al. (1991)             |✅ built (also replicate 2×2×4/2×3×3 designs; see below)|
 |Equivalence/NI means          |margin, difference            |`PowerTOST`; `TrialSize`                      |No     |Julious (2004)                    |✅ built (raw-units `PowerTOST::sampleN.TOST`, not `TrialSize`)|
 |Simon phase II                |p0, p1, α, β                  |`clinfun::ph2simon`                           |No     |Simon (1989)                      |✅ built|
 |Pilot rule-of-thumb           |(none / expected effect)      |rule: n=12/arm                                |No     |Julious (2005)                    |✅ built|
