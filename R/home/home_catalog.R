@@ -123,6 +123,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Means",
        module_input_id = "means-design", design_value = "anova"),
 
+  list(key = "means_planned_contrast", label = "Planned linear contrast among k group means",
+       answers = paste(
+         "Answers: \"How many subjects do I need to test one specific,",
+         "pre-specified comparison across 3+ group means -- e.g. a linear",
+         "dose-response trend -- rather than the omnibus ANOVA question",
+         "of whether any groups differ at all?\""
+       ),
+       outcome_type = "mean", groups = "3plus", dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Means",
+       module_input_id = "means-design", design_value = "planned_contrast"),
+
   # Diagnostic Accuracy entries: outcome_type/groups don't apply to this
   # family (it's not a "how many groups" comparison in the usual sense), so
   # these are only reachable via the "by study design" finder, not "by
@@ -842,7 +853,8 @@ study_design_families <- list(
   list(id = "means", label = "Means",
        hint = "Comparing a continuous measurement within or between groups.",
        catalog_keys = c("means_single_precision", "means_single", "means_two_indep",
-                         "means_two_indep_unequal_n", "means_two_dep", "means_k")),
+                         "means_two_indep_unequal_n", "means_two_dep", "means_k",
+                         "means_planned_contrast")),
   list(id = "case_control", label = "Case-Control",
        hint = "Case-control study (unmatched, matched, nested, or case-cohort), odds ratio or hazard ratio based.",
        catalog_keys = c("case_control_unmatched", "case_control_matched",
@@ -944,9 +956,10 @@ test_families <- list(
        catalog_keys = c("proportion_single", "proportion_two_indep",
                          "logistic_binary", "logistic_continuous")),
   list(id = "f_tests", label = "F Tests",
-       hint = "One-way/factorial ANOVA, ANCOVA, multiple regression, and repeated-measures/mixed ANOVA (general linear model F-test framework).",
+       hint = "One-way/factorial ANOVA, ANCOVA, multiple regression, repeated-measures/mixed ANOVA, and planned linear contrasts (general linear model F-test framework).",
        catalog_keys = c("means_k", "regression_r2", "anova_general",
-                         "rm_anova_between", "rm_anova_within", "rm_anova_interaction")),
+                         "rm_anova_between", "rm_anova_within", "rm_anova_interaction",
+                         "means_planned_contrast")),
   list(id = "chi_square_tests", label = "Chi-Square Tests",
        hint = "Goodness of fit, tests of independence/association, paired-proportions (McNemar's), and stratified/Mantel-Haenszel testing for categorical data.",
        catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar", "chisq_mantelhaenszel")),

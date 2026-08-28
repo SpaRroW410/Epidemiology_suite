@@ -31,7 +31,8 @@ mod_means_ui <- function(id) {
           "Two independent means" = "two_sample",
           "Two independent means, unequal group sizes" = "two_sample_unequal_n",
           "Two paired means (before-after, matched pairs)" = "paired",
-          "Three or more independent groups (one-way ANOVA)" = "anova"
+          "Three or more independent groups (one-way ANOVA)" = "anova",
+          "Planned linear contrast (k-group means)" = "planned_contrast"
         ),
         selected = "single"
       ),
@@ -91,6 +92,16 @@ mod_means_ui <- function(id) {
                      value = 4, min = 0.0001)
       ),
       conditionalPanel(
+        condition = design_is("planned_contrast"),
+        selectInput(ns("k_contrast"), "Number of groups (k)", choices = 2:8, selected = 4),
+        numericInput(ns("sigma_contrast"), "Common/pooled standard deviation",
+                     value = 0.22, min = 0.0001, step = 0.01),
+        p(class = "text-muted",
+          "For each group: mu = expected mean, c = contrast coefficient (must",
+          "sum to 0 across groups), f = share of the total sample (must sum to 1)."),
+        uiOutput(ns("contrast_ui"))
+      ),
+      conditionalPanel(
         condition = design_is_not("single_precision"),
         numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
@@ -143,7 +154,13 @@ mod_means_ui <- function(id) {
       render_formula_block(means_content$anova$formula_latex),
       shiny::markdown(means_content$anova$explanation),
       h5("Worked example"),
-      shiny::markdown(means_content$anova$worked_example)
+      shiny::markdown(means_content$anova$worked_example),
+      hr(),
+      h4(means_content$planned_contrast$title),
+      render_formula_block(means_content$planned_contrast$formula_latex),
+      shiny::markdown(means_content$planned_contrast$explanation),
+      h5("Worked example"),
+      shiny::markdown(means_content$planned_contrast$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -170,7 +187,11 @@ mod_means_ui <- function(id) {
       hr(),
       h4(means_content$anova$title),
       p(strong("Citation: "), means_content$anova$citation),
-      p(strong("Implemented via: "), code(means_content$anova$backend))
+      p(strong("Implemented via: "), code(means_content$anova$backend)),
+      hr(),
+      h4(means_content$planned_contrast$title),
+      p(strong("Citation: "), means_content$planned_contrast$citation),
+      p(strong("Implemented via: "), code(means_content$planned_contrast$backend))
     )
   )
 }
@@ -184,6 +205,20 @@ mod_means_server <- function(id) {
       tagList(lapply(seq_len(k), function(i) {
         numericInput(session$ns(paste0("group_mean_", i)),
                      sprintf("Mean of group %d", i), value = defaults[i])
+      }))
+    })
+
+    output$contrast_ui <- renderUI({
+      req(input$k_contrast)
+      k <- as.integer(input$k_contrast)
+      default_f <- round(1 / k, 3)
+      tagList(lapply(seq_len(k), function(i) {
+        fluidRow(
+          column(4, numericInput(session$ns(paste0("contrast_mu_", i)), sprintf("Group %d: mu", i), value = 0)),
+          column(4, numericInput(session$ns(paste0("contrast_c_", i)), sprintf("Group %d: c", i), value = 0, step = 0.5)),
+          column(4, numericInput(session$ns(paste0("contrast_f_", i)), sprintf("Group %d: f", i),
+                                  value = default_f, min = 0.001, max = 0.999, step = 0.01))
+        )
       }))
     })
 
@@ -217,6 +252,26 @@ mod_means_server <- function(id) {
         return(tryCatch(
           list(ok = TRUE, value = calc_means_anova(
             group_means = group_means, sd = input$sd_anova,
+            alpha = input$alpha, power = input$power
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        ))
+      }
+
+      if (input$design == "planned_contrast") {
+        req(input$k_contrast, input$sigma_contrast)
+        k <- as.integer(input$k_contrast)
+        mu_vals <- lapply(seq_len(k), function(i) input[[paste0("contrast_mu_", i)]])
+        c_vals <- lapply(seq_len(k), function(i) input[[paste0("contrast_c_", i)]])
+        f_vals <- lapply(seq_len(k), function(i) input[[paste0("contrast_f_", i)]])
+        req(!any(vapply(mu_vals, is.null, logical(1))),
+            !any(vapply(c_vals, is.null, logical(1))),
+            !any(vapply(f_vals, is.null, logical(1))))
+
+        return(tryCatch(
+          list(ok = TRUE, value = calc_means_planned_contrast(
+            mu = as.numeric(unlist(mu_vals)), sigma = input$sigma_contrast,
+            ci = as.numeric(unlist(c_vals)), fi = as.numeric(unlist(f_vals)),
             alpha = input$alpha, power = input$power
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
@@ -297,6 +352,12 @@ mod_means_server <- function(id) {
           p(strong("Required sample size per group: "), v$n_per_group),
           p(strong("Total sample size: "), v$n_total),
           p(sprintf("Effect size f = %.4f", v$f))
+        )
+      } else if (input$design == "planned_contrast") {
+        tagList(
+          p(strong("Required total sample size: "), v$n_total),
+          p("Per-group allocation (approximate, from rounding each group's share): ",
+            paste(sprintf("group %d = %d", seq_along(v$n_per_group), v$n_per_group), collapse = "; "))
         )
       } else {
         tagList(

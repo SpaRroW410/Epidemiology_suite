@@ -118,3 +118,31 @@ test_that("calc_means_2s_unequal_n rejects invalid inputs", {
   expect_error(calc_means_2s_unequal_n(mu1 = 5, mu2 = 4, sd = 1, n1 = 1), ">= 2")
   expect_error(calc_means_2s_unequal_n(mu1 = 5, mu2 = 4, sd = -1, n1 = 90), "positive")
 })
+
+test_that("calc_means_planned_contrast matches Chow, Shao & Wang (2003) Example 11.1", {
+  # mu=(0.05,0.12,0.14,0.16), sigma=0.22, ci=(-6,1,2,3), fi=1/4 each,
+  # alpha=0.05, power=0.80 -> n=177.9047, ceiling -> 178 (the textbook's
+  # own worked answer, and TrialSize::Dose.Response.Linear()'s own
+  # documented example).
+  res <- calc_means_planned_contrast(
+    mu = c(0.05, 0.12, 0.14, 0.16), sigma = 0.22,
+    ci = c(-6, 1, 2, 3), fi = rep(0.25, 4),
+    alpha = 0.05, power = 0.80
+  )
+  expect_equal(res$n_total, 178)
+  expect_equal(res$n_per_group, rep(45, 4))
+})
+
+test_that("calc_means_planned_contrast rejects invalid inputs", {
+  mu <- c(1, 2); sigma <- 1; fi <- c(0.5, 0.5)
+  expect_error(calc_means_planned_contrast(mu = mu, sigma = sigma, ci = c(1, 1), fi = fi),
+               "must sum to 0")
+  expect_error(calc_means_planned_contrast(mu = c(1, 1), sigma = sigma, ci = c(-1, 1), fi = fi),
+               "must differ from 0")
+  expect_error(calc_means_planned_contrast(mu = c(1, 2, 3), sigma = sigma, ci = c(-1, 1), fi = fi),
+               "same length")
+  expect_error(calc_means_planned_contrast(mu = mu, sigma = sigma, ci = c(-1, 1), fi = c(0.6, 0.6)),
+               "must sum to 1")
+  expect_error(calc_means_planned_contrast(mu = mu, sigma = -1, ci = c(-1, 1), fi = fi),
+               "positive")
+})

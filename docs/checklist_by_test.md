@@ -50,7 +50,7 @@
 - [x] **[CORE]** Multiple linear regression, R² deviation from zero — f² — `pwr::pwr.f2.test` — GP: F → Linear multiple regression: fixed model R² deviation from zero — *(implemented: new Multiple Regression module, `calc_regression_f2()`; backend verified against Cohen (1988) Exercise 9.1 p.424 (u=5, v=89, f2=0.1111 -> power=0.6736 exactly))*
 - [ ] **[ADV]** Multiple regression, R² increase (hierarchical) — f² for added set — GP: F → …R² increase
 - [ ] **[ADV]** Random-model multiple regression — GP: F (Faul 2009)
-- [ ] **[ADV]** Planned contrasts; post-hoc comparisons with multiplicity adjustment
+- [ ] **[ADV]** Planned contrasts; post-hoc comparisons with multiplicity adjustment — *partially covered: a new "Planned linear contrast (k-group means)" design in the Means module, `calc_means_planned_contrast()`, wraps `TrialSize::Dose.Response.Linear()` (a single pre-specified linear contrast test, e.g. a linear dose-response trend, verified exactly against Chow, Shao & Wang (2003) Example 11.1: n=178) -- but post-hoc comparisons with a family-wise multiplicity adjustment (e.g. Tukey/Scheffe/Bonferroni across several pairwise comparisons) are still not covered -- left unticked pending that*
 
 ### χ² tests — G*Power **χ²** family
 

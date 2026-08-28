@@ -24,7 +24,12 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   independent means (equal or unequal group sizes, the latter via
   `pwr::pwr.t2n.test()`), two paired means (before-after / matched pairs),
   and three or more independent groups (one-way ANOVA, wraps
-  `pwr::pwr.anova.test()`, converting raw group means to Cohen's f)
+  `pwr::pwr.anova.test()`, converting raw group means to Cohen's f); plus a
+  planned linear contrast design for testing one pre-specified comparison
+  across k group means (e.g. a linear dose-response trend) rather than the
+  ANOVA design's omnibus "any groups differ" question, wrapping
+  `TrialSize::Dose.Response.Linear()` -- verified exactly against Chow,
+  Shao & Wang (2003) Example 11.1 (n=178)
 - **Diagnostic Accuracy** (`R/modules/mod_diagnostic.R`) -- sensitivity &
   specificity, precision-based or vs. a known/reference value, comparing
   two diagnostic tests (unpaired or paired), all per Akoglu (2022)'s
