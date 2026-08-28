@@ -81,3 +81,23 @@ test_that("calc_proportion_precision rejects invalid N", {
   expect_error(calc_proportion_precision(p = 0.5, d = 0.05, N = -10), ">= 1")
   expect_error(calc_proportion_precision(p = 0.5, d = 0.05, N = NA), ">= 1")
 })
+
+test_that("calc_proportion_posthoc_pairwise matches Chow, Shao & Wang (2003) Example 4.4.2", {
+  # tau=2, p1=0.2, p2=0.4, alpha=0.05, power=0.80 -> n=96 (independently
+  # re-derived from the standard two-proportion z-test formula with
+  # alpha/tau, and confirmed to reproduce
+  # TrialSize::OneWayANOVA.PairwiseComparison()'s own output exactly).
+  res1 <- calc_proportion_posthoc_pairwise(tau = 2, p1 = 0.2, p2 = 0.4, alpha = 0.05, power = 0.80)
+  expect_equal(res1$n_per_group, 96)
+
+  # Same tau/alpha/power, p1=0.2, p2=0.5 -> n=44.
+  res2 <- calc_proportion_posthoc_pairwise(tau = 2, p1 = 0.2, p2 = 0.5, alpha = 0.05, power = 0.80)
+  expect_equal(res2$n_per_group, 44)
+})
+
+test_that("calc_proportion_posthoc_pairwise rejects invalid inputs", {
+  expect_error(calc_proportion_posthoc_pairwise(tau = 0, p1 = 0.2, p2 = 0.4), ">= 1")
+  expect_error(calc_proportion_posthoc_pairwise(tau = 2.5, p1 = 0.2, p2 = 0.4), ">= 1")
+  expect_error(calc_proportion_posthoc_pairwise(tau = 2, p1 = 0.3, p2 = 0.3), "must differ")
+  expect_error(calc_proportion_posthoc_pairwise(tau = 2, p1 = 1.5, p2 = 0.3), "between 0 and 1")
+})

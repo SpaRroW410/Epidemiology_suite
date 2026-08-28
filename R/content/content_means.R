@@ -147,8 +147,9 @@ means_content <- list(
       "per Cohen's conventions). This omnibus test only tells you *some*",
       "pair of groups differs, not *which* pair -- see the \"Planned",
       "linear contrast\" design below for testing one specific",
-      "pre-specified comparison instead (post-hoc multiplicity-adjusted",
-      "comparisons across several pairs are still not covered).",
+      "pre-specified comparison instead, or \"Post-hoc pairwise",
+      "comparison\" for a multiplicity-adjusted comparison of two",
+      "specific groups after the fact.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -305,5 +306,63 @@ means_content <- list(
       "2.3 p. 437. (as implemented by pwr::pwr.t2n.test)."
     ),
     backend = "pwr::pwr.t2n.test()"
+  ),
+
+  posthoc_pairwise = list(
+    title = "Post-Hoc Pairwise Comparison (Bonferroni-Adjusted)",
+    formula_latex = paste0(
+      "$$n_{ij} = \\frac{2\\left(Z_{1-\\alpha/(2\\tau)} + Z_{1-\\beta}\\right)^2 \\sigma^2}",
+      "{(\\mu_i - \\mu_j)^2}$$"
+    ),
+    explanation = paste(
+      "Use this to size ONE specific pairwise comparison (group i vs.",
+      "group j) out of several planned comparisons across a multi-group",
+      "study, correcting the significance level for running multiple",
+      "tests at once (Bonferroni's method) -- the multiplicity-adjusted",
+      "complement to the \"Planned linear contrast\" design above, which",
+      "instead tests a single pre-specified combination of *all* k means.",
+      "",
+      "- **tau** - the total number of pairwise comparisons planned",
+      "  across the whole study (not just this one pair); e.g. for all",
+      "  pairs among k groups, tau = k(k-1)/2 -- 3 groups gives tau=3, 4",
+      "  groups gives tau=6 -- or a smaller number if you only plan to",
+      "  test some of the pairs.",
+      "- **Common SD (sigma)** - the standard deviation shared by all",
+      "  groups.",
+      "- **Assumed difference (margin)** - the true difference between",
+      "  this specific pair's two group means.",
+      "- **alpha** - the overall (family-wise) significance level; the",
+      "  calculator internally uses alpha/tau for this pair's test, so",
+      "  the whole family of tau tests keeps a combined false-positive",
+      "  rate no higher than alpha.",
+      "- **power** - the desired power for detecting this pair's",
+      "  difference.",
+      "",
+      "Because the correction divides alpha by tau, more planned",
+      "comparisons require a larger sample size per pair for the same",
+      "power -- the cost of testing multiple hypotheses without inflating",
+      "the overall false-positive rate.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Suppose a 3-arm trial (tau = 3 planned pairwise comparisons among",
+      "the 3 arms) expects a common SD of 4 and wants to detect a",
+      "difference of 3 units between one specific pair of arms, at an",
+      "overall alpha = 0.05 and 80% power. This calculator returns n = 38",
+      "per group for that pair -- independently re-derived from the",
+      "standard two-sample z-test formula with alpha/tau in place of",
+      "alpha, and confirmed to reproduce",
+      "TrialSize::OneWayANOVA.pairwise()'s own output exactly (that",
+      "package's Rd file cites the method but doesn't print a worked",
+      "numeric answer).",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
+      "Research. New York: Marcel Dekker; 2003. Bonferroni multiple-",
+      "comparison adjustment applied to the standard two-sample sample",
+      "size formula."
+    ),
+    backend = "TrialSize::OneWayANOVA.pairwise()"
   )
 )

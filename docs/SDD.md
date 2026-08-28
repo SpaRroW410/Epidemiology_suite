@@ -188,8 +188,8 @@ for what to build next):
 
 | Family | Designs covered | Backend package/function | Status |
 |---|---|---|---|
-| Proportions | Precision-based (Cochran, +FPC); vs. known value; two independent | closed-form (Cochran); `pwr::pwr.p.test`, `pwr::pwr.2p.test` | Live |
-| Means | Precision-based; one-sample, two-sample (equal + unequal n), paired, one-way ANOVA (3+ groups), planned linear contrast | `epiR::epi.sssimpleestc()`; `pwr::pwr.t.test`, `pwr::pwr.t2n.test`, `pwr::pwr.anova.test`, `TrialSize::Dose.Response.Linear()` | Live |
+| Proportions | Precision-based (Cochran, +FPC); vs. known value; two independent; Bonferroni-adjusted post-hoc pairwise | closed-form (Cochran); `pwr::pwr.p.test`, `pwr::pwr.2p.test`, `TrialSize::OneWayANOVA.PairwiseComparison()` | Live |
+| Means | Precision-based; one-sample, two-sample (equal + unequal n), paired, one-way ANOVA (3+ groups), planned linear contrast, Bonferroni-adjusted post-hoc pairwise | `epiR::epi.sssimpleestc()`; `pwr::pwr.t.test`, `pwr::pwr.t2n.test`, `pwr::pwr.anova.test`, `TrialSize::Dose.Response.Linear()`, `TrialSize::OneWayANOVA.pairwise()` | Live |
 | Diagnostic accuracy | Precision-based (Buderer); vs. reference value; two tests, unpaired/paired; PPV/NPV; likelihood ratios (LR+/LR-) | closed-form (Buderer; Casagrande-Pike; Connor; Altman & Bland), all + Yates' correction; `presize::prec_pos_lr()`/`prec_neg_lr()` (Simel et al 1991) | Live |
 | Agreement / reliability | Cohen's kappa; ICC; Cronbach's alpha; Bland-Altman LoA; Lin's CCC | `presize::prec_kappa()` (→ `kappaSize`); `presize::prec_icc()` (Bonett 2002); `presize::prec_cronb()` (Bonett & Wright 2015); `presize::prec_lim_agree()` (Bland & Altman 1986); closed-form (Lin 1989/2000, formula as used internally by `epiR::epi.ccc()`) | Live |
 | Case-control | Unmatched; matched (1:1 or 1:m); nested (binary/continuous exposure); case-cohort | `epiR::epi.sscc()`; `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed-form (Cai & Zeng 2004) | Live |

@@ -300,5 +300,55 @@ calc_means_planned_contrast <- function(mu, sigma, ci, fi, alpha = 0.05, power =
   )
 }
 
+#' Sample size for a Bonferroni-adjusted post-hoc pairwise comparison of
+#' two group means
+#'
+#' Wraps TrialSize::OneWayANOVA.pairwise() rather than reimplementing the
+#' underlying math (project convention) -- TrialSize already a
+#' zero-dependency project dependency. The formula is the standard
+#' two-sample z-test sample size, with the significance level Bonferroni-
+#' corrected for `tau` simultaneous pairwise comparisons (alpha/tau in
+#' place of alpha) -- independently re-derived here and confirmed to
+#' reproduce the package's own function exactly, since its Rd file's own
+#' examples don't print a numeric answer.
+#'
+#' This is the multiplicity-adjusted complement to the "Planned linear
+#' contrast" design above: that design tests one pre-specified
+#' combination of all k means, while this one sizes one specific pairwise
+#' comparison (mean i vs. mean j) out of `tau` such comparisons planned
+#' across the study, correcting for running several tests at once.
+#'
+#' @param tau Number of pairwise comparisons planned across the whole
+#'   study (whole number >= 1); e.g. tau = choose(k, 2) for all pairs
+#'   among k groups, or a smaller number if only some pairs are planned
+#' @param sigma Common/pooled standard deviation (> 0)
+#' @param margin Assumed true difference between the two group means
+#'   being compared in this specific pair (!= 0)
+#' @param alpha Family-wise significance level (0,1), before Bonferroni
+#'   correction
+#' @param power Desired power (0,1)
+#' @return list(n_per_group, inputs)
+calc_means_posthoc_pairwise <- function(tau, sigma, margin, alpha = 0.05, power = 0.8) {
+  if (!is.numeric(tau) || length(tau) != 1 || is.na(tau) || tau < 1 || tau != round(tau)) {
+    stop("tau must be a single whole number >= 1.")
+  }
+  .validate_positive(sigma, "sigma")
+  .validate_number(margin, "margin")
+  if (isTRUE(all.equal(margin, 0))) {
+    stop("margin must differ from 0 (no effect to detect).")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  n_solved <- TrialSize::OneWayANOVA.pairwise(
+    alpha = alpha, beta = 1 - power, tau = tau, sigma = sigma, margin = margin
+  )
+
+  list(
+    n_per_group = ceiling(n_solved),
+    inputs = list(tau = tau, sigma = sigma, margin = margin, alpha = alpha, power = power)
+  )
+}
+
 # Shared .validate_number() / .validate_positive() / .validate_unit_interval()
 # live in calc_utils.R (sourced alongside every file in R/calc/).

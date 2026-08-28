@@ -146,3 +146,19 @@ test_that("calc_means_planned_contrast rejects invalid inputs", {
   expect_error(calc_means_planned_contrast(mu = mu, sigma = -1, ci = c(-1, 1), fi = fi),
                "positive")
 })
+
+test_that("calc_means_posthoc_pairwise reproduces the standard Bonferroni-adjusted formula", {
+  # Independently re-derived: n = 2*(qnorm(1-alpha/(2*tau)) + qnorm(1-beta))^2
+  # * sigma^2 / margin^2. tau=3, sigma=4, margin=3, alpha=0.05, power=0.80
+  # -> n = 37.22352, ceiling -> 38 (also confirmed to reproduce
+  # TrialSize::OneWayANOVA.pairwise()'s own output exactly).
+  res <- calc_means_posthoc_pairwise(tau = 3, sigma = 4, margin = 3, alpha = 0.05, power = 0.80)
+  expect_equal(res$n_per_group, 38)
+})
+
+test_that("calc_means_posthoc_pairwise rejects invalid inputs", {
+  expect_error(calc_means_posthoc_pairwise(tau = 0, sigma = 4, margin = 3), ">= 1")
+  expect_error(calc_means_posthoc_pairwise(tau = 1.5, sigma = 4, margin = 3), ">= 1")
+  expect_error(calc_means_posthoc_pairwise(tau = 2, sigma = 4, margin = 0), "must differ from 0")
+  expect_error(calc_means_posthoc_pairwise(tau = 2, sigma = -1, margin = 3), "positive")
+})

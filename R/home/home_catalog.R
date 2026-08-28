@@ -55,6 +55,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Proportions",
        module_input_id = "proportion-design", design_value = "two_sample"),
 
+  list(key = "proportion_posthoc_pairwise",
+       label = "Post-hoc pairwise comparison of proportions (Bonferroni-adjusted)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to compare two specific",
+         "group proportions out of several planned pairwise comparisons,",
+         "correcting for running multiple tests at once?\""
+       ),
+       outcome_type = "proportion", groups = "3plus", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Proportions",
+       module_input_id = "proportion-design", design_value = "posthoc_pairwise"),
+
   list(key = "proportion_two_dep", label = "Two paired/dependent proportions (e.g. before-after, matched pairs)",
        answers = paste(
          "Answers: \"How many matched pairs do I need to detect a change",
@@ -133,6 +144,17 @@ calculator_catalog <- list(
        outcome_type = "mean", groups = "3plus", dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Means",
        module_input_id = "means-design", design_value = "planned_contrast"),
+
+  list(key = "means_posthoc_pairwise",
+       label = "Post-hoc pairwise comparison of means (Bonferroni-adjusted)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to compare two specific",
+         "group means out of several planned pairwise comparisons,",
+         "correcting for running multiple tests at once?\""
+       ),
+       outcome_type = "mean", groups = "3plus", dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Means",
+       module_input_id = "means-design", design_value = "posthoc_pairwise"),
 
   # Diagnostic Accuracy entries: outcome_type/groups don't apply to this
   # family (it's not a "how many groups" comparison in the usual sense), so
@@ -849,12 +871,13 @@ study_design_families <- list(
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",
-                         "proportion_two_indep", "proportion_two_dep", "proportion_k")),
+                         "proportion_two_indep", "proportion_posthoc_pairwise",
+                         "proportion_two_dep", "proportion_k")),
   list(id = "means", label = "Means",
        hint = "Comparing a continuous measurement within or between groups.",
        catalog_keys = c("means_single_precision", "means_single", "means_two_indep",
                          "means_two_indep_unequal_n", "means_two_dep", "means_k",
-                         "means_planned_contrast")),
+                         "means_planned_contrast", "means_posthoc_pairwise")),
   list(id = "case_control", label = "Case-Control",
        hint = "Case-control study (unmatched, matched, nested, or case-cohort), odds ratio or hazard ratio based.",
        catalog_keys = c("case_control_unmatched", "case_control_matched",
@@ -948,13 +971,14 @@ study_design_families <- list(
 # study_design_families.
 test_families <- list(
   list(id = "t_tests", label = "t Tests",
-       hint = "Comparing one or two means (Student's t framework).",
+       hint = "Comparing one or two means, or a Bonferroni-adjusted post-hoc pairwise comparison (Student's t framework).",
        catalog_keys = c("means_single", "means_two_indep",
-                         "means_two_indep_unequal_n", "means_two_dep")),
+                         "means_two_indep_unequal_n", "means_two_dep",
+                         "means_posthoc_pairwise")),
   list(id = "z_tests", label = "z Tests",
-       hint = "Comparing proportions, or a logistic-regression predictor's effect (normal-approximation framework).",
+       hint = "Comparing proportions (incl. a Bonferroni-adjusted post-hoc pairwise comparison), or a logistic-regression predictor's effect (normal-approximation framework).",
        catalog_keys = c("proportion_single", "proportion_two_indep",
-                         "logistic_binary", "logistic_continuous")),
+                         "proportion_posthoc_pairwise", "logistic_binary", "logistic_continuous")),
   list(id = "f_tests", label = "F Tests",
        hint = "One-way/factorial ANOVA, ANCOVA, multiple regression, repeated-measures/mixed ANOVA, and planned linear contrasts (general linear model F-test framework).",
        catalog_keys = c("means_k", "regression_r2", "anova_general",

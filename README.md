@@ -18,7 +18,11 @@ further CORE items, and the start of Stage 2 (analytical depth) --
 - **Proportions** (`R/modules/mod_proportion.R`) -- single proportion
   (precision-based, Cochran's formula, with optional finite population
   correction), single proportion vs. known value, two independent
-  proportions
+  proportions; plus a post-hoc pairwise comparison design (Bonferroni-
+  adjusted, wraps `TrialSize::OneWayANOVA.PairwiseComparison()`) for sizing
+  one specific pairwise comparison out of several planned across a
+  multi-group study -- verified against Chow, Shao & Wang (2003) Example
+  4.4.2 (n=96 and n=44 per group for its two worked cases)
 - **Means** (`R/modules/mod_means.R`) -- single mean, precision-based
   (wraps `epiR::epi.sssimpleestc()`), single mean vs. known value, two
   independent means (equal or unequal group sizes, the latter via
@@ -29,7 +33,14 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   across k group means (e.g. a linear dose-response trend) rather than the
   ANOVA design's omnibus "any groups differ" question, wrapping
   `TrialSize::Dose.Response.Linear()` -- verified exactly against Chow,
-  Shao & Wang (2003) Example 11.1 (n=178)
+  Shao & Wang (2003) Example 11.1 (n=178); and a post-hoc pairwise
+  comparison design (Bonferroni-adjusted, wraps
+  `TrialSize::OneWayANOVA.pairwise()`) for sizing one specific pairwise
+  comparison of two group means out of several planned comparisons --
+  both post-hoc designs' formulas were independently re-derived from the
+  standard two-sample sample-size formula with alpha/tau in place of
+  alpha, since neither package function's own documentation prints a
+  numeric worked answer
 - **Diagnostic Accuracy** (`R/modules/mod_diagnostic.R`) -- sensitivity &
   specificity, precision-based or vs. a known/reference value, comparing
   two diagnostic tests (unpaired or paired), all per Akoglu (2022)'s

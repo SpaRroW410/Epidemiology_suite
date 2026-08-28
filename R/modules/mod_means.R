@@ -32,7 +32,8 @@ mod_means_ui <- function(id) {
           "Two independent means, unequal group sizes" = "two_sample_unequal_n",
           "Two paired means (before-after, matched pairs)" = "paired",
           "Three or more independent groups (one-way ANOVA)" = "anova",
-          "Planned linear contrast (k-group means)" = "planned_contrast"
+          "Planned linear contrast (k-group means)" = "planned_contrast",
+          "Post-hoc pairwise comparison (Bonferroni-adjusted)" = "posthoc_pairwise"
         ),
         selected = "single"
       ),
@@ -102,6 +103,15 @@ mod_means_ui <- function(id) {
         uiOutput(ns("contrast_ui"))
       ),
       conditionalPanel(
+        condition = design_is("posthoc_pairwise"),
+        numericInput(ns("tau_posthoc"), "Number of pairwise comparisons planned (tau)",
+                     value = 3, min = 1, step = 1),
+        numericInput(ns("sigma_posthoc"), "Common/pooled standard deviation",
+                     value = 4, min = 0.0001),
+        numericInput(ns("margin_posthoc"), "Assumed difference between this pair's means",
+                     value = 3)
+      ),
+      conditionalPanel(
         condition = design_is_not("single_precision"),
         numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
@@ -160,7 +170,13 @@ mod_means_ui <- function(id) {
       render_formula_block(means_content$planned_contrast$formula_latex),
       shiny::markdown(means_content$planned_contrast$explanation),
       h5("Worked example"),
-      shiny::markdown(means_content$planned_contrast$worked_example)
+      shiny::markdown(means_content$planned_contrast$worked_example),
+      hr(),
+      h4(means_content$posthoc_pairwise$title),
+      render_formula_block(means_content$posthoc_pairwise$formula_latex),
+      shiny::markdown(means_content$posthoc_pairwise$explanation),
+      h5("Worked example"),
+      shiny::markdown(means_content$posthoc_pairwise$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -191,7 +207,11 @@ mod_means_ui <- function(id) {
       hr(),
       h4(means_content$planned_contrast$title),
       p(strong("Citation: "), means_content$planned_contrast$citation),
-      p(strong("Implemented via: "), code(means_content$planned_contrast$backend))
+      p(strong("Implemented via: "), code(means_content$planned_contrast$backend)),
+      hr(),
+      h4(means_content$posthoc_pairwise$title),
+      p(strong("Citation: "), means_content$posthoc_pairwise$citation),
+      p(strong("Implemented via: "), code(means_content$posthoc_pairwise$backend))
     )
   )
 }
@@ -278,6 +298,17 @@ mod_means_server <- function(id) {
         ))
       }
 
+      if (input$design == "posthoc_pairwise") {
+        req(input$tau_posthoc, input$sigma_posthoc, input$margin_posthoc)
+        return(tryCatch(
+          list(ok = TRUE, value = calc_means_posthoc_pairwise(
+            tau = input$tau_posthoc, sigma = input$sigma_posthoc,
+            margin = input$margin_posthoc, alpha = input$alpha, power = input$power
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        ))
+      }
+
       req(input$alternative)
 
       if (input$design == "single") {
@@ -358,6 +389,10 @@ mod_means_server <- function(id) {
           p(strong("Required total sample size: "), v$n_total),
           p("Per-group allocation (approximate, from rounding each group's share): ",
             paste(sprintf("group %d = %d", seq_along(v$n_per_group), v$n_per_group), collapse = "; "))
+        )
+      } else if (input$design == "posthoc_pairwise") {
+        tagList(
+          p(strong("Required sample size per group (this pair): "), v$n_per_group)
         )
       } else {
         tagList(
