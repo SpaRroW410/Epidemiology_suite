@@ -58,3 +58,63 @@ calc_rule_of_three_n <- function(p, conf_level = 0.95) {
     inputs = list(p = p, conf_level = conf_level)
   )
 }
+
+#' Sample size to detect at least one case in a finite population, with
+#' an imperfect diagnostic test (or two tests, combined in series or
+#' parallel)
+#'
+#' Wraps epiR::epi.ssdetect() rather than reimplementing the underlying
+#' math (project convention) -- epiR already a project dependency. This
+#' generalizes calc_rule_of_three_n() above (which assumes a perfect
+#' test and an effectively infinite population) to a known finite
+#' population size (via the hypergeometric distribution, MacDiarmid
+#' 1988) and a test with imperfect sensitivity/specificity -- the
+#' standard "prove disease freedom" surveillance design (Cannon 2001).
+#'
+#' @param N Total population size (whole number >= 1), e.g. herd size or
+#'   study-area size
+#' @param prev Assumed true prevalence if the condition/disease were
+#'   present (0,1)
+#' @param se Sensitivity of the test, or a length-2 vector of two tests'
+#'   sensitivities, each in (0,1]
+#' @param sp Specificity of the test, or a length-2 vector of two tests'
+#'   specificities (same length as se), each in (0,1]
+#' @param interpretation For two tests, "series" (both must be positive
+#'   to call a case positive -- higher combined specificity, lower
+#'   sensitivity) or "parallel" (either positive suffices -- higher
+#'   combined sensitivity, lower specificity); ignored for a single test
+#' @param conf_level Desired confidence that, if the population is
+#'   affected at the assumed prevalence, at least one case would be
+#'   detected (0,1)
+#' @return list(n_hypergeometric, n_binomial, combined_se, combined_sp, inputs)
+calc_detect_event_imperfect_test <- function(N, prev, se, sp,
+                                              interpretation = c("series", "parallel"),
+                                              conf_level = 0.95) {
+  interpretation <- match.arg(interpretation)
+  .validate_population(N, "N")
+  .validate_unit_interval(prev, "prev")
+  if (!is.numeric(se) || length(se) < 1 || length(se) > 2 || anyNA(se) ||
+        any(se <= 0) || any(se > 1)) {
+    stop("se must be one or two numbers, each in (0, 1].")
+  }
+  if (!is.numeric(sp) || length(sp) != length(se) || anyNA(sp) ||
+        any(sp <= 0) || any(sp > 1)) {
+    stop("sp must have the same length as se, each in (0, 1].")
+  }
+  .validate_unit_interval(conf_level, "conf_level")
+
+  fit <- epiR::epi.ssdetect(
+    N = N, prev = prev, se = se, sp = sp, interpretation = interpretation,
+    covar = c(0, 0), finite.correction = TRUE, nfractional = FALSE,
+    conf.level = conf_level
+  )
+
+  list(
+    n_hypergeometric = unname(fit$sample.size["hypergeo"]),
+    n_binomial = unname(fit$sample.size["binom"]),
+    combined_se = fit$performance$se,
+    combined_sp = fit$performance$sp,
+    inputs = list(N = N, prev = prev, se = se, sp = sp,
+                  interpretation = interpretation, conf_level = conf_level)
+  )
+}

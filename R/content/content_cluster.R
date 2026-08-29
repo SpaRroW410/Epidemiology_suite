@@ -55,5 +55,81 @@ cluster_content <- list(
       "Med. 2004;2(3):204-208."
     ),
     backend = "closed-form (Kish 1965)"
+  ),
+
+  survey = list(
+    title = "Cluster Survey Precision (WHO EPI-Style)",
+    formula_latex = paste0(
+      "$$n_{ssu} = \\frac{z^2 \\, p(1-p) \\, D}{\\epsilon_a^2}, \\quad ",
+      "D = 1 + (b-1)\\rho, \\quad n_{psu} = n_{ssu}/b$$"
+    ),
+    explanation = paste(
+      "Solves the full two-stage (or one-stage) cluster survey design in",
+      "one step -- both the number of clusters (primary sampling units,",
+      "PSUs) and the total number of individuals (secondary sampling",
+      "units, SSUs) needed to estimate a population proportion to a",
+      "target precision -- rather than requiring you to compute a simple-",
+      "random-sample n first and inflate it separately (the \"Design",
+      "Effect\" calculator above). This is the closed-form basis behind",
+      "WHO's classic EPI 30-cluster immunization-coverage survey",
+      "methodology, generalized to any number of clusters and precision",
+      "target.",
+      "",
+      "- **b** - the average number of individuals sampled or examined",
+      "  per cluster.",
+      "- **SD of cluster size** - optional; leave blank if every cluster",
+      "  contributes the same number of individuals, or supply a",
+      "  standard deviation if cluster sizes vary (this inflates the",
+      "  design effect further, since more variable clusters need more",
+      "  clusters sampled for the same precision).",
+      "- **p** - the expected proportion (prevalence) being estimated.",
+      "- **epsilon** - the desired precision (margin of error), either",
+      "  relative (a fraction of p, e.g. 0.10 = \"within 10% of p\") or",
+      "  absolute (on the same 0-1 scale as p, e.g. 0.05 = \"within 5",
+      "  percentage points\").",
+      "- **rho (ICC)** - the intracluster correlation coefficient, as in",
+      "  the Design Effect calculator above.",
+      "- **Total clusters (N, optional)** - the total number of clusters",
+      "  in the source population, if known and not effectively",
+      "  unlimited, for a finite-population correction.",
+      "",
+      "**A package quirk worth knowing:** epiR provides two same-",
+      "sounding functions here, `epi.ssclus1estb()` (\"one-stage\", every",
+      "individual in a sampled cluster is enumerated) and",
+      "`epi.ssclus2estb()` (\"two-stage\", a subsample of b individuals is",
+      "drawn from each cluster) -- on inspection of both functions' own",
+      "source code, they are byte-for-byte identical. This calculator",
+      "therefore covers both cases; read `b` as \"individuals examined per",
+      "cluster\" either way.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "epiR's own documented examples (Levy & Lemeshow 1999; Machin,",
+      "Campbell, Tan & Tan 2018): an aid project wants to know what",
+      "proportion of households are still using a donated cook stove,",
+      "expecting a pilot-study prevalence of p = 0.46, with b = 75",
+      "households visited per village and an intracluster correlation of",
+      "rho = 0.20. At 90% confidence and a relative precision of 10%,",
+      "this calculator returns 67 villages (clusters) to sample. If",
+      "village size actually varies (mean 75, SD 35 households), that",
+      "rises to 81 villages; if the total number of villages in the",
+      "province is known to be only 220 (a finite-population correction),",
+      "it falls back to 60 villages -- all three matching epiR's own",
+      "worked answers exactly. A second, WHO-style example (b = 20 per",
+      "cluster, p = 0.20, an absolute precision of +/-0.05, rho = 0.02, 95%",
+      "confidence) returns 17 clusters and 340 individuals total.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Levy PS, Lemeshow S. Sampling of Populations: Methods and",
+      "Applications. Wiley Series in Probability and Statistics; 1999,",
+      "p. 258. Machin D, Campbell MJ, Tan SB, Tan SH. Sample Sizes for",
+      "Clinical, Laboratory and Epidemiological Studies. 4th ed. Wiley",
+      "Blackwell; 2018, pp. 195-214. Henderson RH, Sundaresan T. Cluster",
+      "sampling to assess immunization coverage: a review of experience",
+      "with a simplified sampling method. Bull World Health Organ.",
+      "1982;60(2):253-260."
+    ),
+    backend = "epiR::epi.ssclus2estb()"
   )
 )

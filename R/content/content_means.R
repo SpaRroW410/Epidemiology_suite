@@ -145,9 +145,11 @@ means_content <- list(
       "f is the population standard deviation of the k group means,",
       "divided by the common SD (small ~0.10, medium ~0.25, large ~0.40,",
       "per Cohen's conventions). This omnibus test only tells you *some*",
-      "pair of groups differs, not *which* pair -- planned pairwise",
-      "contrasts or post-hoc comparisons (not covered by this calculator)",
-      "would be needed to localize the difference.",
+      "pair of groups differs, not *which* pair -- see the \"Planned",
+      "linear contrast\" design below for testing one specific",
+      "pre-specified comparison instead, or \"Post-hoc pairwise",
+      "comparison\" for a multiplicity-adjusted comparison of two",
+      "specific groups after the fact.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -169,6 +171,58 @@ means_content <- list(
       "implemented by pwr::pwr.anova.test)."
     ),
     backend = "pwr::pwr.anova.test()"
+  ),
+
+  planned_contrast = list(
+    title = "Planned Linear Contrast Among k Group Means",
+    formula_latex = paste0(
+      "$$H_0: L(\\mu) = \\sum_{i=1}^{k} c_i \\mu_i = 0 \\quad \\text{vs.} \\quad ",
+      "H_1: L(\\mu) = \\epsilon \\ne 0, \\quad \\sum_{i=1}^{k} c_i = 0$$",
+      "$$n = \\frac{(Z_{1-\\alpha}+Z_{1-\\beta})^2 \\sigma^2 \\sum_i c_i^2/f_i}{\\epsilon^2}$$"
+    ),
+    explanation = paste(
+      "Use this when you have a *specific, pre-specified* (\"planned\")",
+      "comparison in mind across three or more groups -- e.g. a linear",
+      "dose-response trend across ordered dose levels, or any other a",
+      "priori weighted combination of group means -- rather than the",
+      "one-way ANOVA design's *omnibus* question of whether any groups",
+      "differ at all. Because the comparison is specified in advance,",
+      "this needs no post-hoc multiplicity correction (unlike testing",
+      "many pairwise comparisons after the fact, which this calculator",
+      "does not cover).",
+      "",
+      "- **Group means (mu_i)** - the mean you expect in each of the k",
+      "  groups.",
+      "- **Common SD (sigma)** - the standard deviation shared by all",
+      "  groups.",
+      "- **Contrast coefficients (c_i)** - the weights defining your",
+      "  planned comparison, which must sum to 0. For an equally-spaced",
+      "  linear trend across k ordered groups these are the standard",
+      "  orthogonal polynomial coefficients (e.g. -3,-1,1,3 for k=4); for",
+      "  an unequally-spaced trend (e.g. doses 0, 1, 2, 3 mg but tested",
+      "  against a specific non-uniform weighting) any coefficients",
+      "  summing to 0 can be used.",
+      "- **Allocation fractions (f_i)** - each group's share of the total",
+      "  sample size (n_i/n), summing to 1; equal allocation across k",
+      "  groups uses f_i = 1/k for every group.",
+      "- **alpha, power** - as elsewhere.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Chow, Shao & Wang (2003), Example 11.1: a 4-arm dose-response",
+      "trial with expected group means 0.05, 0.12, 0.14, 0.16, a common",
+      "SD of 0.22, and contrast coefficients -6, 1, 2, 3 (an a priori",
+      "weighting emphasizing the placebo-vs-active contrast), with equal",
+      "allocation (f_i = 0.25 for all 4 groups). At alpha = 0.05 and 80%",
+      "power, this calculator returns a total sample size of n = 178,",
+      "matching the textbook's own worked answer exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
+      "Research. New York: Marcel Dekker; 2003. Section 11.2."
+    ),
+    backend = "TrialSize::Dose.Response.Linear()"
   ),
 
   single_precision = list(
@@ -252,5 +306,63 @@ means_content <- list(
       "2.3 p. 437. (as implemented by pwr::pwr.t2n.test)."
     ),
     backend = "pwr::pwr.t2n.test()"
+  ),
+
+  posthoc_pairwise = list(
+    title = "Post-Hoc Pairwise Comparison (Bonferroni-Adjusted)",
+    formula_latex = paste0(
+      "$$n_{ij} = \\frac{2\\left(Z_{1-\\alpha/(2\\tau)} + Z_{1-\\beta}\\right)^2 \\sigma^2}",
+      "{(\\mu_i - \\mu_j)^2}$$"
+    ),
+    explanation = paste(
+      "Use this to size ONE specific pairwise comparison (group i vs.",
+      "group j) out of several planned comparisons across a multi-group",
+      "study, correcting the significance level for running multiple",
+      "tests at once (Bonferroni's method) -- the multiplicity-adjusted",
+      "complement to the \"Planned linear contrast\" design above, which",
+      "instead tests a single pre-specified combination of *all* k means.",
+      "",
+      "- **tau** - the total number of pairwise comparisons planned",
+      "  across the whole study (not just this one pair); e.g. for all",
+      "  pairs among k groups, tau = k(k-1)/2 -- 3 groups gives tau=3, 4",
+      "  groups gives tau=6 -- or a smaller number if you only plan to",
+      "  test some of the pairs.",
+      "- **Common SD (sigma)** - the standard deviation shared by all",
+      "  groups.",
+      "- **Assumed difference (margin)** - the true difference between",
+      "  this specific pair's two group means.",
+      "- **alpha** - the overall (family-wise) significance level; the",
+      "  calculator internally uses alpha/tau for this pair's test, so",
+      "  the whole family of tau tests keeps a combined false-positive",
+      "  rate no higher than alpha.",
+      "- **power** - the desired power for detecting this pair's",
+      "  difference.",
+      "",
+      "Because the correction divides alpha by tau, more planned",
+      "comparisons require a larger sample size per pair for the same",
+      "power -- the cost of testing multiple hypotheses without inflating",
+      "the overall false-positive rate.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Suppose a 3-arm trial (tau = 3 planned pairwise comparisons among",
+      "the 3 arms) expects a common SD of 4 and wants to detect a",
+      "difference of 3 units between one specific pair of arms, at an",
+      "overall alpha = 0.05 and 80% power. This calculator returns n = 38",
+      "per group for that pair -- independently re-derived from the",
+      "standard two-sample z-test formula with alpha/tau in place of",
+      "alpha, and confirmed to reproduce",
+      "TrialSize::OneWayANOVA.pairwise()'s own output exactly (that",
+      "package's Rd file cites the method but doesn't print a worked",
+      "numeric answer).",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
+      "Research. New York: Marcel Dekker; 2003. Bonferroni multiple-",
+      "comparison adjustment applied to the standard two-sample sample",
+      "size formula."
+    ),
+    backend = "TrialSize::OneWayANOVA.pairwise()"
   )
 )

@@ -90,5 +90,49 @@ exact_tests_content <- list(
       "and Software Solutions. Am Stat. 2002;56(2):149-155."
     ),
     backend = "Exact::power.exact.test(method = \"fisher\") (search over n1)"
+  ),
+
+  sign_test = list(
+    title = "Sign Test (Paired Data / One-Sample Median)",
+    formula_latex = paste0(
+      "$$\\text{power} = \\sum_{x \\, : \\, p\\text{-value}(x) \\le \\alpha} \\binom{n}{x} p_{\\text{pos}}^x (1-p_{\\text{pos}})^{n-x}, ",
+      "\\quad p_0 = 0.5$$"
+    ),
+    explanation = paste(
+      "Use this to test whether paired differences (e.g. before-after",
+      "measurements) tend to be positive more often than negative -- or,",
+      "for a single sample, whether values tend to fall above a",
+      "hypothesized median -- without assuming a symmetric distribution",
+      "of differences (unlike the Wilcoxon signed-rank test in the",
+      "Nonparametric Tests module, which does assume symmetry).",
+      "",
+      "- **p_pos** - the proportion of pairs you expect to show a",
+      "  positive difference (or values above the hypothesized median);",
+      "  must differ from 0.5, the null value.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "The sign test only looks at the *direction* of each pair's",
+      "difference, discarding its magnitude -- which is exactly a binomial",
+      "test of whether the proportion of positive differences equals 0.5.",
+      "This calculator is the Binomial Test design above with the",
+      "reference proportion fixed at 0.5, so it inherits the same",
+      "exact-enumeration search over n (and the same sawtooth caveat --",
+      "see the Binomial Test explanation).",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Worked example: expecting 70% of pairs to show a positive",
+      "difference (p_pos = 0.7). At alpha = 0.05 (two-sided) and 80%",
+      "power, this calculator returns n = 54, with an achieved exact",
+      "power of 0.8368 -- computed by the same verified",
+      "stats::binom.test()-based search as the Binomial Test design",
+      "above, just with p0 fixed at 0.5.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Conover WJ. Practical Nonparametric Statistics. 3rd ed. Wiley;",
+      "1999. Chapter 3.4 (the sign test as a binomial test)."
+    ),
+    backend = "stats::binom.test() (search over n; same engine as the Binomial Test design, p0 fixed at 0.5)"
   )
 )

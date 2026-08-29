@@ -106,6 +106,66 @@ calc_mcnemar <- function(p10, p01, alpha = 0.05, power = 0.8) {
   )
 }
 
+#' Sample size for a stratified (Mantel-Haenszel) comparison of two
+#' proportions across J strata
+#'
+#' Wraps TrialSize::Propensity.Score.strata() (a weighted Mantel-Haenszel
+#' test across J strata) and TrialSize::Propensity.Score.nostrata() (the
+#' naive comparison that pools all strata together, ignoring them) --
+#' TrialSize already a zero-dependency project dependency, used elsewhere
+#' in this app (McNemar's test, non-inferiority OR/HR, non-parametric
+#' tests). Despite the package's function names (written in the book's
+#' propensity-score-stratification example), the underlying formula is
+#' the general weighted-Mantel-Haenszel test for a stratified 2x2xJ
+#' table, so this also serves as this app's Mantel-Haenszel / CMH
+#' stratified-proportions calculator. Returning both figures side by side
+#' shows how much larger a sample the naive (unadjusted, confounded)
+#' comparison needs versus the correctly stratified one.
+#'
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param a Numeric vector of length J (>= 2): proportion of the total
+#'   sample falling in each stratum (must sum to 1)
+#' @param b Numeric vector of length J: proportion of stratum j's
+#'   subjects allocated to group 1 (the reference/control group), each in
+#'   (0,1)
+#' @param p1 Numeric vector of length J: expected response probability
+#'   for group 1 in each stratum, each in (0,1)
+#' @param phi Assumed common odds ratio of group 2 vs group 1 (> 0, != 1),
+#'   applied identically in every stratum to derive that stratum's p2
+#'   from its p1
+#' @return list(n_stratified, n_pooled, inputs)
+calc_mantelhaenszel <- function(alpha = 0.05, power = 0.8, a, b, p1, phi) {
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  J <- length(a)
+  if (J < 2) stop("a, b, and p1 must each have at least 2 strata.")
+  if (length(b) != J || length(p1) != J) {
+    stop("a, b, and p1 must all have the same length (one value per stratum).")
+  }
+  if (any(a <= 0) || any(a >= 1)) stop("each value in a must be strictly between 0 and 1.")
+  if (abs(sum(a) - 1) > 1e-6) stop("a (stratum allocation proportions) must sum to 1.")
+  if (any(b <= 0) || any(b >= 1)) stop("each value in b must be strictly between 0 and 1.")
+  if (any(p1 <= 0) || any(p1 >= 1)) stop("each value in p1 must be strictly between 0 and 1.")
+  .validate_positive(phi, "phi")
+  if (isTRUE(all.equal(phi, 1))) {
+    stop("phi (assumed odds ratio) must differ from 1 -- otherwise there's no effect to detect.")
+  }
+
+  n_stratified <- TrialSize::Propensity.Score.strata(
+    alpha = alpha, beta = 1 - power, J = J, a = a, b = b, p1 = p1, phi = phi
+  )
+  n_pooled <- TrialSize::Propensity.Score.nostrata(
+    alpha = alpha, beta = 1 - power, J = J, a = a, b = b, p1 = p1, phi = phi
+  )
+
+  list(
+    n_stratified = ceiling(n_stratified),
+    n_pooled = ceiling(n_pooled),
+    inputs = list(alpha = alpha, power = power, a = a, b = b, p1 = p1, phi = phi)
+  )
+}
+
 .validate_prob_vector <- function(P, label) {
   if (!is.numeric(P) || length(P) < 2 || anyNA(P)) {
     stop(sprintf("%s must be a numeric vector of at least 2 values.", label))

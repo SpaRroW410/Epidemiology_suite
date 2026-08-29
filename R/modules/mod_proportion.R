@@ -29,7 +29,8 @@ mod_proportion_ui <- function(id) {
         choices = c(
           "Single proportion - precision-based (no reference value)" = "precision",
           "Single proportion vs. known/reference value (hypothesis test)" = "single",
-          "Two independent proportions" = "two_sample"
+          "Two independent proportions" = "two_sample",
+          "Post-hoc pairwise comparison (Bonferroni-adjusted)" = "posthoc_pairwise"
         ),
         selected = "precision"
       ),
@@ -56,9 +57,21 @@ mod_proportion_ui <- function(id) {
         numericInput(ns("p2_two"), "p2 (group 2 proportion)", value = 0.25, min = 0, max = 1, step = 0.01)
       ),
       conditionalPanel(
-        condition = design_is("single", "two_sample"),
+        condition = design_is("posthoc_pairwise"),
+        numericInput(ns("tau_posthoc"), "Number of pairwise comparisons planned (tau)",
+                     value = 3, min = 1, step = 1),
+        numericInput(ns("p1_posthoc"), "p1 (this pair's first group proportion)",
+                     value = 0.2, min = 0, max = 1, step = 0.01),
+        numericInput(ns("p2_posthoc"), "p2 (this pair's second group proportion)",
+                     value = 0.4, min = 0, max = 1, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("single", "two_sample", "posthoc_pairwise"),
         numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
-        numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
+        numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("single", "two_sample"),
         selectInput(
           ns("alternative"), "Alternative hypothesis",
           choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
@@ -87,7 +100,13 @@ mod_proportion_ui <- function(id) {
       render_formula_block(proportion_content$two_sample$formula_latex),
       shiny::markdown(proportion_content$two_sample$explanation),
       h5("Worked example"),
-      shiny::markdown(proportion_content$two_sample$worked_example)
+      shiny::markdown(proportion_content$two_sample$worked_example),
+      hr(),
+      h4(proportion_content$posthoc_pairwise$title),
+      render_formula_block(proportion_content$posthoc_pairwise$formula_latex),
+      shiny::markdown(proportion_content$posthoc_pairwise$explanation),
+      h5("Worked example"),
+      shiny::markdown(proportion_content$posthoc_pairwise$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -102,7 +121,11 @@ mod_proportion_ui <- function(id) {
       hr(),
       h4(proportion_content$two_sample$title),
       p(strong("Citation: "), proportion_content$two_sample$citation),
-      p(strong("Implemented via: "), code(proportion_content$two_sample$backend))
+      p(strong("Implemented via: "), code(proportion_content$two_sample$backend)),
+      hr(),
+      h4(proportion_content$posthoc_pairwise$title),
+      p(strong("Citation: "), proportion_content$posthoc_pairwise$citation),
+      p(strong("Implemented via: "), code(proportion_content$posthoc_pairwise$backend))
     )
   )
 }
@@ -136,13 +159,22 @@ mod_proportion_server <- function(id) {
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
-      } else {
+      } else if (input$design == "two_sample") {
         req(input$p1_two, input$p2_two, input$alpha, input$power, input$alternative)
         tryCatch(
           list(ok = TRUE, value = calc_proportion_2s(
             p1 = input$p1_two, p2 = input$p2_two,
             alpha = input$alpha, power = input$power,
             alternative = input$alternative
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$tau_posthoc, input$p1_posthoc, input$p2_posthoc, input$alpha, input$power)
+        tryCatch(
+          list(ok = TRUE, value = calc_proportion_posthoc_pairwise(
+            tau = input$tau_posthoc, p1 = input$p1_posthoc, p2 = input$p2_posthoc,
+            alpha = input$alpha, power = input$power
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -170,11 +202,15 @@ mod_proportion_server <- function(id) {
           p(strong("Required sample size: "), v$n),
           p(sprintf("Effect size h = %.4f", v$h))
         )
-      } else {
+      } else if (input$design == "two_sample") {
         tagList(
           p(strong("Required sample size per group: "), v$n_per_group),
           p(strong("Total sample size: "), v$n_total),
           p(sprintf("Effect size h = %.4f", v$h))
+        )
+      } else {
+        tagList(
+          p(strong("Required sample size per group (this pair): "), v$n_per_group)
         )
       }
     })

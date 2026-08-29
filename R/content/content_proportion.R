@@ -132,5 +132,49 @@ proportion_content <- list(
       "analysis, as implemented by pwr::pwr.2p.test)."
     ),
     backend = "pwr::pwr.2p.test (effect size via pwr::ES.h)"
+  ),
+
+  posthoc_pairwise = list(
+    title = "Post-Hoc Pairwise Comparison (Bonferroni-Adjusted)",
+    formula_latex = paste0(
+      "$$n_{ij} = \\frac{\\left(Z_{1-\\alpha/(2\\tau)} + Z_{1-\\beta}\\right)^2 ",
+      "\\left(p_i(1-p_i) + p_j(1-p_j)\\right)}{(p_i - p_j)^2}$$"
+    ),
+    explanation = paste(
+      "The proportions counterpart of the Means module's \"Post-Hoc",
+      "Pairwise Comparison\" design -- use this to size ONE specific",
+      "pairwise comparison of two group proportions out of several",
+      "planned comparisons across a multi-group study, correcting the",
+      "significance level for running multiple tests at once",
+      "(Bonferroni's method).",
+      "",
+      "- **tau** - the total number of pairwise comparisons planned",
+      "  across the whole study (not just this one pair); e.g. for all",
+      "  pairs among k groups, tau = k(k-1)/2.",
+      "- **p1, p2** - the expected proportions for the two groups in this",
+      "  specific pair.",
+      "- **alpha** - the overall (family-wise) significance level; the",
+      "  calculator internally uses alpha/tau for this pair's test.",
+      "- **power** - the desired power for detecting this pair's",
+      "  difference.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Chow, Shao & Wang (2003)'s own worked examples (Example 4.4.2):",
+      "with tau = 2 planned pairwise comparisons, comparing p1 = 0.2",
+      "against p2 = 0.4 at alpha = 0.05 and 80% power, this calculator",
+      "returns n = 96 per group; comparing p1 = 0.2 against p2 = 0.5",
+      "under the same tau, alpha and power returns n = 44 per group --",
+      "both reproducing TrialSize::OneWayANOVA.PairwiseComparison()'s own",
+      "output exactly (independently re-derived and cross-checked by",
+      "hand, since that function's Rd file doesn't print a numeric",
+      "answer for either example).",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
+      "Research. New York: Marcel Dekker; 2003. Section 4.4.2."
+    ),
+    backend = "TrialSize::OneWayANOVA.PairwiseComparison()"
   )
 )

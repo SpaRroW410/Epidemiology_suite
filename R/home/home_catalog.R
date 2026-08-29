@@ -55,6 +55,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Proportions",
        module_input_id = "proportion-design", design_value = "two_sample"),
 
+  list(key = "proportion_posthoc_pairwise",
+       label = "Post-hoc pairwise comparison of proportions (Bonferroni-adjusted)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to compare two specific",
+         "group proportions out of several planned pairwise comparisons,",
+         "correcting for running multiple tests at once?\""
+       ),
+       outcome_type = "proportion", groups = "3plus", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Proportions",
+       module_input_id = "proportion-design", design_value = "posthoc_pairwise"),
+
   list(key = "proportion_two_dep", label = "Two paired/dependent proportions (e.g. before-after, matched pairs)",
        answers = paste(
          "Answers: \"How many matched pairs do I need to detect a change",
@@ -122,6 +133,28 @@ calculator_catalog <- list(
        outcome_type = "mean", groups = "3plus", dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Means",
        module_input_id = "means-design", design_value = "anova"),
+
+  list(key = "means_planned_contrast", label = "Planned linear contrast among k group means",
+       answers = paste(
+         "Answers: \"How many subjects do I need to test one specific,",
+         "pre-specified comparison across 3+ group means -- e.g. a linear",
+         "dose-response trend -- rather than the omnibus ANOVA question",
+         "of whether any groups differ at all?\""
+       ),
+       outcome_type = "mean", groups = "3plus", dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Means",
+       module_input_id = "means-design", design_value = "planned_contrast"),
+
+  list(key = "means_posthoc_pairwise",
+       label = "Post-hoc pairwise comparison of means (Bonferroni-adjusted)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to compare two specific",
+         "group means out of several planned pairwise comparisons,",
+         "correcting for running multiple tests at once?\""
+       ),
+       outcome_type = "mean", groups = "3plus", dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Means",
+       module_input_id = "means-design", design_value = "posthoc_pairwise"),
 
   # Diagnostic Accuracy entries: outcome_type/groups don't apply to this
   # family (it's not a "how many groups" comparison in the usual sense), so
@@ -307,7 +340,18 @@ calculator_catalog <- list(
        ),
        outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Correlation",
-       module_input_id = NA, design_value = NA),
+       module_input_id = "correlation-design", design_value = "single"),
+
+  list(key = "correlation_two_independent",
+       label = "Compare two independent correlations",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to detect a",
+         "difference in correlation strength between two independent",
+         "groups?\""
+       ),
+       outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Correlation",
+       module_input_id = "correlation-design", design_value = "two_independent"),
 
   # Chi-Square Tests entries: not a "how many groups" comparison in the
   # proportion/mean sense, so only reachable via "by study design" -- except
@@ -345,6 +389,18 @@ calculator_catalog <- list(
        outcome_type = "chisq", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Chi-Square Tests",
        module_input_id = "chisq-design", design_value = "mcnemar"),
+
+  list(key = "chisq_mantelhaenszel",
+       label = "Mantel-Haenszel test (stratified proportions)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to compare two groups'",
+         "response proportions while adjusting for confounding strata",
+         "(age bands, severity categories, propensity-score strata), via",
+         "a Mantel-Haenszel-weighted test?\""
+       ),
+       outcome_type = "chisq", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Chi-Square Tests",
+       module_input_id = "chisq-design", design_value = "mantelhaenszel"),
 
   list(key = "logrank",
        label = "Log-rank test (comparing two survival curves)",
@@ -399,7 +455,19 @@ calculator_catalog <- list(
        ),
        outcome_type = "cluster", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Cluster / Design Effect",
-       module_input_id = NA, design_value = NA),
+       module_input_id = "cluster-design", design_value = "deff"),
+
+  list(key = "cluster_survey",
+       label = "Cluster survey precision (WHO EPI-style, proportion)",
+       answers = paste(
+         "Answers: \"How many clusters and how many individuals do I",
+         "need for a cluster survey (e.g. a WHO EPI-style immunization-",
+         "coverage survey) estimating a proportion to a target",
+         "precision?\""
+       ),
+       outcome_type = "cluster", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Cluster / Design Effect",
+       module_input_id = "cluster-design", design_value = "survey"),
 
   list(key = "stratified_sampling",
        label = "Stratified sampling -- total size and per-stratum allocation",
@@ -563,6 +631,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Equivalence (TOST)",
        module_input_id = "tost-design", design_value = "proportions"),
 
+  list(key = "tost_bioequivalence",
+       label = "Pharmacokinetic bioequivalence crossover (TOST)",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a bioequivalence",
+         "crossover study (classical 2x2, or a full/partial replicate",
+         "design), comparing a test and reference formulation's exposure",
+         "via a log-scale ratio?\""
+       ),
+       outcome_type = "equivalence", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Equivalence (TOST)",
+       module_input_id = "tost-design", design_value = "bioequivalence"),
+
   list(key = "noninferiority_means",
        label = "Non-inferiority trial, two means",
        answers = paste(
@@ -585,6 +665,30 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Non-Inferiority",
        module_input_id = "noninferiority-design", design_value = "proportions"),
 
+  list(key = "noninferiority_or",
+       label = "Non-inferiority trial, odds ratio",
+       answers = paste(
+         "Answers: \"How many subjects do I need to show a new",
+         "treatment's odds of a binary outcome aren't worse than a",
+         "standard treatment's by more than an acceptable margin,",
+         "expressed as an odds ratio?\""
+       ),
+       outcome_type = "noninferiority", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Non-Inferiority",
+       module_input_id = "noninferiority-design", design_value = "odds_ratio"),
+
+  list(key = "noninferiority_hr",
+       label = "Non-inferiority trial, hazard ratio (Cox PH)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to show a new",
+         "treatment's hazard (event) rate isn't worse than a standard",
+         "treatment's by more than an acceptable margin, for a",
+         "time-to-event outcome?\""
+       ),
+       outcome_type = "noninferiority", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Non-Inferiority",
+       module_input_id = "noninferiority-design", design_value = "hazard_ratio"),
+
   list(key = "incidence_rate_precision",
        label = "Incidence rate, precision-based",
        answers = paste(
@@ -606,6 +710,39 @@ calculator_catalog <- list(
        outcome_type = "rate", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Incidence Rate",
        module_input_id = "rate-design", design_value = "comparison"),
+
+  list(key = "ratio_risk_ratio",
+       label = "Risk ratio -- precision-based",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate a risk ratio",
+         "to a target confidence-interval width, rather than to test a",
+         "specific hypothesis?\""
+       ),
+       outcome_type = "ratio", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Ratio Estimation",
+       module_input_id = "ratio-design", design_value = "risk_ratio"),
+
+  list(key = "ratio_odds_ratio",
+       label = "Odds ratio -- precision-based",
+       answers = paste(
+         "Answers: \"How many subjects do I need to estimate an odds ratio",
+         "to a target confidence-interval width, rather than to test a",
+         "specific hypothesis?\""
+       ),
+       outcome_type = "ratio", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Ratio Estimation",
+       module_input_id = "ratio-design", design_value = "odds_ratio"),
+
+  list(key = "ratio_rate_ratio",
+       label = "Rate ratio -- precision-based",
+       answers = paste(
+         "Answers: \"How many subjects (or how much person-time) do I need",
+         "to estimate a rate ratio to a target precision level, rather",
+         "than to test a specific hypothesis?\""
+       ),
+       outcome_type = "ratio", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Ratio Estimation",
+       module_input_id = "ratio-design", design_value = "rate_ratio"),
 
   list(key = "diagnostic_ppv_npv",
        label = "Predictive values (PPV/NPV), precision-based",
@@ -651,6 +788,17 @@ calculator_catalog <- list(
        outcome_type = "exact", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Exact Tests",
        module_input_id = "exact_tests-design", design_value = "fisher"),
+
+  list(key = "sign_test",
+       label = "Sign test (paired data / one-sample median)",
+       answers = paste(
+         "Answers: \"How many pairs do I need to detect that differences",
+         "tend to be positive more often than negative, without assuming",
+         "a symmetric distribution of differences?\""
+       ),
+       outcome_type = "exact", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Exact Tests",
+       module_input_id = "exact_tests-design", design_value = "sign"),
 
   list(key = "prediction_binary",
        label = "Prediction model development -- binary outcome",
@@ -725,7 +873,19 @@ calculator_catalog <- list(
        ),
        outcome_type = "safety", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Rule of Three",
-       module_input_id = "rule_of_three-design", design_value = "n_required")
+       module_input_id = "rule_of_three-design", design_value = "n_required"),
+
+  list(key = "rule_of_three_detect_imperfect",
+       label = "Detect at least one case, imperfect test (finite population)",
+       answers = paste(
+         "Answers: \"How many units do I need to sample from a known-size",
+         "population to be confident of detecting at least one case, if",
+         "present, using a test with imperfect sensitivity/specificity",
+         "(one test, or two combined in series/parallel)?\""
+       ),
+       outcome_type = "safety", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Rule of Three",
+       module_input_id = "rule_of_three-design", design_value = "detect_imperfect")
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -735,11 +895,13 @@ study_design_families <- list(
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",
-                         "proportion_two_indep", "proportion_two_dep", "proportion_k")),
+                         "proportion_two_indep", "proportion_posthoc_pairwise",
+                         "proportion_two_dep", "proportion_k")),
   list(id = "means", label = "Means",
        hint = "Comparing a continuous measurement within or between groups.",
        catalog_keys = c("means_single_precision", "means_single", "means_two_indep",
-                         "means_two_indep_unequal_n", "means_two_dep", "means_k")),
+                         "means_two_indep_unequal_n", "means_two_dep", "means_k",
+                         "means_planned_contrast", "means_posthoc_pairwise")),
   list(id = "case_control", label = "Case-Control",
        hint = "Case-control study (unmatched, matched, nested, or case-cohort), odds ratio or hazard ratio based.",
        catalog_keys = c("case_control_unmatched", "case_control_matched",
@@ -756,39 +918,44 @@ study_design_families <- list(
                          "diagnostic_two_indep", "diagnostic_two_paired",
                          "diagnostic_ppv_npv", "diagnostic_likelihood_ratio")),
   list(id = "correlation", label = "Correlation",
-       hint = "Detecting a Pearson correlation between two continuous variables.",
-       catalog_keys = c("correlation_pearson")),
+       hint = "Detecting a Pearson correlation between two continuous variables, or comparing correlation strength between two independent groups.",
+       catalog_keys = c("correlation_pearson", "correlation_two_independent")),
   list(id = "agreement", label = "Agreement / Reliability",
        hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman, Lin's CCC).",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
                          "agreement_bland_altman", "agreement_ccc")),
   list(id = "chi_square", label = "Chi-Square Tests",
-       hint = "Categorical distribution/association testing (goodness of fit, R x C tables, paired proportions).",
-       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar")),
+       hint = "Categorical distribution/association testing (goodness of fit, R x C tables, paired proportions, stratified/Mantel-Haenszel).",
+       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar", "chisq_mantelhaenszel")),
   list(id = "precision", label = "Precision-based (CI-width)",
        hint = "Estimating with a target confidence-interval width rather than testing a hypothesis.",
        catalog_keys = c("proportion_single_precision", "means_single_precision",
-                         "incidence_rate_precision")),
+                         "incidence_rate_precision", "ratio_risk_ratio",
+                         "ratio_odds_ratio", "ratio_rate_ratio")),
+  list(id = "ratio_estimation", label = "Ratio Estimation",
+       hint = "Precision-based estimation of a risk ratio, odds ratio, or rate ratio.",
+       catalog_keys = c("ratio_risk_ratio", "ratio_odds_ratio", "ratio_rate_ratio")),
   list(id = "incidence_rate", label = "Incidence Rate",
        hint = "Estimating or comparing incidence rates from person-time data.",
        catalog_keys = c("incidence_rate_precision", "rate_comparison")),
   list(id = "exact_tests", label = "Exact Tests",
-       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact).",
-       catalog_keys = c("exact_binomial", "exact_fisher")),
+       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, sign test).",
+       catalog_keys = c("exact_binomial", "exact_fisher", "sign_test")),
   list(id = "survival", label = "Survival",
        hint = "Log-rank, Cox regression, stratified log-rank, or accrual/follow-up based survival study designs.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
   list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
-       hint = "Inflating an existing sample size for cluster-sampled (rather than individually-sampled) surveys.",
-       catalog_keys = c("cluster_deff")),
+       hint = "Inflating an existing sample size for cluster-sampled surveys, or solving a full cluster survey design (WHO EPI-style) directly.",
+       catalog_keys = c("cluster_deff", "cluster_survey")),
   list(id = "stratified_sampling", label = "Stratified Sampling",
        hint = "Surveys where the population is divided into strata, sampled independently within each.",
        catalog_keys = c("stratified_sampling")),
   list(id = "clinical_trials", label = "Clinical Trials",
        hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, and non-inferiority testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",
-                         "tost_means", "tost_proportions", "noninferiority_means",
-                         "noninferiority_proportions")),
+                         "tost_means", "tost_proportions", "tost_bioequivalence",
+                         "noninferiority_means", "noninferiority_proportions",
+                         "noninferiority_or", "noninferiority_hr")),
   list(id = "regression", label = "Regression",
        hint = "Testing whether a multiple regression model explains more variance than chance, or a logistic regression predictor's effect.",
        catalog_keys = c("regression_r2", "logistic_binary", "logistic_continuous")),
@@ -802,8 +969,9 @@ study_design_families <- list(
        hint = "Distribution-free alternatives to the t-test and correlation test, when normality can't be assumed.",
        catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau")),
   list(id = "safety_surveillance", label = "Safety / Surveillance",
-       hint = "Bounding an unseen adverse-event rate, or planning to catch a rare event.",
-       catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required")),
+       hint = "Bounding an unseen adverse-event rate, planning to catch a rare event, or proving disease/defect freedom in a finite population with an imperfect test.",
+       catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required",
+                         "rule_of_three_detect_imperfect")),
   list(id = "prediction", label = "Prediction Model Development",
        hint = "Developing a new multivariable prediction/diagnostic model without excessive overfitting.",
        catalog_keys = c("prediction_binary", "prediction_continuous", "prediction_survival")),
@@ -828,26 +996,28 @@ study_design_families <- list(
 # study_design_families.
 test_families <- list(
   list(id = "t_tests", label = "t Tests",
-       hint = "Comparing one or two means (Student's t framework).",
+       hint = "Comparing one or two means, or a Bonferroni-adjusted post-hoc pairwise comparison (Student's t framework).",
        catalog_keys = c("means_single", "means_two_indep",
-                         "means_two_indep_unequal_n", "means_two_dep")),
+                         "means_two_indep_unequal_n", "means_two_dep",
+                         "means_posthoc_pairwise")),
   list(id = "z_tests", label = "z Tests",
-       hint = "Comparing proportions, or a logistic-regression predictor's effect (normal-approximation framework).",
+       hint = "Comparing proportions (incl. a Bonferroni-adjusted post-hoc pairwise comparison), or a logistic-regression predictor's effect (normal-approximation framework).",
        catalog_keys = c("proportion_single", "proportion_two_indep",
-                         "logistic_binary", "logistic_continuous")),
+                         "proportion_posthoc_pairwise", "logistic_binary", "logistic_continuous")),
   list(id = "f_tests", label = "F Tests",
-       hint = "One-way/factorial ANOVA, ANCOVA, multiple regression, and repeated-measures/mixed ANOVA (general linear model F-test framework).",
+       hint = "One-way/factorial ANOVA, ANCOVA, multiple regression, repeated-measures/mixed ANOVA, and planned linear contrasts (general linear model F-test framework).",
        catalog_keys = c("means_k", "regression_r2", "anova_general",
-                         "rm_anova_between", "rm_anova_within", "rm_anova_interaction")),
+                         "rm_anova_between", "rm_anova_within", "rm_anova_interaction",
+                         "means_planned_contrast")),
   list(id = "chi_square_tests", label = "Chi-Square Tests",
-       hint = "Goodness of fit, tests of independence/association, and paired-proportions (McNemar's) testing for categorical data.",
-       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar")),
+       hint = "Goodness of fit, tests of independence/association, paired-proportions (McNemar's), and stratified/Mantel-Haenszel testing for categorical data.",
+       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar", "chisq_mantelhaenszel")),
   list(id = "exact_tests", label = "Exact Tests",
-       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact) where the normal approximation is unreliable.",
-       catalog_keys = c("exact_binomial", "exact_fisher")),
+       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, sign test) where the normal approximation is unreliable.",
+       catalog_keys = c("exact_binomial", "exact_fisher", "sign_test")),
   list(id = "correlation_regression", label = "Correlation & Regression",
-       hint = "Pearson correlation and multiple linear regression.",
-       catalog_keys = c("correlation_pearson", "regression_r2")),
+       hint = "Pearson correlation (single or comparing two independent groups) and multiple linear regression.",
+       catalog_keys = c("correlation_pearson", "correlation_two_independent", "regression_r2")),
   list(id = "survival_tests", label = "Survival Tests",
        hint = "Log-rank test, Cox proportional-hazards regression, and stratified log-rank for time-to-event outcomes.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
@@ -857,8 +1027,9 @@ test_families <- list(
                          "agreement_bland_altman", "agreement_ccc")),
   list(id = "equivalence_noninferiority", label = "Equivalence / Non-Inferiority Test Forms",
        hint = "Two one-sided tests (TOST) for equivalence, non-inferiority margins, and crossover designs.",
-       catalog_keys = c("tost_means", "tost_proportions", "noninferiority_means",
-                         "noninferiority_proportions", "crossover_2x2")),
+       catalog_keys = c("tost_means", "tost_proportions", "tost_bioequivalence",
+                         "noninferiority_means", "noninferiority_proportions",
+                         "noninferiority_or", "noninferiority_hr", "crossover_2x2")),
   list(id = "nonparametric_tests", label = "Nonparametric Tests",
        hint = "Distribution-free rank-based tests: Wilcoxon rank-sum, Wilcoxon signed-rank, and Kendall's tau.",
        catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau"))

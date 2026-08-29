@@ -11,20 +11,36 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: twenty-seven complete calculator modules -- all Stage-1 CORE items
+of Phase 2: twenty-eight complete calculator modules -- all Stage-1 CORE items
 from the master checklists are now built, plus two "quick wins" batches of
 further CORE items, and the start of Stage 2 (analytical depth) --
 
 - **Proportions** (`R/modules/mod_proportion.R`) -- single proportion
   (precision-based, Cochran's formula, with optional finite population
   correction), single proportion vs. known value, two independent
-  proportions
+  proportions; plus a post-hoc pairwise comparison design (Bonferroni-
+  adjusted, wraps `TrialSize::OneWayANOVA.PairwiseComparison()`) for sizing
+  one specific pairwise comparison out of several planned across a
+  multi-group study -- verified against Chow, Shao & Wang (2003) Example
+  4.4.2 (n=96 and n=44 per group for its two worked cases)
 - **Means** (`R/modules/mod_means.R`) -- single mean, precision-based
   (wraps `epiR::epi.sssimpleestc()`), single mean vs. known value, two
   independent means (equal or unequal group sizes, the latter via
   `pwr::pwr.t2n.test()`), two paired means (before-after / matched pairs),
   and three or more independent groups (one-way ANOVA, wraps
-  `pwr::pwr.anova.test()`, converting raw group means to Cohen's f)
+  `pwr::pwr.anova.test()`, converting raw group means to Cohen's f); plus a
+  planned linear contrast design for testing one pre-specified comparison
+  across k group means (e.g. a linear dose-response trend) rather than the
+  ANOVA design's omnibus "any groups differ" question, wrapping
+  `TrialSize::Dose.Response.Linear()` -- verified exactly against Chow,
+  Shao & Wang (2003) Example 11.1 (n=178); and a post-hoc pairwise
+  comparison design (Bonferroni-adjusted, wraps
+  `TrialSize::OneWayANOVA.pairwise()`) for sizing one specific pairwise
+  comparison of two group means out of several planned comparisons --
+  both post-hoc designs' formulas were independently re-derived from the
+  standard two-sample sample-size formula with alpha/tau in place of
+  alpha, since neither package function's own documentation prints a
+  numeric worked answer
 - **Diagnostic Accuracy** (`R/modules/mod_diagnostic.R`) -- sensitivity &
   specificity, precision-based or vs. a known/reference value, comparing
   two diagnostic tests (unpaired or paired), all per Akoglu (2022)'s
@@ -61,7 +77,10 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   relative-risk studies, wrapping `epiR::epi.sscohortc()` (Kelsey,
   Thompson & Evans 1986; Woodward 2014)
 - **Correlation** (`R/modules/mod_correlation.R`) -- Pearson correlation,
-  wrapping `pwr::pwr.r.test()` (Cohen 1988)
+  wrapping `pwr::pwr.r.test()` (Cohen 1988); plus comparing two
+  independent correlations via Cohen's q effect size (Fisher z),
+  closed-form since `pwr` has no dedicated two-sample function for this
+  case
 - **Chi-Square Tests** (`R/modules/mod_chisq.R`) -- goodness of fit and test
   of independence/association for an R x C table (dynamic 2-5 x 2-5
   proportion-matrix UI), both wrapping `pwr::pwr.chisq.test()` +
@@ -70,7 +89,14 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   finder; plus McNemar's test for paired/matched proportions (the same
   subjects measured twice), wrapping `TrialSize::McNemar.Test()` (Chow,
   Shao & Wang 2003) -- `TrialSize` already a zero-dependency project
-  dependency
+  dependency; and a Mantel-Haenszel design for comparing two proportions
+  across J confounding strata (age bands, severity categories,
+  propensity-score strata), wrapping `TrialSize::Propensity.Score.strata()`
+  (the weighted Mantel-Haenszel test) alongside
+  `TrialSize::Propensity.Score.nostrata()` (the naive pooled comparison,
+  shown side by side to illustrate the cost of ignoring confounding
+  strata) -- verified exactly against Chow, Shao & Wang (2003) Example
+  15.2.3 (stratified n=447 vs. pooled n=1151)
 - **Pilot / Feasibility** (`R/modules/mod_pilot.R`) -- the flat 12/arm
   rule-of-thumb (Julious 2005) plus an interactive tool showing how precise
   a pilot's estimated SD is at a given n (95% CI multipliers on the observed
@@ -83,9 +109,15 @@ further CORE items, and the start of Stage 2 (analytical depth) --
 - **Equivalence (TOST)** (`R/modules/mod_tost.R`) -- two one-sided tests, for
   a mean difference on the raw/untransformed scale (wraps
   `PowerTOST::sampleN.TOST(logscale = FALSE, design = "parallel")`; Phillips
-  1990; Diletti, Hauschke & Steinijans 1991) or for two proportions (wraps
+  1990; Diletti, Hauschke & Steinijans 1991), for two proportions (wraps
   `epiR::epi.ssequb(type = "equivalence")` -- no lightweight package with a
-  dedicated proportions-TOST function was found)
+  dedicated proportions-TOST function was found), or for a pharmacokinetic
+  bioequivalence crossover on the log-ratio scale -- classical 2x2, or the
+  2x2x4 full-replicate/2x3x3 partial-replicate designs used for RSABE/ABEL
+  approaches (wraps `PowerTOST::sampleN.TOST(logscale = TRUE)`, same
+  package/citations, verified exactly against its own documented example:
+  CV=30%, theta0=0.95, 80-125% limits -> n=40 for 2x2, n=20 for 2x2x4, n=30
+  for 2x3x3)
 - **Log-Rank / Survival** (`R/modules/mod_logrank.R`) -- two-arm
   time-to-event studies (required N from event probabilities), wrapping
   `powerSurvEpi::ssizeCT()` (Freedman 1982; Rosner 2006); Cox
@@ -102,16 +134,33 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   (closed-form Demidenko 2007 Poisson-regression formula, reproducing
   WebPower's `wp.poisson()` exactly without that package's heavy
   dependency chain)
+- **Ratio Estimation** (`R/modules/mod_ratio.R`) -- precision-based
+  estimation of a risk ratio, odds ratio, or rate ratio (a target
+  confidence-interval width rather than a power target), wrapping
+  `presize::prec_riskratio()` (Koopman 1984; Katz et al. 1978),
+  `presize::prec_or()` (Gart & Zweifel 1967; Woolf 1955), and
+  `presize::prec_rateratio()` (Rothman & Greenland 2018)
 - **Multiple Regression** (`R/modules/mod_regression.R`) -- R-squared
   deviation from zero for a multiple linear regression model, wrapping
   `pwr::pwr.f2.test()` (Cohen 1988)
 - **Non-Inferiority** (`R/modules/mod_noninferiority.R`) -- means or
   proportions, wrapping `epiR::epi.ssninfc()` / `epi.ssninfb()` (Chow, Shao
-  & Wang 2008)
+  & Wang 2008); plus odds ratio and hazard ratio (Cox PH), wrapping
+  `TrialSize::RelativeRisk.NIS()` / `Cox.NIS()` (Chow, Shao & Wang 2003)
+  -- despite its name, `RelativeRisk.NIS()`'s formula (confirmed from its
+  source, shared with its `RelativeRisk.Equality()` sibling) is built on
+  the log odds ratio, not the relative risk, so this app labels the
+  design by what it actually computes
 - **Rule of Three** (`R/modules/mod_rule_of_three.R`) -- the upper bound on
   an unseen adverse-event rate given zero events observed, or the sample
   size needed to have a good chance of observing at least one event of an
-  assumed rate; closed-form (Hanley & Lippman-Hand 1983)
+  assumed rate; closed-form (Hanley & Lippman-Hand 1983); plus a more
+  realistic "prove disease/defect freedom" design for a known finite
+  population and an imperfect test (single test, or two combined in
+  series/parallel), wrapping `epiR::epi.ssdetect()` -- verified against
+  the package's own worked examples (n=65, n=15) and, for the two-test
+  case, against independently hand-derived series/parallel test-
+  combination formulas (n=44 series, n=38 parallel)
 - **Exact Tests** (`R/modules/mod_exact_tests.R`) -- the binomial test
   (single proportion) and Fisher's exact test (two independent
   proportions), both more accurate than the normal-approximation designs
@@ -119,7 +168,11 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   (via `stats::binom.test()` and `Exact::power.exact.test()` respectively)
   rather than solving a closed-form equation, since exact-test power is
   genuinely non-monotonic in n (Chernick & Liu 2002) -- a stability check
-  guards against recommending a fragile single-n spike
+  guards against recommending a fragile single-n spike; plus the sign
+  test (paired data / one-sample median), a thin wrapper around the
+  binomial-test design with the reference proportion fixed at 0.5 (the
+  sign test IS an exact binomial test against 0.5), so no new math or
+  dependency
 - **Prediction Model** (`R/modules/mod_prediction.R`) -- minimum sample
   size for developing a binary, continuous, or time-to-event prediction/
   prognostic model, wrapping `pmsampsize::pmsampsize()` (Riley et al. 2019
@@ -135,7 +188,16 @@ further CORE items, and the start of Stage 2 (analytical depth) --
 - **Cluster / Design Effect** (`R/modules/mod_cluster.R`) -- inflates an
   already-computed simple-random-sample size for cluster/multistage
   sampling (villages, schools, health facilities), closed-form DEFF = 1 +
-  (m-1)*rho (Kish 1965), no package needed
+  (m-1)*rho (Kish 1965), no package needed; plus a cluster survey
+  precision design (WHO EPI-style) that solves the full two-stage design
+  -- number of clusters (PSUs) and total individuals (SSUs) -- in one
+  step for a target proportion precision, wrapping
+  `epiR::epi.ssclus2estb()` -- verified against Levy & Lemeshow (1999)'s
+  own worked example (67 clusters, rising to 81 with variable cluster
+  size, or falling to 60 with a finite population of 220 clusters).
+  Note: `epiR::epi.ssclus1estb()` ("one-stage") is, on inspection of its
+  source, byte-for-byte identical to `epi.ssclus2estb()` ("two-stage"),
+  so this one design covers both cases
 - **Stratified Sampling** (`R/modules/mod_stratified.R`) -- total sample
   size and per-stratum allocation (proportional or optimal/Neyman) for a
   population divided into strata, closed-form (Cochran 1977; Kauermann &

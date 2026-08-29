@@ -33,3 +33,34 @@ test_that("calc_noninferiority_proportions rejects invalid inputs", {
   expect_error(calc_noninferiority_proportions(p_new = 1.5, p_standard = 0.5, margin = 0.1), "between 0 and 1")
   expect_error(calc_noninferiority_proportions(p_new = 0.5, p_standard = 0.5, margin = 0.1, ratio = -1), "positive")
 })
+
+test_that("calc_noninferiority_or matches Chow, Shao & Wang (2003) Example 4.6.4", {
+  # pt=0.4, pc=0.25 (implied OR=2), margin=0.2 (log-OR scale), k=1,
+  # alpha=0.05, power=0.80 -> n=241.512, ceiling -> 242 per group.
+  res <- calc_noninferiority_or(pt = 0.4, pc = 0.25, margin = 0.2, k = 1,
+                                 alpha = 0.05, power = 0.80)
+  expect_equal(res$n_control, 242)
+  expect_equal(res$n_test, 242)
+  expect_equal(res$n_total, 484)
+  expect_equal(res$or, 2)
+})
+
+test_that("calc_noninferiority_or rejects invalid inputs", {
+  expect_error(calc_noninferiority_or(pt = 0.5, pc = 0.5, margin = 0), "no effect to detect")
+  expect_error(calc_noninferiority_or(pt = 1.5, pc = 0.5, margin = 0.1), "between 0 and 1")
+  expect_error(calc_noninferiority_or(pt = 0.4, pc = 0.25, margin = 0.2, k = -1), "positive")
+})
+
+test_that("calc_noninferiority_hr matches Chow, Shao & Wang (2003) Example 7.3.4", {
+  # hr=2 (loghr=log(2)), margin=0.5 (log-HR scale), p1=0.5, d=0.8,
+  # alpha=0.05, power=0.80 -> n=828.6314, ceiling -> 829.
+  res <- calc_noninferiority_hr(hr = 2, margin = 0.5, p1 = 0.5, d = 0.8,
+                                 alpha = 0.05, power = 0.80)
+  expect_equal(res$n, 829)
+})
+
+test_that("calc_noninferiority_hr rejects invalid inputs", {
+  expect_error(calc_noninferiority_hr(hr = 1, margin = 0), "no effect to detect")
+  expect_error(calc_noninferiority_hr(hr = -1, margin = 0.5), "positive")
+  expect_error(calc_noninferiority_hr(hr = 2, margin = 0.5, p1 = 1.5), "between 0 and 1")
+})

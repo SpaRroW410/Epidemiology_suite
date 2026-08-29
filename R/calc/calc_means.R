@@ -236,5 +236,119 @@ calc_means_2s_unequal_n <- function(mu1, mu2, sd, n1, alpha = 0.05, power = 0.8,
   )
 }
 
+#' Sample size for a planned linear contrast among k group means
+#'
+#' Wraps TrialSize::Dose.Response.Linear() rather than reimplementing the
+#' underlying math (project convention) -- TrialSize already a
+#' zero-dependency project dependency, used elsewhere in this app
+#' (McNemar's test, Mantel-Haenszel, non-inferiority OR/HR,
+#' non-parametric tests). Despite the package's function name (written
+#' for a dose-response trial), the underlying formula is the general
+#' sample size for testing a single pre-specified ("planned") linear
+#' contrast of k group means against zero -- e.g. a linear dose-response
+#' trend, or any other a priori weighted comparison across groups -- not
+#' the k-group omnibus F-test the ANOVA design above already covers.
+#'
+#' Note: the closely related TrialSize::Dose.Response.binary() (the
+#' proportions/Cochran-Armitage-trend analog) was investigated for this
+#' app and found NOT to reproduce its own package's documented example
+#' from its own source code under any tested variant (its doc claims
+#' n=382, but running the function on that exact example gives n=337) --
+#' so it is deliberately not wrapped here, consistent with this
+#' project's practice of skipping formulas that can't be confidently
+#' verified (see also TrialSize::Stuart.Maxwell.Test(), which is
+#' similarly unusable).
+#'
+#' @param mu Numeric vector of length k (>= 2): the assumed/expected mean
+#'   for each group
+#' @param sigma Common/pooled standard deviation (> 0)
+#' @param ci Numeric vector of length k: the contrast coefficients,
+#'   summing to 0 (e.g. c(-3,-1,1,3) for an equally-spaced linear trend
+#'   across 4 ordered groups)
+#' @param fi Numeric vector of length k: each group's share of the total
+#'   sample (ni/n), summing to 1
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n_total, n_per_group, inputs)
+calc_means_planned_contrast <- function(mu, sigma, ci, fi, alpha = 0.05, power = 0.8) {
+  k <- length(mu)
+  if (!is.numeric(mu) || k < 2 || anyNA(mu)) {
+    stop("mu must be a numeric vector of at least 2 values.")
+  }
+  if (length(ci) != k || length(fi) != k) {
+    stop("mu, ci, and fi must all have the same length (one value per group).")
+  }
+  .validate_positive(sigma, "sigma")
+  if (abs(sum(ci)) > 1e-6) stop("ci (contrast coefficients) must sum to 0.")
+  if (isTRUE(all.equal(sum(ci * mu), 0))) {
+    stop("the contrast sum(ci * mu) must differ from 0 (no effect to detect).")
+  }
+  if (any(fi <= 0) || any(fi >= 1)) stop("each value in fi must be strictly between 0 and 1.")
+  if (abs(sum(fi) - 1) > 1e-6) stop("fi (group sample-size fractions) must sum to 1.")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  n_solved <- TrialSize::Dose.Response.Linear(
+    alpha = alpha, beta = 1 - power, sigma = sigma, mui = mu, ci = ci, fi = fi
+  )
+  n_total <- ceiling(n_solved)
+
+  list(
+    n_total = n_total,
+    n_per_group = ceiling(n_total * fi),
+    inputs = list(mu = mu, sigma = sigma, ci = ci, fi = fi, alpha = alpha, power = power)
+  )
+}
+
+#' Sample size for a Bonferroni-adjusted post-hoc pairwise comparison of
+#' two group means
+#'
+#' Wraps TrialSize::OneWayANOVA.pairwise() rather than reimplementing the
+#' underlying math (project convention) -- TrialSize already a
+#' zero-dependency project dependency. The formula is the standard
+#' two-sample z-test sample size, with the significance level Bonferroni-
+#' corrected for `tau` simultaneous pairwise comparisons (alpha/tau in
+#' place of alpha) -- independently re-derived here and confirmed to
+#' reproduce the package's own function exactly, since its Rd file's own
+#' examples don't print a numeric answer.
+#'
+#' This is the multiplicity-adjusted complement to the "Planned linear
+#' contrast" design above: that design tests one pre-specified
+#' combination of all k means, while this one sizes one specific pairwise
+#' comparison (mean i vs. mean j) out of `tau` such comparisons planned
+#' across the study, correcting for running several tests at once.
+#'
+#' @param tau Number of pairwise comparisons planned across the whole
+#'   study (whole number >= 1); e.g. tau = choose(k, 2) for all pairs
+#'   among k groups, or a smaller number if only some pairs are planned
+#' @param sigma Common/pooled standard deviation (> 0)
+#' @param margin Assumed true difference between the two group means
+#'   being compared in this specific pair (!= 0)
+#' @param alpha Family-wise significance level (0,1), before Bonferroni
+#'   correction
+#' @param power Desired power (0,1)
+#' @return list(n_per_group, inputs)
+calc_means_posthoc_pairwise <- function(tau, sigma, margin, alpha = 0.05, power = 0.8) {
+  if (!is.numeric(tau) || length(tau) != 1 || is.na(tau) || tau < 1 || tau != round(tau)) {
+    stop("tau must be a single whole number >= 1.")
+  }
+  .validate_positive(sigma, "sigma")
+  .validate_number(margin, "margin")
+  if (isTRUE(all.equal(margin, 0))) {
+    stop("margin must differ from 0 (no effect to detect).")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  n_solved <- TrialSize::OneWayANOVA.pairwise(
+    alpha = alpha, beta = 1 - power, tau = tau, sigma = sigma, margin = margin
+  )
+
+  list(
+    n_per_group = ceiling(n_solved),
+    inputs = list(tau = tau, sigma = sigma, margin = margin, alpha = alpha, power = power)
+  )
+}
+
 # Shared .validate_number() / .validate_positive() / .validate_unit_interval()
 # live in calc_utils.R (sourced alongside every file in R/calc/).

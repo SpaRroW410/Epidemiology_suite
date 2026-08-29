@@ -108,5 +108,50 @@ calc_proportion_precision <- function(p, d, conf_level = 0.95, N = NULL) {
   )
 }
 
+#' Sample size for a Bonferroni-adjusted post-hoc pairwise comparison of
+#' two group proportions
+#'
+#' Wraps TrialSize::OneWayANOVA.PairwiseComparison() rather than
+#' reimplementing the underlying math (project convention) -- TrialSize
+#' already a zero-dependency project dependency. The formula is the
+#' standard two-independent-proportions z-test sample size, with the
+#' significance level Bonferroni-corrected for `tau` simultaneous
+#' pairwise comparisons (alpha/tau in place of alpha) -- independently
+#' re-derived here and confirmed to reproduce the package's own function
+#' exactly, since its Rd file's own examples don't print a numeric
+#' answer. See calc_means.R's calc_means_posthoc_pairwise() for the
+#' continuous-outcome analog (same package, same correction logic).
+#'
+#' @param tau Number of pairwise comparisons planned across the whole
+#'   study (whole number >= 1); e.g. tau = choose(k, 2) for all pairs
+#'   among k groups, or a smaller number if only some pairs are planned
+#' @param p1 Expected proportion in the first group of this specific pair (0,1)
+#' @param p2 Expected proportion in the second group of this specific pair (0,1)
+#' @param alpha Family-wise significance level (0,1), before Bonferroni
+#'   correction
+#' @param power Desired power (0,1)
+#' @return list(n_per_group, inputs)
+calc_proportion_posthoc_pairwise <- function(tau, p1, p2, alpha = 0.05, power = 0.8) {
+  if (!is.numeric(tau) || length(tau) != 1 || is.na(tau) || tau < 1 || tau != round(tau)) {
+    stop("tau must be a single whole number >= 1.")
+  }
+  .validate_unit_interval(p1, "p1")
+  .validate_unit_interval(p2, "p2")
+  if (isTRUE(all.equal(p1, p2))) {
+    stop("p1 and p2 must differ (no effect to detect).")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  n_solved <- TrialSize::OneWayANOVA.PairwiseComparison(
+    alpha = alpha, beta = 1 - power, tau = tau, p1 = p1, p2 = p2, delta = p1 - p2
+  )
+
+  list(
+    n_per_group = ceiling(n_solved),
+    inputs = list(tau = tau, p1 = p1, p2 = p2, alpha = alpha, power = power)
+  )
+}
+
 # Shared .validate_unit_interval() / .validate_population() live in
 # calc_utils.R (sourced alongside every file in R/calc/).

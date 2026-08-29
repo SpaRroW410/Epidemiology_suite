@@ -22,7 +22,8 @@ mod_exact_tests_ui <- function(id) {
         ns("design"), "Design",
         choices = c(
           "Binomial test, single proportion" = "binomial",
-          "Fisher's exact test, two independent proportions" = "fisher"
+          "Fisher's exact test, two independent proportions" = "fisher",
+          "Sign test (paired data / one-sample median)" = "sign"
         )
       ),
       conditionalPanel(
@@ -48,6 +49,17 @@ mod_exact_tests_ui <- function(id) {
           choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
         )
       ),
+      conditionalPanel(
+        condition = design_is("sign"),
+        numericInput(ns("p_pos_sign"), "Expected proportion of pairs with a positive difference",
+                     value = 0.7, min = 0.001, max = 0.999, step = 0.01),
+        numericInput(ns("alpha_sign"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_sign"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
+        selectInput(
+          ns("alternative_sign"), "Alternative hypothesis",
+          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+        )
+      ),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -65,7 +77,13 @@ mod_exact_tests_ui <- function(id) {
       render_formula_block(exact_tests_content$fisher$formula_latex),
       shiny::markdown(exact_tests_content$fisher$explanation),
       h5("Worked example"),
-      shiny::markdown(exact_tests_content$fisher$worked_example)
+      shiny::markdown(exact_tests_content$fisher$worked_example),
+      hr(),
+      h4(exact_tests_content$sign_test$title),
+      render_formula_block(exact_tests_content$sign_test$formula_latex),
+      shiny::markdown(exact_tests_content$sign_test$explanation),
+      h5("Worked example"),
+      shiny::markdown(exact_tests_content$sign_test$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -76,7 +94,11 @@ mod_exact_tests_ui <- function(id) {
       hr(),
       h4(exact_tests_content$fisher$title),
       p(strong("Citation: "), exact_tests_content$fisher$citation),
-      p(strong("Implemented via: "), code(exact_tests_content$fisher$backend))
+      p(strong("Implemented via: "), code(exact_tests_content$fisher$backend)),
+      hr(),
+      h4(exact_tests_content$sign_test$title),
+      p(strong("Citation: "), exact_tests_content$sign_test$citation),
+      p(strong("Implemented via: "), code(exact_tests_content$sign_test$backend))
     )
   )
 }
@@ -95,7 +117,7 @@ mod_exact_tests_server <- function(id) {
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
-      } else {
+      } else if (input$design == "fisher") {
         req(input$p1_fisher, input$p2_fisher, input$alpha_fisher, input$power_fisher,
             input$ratio_fisher, input$alternative_fisher)
         tryCatch(
@@ -103,6 +125,15 @@ mod_exact_tests_server <- function(id) {
             p1 = input$p1_fisher, p2 = input$p2_fisher, alpha = input$alpha_fisher,
             power = input$power_fisher, ratio = input$ratio_fisher,
             alternative = input$alternative_fisher
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$p_pos_sign, input$alpha_sign, input$power_sign, input$alternative_sign)
+        tryCatch(
+          list(ok = TRUE, value = calc_sign_test(
+            p_pos = input$p_pos_sign, alpha = input$alpha_sign,
+            power = input$power_sign, alternative = input$alternative_sign
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -116,15 +147,15 @@ mod_exact_tests_server <- function(id) {
       }
 
       v <- res$value
-      if (input$design == "binomial") {
+      if (input$design == "fisher") {
         tagList(
-          p(strong("Required sample size: "), v$n),
+          p(strong("Required sample size per group: "), sprintf("n1 = %d, n2 = %d", v$n1, v$n2)),
+          p(strong("Total sample size: "), v$n_total),
           p(sprintf("Achieved exact power at this n: %.4f", v$achieved_power))
         )
       } else {
         tagList(
-          p(strong("Required sample size per group: "), sprintf("n1 = %d, n2 = %d", v$n1, v$n2)),
-          p(strong("Total sample size: "), v$n_total),
+          p(strong("Required sample size: "), v$n),
           p(sprintf("Achieved exact power at this n: %.4f", v$achieved_power))
         )
       }

@@ -188,26 +188,26 @@ for what to build next):
 
 | Family | Designs covered | Backend package/function | Status |
 |---|---|---|---|
-| Proportions | Precision-based (Cochran, +FPC); vs. known value; two independent | closed-form (Cochran); `pwr::pwr.p.test`, `pwr::pwr.2p.test` | Live |
-| Means | Precision-based; one-sample, two-sample (equal + unequal n), paired, one-way ANOVA (3+ groups) | `epiR::epi.sssimpleestc()`; `pwr::pwr.t.test`, `pwr::pwr.t2n.test`, `pwr::pwr.anova.test` | Live |
+| Proportions | Precision-based (Cochran, +FPC); vs. known value; two independent; Bonferroni-adjusted post-hoc pairwise | closed-form (Cochran); `pwr::pwr.p.test`, `pwr::pwr.2p.test`, `TrialSize::OneWayANOVA.PairwiseComparison()` | Live |
+| Means | Precision-based; one-sample, two-sample (equal + unequal n), paired, one-way ANOVA (3+ groups), planned linear contrast, Bonferroni-adjusted post-hoc pairwise | `epiR::epi.sssimpleestc()`; `pwr::pwr.t.test`, `pwr::pwr.t2n.test`, `pwr::pwr.anova.test`, `TrialSize::Dose.Response.Linear()`, `TrialSize::OneWayANOVA.pairwise()` | Live |
 | Diagnostic accuracy | Precision-based (Buderer); vs. reference value; two tests, unpaired/paired; PPV/NPV; likelihood ratios (LR+/LR-) | closed-form (Buderer; Casagrande-Pike; Connor; Altman & Bland), all + Yates' correction; `presize::prec_pos_lr()`/`prec_neg_lr()` (Simel et al 1991) | Live |
 | Agreement / reliability | Cohen's kappa; ICC; Cronbach's alpha; Bland-Altman LoA; Lin's CCC | `presize::prec_kappa()` (→ `kappaSize`); `presize::prec_icc()` (Bonett 2002); `presize::prec_cronb()` (Bonett & Wright 2015); `presize::prec_lim_agree()` (Bland & Altman 1986); closed-form (Lin 1989/2000, formula as used internally by `epiR::epi.ccc()`) | Live |
 | Case-control | Unmatched; matched (1:1 or 1:m); nested (binary/continuous exposure); case-cohort | `epiR::epi.sscc()`; `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed-form (Cai & Zeng 2004) | Live |
 | Cohort / RR | Cohort, cross-sectional, relative risk | `epiR::epi.sscohortc()` | Live |
-| Correlation | Pearson correlation | `pwr::pwr.r.test()` | Live |
-| Chi-square tests | Goodness of fit; test of independence (R×C); McNemar's (paired proportions) | `pwr::pwr.chisq.test()` (`ES.w1`/`ES.w2`); `TrialSize::McNemar.Test()` | Live |
+| Correlation | Pearson correlation; comparing two independent correlations | `pwr::pwr.r.test()`; closed-form (Cohen 1988) | Live |
+| Chi-square tests | Goodness of fit; test of independence (R×C); McNemar's (paired proportions); Mantel-Haenszel (stratified proportions) | `pwr::pwr.chisq.test()` (`ES.w1`/`ES.w2`); `TrialSize::McNemar.Test()`; `TrialSize::Propensity.Score.strata()`/`.nostrata()` | Live |
 | Pilot / feasibility | Flat 12/arm rule-of-thumb; interactive CI-for-SD precision | rule-of-thumb (Julious 2005); closed-form chi-square CI theory | Live |
 | Simon two-stage | Phase II single-arm (minimax + optimal designs) | `clinfun::ph2simon()` | Live |
-| Equivalence (TOST) | Two one-sided tests, means and proportions | `PowerTOST::sampleN.TOST(logscale=FALSE)`; `epiR::epi.ssequb()` | Live |
+| Equivalence (TOST) | Two one-sided tests, means, proportions, and PK bioequivalence crossover (2x2, 2x2x4, 2x3x3) | `PowerTOST::sampleN.TOST(logscale=FALSE/TRUE)`; `epiR::epi.ssequb()` | Live |
 | Log-rank / survival | Two-arm time-to-event, cumulative event probabilities; Cox PH regression (binary or continuous covariate); stratified log-rank (exponential survival) | `powerSurvEpi::ssizeCT()`; `ssizeEpi.default()`; `ssizeEpiCont.default()`; `ssize.stratify()` (Palta & Amini 1985) | Live |
 | Incidence Rate | Precision-based, events + person-time; comparison of two rates | `presize::prec_rate()`; closed-form (Demidenko 2007) | Live |
-| Exact Tests | Binomial test (single proportion); Fisher's exact (two proportions) | `stats::binom.test()` search; `Exact::power.exact.test()` search | Live |
+| Exact Tests | Binomial test (single proportion); Fisher's exact (two proportions); sign test | `stats::binom.test()` search; `Exact::power.exact.test()` search; `stats::binom.test()` search (p0 = 0.5) | Live |
 | Multiple Regression | R-squared deviation from zero | `pwr::pwr.f2.test()` | Live |
-| Non-Inferiority | Means and proportions | `epiR::epi.ssninfc()`, `epi.ssninfb()` | Live |
-| Rule of Three | Upper bound on unseen event rate; n to detect >= 1 event | closed-form (Hanley & Lippman-Hand 1983) | Live |
+| Non-Inferiority | Means, proportions, odds ratio, hazard ratio (Cox PH) | `epiR::epi.ssninfc()`, `epi.ssninfb()`; `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
+| Rule of Three | Upper bound on unseen event rate; n to detect >= 1 event; detect >= 1 case with an imperfect test in a finite population (single or two-test series/parallel) | closed-form (Hanley & Lippman-Hand 1983); `epiR::epi.ssdetect()` | Live |
 | Prediction Model | Model development — binary, continuous, survival | `pmsampsize::pmsampsize()` (Riley et al. 2019/2020/2021) | Live |
 | ROC / AUC | Single ROC AUC vs. chance (0.5) | `pROC::power.roc.test()` (Obuchowski et al. 2004) | Live |
-| Cluster / design effect | Design-effect inflation of an existing base sample size | closed-form (Kish 1965) | Live |
+| Cluster / design effect | Design-effect inflation of an existing base sample size; cluster survey precision (WHO EPI-style, proportion) | closed-form (Kish 1965); `epiR::epi.ssclus2estb()` | Live |
 | Stratified Sampling | Total size + per-stratum allocation (proportional/Neyman) | closed-form (Cochran 1977; Kauermann & Kuechenhoff 2011) | Live |
 | Crossover Trial (2x2) | Continuous outcome, test for a difference (not equivalence) | `TrialSize::TwoSampleCrossOver.Equality()` (Chow, Shao & Wang 2003) | Live |
 | Factorial ANOVA / ANCOVA | Main effects, interactions, ANCOVA group effects (general F-test) | `pwr::pwr.f2.test()` (Cohen 1988) | Live |
@@ -215,6 +215,7 @@ for what to build next):
 | Self-Controlled Case Series | Cases-only design, risk-period vs. own-time comparison, optional age effects | closed-form (Musonda, Farrington & Whitaker 2006) | Live |
 | RM-ANOVA / Mixed ANOVA | Between-subjects, within-subjects, and group x time interaction effects | closed-form (Cohen 1988; `WebPower::wp.rmanova()` algorithm) | Live |
 | Nonparametric Tests | Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau | `TrialSize::Nonpara.Two.Sample()`/`Nonpara.One.Sample()`/`Nonpara.Independ()` (Chow, Shao & Wang 2003) | Live |
+| Ratio Estimation | Precision-based risk ratio, odds ratio, rate ratio | `presize::prec_riskratio()`/`prec_or()`/`prec_rateratio()` | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
 | Survival (advanced) | Accrual/follow-up (non-uniform entry), competing risks, RMST | `gsDesign::nSurv`; `SSRMST` (simulation-based, not yet wrapped) | Not started |
 | MANOVA | Global & special effects, Hotelling's T² | Vonesh & Schork (1986) closed-form; not yet wrapped | Not started |
@@ -394,7 +395,7 @@ maintained backlog. Summary:
 | 1 — v1 CORE (~25 modules) | Single proportion, single mean, two means, two proportions, unmatched case-control, cohort/RR, one-way ANOVA, correlation, chi-square, diagnostic Se/Sp, ICC, kappa, log-rank, Simon two-stage, pilot rules-of-thumb, TOST equivalence | All Stage-1 CORE items live: Proportions, Means (incl. ANOVA), Diagnostic Accuracy, Agreement/Reliability (kappa+ICC), Case-Control (unmatched+matched), Cohort/RR, Correlation, Chi-Square Tests (GoF+independence), Pilot/Feasibility, Simon Two-Stage, Equivalence (TOST), Log-Rank/Survival |
 | 1.5 — study design identification wizard, guided-tree half | "Which calculator?" guided Q&A routing a research question to the right Stage-1 module (or an honest not-built note for anything later); see §7.1 and `docs/design_identification_algorithm.md` Stages 1-5 | Live — built deliberately right after Stage 1 finished and before Stage 2 starts, so every CORE module is reachable both by name and by guided description before the backlog grows further |
 | 2 — analytical depth | F-family completeness (factorial/RM-ANOVA, ANCOVA, MANOVA), full correlation/regression suite, matched case-control, ROC comparison, Bland-Altman/CCC/Cronbach, prediction-model development (`pmsampsize`) | In progress -- Cronbach's alpha, Bland-Altman LoA, and likelihood ratios (LR+/LR-) live; F-family completeness, correlation/regression suite, matched case-control, ROC/AUC, CCC, and prediction models still open |
-| 3 — advanced trial designs | Cluster-randomized/stepped-wedge, group-sequential/adaptive, survival extensions, bioequivalence replicate designs, longitudinal/MMRM | Not started |
+| 3 — advanced trial designs | Cluster-randomized/stepped-wedge, group-sequential/adaptive, survival extensions, bioequivalence replicate designs, longitudinal/MMRM | Bioequivalence replicate designs (2x2x4, 2x3x3) live in Equivalence (TOST); rest not started |
 | 4 — niche/simulation & non-formula | Genetic (`genpwr`), SEM (`semPower`), trial sequential analysis, `simr`-based simulation, guidance-only qualitative/animal-study panels | Not started |
 | 5 — study design identification wizard, free-text half | Stage 0 of `docs/design_identification_algorithm.md`: free-text/PICO input parsing (keyword heuristics and/or an LLM parsing layer) that pre-fills the guided wizard's answers instead of requiring every question to be clicked through manually. Deliberately deferred until after Stage 4, once the guided tree's terminals mostly point at live modules rather than "not yet built" notes | Not started |
 | — (last, maybe cut) | Post-hoc/achieved-power module | Deliberately deprioritized to the very end of the build order; may be dropped entirely if the app's scope grows large enough that it's not worth the added surface area (see the Post-hoc power caveat in §10 and the checklists) |
