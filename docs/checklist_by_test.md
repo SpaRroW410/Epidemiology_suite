@@ -135,7 +135,7 @@
 
 ### Sequential / adaptive test procedures
 
-- [ ] **[ADV]** O'Brien–Fleming / Pocock boundaries — `gsDesign`, `rpact`
+- [x] **[ADV]** O'Brien–Fleming / Pocock boundaries — `gsDesign`, `rpact` — *(implemented: new Group Sequential Design module (`calc_group_sequential_normal()`/`_binary()`/`_survival()`), wrapping `clinfun::gsdesign.normal()`/`.binomial()`/`.survival()` -- `clinfun` already a project dependency (used for Simon two-stage), avoiding `gsDesign`/`rpact` (both confirmed not installed in this sandbox, no network access to CRAN). These functions parameterize the boundary as a "power family" (0 = Pocock, 0.5 = O'Brien-Fleming) rather than literal Lan-DeMets alpha-spending, but reproduce both classic boundary shapes at its endpoints. Verified: the single-look (fixed-design) special case reproduces the classic Schoenfeld (1983) log-rank event formula exactly for survival (66 events for HR=0.5, alpha=0.05, power=0.80) and the exact Z_(1-alpha/2)+Z_(1-beta) drift for all three outcome types; the binomial case cross-checked against `pwr::pwr.2p.test` within the expected variance-formula tolerance. Discovered the underlying functions use internal Monte-Carlo integration (`mvtnorm::pmvnorm`) that varies by +/-1 subject run-to-run without a fixed seed -- this app's wrapper functions set a fixed seed for reproducibility, documented explicitly in the code)*
 - [ ] **[ADV]** Lan–DeMets alpha spending — `gsDesign`, `rpact`
 - [ ] **[ADV]** Conditional power; futility boundaries; SSR — `gsDesign::ssrCP`, `condPower`
 

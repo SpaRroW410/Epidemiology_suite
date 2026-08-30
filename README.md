@@ -11,7 +11,7 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: twenty-eight complete calculator modules -- all Stage-1 CORE items
+of Phase 2: twenty-nine complete calculator modules -- all Stage-1 CORE items
 from the master checklists are now built, plus two "quick wins" batches of
 further CORE items, and the start of Stage 2 (analytical depth) --
 
@@ -151,6 +151,20 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   source, shared with its `RelativeRisk.Equality()` sibling) is built on
   the log odds ratio, not the relative risk, so this app labels the
   design by what it actually computes
+- **Group Sequential Design** (`R/modules/mod_group_sequential.R`) --
+  interim-monitoring trial designs (continuous, binary, or time-to-event
+  outcome) with planned interim analyses and a Pocock-to-O'Brien-Fleming
+  efficacy/futility boundary family, wrapping
+  `clinfun::gsdesign.normal()`/`.binomial()`/`.survival()` --
+  `clinfun` already a project dependency (used for Simon Two-Stage);
+  avoids `gsDesign`/`rpact`, both unavailable in this sandbox. Verified:
+  the single-look (fixed-design) special case reproduces the classic
+  Schoenfeld (1983) log-rank event formula exactly (66 events for
+  HR=0.5, alpha=0.05, 80% power) and the exact Z_(1-alpha/2)+Z_(1-beta)
+  drift statistic for all three outcome types. Note: the underlying
+  package functions use internal Monte-Carlo integration that varies
+  slightly run-to-run without a fixed seed -- this module's calc layer
+  fixes one internally so results are exactly reproducible
 - **Rule of Three** (`R/modules/mod_rule_of_three.R`) -- the upper bound on
   an unseen adverse-event rate given zero events observed, or the sample
   size needed to have a good chance of observing at least one event of an

@@ -885,7 +885,40 @@ calculator_catalog <- list(
        ),
        outcome_type = "safety", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Rule of Three",
-       module_input_id = "rule_of_three-design", design_value = "detect_imperfect")
+       module_input_id = "rule_of_three-design", design_value = "detect_imperfect"),
+
+  list(key = "group_sequential_normal",
+       label = "Group sequential design, continuous outcome",
+       answers = paste(
+         "Answers: \"How large a trial do I need, at most, if I plan to",
+         "monitor a continuous outcome at several interim analyses and",
+         "stop early for benefit (or futility)?\""
+       ),
+       outcome_type = "mean", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Group Sequential Design",
+       module_input_id = "group_sequential-design", design_value = "normal"),
+
+  list(key = "group_sequential_binary",
+       label = "Group sequential design, binary outcome",
+       answers = paste(
+         "Answers: \"How large a trial do I need, at most, if I plan to",
+         "monitor a binary/proportion outcome at several interim",
+         "analyses and stop early for benefit (or futility)?\""
+       ),
+       outcome_type = "proportion", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Group Sequential Design",
+       module_input_id = "group_sequential-design", design_value = "binary"),
+
+  list(key = "group_sequential_survival",
+       label = "Group sequential design, time-to-event outcome",
+       answers = paste(
+         "Answers: \"How many events do I need, at most, if I plan to",
+         "monitor a survival/time-to-event trial at several interim",
+         "analyses and stop early for benefit (or futility)?\""
+       ),
+       outcome_type = "survival", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Group Sequential Design",
+       module_input_id = "group_sequential-design", design_value = "survival")
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -951,11 +984,13 @@ study_design_families <- list(
        hint = "Surveys where the population is divided into strata, sampled independently within each.",
        catalog_keys = c("stratified_sampling")),
   list(id = "clinical_trials", label = "Clinical Trials",
-       hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, and non-inferiority testing.",
+       hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, non-inferiority, and group-sequential (interim-monitoring) testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",
                          "tost_means", "tost_proportions", "tost_bioequivalence",
                          "noninferiority_means", "noninferiority_proportions",
-                         "noninferiority_or", "noninferiority_hr")),
+                         "noninferiority_or", "noninferiority_hr",
+                         "group_sequential_normal", "group_sequential_binary",
+                         "group_sequential_survival")),
   list(id = "regression", label = "Regression",
        hint = "Testing whether a multiple regression model explains more variance than chance, or a logistic regression predictor's effect.",
        catalog_keys = c("regression_r2", "logistic_binary", "logistic_continuous")),
@@ -1032,7 +1067,11 @@ test_families <- list(
                          "noninferiority_or", "noninferiority_hr", "crossover_2x2")),
   list(id = "nonparametric_tests", label = "Nonparametric Tests",
        hint = "Distribution-free rank-based tests: Wilcoxon rank-sum, Wilcoxon signed-rank, and Kendall's tau.",
-       catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau"))
+       catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau")),
+  list(id = "group_sequential_designs", label = "Group Sequential Designs",
+       hint = "Interim-monitoring trial designs with Pocock-to-O'Brien-Fleming efficacy/futility boundaries, for continuous, binary, or time-to-event outcomes.",
+       catalog_keys = c("group_sequential_normal", "group_sequential_binary",
+                         "group_sequential_survival"))
 )
 
 catalog_entry <- function(key) {
