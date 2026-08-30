@@ -29,8 +29,8 @@
 - [x] **[CORE]** Two independent means, unequal n — d, n ratio — `pwr::pwr.t2n.test`  — GP: Yes — *(implemented: Means module's new "Two independent means, unequal group sizes" design, `calc_means_2s_unequal_n()`; verified backend against Cohen (1988) Exercise 2.3 p.437 (d=0.6, n1=90, n2=60 -> power=0.9737 exactly))*
 - [ ] **[ADV]** Welch t (unequal variances) — SD1, SD2, ratio — `MESS::power_t_test` / simulation — GP: Partial
 - [x] **[CORE]** Paired t — dz (mean & SD of differences) — `pwr::pwr.t.test(type="paired")` — GP: t → Means: two dependent (matched pairs) — *(implemented: Means → "Two paired means", `calc_means_paired()`)*
-- [ ] **[ADV]** Point-biserial correlation — r — GP: t → Correlation: point biserial
-- [ ] **[ADV]** Regression coefficient / linear bivariate slope — slope, SDx, SDy — GP: t → Linear bivariate regression
+- [x] **[ADV]** Point-biserial correlation — r — GP: t → Correlation: point biserial — *(implemented: Correlation → "Point-biserial correlation", `calc_correlation_point_biserial()`; converts r to Cohen's d = 2r/sqrt(1-r^2) and reuses `pwr::pwr.t.test()`; verified r=0.5 -> d=1.1547 -> n=13/group (26 total), cross-checked by simulation)*
+- [x] **[ADV]** Regression coefficient / linear bivariate slope — slope, SDx, SDy — GP: t → Linear bivariate regression — *(implemented: Correlation → "Regression coefficient (bivariate slope)", `calc_regression_slope()`; uses the exact identity r = slope*SDx/SDy and reuses `pwr::pwr.r.test()`; verified slope=0.5, SDx=2, SDy=4 -> r=0.25 -> n=123, cross-checked by simulation)*
 
 ### z tests — G*Power **z** family
 
@@ -60,7 +60,7 @@
 - [ ] **[ADV]** Cochran's Q (k paired proportions)
 - [x] **[ADV]** Mantel–Haenszel (stratified OR) — PASS CMH — *(implemented: Chi-Square Tests → "Mantel-Haenszel (stratified proportions)", `calc_mantelhaenszel()`, wrapping `TrialSize::Propensity.Score.strata()` (weighted Mantel-Haenszel test) and `TrialSize::Propensity.Score.nostrata()` (naive pooled comparison, shown side by side) -- `TrialSize` already a zero-dependency project dependency. Verified exactly against Chow, Shao & Wang (2003) Example 15.2.3: J=5 strata, phi=2, alpha=0.05, power=0.80 -> stratified n=447 vs. naive pooled n=1151, both matching the textbook's own two worked answers)*
 - [ ] **[ADV]** Cochran–Armitage trend — dose-response proportions — Epi Info StatCalc (χ² for trend)
-- [ ] **[ADV]** Single-variance χ² test
+- [x] **[ADV]** Single-variance χ² test — *(implemented: new Variance Tests module → "Single-variance test (vs. a reference SD)", `calc_variance_single()`; closed-form chi-squared power function solved via `uniroot()` (no package -- `TrialSize::ISV.Equality()`/`ISCV.Equality()` were investigated and found broken, see below); verified sigma0=10, sigma1=14, one-sided greater, alpha=0.05, power=0.80 -> n=28, cross-checked by 20,000-replicate Monte Carlo simulation (empirical power 0.814))*
 
 ### Exact tests — G*Power **Exact** family
 
@@ -141,7 +141,7 @@
 
 ### Tests for variance / rates / counts
 
-- [ ] **[ADV]** Single-variance & two-variance (F) tests
+- [x] **[ADV]** Single-variance & two-variance (F) tests — *(implemented: new Variance Tests module — single-variance chi-squared test (see above) plus "Two-variance test (compare two groups)", `calc_variance_two()`; closed-form F-distribution power function solved via `uniroot()` (equal group sizes), same `TrialSize::ISV.Equality()`/`ISCV.Equality()` dead end documented in the module's code comments and content; verified sigma1=10, sigma2=14, two-sided, alpha=0.05, power=0.80 -> n=72/group (144 total), cross-checked by 20,000-replicate Monte Carlo simulation (empirical power 0.804))*
 - [ ] **[ADV]** One-sample & two-sample Poisson rate — `epiR`, Epi Info StatCalc
 
 ### Summary mapping table (selected CORE items)

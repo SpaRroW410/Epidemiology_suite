@@ -11,7 +11,7 @@ lives in [`docs/checklist_by_design.md`](docs/checklist_by_design.md) and
 not the SDD, for what's built and what's next.
 
 This is Phase 1 (app shell, Home finders, Proportions module) plus the start
-of Phase 2: twenty-nine complete calculator modules -- all Stage-1 CORE items
+of Phase 2: thirty complete calculator modules -- all Stage-1 CORE items
 from the master checklists are now built, plus two "quick wins" batches of
 further CORE items, and the start of Stage 2 (analytical depth) --
 
@@ -80,7 +80,12 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   wrapping `pwr::pwr.r.test()` (Cohen 1988); plus comparing two
   independent correlations via Cohen's q effect size (Fisher z),
   closed-form since `pwr` has no dedicated two-sample function for this
-  case
+  case; plus a point-biserial correlation design (converts r to Cohen's
+  d = 2r/sqrt(1-r^2) and reuses `pwr::pwr.t.test()`; verified r=0.5 ->
+  d=1.1547 -> n=13/group, cross-checked by simulation) and a simple
+  linear regression slope design (uses the exact identity
+  r = slope*SDx/SDy and reuses `pwr::pwr.r.test()`; verified slope=0.5,
+  SDx=2, SDy=4 -> r=0.25 -> n=123)
 - **Chi-Square Tests** (`R/modules/mod_chisq.R`) -- goodness of fit and test
   of independence/association for an R x C table (dynamic 2-5 x 2-5
   proportion-matrix UI), both wrapping `pwr::pwr.chisq.test()` +
@@ -262,6 +267,20 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   probabilities directly, not an ARE-inflation shortcut on top of a
   parametric calculation; `TrialSize` already a zero-dependency project
   dependency
+- **Variance Tests** (`R/modules/mod_variance.R`) -- a single-variance test
+  against a reference SD, and a two-variance test comparing two groups,
+  both closed-form (chi-squared/F distribution respectively, solved via
+  `uniroot()`, no package needed). `TrialSize::ISV.Equality()` and
+  `ISCV.Equality()` were investigated as possible backends first and
+  found to be broken in the installed package -- `ISV.Equality()`'s loop
+  computes a ratio but never uses it, silently returning `NULL`, and
+  `ISCV.Equality()` has a literal missing multiplication operator in its
+  source and throws a runtime error on any input -- so this app
+  reimplements the standard formulas directly instead, each verified by
+  20,000-replicate Monte Carlo simulation since no citable printed
+  worked example was available (single-variance: sigma0=10, sigma1=14,
+  one-sided greater -> n=28, empirical power 0.814; two-variance:
+  sigma1=10, sigma2=14, two-sided -> n=72/group, empirical power 0.804)
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

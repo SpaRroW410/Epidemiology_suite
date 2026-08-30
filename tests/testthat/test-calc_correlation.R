@@ -40,3 +40,34 @@ test_that("calc_correlation_two_independent rejects invalid inputs", {
   expect_error(calc_correlation_two_independent(r1 = 1, r2 = 0.5), "between -1 and 1")
   expect_error(calc_correlation_two_independent(r1 = 0.5, r2 = 0.3, alpha = 0), "between 0 and 1")
 })
+
+test_that("calc_correlation_point_biserial matches hand computation (r = 0.5 -> d = 1.1547 -> n = 13/group)", {
+  # d = 2r/sqrt(1-r^2) = 2*0.5/sqrt(0.75) = 1.154701; pwr::pwr.t.test at that
+  # d, alpha = 0.05 two-sided, power = 0.80 gives n = 13 per group (26 total).
+  res <- calc_correlation_point_biserial(r = 0.5, alpha = 0.05, power = 0.8)
+  expect_equal(round(res$d, 4), 1.1547)
+  expect_equal(res$n_per_group, 13)
+  expect_equal(res$n_total, 26)
+})
+
+test_that("calc_correlation_point_biserial rejects invalid inputs", {
+  expect_error(calc_correlation_point_biserial(r = 0), "must not be zero")
+  expect_error(calc_correlation_point_biserial(r = 1), "between -1 and 1")
+  expect_error(calc_correlation_point_biserial(r = -1), "between -1 and 1")
+  expect_error(calc_correlation_point_biserial(r = 0.5, alpha = 0), "between 0 and 1")
+})
+
+test_that("calc_regression_slope matches hand computation (slope = 0.5, sdx = 2, sdy = 4 -> r = 0.25 -> n = 123)", {
+  # r = slope * sdx / sdy = 0.5 * 2 / 4 = 0.25; pwr::pwr.r.test at r = 0.25,
+  # alpha = 0.05 two-sided, power = 0.80 gives n = 123.
+  res <- calc_regression_slope(slope = 0.5, sd_x = 2, sd_y = 4, alpha = 0.05, power = 0.8)
+  expect_equal(res$r, 0.25)
+  expect_equal(res$n, 123)
+})
+
+test_that("calc_regression_slope rejects invalid inputs", {
+  expect_error(calc_regression_slope(slope = 0, sd_x = 2, sd_y = 4), "must not be zero")
+  expect_error(calc_regression_slope(slope = 0.5, sd_x = -2, sd_y = 4), "positive")
+  expect_error(calc_regression_slope(slope = 0.5, sd_x = 2, sd_y = 4, alpha = 0), "between 0 and 1")
+  expect_error(calc_regression_slope(slope = 10, sd_x = 2, sd_y = 4), "between -1 and 1")
+})

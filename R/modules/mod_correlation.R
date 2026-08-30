@@ -21,7 +21,9 @@ mod_correlation_ui <- function(id) {
         ns("design"), "Design",
         choices = c(
           "Single correlation vs. zero" = "single",
-          "Compare two independent correlations" = "two_independent"
+          "Compare two independent correlations" = "two_independent",
+          "Point-biserial correlation" = "point_biserial",
+          "Regression coefficient (bivariate slope)" = "regression_slope"
         ),
         selected = "single"
       ),
@@ -33,6 +35,16 @@ mod_correlation_ui <- function(id) {
         condition = design_is("two_independent"),
         numericInput(ns("r1"), "Expected correlation, group 1 (r1)", value = 0.89, min = -0.99, max = 0.99, step = 0.01),
         numericInput(ns("r2"), "Expected correlation, group 2 (r2)", value = 0.76, min = -0.99, max = 0.99, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("point_biserial"),
+        numericInput(ns("r_pb"), "Expected point-biserial correlation (r)", value = 0.5, min = -0.99, max = 0.99, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("regression_slope"),
+        numericInput(ns("slope_reg"), "Assumed regression slope", value = 0.5, step = 0.01),
+        numericInput(ns("sdx_reg"), "SD of predictor (SDx)", value = 2, min = 0.0001, step = 0.1),
+        numericInput(ns("sdy_reg"), "SD of outcome (SDy)", value = 4, min = 0.0001, step = 0.1)
       ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
@@ -57,7 +69,19 @@ mod_correlation_ui <- function(id) {
       render_formula_block(correlation_content$two_independent$formula_latex),
       shiny::markdown(correlation_content$two_independent$explanation),
       h5("Worked example"),
-      shiny::markdown(correlation_content$two_independent$worked_example)
+      shiny::markdown(correlation_content$two_independent$worked_example),
+      hr(),
+      h4(correlation_content$point_biserial$title),
+      render_formula_block(correlation_content$point_biserial$formula_latex),
+      shiny::markdown(correlation_content$point_biserial$explanation),
+      h5("Worked example"),
+      shiny::markdown(correlation_content$point_biserial$worked_example),
+      hr(),
+      h4(correlation_content$regression_slope$title),
+      render_formula_block(correlation_content$regression_slope$formula_latex),
+      shiny::markdown(correlation_content$regression_slope$explanation),
+      h5("Worked example"),
+      shiny::markdown(correlation_content$regression_slope$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -68,7 +92,15 @@ mod_correlation_ui <- function(id) {
       hr(),
       h4(correlation_content$two_independent$title),
       p(strong("Citation: "), correlation_content$two_independent$citation),
-      p(strong("Implemented via: "), code(correlation_content$two_independent$backend))
+      p(strong("Implemented via: "), code(correlation_content$two_independent$backend)),
+      hr(),
+      h4(correlation_content$point_biserial$title),
+      p(strong("Citation: "), correlation_content$point_biserial$citation),
+      p(strong("Implemented via: "), code(correlation_content$point_biserial$backend)),
+      hr(),
+      h4(correlation_content$regression_slope$title),
+      p(strong("Citation: "), correlation_content$regression_slope$citation),
+      p(strong("Implemented via: "), code(correlation_content$regression_slope$backend))
     )
   )
 }
@@ -85,10 +117,23 @@ mod_correlation_server <- function(id) {
             r = input$r, alpha = input$alpha, power = input$power,
             alternative = input$alternative
           )
-        } else {
+        } else if (input$design == "two_independent") {
           req(input$r1, input$r2)
           calc_correlation_two_independent(
             r1 = input$r1, r2 = input$r2, alpha = input$alpha, power = input$power,
+            alternative = input$alternative
+          )
+        } else if (input$design == "point_biserial") {
+          req(input$r_pb)
+          calc_correlation_point_biserial(
+            r = input$r_pb, alpha = input$alpha, power = input$power,
+            alternative = input$alternative
+          )
+        } else {
+          req(input$slope_reg, input$sdx_reg, input$sdy_reg)
+          calc_regression_slope(
+            slope = input$slope_reg, sd_x = input$sdx_reg, sd_y = input$sdy_reg,
+            alpha = input$alpha, power = input$power,
             alternative = input$alternative
           )
         }
@@ -105,10 +150,21 @@ mod_correlation_server <- function(id) {
       v <- res$value
       if (res$design == "single") {
         p(strong("Required sample size: "), v$n)
-      } else {
+      } else if (res$design == "two_independent") {
         tagList(
           p(strong("Required sample size per group: "), v$n_per_group),
           p(sprintf("Cohen's q = %.4f", v$q))
+        )
+      } else if (res$design == "point_biserial") {
+        tagList(
+          p(strong("Required sample size per group: "), v$n_per_group),
+          p(strong("Total sample size: "), v$n_total),
+          p(sprintf("Cohen's d (equivalent) = %.4f", v$d))
+        )
+      } else {
+        tagList(
+          p(strong("Required sample size: "), v$n),
+          p(sprintf("Implied correlation r = %.4f", v$r))
         )
       }
     })

@@ -353,6 +353,28 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Correlation",
        module_input_id = "correlation-design", design_value = "two_independent"),
 
+  list(key = "correlation_point_biserial",
+       label = "Point-biserial correlation",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a correlation",
+         "of a given size between a continuous outcome and a naturally",
+         "dichotomous (two-group) variable?\""
+       ),
+       outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Correlation",
+       module_input_id = "correlation-design", design_value = "point_biserial"),
+
+  list(key = "correlation_regression_slope",
+       label = "Simple linear regression slope",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a bivariate",
+         "regression slope of a given size (in raw units), given the",
+         "predictor's and outcome's standard deviations?\""
+       ),
+       outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Correlation",
+       module_input_id = "correlation-design", design_value = "regression_slope"),
+
   # Chi-Square Tests entries: not a "how many groups" comparison in the
   # proportion/mean sense, so only reachable via "by study design" -- except
   # "independence" is also cross-referenced from proportion_k above, since
@@ -918,7 +940,29 @@ calculator_catalog <- list(
        ),
        outcome_type = "survival", groups = "2", dependency = "independent", reference_based = NA,
        built = TRUE, nav_target = "Group Sequential Design",
-       module_input_id = "group_sequential-design", design_value = "survival")
+       module_input_id = "group_sequential-design", design_value = "survival"),
+
+  list(key = "variance_single",
+       label = "Single-variance test (vs. a reference SD)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to test whether a",
+         "population's variability (SD) differs from a specific",
+         "reference value?\""
+       ),
+       outcome_type = "variance", groups = "1", dependency = NA, reference_based = TRUE,
+       built = TRUE, nav_target = "Variance Tests",
+       module_input_id = "variance-design", design_value = "single"),
+
+  list(key = "variance_two",
+       label = "Two-variance test (compare two groups)",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to test",
+         "whether two groups have equal variability (SD), rather than",
+         "comparing their means?\""
+       ),
+       outcome_type = "variance", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Variance Tests",
+       module_input_id = "variance-design", design_value = "two")
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -951,8 +995,9 @@ study_design_families <- list(
                          "diagnostic_two_indep", "diagnostic_two_paired",
                          "diagnostic_ppv_npv", "diagnostic_likelihood_ratio")),
   list(id = "correlation", label = "Correlation",
-       hint = "Detecting a Pearson correlation between two continuous variables, or comparing correlation strength between two independent groups.",
-       catalog_keys = c("correlation_pearson", "correlation_two_independent")),
+       hint = "Detecting a Pearson correlation between two continuous variables, comparing correlation strength between two independent groups, a point-biserial correlation, or a simple regression slope.",
+       catalog_keys = c("correlation_pearson", "correlation_two_independent",
+                         "correlation_point_biserial", "correlation_regression_slope")),
   list(id = "agreement", label = "Agreement / Reliability",
        hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman, Lin's CCC).",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
@@ -1015,7 +1060,10 @@ study_design_families <- list(
        catalog_keys = c("roc_single_auc")),
   list(id = "posthoc_power", label = "Post-hoc / Achieved Power",
        hint = "Achieved power for planning a replication study.",
-       catalog_keys = character(0))
+       catalog_keys = character(0)),
+  list(id = "variance", label = "Variance Tests",
+       hint = "Testing whether a population's variability differs from a reference value, or whether two groups' variability differs.",
+       catalog_keys = c("variance_single", "variance_two"))
 )
 
 # Second index over the SAME calculator_catalog entries, grouped by
@@ -1031,10 +1079,10 @@ study_design_families <- list(
 # study_design_families.
 test_families <- list(
   list(id = "t_tests", label = "t Tests",
-       hint = "Comparing one or two means, or a Bonferroni-adjusted post-hoc pairwise comparison (Student's t framework).",
+       hint = "Comparing one or two means, a Bonferroni-adjusted post-hoc pairwise comparison, or a point-biserial correlation (Student's t framework).",
        catalog_keys = c("means_single", "means_two_indep",
                          "means_two_indep_unequal_n", "means_two_dep",
-                         "means_posthoc_pairwise")),
+                         "means_posthoc_pairwise", "correlation_point_biserial")),
   list(id = "z_tests", label = "z Tests",
        hint = "Comparing proportions (incl. a Bonferroni-adjusted post-hoc pairwise comparison), or a logistic-regression predictor's effect (normal-approximation framework).",
        catalog_keys = c("proportion_single", "proportion_two_indep",
@@ -1051,8 +1099,9 @@ test_families <- list(
        hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, sign test) where the normal approximation is unreliable.",
        catalog_keys = c("exact_binomial", "exact_fisher", "sign_test")),
   list(id = "correlation_regression", label = "Correlation & Regression",
-       hint = "Pearson correlation (single or comparing two independent groups) and multiple linear regression.",
-       catalog_keys = c("correlation_pearson", "correlation_two_independent", "regression_r2")),
+       hint = "Pearson correlation (single or comparing two independent groups), a simple regression slope, and multiple linear regression.",
+       catalog_keys = c("correlation_pearson", "correlation_two_independent",
+                         "correlation_regression_slope", "regression_r2")),
   list(id = "survival_tests", label = "Survival Tests",
        hint = "Log-rank test, Cox proportional-hazards regression, and stratified log-rank for time-to-event outcomes.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
@@ -1071,7 +1120,10 @@ test_families <- list(
   list(id = "group_sequential_designs", label = "Group Sequential Designs",
        hint = "Interim-monitoring trial designs with Pocock-to-O'Brien-Fleming efficacy/futility boundaries, for continuous, binary, or time-to-event outcomes.",
        catalog_keys = c("group_sequential_normal", "group_sequential_binary",
-                         "group_sequential_survival"))
+                         "group_sequential_survival")),
+  list(id = "variance_tests", label = "Variance Tests",
+       hint = "Chi-squared test for a single variance against a reference value, and F test for comparing two variances.",
+       catalog_keys = c("variance_single", "variance_two"))
 )
 
 catalog_entry <- function(key) {
