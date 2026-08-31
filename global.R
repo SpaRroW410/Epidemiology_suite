@@ -67,7 +67,11 @@ module_registry <- list(
   list(id = nonparametric_meta$id, title = nonparametric_meta$nav_title,
        ui = mod_nonparametric_ui, server = mod_nonparametric_server),
   list(id = ratio_meta$id, title = ratio_meta$nav_title,
-       ui = mod_ratio_ui, server = mod_ratio_server)
+       ui = mod_ratio_ui, server = mod_ratio_server),
+  list(id = group_sequential_meta$id, title = group_sequential_meta$nav_title,
+       ui = mod_group_sequential_ui, server = mod_group_sequential_server),
+  list(id = variance_meta$id, title = variance_meta$nav_title,
+       ui = mod_variance_ui, server = mod_variance_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -90,7 +94,7 @@ module_groups <- list(
   list(title = "Agreement & Reliability",
        module_ids = c("agreement")),
   list(title = "Clinical Trials",
-       module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover")),
+       module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential")),
   list(title = "Survival Analysis",
        module_ids = c("logrank")),
   list(title = "Prediction Models",
@@ -99,5 +103,6 @@ module_groups <- list(
        module_ids = c("rule_of_three")),
   list(title = "General Statistical Tests",
        module_ids = c("correlation", "chisq", "regression", "anova_general",
-                       "logistic", "exact_tests", "rm_anova", "nonparametric"))
+                       "logistic", "exact_tests", "rm_anova", "nonparametric",
+                       "variance"))
 )

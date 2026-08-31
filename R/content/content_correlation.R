@@ -97,5 +97,97 @@ correlation_content <- list(
       "(Correlations: Two independent Pearson r's)."
     ),
     backend = "closed-form (Cohen 1988)"
+  ),
+
+  point_biserial = list(
+    title = "Point-Biserial Correlation (Continuous vs. Dichotomous Variable)",
+    formula_latex = paste0(
+      "$$d = \\frac{2r}{\\sqrt{1-r^2}} \\quad \\text{(Cohen 1988)}$$",
+      "$$n_{\\text{per group}} = \\text{solved from } d, \\alpha, \\text{power (two-sample t-test)}$$"
+    ),
+    explanation = paste(
+      "A point-biserial correlation is a Pearson correlation between a",
+      "continuous variable and a naturally dichotomous (0/1) grouping",
+      "variable -- e.g. \"does score correlate with sex/treatment group?\"",
+      "Testing it against zero is mathematically the same question as a",
+      "two-independent-samples t-test on the continuous variable across",
+      "the two groups, so this calculator converts the expected",
+      "correlation to Cohen's *d* and reuses the same two-sample t-test",
+      "machinery as the Means module.",
+      "",
+      "- **r** - the expected point-biserial correlation between the",
+      "  continuous outcome and the two-group membership variable.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "Use this framing when your research question is naturally phrased",
+      "as a correlation (\"how strongly does X relate to group\"); use the",
+      "Means module's \"Two independent means\" design directly if you'd",
+      "rather think in terms of an assumed difference and SD -- both give",
+      "the same answer for the same effect.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "For an expected point-biserial correlation of r = 0.5 between a",
+      "continuous outcome and a two-group indicator, this calculator",
+      "converts to Cohen's d = 1.1547 and returns n = 13 per group (26",
+      "total) at alpha = 0.05 (two-sided) and 80% power -- independently",
+      "confirmed by simulating data at r = 0.5 and checking the fitted",
+      "correlation and equivalent group-mean difference both recover the",
+      "intended value.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Cohen J. Statistical Power Analysis for the Behavioral Sciences.",
+      "2nd ed. Hillsdale, NJ: Lawrence Erlbaum Associates; 1988, ch. 2",
+      "(the r-to-d conversion for equal group sizes)."
+    ),
+    backend = "closed-form (Cohen 1988) via pwr::pwr.t.test()"
+  ),
+
+  regression_slope = list(
+    title = "Simple Linear Regression Slope",
+    formula_latex = paste0(
+      "$$r = \\frac{b \\cdot SD_x}{SD_y} \\quad \\text{(exact identity for one predictor)}$$",
+      "$$n = \\text{solved from } r, \\alpha, \\text{power (Fisher z')}$$"
+    ),
+    explanation = paste(
+      "Testing whether a simple (one-predictor) linear regression slope",
+      "differs from zero is *exactly* the same test as whether the",
+      "Pearson correlation between the predictor and outcome differs",
+      "from zero -- not an approximation, a mathematical identity",
+      "(r = slope x SDx / SDy) for the one-predictor case. This",
+      "calculator converts your raw-scale slope and SDs to the implied",
+      "correlation and reuses the Pearson-correlation calculator's",
+      "engine.",
+      "",
+      "- **slope** - the assumed/expected regression slope, in the",
+      "  outcome's units per unit of the predictor.",
+      "- **SDx, SDy** - the standard deviations of the predictor and the",
+      "  outcome.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "If you already know the expected correlation directly, use the",
+      "Pearson Correlation design above instead -- this one exists for",
+      "when your assumption is more naturally phrased as a raw-scale",
+      "slope (e.g. \"a 1-unit increase in exposure raises the outcome by",
+      "b units\") than as a standardized correlation.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "For an assumed slope of 0.5 (outcome units per predictor unit),",
+      "with SDx = 2 and SDy = 4, this calculator computes the implied",
+      "correlation r = 0.5 x 2 / 4 = 0.25 and returns n = 123 at",
+      "alpha = 0.05 (two-sided) and 80% power -- independently confirmed",
+      "by simulating data with this exact slope/SDx/SDy combination and",
+      "checking that both the fitted slope and correlation recover the",
+      "intended values.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Kutner MH, Nachtsheim CJ, Neter J, Li W. Applied Linear",
+      "Statistical Models. 5th ed. McGraw-Hill/Irwin; 2005 (the",
+      "slope-correlation identity for simple linear regression)."
+    ),
+    backend = "closed-form identity via pwr::pwr.r.test()"
   )
 )
