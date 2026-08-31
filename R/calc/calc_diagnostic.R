@@ -274,6 +274,53 @@ calc_diagnostic_ppv_npv <- function(sens, spec, prevalence,
   )
 }
 
+#' Sample size to test a diagnostic odds ratio (DOR) against 1 (no
+#' discrimination)
+#'
+#' The diagnostic odds ratio is DOR = [Se/(1-Se)] / [(1-Sp)/Sp] -- the odds
+#' of a positive test result in diseased subjects relative to the odds of
+#' a positive result in non-diseased subjects. Testing H0: DOR=1 given an
+#' assumed sensitivity and specificity is mathematically identical to
+#' comparing the test-positive rate between two independent groups
+#' (diseased vs. non-diseased subjects, p1=Se and p2=1-Sp respectively) --
+#' exactly the same comparison calc_diagnostic_two_indep() above already
+#' performs, just with a different pair of inputs and a DOR summary added,
+#' so this is a thin wrapper (no new formula, no new verification risk),
+#' the same pattern used for the Sign test's wrap around the binomial
+#' test.
+#'
+#' @param sens Expected sensitivity (0,1)
+#' @param spec Expected specificity (0,1)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided", "less", or "greater"
+#' @return list(n_diseased, n_healthy, n_total, dor, inputs)
+calc_diagnostic_odds_ratio <- function(sens, spec, alpha = 0.05, power = 0.8,
+                                        alternative = c("two.sided", "less", "greater")) {
+  alternative <- match.arg(alternative)
+  .validate_unit_interval(sens, "sens")
+  .validate_unit_interval(spec, "spec")
+
+  p1 <- sens
+  p2 <- 1 - spec
+  if (isTRUE(all.equal(p1, p2))) {
+    stop("sensitivity and (1 - specificity) must differ -- otherwise DOR = 1 (no effect to detect).")
+  }
+
+  base <- calc_diagnostic_two_indep(p1 = p1, p2 = p2, alpha = alpha, power = power,
+                                     alternative = alternative)
+  dor <- (p1 / (1 - p1)) / (p2 / (1 - p2))
+
+  list(
+    n_diseased = base$n_per_group,
+    n_healthy = base$n_per_group,
+    n_total = base$n_total,
+    dor = dor,
+    inputs = list(sens = sens, spec = spec, alpha = alpha, power = power,
+                  alternative = alternative)
+  )
+}
+
 #' Sample size for a likelihood ratio (LR+ or LR-), precision-based
 #'
 #' Wraps presize::prec_pos_lr() / prec_neg_lr() (Simel, Samsa & Matchar

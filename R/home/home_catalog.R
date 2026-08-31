@@ -424,6 +424,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Chi-Square Tests",
        module_input_id = "chisq-design", design_value = "mantelhaenszel"),
 
+  list(key = "chisq_cochran_armitage",
+       label = "Cochran-Armitage trend test (dose-response)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a monotonic",
+         "trend in response proportion across ordered dose/exposure",
+         "groups?\""
+       ),
+       outcome_type = "chisq", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Chi-Square Tests",
+       module_input_id = "chisq-design", design_value = "cochran_armitage"),
+
   list(key = "logrank",
        label = "Log-rank test (comparing two survival curves)",
        answers = paste(
@@ -788,6 +799,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Diagnostic Accuracy",
        module_input_id = "diagnostic-design", design_value = "likelihood_ratio"),
 
+  list(key = "diagnostic_odds_ratio",
+       label = "Diagnostic odds ratio (DOR)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to test whether my",
+         "test's diagnostic odds ratio differs from 1 (no",
+         "discrimination), given its expected sensitivity and",
+         "specificity?\""
+       ),
+       outcome_type = "diagnostic", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Diagnostic Accuracy",
+       module_input_id = "diagnostic-design", design_value = "odds_ratio"),
+
   list(key = "exact_binomial",
        label = "Binomial test, single proportion (exact)",
        answers = paste(
@@ -993,7 +1016,8 @@ study_design_families <- list(
        hint = "Estimating sensitivity/specificity given expected prevalence.",
        catalog_keys = c("diagnostic_precision", "diagnostic_vs_reference",
                          "diagnostic_two_indep", "diagnostic_two_paired",
-                         "diagnostic_ppv_npv", "diagnostic_likelihood_ratio")),
+                         "diagnostic_ppv_npv", "diagnostic_likelihood_ratio",
+                         "diagnostic_odds_ratio")),
   list(id = "correlation", label = "Correlation",
        hint = "Detecting a Pearson correlation between two continuous variables, comparing correlation strength between two independent groups, a point-biserial correlation, or a simple regression slope.",
        catalog_keys = c("correlation_pearson", "correlation_two_independent",
@@ -1003,8 +1027,9 @@ study_design_families <- list(
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
                          "agreement_bland_altman", "agreement_ccc")),
   list(id = "chi_square", label = "Chi-Square Tests",
-       hint = "Categorical distribution/association testing (goodness of fit, R x C tables, paired proportions, stratified/Mantel-Haenszel).",
-       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar", "chisq_mantelhaenszel")),
+       hint = "Categorical distribution/association testing (goodness of fit, R x C tables, paired proportions, stratified/Mantel-Haenszel, dose-response trend).",
+       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar",
+                         "chisq_mantelhaenszel", "chisq_cochran_armitage")),
   list(id = "precision", label = "Precision-based (CI-width)",
        hint = "Estimating with a target confidence-interval width rather than testing a hypothesis.",
        catalog_keys = c("proportion_single_precision", "means_single_precision",
@@ -1093,8 +1118,9 @@ test_families <- list(
                          "rm_anova_between", "rm_anova_within", "rm_anova_interaction",
                          "means_planned_contrast")),
   list(id = "chi_square_tests", label = "Chi-Square Tests",
-       hint = "Goodness of fit, tests of independence/association, paired-proportions (McNemar's), and stratified/Mantel-Haenszel testing for categorical data.",
-       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar", "chisq_mantelhaenszel")),
+       hint = "Goodness of fit, tests of independence/association, paired-proportions (McNemar's), stratified/Mantel-Haenszel, and dose-response trend testing for categorical data.",
+       catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar",
+                         "chisq_mantelhaenszel", "chisq_cochran_armitage")),
   list(id = "exact_tests", label = "Exact Tests",
        hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, sign test) where the normal approximation is unreliable.",
        catalog_keys = c("exact_binomial", "exact_fisher", "sign_test")),

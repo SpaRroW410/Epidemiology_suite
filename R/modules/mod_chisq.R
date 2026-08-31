@@ -25,7 +25,8 @@ mod_chisq_ui <- function(id) {
           "Goodness of fit" = "gof",
           "Test of independence / association (R x C table)" = "independence",
           "McNemar's test (paired proportions)" = "mcnemar",
-          "Mantel-Haenszel (stratified proportions)" = "mantelhaenszel"
+          "Mantel-Haenszel (stratified proportions)" = "mantelhaenszel",
+          "Cochran-Armitage trend test (dose-response)" = "cochran_armitage"
         ),
         selected = "gof"
       ),
@@ -61,6 +62,16 @@ mod_chisq_ui <- function(id) {
           "stratum allocated to group 1, p1 = group-1 response probability."),
         uiOutput(ns("mh_strata_ui"))
       ),
+      conditionalPanel(
+        condition = design_is("cochran_armitage"),
+        selectInput(ns("k_ca"), "Number of dose/exposure groups (k)", choices = 2:8, selected = 4),
+        numericInput(ns("delta_ca"), "Clinically meaningful minimal difference (delta)",
+                     value = 0, step = 0.1),
+        p(class = "text-muted",
+          "For each group: pi = expected response proportion, di = dose/exposure",
+          "level, ni = planned relative allocation (only the ratios matter)."),
+        uiOutput(ns("ca_groups_ui"))
+      ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
       hr(),
@@ -92,7 +103,13 @@ mod_chisq_ui <- function(id) {
       render_formula_block(chisq_content$mantelhaenszel$formula_latex),
       shiny::markdown(chisq_content$mantelhaenszel$explanation),
       h5("Worked example"),
-      shiny::markdown(chisq_content$mantelhaenszel$worked_example)
+      shiny::markdown(chisq_content$mantelhaenszel$worked_example),
+      hr(),
+      h4(chisq_content$cochran_armitage$title),
+      render_formula_block(chisq_content$cochran_armitage$formula_latex),
+      shiny::markdown(chisq_content$cochran_armitage$explanation),
+      h5("Worked example"),
+      shiny::markdown(chisq_content$cochran_armitage$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -111,7 +128,11 @@ mod_chisq_ui <- function(id) {
       hr(),
       h4(chisq_content$mantelhaenszel$title),
       p(strong("Citation: "), chisq_content$mantelhaenszel$citation),
-      p(strong("Implemented via: "), code(chisq_content$mantelhaenszel$backend))
+      p(strong("Implemented via: "), code(chisq_content$mantelhaenszel$backend)),
+      hr(),
+      h4(chisq_content$cochran_armitage$title),
+      p(strong("Citation: "), chisq_content$cochran_armitage$citation),
+      p(strong("Implemented via: "), code(chisq_content$cochran_armitage$backend))
     )
   )
 }
@@ -168,10 +189,44 @@ mod_chisq_server <- function(id) {
       }))
     })
 
+    output$ca_groups_ui <- renderUI({
+      req(input$k_ca)
+      k <- as.integer(input$k_ca)
+      default_pi <- round(seq(0.2, 0.8, length.out = k), 2)
+      tagList(lapply(seq_len(k), function(i) {
+        fluidRow(
+          column(4, numericInput(session$ns(paste0("pi_ca_", i)), sprintf("Group %d: pi", i),
+                                  value = default_pi[i], min = 0.001, max = 0.999, step = 0.01)),
+          column(4, numericInput(session$ns(paste0("di_ca_", i)), sprintf("Group %d: di (dose)", i),
+                                  value = i, step = 1)),
+          column(4, numericInput(session$ns(paste0("ni_ca_", i)), sprintf("Group %d: ni (allocation)", i),
+                                  value = 1, min = 0.001, step = 0.1))
+        )
+      }))
+    })
+
     result <- reactive({
       req(input$design, input$alpha, input$power)
 
-      if (input$design == "mantelhaenszel") {
+      if (input$design == "cochran_armitage") {
+        req(input$k_ca, input$delta_ca)
+        k <- as.integer(input$k_ca)
+        pi_vals <- lapply(seq_len(k), function(i) input[[paste0("pi_ca_", i)]])
+        di_vals <- lapply(seq_len(k), function(i) input[[paste0("di_ca_", i)]])
+        ni_vals <- lapply(seq_len(k), function(i) input[[paste0("ni_ca_", i)]])
+        req(!any(vapply(pi_vals, is.null, logical(1))),
+            !any(vapply(di_vals, is.null, logical(1))),
+            !any(vapply(ni_vals, is.null, logical(1))))
+
+        tryCatch(
+          list(ok = TRUE, value = calc_cochran_armitage_trend(
+            pi = as.numeric(unlist(pi_vals)), di = as.numeric(unlist(di_vals)),
+            ni = as.numeric(unlist(ni_vals)), delta = input$delta_ca,
+            alpha = input$alpha, power = input$power
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else if (input$design == "mantelhaenszel") {
         req(input$J_mh, input$phi_mh)
         J <- as.integer(input$J_mh)
         a_vals <- lapply(seq_len(J), function(j) input[[paste0("mh_a_", j)]])
@@ -238,7 +293,13 @@ mod_chisq_server <- function(id) {
       }
 
       v <- res$value
-      if (input$design == "mantelhaenszel") {
+      if (input$design == "cochran_armitage") {
+        tagList(
+          p(strong("Reference (group 1) sample size: "), v$n_group1),
+          p(strong("Per-group sample sizes: "), paste(v$n_per_group, collapse = ", ")),
+          p(strong("Total sample size: "), v$n_total)
+        )
+      } else if (input$design == "mantelhaenszel") {
         tagList(
           p(strong("Stratified (Mantel-Haenszel) sample size: "), v$n_stratified),
           p(strong("Naive pooled sample size (ignoring strata): "), v$n_pooled)

@@ -353,5 +353,55 @@ diagnostic_content <- list(
       "Epidemiol. 1991;44(8):763-770."
     ),
     backend = "presize::prec_pos_lr() / presize::prec_neg_lr()"
+  ),
+
+  odds_ratio = list(
+    title = "Diagnostic Odds Ratio (DOR)",
+    formula_latex = paste0(
+      "$$DOR = \\frac{Sn/(1-Sn)}{(1-Sp)/Sp}$$",
+      "$$n_{\\text{per group}} \\text{ solved as for two independent proportions, } ",
+      "P_1=Sn, \\, P_2=1-Sp \\text{ (Casagrande-Pike + Yates' correction)}$$"
+    ),
+    explanation = paste(
+      "The diagnostic odds ratio summarizes overall test discrimination",
+      "in a single number: the odds of a positive result in diseased",
+      "subjects, relative to the odds of a positive result in",
+      "non-diseased subjects. A DOR of 1 means the test result carries no",
+      "information about disease status; larger DORs mean better",
+      "discrimination.",
+      "",
+      "- **Sn, Sp** - expected sensitivity and specificity.",
+      "- **alpha, power, Alternative hypothesis** - as elsewhere.",
+      "",
+      "Testing whether the DOR differs from 1 (no discrimination) given",
+      "an assumed sensitivity and specificity is mathematically identical",
+      "to comparing the test-positive rate between two independent",
+      "groups -- diseased subjects (P1 = Sn) and non-diseased subjects",
+      "(P2 = 1-Sp) -- exactly the same comparison as the \"Two independent",
+      "diagnostic tests\" design above, just applied to one test across",
+      "the two disease-status groups instead of two tests within one",
+      "group. This calculator reuses that same formula directly (no new",
+      "math, no new verification risk), the same way the Exact Tests",
+      "module's sign test reuses the binomial test.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "A test with 80% sensitivity and 70% specificity has",
+      "DOR = (0.8/0.2) / (0.3/0.7) = 9.33. Comparing the resulting",
+      "test-positive rates (80% in diseased subjects vs. 30% in",
+      "non-diseased subjects) at alpha = 0.05 (two-sided) and 80% power,",
+      "this calculator returns n = 19 per group (38 total) -- inheriting",
+      "the already-verified Two Independent Diagnostic Tests calculation",
+      "above exactly, just relabeled.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Glas AS, Lijmer JG, Prins MH, Bonsel GJ, Bossuyt PM. The",
+      "diagnostic odds ratio: a single indicator of test performance.",
+      "J Clin Epidemiol. 2003;56(11):1129-1135. Sample size formula:",
+      "Casagrande JT, Pike MC. Biometrics. 1978;34(3):483-6; Beam CA.",
+      "AJR Am J Roentgenol. 1992;159:631-7 (Yates' correction)."
+    ),
+    backend = "Closed-form (reuses calc_diagnostic_two_indep(): Casagrande-Pike + Yates' correction)"
   )
 )

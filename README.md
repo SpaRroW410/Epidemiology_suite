@@ -48,10 +48,13 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   Buderer's prevalence-adjustment logic extended to Altman & Bland 1994's
   PPV/NPV formulas) and likelihood ratios (LR+/LR-, wrapping
   `presize::prec_pos_lr()`/`prec_neg_lr()`, Simel, Samsa & Matchar 1991)
-  -- see that module's own doc comments and
-  `R/content/content_diagnostic.R` for the full formula set and citations
-  (Buderer 1996, Casagrande & Pike 1978, Connor 1987, Obuchowski 1998,
-  Altman & Bland 1994, Simel et al 1991)
+  -- plus the diagnostic odds ratio (DOR), a thin wrapper reusing the
+  module's own two-independent-tests engine (Sn=P1, 1-Sp=P2 -- testing
+  DOR=1 is mathematically the same comparison), verified Sn=0.80/Sp=0.70
+  -> DOR=9.33, n=19/group (38 total) -- see that module's own doc comments
+  and `R/content/content_diagnostic.R` for the full formula set and
+  citations (Buderer 1996, Casagrande & Pike 1978, Connor 1987, Obuchowski
+  1998, Altman & Bland 1994, Simel et al 1991, Glas et al 2003)
 - **Agreement / Reliability** (`R/modules/mod_agreement.R`) -- for when
   there's *no* gold standard at all, only two raters/methods being compared
   to each other: Cohen's kappa (categorical, wraps `presize::prec_kappa()` /
@@ -101,7 +104,13 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   `TrialSize::Propensity.Score.nostrata()` (the naive pooled comparison,
   shown side by side to illustrate the cost of ignoring confounding
   strata) -- verified exactly against Chow, Shao & Wang (2003) Example
-  15.2.3 (stratified n=447 vs. pooled n=1151)
+  15.2.3 (stratified n=447 vs. pooled n=1151); plus a Cochran-Armitage
+  trend test for dose-response proportions across ordered groups, wrapping
+  `TrialSize::Cochran.Armitage.Trend()` -- verified exactly against Chow,
+  Shao & Wang (2003) Example 11.5 (n=8/group, 32 total). Note: the closely
+  related `TrialSize::Dose.Response.binary()` was found broken in an
+  earlier batch -- this is a different, independently verified function
+  from the same package
 - **Pilot / Feasibility** (`R/modules/mod_pilot.R`) -- the flat 12/arm
   rule-of-thumb (Julious 2005) plus an interactive tool showing how precise
   a pilot's estimated SD is at a given n (95% CI multipliers on the observed

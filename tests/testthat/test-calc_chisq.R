@@ -78,3 +78,39 @@ test_that("calc_mantelhaenszel rejects invalid inputs", {
   expect_error(calc_mantelhaenszel(a = a, b = c(0.5, 0.5, 0.5), p1 = p1, phi = 2), "same length")
   expect_error(calc_mantelhaenszel(a = 0.5, b = 0.5, p1 = 0.5, phi = 2), "at least 2 strata")
 })
+
+test_that("calc_cochran_armitage_trend matches Chow, Shao & Wang (2003) Example 11.5", {
+  # pi=(0.1,0.3,0.5,0.7), di=(1,2,3,4), ni=(10,10,10,10) equal allocation,
+  # delta=1, alpha=0.05, power=0.80 -> raw n = 7.468497 for group 1;
+  # ceiling'd and scaled by equal ratios -> n=8/group, 32 total, matching
+  # the textbook's own worked answer ("~7.5 for one group, total 28-32").
+  res <- calc_cochran_armitage_trend(pi = c(0.1, 0.3, 0.5, 0.7), di = c(1, 2, 3, 4),
+                                      ni = c(10, 10, 10, 10), delta = 1,
+                                      alpha = 0.05, power = 0.80)
+  expect_equal(res$n_group1, 8)
+  expect_equal(res$n_per_group, c(8, 8, 8, 8))
+  expect_equal(res$n_total, 32)
+})
+
+test_that("calc_cochran_armitage_trend scales unequal allocation ratios correctly", {
+  res <- calc_cochran_armitage_trend(pi = c(0.1, 0.3, 0.5, 0.7), di = c(1, 2, 3, 4),
+                                      ni = c(1, 2, 1, 1), delta = 1,
+                                      alpha = 0.05, power = 0.80)
+  # Group 2's allocation ratio is double group 1's, so its sample size must
+  # be at least as large (roughly double, modulo independent ceiling()'ing).
+  expect_gt(res$n_per_group[2], res$n_per_group[1])
+  expect_equal(res$n_total, sum(res$n_per_group))
+})
+
+test_that("calc_cochran_armitage_trend rejects invalid inputs", {
+  expect_error(calc_cochran_armitage_trend(pi = c(0.5, 0.5), di = c(1, 2), ni = c(1, 1)),
+               "no trend to detect")
+  expect_error(calc_cochran_armitage_trend(pi = c(1.5, 0.3), di = c(1, 2), ni = c(1, 1)),
+               "between 0 and 1")
+  expect_error(calc_cochran_armitage_trend(pi = c(0.1, 0.3), di = c(1), ni = c(1, 1)),
+               "same length as pi")
+  expect_error(calc_cochran_armitage_trend(pi = c(0.1, 0.3), di = c(1, 2), ni = c(-1, 1)),
+               "strictly positive")
+  expect_error(calc_cochran_armitage_trend(pi = c(0.1, 0.3), di = c(1, 2), ni = c(1, 1), alpha = 0),
+               "between 0 and 1")
+})
