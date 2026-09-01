@@ -23,6 +23,8 @@ mod_exact_tests_ui <- function(id) {
         choices = c(
           "Binomial test, single proportion" = "binomial",
           "Fisher's exact test, two independent proportions" = "fisher",
+          "Boschloo's exact test, two independent proportions (unconditional)" = "boschloo",
+          "Exact Poisson test, single rate vs. reference" = "poisson",
           "Sign test (paired data / one-sample median)" = "sign"
         )
       ),
@@ -46,6 +48,29 @@ mod_exact_tests_ui <- function(id) {
         numericInput(ns("ratio_fisher"), "Allocation ratio (group 2 : group 1)", value = 2, min = 0.1, step = 0.1),
         selectInput(
           ns("alternative_fisher"), "Alternative hypothesis",
+          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+        )
+      ),
+      conditionalPanel(
+        condition = design_is("boschloo"),
+        numericInput(ns("p1_boschloo"), "p1 (group 1 proportion)", value = 0.30, min = 0, max = 1, step = 0.01),
+        numericInput(ns("p2_boschloo"), "p2 (group 2 proportion)", value = 0.60, min = 0, max = 1, step = 0.01),
+        numericInput(ns("alpha_boschloo"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_boschloo"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
+        numericInput(ns("ratio_boschloo"), "Allocation ratio (group 2 : group 1)", value = 1, min = 0.1, step = 0.1),
+        selectInput(
+          ns("alternative_boschloo"), "Alternative hypothesis",
+          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+        )
+      ),
+      conditionalPanel(
+        condition = design_is("poisson"),
+        numericInput(ns("rate0_poisson"), "rate0 (reference/standard rate)", value = 5, min = 0.0001, step = 0.1),
+        numericInput(ns("rate1_poisson"), "rate1 (expected/anticipated true rate)", value = 10, min = 0.0001, step = 0.1),
+        numericInput(ns("alpha_poisson"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_poisson"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
+        selectInput(
+          ns("alternative_poisson"), "Alternative hypothesis",
           choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
         )
       ),
@@ -79,6 +104,18 @@ mod_exact_tests_ui <- function(id) {
       h5("Worked example"),
       shiny::markdown(exact_tests_content$fisher$worked_example),
       hr(),
+      h4(exact_tests_content$boschloo$title),
+      render_formula_block(exact_tests_content$boschloo$formula_latex),
+      shiny::markdown(exact_tests_content$boschloo$explanation),
+      h5("Worked example"),
+      shiny::markdown(exact_tests_content$boschloo$worked_example),
+      hr(),
+      h4(exact_tests_content$poisson$title),
+      render_formula_block(exact_tests_content$poisson$formula_latex),
+      shiny::markdown(exact_tests_content$poisson$explanation),
+      h5("Worked example"),
+      shiny::markdown(exact_tests_content$poisson$worked_example),
+      hr(),
       h4(exact_tests_content$sign_test$title),
       render_formula_block(exact_tests_content$sign_test$formula_latex),
       shiny::markdown(exact_tests_content$sign_test$explanation),
@@ -95,6 +132,14 @@ mod_exact_tests_ui <- function(id) {
       h4(exact_tests_content$fisher$title),
       p(strong("Citation: "), exact_tests_content$fisher$citation),
       p(strong("Implemented via: "), code(exact_tests_content$fisher$backend)),
+      hr(),
+      h4(exact_tests_content$boschloo$title),
+      p(strong("Citation: "), exact_tests_content$boschloo$citation),
+      p(strong("Implemented via: "), code(exact_tests_content$boschloo$backend)),
+      hr(),
+      h4(exact_tests_content$poisson$title),
+      p(strong("Citation: "), exact_tests_content$poisson$citation),
+      p(strong("Implemented via: "), code(exact_tests_content$poisson$backend)),
       hr(),
       h4(exact_tests_content$sign_test$title),
       p(strong("Citation: "), exact_tests_content$sign_test$citation),
@@ -128,6 +173,28 @@ mod_exact_tests_server <- function(id) {
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
+      } else if (input$design == "boschloo") {
+        req(input$p1_boschloo, input$p2_boschloo, input$alpha_boschloo, input$power_boschloo,
+            input$ratio_boschloo, input$alternative_boschloo)
+        tryCatch(
+          list(ok = TRUE, value = calc_boschloo_exact(
+            p1 = input$p1_boschloo, p2 = input$p2_boschloo, alpha = input$alpha_boschloo,
+            power = input$power_boschloo, ratio = input$ratio_boschloo,
+            alternative = input$alternative_boschloo
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else if (input$design == "poisson") {
+        req(input$rate0_poisson, input$rate1_poisson, input$alpha_poisson,
+            input$power_poisson, input$alternative_poisson)
+        tryCatch(
+          list(ok = TRUE, value = calc_poisson_exact(
+            rate0 = input$rate0_poisson, rate1 = input$rate1_poisson,
+            alpha = input$alpha_poisson, power = input$power_poisson,
+            alternative = input$alternative_poisson
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
       } else {
         req(input$p_pos_sign, input$alpha_sign, input$power_sign, input$alternative_sign)
         tryCatch(
@@ -147,11 +214,17 @@ mod_exact_tests_server <- function(id) {
       }
 
       v <- res$value
-      if (input$design == "fisher") {
+      if (input$design %in% c("fisher", "boschloo")) {
         tagList(
           p(strong("Required sample size per group: "), sprintf("n1 = %d, n2 = %d", v$n1, v$n2)),
           p(strong("Total sample size: "), v$n_total),
           p(sprintf("Achieved exact power at this n: %.4f", v$achieved_power))
+        )
+      } else if (input$design == "poisson") {
+        tagList(
+          p(strong("Required person-time: "), v$person_time),
+          p(sprintf("Expected number of events at rate1: %.2f", v$expected_events)),
+          p(sprintf("Achieved exact power at this person-time: %.4f", v$achieved_power))
         )
       } else {
         tagList(

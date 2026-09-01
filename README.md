@@ -196,11 +196,19 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   (via `stats::binom.test()` and `Exact::power.exact.test()` respectively)
   rather than solving a closed-form equation, since exact-test power is
   genuinely non-monotonic in n (Chernick & Liu 2002) -- a stability check
-  guards against recommending a fragile single-n spike; plus the sign
-  test (paired data / one-sample median), a thin wrapper around the
-  binomial-test design with the reference proportion fixed at 0.5 (the
-  sign test IS an exact binomial test against 0.5), so no new math or
-  dependency
+  guards against recommending a fragile single-n spike; plus Boschloo's
+  exact test (the classic *unconditional* exact test for two proportions,
+  uniformly at least as powerful as Fisher's exact -- verified directly:
+  n1=44 vs. Fisher's n1=48 for identical inputs), wrapping the same
+  `Exact::power.exact.test()` with `method = "boschloo"` (noticeably
+  slower to compute than Fisher's exact, since it searches a
+  nuisance-parameter grid internally); plus the exact Poisson test
+  (single rate vs. a reference/standard rate), searching person-time via
+  `stats::poisson.test()`, the count-data analog of the binomial-test
+  design above; plus the sign test (paired data / one-sample median), a
+  thin wrapper around the binomial-test design with the reference
+  proportion fixed at 0.5 (the sign test IS an exact binomial test
+  against 0.5), so no new math or dependency
 - **Prediction Model** (`R/modules/mod_prediction.R`) -- minimum sample
   size for developing a binary, continuous, or time-to-event prediction/
   prognostic model, wrapping `pmsampsize::pmsampsize()` (Riley et al. 2019

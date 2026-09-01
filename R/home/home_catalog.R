@@ -834,6 +834,30 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Exact Tests",
        module_input_id = "exact_tests-design", design_value = "fisher"),
 
+  list(key = "exact_boschloo",
+       label = "Boschloo's exact test, two independent proportions (unconditional)",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to detect a",
+         "difference between two independent groups' proportions, using",
+         "the unconditional exact (Boschloo) test -- uniformly at least as",
+         "powerful as Fisher's exact test?\""
+       ),
+       outcome_type = "exact", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Exact Tests",
+       module_input_id = "exact_tests-design", design_value = "boschloo"),
+
+  list(key = "exact_poisson",
+       label = "Exact Poisson test, single rate vs. reference",
+       answers = paste(
+         "Answers: \"How much person-time do I need to observe to detect",
+         "whether my population's incidence rate differs from a known",
+         "background/standard rate, using the exact Poisson",
+         "distribution?\""
+       ),
+       outcome_type = "exact", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Exact Tests",
+       module_input_id = "exact_tests-design", design_value = "poisson"),
+
   list(key = "sign_test",
        label = "Sign test (paired data / one-sample median)",
        answers = paste(
@@ -1042,8 +1066,9 @@ study_design_families <- list(
        hint = "Estimating or comparing incidence rates from person-time data.",
        catalog_keys = c("incidence_rate_precision", "rate_comparison")),
   list(id = "exact_tests", label = "Exact Tests",
-       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, sign test).",
-       catalog_keys = c("exact_binomial", "exact_fisher", "sign_test")),
+       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, Boschloo's unconditional exact, sign test) and rates (exact Poisson).",
+       catalog_keys = c("exact_binomial", "exact_fisher", "exact_boschloo",
+                         "exact_poisson", "sign_test")),
   list(id = "survival", label = "Survival",
        hint = "Log-rank, Cox regression, stratified log-rank, or accrual/follow-up based survival study designs.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
@@ -1122,8 +1147,9 @@ test_families <- list(
        catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar",
                          "chisq_mantelhaenszel", "chisq_cochran_armitage")),
   list(id = "exact_tests", label = "Exact Tests",
-       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, sign test) where the normal approximation is unreliable.",
-       catalog_keys = c("exact_binomial", "exact_fisher", "sign_test")),
+       hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, Boschloo's unconditional exact, sign test) and rates (exact Poisson) where the normal approximation is unreliable.",
+       catalog_keys = c("exact_binomial", "exact_fisher", "exact_boschloo",
+                         "exact_poisson", "sign_test")),
   list(id = "correlation_regression", label = "Correlation & Regression",
        hint = "Pearson correlation (single or comparing two independent groups), a simple regression slope, and multiple linear regression.",
        catalog_keys = c("correlation_pearson", "correlation_two_independent",
