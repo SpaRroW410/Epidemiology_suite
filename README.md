@@ -289,7 +289,14 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   genuine distribution-free closed forms using rank/concordance
   probabilities directly, not an ARE-inflation shortcut on top of a
   parametric calculation; `TrialSize` already a zero-dependency project
-  dependency
+  dependency; plus the Kruskal-Wallis test (k >= 3 independent groups) --
+  no installed package has a k-sample rank-test closed form, so this one
+  design *does* use the ARE-inflation shortcut the checklist itself names
+  for this item: solves the equivalent one-way ANOVA n via
+  `pwr::pwr.anova.test()`, then inflates by the classical 3/pi asymptotic
+  relative efficiency (Hodges & Lehmann 1956); verified against the real
+  `kruskal.test()` by simulation (k=3, f=0.25 -> ANOVA n=53/group, KW
+  n=56/group, empirical power 0.812 vs. only 0.787 unadjusted)
 - **Variance Tests** (`R/modules/mod_variance.R`) -- a single-variance test
   against a reference SD, and a two-variance test comparing two groups,
   both closed-form (chi-squared/F distribution respectively, solved via

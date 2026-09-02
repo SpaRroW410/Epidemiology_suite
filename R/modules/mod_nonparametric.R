@@ -22,7 +22,8 @@ mod_nonparametric_ui <- function(id) {
         choices = c(
           "Wilcoxon rank-sum (Mann-Whitney U, two independent groups)" = "rank_sum",
           "Wilcoxon signed-rank (one sample / paired differences)" = "signed_rank",
-          "Kendall's tau (nonparametric association)" = "kendall"
+          "Kendall's tau (nonparametric association)" = "kendall",
+          "Kruskal-Wallis (k independent groups)" = "kruskal_wallis"
         ),
         selected = "rank_sum"
       ),
@@ -44,6 +45,11 @@ mod_nonparametric_ui <- function(id) {
         numericInput(ns("p1_k"), "p1 = concordance probability (tau = 2*p1 - 1)",
                      value = 0.6, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("p2_k"), "p2", value = 0.7, min = 0.001, max = 0.999, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("kruskal_wallis"),
+        selectInput(ns("k_kw"), "Number of groups (k)", choices = 3:8, selected = 3),
+        numericInput(ns("f_kw"), "Cohen's f effect size", value = 0.25, min = 0.001, step = 0.01)
       ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
@@ -70,7 +76,13 @@ mod_nonparametric_ui <- function(id) {
       render_formula_block(nonparametric_content$kendall_tau$formula_latex),
       shiny::markdown(nonparametric_content$kendall_tau$explanation),
       h5("Worked example"),
-      shiny::markdown(nonparametric_content$kendall_tau$worked_example)
+      shiny::markdown(nonparametric_content$kendall_tau$worked_example),
+      hr(),
+      h4(nonparametric_content$kruskal_wallis$title),
+      render_formula_block(nonparametric_content$kruskal_wallis$formula_latex),
+      shiny::markdown(nonparametric_content$kruskal_wallis$explanation),
+      h5("Worked example"),
+      shiny::markdown(nonparametric_content$kruskal_wallis$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -85,7 +97,11 @@ mod_nonparametric_ui <- function(id) {
       hr(),
       h4(nonparametric_content$kendall_tau$title),
       p(strong("Citation: "), nonparametric_content$kendall_tau$citation),
-      p(strong("Implemented via: "), code(nonparametric_content$kendall_tau$backend))
+      p(strong("Implemented via: "), code(nonparametric_content$kendall_tau$backend)),
+      hr(),
+      h4(nonparametric_content$kruskal_wallis$title),
+      p(strong("Citation: "), nonparametric_content$kruskal_wallis$citation),
+      p(strong("Implemented via: "), code(nonparametric_content$kruskal_wallis$backend))
     )
   )
 }
@@ -108,10 +124,16 @@ mod_nonparametric_server <- function(id) {
             p2 = input$p2_sr, p3 = input$p3_sr, p4 = input$p4_sr,
             alpha = input$alpha, power = input$power
           )
-        } else {
+        } else if (input$design == "kendall") {
           req(input$p1_k, input$p2_k)
           calc_kendall_tau(
             p1 = input$p1_k, p2 = input$p2_k, alpha = input$alpha, power = input$power
+          )
+        } else {
+          req(input$k_kw, input$f_kw)
+          calc_kruskal_wallis(
+            k = as.integer(input$k_kw), f = input$f_kw,
+            alpha = input$alpha, power = input$power
           )
         }
         list(ok = TRUE, design = input$design, value = value)
@@ -129,6 +151,12 @@ mod_nonparametric_server <- function(id) {
         tagList(
           p(strong("Required sample size: "), v$n),
           p(sprintf("Implied Kendall's tau: %.3f", v$tau))
+        )
+      } else if (res$design == "kruskal_wallis") {
+        tagList(
+          p(strong("Required sample size per group: "), v$n_per_group),
+          p(strong("Total sample size: "), v$n_total),
+          p(sprintf("(Equivalent one-way ANOVA would need n = %d per group)", v$n_anova_per_group))
         )
       } else {
         p(strong("Required sample size: "), v$n)

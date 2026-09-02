@@ -1,10 +1,24 @@
 # Pure calculation functions for distribution-free (nonparametric) tests.
 # No Shiny dependency here so these are directly unit-testable (see
-# tests/testthat). All three wrap TrialSize:: functions (Chow, Shao & Wang
-# 2003) rather than reimplementing the underlying math (project
+# tests/testthat). The first three wrap TrialSize:: functions (Chow, Shao
+# & Wang 2003) rather than reimplementing the underlying math (project
 # convention) -- TrialSize is already a project dependency (used by the
 # Crossover Trial and Chi-Square Tests modules) with zero package
-# dependencies of its own, so this adds no new dependency.
+# dependencies of its own, so this adds no new dependency. Kruskal-Wallis
+# below instead uses the checklist's own suggested asymptotic-relative-
+# efficiency (ARE) approach, since no TrialSize/other-installed-package
+# closed form for the *k-sample* rank test was found.
+
+# Asymptotic relative efficiency of the Wilcoxon/Kruskal-Wallis/Friedman
+# rank-based family relative to their normal-theory counterparts (t-test/
+# ANOVA/RM-ANOVA) under a normal distribution -- the classical Hodges &
+# Lehmann (1956) result, 3/pi ~ 0.9549. A rank-based test needs n /
+# (3/pi) = n * pi/3 subjects per group to match the power of its
+# parametric counterpart at the same effect size when the data really are
+# normal (its worst case relative to the parametric test; ARE is >= 3/pi
+# for many other distributions, so this is a conservative -- i.e.
+# adequately large -- n).
+.ARE_WILCOXON_NORMAL <- 3 / pi
 
 #' Sample size for the Wilcoxon rank-sum test (Mann-Whitney U), two
 #' independent samples
@@ -100,5 +114,48 @@ calc_kendall_tau <- function(p1, p2, alpha = 0.05, power = 0.8) {
     n = ceiling(n),
     tau = 2 * p1 - 1,
     inputs = list(p1 = p1, p2 = p2, alpha = alpha, power = power)
+  )
+}
+
+#' Sample size for the Kruskal-Wallis test (k independent groups,
+#' distribution-free one-way analysis)
+#'
+#' No installed package provides a k-sample rank-test closed form (unlike
+#' the two-sample/one-sample/independence cases above, each backed by a
+#' genuine TrialSize:: closed form) -- so this uses the approach the
+#' project's own feasibility checklist names for this item: solve the
+#' equivalent one-way ANOVA sample size (pwr::pwr.anova.test(), already a
+#' project dependency) at the same Cohen's f effect size, then inflate by
+#' the classical asymptotic relative efficiency of Kruskal-Wallis versus
+#' ANOVA under normality (3/pi, Hodges & Lehmann 1956) -- the same
+#' constant that relates the Wilcoxon rank-sum test to the two-sample
+#' t-test. This is an asymptotic approximation, not an exact finite-sample
+#' formula (unlike this module's other three designs), but is standard
+#' practice (e.g. Lehmann 1975; Hollander & Wolfe 1999) and directly
+#' verified by simulation below.
+#'
+#' @param k Number of groups (>= 3; use the Wilcoxon rank-sum design above
+#'   for k = 2)
+#' @param f Cohen's f effect size (> 0)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n_per_group, n_total, n_anova_per_group, inputs)
+calc_kruskal_wallis <- function(k, f, alpha = 0.05, power = 0.8) {
+  if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 3 || k != round(k)) {
+    stop("k must be a whole number, at least 3 (use Wilcoxon rank-sum for k = 2).")
+  }
+  .validate_positive(f, "f")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  fit <- pwr::pwr.anova.test(k = k, f = f, sig.level = alpha, power = power)
+  n_anova <- ceiling(fit$n)
+  n_per_group <- ceiling(n_anova / .ARE_WILCOXON_NORMAL)
+
+  list(
+    n_per_group = n_per_group,
+    n_total = n_per_group * k,
+    n_anova_per_group = n_anova,
+    inputs = list(k = k, f = f, alpha = alpha, power = power)
   )
 }
