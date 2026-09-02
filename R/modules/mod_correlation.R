@@ -23,7 +23,8 @@ mod_correlation_ui <- function(id) {
           "Single correlation vs. zero" = "single",
           "Compare two independent correlations" = "two_independent",
           "Point-biserial correlation" = "point_biserial",
-          "Regression coefficient (bivariate slope)" = "regression_slope"
+          "Regression coefficient (bivariate slope)" = "regression_slope",
+          "Partial correlation (controlling for k covariates)" = "partial"
         ),
         selected = "single"
       ),
@@ -45,6 +46,11 @@ mod_correlation_ui <- function(id) {
         numericInput(ns("slope_reg"), "Assumed regression slope", value = 0.5, step = 0.01),
         numericInput(ns("sdx_reg"), "SD of predictor (SDx)", value = 2, min = 0.0001, step = 0.1),
         numericInput(ns("sdy_reg"), "SD of outcome (SDy)", value = 4, min = 0.0001, step = 0.1)
+      ),
+      conditionalPanel(
+        condition = design_is("partial"),
+        numericInput(ns("r_partial"), "Expected partial correlation (r)", value = 0.3, min = -0.99, max = 0.99, step = 0.01),
+        numericInput(ns("k_partial"), "Number of covariates controlled for (k)", value = 2, min = 1, step = 1)
       ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
@@ -81,7 +87,13 @@ mod_correlation_ui <- function(id) {
       render_formula_block(correlation_content$regression_slope$formula_latex),
       shiny::markdown(correlation_content$regression_slope$explanation),
       h5("Worked example"),
-      shiny::markdown(correlation_content$regression_slope$worked_example)
+      shiny::markdown(correlation_content$regression_slope$worked_example),
+      hr(),
+      h4(correlation_content$partial$title),
+      render_formula_block(correlation_content$partial$formula_latex),
+      shiny::markdown(correlation_content$partial$explanation),
+      h5("Worked example"),
+      shiny::markdown(correlation_content$partial$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -100,7 +112,11 @@ mod_correlation_ui <- function(id) {
       hr(),
       h4(correlation_content$regression_slope$title),
       p(strong("Citation: "), correlation_content$regression_slope$citation),
-      p(strong("Implemented via: "), code(correlation_content$regression_slope$backend))
+      p(strong("Implemented via: "), code(correlation_content$regression_slope$backend)),
+      hr(),
+      h4(correlation_content$partial$title),
+      p(strong("Citation: "), correlation_content$partial$citation),
+      p(strong("Implemented via: "), code(correlation_content$partial$backend))
     )
   )
 }
@@ -129,10 +145,17 @@ mod_correlation_server <- function(id) {
             r = input$r_pb, alpha = input$alpha, power = input$power,
             alternative = input$alternative
           )
-        } else {
+        } else if (input$design == "regression_slope") {
           req(input$slope_reg, input$sdx_reg, input$sdy_reg)
           calc_regression_slope(
             slope = input$slope_reg, sd_x = input$sdx_reg, sd_y = input$sdy_reg,
+            alpha = input$alpha, power = input$power,
+            alternative = input$alternative
+          )
+        } else {
+          req(input$r_partial, input$k_partial)
+          calc_correlation_partial(
+            r = input$r_partial, k = input$k_partial,
             alpha = input$alpha, power = input$power,
             alternative = input$alternative
           )
@@ -161,11 +184,13 @@ mod_correlation_server <- function(id) {
           p(strong("Total sample size: "), v$n_total),
           p(sprintf("Cohen's d (equivalent) = %.4f", v$d))
         )
-      } else {
+      } else if (res$design == "regression_slope") {
         tagList(
           p(strong("Required sample size: "), v$n),
           p(sprintf("Implied correlation r = %.4f", v$r))
         )
+      } else {
+        p(strong("Required sample size: "), v$n)
       }
     })
   })

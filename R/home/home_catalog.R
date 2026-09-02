@@ -375,6 +375,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Correlation",
        module_input_id = "correlation-design", design_value = "regression_slope"),
 
+  list(key = "correlation_partial",
+       label = "Partial correlation (controlling for k covariates)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a correlation",
+         "between two variables after statistically controlling for one",
+         "or more other covariates?\""
+       ),
+       outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Correlation",
+       module_input_id = "correlation-design", design_value = "partial"),
+
   # Chi-Square Tests entries: not a "how many groups" comparison in the
   # proportion/mean sense, so only reachable via "by study design" -- except
   # "independence" is also cross-referenced from proportion_k above, since
@@ -1043,9 +1054,10 @@ study_design_families <- list(
                          "diagnostic_ppv_npv", "diagnostic_likelihood_ratio",
                          "diagnostic_odds_ratio")),
   list(id = "correlation", label = "Correlation",
-       hint = "Detecting a Pearson correlation between two continuous variables, comparing correlation strength between two independent groups, a point-biserial correlation, or a simple regression slope.",
+       hint = "Detecting a Pearson correlation between two continuous variables, comparing correlation strength between two independent groups, a point-biserial correlation, a simple regression slope, or a partial correlation.",
        catalog_keys = c("correlation_pearson", "correlation_two_independent",
-                         "correlation_point_biserial", "correlation_regression_slope")),
+                         "correlation_point_biserial", "correlation_regression_slope",
+                         "correlation_partial")),
   list(id = "agreement", label = "Agreement / Reliability",
        hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman, Lin's CCC).",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
@@ -1151,9 +1163,10 @@ test_families <- list(
        catalog_keys = c("exact_binomial", "exact_fisher", "exact_boschloo",
                          "exact_poisson", "sign_test")),
   list(id = "correlation_regression", label = "Correlation & Regression",
-       hint = "Pearson correlation (single or comparing two independent groups), a simple regression slope, and multiple linear regression.",
+       hint = "Pearson correlation (single or comparing two independent groups), a simple regression slope, a partial correlation, and multiple linear regression.",
        catalog_keys = c("correlation_pearson", "correlation_two_independent",
-                         "correlation_regression_slope", "regression_r2")),
+                         "correlation_regression_slope", "correlation_partial",
+                         "regression_r2")),
   list(id = "survival_tests", label = "Survival Tests",
        hint = "Log-rank test, Cox proportional-hazards regression, and stratified log-rank for time-to-event outcomes.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),

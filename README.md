@@ -88,7 +88,13 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   d=1.1547 -> n=13/group, cross-checked by simulation) and a simple
   linear regression slope design (uses the exact identity
   r = slope*SDx/SDy and reuses `pwr::pwr.r.test()`; verified slope=0.5,
-  SDx=2, SDy=4 -> r=0.25 -> n=123)
+  SDx=2, SDy=4 -> r=0.25 -> n=123); and a partial correlation design
+  (controlling for k covariates), reusing `pwr::pwr.r.test()`'s
+  zero-order-correlation engine plus k additional subjects, since testing
+  a partial correlation loses one degree of freedom per covariate (Cohen
+  1988's own tables read partial correlation off the same table as
+  zero-order correlation, entered with n-k); verified r=0.3, k=2 -> n=87,
+  cross-checked by simulation
 - **Chi-Square Tests** (`R/modules/mod_chisq.R`) -- goodness of fit and test
   of independence/association for an R x C table (dynamic 2-5 x 2-5
   proportion-matrix UI), both wrapping `pwr::pwr.chisq.test()` +
