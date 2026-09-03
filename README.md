@@ -305,7 +305,15 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   `pwr::pwr.anova.test()`, then inflates by the classical 3/pi asymptotic
   relative efficiency (Hodges & Lehmann 1956); verified against the real
   `kruskal.test()` by simulation (k=3, f=0.25 -> ANOVA n=53/group, KW
-  n=56/group, empirical power 0.812 vs. only 0.787 unadjusted)
+  n=56/group, empirical power 0.812 vs. only 0.787 unadjusted); plus the
+  Jonckheere-Terpstra test (monotonic trend across ordered groups) --
+  `clinfun::jonckheere.test()` (already used for Simon two-stage) turns
+  out to provide no sample-size function at all, but its own
+  documentation states its asymptotic version is exactly equivalent to
+  Kendall's tau between the outcome and an ordinal group score (Terpstra
+  1952; Jonckheere 1954), so this is a thin wrapper around the Kendall's
+  tau design above -- reproduces its Chow, Shao & Wang (2003) Example
+  14.4 answer bit-for-bit (n=135)
 - **Variance Tests** (`R/modules/mod_variance.R`) -- a single-variance test
   against a reference SD, and a two-variance test comparing two groups,
   both closed-form (chi-squared/F distribution respectively, solved via

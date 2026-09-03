@@ -159,3 +159,39 @@ calc_kruskal_wallis <- function(k, f, alpha = 0.05, power = 0.8) {
     inputs = list(k = k, f = f, alpha = alpha, power = power)
   )
 }
+
+#' Sample size for the Jonckheere-Terpstra test (ordered alternatives
+#' across k groups)
+#'
+#' The Jonckheere-Terpstra test looks for a monotonic trend in a
+#' continuous outcome across k *ordered* groups (e.g. increasing dose
+#' levels), without assuming normality. clinfun::jonckheere.test() itself
+#' documents that "the asymptotic version is equivalent to cor.test(x, g,
+#' method = \"k\")" -- i.e. the same statistic as Kendall's tau computed
+#' between the outcome and an ordinal group score -- a classical result
+#' (Terpstra 1952; Jonckheere 1954; see also Hollander & Wolfe,
+#' Nonparametric Statistical Methods). clinfun itself provides no sample
+#' size function at all (jonckheere.test() is an analysis-only function,
+#' like stats::kruskal.test()), so this is a thin wrapper around this
+#' module's own already-verified calc_kendall_tau() (TrialSize::
+#' Nonpara.Independ(), verified exactly against Chow, Shao & Wang (2003)
+#' Example 14.4) -- no new formula, no new verification risk, the same
+#' pattern as the Exact Tests module's sign-test wrap around the binomial
+#' test.
+#'
+#' @param p1 P((X1-X2)(Y1-Y2) > 0) -- concordance probability between the
+#'   outcome and the ordinal group score; 0.5 under no trend
+#' @param p2 Higher-order concordance probability (three independent
+#'   pairs sharing one member), needed for the variance under the
+#'   alternative
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n, tau, inputs)
+calc_jonckheere_terpstra <- function(p1, p2, alpha = 0.05, power = 0.8) {
+  base <- calc_kendall_tau(p1 = p1, p2 = p2, alpha = alpha, power = power)
+  list(
+    n = base$n,
+    tau = base$tau,
+    inputs = list(p1 = p1, p2 = p2, alpha = alpha, power = power)
+  )
+}

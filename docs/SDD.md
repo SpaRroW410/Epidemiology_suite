@@ -216,7 +216,7 @@ for what to build next):
 | Logistic Regression | Simple logistic regression, binary or continuous predictor | `powerMediation::SSizeLogisticBin()`/`SSizeLogisticCon()` (Hsieh et al. 1998) | Live |
 | Self-Controlled Case Series | Cases-only design, risk-period vs. own-time comparison, optional age effects | closed-form (Musonda, Farrington & Whitaker 2006) | Live |
 | RM-ANOVA / Mixed ANOVA | Between-subjects, within-subjects, and group x time interaction effects | closed-form (Cohen 1988; `WebPower::wp.rmanova()` algorithm) | Live |
-| Nonparametric Tests | Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau, Kruskal-Wallis | `TrialSize::Nonpara.Two.Sample()`/`Nonpara.One.Sample()`/`Nonpara.Independ()` (Chow, Shao & Wang 2003); `pwr::pwr.anova.test()` inflated by 3/pi ARE (Hodges & Lehmann 1956) | Live |
+| Nonparametric Tests | Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau, Kruskal-Wallis, Jonckheere-Terpstra | `TrialSize::Nonpara.Two.Sample()`/`Nonpara.One.Sample()`/`Nonpara.Independ()` (Chow, Shao & Wang 2003); `pwr::pwr.anova.test()` inflated by 3/pi ARE (Hodges & Lehmann 1956); Jonckheere-Terpstra reuses the Kendall's tau engine (asymptotic equivalence) | Live |
 | Ratio Estimation | Precision-based risk ratio, odds ratio, rate ratio | `presize::prec_riskratio()`/`prec_or()`/`prec_rateratio()` | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
 | Survival (advanced) | Accrual/follow-up (non-uniform entry), competing risks, RMST | `gsDesign::nSurv`; `SSRMST` (simulation-based, not yet wrapped) | Not started |

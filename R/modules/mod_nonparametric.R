@@ -23,7 +23,8 @@ mod_nonparametric_ui <- function(id) {
           "Wilcoxon rank-sum (Mann-Whitney U, two independent groups)" = "rank_sum",
           "Wilcoxon signed-rank (one sample / paired differences)" = "signed_rank",
           "Kendall's tau (nonparametric association)" = "kendall",
-          "Kruskal-Wallis (k independent groups)" = "kruskal_wallis"
+          "Kruskal-Wallis (k independent groups)" = "kruskal_wallis",
+          "Jonckheere-Terpstra (ordered alternatives)" = "jonckheere"
         ),
         selected = "rank_sum"
       ),
@@ -50,6 +51,12 @@ mod_nonparametric_ui <- function(id) {
         condition = design_is("kruskal_wallis"),
         selectInput(ns("k_kw"), "Number of groups (k)", choices = 3:8, selected = 3),
         numericInput(ns("f_kw"), "Cohen's f effect size", value = 0.25, min = 0.001, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("jonckheere"),
+        numericInput(ns("p1_jt"), "p1 = concordance probability (tau = 2*p1 - 1)",
+                     value = 0.6, min = 0.001, max = 0.999, step = 0.01),
+        numericInput(ns("p2_jt"), "p2", value = 0.7, min = 0.001, max = 0.999, step = 0.01)
       ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
@@ -82,7 +89,13 @@ mod_nonparametric_ui <- function(id) {
       render_formula_block(nonparametric_content$kruskal_wallis$formula_latex),
       shiny::markdown(nonparametric_content$kruskal_wallis$explanation),
       h5("Worked example"),
-      shiny::markdown(nonparametric_content$kruskal_wallis$worked_example)
+      shiny::markdown(nonparametric_content$kruskal_wallis$worked_example),
+      hr(),
+      h4(nonparametric_content$jonckheere_terpstra$title),
+      render_formula_block(nonparametric_content$jonckheere_terpstra$formula_latex),
+      shiny::markdown(nonparametric_content$jonckheere_terpstra$explanation),
+      h5("Worked example"),
+      shiny::markdown(nonparametric_content$jonckheere_terpstra$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -101,7 +114,11 @@ mod_nonparametric_ui <- function(id) {
       hr(),
       h4(nonparametric_content$kruskal_wallis$title),
       p(strong("Citation: "), nonparametric_content$kruskal_wallis$citation),
-      p(strong("Implemented via: "), code(nonparametric_content$kruskal_wallis$backend))
+      p(strong("Implemented via: "), code(nonparametric_content$kruskal_wallis$backend)),
+      hr(),
+      h4(nonparametric_content$jonckheere_terpstra$title),
+      p(strong("Citation: "), nonparametric_content$jonckheere_terpstra$citation),
+      p(strong("Implemented via: "), code(nonparametric_content$jonckheere_terpstra$backend))
     )
   )
 }
@@ -129,11 +146,16 @@ mod_nonparametric_server <- function(id) {
           calc_kendall_tau(
             p1 = input$p1_k, p2 = input$p2_k, alpha = input$alpha, power = input$power
           )
-        } else {
+        } else if (input$design == "kruskal_wallis") {
           req(input$k_kw, input$f_kw)
           calc_kruskal_wallis(
             k = as.integer(input$k_kw), f = input$f_kw,
             alpha = input$alpha, power = input$power
+          )
+        } else {
+          req(input$p1_jt, input$p2_jt)
+          calc_jonckheere_terpstra(
+            p1 = input$p1_jt, p2 = input$p2_jt, alpha = input$alpha, power = input$power
           )
         }
         list(ok = TRUE, design = input$design, value = value)
@@ -147,7 +169,7 @@ mod_nonparametric_server <- function(id) {
       }
 
       v <- res$value
-      if (res$design == "kendall") {
+      if (res$design == "kendall" || res$design == "jonckheere") {
         tagList(
           p(strong("Required sample size: "), v$n),
           p(sprintf("Implied Kendall's tau: %.3f", v$tau))

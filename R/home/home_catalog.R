@@ -643,6 +643,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Nonparametric Tests",
        module_input_id = "nonparametric-design", design_value = "kruskal_wallis"),
 
+  list(key = "jonckheere_terpstra",
+       label = "Jonckheere-Terpstra test (ordered alternatives)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a monotonic",
+         "trend in a continuous outcome across ordered groups (e.g.",
+         "increasing dose levels), without assuming normality?\""
+       ),
+       outcome_type = "continuous", groups = "3+", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Nonparametric Tests",
+       module_input_id = "nonparametric-design", design_value = "jonckheere"),
+
   list(key = "rm_anova_interaction",
        label = "Mixed (split-plot) ANOVA -- group x time interaction",
        answers = paste(
@@ -1131,9 +1142,9 @@ study_design_families <- list(
        hint = "Between-subjects, within-subjects, or group-by-time interaction effects in a repeated-measures or split-plot design.",
        catalog_keys = c("rm_anova_between", "rm_anova_within", "rm_anova_interaction")),
   list(id = "nonparametric", label = "Nonparametric Tests",
-       hint = "Distribution-free alternatives to the t-test, one-way ANOVA, and correlation test, when normality can't be assumed.",
+       hint = "Distribution-free alternatives to the t-test, one-way ANOVA, correlation test, and trend test, when normality can't be assumed.",
        catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau",
-                         "kruskal_wallis")),
+                         "kruskal_wallis", "jonckheere_terpstra")),
   list(id = "safety_surveillance", label = "Safety / Surveillance",
        hint = "Bounding an unseen adverse-event rate, planning to catch a rare event, or proving disease/defect freedom in a finite population with an imperfect test.",
        catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required",
@@ -1204,9 +1215,9 @@ test_families <- list(
                          "noninferiority_means", "noninferiority_proportions",
                          "noninferiority_or", "noninferiority_hr", "crossover_2x2")),
   list(id = "nonparametric_tests", label = "Nonparametric Tests",
-       hint = "Distribution-free rank-based tests: Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau, and Kruskal-Wallis.",
+       hint = "Distribution-free rank-based tests: Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau, Kruskal-Wallis, and Jonckheere-Terpstra.",
        catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau",
-                         "kruskal_wallis")),
+                         "kruskal_wallis", "jonckheere_terpstra")),
   list(id = "group_sequential_designs", label = "Group Sequential Designs",
        hint = "Interim-monitoring trial designs with Pocock-to-O'Brien-Fleming efficacy/futility boundaries, for continuous, binary, or time-to-event outcomes.",
        catalog_keys = c("group_sequential_normal", "group_sequential_binary",

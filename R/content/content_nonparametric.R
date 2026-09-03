@@ -180,5 +180,63 @@ nonparametric_content <- list(
       "as implemented by pwr::pwr.anova.test)."
     ),
     backend = "pwr::pwr.anova.test() inflated by the 3/pi asymptotic relative efficiency (Hodges & Lehmann 1956)"
+  ),
+
+  jonckheere_terpstra = list(
+    title = "Jonckheere-Terpstra Test (Ordered Alternatives)",
+    formula_latex = paste0(
+      "$$n = \\frac{\\left(Z_{1-\\alpha/2}/3 + ",
+      "Z_{1-\\beta}\\sqrt{2p_2 - 1 - (2p_1-1)^2}\\right)^2}{(2p_1-1)^2/4}$$",
+      "$$\\tau = 2p_1 - 1$$"
+    ),
+    explanation = paste(
+      "Use this to test for a monotonic trend in a continuous outcome",
+      "across k *ordered* groups (e.g. increasing dose levels, disease",
+      "severity stages) WITHOUT assuming normality -- the nonparametric",
+      "alternative to the Cochran-Armitage trend test's continuous-",
+      "outcome analog, and closely related to the Kruskal-Wallis design",
+      "above but specifically for ordered (not just categorical) groups.",
+      "",
+      "- **p1 (concordance probability)** - the probability that a",
+      "  randomly chosen pair of subjects has their outcome and their",
+      "  ordinal group both moving the same direction; exactly 0.5 under",
+      "  no trend. This directly determines Kendall's tau via",
+      "  tau = 2\\*p1 - 1.",
+      "- **p2** - a higher-order concordance probability (three",
+      "  independent pairs sharing one member) needed for the variance",
+      "  of the test statistic under the alternative.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "`clinfun::jonckheere.test()` -- the package this app already uses",
+      "for Simon's two-stage design and Kendall's tau -- provides no",
+      "sample-size function at all (it's an analysis-only function, like",
+      "`stats::kruskal.test()`), but its own documentation notes that",
+      "\"the asymptotic version is equivalent to",
+      "`cor.test(x, g, method = \"k\")`\" -- i.e. exactly Kendall's tau",
+      "computed between the outcome and an integer group score (Terpstra",
+      "1952; Jonckheere 1954). This calculator is therefore a thin wrapper",
+      "around the Kendall's Tau design above -- no new formula, since",
+      "they're mathematically the same statistic under this framing.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Using the same inputs as the Kendall's Tau worked example (p1 =",
+      "0.6, i.e. tau = 0.2, and p2 = 0.7), at alpha = 0.05 and 80% power,",
+      "this calculator returns n = 135 -- identical to Kendall's tau's own",
+      "verified answer (Chow, Shao & Wang (2003) Example 14.4), since the",
+      "two tests are the same computation under the asymptotic",
+      "equivalence noted above.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Jonckheere AR. A distribution-free k-sample test against ordered",
+      "alternatives. Biometrika. 1954;41(1-2):133-145; Terpstra TJ. The",
+      "asymptotic normality and consistency of Kendall's test against",
+      "trend, when ties are present in one ranking. Indagationes",
+      "Mathematicae. 1952;14:327-333; Hollander M, Wolfe DA.",
+      "Nonparametric Statistical Methods. 2nd ed. Wiley; 1999 (the",
+      "trend-test-as-Kendall's-tau equivalence)."
+    ),
+    backend = "TrialSize::Nonpara.Independ() (thin wrapper around this module's Kendall's tau design)"
   )
 )

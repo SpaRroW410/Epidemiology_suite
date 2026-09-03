@@ -55,3 +55,22 @@ test_that("calc_kruskal_wallis rejects invalid inputs", {
   expect_error(calc_kruskal_wallis(k = 3, f = -0.1), "positive")
   expect_error(calc_kruskal_wallis(k = 3, f = 0.25, alpha = 0), "between 0 and 1")
 })
+
+test_that("calc_jonckheere_terpstra matches calc_kendall_tau() exactly (same statistic under the asymptotic equivalence)", {
+  # clinfun::jonckheere.test()'s own documentation states the asymptotic
+  # version is equivalent to cor.test(x, g, method="k") -- i.e. exactly
+  # Kendall's tau -- so this thin wrapper must reproduce
+  # calc_kendall_tau()'s own verified answer (Chow, Shao & Wang (2003)
+  # Example 14.4: p1=0.6, p2=0.7 -> n=135) bit-for-bit.
+  wrapped <- calc_jonckheere_terpstra(p1 = 0.6, p2 = 0.7, alpha = 0.05, power = 0.80)
+  direct <- calc_kendall_tau(p1 = 0.6, p2 = 0.7, alpha = 0.05, power = 0.80)
+  expect_equal(wrapped$n, direct$n)
+  expect_equal(wrapped$tau, direct$tau)
+  expect_equal(wrapped$n, 135)
+  expect_equal(wrapped$tau, 0.2)
+})
+
+test_that("calc_jonckheere_terpstra rejects invalid inputs", {
+  expect_error(calc_jonckheere_terpstra(p1 = 0.5, p2 = 0.5), "must differ from 0.5")
+  expect_error(calc_jonckheere_terpstra(p1 = 0.6, p2 = 0.7, alpha = 0), "between 0 and 1")
+})
