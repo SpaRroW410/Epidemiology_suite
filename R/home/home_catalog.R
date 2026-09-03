@@ -1065,7 +1065,53 @@ calculator_catalog <- list(
        ),
        outcome_type = "variance", groups = "2", dependency = "independent", reference_based = NA,
        built = TRUE, nav_target = "Variance Tests",
-       module_input_id = "variance-design", design_value = "two")
+       module_input_id = "variance-design", design_value = "two"),
+
+  list(key = "multiplicity_proportion_1s",
+       label = "Multiplicity-adjusted: one proportion vs. reference",
+       answers = paste(
+         "Answers: \"I'm planning several simultaneous comparisons of a",
+         "proportion against a reference value -- how many subjects do I",
+         "need per comparison after a Bonferroni/Sidak alpha correction?\""
+       ),
+       outcome_type = "proportion", groups = "1", dependency = NA, reference_based = TRUE,
+       built = TRUE, nav_target = "Multiplicity Adjustment",
+       module_input_id = "multiplicity-design", design_value = "proportion_1s"),
+
+  list(key = "multiplicity_proportion_2s",
+       label = "Multiplicity-adjusted: two independent proportions",
+       answers = paste(
+         "Answers: \"I'm planning several simultaneous two-proportion",
+         "comparisons (e.g. several outcome variables) -- how many",
+         "subjects per group do I need after a Bonferroni/Sidak alpha",
+         "correction?\""
+       ),
+       outcome_type = "proportion", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Multiplicity Adjustment",
+       module_input_id = "multiplicity-design", design_value = "proportion_2s"),
+
+  list(key = "multiplicity_means_1s",
+       label = "Multiplicity-adjusted: one mean vs. reference",
+       answers = paste(
+         "Answers: \"I'm planning several simultaneous comparisons of a",
+         "mean against a reference value -- how many subjects do I need",
+         "per comparison after a Bonferroni/Sidak alpha correction?\""
+       ),
+       outcome_type = "means", groups = "1", dependency = NA, reference_based = TRUE,
+       built = TRUE, nav_target = "Multiplicity Adjustment",
+       module_input_id = "multiplicity-design", design_value = "means_1s"),
+
+  list(key = "multiplicity_means_2s",
+       label = "Multiplicity-adjusted: two independent means",
+       answers = paste(
+         "Answers: \"I'm planning several simultaneous two-mean",
+         "comparisons (e.g. several outcome variables) -- how many",
+         "subjects per group do I need after a Bonferroni/Sidak alpha",
+         "correction?\""
+       ),
+       outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Multiplicity Adjustment",
+       module_input_id = "multiplicity-design", design_value = "means_2s")
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -1171,7 +1217,11 @@ study_design_families <- list(
        catalog_keys = character(0)),
   list(id = "variance", label = "Variance Tests",
        hint = "Testing whether a population's variability differs from a reference value, or whether two groups' variability differs.",
-       catalog_keys = c("variance_single", "variance_two"))
+       catalog_keys = c("variance_single", "variance_two")),
+  list(id = "multiplicity", label = "Multiplicity Adjustment",
+       hint = "Sample size for a one- or two-sample proportion or mean comparison after a Bonferroni/Sidak correction for several planned simultaneous comparisons.",
+       catalog_keys = c("multiplicity_proportion_1s", "multiplicity_proportion_2s",
+                         "multiplicity_means_1s", "multiplicity_means_2s"))
 )
 
 # Second index over the SAME calculator_catalog entries, grouped by
@@ -1235,7 +1285,11 @@ test_families <- list(
                          "group_sequential_survival")),
   list(id = "variance_tests", label = "Variance Tests",
        hint = "Chi-squared test for a single variance against a reference value, and F test for comparing two variances.",
-       catalog_keys = c("variance_single", "variance_two"))
+       catalog_keys = c("variance_single", "variance_two")),
+  list(id = "multiplicity_adjustment", label = "Multiplicity Adjustment",
+       hint = "Bonferroni or Sidak alpha correction applied to a one- or two-sample proportion or mean test, for several planned simultaneous comparisons.",
+       catalog_keys = c("multiplicity_proportion_1s", "multiplicity_proportion_2s",
+                         "multiplicity_means_1s", "multiplicity_means_2s"))
 )
 
 catalog_entry <- function(key) {

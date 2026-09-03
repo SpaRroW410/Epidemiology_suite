@@ -109,7 +109,7 @@
 
 ### Multiple-comparison procedures
 
-- [ ] **[ADV]** Bonferroni-adjusted α → inflated n (wrap any calculator with α/m)
+- [x] **[ADV]** Bonferroni-adjusted α → inflated n (wrap any calculator with α/m) — *(implemented: new Multiplicity Adjustment module, `calc_multiplicity_adjusted_alpha()` (Bonferroni alpha/m, or Sidak 1-(1-alpha)^(1/m)) plugged into this app's own already-verified `calc_proportion_1s()`/`calc_proportion_2s()`/`calc_means_1s()`/`calc_means_2s_indep()` -- literally "wrap any calculator with alpha/m", no new formula or verification risk since the base functions are already fully tested and the correction is exact algebra. Verified: m=1 reduces exactly to the un-adjusted base calculator's own n; worked example m=4 Bonferroni, p1=0.50 vs p2=0.65, alpha=0.05, power=0.80 -> adjusted alpha=0.0125, n=241/group (482 total) vs. n=170/group (340 total) unadjusted. Holm's step-down procedure is not offered as a separate option since its threshold is data-dependent (no single a priori alpha to solve n for); its worst-case first step equals the Bonferroni value already computed here)*
 - [ ] **[ADV]** Holm; FDR / Benjamini–Hochberg adjusted sample size; family-wise error control — `ssize.fdr`
 
 ### Equivalence / non-inferiority test forms

@@ -333,6 +333,21 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   worked example was available (single-variance: sigma0=10, sigma1=14,
   one-sided greater -> n=28, empirical power 0.814; two-variance:
   sigma1=10, sigma2=14, two-sided -> n=72/group, empirical power 0.804)
+- **Multiplicity Adjustment** (`R/modules/mod_multiplicity.R`) -- the
+  first module in this app that is explicitly a generic wrapper rather
+  than its own dedicated test: given a family-wise alpha and m planned
+  simultaneous comparisons, computes the Bonferroni (alpha/m, always
+  valid) or Sidak (1-(1-alpha)^(1/m), exact under independence) adjusted
+  per-comparison alpha, then plugs it straight into this app's own
+  already-verified one-proportion/two-proportion/one-mean/two-mean
+  formulas -- literally "wrap any calculator with alpha/m", no new
+  formula or verification risk beyond the correction algebra itself.
+  Verified: m=1 reduces exactly to the un-adjusted base calculator's own
+  n; worked example (two independent proportions, p1=0.50 vs p2=0.65,
+  m=4, alpha=0.05, power=0.80) -> Bonferroni n=241/group (482 total) vs.
+  n=170/group (340 total) unadjusted, Sidak n=240/group. Holm's
+  step-down correction is not offered as a third method since its
+  threshold is data-dependent (no single a priori alpha to plan against)
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

@@ -218,6 +218,7 @@ for what to build next):
 | RM-ANOVA / Mixed ANOVA | Between-subjects, within-subjects, and group x time interaction effects | closed-form (Cohen 1988; `WebPower::wp.rmanova()` algorithm) | Live |
 | Nonparametric Tests | Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau, Kruskal-Wallis, Jonckheere-Terpstra | `TrialSize::Nonpara.Two.Sample()`/`Nonpara.One.Sample()`/`Nonpara.Independ()` (Chow, Shao & Wang 2003); `pwr::pwr.anova.test()` inflated by 3/pi ARE (Hodges & Lehmann 1956); Jonckheere-Terpstra reuses the Kendall's tau engine (asymptotic equivalence) | Live |
 | Ratio Estimation | Precision-based risk ratio, odds ratio, rate ratio | `presize::prec_riskratio()`/`prec_or()`/`prec_rateratio()` | Live |
+| Multiplicity Adjustment | Bonferroni/Sidak-adjusted sample size for one-/two-sample proportion or mean tests, given m planned simultaneous comparisons | closed-form correction wrapping this app's own `calc_proportion_1s()`/`_2s()`/`calc_means_1s()`/`_2s()` | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
 | Survival (advanced) | Accrual/follow-up (non-uniform entry), competing risks, RMST | `gsDesign::nSurv`; `SSRMST` (simulation-based, not yet wrapped) | Not started |
 | MANOVA | Global & special effects, Hotelling's T² | Vonesh & Schork (1986) closed-form; not yet wrapped | Not started |
