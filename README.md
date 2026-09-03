@@ -171,7 +171,12 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   `presize::prec_rateratio()` (Rothman & Greenland 2018)
 - **Multiple Regression** (`R/modules/mod_regression.R`) -- R-squared
   deviation from zero for a multiple linear regression model, wrapping
-  `pwr::pwr.f2.test()` (Cohen 1988)
+  `pwr::pwr.f2.test()` (Cohen 1988); plus R-squared increase (hierarchical
+  regression), testing whether adding a set of new predictors to an
+  existing model significantly raises R-squared, same `pwr::pwr.f2.test()`
+  backend with Cohen (1988) section 9.7's effect-size/df mapping (verified:
+  R-squared 0.30 -> 0.40 adding 2 of 5 total predictors, alpha=0.05,
+  power=0.80 -> n=64)
 - **Non-Inferiority** (`R/modules/mod_noninferiority.R`) -- means or
   proportions, wrapping `epiR::epi.ssninfc()` / `epi.ssninfb()` (Chow, Shao
   & Wang 2008); plus odds ratio and hazard ratio (Cox PH), wrapping

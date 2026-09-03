@@ -202,7 +202,7 @@ for what to build next):
 | Log-rank / survival | Two-arm time-to-event, cumulative event probabilities; Cox PH regression (binary or continuous covariate); stratified log-rank (exponential survival) | `powerSurvEpi::ssizeCT()`; `ssizeEpi.default()`; `ssizeEpiCont.default()`; `ssize.stratify()` (Palta & Amini 1985) | Live |
 | Incidence Rate | Precision-based, events + person-time; comparison of two rates | `presize::prec_rate()`; closed-form (Demidenko 2007) | Live |
 | Exact Tests | Binomial test (single proportion); Fisher's exact (two proportions); Boschloo's exact (unconditional, two proportions); exact Poisson (single rate); sign test | `stats::binom.test()` search; `Exact::power.exact.test()` search (methods "fisher"/"boschloo"); `stats::poisson.test()` search; `stats::binom.test()` search (p0 = 0.5) | Live |
-| Multiple Regression | R-squared deviation from zero | `pwr::pwr.f2.test()` | Live |
+| Multiple Regression | R-squared deviation from zero; R-squared increase (hierarchical) | `pwr::pwr.f2.test()` | Live |
 | Non-Inferiority | Means, proportions, odds ratio, hazard ratio (Cox PH) | `epiR::epi.ssninfc()`, `epi.ssninfb()`; `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
 | Rule of Three | Upper bound on unseen event rate; n to detect >= 1 event; detect >= 1 case with an imperfect test in a finite population (single or two-test series/parallel) | closed-form (Hanley & Lippman-Hand 1983); `epiR::epi.ssdetect()` | Live |
 | Group Sequential Design | Interim-monitoring trial design (continuous, binary, or survival outcome) with Pocock-to-O'Brien-Fleming efficacy/futility boundaries | `clinfun::gsdesign.normal()`/`.binomial()`/`.survival()` | Live |
