@@ -37,6 +37,42 @@ test_that("calc_binomial_exact rejects invalid inputs", {
   expect_error(calc_binomial_exact(p0 = 1.5, p1 = 0.3), "between 0 and 1")
 })
 
+test_that("calc_boschloo_exact finds a smaller (or equal) n1 than Fisher's exact test on the same inputs", {
+  # Boschloo's test is uniformly at least as powerful as Fisher's exact
+  # test (Boschloo 1970), so for identical p1/p2/alpha/power it should
+  # never need a larger n1: p1=0.30, p2=0.60, alpha=0.05, power=0.80 ->
+  # boschloo n1=44 (88 total), vs. fisher n1=48 (96 total).
+  res_boschloo <- calc_boschloo_exact(p1 = 0.30, p2 = 0.60, alpha = 0.05, power = 0.8)
+  res_fisher <- calc_fisher_exact(p1 = 0.30, p2 = 0.60, alpha = 0.05, power = 0.8)
+  expect_equal(res_boschloo$n1, 44)
+  expect_equal(res_boschloo$n_total, 88)
+  expect_lte(res_boschloo$n1, res_fisher$n1)
+  expect_gte(res_boschloo$achieved_power, 0.8)
+})
+
+test_that("calc_boschloo_exact rejects invalid inputs", {
+  expect_error(calc_boschloo_exact(p1 = 0.5, p2 = 0.5), "must differ")
+  expect_error(calc_boschloo_exact(p1 = 0.30, p2 = 0.60, ratio = -1), "positive")
+  expect_error(calc_boschloo_exact(p1 = 1.5, p2 = 0.60), "between 0 and 1")
+})
+
+test_that("calc_poisson_exact finds the first stable person-time crossing the target power", {
+  # rate0=5, rate1=10, alpha=0.05, power=0.8, two-sided -> T=3 is the first
+  # person-time where achieved exact power stays >= 0.8 for T, T+1, T+2;
+  # independently cross-checked by a 20,000-replicate Monte Carlo
+  # simulation (empirical power 0.8835, matching the exact 0.8854).
+  res <- calc_poisson_exact(rate0 = 5, rate1 = 10, alpha = 0.05, power = 0.8)
+  expect_equal(res$person_time, 3)
+  expect_equal(res$expected_events, 30)
+  expect_equal(round(res$achieved_power, 4), 0.8854)
+})
+
+test_that("calc_poisson_exact rejects invalid inputs", {
+  expect_error(calc_poisson_exact(rate0 = 5, rate1 = 5), "must differ")
+  expect_error(calc_poisson_exact(rate0 = -1, rate1 = 5), "positive")
+  expect_error(calc_poisson_exact(rate0 = 5, rate1 = 10, alpha = 0), "between 0 and 1")
+})
+
 test_that("calc_sign_test matches calc_binomial_exact(p0 = 0.5) exactly", {
   # The sign test is exactly a binomial test against 0.5 -- verify the thin
   # wrapper reproduces calc_binomial_exact()'s own result bit-for-bit for

@@ -166,6 +166,74 @@ calc_mantelhaenszel <- function(alpha = 0.05, power = 0.8, a, b, p1, phi) {
   )
 }
 
+#' Sample size for the Cochran-Armitage trend test (dose-response
+#' proportions)
+#'
+#' Wraps TrialSize::Cochran.Armitage.Trend() (already a zero-dependency
+#' project dependency) -- tests for a monotonic trend in response
+#' proportion across k ordered dose/exposure groups (H0: p1=p2=...=pk vs.
+#' Ha: a monotone trend), rather than the omnibus "any group differs"
+#' question a plain chi-squared test of independence asks. The function
+#' returns the required sample size for the *first* group; other groups'
+#' sizes follow from the same allocation ratios (ni) the user supplies,
+#' scaled by that reference n.
+#'
+#' Note: the closely related TrialSize::Dose.Response.binary() (also a
+#' dose-response/Cochran-Armitage-style formula) was investigated for an
+#' earlier batch and found to NOT reproduce its own package's documented
+#' example -- this function is a different, independently verified
+#' formula (Cochran.Armitage.Trend(), Chow, Shao & Wang (2003) section
+#' 11.5) that DOES reproduce its own documented example exactly, so it
+#' was adopted instead.
+#'
+#' @param pi Numeric vector (length >= 2) of assumed response
+#'   proportions in each dose group, each in (0,1)
+#' @param di Numeric vector, same length as pi: the dose/exposure level
+#'   for each group (e.g. 1,2,3,4, or actual doses)
+#' @param ni Numeric vector, same length as pi: the planned *relative*
+#'   allocation across groups (e.g. all equal for equal allocation) --
+#'   only the ratios ni/ni[1] matter, not the absolute values
+#' @param delta Clinically meaningful minimal difference used in the
+#'   formula's small-sample correction term (Chow, Shao & Wang 2003);
+#'   0 is a reasonable default when no such minimal difference is known
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n_group1, n_per_group, n_total, inputs)
+calc_cochran_armitage_trend <- function(pi, di, ni, delta = 0, alpha = 0.05, power = 0.8) {
+  if (!is.numeric(pi) || length(pi) < 2 || anyNA(pi) || any(pi <= 0) || any(pi >= 1)) {
+    stop("pi must be a numeric vector of at least 2 values, each strictly between 0 and 1.")
+  }
+  k <- length(pi)
+  if (!is.numeric(di) || length(di) != k || anyNA(di)) {
+    stop("di must be a numeric vector of the same length as pi.")
+  }
+  if (!is.numeric(ni) || length(ni) != k || anyNA(ni) || any(ni <= 0)) {
+    stop("ni must be a numeric vector of the same length as pi, each strictly positive.")
+  }
+  if (length(unique(pi)) < 2) {
+    stop("pi must not be identical across all groups (no trend to detect).")
+  }
+  .validate_number(delta, "delta")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  n1 <- TrialSize::Cochran.Armitage.Trend(alpha = alpha, beta = 1 - power,
+                                           pi = pi, di = di, ni = ni, delta = delta)
+  if (!is.finite(n1) || n1 <= 0) {
+    stop("could not solve for a valid sample size with these inputs -- try adjusting pi, di, ni, or delta.")
+  }
+
+  ratios <- ni / ni[1]
+  n_per_group <- ceiling(ratios * n1)
+
+  list(
+    n_group1 = ceiling(n1),
+    n_per_group = n_per_group,
+    n_total = sum(n_per_group),
+    inputs = list(pi = pi, di = di, ni = ni, delta = delta, alpha = alpha, power = power)
+  )
+}
+
 .validate_prob_vector <- function(P, label) {
   if (!is.numeric(P) || length(P) < 2 || anyNA(P)) {
     stop(sprintf("%s must be a numeric vector of at least 2 values.", label))

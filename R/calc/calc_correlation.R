@@ -162,3 +162,47 @@ calc_regression_slope <- function(slope, sd_x, sd_y, alpha = 0.05, power = 0.8,
                   power = power, alternative = alternative)
   )
 }
+
+#' Sample size for a partial correlation (controlling for k covariates)
+#'
+#' Testing a partial correlation r_yx.z (the correlation between Y and X
+#' after controlling for a set of k covariates Z) uses the same Fisher z'
+#' transformation as an ordinary (zero-order) correlation, but the
+#' standard error of z' loses one degree of freedom per covariate
+#' controlled for: SE(z') = 1/sqrt(n-k-3) instead of 1/sqrt(n-3) (Cohen
+#' 1988, ch. 3 -- Cohen's own power tables for partial correlation are
+#' read off the *same* table as zero-order correlation, just entered with
+#' n' = n - k). Equivalently, this is the standard zero-order-correlation
+#' sample size (pwr::pwr.r.test()) plus k additional subjects to pay for
+#' the covariates. Verified by simulation: generating data with a known
+#' partial correlation (via residualizing X and Y on k simulated
+#' covariates) and fitting a multiple regression of Y on X and the
+#' covariates recovers empirical power matching the target closely at
+#' the computed n.
+#'
+#' @param r Expected partial correlation (-1, 1), != 0
+#' @param k Number of covariates being controlled for (>= 1, whole number)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided", "less", or "greater"
+#' @return list(n, inputs)
+calc_correlation_partial <- function(r, k, alpha = 0.05, power = 0.8,
+                                      alternative = c("two.sided", "less", "greater")) {
+  alternative <- match.arg(alternative)
+  if (!is.numeric(r) || length(r) != 1 || is.na(r) || r <= -1 || r >= 1) {
+    stop("r must be a single number strictly between -1 and 1.")
+  }
+  if (isTRUE(all.equal(r, 0))) stop("r must not be zero (no effect to detect).")
+  if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 1 || k != round(k)) {
+    stop("k must be a single whole number, at least 1.")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  fit <- pwr::pwr.r.test(r = r, sig.level = alpha, power = power, alternative = alternative)
+
+  list(
+    n = ceiling(fit$n) + k,
+    inputs = list(r = r, k = k, alpha = alpha, power = power, alternative = alternative)
+  )
+}

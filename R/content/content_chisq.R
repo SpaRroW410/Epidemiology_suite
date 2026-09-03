@@ -190,5 +190,63 @@ chisq_content <- list(
       "Research. New York: Marcel Dekker; 2003. Section 15.2.3."
     ),
     backend = "TrialSize::Propensity.Score.strata() + TrialSize::Propensity.Score.nostrata()"
+  ),
+
+  cochran_armitage = list(
+    title = "Cochran-Armitage Trend Test (Dose-Response Proportions)",
+    formula_latex = paste0(
+      "$$H_0: p_1 = p_2 = \\cdots = p_k \\quad \\text{vs.} \\quad ",
+      "H_a: p_1 \\le p_2 \\le \\cdots \\le p_k, \\; p_1 < p_k$$",
+      "$$n \\text{ solved from the weighted-least-squares trend statistic ",
+      "(Chow, Shao \\& Wang 2003, \\S11.5)}$$"
+    ),
+    explanation = paste(
+      "Use this to test for a monotonic trend in response proportion",
+      "across k ordered dose/exposure groups -- e.g. \"does the",
+      "proportion of adverse events increase steadily as dose",
+      "increases?\" -- rather than the omnibus \"do any groups differ\"",
+      "question a plain chi-squared test of independence asks. This is",
+      "the standard method for dose-response and exposure-response",
+      "studies with a binary outcome.",
+      "",
+      "For each of the k ordered groups, enter:",
+      "- **pi** - the response proportion you expect in that group.",
+      "- **di** - the dose/exposure level for that group (e.g. 1, 2, 3,",
+      "  4, or the actual doses).",
+      "- **ni** - the planned *relative* allocation across groups (e.g.",
+      "  all equal for equal allocation) -- only the ratios between",
+      "  groups matter, not the absolute values.",
+      "",
+      "**delta** is a clinically meaningful minimal difference used in a",
+      "small-sample correction term; 0 is a reasonable default when no",
+      "such minimal difference is known. The calculator solves for the",
+      "reference (first) group's sample size, then scales every other",
+      "group by its allocation ratio to get the per-group and total",
+      "sample sizes.",
+      "",
+      "Note: the closely related `TrialSize::Dose.Response.binary()` (also",
+      "a dose-response/Cochran-Armitage-style formula) was investigated in",
+      "an earlier batch and found to NOT reproduce its own package's",
+      "documented example -- this calculator uses a different,",
+      "independently verified function from the same package that DOES",
+      "reproduce its own documented example exactly.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Chow, Shao & Wang (2003), Example 11.5: four equally-allocated",
+      "dose groups with expected response proportions 0.1, 0.3, 0.5, 0.7",
+      "at doses 1, 2, 3, 4, a minimal clinically meaningful difference of",
+      "delta = 1, alpha = 0.05, and 80% power. This calculator returns",
+      "n = 8 per group (32 total), matching the textbook's own worked",
+      "answer (\"~7.5 for one group, total 28-32\") once rounded up to a",
+      "whole number of subjects, consistent with every other calculator",
+      "in this app.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
+      "Research. New York: Marcel Dekker; 2003. Section 11.5."
+    ),
+    backend = "TrialSize::Cochran.Armitage.Trend()"
   )
 )

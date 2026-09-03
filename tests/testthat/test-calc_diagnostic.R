@@ -130,3 +130,22 @@ test_that("calc_diagnostic_likelihood_ratio rejects invalid inputs", {
   expect_error(calc_diagnostic_likelihood_ratio(sens = 0.8, spec = 0.73, prevalence = 0.5,
                                                  type = "positive", conf_width = -1), "positive")
 })
+
+test_that("calc_diagnostic_odds_ratio matches the reused two-independent-proportions engine", {
+  # sens=0.80, spec=0.70 -> p1=0.8 (diseased), p2=0.3 (non-diseased),
+  # DOR = (0.8/0.2)/(0.3/0.7) = 9.3333. Since this reuses
+  # calc_diagnostic_two_indep(p1=0.8, p2=0.3) exactly, it must return the
+  # same n_per_group/n_total as that already-verified calculation.
+  base <- calc_diagnostic_two_indep(p1 = 0.80, p2 = 0.30, alpha = 0.05, power = 0.8)
+  res <- calc_diagnostic_odds_ratio(sens = 0.80, spec = 0.70, alpha = 0.05, power = 0.8)
+  expect_equal(res$n_diseased, base$n_per_group)
+  expect_equal(res$n_healthy, base$n_per_group)
+  expect_equal(res$n_total, base$n_total)
+  expect_equal(round(res$dor, 4), 9.3333)
+})
+
+test_that("calc_diagnostic_odds_ratio rejects invalid inputs", {
+  expect_error(calc_diagnostic_odds_ratio(sens = 0.5, spec = 0.5), "must differ")
+  expect_error(calc_diagnostic_odds_ratio(sens = 1.5, spec = 0.5), "between 0 and 1")
+  expect_error(calc_diagnostic_odds_ratio(sens = 0.8, spec = 0.7, alpha = 0), "between 0 and 1")
+})

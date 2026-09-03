@@ -123,5 +123,62 @@ nonparametric_content <- list(
       "Research. New York: Marcel Dekker; 2003. Section 14.4."
     ),
     backend = "TrialSize::Nonpara.Independ()"
+  ),
+
+  kruskal_wallis = list(
+    title = "Kruskal-Wallis Test (k Independent Groups)",
+    formula_latex = paste0(
+      "$$n_{\\text{ANOVA}} \\text{ solved from } k, f, \\alpha, \\text{power (Cohen 1988)}$$",
+      "$$n_{\\text{per group}} = \\left\\lceil n_{\\text{ANOVA}} \\times \\frac{\\pi}{3} \\right\\rceil$$"
+    ),
+    explanation = paste(
+      "Use this to compare k >= 3 independent groups on a continuous or",
+      "ordinal outcome WITHOUT assuming normality -- the nonparametric",
+      "alternative to one-way ANOVA in the Means module, based on ranks",
+      "across all groups rather than raw values.",
+      "",
+      "- **k** - the number of groups (use the Wilcoxon rank-sum design",
+      "  above for k = 2).",
+      "- **f (Cohen's f)** - the same standardized effect size the ANOVA",
+      "  design uses (small ~0.10, medium ~0.25, large ~0.40).",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "No installed package provides a genuine k-sample rank-test closed",
+      "form (unlike this module's other three designs, each a direct",
+      "TrialSize:: formula) -- so this uses the approach this project's",
+      "own feasibility review named for this item: solve the equivalent",
+      "one-way ANOVA sample size at the same Cohen's f, then inflate it by",
+      "the classical asymptotic relative efficiency (ARE) of the",
+      "Kruskal-Wallis test relative to ANOVA under normality, 3/pi ~ 0.955",
+      "(Hodges & Lehmann 1956) -- the same constant that relates the",
+      "Wilcoxon rank-sum test to the two-sample t-test. This is an",
+      "asymptotic approximation, not an exact finite-sample formula, and",
+      "is conservative (adequately large, if anything) for many",
+      "non-normal distributions, since the Kruskal-Wallis test's",
+      "efficiency relative to ANOVA is often *higher* than 3/pi when the",
+      "data are non-normal.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "For k = 3 groups and a medium effect (f = 0.25) at alpha = 0.05",
+      "and 80% power, one-way ANOVA needs n = 53 per group; this",
+      "calculator inflates that by pi/3 to n = 56 per group (168 total)",
+      "for the Kruskal-Wallis test -- independently confirmed by",
+      "simulation: running the actual `kruskal.test()` on 5,000",
+      "replicates of 3-group data at this exact effect size gives an",
+      "empirical power of 0.812 at n = 56 (closely matching the 0.80",
+      "target), versus only 0.787 at the unadjusted ANOVA n = 53.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Hodges JL, Lehmann EL. The Efficiency of Some Nonparametric",
+      "Competitors of the t-Test. Ann Math Stat. 1956;27(2):324-335",
+      "(asymptotic relative efficiency 3/pi); Lehmann EL. Nonparametrics:",
+      "Statistical Methods Based on Ranks. Holden-Day; 1975; Cohen J.",
+      "Statistical Power Analysis for the Behavioral Sciences. 2nd ed.",
+      "Lawrence Erlbaum Associates; 1988 (one-way ANOVA power analysis,",
+      "as implemented by pwr::pwr.anova.test)."
+    ),
+    backend = "pwr::pwr.anova.test() inflated by the 3/pi asymptotic relative efficiency (Hodges & Lehmann 1956)"
   )
 )

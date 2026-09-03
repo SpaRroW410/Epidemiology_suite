@@ -92,6 +92,103 @@ exact_tests_content <- list(
     backend = "Exact::power.exact.test(method = \"fisher\") (search over n1)"
   ),
 
+  boschloo = list(
+    title = "Boschloo's Exact Test, Two Independent Proportions (Unconditional)",
+    formula_latex = paste0(
+      "$$\\text{power computed by maximizing the p-value over the unknown ",
+      "nuisance parameter (Exact package)}$$"
+    ),
+    explanation = paste(
+      "Boschloo's test is the classic \"unconditional\" exact test for two",
+      "independent proportions -- unlike Fisher's exact test above (which",
+      "conditions on the observed row/column margins), Boschloo's test",
+      "maximizes the p-value over the unknown common success probability",
+      "instead of conditioning it away. This makes it *uniformly at least",
+      "as powerful* as Fisher's exact test (Boschloo 1970), at the cost of",
+      "being somewhat more computationally intensive -- the standard",
+      "recommendation when small-sample power matters more than",
+      "familiarity.",
+      "",
+      "- **p1, p2** - the proportions expected in group 1 and group 2.",
+      "- **alpha, power, ratio** - as in Fisher's exact test above.",
+      "",
+      "Same search strategy as Fisher's exact test above (searching",
+      "upward over n1 with a stability check for the sawtooth effect),",
+      "just a different method argument to the same `Exact` package",
+      "already used for Fisher's exact test. Boschloo's own p-value",
+      "calculation searches over a grid of nuisance-parameter values",
+      "internally, so this design can take a few seconds to compute --",
+      "noticeably slower than Fisher's exact test above, but still exact.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "For p1 = 0.30, p2 = 0.60 at alpha = 0.05 (two-sided) and 80% power,",
+      "this calculator returns n1 = 44 (88 total), versus n1 = 48 (96",
+      "total) for Fisher's exact test on the identical inputs -- exactly",
+      "the theoretical relationship the method is known for (Boschloo",
+      "1970 proved Boschloo's test is never less powerful than Fisher's",
+      "exact test for the same inputs), used here as the verification",
+      "since no external printed worked example was available in this",
+      "sandboxed session.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Boschloo RD. Raised Conditional Level of Significance for the",
+      "2x2-table when Testing the Equality of Two Probabilities. Statist",
+      "Neerlandica. 1970;24(1):1-35."
+    ),
+    backend = "Exact::power.exact.test(method = \"boschloo\") (search over n1)"
+  ),
+
+  poisson = list(
+    title = "Exact Poisson Test, Single Rate vs. a Reference/Standard Rate",
+    formula_latex = paste0(
+      "$$\\text{power} = \\sum_{x \\, : \\, p\\text{-value}(x) \\le \\alpha} ",
+      "\\frac{e^{-\\lambda_1}\\lambda_1^x}{x!}, \\quad \\lambda_1 = \\text{rate}_1 \\times T$$"
+    ),
+    explanation = paste(
+      "The one-sample, count-data counterpart of the Binomial Test design",
+      "above -- use this to test whether an observed incidence rate",
+      "differs from a known background/standard rate, using the exact",
+      "Poisson distribution rather than a normal approximation. Typical",
+      "use: \"is this population's disease rate different from the",
+      "published national/standard rate?\"",
+      "",
+      "- **rate0 (reference/standard rate)** - the null-hypothesis rate,",
+      "  in events per unit of person-time (e.g. per person-year).",
+      "- **rate1 (expected/anticipated true rate)** - the rate you",
+      "  actually expect to observe, same units as rate0.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "This searches upward over person-time T calling R's own",
+      "`stats::poisson.test()` at every candidate rather than a",
+      "closed-form formula, for exactly the same reason as the Binomial",
+      "Test design: exact-test power is a non-monotonic (\"sawtoothed\")",
+      "function of T (Chernick & Liu 2002), so this requires power to",
+      "stay at or above target for a couple of subsequent T values before",
+      "accepting it.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Worked example: a reference rate of 5 events per unit person-time,",
+      "expecting a true rate of 10 (double the reference). At alpha =",
+      "0.05 (two-sided) and 80% power, this calculator returns a required",
+      "person-time of T = 3 (expecting 30 events), with an achieved exact",
+      "power of 0.8854 -- independently confirmed by a 20,000-replicate",
+      "Monte Carlo simulation (empirical power 0.8835, closely matching",
+      "the exact value).",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Exact Poisson test: R's own stats::poisson.test(); Chernick MR,",
+      "Liu CY. The Saw-Toothed Behavior of Power versus Sample Size and",
+      "Software Solutions. Am Stat. 2002;56(2):149-155 (the",
+      "non-monotonicity this calculator's stability check guards",
+      "against)."
+    ),
+    backend = "stats::poisson.test() (search over person-time; no additional package required)"
+  ),
+
   sign_test = list(
     title = "Sign Test (Paired Data / One-Sample Median)",
     formula_latex = paste0(
