@@ -22,6 +22,7 @@ mod_correlation_ui <- function(id) {
         choices = c(
           "Single correlation vs. zero" = "single",
           "Compare two independent correlations" = "two_independent",
+          "Compare two dependent (overlapping) correlations" = "two_dependent",
           "Point-biserial correlation" = "point_biserial",
           "Regression coefficient (bivariate slope)" = "regression_slope",
           "Partial correlation (controlling for k covariates)" = "partial"
@@ -36,6 +37,12 @@ mod_correlation_ui <- function(id) {
         condition = design_is("two_independent"),
         numericInput(ns("r1"), "Expected correlation, group 1 (r1)", value = 0.89, min = -0.99, max = 0.99, step = 0.01),
         numericInput(ns("r2"), "Expected correlation, group 2 (r2)", value = 0.76, min = -0.99, max = 0.99, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("two_dependent"),
+        numericInput(ns("r_yx1"), "Correlation between Y and X1 (r_yx1)", value = 0.4, min = -0.99, max = 0.99, step = 0.01),
+        numericInput(ns("r_yx2"), "Correlation between Y and X2 (r_yx2)", value = 0.6, min = -0.99, max = 0.99, step = 0.01),
+        numericInput(ns("r_x1x2"), "Correlation between X1 and X2 (r_x1x2)", value = 0.3, min = -0.99, max = 0.99, step = 0.01)
       ),
       conditionalPanel(
         condition = design_is("point_biserial"),
@@ -77,6 +84,12 @@ mod_correlation_ui <- function(id) {
       h5("Worked example"),
       shiny::markdown(correlation_content$two_independent$worked_example),
       hr(),
+      h4(correlation_content$two_dependent$title),
+      render_formula_block(correlation_content$two_dependent$formula_latex),
+      shiny::markdown(correlation_content$two_dependent$explanation),
+      h5("Worked example"),
+      shiny::markdown(correlation_content$two_dependent$worked_example),
+      hr(),
       h4(correlation_content$point_biserial$title),
       render_formula_block(correlation_content$point_biserial$formula_latex),
       shiny::markdown(correlation_content$point_biserial$explanation),
@@ -105,6 +118,10 @@ mod_correlation_ui <- function(id) {
       h4(correlation_content$two_independent$title),
       p(strong("Citation: "), correlation_content$two_independent$citation),
       p(strong("Implemented via: "), code(correlation_content$two_independent$backend)),
+      hr(),
+      h4(correlation_content$two_dependent$title),
+      p(strong("Citation: "), correlation_content$two_dependent$citation),
+      p(strong("Implemented via: "), code(correlation_content$two_dependent$backend)),
       hr(),
       h4(correlation_content$point_biserial$title),
       p(strong("Citation: "), correlation_content$point_biserial$citation),
@@ -137,6 +154,13 @@ mod_correlation_server <- function(id) {
           req(input$r1, input$r2)
           calc_correlation_two_independent(
             r1 = input$r1, r2 = input$r2, alpha = input$alpha, power = input$power,
+            alternative = input$alternative
+          )
+        } else if (input$design == "two_dependent") {
+          req(input$r_yx1, input$r_yx2, input$r_x1x2)
+          calc_correlation_two_dependent(
+            r_yx1 = input$r_yx1, r_yx2 = input$r_yx2, r_x1x2 = input$r_x1x2,
+            alpha = input$alpha, power = input$power,
             alternative = input$alternative
           )
         } else if (input$design == "point_biserial") {
@@ -177,6 +201,11 @@ mod_correlation_server <- function(id) {
         tagList(
           p(strong("Required sample size per group: "), v$n_per_group),
           p(sprintf("Cohen's q = %.4f", v$q))
+        )
+      } else if (res$design == "two_dependent") {
+        tagList(
+          p(strong("Required sample size: "), v$n),
+          p(sprintf("Fisher z' covariance c = %.4f", v$c))
         )
       } else if (res$design == "point_biserial") {
         tagList(

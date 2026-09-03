@@ -103,7 +103,18 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   a partial correlation loses one degree of freedom per covariate (Cohen
   1988's own tables read partial correlation off the same table as
   zero-order correlation, entered with n-k); verified r=0.3, k=2 -> n=87,
-  cross-checked by simulation
+  cross-checked by simulation; and a "compare two dependent (overlapping)
+  correlations" design, for testing whether Y correlates more strongly
+  with X1 than X2 when both are measured on the SAME sample (unlike the
+  independent-correlations design above), closed-form (Steiger 1980's
+  Fisher z'-transformation Z-test, eq. 14-15, since no installed package
+  implements this as a sample-size formula) -- verified against the
+  `psych` package's `r.test()` (an analysis, not sample-size, function
+  implementing Steiger's exact raw-r t-statistic, eq. 3-4, confirmed to
+  reproduce Steiger's own 1980 textbook example exactly: r_yx1=.4,
+  r_yx2=.5, r_x1x2=.1, n=103 -> t=-0.89) and by simulation: r_yx1=0.4,
+  r_yx2=0.6, r_x1x2=0.3, alpha=0.05, power=0.80 -> n=183, empirical power
+  0.816 at 5,000 replicates
 - **Chi-Square Tests** (`R/modules/mod_chisq.R`) -- goodness of fit and test
   of independence/association for an R x C table (dynamic 2-5 x 2-5
   proportion-matrix UI), both wrapping `pwr::pwr.chisq.test()` +

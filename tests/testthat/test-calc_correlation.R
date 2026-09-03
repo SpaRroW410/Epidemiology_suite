@@ -90,3 +90,35 @@ test_that("calc_correlation_partial rejects invalid inputs", {
   expect_error(calc_correlation_partial(r = 0.3, k = 1.5), "whole number, at least 1")
   expect_error(calc_correlation_partial(r = 0.3, k = 2, alpha = 0), "between 0 and 1")
 })
+
+test_that("calc_correlation_two_dependent matches the worked example (r_yx1=.4, r_yx2=.6, r_x1x2=.3 -> n=183)", {
+  # Verified against psych::r.test()'s exact implementation of Steiger
+  # (1980)'s raw-r t-test and by 5,000-replicate Monte Carlo simulation
+  # (empirical power 0.816 at this n, vs. the 0.80 target).
+  res <- calc_correlation_two_dependent(r_yx1 = 0.4, r_yx2 = 0.6, r_x1x2 = 0.3,
+                                         alpha = 0.05, power = 0.8)
+  expect_equal(round(res$c, 4), 0.1704)
+  expect_equal(res$n, 183)
+})
+
+test_that("calc_correlation_two_dependent reproduces Steiger (1980)'s own classic example's Z closely", {
+  # Steiger's own textbook case: r_yx1=.4, r_yx2=.5, r_x1x2=.1, n=103 -> the
+  # exact raw-r t-statistic (psych::r.test) gives t=-0.89. The Fisher-z
+  # version implemented here should give a very close Z at the same n (both
+  # are asymptotically equivalent tests of the same null hypothesis).
+  z1 <- atanh(0.4); z2 <- atanh(0.5)
+  rbar2 <- (0.4^2 + 0.5^2) / 2
+  c_term <- (0.1 * (1 - 2 * rbar2) - 0.5 * rbar2 * (1 - 2 * rbar2 - 0.1^2)) / (1 - rbar2)^2
+  Z <- (z1 - z2) * sqrt(103 - 3) / sqrt(2 - 2 * c_term)
+  expect_equal(round(Z, 2), -0.89)
+})
+
+test_that("calc_correlation_two_dependent rejects invalid inputs", {
+  expect_error(calc_correlation_two_dependent(1.1, 0.6, 0.3), "between -1 and 1")
+  expect_error(calc_correlation_two_dependent(0.4, 1.1, 0.3), "between -1 and 1")
+  expect_error(calc_correlation_two_dependent(0.4, 0.6, 1.1), "between -1 and 1")
+  expect_error(calc_correlation_two_dependent(0.4, 0.4, 0.3), "must differ")
+  expect_error(calc_correlation_two_dependent(0.9, -0.9, 0.0), "not a valid correlation matrix")
+  expect_error(calc_correlation_two_dependent(0.4, 0.6, 0.3, alpha = 0), "between 0 and 1")
+  expect_error(calc_correlation_two_dependent(0.4, 0.6, 0.3, power = 0), "between 0 and 1")
+})

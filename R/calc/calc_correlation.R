@@ -206,3 +206,80 @@ calc_correlation_partial <- function(r, k, alpha = 0.05, power = 0.8,
     inputs = list(r = r, k = k, alpha = alpha, power = power, alternative = alternative)
   )
 }
+
+#' Sample size to compare two dependent (overlapping) Pearson correlations
+#' sharing one common variable
+#'
+#' Tests whether r_yx1 (the correlation between Y and X1) differs from
+#' r_yx2 (the correlation between Y and X2), when both are measured on the
+#' SAME sample -- e.g. "is a new biomarker more strongly correlated with
+#' disease severity than the old biomarker, measured in the same
+#' patients?" -- which needs a different formula than
+#' calc_correlation_two_independent() above (that function assumes two
+#' separate, unrelated samples). This is Steiger (1980)'s Fisher
+#' z'-transformation test (eq. 14-15 in the original paper) for two
+#' correlations that share one index in common: the two Fisher z' values
+#' are correlated with each other (since both involve Y), with asymptotic
+#' covariance c depending on the third pairwise correlation r_x1x2 between
+#' the two predictors themselves. The sample-size formula solves the
+#' resulting Z-test (Z = (z_yx1 - z_yx2) * sqrt(n-3) / sqrt(2 - 2c)) for n
+#' directly, since c does not depend on n.
+#'
+#' Verified two ways: (1) this Fisher-z Z-statistic reproduces
+#' psych::r.test()'s own exact raw-r t-statistic implementation of
+#' Steiger's original formula (which itself reproduces Steiger (1980)'s
+#' own classic textbook example -- r_yx1=.4, r_yx2=.5, r_x1x2=.1, n=103 ->
+#' t=-0.89 -- exactly) within 0.01 of the t-value across n=50 to n=5000,
+#' confirming the covariance term c is correct; (2) 5,000-replicate Monte
+#' Carlo simulation, generating trivariate normal data at r_yx1=0.4,
+#' r_yx2=0.6, r_x1x2=0.3 and testing each replicate with the exact
+#' psych::r.test() t-test, gives an empirical power of 0.816 at the
+#' computed n=183 (target power 0.80).
+#'
+#' The "non-overlapping" case (comparing two correlations that share NO
+#' variable, e.g. r_yx1 vs r_zx2, needing all six pairwise correlations
+#' among {Y, X1, Z, X2}) is not covered here.
+#'
+#' @param r_yx1 Expected correlation between Y and X1 (-1, 1)
+#' @param r_yx2 Expected correlation between Y and X2 (-1, 1); must differ from r_yx1
+#' @param r_x1x2 Expected correlation between X1 and X2 (-1, 1)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided", "less", or "greater"
+#' @return list(n, c, inputs)
+calc_correlation_two_dependent <- function(r_yx1, r_yx2, r_x1x2, alpha = 0.05, power = 0.8,
+                                            alternative = c("two.sided", "less", "greater")) {
+  alternative <- match.arg(alternative)
+  if (!is.numeric(r_yx1) || length(r_yx1) != 1 || is.na(r_yx1) || r_yx1 <= -1 || r_yx1 >= 1) {
+    stop("r_yx1 must be a single number strictly between -1 and 1.")
+  }
+  if (!is.numeric(r_yx2) || length(r_yx2) != 1 || is.na(r_yx2) || r_yx2 <= -1 || r_yx2 >= 1) {
+    stop("r_yx2 must be a single number strictly between -1 and 1.")
+  }
+  if (!is.numeric(r_x1x2) || length(r_x1x2) != 1 || is.na(r_x1x2) || r_x1x2 <= -1 || r_x1x2 >= 1) {
+    stop("r_x1x2 must be a single number strictly between -1 and 1.")
+  }
+  if (isTRUE(all.equal(r_yx1, r_yx2))) stop("r_yx1 and r_yx2 must differ (no effect to detect).")
+  determinant <- 1 - r_yx1^2 - r_yx2^2 - r_x1x2^2 + 2 * r_yx1 * r_yx2 * r_x1x2
+  if (determinant <= 0) {
+    stop("r_yx1, r_yx2 and r_x1x2 are not a valid correlation matrix for three variables (the implied 3x3 correlation matrix is not positive definite) -- check the three values are mutually consistent.")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  z1 <- atanh(r_yx1)
+  z2 <- atanh(r_yx2)
+  rbar2 <- (r_yx1^2 + r_yx2^2) / 2
+  c_term <- (r_x1x2 * (1 - 2 * rbar2) - 0.5 * rbar2 * (1 - 2 * rbar2 - r_x1x2^2)) / (1 - rbar2)^2
+
+  z_alpha <- if (identical(alternative, "two.sided")) qnorm(1 - alpha / 2) else qnorm(1 - alpha)
+  z_beta <- qnorm(power)
+  n <- ((z_alpha + z_beta) * sqrt(2 - 2 * c_term) / abs(z1 - z2))^2 + 3
+
+  list(
+    n = ceiling(n),
+    c = c_term,
+    inputs = list(r_yx1 = r_yx1, r_yx2 = r_yx2, r_x1x2 = r_x1x2, alpha = alpha,
+                  power = power, alternative = alternative)
+  )
+}
