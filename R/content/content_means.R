@@ -364,5 +364,61 @@ means_content <- list(
       "size formula."
     ),
     backend = "TrialSize::OneWayANOVA.pairwise()"
+  ),
+
+  welch = list(
+    title = "Two Independent Means, Unequal Variances (Welch's t-test)",
+    formula_latex = paste0(
+      "$$n_1 = \\frac{\\left(Z_{1-\\alpha/2} + Z_{1-\\beta}\\right)^2 ",
+      "\\left(\\sigma_1^2 + \\sigma_2^2/r\\right)}{(\\mu_1-\\mu_2)^2}, ",
+      "\\quad n_2 = r\\,n_1$$"
+    ),
+    explanation = paste(
+      "Use this instead of the plain \"Two independent means\" design when",
+      "the two groups are expected to have genuinely *different*",
+      "variability (not just different sample sizes) -- e.g. a new",
+      "treatment that's expected to also change how consistent the",
+      "response is, not just its average. Welch's t-test (the default",
+      "two-sample t-test in R and most modern software) doesn't assume",
+      "equal variances the way the classic pooled-variance t-test does.",
+      "",
+      "- **mu1, mu2** - the expected means in group 1 and group 2.",
+      "- **sd1, sd2** - the expected standard deviations in group 1 and",
+      "  group 2 (allowed to differ).",
+      "- **alpha, power** - as elsewhere.",
+      "- **ratio** - group 2 size divided by group 1 size (1 = equal",
+      "  allocation).",
+      "",
+      "No installed package provides this formula directly (`MESS`",
+      "package would, but isn't installed and this sandbox has no CRAN",
+      "access to add it), so this uses the standard large-sample normal",
+      "approximation from the sample-size literature (e.g. Julious 2004;",
+      "Rosner's Fundamentals of Biostatistics): the same idea as the",
+      "pooled-variance formula elsewhere in this app, except the two",
+      "variances are kept separate rather than pooled into one -- exactly",
+      "how Welch's t-test itself treats them. When sigma1 = sigma2, this",
+      "formula reduces algebraically to exactly the pooled-variance",
+      "formula.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Sanity check (equal variances): sigma1 = sigma2 = 0.1, mu1 = 0.05,",
+      "mu2 = 0.10, alpha = 0.05, power = 0.80 reproduces",
+      "`TrialSize::TwoSampleMean.Equality()`'s own documented example",
+      "exactly (n = 63 per group). For genuinely unequal variances: mu1 =",
+      "0, mu2 = 0.5, sigma1 = 1, sigma2 = 2, alpha = 0.05 (two-sided), 80%",
+      "power, equal allocation -- this calculator returns n = 157 per",
+      "group (314 total), independently confirmed by simulation: running",
+      "R's own Welch t-test (`stats::t.test(var.equal = FALSE)`) on 5,000",
+      "replicates at this n gives an empirical power of 0.793, closely",
+      "matching the 0.80 target.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Julious SA. Sample sizes for clinical trials with Normal data.",
+      "Stat Med. 2004;23(12):1921-1986; Rosner B. Fundamentals of",
+      "Biostatistics. 8th ed. Cengage Learning; 2015."
+    ),
+    backend = "closed-form (normal approximation, unpooled variances); no external package required"
   )
 )

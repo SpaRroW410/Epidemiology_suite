@@ -122,6 +122,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Means",
        module_input_id = "means-design", design_value = "two_sample_unequal_n"),
 
+  list(key = "means_welch",
+       label = "Two independent means, unequal variances (Welch's t-test)",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to detect a",
+         "difference between two independent groups' means, when the two",
+         "groups are expected to have genuinely different variability",
+         "(not just different sample sizes)?\""
+       ),
+       outcome_type = "means_welch", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Means",
+       module_input_id = "means-design", design_value = "welch"),
+
   list(key = "means_two_dep", label = "Two paired means (e.g. pre-post)",
        answers = "Answers: \"How many subjects do I need to detect a change in mean within the same subjects (pre-post)?\"",
        outcome_type = "mean", groups = "2", dependency = "dependent", reference_based = NA,
@@ -1046,7 +1058,7 @@ study_design_families <- list(
   list(id = "means", label = "Means",
        hint = "Comparing a continuous measurement within or between groups.",
        catalog_keys = c("means_single_precision", "means_single", "means_two_indep",
-                         "means_two_indep_unequal_n", "means_two_dep", "means_k",
+                         "means_two_indep_unequal_n", "means_welch", "means_two_dep", "means_k",
                          "means_planned_contrast", "means_posthoc_pairwise")),
   list(id = "case_control", label = "Case-Control",
        hint = "Case-control study (unmatched, matched, nested, or case-cohort), odds ratio or hazard ratio based.",
@@ -1153,9 +1165,9 @@ study_design_families <- list(
 # study_design_families.
 test_families <- list(
   list(id = "t_tests", label = "t Tests",
-       hint = "Comparing one or two means, a Bonferroni-adjusted post-hoc pairwise comparison, or a point-biserial correlation (Student's t framework).",
+       hint = "Comparing one or two means (incl. Welch's unequal-variance test), a Bonferroni-adjusted post-hoc pairwise comparison, or a point-biserial correlation (Student's t framework).",
        catalog_keys = c("means_single", "means_two_indep",
-                         "means_two_indep_unequal_n", "means_two_dep",
+                         "means_two_indep_unequal_n", "means_welch", "means_two_dep",
                          "means_posthoc_pairwise", "correlation_point_biserial")),
   list(id = "z_tests", label = "z Tests",
        hint = "Comparing proportions (incl. a Bonferroni-adjusted post-hoc pairwise comparison), or a logistic-regression predictor's effect (normal-approximation framework).",

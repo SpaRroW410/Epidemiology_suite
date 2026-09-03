@@ -30,6 +30,7 @@ mod_means_ui <- function(id) {
           "Single mean vs. known/reference value (hypothesis test)" = "single",
           "Two independent means" = "two_sample",
           "Two independent means, unequal group sizes" = "two_sample_unequal_n",
+          "Two independent means, unequal variances (Welch's t-test)" = "welch",
           "Two paired means (before-after, matched pairs)" = "paired",
           "Three or more independent groups (one-way ANOVA)" = "anova",
           "Planned linear contrast (k-group means)" = "planned_contrast",
@@ -77,6 +78,17 @@ mod_means_ui <- function(id) {
                      value = 90, min = 2, step = 1)
       ),
       conditionalPanel(
+        condition = design_is("welch"),
+        numericInput(ns("mu1_welch"), "mu1 (group 1 mean)", value = 0),
+        numericInput(ns("mu2_welch"), "mu2 (group 2 mean)", value = 0.5),
+        numericInput(ns("sd1_welch"), "sd1 (group 1 standard deviation)",
+                     value = 1, min = 0.0001),
+        numericInput(ns("sd2_welch"), "sd2 (group 2 standard deviation)",
+                     value = 2, min = 0.0001),
+        numericInput(ns("ratio_welch"), "Allocation ratio (group 2 : group 1)",
+                     value = 1, min = 0.1, step = 0.1)
+      ),
+      conditionalPanel(
         condition = design_is("paired"),
         numericInput(ns("mean_diff"), "Mean of the paired differences", value = 2),
         numericInput(ns("sd_diff"), "SD of the paired differences",
@@ -117,7 +129,7 @@ mod_means_ui <- function(id) {
         numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
       ),
       conditionalPanel(
-        condition = design_is("single", "two_sample", "two_sample_unequal_n", "paired"),
+        condition = design_is("single", "two_sample", "two_sample_unequal_n", "welch", "paired"),
         selectInput(
           ns("alternative"), "Alternative hypothesis",
           choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
@@ -153,6 +165,12 @@ mod_means_ui <- function(id) {
       shiny::markdown(means_content$two_sample_unequal_n$explanation),
       h5("Worked example"),
       shiny::markdown(means_content$two_sample_unequal_n$worked_example),
+      hr(),
+      h4(means_content$welch$title),
+      render_formula_block(means_content$welch$formula_latex),
+      shiny::markdown(means_content$welch$explanation),
+      h5("Worked example"),
+      shiny::markdown(means_content$welch$worked_example),
       hr(),
       h4(means_content$paired$title),
       render_formula_block(means_content$paired$formula_latex),
@@ -196,6 +214,10 @@ mod_means_ui <- function(id) {
       h4(means_content$two_sample_unequal_n$title),
       p(strong("Citation: "), means_content$two_sample_unequal_n$citation),
       p(strong("Implemented via: "), code(means_content$two_sample_unequal_n$backend)),
+      hr(),
+      h4(means_content$welch$title),
+      p(strong("Citation: "), means_content$welch$citation),
+      p(strong("Implemented via: "), code(means_content$welch$backend)),
       hr(),
       h4(means_content$paired$title),
       p(strong("Citation: "), means_content$paired$citation),
@@ -341,6 +363,17 @@ mod_means_server <- function(id) {
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
+      } else if (input$design == "welch") {
+        req(input$mu1_welch, input$mu2_welch, input$sd1_welch, input$sd2_welch, input$ratio_welch)
+        tryCatch(
+          list(ok = TRUE, value = calc_means_welch(
+            mu1 = input$mu1_welch, mu2 = input$mu2_welch,
+            sd1 = input$sd1_welch, sd2 = input$sd2_welch,
+            ratio = input$ratio_welch, alpha = input$alpha, power = input$power,
+            alternative = input$alternative
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
       } else {
         req(input$mean_diff, input$sd_diff)
         tryCatch(
@@ -393,6 +426,11 @@ mod_means_server <- function(id) {
       } else if (input$design == "posthoc_pairwise") {
         tagList(
           p(strong("Required sample size per group (this pair): "), v$n_per_group)
+        )
+      } else if (input$design == "welch") {
+        tagList(
+          p(strong("Required sample size: "), sprintf("n1 = %d, n2 = %d", v$n1, v$n2)),
+          p(strong("Total sample size: "), v$n_total)
         )
       } else {
         tagList(

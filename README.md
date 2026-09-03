@@ -40,7 +40,16 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   both post-hoc designs' formulas were independently re-derived from the
   standard two-sample sample-size formula with alpha/tau in place of
   alpha, since neither package function's own documentation prints a
-  numeric worked answer
+  numeric worked answer; plus a Welch's-t-test (unequal-variance)
+  independent-means design, `calc_means_welch()` -- `MESS::power_t_test()`
+  isn't installed and this sandbox has no CRAN access to add it, so this
+  keeps the two group variances separate in the noncentrality calculation
+  rather than pooling them (the standard large-sample normal-approximation
+  formula, Julious 2004; Rosner), verified two ways: with equal variances
+  it reduces exactly to `TrialSize::TwoSampleMean.Equality()`'s own
+  documented example (n=63), and for unequal variances (sigma1=1,
+  sigma2=2) a Monte Carlo simulation using R's own Welch t-test confirmed
+  empirical power 0.793 against the 0.80 target at n=157/group
 - **Diagnostic Accuracy** (`R/modules/mod_diagnostic.R`) -- sensitivity &
   specificity, precision-based or vs. a known/reference value, comparing
   two diagnostic tests (unpaired or paired), all per Akoglu (2022)'s
