@@ -589,6 +589,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Logistic Regression",
        module_input_id = "logistic-design", design_value = "continuous"),
 
+  list(key = "logistic_ordinal",
+       label = "Ordinal (proportional odds) regression, two groups",
+       answers = paste(
+         "Answers: \"How many subjects do I need to compare two groups on",
+         "an ordinal outcome with 3 or more ordered categories (e.g. a",
+         "pain severity scale), via a proportional-odds model?\""
+       ),
+       outcome_type = "ordinal", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Logistic Regression",
+       module_input_id = "logistic-design", design_value = "ordinal"),
+
   list(key = "rm_anova_between",
        label = "Repeated-measures ANOVA -- between-subjects effect",
        answers = paste(
@@ -1212,8 +1223,9 @@ study_design_families <- list(
                          "group_sequential_normal", "group_sequential_binary",
                          "group_sequential_survival")),
   list(id = "regression", label = "Regression",
-       hint = "Testing whether a multiple regression model explains more variance than chance, whether adding predictors increases R-squared, or a logistic regression predictor's effect.",
-       catalog_keys = c("regression_r2", "regression_r2_increase", "logistic_binary", "logistic_continuous")),
+       hint = "Testing whether a multiple regression model explains more variance than chance, whether adding predictors increases R-squared, a logistic regression predictor's effect, or two groups on an ordinal outcome (proportional odds).",
+       catalog_keys = c("regression_r2", "regression_r2_increase", "logistic_binary",
+                         "logistic_continuous", "logistic_ordinal")),
   list(id = "anova_general", label = "Factorial ANOVA / ANCOVA",
        hint = "Main effects, interactions, or covariate-adjusted group effects via the general linear model F-test.",
        catalog_keys = c("anova_general")),
@@ -1264,9 +1276,10 @@ test_families <- list(
                          "means_two_indep_unequal_n", "means_welch", "means_two_dep",
                          "means_posthoc_pairwise", "correlation_point_biserial")),
   list(id = "z_tests", label = "z Tests",
-       hint = "Comparing proportions (incl. a Bonferroni-adjusted post-hoc pairwise comparison), or a logistic-regression predictor's effect (normal-approximation framework).",
+       hint = "Comparing proportions (incl. a Bonferroni-adjusted post-hoc pairwise comparison), a logistic-regression predictor's effect, or two groups on an ordinal outcome via proportional-odds regression (all normal-approximation frameworks).",
        catalog_keys = c("proportion_single", "proportion_two_indep",
-                         "proportion_posthoc_pairwise", "logistic_binary", "logistic_continuous")),
+                         "proportion_posthoc_pairwise", "logistic_binary",
+                         "logistic_continuous", "logistic_ordinal")),
   list(id = "f_tests", label = "F Tests",
        hint = "One-way/factorial ANOVA, ANCOVA, multiple regression (incl. hierarchical R-squared increase), repeated-measures/mixed ANOVA, and planned linear contrasts (general linear model F-test framework).",
        catalog_keys = c("means_k", "regression_r2", "regression_r2_increase", "anova_general",

@@ -288,7 +288,14 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   regression with a binary or continuous predictor, wrapping
   `powerMediation::SSizeLogisticBin()`/`SSizeLogisticCon()` (Hsieh, Bloch
   & Larsen 1998) rather than `WebPower::wp.logistic`; `powerMediation`
-  has zero package dependencies
+  has zero package dependencies; plus ordinal (proportional odds)
+  regression comparing two groups on an outcome with 3+ ordered
+  categories, wrapping `Hmisc::posamsize()` (Whitehead 1993) -- verified
+  exactly against Hmisc's own documented example (a back-pain severity
+  study, 4 categories, p=(0.1,0.2,0.4,0.3), odds ratio=1.2, equal
+  allocation, alpha=0.05, power=0.80 -> n=3149, efficiency 0.90 relative
+  to a continuous response; cross-checked via `Hmisc::popower()` at
+  n=3148, reproducing power=0.80 exactly)
 - **Self-Controlled Case Series** (`R/modules/mod_sccs.R`) -- sample size
   for an SCCS study of a transient exposure's association with an event,
   with an optional age-effect stratification (Musonda, Farrington &
