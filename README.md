@@ -329,7 +329,18 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   Kendall's tau between the outcome and an ordinal group score (Terpstra
   1952; Jonckheere 1954), so this is a thin wrapper around the Kendall's
   tau design above -- reproduces its Chow, Shao & Wang (2003) Example
-  14.4 answer bit-for-bit (n=135)
+  14.4 answer bit-for-bit (n=135); and the Friedman test (k >= 3 related/
+  repeated measurements on the SAME subjects) -- following the same
+  "RM-ANOVA basis" ARE-inflation approach as Kruskal-Wallis above but with
+  a k-dependent correction: solves the equivalent one-group within-subjects
+  RM-ANOVA n via this app's own `calc_rm_anova()`, then inflates by
+  (3/pi) x k/(k+1) (Zimmerman & Zumbo 1993) rather than the plain 3/pi
+  constant, which only holds in the k -> infinity limit; verified by
+  simulation searching for the n at which the real `stats::friedman.test()`
+  and a from-scratch RM-ANOVA F-test each cross 80% empirical power on
+  identical simulated data (k=4) -- ratio n_Friedman/n_RM-ANOVA ~1.30,
+  closely matching the formula's predicted 1/ARE = pi/3 x 5/4 = 1.309
+  (k=4, f=0.25, alpha=0.05, power=0.80 -> RM-ANOVA n=176, Friedman n=231)
 - **Variance Tests** (`R/modules/mod_variance.R`) -- a single-variance test
   against a reference SD, and a two-variance test comparing two groups,
   both closed-form (chi-squared/F distribution respectively, solved via

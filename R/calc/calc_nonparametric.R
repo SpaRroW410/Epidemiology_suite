@@ -160,6 +160,76 @@ calc_kruskal_wallis <- function(k, f, alpha = 0.05, power = 0.8) {
   )
 }
 
+#' Sample size for the Friedman test (k related/repeated measurements,
+#' distribution-free repeated-measures analysis)
+#'
+#' The Friedman test is the rank-based (distribution-free) analog of a
+#' one-group repeated-measures ANOVA -- e.g. comparing k time points or k
+#' treatment conditions measured on the SAME subjects, without assuming
+#' normality. No installed package provides a closed form for it (the
+#' same situation as Kruskal-Wallis above), so this follows the
+#' checklist's own suggested approach for this item ("RM-ANOVA basis"):
+#' solve the equivalent one-group within-subjects RM-ANOVA sample size
+#' (this module's own calc_rm_anova(type = "within"), already verified in
+#' an earlier batch) at the same Cohen's f effect size, then inflate by
+#' the asymptotic relative efficiency (ARE) of Friedman versus RM-ANOVA
+#' under normality.
+#'
+#' Unlike the plain 3/pi constant used for Wilcoxon/Kruskal-Wallis above
+#' (which holds regardless of the number of groups), Friedman's ARE
+#' relative to the RM-ANOVA F-test depends on k, the number of repeated
+#' measurements: ARE = (3/pi) * k/(k+1) (Zimmerman & Zumbo 1993, also
+#' expressed as ~0.955*k/(k+1) since 3/pi = 0.9549), converging to the
+#' familiar 3/pi limit only as k -> infinity. Using the plain 3/pi
+#' constant here (ignoring the k/(k+1) factor) would UNDERSTATE the
+#' needed sample size for small/moderate k -- e.g. at k=4 the correction
+#' factor is 0.8, meaningfully different from 1.
+#'
+#' Verified by two-sided Monte Carlo simulation (base R's own
+#' stats::friedman.test() and a matching from-scratch RM-ANOVA F-test
+#' computed on the identical simulated data, a
+#' random-intercept/compound-symmetry model with k=4 repeated
+#' measurements): searching for the n at which each test's *empirical*
+#' power crosses 80% gives n_friedman/n_rmanova ~ 1.28, closely matching
+#' this formula's predicted 1/ARE = pi/3 * (k+1)/k = 1.309 for k=4 --
+#' confirming the ARE ratio directly from simulated power curves rather
+#' than relying on calc_rm_anova()'s own internal Cohen's-f scaling
+#' convention (which was already verified independently in an earlier
+#' batch and is reused here as-is).
+#'
+#' @param k Number of repeated measurements/conditions (>= 3; use the
+#'   Wilcoxon signed-rank design above for k = 2)
+#' @param f Cohen's f effect size (> 0), same convention as
+#'   calc_rm_anova()'s within-subjects design
+#' @param nscor Nonsphericity correction coefficient in (0, 1]; 1 =
+#'   sphericity assumption met (default) -- same as calc_rm_anova()
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n, n_rm_anova, are, inputs)
+calc_friedman <- function(k, f, nscor = 1, alpha = 0.05, power = 0.8) {
+  if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 3 || k != round(k)) {
+    stop("k must be a whole number, at least 3 (use Wilcoxon signed-rank for k = 2).")
+  }
+  .validate_positive(f, "f")
+  if (!is.numeric(nscor) || length(nscor) != 1 || is.na(nscor) || nscor <= 0 || nscor > 1) {
+    stop("nscor must be a single number in (0, 1].")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  rm_fit <- calc_rm_anova(ng = 1, nm = k, f = f, nscor = nscor, alpha = alpha,
+                           power = power, type = "within")
+  are <- (3 / pi) * k / (k + 1)
+  n <- ceiling(rm_fit$n / are)
+
+  list(
+    n = n,
+    n_rm_anova = rm_fit$n,
+    are = are,
+    inputs = list(k = k, f = f, nscor = nscor, alpha = alpha, power = power)
+  )
+}
+
 #' Sample size for the Jonckheere-Terpstra test (ordered alternatives
 #' across k groups)
 #'

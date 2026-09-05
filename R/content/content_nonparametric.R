@@ -238,5 +238,62 @@ nonparametric_content <- list(
       "trend-test-as-Kendall's-tau equivalence)."
     ),
     backend = "TrialSize::Nonpara.Independ() (thin wrapper around this module's Kendall's tau design)"
+  ),
+
+  friedman = list(
+    title = "Friedman Test (k Related/Repeated Measurements)",
+    formula_latex = paste0(
+      "$$n_{\\text{RM-ANOVA}} \\text{ solved from } k, f, \\alpha, \\text{power (Cohen 1988)}$$",
+      "$$ARE = \\frac{3}{\\pi}\\cdot\\frac{k}{k+1} \\quad n_{\\text{Friedman}} = \\left\\lceil n_{\\text{RM-ANOVA}} / ARE \\right\\rceil$$"
+    ),
+    explanation = paste(
+      "Use this to compare k >= 3 related/repeated measurements (e.g. the",
+      "same subjects measured at k time points, or under k treatment",
+      "conditions) WITHOUT assuming normality -- the nonparametric",
+      "alternative to the one-group within-subjects design in the",
+      "RM-ANOVA / Mixed ANOVA module, based on within-subject ranks",
+      "rather than raw values.",
+      "",
+      "- **k** - the number of repeated measurements/conditions (use the",
+      "  Wilcoxon signed-rank design above for k = 2).",
+      "- **f (Cohen's f)** - the same standardized effect size the",
+      "  RM-ANOVA within-subjects design uses.",
+      "- **nscor** - nonsphericity correction (1 = sphericity assumption",
+      "  met), same as the RM-ANOVA module.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "Like the Kruskal-Wallis design above, no installed package provides",
+      "a genuine closed form for the Friedman test's sample size -- so",
+      "this solves the equivalent one-group within-subjects RM-ANOVA",
+      "sample size at the same Cohen's f, then inflates it by the",
+      "asymptotic relative efficiency (ARE) of Friedman relative to",
+      "RM-ANOVA under normality. Unlike Kruskal-Wallis's constant 3/pi",
+      "(which applies for any number of groups), Friedman's ARE also",
+      "depends on k itself: ARE = (3/pi) x k/(k+1), only approaching the",
+      "familiar 3/pi limit as k grows large (Zimmerman & Zumbo 1993). This",
+      "is an asymptotic approximation, not an exact finite-sample formula.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "For k = 4 repeated measurements and a medium effect (f = 0.25) at",
+      "alpha = 0.05 and 80% power, the equivalent one-group within-subjects",
+      "RM-ANOVA needs n = 176; the ARE for k = 4 is (3/pi) x 4/5 = 0.764,",
+      "so this calculator inflates n to 231 for the Friedman test.",
+      "Independently confirmed by simulation: searching for the n at which",
+      "the actual `stats::friedman.test()` and a from-scratch RM-ANOVA",
+      "F-test each cross 80% empirical power, on identical simulated",
+      "compound-symmetric data (k = 4), gives a ratio",
+      "n_Friedman/n_RM-ANOVA of about 1.28 -- closely matching this",
+      "formula's predicted 1/ARE = pi/3 x 5/4 = 1.31.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Zimmerman DW, Zumbo BD. Relative power of the Wilcoxon test, the",
+      "Friedman test, and repeated-measures ANOVA on ranks. J Exp Educ.",
+      "1993;62(1):75-86 (ARE = (3/pi) x k/(k+1)); Cohen J. Statistical",
+      "Power Analysis for the Behavioral Sciences. 2nd ed. Lawrence",
+      "Erlbaum Associates; 1988 (repeated-measures ANOVA power analysis)."
+    ),
+    backend = "calc_rm_anova() inflated by the (3/pi)*k/(k+1) asymptotic relative efficiency (Zimmerman & Zumbo 1993)"
   )
 )

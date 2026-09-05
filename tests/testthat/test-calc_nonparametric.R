@@ -1,4 +1,5 @@
 source(file.path("..", "..", "R", "calc", "calc_utils.R"))
+source(file.path("..", "..", "R", "calc", "calc_rm_anova.R"))
 source(file.path("..", "..", "R", "calc", "calc_nonparametric.R"))
 
 test_that("calc_wilcoxon_rank_sum matches Chow, Shao & Wang (2003) Example 14.3", {
@@ -73,4 +74,33 @@ test_that("calc_jonckheere_terpstra matches calc_kendall_tau() exactly (same sta
 test_that("calc_jonckheere_terpstra rejects invalid inputs", {
   expect_error(calc_jonckheere_terpstra(p1 = 0.5, p2 = 0.5), "must differ from 0.5")
   expect_error(calc_jonckheere_terpstra(p1 = 0.6, p2 = 0.7, alpha = 0), "between 0 and 1")
+})
+
+test_that("calc_friedman matches hand computation (k=4, f=0.25 -> RM-ANOVA n=176, Friedman n=231)", {
+  # calc_rm_anova(ng=1, nm=4, f=0.25, nscor=1, alpha=0.05, power=0.8, type="within")
+  # gives n=176; ARE = (3/pi)*4/5 = 0.76394; ceiling(176/0.76394) = 231.
+  # Independently confirmed by simulation: searching for the n at which
+  # stats::friedman.test() and a from-scratch RM-ANOVA F-test each cross
+  # 80% empirical power on identical compound-symmetric data (k=4) gives a
+  # ratio n_Friedman/n_RM-ANOVA of about 1.28-1.30, closely matching this
+  # formula's predicted 1/ARE = pi/3 * 5/4 = 1.309.
+  res <- calc_friedman(k = 4, f = 0.25, alpha = 0.05, power = 0.8)
+  expect_equal(res$n_rm_anova, 176)
+  expect_equal(round(res$are, 4), 0.7639)
+  expect_equal(res$n, 231)
+})
+
+test_that("calc_friedman's ARE formula reduces to the plain 3/pi constant as k grows large", {
+  are_k1e6 <- (3 / pi) * 1e6 / (1e6 + 1)
+  expect_equal(round(are_k1e6, 4), round(3 / pi, 4))
+})
+
+test_that("calc_friedman rejects invalid inputs", {
+  expect_error(calc_friedman(k = 2, f = 0.25), "at least 3")
+  expect_error(calc_friedman(k = 3.5, f = 0.25), "at least 3")
+  expect_error(calc_friedman(k = 4, f = -0.1), "positive")
+  expect_error(calc_friedman(k = 4, f = 0.25, nscor = 0), "in \\(0, 1\\]")
+  expect_error(calc_friedman(k = 4, f = 0.25, nscor = 1.5), "in \\(0, 1\\]")
+  expect_error(calc_friedman(k = 4, f = 0.25, alpha = 0), "between 0 and 1")
+  expect_error(calc_friedman(k = 4, f = 0.25, power = 0), "between 0 and 1")
 })

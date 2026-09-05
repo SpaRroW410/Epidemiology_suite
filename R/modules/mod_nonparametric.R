@@ -24,7 +24,8 @@ mod_nonparametric_ui <- function(id) {
           "Wilcoxon signed-rank (one sample / paired differences)" = "signed_rank",
           "Kendall's tau (nonparametric association)" = "kendall",
           "Kruskal-Wallis (k independent groups)" = "kruskal_wallis",
-          "Jonckheere-Terpstra (ordered alternatives)" = "jonckheere"
+          "Jonckheere-Terpstra (ordered alternatives)" = "jonckheere",
+          "Friedman (k related/repeated measurements)" = "friedman"
         ),
         selected = "rank_sum"
       ),
@@ -57,6 +58,13 @@ mod_nonparametric_ui <- function(id) {
         numericInput(ns("p1_jt"), "p1 = concordance probability (tau = 2*p1 - 1)",
                      value = 0.6, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("p2_jt"), "p2", value = 0.7, min = 0.001, max = 0.999, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("friedman"),
+        selectInput(ns("k_fr"), "Number of repeated measurements (k)", choices = 3:8, selected = 4),
+        numericInput(ns("f_fr"), "Cohen's f effect size", value = 0.25, min = 0.001, step = 0.01),
+        numericInput(ns("nscor_fr"), "Nonsphericity correction (1 = sphericity assumed)",
+                     value = 1, min = 0.01, max = 1, step = 0.01)
       ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
@@ -95,7 +103,13 @@ mod_nonparametric_ui <- function(id) {
       render_formula_block(nonparametric_content$jonckheere_terpstra$formula_latex),
       shiny::markdown(nonparametric_content$jonckheere_terpstra$explanation),
       h5("Worked example"),
-      shiny::markdown(nonparametric_content$jonckheere_terpstra$worked_example)
+      shiny::markdown(nonparametric_content$jonckheere_terpstra$worked_example),
+      hr(),
+      h4(nonparametric_content$friedman$title),
+      render_formula_block(nonparametric_content$friedman$formula_latex),
+      shiny::markdown(nonparametric_content$friedman$explanation),
+      h5("Worked example"),
+      shiny::markdown(nonparametric_content$friedman$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -118,7 +132,11 @@ mod_nonparametric_ui <- function(id) {
       hr(),
       h4(nonparametric_content$jonckheere_terpstra$title),
       p(strong("Citation: "), nonparametric_content$jonckheere_terpstra$citation),
-      p(strong("Implemented via: "), code(nonparametric_content$jonckheere_terpstra$backend))
+      p(strong("Implemented via: "), code(nonparametric_content$jonckheere_terpstra$backend)),
+      hr(),
+      h4(nonparametric_content$friedman$title),
+      p(strong("Citation: "), nonparametric_content$friedman$citation),
+      p(strong("Implemented via: "), code(nonparametric_content$friedman$backend))
     )
   )
 }
@@ -152,10 +170,16 @@ mod_nonparametric_server <- function(id) {
             k = as.integer(input$k_kw), f = input$f_kw,
             alpha = input$alpha, power = input$power
           )
-        } else {
+        } else if (input$design == "jonckheere") {
           req(input$p1_jt, input$p2_jt)
           calc_jonckheere_terpstra(
             p1 = input$p1_jt, p2 = input$p2_jt, alpha = input$alpha, power = input$power
+          )
+        } else {
+          req(input$k_fr, input$f_fr, input$nscor_fr)
+          calc_friedman(
+            k = as.integer(input$k_fr), f = input$f_fr, nscor = input$nscor_fr,
+            alpha = input$alpha, power = input$power
           )
         }
         list(ok = TRUE, design = input$design, value = value)
@@ -179,6 +203,11 @@ mod_nonparametric_server <- function(id) {
           p(strong("Required sample size per group: "), v$n_per_group),
           p(strong("Total sample size: "), v$n_total),
           p(sprintf("(Equivalent one-way ANOVA would need n = %d per group)", v$n_anova_per_group))
+        )
+      } else if (res$design == "friedman") {
+        tagList(
+          p(strong("Required sample size: "), v$n),
+          p(sprintf("(Equivalent RM-ANOVA would need n = %d; ARE = %.4f)", v$n_rm_anova, v$are))
         )
       } else {
         p(strong("Required sample size: "), v$n)
