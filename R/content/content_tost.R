@@ -160,5 +160,60 @@ tost_content <- list(
       "Int J Clin Pharmacol Ther Toxicol. 1991;29(1):1-8."
     ),
     backend = "PowerTOST::sampleN.TOST(logscale = TRUE, design = \"2x2\"/\"2x2x4\"/\"2x3x3\")"
+  ),
+
+  assurance = list(
+    title = "Bioequivalence Crossover, Expected Power (Assurance)",
+    formula_latex = paste0(
+      "$$\\text{Expected power} = E_{CV}\\!\\left[\\Pr(\\text{reject } H_0 \\mid CV)\\right], ",
+      "\\quad CV \\text{ uncertain given a prior study of } m \\text{ subjects}$$"
+    ),
+    explanation = paste(
+      "The \"Pharmacokinetic Bioequivalence Crossover\" design above treats",
+      "the assumed CV as known/fixed -- but in practice it is only an",
+      "ESTIMATE from a smaller prior or pilot study, so the usual power",
+      "calculation is conditional on that estimate happening to be exactly",
+      "right. This design instead computes the sample size needed for the",
+      "EXPECTED power (also called \"assurance\" or the \"probability of",
+      "trial success\"), averaging over the sampling uncertainty in the CV",
+      "estimate itself, given how many subjects it was based on.",
+      "",
+      "- **CV (intra-subject)** - the point estimate of the intra-subject",
+      "  coefficient of variation from the prior/pilot study.",
+      "- **Prior study size (m)** - how many subjects that prior study",
+      "  had; a CV estimated from a small pilot is itself quite uncertain,",
+      "  so smaller m inflates the required sample size more.",
+      "- **theta0, theta1, theta2, alpha, power, Design** - as in the",
+      "  fixed-CV bioequivalence design above (power here is the desired",
+      "  EXPECTED power).",
+      "",
+      "Because assurance is bounded above by the \"probability of technical",
+      "success\" (which can be well below 1 when the prior study was very",
+      "small), this design will always need at least as many subjects as",
+      "the fixed-CV design above for the same target power -- and can fail",
+      "to find a feasible n at all if the prior study was too small to",
+      "pin down the CV with any confidence.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "PowerTOST's own documented example: CV = 30% estimated from a",
+      "prior 2x2 crossover study with m = 30 subjects, default 80-125%",
+      "limits, theta0 = 0.95, alpha = 0.05 (one-sided), 80% target expected",
+      "power. This calculator returns n = 42, with an achieved expected",
+      "power of 0.8063 -- matching the package's own worked answer",
+      "exactly. Compare this to the fixed-CV design above with the",
+      "identical CV/theta0/limits, which needs only n = 40 (achieved power",
+      "0.8158): accounting for the CV's own sampling uncertainty costs 2",
+      "extra subjects here.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Julious SA, Owen RJ. Sample size calculations for clinical studies",
+      "allowing for uncertainty in variance. Pharm Stat. 2006;5:29-37;",
+      "O'Hagan A, Stevens JW, Campbell MJ. Assurance in clinical trial",
+      "design. Pharm Stat. 2005;4:187-201; Grieve AP. Confidence",
+      "intervals and sample sizes. Biometrics. 1991;47:1597-1603."
+    ),
+    backend = "PowerTOST::expsampleN.TOST(prior.type = \"CV\")"
   )
 )

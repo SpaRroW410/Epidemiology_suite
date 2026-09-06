@@ -754,6 +754,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Equivalence (TOST)",
        module_input_id = "tost-design", design_value = "bioequivalence"),
 
+  list(key = "tost_assurance",
+       label = "Bioequivalence crossover, expected power (assurance)",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a bioequivalence",
+         "crossover study, accounting for the fact that my assumed CV is",
+         "itself only an estimate from a smaller prior/pilot study?\""
+       ),
+       outcome_type = "equivalence", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Equivalence (TOST)",
+       module_input_id = "tost-design", design_value = "assurance"),
+
   list(key = "noninferiority_means",
        label = "Non-inferiority trial, two means",
        answers = paste(
@@ -1218,6 +1229,7 @@ study_design_families <- list(
        hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, non-inferiority, and group-sequential (interim-monitoring) testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",
                          "tost_means", "tost_proportions", "tost_bioequivalence",
+                         "tost_assurance",
                          "noninferiority_means", "noninferiority_proportions",
                          "noninferiority_or", "noninferiority_hr",
                          "group_sequential_normal", "group_sequential_binary",
@@ -1306,8 +1318,9 @@ test_families <- list(
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
                          "agreement_bland_altman", "agreement_ccc")),
   list(id = "equivalence_noninferiority", label = "Equivalence / Non-Inferiority Test Forms",
-       hint = "Two one-sided tests (TOST) for equivalence, non-inferiority margins, and crossover designs.",
+       hint = "Two one-sided tests (TOST) for equivalence (incl. expected-power/assurance bioequivalence), non-inferiority margins, and crossover designs.",
        catalog_keys = c("tost_means", "tost_proportions", "tost_bioequivalence",
+                         "tost_assurance",
                          "noninferiority_means", "noninferiority_proportions",
                          "noninferiority_or", "noninferiority_hr", "crossover_2x2")),
   list(id = "nonparametric_tests", label = "Nonparametric Tests",

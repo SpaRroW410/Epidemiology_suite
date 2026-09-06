@@ -64,3 +64,28 @@ test_that("calc_tost_bioequivalence rejects invalid inputs", {
   expect_error(calc_tost_bioequivalence(cv = -0.1), "positive")
   expect_error(calc_tost_bioequivalence(cv = 0.3, alpha = 1.5), "between 0 and 1")
 })
+
+test_that("calc_tost_assurance matches PowerTOST::expsampleN.TOST()'s own documented example", {
+  # PowerTOST's own doc example: CV=0.3 estimated from a prior 2x2
+  # crossover with m=30 subjects, default 0.8-1.25 limits, theta0=0.95
+  # (default), alpha=0.05, target expected power=0.8 -> n=42 (total),
+  # achieved expected power=0.806262 per the package's own example.
+  res <- calc_tost_assurance(cv = 0.3, prior_n = 30, design = "2x2")
+  expect_equal(res$n_total, 42)
+  expect_equal(round(res$achieved_expected_power, 6), 0.806262)
+})
+
+test_that("calc_tost_assurance needs at least as many subjects as the fixed-CV design for the same target power", {
+  assurance <- calc_tost_assurance(cv = 0.3, prior_n = 30, design = "2x2")
+  fixed <- calc_tost_bioequivalence(cv = 0.3, design = "2x2")
+  expect_gte(assurance$n_total, fixed$n_total)
+})
+
+test_that("calc_tost_assurance rejects invalid inputs", {
+  expect_error(calc_tost_assurance(cv = -0.1, prior_n = 30), "positive")
+  expect_error(calc_tost_assurance(cv = 0.3, prior_n = 2), "at least 4")
+  expect_error(calc_tost_assurance(cv = 0.3, prior_n = 30.5), "at least 4")
+  expect_error(calc_tost_assurance(cv = 0.3, prior_n = 30, theta0 = 1.3), "must fall strictly within")
+  expect_error(calc_tost_assurance(cv = 0.3, prior_n = 30, alpha = 0), "between 0 and 1")
+  expect_error(calc_tost_assurance(cv = 0.3, prior_n = 30, power = 0), "between 0 and 1")
+})

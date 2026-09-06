@@ -157,7 +157,15 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   approaches (wraps `PowerTOST::sampleN.TOST(logscale = TRUE)`, same
   package/citations, verified exactly against its own documented example:
   CV=30%, theta0=0.95, 80-125% limits -> n=40 for 2x2, n=20 for 2x2x4, n=30
-  for 2x3x3)
+  for 2x3x3); plus a bioequivalence crossover design based on EXPECTED
+  power (assurance / probability of trial success) rather than a
+  fixed/known CV, wrapping `PowerTOST::expsampleN.TOST(prior.type = "CV")`
+  -- averages over the sampling uncertainty in the CV estimate itself,
+  given how many subjects the prior/pilot study that produced it had;
+  verified exactly against the package's own documented example (CV=30%
+  from a prior study with m=30 subjects, same 80-125% limits and
+  theta0=0.95 -> n=42, achieved expected power=0.8063, versus n=40 for
+  the fixed-CV design on the identical inputs)
 - **Log-Rank / Survival** (`R/modules/mod_logrank.R`) -- two-arm
   time-to-event studies (required N from event probabilities), wrapping
   `powerSurvEpi::ssizeCT()` (Freedman 1982; Rosner 2006); Cox

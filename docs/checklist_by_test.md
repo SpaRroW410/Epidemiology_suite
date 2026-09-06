@@ -126,7 +126,7 @@
 ### Bayesian sample-size approaches
 
 - [ ] **[ADV]** Bayes factor design analysis — `BFDA`, `bfpwr` — *Schönbrodt & Wagenmakers*
-- [ ] **[ADV]** Assurance / expected power — `PowerTOST` (exp.* functions); PASS assurance procedures
+- [x] **[ADV]** Assurance / expected power — `PowerTOST` (exp.* functions); PASS assurance procedures — *(implemented: new "Bioequivalence crossover, expected power (assurance)" design in the Equivalence (TOST) module, `calc_tost_assurance()`, wrapping `PowerTOST::expsampleN.TOST(prior.type="CV")` -- `PowerTOST` already a project dependency (used by the module's other bioequivalence design), and literally the `exp.*` function family this checklist item names. Verified exactly against the package's own documented example: CV=0.3 estimated from a prior 2x2 crossover study with m=30 subjects, default 80-125% limits, theta0=0.95, alpha=0.05, target expected power=0.80 -> n=42, achieved expected power=0.8063 -- versus the module's existing fixed-CV design's n=40 for the identical CV/theta0/limits, confirming the expected direction (accounting for CV uncertainty needs a somewhat larger sample size))*
 - [ ] **[ADV]** Average coverage criterion; HPD interval width — `BayesianPower`
 
 ### Simulation-based power (no closed form)
