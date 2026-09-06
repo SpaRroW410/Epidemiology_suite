@@ -385,6 +385,24 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   n=170/group (340 total) unadjusted, Sidak n=240/group. Holm's
   step-down correction is not offered as a third method since its
   threshold is data-dependent (no single a priori alpha to plan against)
+- **MANOVA / Hotelling's T²** (`R/modules/mod_manova.R`) -- the two-group
+  special case of MANOVA: comparing two independent groups on p >= 1
+  continuous outcome variables JOINTLY via Hotelling's T-squared test.
+  No installed package provides a Hotelling's T² sample-size function, so
+  `calc_manova_hotelling()` reimplements the standard noncentral-F
+  approach directly (Rencher 2002; the general Vonesh & Schork 1986
+  framework), converting the squared Mahalanobis distance D² between the
+  two group mean vectors into a noncentral F(p, 2n-p-1) test -- the same
+  noncentral-F machinery this app's other F-test modules already use.
+  Verified two ways: at p=1 this formula reduces EXACTLY to the ordinary
+  two-sample t-test (D²=Cohen's d²; d=0.5, alpha=0.05, power=0.80 -> n=64,
+  bit-for-bit identical to `pwr::pwr.t.test()`); for a genuine
+  multivariate case (p=3 correlated outcomes, D²=0.1243, alpha=0.05,
+  power=0.80 -> n=178/group), a 5,000-replicate Monte Carlo simulation
+  computing the actual two-sample Hotelling's T² statistic on simulated
+  trivariate normal data gives empirical power 0.8068, closely matching
+  the 0.80 target. Global (k>2 group) MANOVA and special-effects
+  contrasts are not covered
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

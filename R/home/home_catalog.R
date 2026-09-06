@@ -1155,7 +1155,19 @@ calculator_catalog <- list(
        ),
        outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
        built = TRUE, nav_target = "Multiplicity Adjustment",
-       module_input_id = "multiplicity-design", design_value = "means_2s")
+       module_input_id = "multiplicity-design", design_value = "means_2s"),
+
+  list(key = "manova_hotelling",
+       label = "Two-group Hotelling's T-squared test (MANOVA, two groups)",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to compare two",
+         "independent groups on several continuous outcome variables",
+         "JOINTLY (e.g. several correlated symptom scores or",
+         "biomarkers), rather than testing each one separately?\""
+       ),
+       outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "MANOVA / Hotelling's T²",
+       module_input_id = NA, design_value = NA)
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -1267,7 +1279,10 @@ study_design_families <- list(
   list(id = "multiplicity", label = "Multiplicity Adjustment",
        hint = "Sample size for a one- or two-sample proportion or mean comparison after a Bonferroni/Sidak correction for several planned simultaneous comparisons.",
        catalog_keys = c("multiplicity_proportion_1s", "multiplicity_proportion_2s",
-                         "multiplicity_means_1s", "multiplicity_means_2s"))
+                         "multiplicity_means_1s", "multiplicity_means_2s")),
+  list(id = "manova", label = "MANOVA / Hotelling's T-Squared",
+       hint = "Comparing two independent groups on several continuous outcome variables jointly, rather than testing each one separately.",
+       catalog_keys = c("manova_hotelling"))
 )
 
 # Second index over the SAME calculator_catalog entries, grouped by
@@ -1337,7 +1352,10 @@ test_families <- list(
   list(id = "multiplicity_adjustment", label = "Multiplicity Adjustment",
        hint = "Bonferroni or Sidak alpha correction applied to a one- or two-sample proportion or mean test, for several planned simultaneous comparisons.",
        catalog_keys = c("multiplicity_proportion_1s", "multiplicity_proportion_2s",
-                         "multiplicity_means_1s", "multiplicity_means_2s"))
+                         "multiplicity_means_1s", "multiplicity_means_2s")),
+  list(id = "manova_tests", label = "MANOVA / Hotelling's T-Squared",
+       hint = "Two-group Hotelling's T-squared test, comparing two independent groups on several continuous outcome variables jointly.",
+       catalog_keys = c("manova_hotelling"))
 )
 
 catalog_entry <- function(key) {
