@@ -295,5 +295,64 @@ nonparametric_content <- list(
       "Erlbaum Associates; 1988 (repeated-measures ANOVA power analysis)."
     ),
     backend = "calc_rm_anova() inflated by the (3/pi)*k/(k+1) asymptotic relative efficiency (Zimmerman & Zumbo 1993)"
+  ),
+  ks_two_sample = list(
+    title = "Kolmogorov-Smirnov Test (Two Independent Samples), via Monte Carlo Simulation",
+    formula_latex = paste0(
+      "$$\\hat{\\text{power}}(n) = \\frac{1}{R}\\sum_{r=1}^{R} \\mathbb{1}\\left[",
+      "\\text{ks.test}(X_r, Y_r)_{p\\text{-value}} < \\alpha\\right]$$",
+      "$$X_r \\sim N(0,1)^{n_1}, \\quad Y_r \\sim N(\\delta,1)^{n_2}$$"
+    ),
+    explanation = paste(
+      "Unlike every other design in this module, the two-sample",
+      "Kolmogorov-Smirnov (KS) test has NO closed-form power/sample-size",
+      "formula against a general alternative -- its power depends on the",
+      "full shape of the difference between the two groups' distributions,",
+      "not a single effect-size number, so the asymptotic-relative-",
+      "efficiency shortcuts used elsewhere in this module don't apply.",
+      "This design instead does exactly what this app's own checklist",
+      "names for this situation: direct Monte Carlo simulation of the",
+      "actual test.",
+      "",
+      "- **effect_size** - a standardized mean shift between two Normal",
+      "  distributions with equal variance (comparable to Cohen's d for",
+      "  the t-test) -- a representative benchmark scenario for framing",
+      "  the KS test's sensitivity to a location shift, not a claim that",
+      "  real data will be exactly Normal. KS power for a genuinely",
+      "  different kind of distributional difference (a scale change, a",
+      "  shape change, heavy tails) will differ from what's reported here.",
+      "- **nsim** - the number of simulated datasets drawn per candidate",
+      "  sample size while searching; more replicates reduce the Monte",
+      "  Carlo sampling error in the reported n and achieved power, at the",
+      "  cost of runtime.",
+      "- **alpha, power, n_ratio** - as elsewhere.",
+      "",
+      "Because this searches by simulation, the result carries ordinary",
+      "Monte Carlo error (bigger than the negligible rounding error of a",
+      "closed-form calculation) -- re-running with a different seed or a",
+      "larger nsim will give a slightly different but converging answer.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "A medium shift (effect_size = 0.5, comparable to Cohen's d = 0.5),",
+      "alpha = 0.05, 80% power, equal groups, nsim = 500: this calculator",
+      "returns n = 91 per group (182 total), achieved simulated power",
+      "0.797. For comparison, the equivalent two-sample t-test (which IS",
+      "the optimal test against exactly this Normal location-shift",
+      "alternative) needs only n = 64/group -- the KS test's well-known",
+      "efficiency loss against a plain mean shift, since it is a",
+      "general-purpose omnibus test for ANY distributional difference,",
+      "not one tuned to detect a location shift specifically.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Massey FJ Jr. The Kolmogorov-Smirnov test for goodness of fit.",
+      "J Am Stat Assoc. 1951;46(253):68-78 (defines the two-sample KS",
+      "test statistic; no general power formula is given there or",
+      "anywhere else in the literature for an arbitrary alternative, which",
+      "is why direct simulation -- as this app's own checklist recommends",
+      "for this test -- is used here instead)."
+    ),
+    backend = "direct Monte Carlo simulation of stats::ks.test()"
   )
 )

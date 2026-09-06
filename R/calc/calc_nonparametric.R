@@ -265,3 +265,94 @@ calc_jonckheere_terpstra <- function(p1, p2, alpha = 0.05, power = 0.8) {
     inputs = list(p1 = p1, p2 = p2, alpha = alpha, power = power)
   )
 }
+
+#' Sample size for the two-sample Kolmogorov-Smirnov test, via Monte Carlo
+#' simulation
+#'
+#' Unlike the rank-based tests above, no closed-form power/sample-size
+#' formula exists for the two-sample KS test against a general
+#' alternative: its power depends on the FULL shape of the difference
+#' between the two distributions, not a single summary effect size, so
+#' asymptotic-relative-efficiency shortcuts don't apply the way they do
+#' for Wilcoxon/Kruskal-Wallis/Friedman above. This is exactly the
+#' situation this app's own checklist names "simulation (`simr`/custom
+#' Monte Carlo)" for -- so this directly simulates the actual test
+#' (repeatedly drawing two Normal samples under a location-shift
+#' alternative and running `stats::ks.test()` on each draw) rather than
+#' approximating it with any formula.
+#'
+#' The alternative used is a standardized mean shift between two Normal
+#' distributions with equal variance (comparable to Cohen's d for the
+#' t-test) -- a representative benchmark scenario, not a generality claim:
+#' true KS power for a different shape of distributional difference (a
+#' scale shift, a shape difference, a distribution with heavier tails)
+#' will differ from what this design reports.
+#'
+#' Sample size is found by exponential search (to bracket the target
+#' power) followed by bisection, evaluating empirical power at each
+#' candidate n via `nsim` replicates of the actual `ks.test()` -- so the
+#' result carries ordinary Monte Carlo sampling error, not formula error;
+#' `nsim` controls that error directly (halving as `nsim` quadruples). A
+#' fixed seed makes repeated calls with the same inputs reproducible.
+#'
+#' @param effect_size Standardized mean shift between the two Normal
+#'   distributions being compared (> 0; e.g. 0.5 for a "medium" shift,
+#'   comparable to Cohen's d)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param n_ratio Allocation ratio n2/n1 (> 0), default 1 (equal groups)
+#' @param nsim Monte Carlo replicates per sample-size candidate evaluated
+#'   during the search (>= 100; higher reduces sampling error at the cost
+#'   of runtime)
+#' @param seed RNG seed for reproducibility
+#' @return list(n1, n2, n_total, achieved_power, inputs)
+calc_ks_two_sample <- function(effect_size, alpha = 0.05, power = 0.8,
+                                n_ratio = 1, nsim = 500, seed = 20240607) {
+  .validate_positive(effect_size, "effect_size")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  .validate_positive(n_ratio, "n_ratio")
+  if (!is.numeric(nsim) || length(nsim) != 1 || is.na(nsim) || nsim < 100 || nsim != round(nsim)) {
+    stop("nsim must be a single whole number >= 100.")
+  }
+
+  empirical_power <- function(n1, reps) {
+    n2 <- max(2, round(n1 * n_ratio))
+    set.seed(seed)
+    rejections <- replicate(reps, {
+      x <- rnorm(n1, 0, 1)
+      y <- rnorm(n2, effect_size, 1)
+      suppressWarnings(ks.test(x, y)$p.value) < alpha
+    })
+    mean(rejections)
+  }
+
+  n_lo <- 5
+  n_hi <- 10
+  while (empirical_power(n_hi, nsim) < power) {
+    n_lo <- n_hi
+    n_hi <- n_hi * 2
+    if (n_hi > 20000) {
+      stop("No feasible sample size found up to 20,000 per group (effect size likely too small).")
+    }
+  }
+
+  for (i in 1:12) {
+    mid <- round((n_lo + n_hi) / 2)
+    if (mid == n_lo || mid == n_hi) break
+    if (empirical_power(mid, nsim) >= power) {
+      n_hi <- mid
+    } else {
+      n_lo <- mid
+    }
+  }
+
+  list(
+    n1 = n_hi,
+    n2 = max(2, round(n_hi * n_ratio)),
+    n_total = n_hi + max(2, round(n_hi * n_ratio)),
+    achieved_power = empirical_power(n_hi, nsim * 3),
+    inputs = list(effect_size = effect_size, alpha = alpha, power = power,
+                  n_ratio = n_ratio, nsim = nsim)
+  )
+}

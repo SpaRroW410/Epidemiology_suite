@@ -316,7 +316,14 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   study, 4 categories, p=(0.1,0.2,0.4,0.3), odds ratio=1.2, equal
   allocation, alpha=0.05, power=0.80 -> n=3149, efficiency 0.90 relative
   to a continuous response; cross-checked via `Hmisc::popower()` at
-  n=3148, reproducing power=0.80 exactly)
+  n=3148, reproducing power=0.80 exactly); plus two covariate-adjusted
+  (multiple regression) designs for the binary- and continuous-predictor
+  cases, applying Hsieh, Bloch & Larsen (1998)'s own 1/(1-R²) variance
+  inflation factor directly to the simple-model sample size above (R² =
+  the predictor of interest's squared multiple correlation with the
+  model's other covariates) -- at R²=0 both reduce exactly to the simple
+  case (n=1281 binary, n=317 continuous); at R²=0.5 the binary design's n
+  exactly doubles
 - **Self-Controlled Case Series** (`R/modules/mod_sccs.R`) -- sample size
   for an SCCS study of a transient exposure's association with an event,
   with an optional age-effect stratification (Musonda, Farrington &
@@ -367,7 +374,21 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   simulation searching for the n at which the real `stats::friedman.test()`
   and a from-scratch RM-ANOVA F-test each cross 80% empirical power on
   identical simulated data (k=4) -- ratio n_Friedman/n_RM-ANOVA ~1.30,
-  closely matching the formula's predicted 1/ARE = pi/3 x 5/4 = 1.309
+  closely matching the formula's predicted 1/ARE = pi/3 x 5/4 = 1.309;
+  plus the two-sample Kolmogorov-Smirnov test -- unlike every other
+  design in this module, no closed-form power formula exists against a
+  general alternative (KS power depends on the full shape of the
+  distributional difference, not one effect-size number), so this design
+  does exactly what this app's own checklist prescribes for it: direct
+  Monte Carlo simulation of the actual `stats::ks.test()`, under a
+  standardized-mean-shift Normal alternative comparable to Cohen's d,
+  found via exponential search then bisection over candidate n. A fixed
+  internal seed makes repeated calls with identical inputs reproducible.
+  Verified: effect_size=0.5 (medium shift), alpha=0.05, 80% power,
+  nsim=500 -> n=91/group, simulated achieved power 0.797 -- versus the
+  equivalent two-sample t-test's n=64/group, the expected efficiency loss
+  since KS is a general-purpose omnibus test, not tuned to a location
+  shift specifically
   (k=4, f=0.25, alpha=0.05, power=0.80 -> RM-ANOVA n=176, Friedman n=231)
 - **Variance Tests** (`R/modules/mod_variance.R`) -- a single-variance test
   against a reference SD, and a two-variance test comparing two groups,

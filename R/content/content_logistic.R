@@ -123,5 +123,79 @@ logistic_content <- list(
       "implemented by Hmisc::posamsize()/popower(), Frank Harrell)."
     ),
     backend = "Hmisc::posamsize()"
+  ),
+  binary_adjusted = list(
+    title = "Multiple Logistic Regression, Covariate-Adjusted -- Binary Predictor",
+    formula_latex = paste0(
+      "$$n_{\\text{multiple}} = \\frac{n_{\\text{simple}}}{1-R^2}$$"
+    ),
+    explanation = paste(
+      "Use this when the predictor of interest (binary) will be entered",
+      "into a MULTIPLE logistic regression model ALONGSIDE other",
+      "covariates (e.g. adjusting for age, sex, or baseline severity),",
+      "rather than alone. Hsieh, Bloch & Larsen (1998) -- the same paper",
+      "behind the simple binary-predictor design above -- show that the",
+      "simple-model sample size must be inflated by the variance",
+      "inflation factor 1 / (1 - R-squared), exactly the same style of",
+      "correction already used elsewhere in this app for Cox regression",
+      "(the \"squared correlation with adjustment covariate\" term in the",
+      "Log-Rank / Survival module's Cox designs).",
+      "",
+      "- **p1, p2, prop_x1** - as in the simple binary-predictor design.",
+      "- **R-squared** - the squared multiple correlation between the",
+      "  predictor of interest and the OTHER covariates in the model (0 =",
+      "  uncorrelated with the other covariates, reducing to the simple",
+      "  case; closer to 1 means the other covariates largely predict this",
+      "  one, requiring more collinearity-adjusted information).",
+      "- **alpha, power** - as elsewhere (two-sided test).",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "At R-squared = 0, this reduces EXACTLY to the simple-predictor",
+      "design's own worked example (Hsieh, Bloch & Larsen 1998, Table I:",
+      "p1=0.4, p2=0.5, prop_x1=0.5, alpha=0.05, 95% power -> n=1281). At",
+      "R-squared = 0.5, the required n exactly doubles to n=2562 -- the",
+      "variance inflation factor 1/(1-0.5) = 2, applied directly to the",
+      "already-verified simple-model n.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Hsieh FY, Bloch DA, Larsen MD. A simple method of sample size",
+      "calculation for linear and logistic regression. Stat Med.",
+      "1998;17(14):1623-1634 (variance inflation factor for multiple",
+      "covariates)."
+    ),
+    backend = "closed-form wrapper around powerMediation::SSizeLogisticBin()"
+  ),
+  continuous_adjusted = list(
+    title = "Multiple Logistic Regression, Covariate-Adjusted -- Continuous Predictor",
+    formula_latex = paste0(
+      "$$n_{\\text{multiple}} = \\frac{n_{\\text{simple}}}{1-R^2}$$"
+    ),
+    explanation = paste(
+      "Same variance-inflation adjustment as the binary-predictor version",
+      "above, applied instead to the simple continuous-predictor design.",
+      "",
+      "- **p1, or** - as in the simple continuous-predictor design.",
+      "- **R-squared** - the squared multiple correlation between the",
+      "  predictor of interest and the OTHER covariates in the model.",
+      "- **alpha, power** - as elsewhere (two-sided test).",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "At R-squared = 0, this reduces EXACTLY to the simple-predictor",
+      "design's own worked example (Hsieh, Bloch & Larsen 1998, Table II:",
+      "p1=0.5, OR=exp(0.405), alpha=0.05, 95% power -> n=317). At",
+      "R-squared = 0.3, the required n is the same n divided by 0.7,",
+      "matching the variance inflation factor exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Hsieh FY, Bloch DA, Larsen MD. A simple method of sample size",
+      "calculation for linear and logistic regression. Stat Med.",
+      "1998;17(14):1623-1634 (variance inflation factor for multiple",
+      "covariates)."
+    ),
+    backend = "closed-form wrapper around powerMediation::SSizeLogisticCon()"
   )
 )

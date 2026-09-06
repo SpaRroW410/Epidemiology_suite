@@ -104,3 +104,29 @@ test_that("calc_friedman rejects invalid inputs", {
   expect_error(calc_friedman(k = 4, f = 0.25, alpha = 0), "between 0 and 1")
   expect_error(calc_friedman(k = 4, f = 0.25, power = 0), "between 0 and 1")
 })
+
+test_that("calc_ks_two_sample finds a sample size close to its own simulated target power (reproducible via fixed seed)", {
+  # Two independent runs with identical inputs (same fixed internal seed)
+  # must return bit-for-bit identical results.
+  res1 <- calc_ks_two_sample(effect_size = 0.5, alpha = 0.05, power = 0.8, nsim = 500)
+  res2 <- calc_ks_two_sample(effect_size = 0.5, alpha = 0.05, power = 0.8, nsim = 500)
+  expect_identical(res1, res2)
+
+  # The final achieved power (estimated with 3x the search nsim) should be
+  # close to the 0.80 target -- Monte Carlo tolerance, not exact equality.
+  expect_true(abs(res1$achieved_power - 0.8) < 0.05)
+  expect_equal(res1$n_total, res1$n1 + res1$n2)
+})
+
+test_that("calc_ks_two_sample needs a larger n for a smaller effect size", {
+  res_small <- calc_ks_two_sample(effect_size = 0.3, alpha = 0.05, power = 0.8, nsim = 500)
+  res_large <- calc_ks_two_sample(effect_size = 0.8, alpha = 0.05, power = 0.8, nsim = 500)
+  expect_gt(res_small$n1, res_large$n1)
+})
+
+test_that("calc_ks_two_sample rejects invalid inputs", {
+  expect_error(calc_ks_two_sample(effect_size = -0.5), "positive")
+  expect_error(calc_ks_two_sample(effect_size = 0.5, alpha = 0), "between 0 and 1")
+  expect_error(calc_ks_two_sample(effect_size = 0.5, power = 0), "between 0 and 1")
+  expect_error(calc_ks_two_sample(effect_size = 0.5, nsim = 50), "nsim must be a single whole number")
+})

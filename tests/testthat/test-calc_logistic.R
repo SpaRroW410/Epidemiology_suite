@@ -47,3 +47,42 @@ test_that("calc_ordinal_proportional_odds rejects invalid inputs", {
   expect_error(calc_ordinal_proportional_odds(p = c(.5, .5), odds_ratio = 1.2, alpha = 0), "between 0 and 1")
   expect_error(calc_ordinal_proportional_odds(p = c(.5, .5), odds_ratio = 1.2, power = 0), "between 0 and 1")
 })
+
+test_that("calc_logistic_binary_adjusted reduces exactly to the simple case at r2=0 and inflates correctly", {
+  # Hsieh, Bloch & Larsen (1998), Table I: p1=0.4, p2=0.5, prop_x1=0.5,
+  # alpha=0.05, 95% power -> n=1281 (already verified for the simple case).
+  base <- calc_logistic_binary(p1 = 0.4, p2 = 0.5, prop_x1 = 0.5, alpha = 0.05, power = 0.95)
+  at_zero <- calc_logistic_binary_adjusted(p1 = 0.4, p2 = 0.5, prop_x1 = 0.5, r2 = 0,
+                                            alpha = 0.05, power = 0.95)
+  expect_equal(at_zero$n, base$n)
+  expect_equal(at_zero$n, 1281)
+
+  doubled <- calc_logistic_binary_adjusted(p1 = 0.4, p2 = 0.5, prop_x1 = 0.5, r2 = 0.5,
+                                            alpha = 0.05, power = 0.95)
+  expect_equal(doubled$n, base$n * 2)
+  expect_equal(doubled$n_unadjusted, base$n)
+})
+
+test_that("calc_logistic_binary_adjusted rejects invalid r2", {
+  expect_error(calc_logistic_binary_adjusted(p1 = 0.4, p2 = 0.5, prop_x1 = 0.5, r2 = -0.1), "\\[0, 1\\)")
+  expect_error(calc_logistic_binary_adjusted(p1 = 0.4, p2 = 0.5, prop_x1 = 0.5, r2 = 1), "\\[0, 1\\)")
+})
+
+test_that("calc_logistic_continuous_adjusted reduces exactly to the simple case at r2=0 and inflates correctly", {
+  # Hsieh, Bloch & Larsen (1998), Table II: p1=0.5, OR=exp(0.405), alpha=0.05,
+  # 95% power -> n=317 (already verified for the simple case).
+  base <- calc_logistic_continuous(p1 = 0.5, or = exp(0.405), alpha = 0.05, power = 0.95)
+  at_zero <- calc_logistic_continuous_adjusted(p1 = 0.5, or = exp(0.405), r2 = 0,
+                                                alpha = 0.05, power = 0.95)
+  expect_equal(at_zero$n, base$n)
+  expect_equal(at_zero$n, 317)
+
+  inflated <- calc_logistic_continuous_adjusted(p1 = 0.5, or = exp(0.405), r2 = 0.3,
+                                                 alpha = 0.05, power = 0.95)
+  expect_equal(inflated$n, ceiling(base$n / 0.7))
+})
+
+test_that("calc_logistic_continuous_adjusted rejects invalid r2", {
+  expect_error(calc_logistic_continuous_adjusted(p1 = 0.5, or = 1.5, r2 = -0.1), "\\[0, 1\\)")
+  expect_error(calc_logistic_continuous_adjusted(p1 = 0.5, or = 1.5, r2 = 1), "\\[0, 1\\)")
+})
