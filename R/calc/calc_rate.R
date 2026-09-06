@@ -112,3 +112,63 @@ calc_rate_comparison <- function(rate_ref, rate_ratio, prop_exposed = 0.5,
                   alpha = alpha, power = power, alternative = alternative)
   )
 }
+
+#' Sample size for Poisson regression with a continuous, normally
+#' distributed predictor
+#'
+#' The design above (calc_rate_comparison()) covers Poisson regression
+#' with a single BINARY predictor (comparing two groups' rates); this
+#' covers the continuous-predictor case named in the same
+#' checklist_by_test.md item ("Poisson regression -- rate ratio, exposure
+#' distribution"), for a normally distributed predictor (e.g. a
+#' continuous exposure or biomarker level) rather than an exposed/
+#' unexposed group indicator. Wraps powerMediation::sizePoisson() --
+#' already a project dependency (used by the Logistic Regression module)
+#' -- which directly implements Signorini (1991)'s closed-form Wald-test
+#' formula, exactly the source this app's own docs/checklist_by_test.md
+#' cites for this item (via `WebPower::wp.poisson`, which itself wraps
+#' the same Signorini formula; `powerMediation` is used here instead
+#' since it is already a project dependency with zero package
+#' dependencies of its own).
+#'
+#' Verified exactly against the package's own documented example:
+#' beta0 = 0.1, beta1 = 0.5, mu.x1 = 0, sigma2.x1 = 1, mu.T = 1, phi = 1,
+#' alpha = 0.05, power = 0.80 -> n = 28, reproduced by directly running
+#' the installed package.
+#'
+#' @param beta0 Intercept (log scale) of the Poisson regression
+#' @param beta1 Slope (log rate ratio per unit increase in the
+#'   predictor); the effect size being tested (!= 0)
+#' @param mu_x1 Mean of the predictor (assumed normally distributed)
+#' @param sigma2_x1 Variance of the predictor (> 0)
+#' @param mu_T Mean exposure/follow-up time (> 0)
+#' @param phi Over-dispersion parameter, var(y)/mean(y) (>= 1; 1 = no
+#'   over-dispersion, i.e. a genuine Poisson distribution)
+#' @param alpha Significance level, two-sided (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n_total, inputs)
+calc_poisson_regression_continuous <- function(beta0, beta1, mu_x1, sigma2_x1,
+                                                mu_T = 1, phi = 1,
+                                                alpha = 0.05, power = 0.8) {
+  .validate_number(beta0, "beta0")
+  .validate_number(beta1, "beta1")
+  if (isTRUE(all.equal(beta1, 0))) stop("beta1 must differ from 0 (no effect to detect).")
+  .validate_number(mu_x1, "mu_x1")
+  .validate_positive(sigma2_x1, "sigma2_x1")
+  .validate_positive(mu_T, "mu_T")
+  if (!is.numeric(phi) || length(phi) != 1 || is.na(phi) || phi < 1) {
+    stop("phi must be a single number >= 1 (the over-dispersion parameter; 1 = no over-dispersion).")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  n <- powerMediation::sizePoisson(beta0 = beta0, beta1 = beta1, mu.x1 = mu_x1,
+                                    sigma2.x1 = sigma2_x1, mu.T = mu_T, phi = phi,
+                                    alpha = alpha, power = power)
+
+  list(
+    n_total = ceiling(n),
+    inputs = list(beta0 = beta0, beta1 = beta1, mu_x1 = mu_x1, sigma2_x1 = sigma2_x1,
+                  mu_T = mu_T, phi = phi, alpha = alpha, power = power)
+  )
+}

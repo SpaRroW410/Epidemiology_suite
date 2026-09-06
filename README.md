@@ -181,7 +181,13 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   `presize::prec_rate()`), plus comparison of two rates via person-time
   (closed-form Demidenko 2007 Poisson-regression formula, reproducing
   WebPower's `wp.poisson()` exactly without that package's heavy
-  dependency chain)
+  dependency chain); plus Poisson regression with a continuous predictor
+  (e.g. a biomarker level rather than an exposed/unexposed group),
+  wrapping `powerMediation::sizePoisson()` (Signorini 1991) -- already a
+  project dependency (used by the Logistic Regression module); verified
+  exactly against the package's own documented example: beta0=0.1,
+  beta1=0.5, predictor mean=0/variance=1, mean exposure time=1, no
+  over-dispersion, alpha=0.05, power=0.80 -> n=28
 - **Ratio Estimation** (`R/modules/mod_ratio.R`) -- precision-based
   estimation of a risk ratio, odds ratio, or rate ratio (a target
   confidence-interval width rather than a power target), wrapping

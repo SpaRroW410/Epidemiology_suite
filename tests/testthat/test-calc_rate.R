@@ -30,3 +30,21 @@ test_that("calc_rate_comparison rejects invalid inputs", {
   expect_error(calc_rate_comparison(rate_ref = 2, rate_ratio = 1), "must differ")
   expect_error(calc_rate_comparison(rate_ref = 2, rate_ratio = 1.5, prop_exposed = 1.5), "between 0 and 1")
 })
+
+test_that("calc_poisson_regression_continuous matches powerMediation::sizePoisson()'s own documented example", {
+  # powerMediation's own doc example: beta0=0.1, beta1=0.5, mu.x1=0,
+  # sigma2.x1=1, mu.T=1, phi=1, alpha=0.05, power=0.8 -> n=28.
+  res <- calc_poisson_regression_continuous(beta0 = 0.1, beta1 = 0.5, mu_x1 = 0,
+                                             sigma2_x1 = 1, mu_T = 1, phi = 1,
+                                             alpha = 0.05, power = 0.8)
+  expect_equal(res$n_total, 28)
+})
+
+test_that("calc_poisson_regression_continuous rejects invalid inputs", {
+  expect_error(calc_poisson_regression_continuous(beta0 = 0.1, beta1 = 0, mu_x1 = 0, sigma2_x1 = 1), "must differ from 0")
+  expect_error(calc_poisson_regression_continuous(beta0 = 0.1, beta1 = 0.5, mu_x1 = 0, sigma2_x1 = -1), "positive")
+  expect_error(calc_poisson_regression_continuous(beta0 = 0.1, beta1 = 0.5, mu_x1 = 0, sigma2_x1 = 1, mu_T = -1), "positive")
+  expect_error(calc_poisson_regression_continuous(beta0 = 0.1, beta1 = 0.5, mu_x1 = 0, sigma2_x1 = 1, phi = 0.5), ">= 1")
+  expect_error(calc_poisson_regression_continuous(beta0 = 0.1, beta1 = 0.5, mu_x1 = 0, sigma2_x1 = 1, alpha = 0), "between 0 and 1")
+  expect_error(calc_poisson_regression_continuous(beta0 = 0.1, beta1 = 0.5, mu_x1 = 0, sigma2_x1 = 1, power = 0), "between 0 and 1")
+})

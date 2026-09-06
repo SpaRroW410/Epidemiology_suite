@@ -89,5 +89,54 @@ rate_content <- list(
       "2018. (parameterization/worked example this was verified against)."
     ),
     backend = "Closed-form (Demidenko 2007's Poisson-regression Wald-test formula, as documented by WebPower::wp.poisson); no external package required"
+  ),
+
+  poisson_regression = list(
+    title = "Poisson Regression, Continuous Predictor",
+    formula_latex = paste0(
+      "$$\\log(\\mu_i) = \\beta_0 + \\beta_1 x_{1i}, \\quad x_1 \\sim N(\\mu_{x_1}, \\sigma^2_{x_1})$$",
+      "$$n = \\phi\\frac{\\left(Z_{1-\\alpha/2}\\sqrt{V(b_1|\\beta_1=0)} + Z_{power}\\sqrt{V(b_1|\\beta_1=\\theta_1)}\\right)^2}",
+      "{\\mu_T e^{\\beta_0}\\theta_1^2}$$"
+    ),
+    explanation = paste(
+      "The \"Comparison of Two Incidence Rates\" design above covers",
+      "Poisson regression with a single BINARY predictor (an exposed vs.",
+      "unexposed group indicator); this covers the continuous-predictor",
+      "case instead -- e.g. testing whether a continuous exposure or",
+      "biomarker level (assumed normally distributed) is associated with",
+      "an event rate.",
+      "",
+      "- **beta0** - the intercept (log scale) of the Poisson regression.",
+      "- **beta1** - the slope (log rate ratio per unit increase in the",
+      "  predictor) you want to detect; must differ from 0.",
+      "- **Predictor mean / variance (mu.x1, sigma2.x1)** - the assumed",
+      "  mean and variance of the (normally distributed) predictor.",
+      "- **Mean exposure time (mu.T)** - the average follow-up/exposure",
+      "  time per subject.",
+      "- **Over-dispersion (phi)** - the ratio var(y)/mean(y); 1 means a",
+      "  genuine Poisson distribution (no over-dispersion), values above 1",
+      "  inflate the required sample size to compensate for extra-Poisson",
+      "  variability often seen in real count data.",
+      "- **alpha, power** - as elsewhere (two-sided test).",
+      "",
+      "Wraps `powerMediation::sizePoisson()` -- already a project",
+      "dependency (used by the Logistic Regression module) -- which",
+      "directly implements Signorini (1991)'s closed-form Wald-test",
+      "sample-size formula for Poisson regression.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "powerMediation's own documented example: beta0 = 0.1, beta1 = 0.5,",
+      "predictor mean = 0 and variance = 1 (a standard normal predictor),",
+      "mean exposure time = 1, no over-dispersion (phi = 1), alpha = 0.05",
+      "(two-sided), 80% power. This calculator returns n = 28, matching",
+      "the package's own worked answer exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Signorini DF. Sample size for Poisson regression. Biometrika.",
+      "1991;78(2):446-450."
+    ),
+    backend = "powerMediation::sizePoisson()"
   )
 )

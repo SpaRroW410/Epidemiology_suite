@@ -833,6 +833,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Incidence Rate",
        module_input_id = "rate-design", design_value = "comparison"),
 
+  list(key = "poisson_regression_continuous",
+       label = "Poisson regression, continuous predictor",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect an association",
+         "between a continuous exposure/biomarker and an event rate, via",
+         "Poisson regression?\""
+       ),
+       outcome_type = "rate", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Incidence Rate",
+       module_input_id = "rate-design", design_value = "poisson_regression"),
+
   list(key = "ratio_risk_ratio",
        label = "Risk ratio -- precision-based",
        answers = paste(
@@ -1222,8 +1233,9 @@ study_design_families <- list(
        hint = "Precision-based estimation of a risk ratio, odds ratio, or rate ratio.",
        catalog_keys = c("ratio_risk_ratio", "ratio_odds_ratio", "ratio_rate_ratio")),
   list(id = "incidence_rate", label = "Incidence Rate",
-       hint = "Estimating or comparing incidence rates from person-time data.",
-       catalog_keys = c("incidence_rate_precision", "rate_comparison")),
+       hint = "Estimating or comparing incidence rates from person-time data, or Poisson regression with a continuous predictor.",
+       catalog_keys = c("incidence_rate_precision", "rate_comparison",
+                         "poisson_regression_continuous")),
   list(id = "exact_tests", label = "Exact Tests",
        hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, Boschloo's unconditional exact, sign test) and rates (exact Poisson).",
        catalog_keys = c("exact_binomial", "exact_fisher", "exact_boschloo",
