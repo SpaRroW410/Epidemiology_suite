@@ -193,5 +193,70 @@ logrank_content <- list(
       "Dis. 1985;38(9):801-809."
     ),
     backend = "powerSurvEpi::ssize.stratify()"
+  ),
+  noncompliance = list(
+    title = "Log-Rank Test with Accrual, Follow-up, and Noncompliance",
+    formula_latex = paste0(
+      "$$\\text{Var}(\\log \\widehat{HR}) \\approx \\frac{1}{m_1}+\\frac{1}{m_0}, ",
+      "\\qquad m_g = \\text{expected events (George \\& Desu)}$$",
+      "$$\\text{corrected effect} = (1-c-d)\\cdot(\\text{uncorrected log HR})$$",
+      "$$c = \\text{drop-in rate (control} \\to \\text{intervention)}, ",
+      "\\quad d = \\text{non-adherence rate (intervention} \\to \\text{control)}$$"
+    ),
+    explanation = paste(
+      "Extends the basic log-rank sample size above to two realities of",
+      "real trials: (1) subjects are enrolled gradually over an",
+      "**accrual** period rather than all at once, so early enrollees are",
+      "followed longer than late ones, and (2) some subjects don't take",
+      "the treatment they were assigned -- control-arm **drop-ins** who",
+      "actually receive the intervention, and intervention-arm",
+      "**non-adherers** who don't. Both dilute the observable treatment",
+      "effect toward the null, so a naive log-rank calculation ignoring",
+      "them understates the sample size needed.",
+      "",
+      "- **tref, mc** - a reference time (e.g. 5 years) and the",
+      "  cumulative mortality/event probability in the control arm by",
+      "  that time, assuming exponential survival.",
+      "- **pct_reduction** - the percent reduction in that event",
+      "  probability produced by the (fully-complied-with) intervention.",
+      "- **accrual, tmin** - the enrollment period's length, and the",
+      "  minimum follow-up time guaranteed to the last-enrolled subject",
+      "  (so total study duration = accrual + tmin).",
+      "- **noncomp_c, noncomp_i** - the percent of control-arm subjects",
+      "  who cross over to the intervention (drop-ins), and the percent",
+      "  of intervention-arm subjects who don't adhere to it.",
+      "- **alpha, power** - as elsewhere (two-sided test).",
+      "",
+      "The underlying method combines the George & Desu (1974)",
+      "expected-events approach with Schoenfeld (1983)'s variance for the",
+      "log hazard ratio, then rescales the effect size by the",
+      "noncompliance correction of Lachin & Foulkes (1986), following",
+      "Peterson & George (1993).",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Reproducing Hmisc::cpower()'s own documentation example exactly:",
+      "a 5-year mortality trial (tref = 5) with 18% control-arm mortality",
+      "(mc = 0.18), a postulated 15% relative reduction, a 1.5-year",
+      "accrual period, a 5-year minimum follow-up, 15% drop-in",
+      "(noncomp_c) and 25% non-adherence (noncomp_i), alpha = 0.05,",
+      "target power = 0.80: this calculator returns a total n = 14,634",
+      "(7,317 per arm). The package's own example code runs the",
+      "equivalent `uniroot()` search directly and returns n = 14,632.2,",
+      "matching to within rounding.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Peterson B, George SL. Sample size requirements and length of",
+      "study for testing interaction in a 1 x k factorial design when",
+      "time-to-failure is the outcome. Control Clin Trials.",
+      "1993;14(6):511-522. Lachin JM, Foulkes MA. Evaluation of sample",
+      "size and power for analyses of survival with allowance for",
+      "nonuniform patient entry, losses to follow-up, noncompliance, and",
+      "stratification. Biometrics. 1986;42(3):507-519. Schoenfeld D.",
+      "Sample-size formula for the proportional-hazards regression",
+      "model. Biometrics. 1983;39(2):499-503."
+    ),
+    backend = "Hmisc::cpower()"
   )
 )

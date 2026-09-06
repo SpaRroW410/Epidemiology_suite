@@ -175,7 +175,14 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   Hsieh & Lavori 2000); and a stratified log-rank test under exponential
   survival (per-stratum allocation, event rates under the null, and a
   common hazard ratio), wrapping `powerSurvEpi::ssize.stratify()` (Palta
-  & Amini 1985)
+  & Amini 1985); and a log-rank design with a non-uniform accrual period,
+  minimum follow-up time, and noncompliance (control-arm drop-ins and
+  intervention-arm non-adherers), wrapping `Hmisc::cpower()` (Peterson &
+  George 1993; Lachin & Foulkes 1986; Schoenfeld 1983) -- verified by
+  reproducing the package's own documented example exactly (18% control
+  mortality, 15% reduction, 1.5-year accrual, 5-year minimum follow-up,
+  15% drop-in/25% non-adherence, 80% power -> n=14,634 total, matching
+  the package's own `uniroot()` search to within rounding)
 - **Incidence Rate** (`R/modules/mod_rate.R`) -- precision-based estimation
   of an incidence rate (number of events, then person-time, wrapping
   `presize::prec_rate()`), plus comparison of two rates via person-time
@@ -409,6 +416,21 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   trivariate normal data gives empirical power 0.8068, closely matching
   the 0.80 target. Global (k>2 group) MANOVA and special-effects
   contrasts are not covered
+- **Bayesian Assurance** (`R/modules/mod_bayesian.R`) -- sample size for a
+  target *assurance* (prior-averaged power) in a two-arm proportions trial
+  on the log odds ratio scale, when the true treatment effect is itself
+  uncertain rather than fixed at one assumed value. Places a Normal or
+  Uniform prior on the log odds ratio and reports the probability,
+  averaged over that prior, that the trial's confidence interval will
+  exclude a minimally-worthwhile effect (Spiegelhalter & Freedman 1986).
+  `calc_bayesian_assurance_or()` wraps `Hmisc::gbayes2()` (already a
+  project dependency; no new package needed) rather than reimplementing
+  its numerical-integration engine. Verified by reproducing the package's
+  own documented examples exactly: a Uniform(log(1.2), log(1.3)) prior,
+  p1=p2=0.3, equal allocation, alpha=0.05, target assurance=0.90 ->
+  n=2,120/arm, matching the package's own `uniroot()` example to within
+  rounding; and its 50:50 Gaussian-mixture-prior example reproduces the
+  package's own printed assurance value of 0.6133338 exactly
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

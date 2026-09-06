@@ -199,7 +199,7 @@ for what to build next):
 | Pilot / feasibility | Flat 12/arm rule-of-thumb; interactive CI-for-SD precision | rule-of-thumb (Julious 2005); closed-form chi-square CI theory | Live |
 | Simon two-stage | Phase II single-arm (minimax + optimal designs) | `clinfun::ph2simon()` | Live |
 | Equivalence (TOST) | Two one-sided tests, means, proportions, PK bioequivalence crossover (2x2, 2x2x4, 2x3x3), and bioequivalence crossover with expected power/assurance (CV uncertainty) | `PowerTOST::sampleN.TOST(logscale=FALSE/TRUE)`; `epiR::epi.ssequb()`; `PowerTOST::expsampleN.TOST(prior.type="CV")` | Live |
-| Log-rank / survival | Two-arm time-to-event, cumulative event probabilities; Cox PH regression (binary or continuous covariate); stratified log-rank (exponential survival) | `powerSurvEpi::ssizeCT()`; `ssizeEpi.default()`; `ssizeEpiCont.default()`; `ssize.stratify()` (Palta & Amini 1985) | Live |
+| Log-rank / survival | Two-arm time-to-event, cumulative event probabilities; Cox PH regression (binary or continuous covariate); stratified log-rank (exponential survival); accrual/follow-up with drop-in/non-adherence | `powerSurvEpi::ssizeCT()`; `ssizeEpi.default()`; `ssizeEpiCont.default()`; `ssize.stratify()` (Palta & Amini 1985); `Hmisc::cpower()` (Peterson & George 1993; Lachin & Foulkes 1986) | Live |
 | Incidence Rate | Precision-based, events + person-time; comparison of two rates; Poisson regression with a continuous predictor | `presize::prec_rate()`; closed-form (Demidenko 2007); `powerMediation::sizePoisson()` (Signorini 1991) | Live |
 | Exact Tests | Binomial test (single proportion); Fisher's exact (two proportions); Boschloo's exact (unconditional, two proportions); exact Poisson (single rate); sign test | `stats::binom.test()` search; `Exact::power.exact.test()` search (methods "fisher"/"boschloo"); `stats::poisson.test()` search; `stats::binom.test()` search (p0 = 0.5) | Live |
 | Multiple Regression | R-squared deviation from zero; R-squared increase (hierarchical) | `pwr::pwr.f2.test()` | Live |
@@ -220,8 +220,9 @@ for what to build next):
 | Ratio Estimation | Precision-based risk ratio, odds ratio, rate ratio | `presize::prec_riskratio()`/`prec_or()`/`prec_rateratio()` | Live |
 | Multiplicity Adjustment | Bonferroni/Sidak-adjusted sample size for one-/two-sample proportion or mean tests, given m planned simultaneous comparisons | closed-form correction wrapping this app's own `calc_proportion_1s()`/`_2s()`/`calc_means_1s()`/`_2s()` | Live |
 | MANOVA / Hotelling's T² | Two-group Hotelling's T-squared test (p jointly-tested continuous outcomes) | closed-form noncentral F (Rencher 2002; Vonesh & Schork 1986 framework) | Live |
+| Bayesian Assurance | Prior-averaged power (assurance) for a two-arm proportions trial, log odds ratio, given a Normal or Uniform prior on the true effect | `Hmisc::gbayes2()` (Spiegelhalter & Freedman 1986) | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
-| Survival (advanced) | Accrual/follow-up (non-uniform entry), competing risks, RMST | `gsDesign::nSurv`; `SSRMST` (simulation-based, not yet wrapped) | Not started |
+| Survival (advanced) | Competing risks, RMST | `powerCompRisk`; `SSRMST` (simulation-based, not yet wrapped) | Not started |
 | MANOVA (global, k>2 groups) | Global & special effects for k > 2 groups | Vonesh & Schork (1986) closed-form; not yet wrapped | Not started |
 | Post-hoc / achieved power | Given n and observed effect, compute achieved power | reuse each module's engine, solve for power | Not started |
 

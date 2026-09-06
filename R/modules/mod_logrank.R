@@ -28,7 +28,8 @@ mod_logrank_ui <- function(id) {
           "Log-rank test (two survival curves)" = "logrank",
           "Cox regression -- binary covariate" = "cox_binary",
           "Cox regression -- continuous covariate" = "cox_continuous",
-          "Stratified log-rank, exponential survival" = "stratified"
+          "Stratified log-rank, exponential survival" = "stratified",
+          "Log-rank with accrual, follow-up & noncompliance" = "noncompliance"
         )
       ),
       conditionalPanel(
@@ -76,6 +77,19 @@ mod_logrank_ui <- function(id) {
         numericInput(ns("alpha_strat"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_strat"), "Desired power", value = 0.9, min = 0.5, max = 0.999, step = 0.01)
       ),
+      conditionalPanel(
+        condition = design_is("noncompliance"),
+        numericInput(ns("tref_nc"), "Reference time (tref)", value = 5, min = 0.01, step = 0.5),
+        numericInput(ns("mc_nc"), "Control-arm event probability by tref (mc)",
+                     value = 0.18, min = 0.001, max = 0.999, step = 0.01),
+        numericInput(ns("r_nc"), "Postulated percent reduction in mc (%)", value = 15, min = 0.1, max = 99, step = 1),
+        numericInput(ns("accrual_nc"), "Accrual period length", value = 1.5, min = 0.01, step = 0.1),
+        numericInput(ns("tmin_nc"), "Minimum follow-up time", value = 5, min = 0.01, step = 0.5),
+        numericInput(ns("noncomp_c_nc"), "Control-arm drop-in (%)", value = 15, min = 0, max = 99, step = 1),
+        numericInput(ns("noncomp_i_nc"), "Intervention-arm non-adherence (%)", value = 25, min = 0, max = 99, step = 1),
+        numericInput(ns("alpha_nc"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_nc"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
+      ),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -105,7 +119,13 @@ mod_logrank_ui <- function(id) {
       render_formula_block(logrank_content$stratified$formula_latex),
       shiny::markdown(logrank_content$stratified$explanation),
       h5("Worked example"),
-      shiny::markdown(logrank_content$stratified$worked_example)
+      shiny::markdown(logrank_content$stratified$worked_example),
+      hr(),
+      h4(logrank_content$noncompliance$title),
+      render_formula_block(logrank_content$noncompliance$formula_latex),
+      shiny::markdown(logrank_content$noncompliance$explanation),
+      h5("Worked example"),
+      shiny::markdown(logrank_content$noncompliance$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -124,7 +144,11 @@ mod_logrank_ui <- function(id) {
       hr(),
       h4(logrank_content$stratified$title),
       p(strong("Citation: "), logrank_content$stratified$citation),
-      p(strong("Implemented via: "), code(logrank_content$stratified$backend))
+      p(strong("Implemented via: "), code(logrank_content$stratified$backend)),
+      hr(),
+      h4(logrank_content$noncompliance$title),
+      p(strong("Citation: "), logrank_content$noncompliance$citation),
+      p(strong("Implemented via: "), code(logrank_content$noncompliance$backend))
     )
   )
 }
@@ -176,7 +200,7 @@ mod_logrank_server <- function(id) {
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
-      } else {
+      } else if (input$design == "stratified") {
         req(input$m_strata, input$timeUnit, input$hr_strat, input$alpha_strat, input$power_strat)
         m <- as.integer(input$m_strata)
         g_vals <- lapply(seq_len(m), function(i) input[[paste0("g_", i)]])
@@ -192,6 +216,18 @@ mod_logrank_server <- function(id) {
             gVec = as.numeric(unlist(g_vals)), pVec = as.numeric(unlist(p_vals)),
             hr = input$hr_strat, lambda0Vec = as.numeric(unlist(lambda0_vals)),
             alpha = input$alpha_strat
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$tref_nc, input$mc_nc, input$r_nc, input$accrual_nc, input$tmin_nc,
+            input$noncomp_c_nc, input$noncomp_i_nc, input$alpha_nc, input$power_nc)
+        tryCatch(
+          list(ok = TRUE, value = calc_survival_noncompliance(
+            tref = input$tref_nc, mc = input$mc_nc, pct_reduction = input$r_nc,
+            accrual = input$accrual_nc, tmin = input$tmin_nc,
+            noncomp_c = input$noncomp_c_nc, noncomp_i = input$noncomp_i_nc,
+            alpha = input$alpha_nc, power = input$power_nc
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -213,6 +249,11 @@ mod_logrank_server <- function(id) {
       } else if (input$design == "stratified") {
         tagList(
           p(strong("Total sample size: "), v$n_total)
+        )
+      } else if (input$design == "noncompliance") {
+        tagList(
+          p(strong("Total sample size: "), v$n_total),
+          p(sprintf("Per arm: %d, achieved power: %.4f", v$n_per_group, v$achieved_power))
         )
       } else {
         tagList(

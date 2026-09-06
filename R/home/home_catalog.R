@@ -513,6 +513,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Log-Rank / Survival",
        module_input_id = "logrank-design", design_value = "stratified"),
 
+  list(key = "survival_noncompliance",
+       label = "Log-rank test with accrual, follow-up & noncompliance",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a survival trial with",
+         "gradual enrollment (accrual), a minimum follow-up period, and",
+         "some drop-in/non-adherence between arms diluting the treatment",
+         "effect?\""
+       ),
+       outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Log-Rank / Survival",
+       module_input_id = "logrank-design", design_value = "noncompliance"),
+
   list(key = "cluster_deff",
        label = "Cluster / multistage sampling -- design effect (DEFF)",
        answers = paste(
@@ -1178,6 +1190,18 @@ calculator_catalog <- list(
        ),
        outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
        built = TRUE, nav_target = "MANOVA / Hotelling's T²",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "bayesian_assurance_or",
+       label = "Bayesian assurance, two-arm proportions trial (log odds ratio)",
+       answers = paste(
+         "Answers: \"Given a prior distribution (not a single fixed value)",
+         "for the true treatment effect, what sample size gives a target",
+         "probability (assurance) that the trial's confidence interval",
+         "will exclude a minimally-worthwhile effect?\""
+       ),
+       outcome_type = "proportions", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Bayesian Assurance",
        module_input_id = NA, design_value = NA)
 )
 
@@ -1242,7 +1266,8 @@ study_design_families <- list(
                          "exact_poisson", "sign_test")),
   list(id = "survival", label = "Survival",
        hint = "Log-rank, Cox regression, stratified log-rank, or accrual/follow-up based survival study designs.",
-       catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
+       catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified",
+                         "survival_noncompliance")),
   list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
        hint = "Inflating an existing sample size for cluster-sampled surveys, or solving a full cluster survey design (WHO EPI-style) directly.",
        catalog_keys = c("cluster_deff", "cluster_survey")),
@@ -1294,7 +1319,10 @@ study_design_families <- list(
                          "multiplicity_means_1s", "multiplicity_means_2s")),
   list(id = "manova", label = "MANOVA / Hotelling's T-Squared",
        hint = "Comparing two independent groups on several continuous outcome variables jointly, rather than testing each one separately.",
-       catalog_keys = c("manova_hotelling"))
+       catalog_keys = c("manova_hotelling")),
+  list(id = "bayesian", label = "Bayesian Assurance",
+       hint = "Sample size for a target prior-averaged power (assurance) when the true treatment effect is itself uncertain, rather than fixed at one assumed value.",
+       catalog_keys = c("bayesian_assurance_or"))
 )
 
 # Second index over the SAME calculator_catalog entries, grouped by
@@ -1338,8 +1366,9 @@ test_families <- list(
                          "correlation_two_dependent", "correlation_regression_slope",
                          "correlation_partial", "regression_r2", "regression_r2_increase")),
   list(id = "survival_tests", label = "Survival Tests",
-       hint = "Log-rank test, Cox proportional-hazards regression, and stratified log-rank for time-to-event outcomes.",
-       catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
+       hint = "Log-rank test, Cox proportional-hazards regression, stratified log-rank, and accrual/follow-up/noncompliance-adjusted log-rank for time-to-event outcomes.",
+       catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified",
+                         "survival_noncompliance")),
   list(id = "agreement_statistics", label = "Agreement Statistics",
        hint = "Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman limits of agreement, and Lin's CCC.",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
@@ -1367,7 +1396,10 @@ test_families <- list(
                          "multiplicity_means_1s", "multiplicity_means_2s")),
   list(id = "manova_tests", label = "MANOVA / Hotelling's T-Squared",
        hint = "Two-group Hotelling's T-squared test, comparing two independent groups on several continuous outcome variables jointly.",
-       catalog_keys = c("manova_hotelling"))
+       catalog_keys = c("manova_hotelling")),
+  list(id = "bayesian_tests", label = "Bayesian Assurance",
+       hint = "Prior-averaged power (assurance) for a two-arm proportions trial, when the true log odds ratio is itself uncertain.",
+       catalog_keys = c("bayesian_assurance_or"))
 )
 
 catalog_entry <- function(key) {
