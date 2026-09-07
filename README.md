@@ -607,6 +607,27 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   achieving simulated power 0.823; and required n increases
   monotonically with target power (n_total=680 at power=0.7, 950 at
   power=0.9)
+- **Longitudinal Slope Difference** (`R/modules/mod_longitudinal.R`) --
+  sample size for detecting a difference in linear SLOPE (rate of
+  change) between two groups measured repeatedly at the same visit
+  times, under a random-intercept + random-slope + residual-error
+  covariance structure (the standard linear mixed model for
+  longitudinal data). `longpower` (the checklist's named package for
+  GEE-based longitudinal tests) isn't installable from CRAN in this
+  sandbox, so `liu.liang.linear.power()`'s source -- a single, self-
+  contained function with no cross-file dependencies -- was read
+  directly from its public GitHub CRAN mirror and reimplemented. Liu &
+  Liang (1997)'s general GLS/GEE-style method accepts arbitrary
+  covariate matrices, too general for a simple form UI, so
+  `calc_longitudinal_slope_diff()` wraps its single most common real-
+  world use (the two-group slope-difference case). Verified by
+  reproducing the function's own documented Alzheimer's-disease
+  vignette example exactly: 7 visits (0 to 1.5 years, step 0.25), slope
+  difference=1.5, random-intercept variance=55, random-slope
+  variance=24, intercept-slope correlation=0.8, residual variance=10,
+  alpha=0.05, target power=0.80 -> N=415 total (208/arm), matching the
+  package's own vignette statement -- "the study would require about
+  207 subjects per arm" -- exactly (raw N=414.62, 207.31/arm)
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

@@ -121,7 +121,7 @@
 ### Multilevel / mixed-model / GEE tests
 
 - [ ] **[ADV]** Mixed-model tests (2/3-level) — `powerlmm`, `longpower`
-- [ ] **[ADV]** GEE-based tests — `longpower::liu.liang.linear.power` — *Liu & Liang (1997); Rochon (1998)*
+- [x] **[ADV]** GEE-based tests — `longpower::liu.liang.linear.power` — *Liu & Liang (1997); Rochon (1998)* — *(implemented: new standalone Longitudinal Slope Difference module, `calc_longitudinal_slope_diff()`. `longpower` is not installable from CRAN in this sandbox (no network access); `liu.liang.linear.power()`'s source -- a single, self-contained function with no cross-file dependencies (pure base-R linear algebra: matrix inversion + `uniroot()`) -- was read directly from its public GitHub CRAN mirror and transcribed. Liu & Liang's general GLS/GEE-style method accepts arbitrary covariate matrices, too general for a simple form UI, so this wraps its single most common real-world use: comparing two groups' linear SLOPES (rate of change) over repeated visits, under a random-intercept + random-slope + residual-error covariance structure. Verified by reproducing the function's own documented Alzheimer's-disease vignette example exactly: 7 visits (0 to 1.5 years, step 0.25), slope difference=1.5, random-intercept variance=55, random-slope variance=24, intercept-slope correlation=0.8, residual variance=10, alpha=0.05, power=0.80 -> N=415 total (208/arm), matching the package's own vignette statement -- "the study would require about 207 subjects per arm" -- exactly (raw N=414.62, 207.31/arm))*
 
 ### Bayesian sample-size approaches
 

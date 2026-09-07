@@ -81,7 +81,9 @@ module_registry <- list(
   list(id = competing_risks_meta$id, title = competing_risks_meta$nav_title,
        ui = mod_competing_risks_ui, server = mod_competing_risks_server),
   list(id = rmst_meta$id, title = rmst_meta$nav_title,
-       ui = mod_rmst_ui, server = mod_rmst_server)
+       ui = mod_rmst_ui, server = mod_rmst_server),
+  list(id = longitudinal_meta$id, title = longitudinal_meta$nav_title,
+       ui = mod_longitudinal_ui, server = mod_longitudinal_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -114,5 +116,6 @@ module_groups <- list(
   list(title = "General Statistical Tests",
        module_ids = c("correlation", "chisq", "regression", "anova_general",
                        "logistic", "exact_tests", "rm_anova", "nonparametric",
-                       "variance", "multiplicity", "manova", "bayesian"))
+                       "variance", "multiplicity", "manova", "bayesian",
+                       "longitudinal"))
 )
