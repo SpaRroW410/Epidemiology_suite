@@ -61,3 +61,76 @@ test_that("calc_survival_stratified rejects invalid inputs", {
                                          pVec = c(0.5, 0.5), hr = 0.5, lambda0Vec = c(2.303, 1.139)),
                "same length")
 })
+
+test_that("calc_weighted_logrank is reproducible under a fixed seed", {
+  res1 <- calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4, effect_timing = "delayed",
+                                 accrual = 12, tot_time = 30, rho = 0, power = 0.8)
+  res2 <- calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4, effect_timing = "delayed",
+                                 accrual = 12, tot_time = 30, rho = 0, power = 0.8)
+  expect_identical(res1$n0, res2$n0)
+  expect_identical(res1$achieved_power, res2$achieved_power)
+})
+
+test_that("calc_weighted_logrank reproduces the well-documented, opposite-direction behavior of the Fleming-Harrington G-rho family under delayed vs. early/fading non-PH effects", {
+  # npsurvSS (the checklist's named package) isn't installable from CRAN
+  # in this sandbox (no network access); its own source, read from its
+  # public GitHub CRAN mirror, implements a much larger (11-file,
+  # numerical-integration-based) weighted log-rank engine judged too
+  # complex to safely reimplement here -- so this instead directly
+  # simulates the actual Fleming-Harrington G^rho test via the
+  # already-installed `survival::survdiff()`, per the checklist's own
+  # "npsurvSS/simulation" allowance. Verified directly by Rscript before
+  # wiring into the app: under a DELAYED effect, rho=1 (which up-weights
+  # the early period where the curves haven't yet separated) needs far
+  # MORE n than rho=0 (ordinary log-rank); under the mirror-image
+  # EARLY/FADING effect, rho=1 needs FEWER n than rho=0 -- the
+  # well-documented, opposite-direction behavior of this test family
+  # (Harrington & Fleming 1982; Fleming & Harrington 1991).
+  res_delayed_rho0 <- calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4,
+                                             effect_timing = "delayed", accrual = 12, tot_time = 30,
+                                             rho = 0, power = 0.8)
+  res_delayed_rho1 <- calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4,
+                                             effect_timing = "delayed", accrual = 12, tot_time = 30,
+                                             rho = 1, power = 0.8)
+  expect_equal(res_delayed_rho0$n_total, 280)
+  expect_equal(res_delayed_rho1$n_total, 1080)
+  expect_gt(res_delayed_rho1$n_total, res_delayed_rho0$n_total)
+
+  res_fading_rho0 <- calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4,
+                                            effect_timing = "early_fading", accrual = 12, tot_time = 30,
+                                            rho = 0, power = 0.8)
+  res_fading_rho1 <- calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4,
+                                            effect_timing = "early_fading", accrual = 12, tot_time = 30,
+                                            rho = 1, power = 0.8)
+  expect_equal(res_fading_rho0$n_total, 510)
+  expect_equal(res_fading_rho1$n_total, 266)
+  expect_lt(res_fading_rho1$n_total, res_fading_rho0$n_total)
+})
+
+test_that("calc_weighted_logrank rejects invalid inputs", {
+  expect_error(
+    calc_weighted_logrank(hazard0 = 0.15, hr = 1, change_time = 4, accrual = 12, tot_time = 30),
+    "differ from 1"
+  )
+  expect_error(
+    calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 30, accrual = 12, tot_time = 30),
+    "less than tot_time"
+  )
+  expect_error(
+    calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4, accrual = 30, tot_time = 20),
+    "greater than accrual"
+  )
+  expect_error(
+    calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4, accrual = 12, tot_time = 30, rho = -1),
+    "rho"
+  )
+  expect_error(
+    calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4, accrual = 12, tot_time = 30,
+                           effect_timing = "bad"),
+    "delayed"
+  )
+  expect_error(
+    calc_weighted_logrank(hazard0 = -1, hr = 0.5, change_time = 4, accrual = 12, tot_time = 30),
+    "positive"
+  )
+})

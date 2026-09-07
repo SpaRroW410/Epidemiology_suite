@@ -196,7 +196,23 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   reproducing the package's own documented example exactly (18% control
   mortality, 15% reduction, 1.5-year accrual, 5-year minimum follow-up,
   15% drop-in/25% non-adherence, 80% power -> n=14,634 total, matching
-  the package's own `uniroot()` search to within rounding)
+  the package's own `uniroot()` search to within rounding); and a
+  weighted log-rank design for NON-proportional hazards (`calc_weighted_
+  logrank()`) -- the checklist's named package, `npsurvSS`, isn't
+  installable from CRAN in this sandbox, and its own source (read from
+  its public GitHub CRAN mirror) implements an 11-file numerical-
+  integration engine judged too large to safely reimplement, so this
+  instead directly simulates the actual Fleming-Harrington G^rho
+  weighted log-rank test (Harrington & Fleming 1982) via the already-
+  installed `survival::survdiff(rho=...)`, under a DELAYED or an
+  EARLY/FADING non-PH effect shape. Verified by reproducing the well-
+  documented, opposite-direction behavior of this test family: with
+  hazard0=0.15, hr=0.5, change_time=4, accrual=12, tot_time=30, 80%
+  power -- for a DELAYED effect, rho=0 (ordinary log-rank) needs n=280
+  total vs. rho=1's n=1,080 (nearly 4x more, since rho=1 wastes weight
+  on the early no-difference period); for the mirror-image EARLY/FADING
+  effect, the ranking flips: rho=0 needs n=510 vs. rho=1's n=266 (fewer
+  than half) -- both directions matching textbook predictions exactly
 - **Incidence Rate** (`R/modules/mod_rate.R`) -- precision-based estimation
   of an incidence rate (number of events, then person-time, wrapping
   `presize::prec_rate()`), plus comparison of two rates via person-time
