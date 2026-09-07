@@ -2,7 +2,7 @@
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(shiny, bslib, pwr, presize, epiR, clinfun, powerSurvEpi, PowerTOST, Exact,
-               pmsampsize, pROC, TrialSize, powerMediation, Hmisc, tseries, BayesFactor)
+               pmsampsize, pROC, TrialSize, powerMediation, Hmisc, tseries, BayesFactor, mvtnorm)
 
 for (f in list.files("R/calc", pattern = "\\.R$", full.names = TRUE)) source(f)
 for (f in list.files("R/content", pattern = "\\.R$", full.names = TRUE)) source(f)
@@ -77,7 +77,9 @@ module_registry <- list(
   list(id = manova_meta$id, title = manova_meta$nav_title,
        ui = mod_manova_ui, server = mod_manova_server),
   list(id = bayesian_meta$id, title = bayesian_meta$nav_title,
-       ui = mod_bayesian_ui, server = mod_bayesian_server)
+       ui = mod_bayesian_ui, server = mod_bayesian_server),
+  list(id = competing_risks_meta$id, title = competing_risks_meta$nav_title,
+       ui = mod_competing_risks_ui, server = mod_competing_risks_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -102,7 +104,7 @@ module_groups <- list(
   list(title = "Clinical Trials",
        module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential")),
   list(title = "Survival Analysis",
-       module_ids = c("logrank")),
+       module_ids = c("logrank", "competing_risks")),
   list(title = "Prediction Models",
        module_ids = c("prediction")),
   list(title = "Surveillance",

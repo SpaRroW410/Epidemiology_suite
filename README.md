@@ -518,6 +518,30 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   separate, larger (400-replicate) simulation: P(BF10>10)=0.835 at n=129
   (matching the 0.80 target) vs. only 0.75 at n=110, confirming n=129 is
   a genuine crossing point rather than search noise
+- **Competing Risks** (`R/modules/mod_competing_risks.R`) -- joint test of
+  a cause-specific hazard and the any-cause hazard in the presence of
+  competing risks (the setting Gray's test addresses). No installed
+  package covers this and CRAN is unreachable from this sandbox, so
+  rather than fabricate a formula, `powerCompRisk::powerCompRisk()`'s
+  actual algorithm was read directly from the package's own public source
+  on its read-only GitHub CRAN mirror
+  (`https://raw.githubusercontent.com/cran/powerCompRisk/master/R/powerCompRisk.R`)
+  -- the underlying published method (Yang, Fung & Li, "Sample size
+  determination for jointly testing a cause-specific hazard and the
+  any-cause hazard in the presence of competing risks," UCLA
+  Biostatistics Technical Report, 2017) does not change across package
+  versions, so a genuine archived/mirrored copy of the source is as valid
+  a "real" source as an installed package. `calc_competing_risks_joint()`
+  reimplements it as closed-form root-finding (`uniroot()` +
+  `mvtnorm::pmvnorm()` for the bivariate-normal joint test statistic),
+  computing all three of the package's reported designs -- chi-square
+  joint test, maximum joint test, and Bonferroni joint test. Verified by
+  reproducing the fetched source's own documented worked example exactly:
+  lambda_11=0.3, HR_1=1.44, HR_all=1.33, RR=0.8, accrual=1, follow_up=8,
+  attrition=0.1, a1=0.5, alpha=0.05, power=0.8 -> chi-square joint test:
+  290 events/436 total; maximum joint test: 252 events/378 total;
+  Bonferroni joint test: 288 events/430 total -- matching the package's
+  own printed output exactly
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

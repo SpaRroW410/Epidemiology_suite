@@ -537,6 +537,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Log-Rank / Survival",
        module_input_id = "logrank-design", design_value = "noncompliance"),
 
+  list(key = "competing_risks_joint",
+       label = "Joint cause-specific/any-cause hazard test (competing risks)",
+       answers = paste(
+         "Answers: \"How many cause-1 events and total patients do I need",
+         "for a competing-risks trial that jointly tests the",
+         "cause-specific hazard and the any-cause hazard, rather than",
+         "either alone?\""
+       ),
+       outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Competing Risks",
+       module_input_id = NA, design_value = NA),
+
   list(key = "cluster_deff",
        label = "Cluster / multistage sampling -- design effect (DEFF)",
        answers = paste(
@@ -1349,9 +1361,9 @@ study_design_families <- list(
        catalog_keys = c("exact_binomial", "exact_fisher", "exact_boschloo",
                          "exact_poisson", "sign_test")),
   list(id = "survival", label = "Survival",
-       hint = "Log-rank, Cox regression, stratified log-rank, or accrual/follow-up based survival study designs.",
+       hint = "Log-rank, Cox regression, stratified log-rank, accrual/follow-up based survival study designs, or a competing-risks joint hazard test.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified",
-                         "survival_noncompliance")),
+                         "survival_noncompliance", "competing_risks_joint")),
   list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
        hint = "Inflating an existing sample size for cluster-sampled surveys, or solving a full cluster survey design (WHO EPI-style) directly.",
        catalog_keys = c("cluster_deff", "cluster_survey")),
@@ -1455,9 +1467,9 @@ test_families <- list(
                          "correlation_partial", "correlation_spearman",
                          "regression_r2", "regression_r2_increase")),
   list(id = "survival_tests", label = "Survival Tests",
-       hint = "Log-rank test, Cox proportional-hazards regression, stratified log-rank, and accrual/follow-up/noncompliance-adjusted log-rank for time-to-event outcomes.",
+       hint = "Log-rank test, Cox proportional-hazards regression, stratified log-rank, accrual/follow-up/noncompliance-adjusted log-rank, and a competing-risks joint hazard test for time-to-event outcomes.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified",
-                         "survival_noncompliance")),
+                         "survival_noncompliance", "competing_risks_joint")),
   list(id = "agreement_statistics", label = "Agreement Statistics",
        hint = "Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman limits of agreement, and Lin's CCC.",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",

@@ -221,8 +221,9 @@ for what to build next):
 | Multiplicity Adjustment | Bonferroni/Sidak-adjusted sample size for one-/two-sample proportion or mean tests, given m planned simultaneous comparisons; FDR (Benjamini-Hochberg)-controlled sample size for two independent means | closed-form correction wrapping this app's own `calc_proportion_1s()`/`_2s()`/`calc_means_1s()`/`_2s()`; FDR design via an independently-derived, Monte-Carlo-verified closed form wrapping `pwr::pwr.t.test()` (Benjamini & Hochberg 1995) | Live |
 | MANOVA / Hotelling's T² | Two-group Hotelling's T-squared test (p jointly-tested continuous outcomes) | closed-form noncentral F (Rencher 2002; Vonesh & Schork 1986 framework) | Live |
 | Bayesian Design Analysis | Prior-averaged power (assurance) for a two-arm proportions trial, log odds ratio, given a Normal or Uniform prior on the true effect; Bayes Factor Design Analysis for two-sample means | `Hmisc::gbayes2()` (Spiegelhalter & Freedman 1986); direct Monte Carlo simulation of `BayesFactor::ttestBF()` (Rouder et al. 2009; Schönbrodt & Wagenmakers 2018) | Live |
+| Competing Risks | Joint test of a cause-specific hazard and the any-cause hazard (Gray's-test setting) | closed-form root-finding (`uniroot()` + `mvtnorm::pmvnorm()`), reimplemented from `powerCompRisk::powerCompRisk()`'s own public source (package not installable from CRAN in this sandbox; source read from its GitHub CRAN mirror) per Yang, Fung & Li (2017) | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
-| Survival (advanced) | Competing risks, RMST | `powerCompRisk`; `SSRMST` (simulation-based, not yet wrapped) | Not started |
+| Survival (advanced) | RMST comparison | `SSRMST` (simulation-based; source read but not yet wrapped) | Not started |
 | MANOVA (global, k>2 groups) | Global & special effects for k > 2 groups | Vonesh & Schork (1986) closed-form; not yet wrapped | Not started |
 | Post-hoc / achieved power | Given n and observed effect, compute achieved power | reuse each module's engine, solve for power | Not started |
 
