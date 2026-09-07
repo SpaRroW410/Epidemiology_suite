@@ -1272,8 +1272,20 @@ calculator_catalog <- list(
          "will exclude a minimally-worthwhile effect?\""
        ),
        outcome_type = "proportions", groups = "2", dependency = "independent", reference_based = NA,
-       built = TRUE, nav_target = "Bayesian Assurance",
-       module_input_id = NA, design_value = NA)
+       built = TRUE, nav_target = "Bayesian Design Analysis",
+       module_input_id = "bayesian-design", design_value = "assurance_or"),
+
+  list(key = "bfda_ttest",
+       label = "Bayes Factor Design Analysis, two-sample means",
+       answers = paste(
+         "Answers: \"What sample size gives me a target PROBABILITY that",
+         "the actual Bayes factor will reach a chosen evidence threshold",
+         "(e.g. BF10 > 10), rather than a target probability of a",
+         "significant p-value?\""
+       ),
+       outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Bayesian Design Analysis",
+       module_input_id = "bayesian-design", design_value = "bfda")
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -1395,9 +1407,9 @@ study_design_families <- list(
   list(id = "manova", label = "MANOVA / Hotelling's T-Squared",
        hint = "Comparing two independent groups on several continuous outcome variables jointly, rather than testing each one separately.",
        catalog_keys = c("manova_hotelling")),
-  list(id = "bayesian", label = "Bayesian Assurance",
-       hint = "Sample size for a target prior-averaged power (assurance) when the true treatment effect is itself uncertain, rather than fixed at one assumed value.",
-       catalog_keys = c("bayesian_assurance_or"))
+  list(id = "bayesian", label = "Bayesian Design Analysis",
+       hint = "Sample size for a target prior-averaged power (assurance) when the true treatment effect is itself uncertain, rather than fixed at one assumed value, or a target probability that the actual Bayes factor reaches a chosen evidence threshold.",
+       catalog_keys = c("bayesian_assurance_or", "bfda_ttest"))
 )
 
 # Second index over the SAME calculator_catalog entries, grouped by
@@ -1476,9 +1488,9 @@ test_families <- list(
   list(id = "manova_tests", label = "MANOVA / Hotelling's T-Squared",
        hint = "Two-group Hotelling's T-squared test, comparing two independent groups on several continuous outcome variables jointly.",
        catalog_keys = c("manova_hotelling")),
-  list(id = "bayesian_tests", label = "Bayesian Assurance",
-       hint = "Prior-averaged power (assurance) for a two-arm proportions trial, when the true log odds ratio is itself uncertain.",
-       catalog_keys = c("bayesian_assurance_or"))
+  list(id = "bayesian_tests", label = "Bayesian Design Analysis",
+       hint = "Prior-averaged power (assurance) for a two-arm proportions trial when the true log odds ratio is itself uncertain, or Bayes Factor Design Analysis for a two-sample means comparison.",
+       catalog_keys = c("bayesian_assurance_or", "bfda_ttest"))
 )
 
 catalog_entry <- function(key) {

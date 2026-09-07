@@ -480,13 +480,15 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   trivariate normal data gives empirical power 0.8068, closely matching
   the 0.80 target. Global (k>2 group) MANOVA and special-effects
   contrasts are not covered
-- **Bayesian Assurance** (`R/modules/mod_bayesian.R`) -- sample size for a
-  target *assurance* (prior-averaged power) in a two-arm proportions trial
-  on the log odds ratio scale, when the true treatment effect is itself
-  uncertain rather than fixed at one assumed value. Places a Normal or
-  Uniform prior on the log odds ratio and reports the probability,
-  averaged over that prior, that the trial's confidence interval will
-  exclude a minimally-worthwhile effect (Spiegelhalter & Freedman 1986).
+- **Bayesian Design Analysis** (`R/modules/mod_bayesian.R`, formerly
+  "Bayesian Assurance" -- renamed when a second, genuinely different
+  Bayesian method was added) -- sample size for a target *assurance*
+  (prior-averaged power) in a two-arm proportions trial on the log odds
+  ratio scale, when the true treatment effect is itself uncertain rather
+  than fixed at one assumed value. Places a Normal or Uniform prior on
+  the log odds ratio and reports the probability, averaged over that
+  prior, that the trial's confidence interval will exclude a
+  minimally-worthwhile effect (Spiegelhalter & Freedman 1986).
   `calc_bayesian_assurance_or()` wraps `Hmisc::gbayes2()` (already a
   project dependency; no new package needed) rather than reimplementing
   its numerical-integration engine. Verified by reproducing the package's
@@ -494,7 +496,28 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   p1=p2=0.3, equal allocation, alpha=0.05, target assurance=0.90 ->
   n=2,120/arm, matching the package's own `uniroot()` example to within
   rounding; and its 50:50 Gaussian-mixture-prior example reproduces the
-  package's own printed assurance value of 0.6133338 exactly
+  package's own printed assurance value of 0.6133338 exactly; plus a
+  second, genuinely different design -- Bayes Factor Design Analysis
+  (BFDA) for two-sample means, `calc_bfda_ttest()`. Ordinary power
+  analysis asks what sample size gives X% probability of a significant
+  p-value; BFDA (Schönbrodt & Wagenmakers 2018) asks what sample size
+  gives X% probability that the actual Bayes factor (BF10, the JZS
+  default Bayesian t-test of Rouder et al. 2009, via
+  `BayesFactor::ttestBF()`) exceeds a chosen evidence threshold (e.g.
+  BF10 > 10, "strong evidence"). BFDA has no closed form by design -- the
+  method itself IS direct simulation -- so this reuses the same
+  exponential-search-then-bisection engine (`.mc_search_n1()`) as the
+  Nonparametric Tests module's KS/runs-test designs, but warm-started
+  from the classical two-sample t-test n (`pwr::pwr.t.test()`) since
+  `ttestBF()` is far slower per call (~7ms) than `ks.test()`/`runs.test()`
+  (~0.3ms). Verified: Cohen's d=0.5, BF10 threshold=10, target
+  probability=0.8, nsim=100 -> n=129/group, versus the classical test's
+  n=64/group -- BFDA needing roughly double the classical n to reach a
+  stringent evidence threshold matches the direction reported in the
+  original paper's own simulations. Independently confirmed by a
+  separate, larger (400-replicate) simulation: P(BF10>10)=0.835 at n=129
+  (matching the 0.80 target) vs. only 0.75 at n=110, confirming n=129 is
+  a genuine crossing point rather than search noise
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

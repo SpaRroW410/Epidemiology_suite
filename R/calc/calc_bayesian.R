@@ -90,3 +90,77 @@ calc_bayesian_assurance_or <- function(p1, p2,
     )
   )
 }
+
+#' Bayes Factor Design Analysis for a two-sample t-test, via Monte Carlo
+#' simulation
+#'
+#' Schönbrodt & Wagenmakers (2018)'s "Bayes Factor Design Analysis" (BFDA)
+#' asks a different question than ordinary frequentist power: not "what
+#' sample size gives X% probability of a significant p-value," but "what
+#' sample size gives X% probability that the actual Bayes factor (BF10,
+#' the JZS/Cauchy-prior default Bayesian t-test of Rouder et al. 2009)
+#' will exceed a chosen evidence threshold" (e.g. BF10 > 10, conventionally
+#' "strong evidence," Jeffreys 1961/Lee & Wagenmakers 2013). BFDA has no
+#' closed form by design -- the original paper's own method IS direct
+#' simulation -- so this wraps `BayesFactor::ttestBF()` (already
+#' installed; a new project dependency) exactly the same way this app's
+#' `calc_ks_two_sample()`/`calc_wald_wolfowitz_runs()` wrap `stats::
+#' ks.test()`/`tseries::runs.test()`, reusing the identical
+#' exponential-search-then-bisection engine (`.mc_search_n1()`), but
+#' warm-started from the classical two-sample t-test n (via
+#' `pwr::pwr.t.test()`) to keep the search fast despite `ttestBF()` being
+#' much slower per call (~7ms) than `ks.test()`/`runs.test()` (~0.3ms).
+#'
+#' @param effect_size Cohen's d effect size between the two groups (> 0)
+#' @param bf_threshold Target Bayes factor (BF10) threshold counted as
+#'   "compelling evidence" (> 1; e.g. 3 = "moderate," 10 = "strong,"
+#'   the two conventional Jeffreys/Lee & Wagenmakers benchmarks)
+#' @param alpha Significance level, used only to compute the classical
+#'   warm-start n (0,1) -- BFDA itself has no alpha; this does not affect
+#'   the returned n directly
+#' @param power Target probability that the simulated BF10 exceeds
+#'   `bf_threshold` (0,1)
+#' @param nsim Monte Carlo replicates per sample-size candidate evaluated
+#'   during the search (>= 50; `ttestBF()` is slow enough that this
+#'   defaults lower than the KS/runs-test designs' nsim)
+#' @param seed RNG seed for reproducibility
+#' @return list(n1, n2, n_total, n_classical, achieved_power, inputs)
+calc_bfda_ttest <- function(effect_size, bf_threshold = 10, alpha = 0.05, power = 0.8,
+                             nsim = 100, seed = 20240607) {
+  .validate_positive(effect_size, "effect_size")
+  if (!is.numeric(bf_threshold) || length(bf_threshold) != 1 || is.na(bf_threshold) || bf_threshold <= 1) {
+    stop("bf_threshold must be a single number greater than 1.")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (!is.numeric(nsim) || length(nsim) != 1 || is.na(nsim) || nsim < 50 || nsim != round(nsim)) {
+    stop("nsim must be a single whole number >= 50.")
+  }
+
+  n_classical <- ceiling(pwr::pwr.t.test(d = effect_size, sig.level = alpha, power = power,
+                                          type = "two.sample")$n)
+
+  empirical_power <- function(n1, reps) {
+    set.seed(seed)
+    bfs <- replicate(reps, {
+      x <- rnorm(n1, 0, 1)
+      y <- rnorm(n1, effect_size, 1)
+      exp(as.vector(BayesFactor::ttestBF(x = x, y = y)@bayesFactor$bf))
+    })
+    mean(bfs > bf_threshold)
+  }
+
+  n_lo <- max(5, round(n_classical / 2))
+  n_hi <- max(10, n_classical)
+  n1 <- .mc_search_n1(function(n) empirical_power(n, nsim), power, n_lo = n_lo, n_hi = n_hi, n_max = 5000)
+
+  list(
+    n1 = n1,
+    n2 = n1,
+    n_total = n1 * 2,
+    n_classical = n_classical,
+    achieved_power = empirical_power(n1, nsim * 3),
+    inputs = list(effect_size = effect_size, bf_threshold = bf_threshold,
+                  alpha = alpha, power = power, nsim = nsim)
+  )
+}
