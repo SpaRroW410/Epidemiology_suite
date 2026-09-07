@@ -130,3 +130,33 @@ test_that("calc_ks_two_sample rejects invalid inputs", {
   expect_error(calc_ks_two_sample(effect_size = 0.5, power = 0), "between 0 and 1")
   expect_error(calc_ks_two_sample(effect_size = 0.5, nsim = 50), "nsim must be a single whole number")
 })
+
+test_that("calc_wald_wolfowitz_runs finds a sample size close to its own simulated target power (reproducible via fixed seed)", {
+  res1 <- calc_wald_wolfowitz_runs(effect_size = 0.8, alpha = 0.05, power = 0.8, nsim = 500)
+  res2 <- calc_wald_wolfowitz_runs(effect_size = 0.8, alpha = 0.05, power = 0.8, nsim = 500)
+  expect_identical(res1, res2)
+
+  expect_true(abs(res1$achieved_power - 0.8) < 0.05)
+  expect_equal(res1$n_total, res1$n1 + res1$n2)
+})
+
+test_that("calc_wald_wolfowitz_runs needs a larger n for a smaller effect size, and more than the equivalent KS design", {
+  res_small <- calc_wald_wolfowitz_runs(effect_size = 0.6, alpha = 0.05, power = 0.8, nsim = 500)
+  res_large <- calc_wald_wolfowitz_runs(effect_size = 1.2, alpha = 0.05, power = 0.8, nsim = 500)
+  expect_gt(res_small$n1, res_large$n1)
+
+  # The runs test is a comparatively weak omnibus test against a plain
+  # location shift (it only uses each observation's rank position in the
+  # pooled sequence, discarding magnitude) -- it should need noticeably
+  # more subjects than the KS design at the same effect size.
+  res_runs <- calc_wald_wolfowitz_runs(effect_size = 0.8, alpha = 0.05, power = 0.8, nsim = 500)
+  res_ks <- calc_ks_two_sample(effect_size = 0.8, alpha = 0.05, power = 0.8, nsim = 500)
+  expect_gt(res_runs$n1, res_ks$n1)
+})
+
+test_that("calc_wald_wolfowitz_runs rejects invalid inputs", {
+  expect_error(calc_wald_wolfowitz_runs(effect_size = -0.5), "positive")
+  expect_error(calc_wald_wolfowitz_runs(effect_size = 0.5, alpha = 0), "between 0 and 1")
+  expect_error(calc_wald_wolfowitz_runs(effect_size = 0.5, power = 0), "between 0 and 1")
+  expect_error(calc_wald_wolfowitz_runs(effect_size = 0.5, nsim = 50), "nsim must be a single whole number")
+})

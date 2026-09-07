@@ -26,7 +26,8 @@ mod_nonparametric_ui <- function(id) {
           "Kruskal-Wallis (k independent groups)" = "kruskal_wallis",
           "Jonckheere-Terpstra (ordered alternatives)" = "jonckheere",
           "Friedman (k related/repeated measurements)" = "friedman",
-          "Kolmogorov-Smirnov (two independent samples, Monte Carlo)" = "ks"
+          "Kolmogorov-Smirnov (two independent samples, Monte Carlo)" = "ks",
+          "Wald-Wolfowitz runs test (two independent samples, Monte Carlo)" = "runs"
         ),
         selected = "rank_sum"
       ),
@@ -72,6 +73,15 @@ mod_nonparametric_ui <- function(id) {
         numericInput(ns("effect_size_ks"), "Standardized mean shift (comparable to Cohen's d)",
                      value = 0.5, min = 0.01, step = 0.05),
         numericInput(ns("nsim_ks"), "Monte Carlo replicates per candidate n (nsim)",
+                     value = 500, min = 100, max = 5000, step = 100),
+        p(class = "text-muted",
+          "This design searches by simulation and may take several seconds.")
+      ),
+      conditionalPanel(
+        condition = design_is("runs"),
+        numericInput(ns("effect_size_runs"), "Standardized mean shift (comparable to Cohen's d)",
+                     value = 0.8, min = 0.01, step = 0.05),
+        numericInput(ns("nsim_runs"), "Monte Carlo replicates per candidate n (nsim)",
                      value = 500, min = 100, max = 5000, step = 100),
         p(class = "text-muted",
           "This design searches by simulation and may take several seconds.")
@@ -125,7 +135,13 @@ mod_nonparametric_ui <- function(id) {
       render_formula_block(nonparametric_content$ks_two_sample$formula_latex),
       shiny::markdown(nonparametric_content$ks_two_sample$explanation),
       h5("Worked example"),
-      shiny::markdown(nonparametric_content$ks_two_sample$worked_example)
+      shiny::markdown(nonparametric_content$ks_two_sample$worked_example),
+      hr(),
+      h4(nonparametric_content$wald_wolfowitz$title),
+      render_formula_block(nonparametric_content$wald_wolfowitz$formula_latex),
+      shiny::markdown(nonparametric_content$wald_wolfowitz$explanation),
+      h5("Worked example"),
+      shiny::markdown(nonparametric_content$wald_wolfowitz$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -156,7 +172,11 @@ mod_nonparametric_ui <- function(id) {
       hr(),
       h4(nonparametric_content$ks_two_sample$title),
       p(strong("Citation: "), nonparametric_content$ks_two_sample$citation),
-      p(strong("Implemented via: "), code(nonparametric_content$ks_two_sample$backend))
+      p(strong("Implemented via: "), code(nonparametric_content$ks_two_sample$backend)),
+      hr(),
+      h4(nonparametric_content$wald_wolfowitz$title),
+      p(strong("Citation: "), nonparametric_content$wald_wolfowitz$citation),
+      p(strong("Implemented via: "), code(nonparametric_content$wald_wolfowitz$backend))
     )
   )
 }
@@ -201,11 +221,17 @@ mod_nonparametric_server <- function(id) {
             k = as.integer(input$k_fr), f = input$f_fr, nscor = input$nscor_fr,
             alpha = input$alpha, power = input$power
           )
-        } else {
+        } else if (input$design == "ks") {
           req(input$effect_size_ks, input$nsim_ks)
           calc_ks_two_sample(
             effect_size = input$effect_size_ks, alpha = input$alpha, power = input$power,
             nsim = input$nsim_ks
+          )
+        } else {
+          req(input$effect_size_runs, input$nsim_runs)
+          calc_wald_wolfowitz_runs(
+            effect_size = input$effect_size_runs, alpha = input$alpha, power = input$power,
+            nsim = input$nsim_runs
           )
         }
         list(ok = TRUE, design = input$design, value = value)
@@ -235,7 +261,7 @@ mod_nonparametric_server <- function(id) {
           p(strong("Required sample size: "), v$n),
           p(sprintf("(Equivalent RM-ANOVA would need n = %d; ARE = %.4f)", v$n_rm_anova, v$are))
         )
-      } else if (res$design == "ks") {
+      } else if (res$design == "ks" || res$design == "runs") {
         tagList(
           p(strong("Required sample size per group: "), v$n1),
           p(strong("Total sample size: "), v$n_total),

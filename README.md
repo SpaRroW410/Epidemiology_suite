@@ -388,8 +388,19 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   nsim=500 -> n=91/group, simulated achieved power 0.797 -- versus the
   equivalent two-sample t-test's n=64/group, the expected efficiency loss
   since KS is a general-purpose omnibus test, not tuned to a location
-  shift specifically
-  (k=4, f=0.25, alpha=0.05, power=0.80 -> RM-ANOVA n=176, Friedman n=231)
+  shift specifically; plus the two-sample Wald-Wolfowitz runs test --
+  another omnibus distribution-free test with no closed-form power
+  formula, built the same way: direct Monte Carlo simulation of
+  `tseries::runs.test()` (newly added dependency, already installed) on
+  the pooled-and-sorted group-label sequence, reusing the identical
+  exponential-search-then-bisection engine (factored out as a shared
+  `.mc_search_n1()` helper in `calc_utils.R`). Verified: effect_size=0.8
+  (large shift), alpha=0.05, 80% power, nsim=500 -> n=216/group,
+  simulated achieved power 0.817 -- far more than the equivalent KS
+  design's n=37/group at the same effect size, correctly reflecting that
+  the runs test discards each observation's magnitude and uses only its
+  rank position, a comparatively weak omnibus test against a plain
+  location shift
 - **Variance Tests** (`R/modules/mod_variance.R`) -- a single-variance test
   against a reference SD, and a two-variance test comparing two groups,
   both closed-form (chi-squared/F distribution respectively, solved via
@@ -418,7 +429,25 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   m=4, alpha=0.05, power=0.80) -> Bonferroni n=241/group (482 total) vs.
   n=170/group (340 total) unadjusted, Sidak n=240/group. Holm's
   step-down correction is not offered as a third method since its
-  threshold is data-dependent (no single a priori alpha to plan against)
+  threshold is data-dependent (no single a priori alpha to plan against);
+  plus a fifth design controlling the FALSE DISCOVERY RATE instead of the
+  family-wise error rate -- `calc_multiplicity_fdr_means()`, for two
+  independent means, given m total tests and an assumed proportion pi1
+  truly non-null. The checklist's own named package, `ssize.fdr`, is not
+  installed and CRAN is unreachable from this sandbox, so the closed form
+  (alpha* = fdr_level x m1 x power / (m0 x (1-fdr_level)), from the
+  expected-FDR self-consistency equation FDR = E[false rejections] /
+  E[total rejections]) was independently derived from the standard
+  Benjamini & Hochberg (1995) FDR definition, then independently verified
+  twice by directly simulating the ACTUAL Benjamini-Hochberg procedure
+  (`stats::p.adjust(method="BH")` on simulated two-sample t-test p-values
+  from a mix of true nulls and true non-nulls) at the resulting n: m=1000,
+  pi1=0.1 (m1=100), d=2, fdr_level=0.1, target average power=0.8 -> n=8/
+  group, 500-replicate simulation gives empirical average FDR 0.082
+  (target 0.1) and empirical average power 0.794 (target 0.8); m=500,
+  pi1=0.1 (m1=50), d=1, fdr_level=0.05, target average power=0.9 ->
+  n=36/group, 400-replicate simulation gives empirical average FDR 0.045
+  (target 0.05) and empirical average power 0.904 (target 0.9)
 - **MANOVA / Hotelling's T²** (`R/modules/mod_manova.R`) -- the two-group
   special case of MANOVA: comparing two independent groups on p >= 1
   continuous outcome variables JOINTLY via Hotelling's T-squared test.

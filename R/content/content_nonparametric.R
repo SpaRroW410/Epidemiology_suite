@@ -354,5 +354,60 @@ nonparametric_content <- list(
       "for this test -- is used here instead)."
     ),
     backend = "direct Monte Carlo simulation of stats::ks.test()"
+  ),
+  wald_wolfowitz = list(
+    title = "Wald-Wolfowitz Runs Test (Two Independent Samples), via Monte Carlo Simulation",
+    formula_latex = paste0(
+      "$$\\hat{\\text{power}}(n) = \\frac{1}{R}\\sum_{r=1}^{R} \\mathbb{1}\\left[",
+      "\\text{runs.test}(\\text{labels}_r)_{p\\text{-value}} < \\alpha\\right]$$",
+      "$$\\text{labels}_r = \\text{group labels of } (X_r, Y_r), ",
+      "\\text{ sorted by pooled value}$$"
+    ),
+    explanation = paste(
+      "Like the Kolmogorov-Smirnov design above, the Wald-Wolfowitz runs",
+      "test has NO closed-form power/sample-size formula against a",
+      "general alternative. It tests whether two independent samples come",
+      "from the same distribution by pooling both samples, sorting the",
+      "combined values, and counting \"runs\" -- unbroken stretches of the",
+      "same group's label -- in that sorted sequence: too few runs means",
+      "the two groups' values cluster apart from each other (evidence of",
+      "a real difference) rather than interleaving as they would if both",
+      "samples came from the same distribution.",
+      "",
+      "- **effect_size** - a standardized mean shift between two Normal",
+      "  distributions with equal variance (comparable to Cohen's d) --",
+      "  a representative benchmark scenario, not a generality claim.",
+      "- **nsim** - simulated datasets drawn per candidate sample size",
+      "  while searching; more replicates reduce Monte Carlo sampling",
+      "  error at the cost of runtime.",
+      "- **alpha, power, n_ratio** - as elsewhere.",
+      "",
+      "As with the KS design, the result carries ordinary Monte Carlo",
+      "sampling error rather than the negligible rounding error of a",
+      "closed-form calculation.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "A large shift (effect_size = 0.8), alpha = 0.05, 80% power, equal",
+      "groups, nsim = 500: this calculator returns n = 216 per group (432",
+      "total), simulated achieved power 0.817. This is far more than the",
+      "equivalent Kolmogorov-Smirnov design's n = 37/group at the same",
+      "effect size -- the runs test is known to be a comparatively weak",
+      "omnibus test against a plain location shift (it discards the",
+      "actual magnitude of each observation, using only its rank position",
+      "relative to the pooled sequence), so this large a gap between the",
+      "two general-purpose distribution-free tests is expected, not a",
+      "sign of an error.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Wald A, Wolfowitz J. On a test whether two samples are from the",
+      "same population. Ann Math Stat. 1940;11(2):147-162 (defines the",
+      "two-sample runs test; no general power formula is given there or",
+      "anywhere else in the literature for an arbitrary alternative,",
+      "which is why direct simulation -- as this app's own checklist",
+      "recommends for this test -- is used here instead)."
+    ),
+    backend = "direct Monte Carlo simulation of tseries::runs.test()"
   )
 )
