@@ -409,6 +409,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Correlation",
        module_input_id = "correlation-design", design_value = "partial"),
 
+  list(key = "correlation_spearman",
+       label = "Spearman rank correlation (ARE-inflated)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a Spearman",
+         "rank correlation, when the relationship is expected to be",
+         "monotonic but not necessarily linear, or the variables are",
+         "ordinal?\""
+       ),
+       outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Correlation",
+       module_input_id = "correlation-design", design_value = "spearman"),
+
   # Chi-Square Tests entries: not a "how many groups" comparison in the
   # proportion/mean sense, so only reachable via "by study design" -- except
   # "independence" is also cross-referenced from proportion_k above, since
@@ -1295,10 +1307,11 @@ study_design_families <- list(
                          "diagnostic_ppv_npv", "diagnostic_likelihood_ratio",
                          "diagnostic_odds_ratio")),
   list(id = "correlation", label = "Correlation",
-       hint = "Detecting a Pearson correlation between two continuous variables, comparing correlation strength between two independent or two dependent (overlapping) groups, a point-biserial correlation, a simple regression slope, or a partial correlation.",
+       hint = "Detecting a Pearson correlation between two continuous variables, comparing correlation strength between two independent or two dependent (overlapping) groups, a point-biserial correlation, a simple regression slope, a partial correlation, or a Spearman rank correlation.",
        catalog_keys = c("correlation_pearson", "correlation_two_independent",
                          "correlation_two_dependent", "correlation_point_biserial",
-                         "correlation_regression_slope", "correlation_partial")),
+                         "correlation_regression_slope", "correlation_partial",
+                         "correlation_spearman")),
   list(id = "agreement", label = "Agreement / Reliability",
        hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman, Lin's CCC).",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
@@ -1424,10 +1437,11 @@ test_families <- list(
        catalog_keys = c("exact_binomial", "exact_fisher", "exact_boschloo",
                          "exact_poisson", "sign_test")),
   list(id = "correlation_regression", label = "Correlation & Regression",
-       hint = "Pearson correlation (single or comparing two independent or two dependent/overlapping groups), a simple regression slope, a partial correlation, and multiple linear regression (incl. hierarchical R-squared increase).",
+       hint = "Pearson correlation (single or comparing two independent or two dependent/overlapping groups), a simple regression slope, a partial correlation, a Spearman rank correlation, and multiple linear regression (incl. hierarchical R-squared increase).",
        catalog_keys = c("correlation_pearson", "correlation_two_independent",
                          "correlation_two_dependent", "correlation_regression_slope",
-                         "correlation_partial", "regression_r2", "regression_r2_increase")),
+                         "correlation_partial", "correlation_spearman",
+                         "regression_r2", "regression_r2_increase")),
   list(id = "survival_tests", label = "Survival Tests",
        hint = "Log-rank test, Cox proportional-hazards regression, stratified log-rank, and accrual/follow-up/noncompliance-adjusted log-rank for time-to-event outcomes.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified",

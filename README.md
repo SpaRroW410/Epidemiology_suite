@@ -114,7 +114,21 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   reproduce Steiger's own 1980 textbook example exactly: r_yx1=.4,
   r_yx2=.5, r_x1x2=.1, n=103 -> t=-0.89) and by simulation: r_yx1=0.4,
   r_yx2=0.6, r_x1x2=0.3, alpha=0.05, power=0.80 -> n=183, empirical power
-  0.816 at 5,000 replicates
+  0.816 at 5,000 replicates; and a Spearman rank correlation design -- no
+  installed package provides a Spearman-specific closed form, so this
+  does exactly what this app's own checklist names for this item:
+  solves the equivalent Pearson-correlation n via this module's own
+  `calc_correlation()`, then inflates it by the classical asymptotic
+  relative efficiency of Spearman's rho relative to Pearson's r under
+  bivariate normality, 9/pi^2 ~ 0.9119 (Hotelling & Pabst 1936; Fieller,
+  Hartley & Pearson 1957) -- the same ARE-inflation pattern already used
+  by the Nonparametric Tests module's Kruskal-Wallis and Friedman
+  designs. Verified: r=0.3, alpha=0.05, 80% power -> Pearson n=85,
+  Spearman n=94; independently confirmed by a 3,000-replicate Monte
+  Carlo simulation of the actual `stats::cor.test(method="spearman")` on
+  simulated bivariate normal data at rho=0.3 -- empirical power 0.796 at
+  n=94 (matching the 0.80 target) versus only 0.752 at the unadjusted
+  n=85
 - **Chi-Square Tests** (`R/modules/mod_chisq.R`) -- goodness of fit and test
   of independence/association for an R x C table (dynamic 2-5 x 2-5
   proportion-matrix UI), both wrapping `pwr::pwr.chisq.test()` +

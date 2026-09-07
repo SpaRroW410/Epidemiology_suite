@@ -25,7 +25,8 @@ mod_correlation_ui <- function(id) {
           "Compare two dependent (overlapping) correlations" = "two_dependent",
           "Point-biserial correlation" = "point_biserial",
           "Regression coefficient (bivariate slope)" = "regression_slope",
-          "Partial correlation (controlling for k covariates)" = "partial"
+          "Partial correlation (controlling for k covariates)" = "partial",
+          "Spearman rank correlation (ARE-inflated)" = "spearman"
         ),
         selected = "single"
       ),
@@ -58,6 +59,10 @@ mod_correlation_ui <- function(id) {
         condition = design_is("partial"),
         numericInput(ns("r_partial"), "Expected partial correlation (r)", value = 0.3, min = -0.99, max = 0.99, step = 0.01),
         numericInput(ns("k_partial"), "Number of covariates controlled for (k)", value = 2, min = 1, step = 1)
+      ),
+      conditionalPanel(
+        condition = design_is("spearman"),
+        numericInput(ns("r_spearman"), "Expected Spearman correlation (r)", value = 0.3, min = -0.99, max = 0.99, step = 0.01)
       ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
@@ -106,7 +111,13 @@ mod_correlation_ui <- function(id) {
       render_formula_block(correlation_content$partial$formula_latex),
       shiny::markdown(correlation_content$partial$explanation),
       h5("Worked example"),
-      shiny::markdown(correlation_content$partial$worked_example)
+      shiny::markdown(correlation_content$partial$worked_example),
+      hr(),
+      h4(correlation_content$spearman$title),
+      render_formula_block(correlation_content$spearman$formula_latex),
+      shiny::markdown(correlation_content$spearman$explanation),
+      h5("Worked example"),
+      shiny::markdown(correlation_content$spearman$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -133,7 +144,11 @@ mod_correlation_ui <- function(id) {
       hr(),
       h4(correlation_content$partial$title),
       p(strong("Citation: "), correlation_content$partial$citation),
-      p(strong("Implemented via: "), code(correlation_content$partial$backend))
+      p(strong("Implemented via: "), code(correlation_content$partial$backend)),
+      hr(),
+      h4(correlation_content$spearman$title),
+      p(strong("Citation: "), correlation_content$spearman$citation),
+      p(strong("Implemented via: "), code(correlation_content$spearman$backend))
     )
   )
 }
@@ -176,11 +191,17 @@ mod_correlation_server <- function(id) {
             alpha = input$alpha, power = input$power,
             alternative = input$alternative
           )
-        } else {
+        } else if (input$design == "partial") {
           req(input$r_partial, input$k_partial)
           calc_correlation_partial(
             r = input$r_partial, k = input$k_partial,
             alpha = input$alpha, power = input$power,
+            alternative = input$alternative
+          )
+        } else {
+          req(input$r_spearman)
+          calc_correlation_spearman(
+            r = input$r_spearman, alpha = input$alpha, power = input$power,
             alternative = input$alternative
           )
         }
@@ -217,6 +238,12 @@ mod_correlation_server <- function(id) {
         tagList(
           p(strong("Required sample size: "), v$n),
           p(sprintf("Implied correlation r = %.4f", v$r))
+        )
+      } else if (res$design == "spearman") {
+        tagList(
+          p(strong("Required sample size: "), v$n),
+          p(sprintf("(Equivalent Pearson-correlation design would need n = %d; ARE = %.4f)",
+                     v$n_pearson, v$are))
         )
       } else {
         p(strong("Required sample size: "), v$n)
