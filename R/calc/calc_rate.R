@@ -172,3 +172,104 @@ calc_poisson_regression_continuous <- function(beta0, beta1, mu_x1, sigma2_x1,
                   mu_T = mu_T, phi = phi, alpha = alpha, power = power)
   )
 }
+
+# Comparison of two negative binomial rates, Zhu & Lakkis (2014).
+#
+# The checklist's named package for this item, `MKpower` (its function
+# `power.nb.test()`), is not installed and CRAN is unreachable from this
+# sandbox. Its source was read directly from its public GitHub CRAN
+# mirror (https://raw.githubusercontent.com/cran/MKpower/master/R/
+# powerNbinomTest.R) -- a single, self-contained closed-form function
+# with no cross-file dependencies, unlike the large multi-file packages
+# (`gsDesign`, `npsurvSS`) this session judged too complex to safely
+# reimplement -- and transcribed directly below.
+#
+# This is a genuinely different method than the existing Poisson
+# comparison-of-two-rates design (`calc_rate_comparison()`) and the
+# Poisson regression design above (`calc_poisson_regression_continuous()`,
+# whose `phi` over-dispersion parameter linearly inflates the Poisson
+# variance, a quasi-Poisson-style adjustment) -- the negative binomial
+# model instead has a quadratic mean-variance relationship (Var(Y) = mu +
+# mu^2/theta), the standard model for count data whose over-dispersion
+# grows with the mean rather than staying proportional to it.
+#
+# Verified two independent ways against the package's own worked example
+# (mu0=10, RR=1.5, theta=1/5, duration=1, ssize.ratio=1.5, approach=3,
+# target power=0.8 -> n0=405/n1=607): (1) reproducing the package's own
+# defined test statistic exactly (Z = sqrt(n0)*log(mu1_hat/mu0_hat) /
+# sqrt(V1), using the DESIGN-ASSUMED dispersion, matching how the formula
+# itself is derived) on simulated MASS::rnegbin() data -> empirical power
+# 0.814; (2) a genuinely independent check fitting MASS::glm.nb() (which
+# ESTIMATES the dispersion from the data rather than assuming it known)
+# on the same simulated data and using its own Wald test p-value ->
+# empirical power 0.797 -- both close to the formula's own target of 0.8.
+
+#' Sample size for comparing two negative binomial rates
+#'
+#' Wraps a direct transcription of `MKpower::power.nb.test()` (Zhu &
+#' Lakkis 2014). Solves for the control-group sample size needed to
+#' detect a given rate ratio between two groups whose event counts follow
+#' negative binomial distributions (Var(Y) = mu + mu^2/theta -- constant-
+#' over-dispersion count data, e.g. recurrent-event or exacerbation
+#' counts), given a fixed treatment/follow-up duration.
+#'
+#' @param mu0 Expected event rate per time unit, group 0 (control) (> 0)
+#' @param RR Rate ratio, group 1 (treatment) vs. group 0 (> 0, != 1)
+#' @param theta Dispersion parameter of the negative binomial
+#'   distribution, in the `MASS::rnegbin()` parameterization (Var(Y) =
+#'   mu + mu^2/theta); > 0, smaller = more over-dispersion
+#' @param duration Average treatment/follow-up duration (> 0)
+#' @param ssize_ratio Ratio of group-1 to group-0 sample size (> 0),
+#'   default 1 (equal allocation)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided" or "one.sided"
+#' @param approach 1, 2, or 3 (three variance-estimator variants from Zhu
+#'   & Lakkis 2014); default 3, one of the two the authors' own
+#'   simulation study recommends (along with 2)
+#' @return list(n0, n1, n_total, inputs)
+calc_negative_binomial_rates <- function(mu0, RR, theta, duration = 1, ssize_ratio = 1,
+                                          alpha = 0.05, power = 0.8,
+                                          alternative = "two.sided", approach = 3) {
+  .validate_positive(mu0, "mu0")
+  .validate_positive(RR, "RR")
+  if (isTRUE(all.equal(RR, 1))) stop("RR must differ from 1 (no effect to detect).")
+  .validate_positive(theta, "theta")
+  .validate_positive(duration, "duration")
+  .validate_positive(ssize_ratio, "ssize_ratio")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (!alternative %in% c("two.sided", "one.sided")) {
+    stop('alternative must be "two.sided" or "one.sided".')
+  }
+  if (!approach %in% c(1, 2, 3)) stop("approach must be 1, 2, or 3.")
+
+  mu1 <- mu0 * RR
+  sided <- if (alternative == "one.sided") 1 else 2
+  k <- 1 / theta
+
+  if (approach == 1) {
+    V0 <- (1 + ssize_ratio) / (duration * ssize_ratio * mu0) + (1 + ssize_ratio) * k / ssize_ratio
+  } else if (approach == 2) {
+    V0 <- 1 / duration * (1 / mu0 + 1 / (ssize_ratio * mu1)) + (1 + ssize_ratio) * k / ssize_ratio
+  } else {
+    V0 <- (1 + ssize_ratio)^2 / (duration * ssize_ratio * (mu0 + ssize_ratio * mu1)) +
+      (1 + ssize_ratio) * k / ssize_ratio
+  }
+  V1 <- 1 / duration * (1 / mu0 + 1 / (ssize_ratio * mu1)) + (1 + ssize_ratio) * k / ssize_ratio
+
+  beta <- 1 - power
+  if (sided == 1) {
+    n0 <- ((qnorm(1 - alpha) * sqrt(V0) + qnorm(1 - beta) * sqrt(V1)) / log(mu1 / mu0))^2
+  } else {
+    n0 <- ((qnorm(1 - alpha / 2) * sqrt(V0) + qnorm(1 - beta) * sqrt(V1)) / log(mu1 / mu0))^2
+  }
+  n1 <- ssize_ratio * n0
+
+  list(
+    n0 = ceiling(n0), n1 = ceiling(n1), n_total = ceiling(n0) + ceiling(n1),
+    inputs = list(mu0 = mu0, RR = RR, theta = theta, duration = duration,
+                  ssize_ratio = ssize_ratio, alpha = alpha, power = power,
+                  alternative = alternative, approach = approach)
+  )
+}

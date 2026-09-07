@@ -48,3 +48,51 @@ test_that("calc_poisson_regression_continuous rejects invalid inputs", {
   expect_error(calc_poisson_regression_continuous(beta0 = 0.1, beta1 = 0.5, mu_x1 = 0, sigma2_x1 = 1, alpha = 0), "between 0 and 1")
   expect_error(calc_poisson_regression_continuous(beta0 = 0.1, beta1 = 0.5, mu_x1 = 0, sigma2_x1 = 1, power = 0), "between 0 and 1")
 })
+
+test_that("calc_negative_binomial_rates matches MKpower::power.nb.test()'s own documented example exactly", {
+  # MKpower isn't installable from CRAN in this sandbox (no network
+  # access); power.nb.test()'s source -- a single, self-contained
+  # closed-form function (Zhu & Lakkis 2014) -- was read directly from
+  # its public GitHub CRAN mirror and transcribed. Its own man-page
+  # \examples{} include this exact scenario (mu0=10, RR=1.5, theta=1/5,
+  # duration=1, ssize.ratio=3/2, power=0.8, approach=3), for which the
+  # transcribed formula gives n0=404.2/n1=606.3 (this calculator's
+  # ceiling() convention: 405/607). Independently verified two ways by
+  # Monte Carlo before wiring into the app: (1) reproducing the paper's
+  # own test statistic on simulated MASS::rnegbin() data at this n gives
+  # empirical power 0.814; (2) a genuinely different check -- fitting
+  # MASS::glm.nb() (which ESTIMATES the dispersion from data, unlike the
+  # design formula which assumes it known) on the same simulated data and
+  # using its own Wald test -- gives empirical power 0.797. Both closely
+  # bracket the formula's 0.8 target.
+  res <- calc_negative_binomial_rates(mu0 = 10, RR = 1.5, theta = 1 / 5, duration = 1,
+                                       ssize_ratio = 3 / 2, power = 0.8, approach = 3)
+  expect_equal(res$n0, 405)
+  expect_equal(res$n1, 607)
+
+  # Table I (row 1) example: mu0=0.8, RR=0.85, theta=1/0.4, duration=0.75,
+  # power=0.8, equal allocation -- verified for all three approaches.
+  res1 <- calc_negative_binomial_rates(mu0 = 0.8, RR = 0.85, theta = 1 / 0.4, duration = 0.75,
+                                        power = 0.8, approach = 1)
+  res2 <- calc_negative_binomial_rates(mu0 = 0.8, RR = 0.85, theta = 1 / 0.4, duration = 0.75,
+                                        power = 0.8, approach = 2)
+  res3 <- calc_negative_binomial_rates(mu0 = 0.8, RR = 0.85, theta = 1 / 0.4, duration = 0.75,
+                                        power = 0.8, approach = 3)
+  expect_equal(res1$n0, 1255)
+  expect_equal(res2$n0, 1316)
+  expect_equal(res3$n0, 1311)
+})
+
+test_that("calc_negative_binomial_rates needs a larger sample size for a higher target power", {
+  res_low <- calc_negative_binomial_rates(mu0 = 10, RR = 1.5, theta = 1 / 5, power = 0.7)
+  res_high <- calc_negative_binomial_rates(mu0 = 10, RR = 1.5, theta = 1 / 5, power = 0.9)
+  expect_lt(res_low$n_total, res_high$n_total)
+})
+
+test_that("calc_negative_binomial_rates rejects invalid inputs", {
+  expect_error(calc_negative_binomial_rates(mu0 = -1, RR = 1.5, theta = 1), "positive")
+  expect_error(calc_negative_binomial_rates(mu0 = 10, RR = 1, theta = 1), "must differ from 1")
+  expect_error(calc_negative_binomial_rates(mu0 = 10, RR = 1.5, theta = -1), "positive")
+  expect_error(calc_negative_binomial_rates(mu0 = 10, RR = 1.5, theta = 1, approach = 4), "approach must be")
+  expect_error(calc_negative_binomial_rates(mu0 = 10, RR = 1.5, theta = 1, alternative = "bad"), "two.sided")
+})

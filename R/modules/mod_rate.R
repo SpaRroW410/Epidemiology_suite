@@ -23,7 +23,8 @@ mod_rate_ui <- function(id) {
         choices = c(
           "Single rate, precision-based (no comparison)" = "precision",
           "Comparison of two rates" = "comparison",
-          "Poisson regression, continuous predictor" = "poisson_regression"
+          "Poisson regression, continuous predictor" = "poisson_regression",
+          "Comparison of two negative binomial rates" = "negative_binomial"
         )
       ),
       conditionalPanel(
@@ -60,6 +61,21 @@ mod_rate_ui <- function(id) {
         numericInput(ns("alpha_pr"), "Significance level, two-sided (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_pr"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
       ),
+      conditionalPanel(
+        condition = design_is("negative_binomial"),
+        numericInput(ns("mu0_nb"), "Control-group event rate per time unit (mu0)", value = 10, min = 0.0001, step = 0.5),
+        numericInput(ns("rr_nb"), "Rate ratio to detect (treatment / control)", value = 1.5, min = 0.0001, step = 0.05),
+        numericInput(ns("theta_nb"), "Dispersion parameter (theta, MASS::rnegbin parameterization)", value = 0.2, min = 0.0001, step = 0.05),
+        numericInput(ns("duration_nb"), "Average treatment/follow-up duration", value = 1, min = 0.0001, step = 0.1),
+        numericInput(ns("ratio_nb"), "Treatment:control sample size ratio", value = 1.5, min = 0.01, step = 0.1),
+        selectInput(ns("approach_nb"), "Variance-estimator approach (Zhu & Lakkis 2014)",
+                    choices = c("Approach 3 (recommended)" = 3, "Approach 2 (recommended)" = 2,
+                                "Approach 1" = 1)),
+        selectInput(ns("alternative_nb"), "Alternative hypothesis",
+                    choices = c("Two-sided" = "two.sided", "One-sided" = "one.sided")),
+        numericInput(ns("alpha_nb"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_nb"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
+      ),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -83,7 +99,13 @@ mod_rate_ui <- function(id) {
       render_formula_block(rate_content$poisson_regression$formula_latex),
       shiny::markdown(rate_content$poisson_regression$explanation),
       h5("Worked example"),
-      shiny::markdown(rate_content$poisson_regression$worked_example)
+      shiny::markdown(rate_content$poisson_regression$worked_example),
+      hr(),
+      h4(rate_content$negative_binomial$title),
+      render_formula_block(rate_content$negative_binomial$formula_latex),
+      shiny::markdown(rate_content$negative_binomial$explanation),
+      h5("Worked example"),
+      shiny::markdown(rate_content$negative_binomial$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -98,7 +120,11 @@ mod_rate_ui <- function(id) {
       hr(),
       h4(rate_content$poisson_regression$title),
       p(strong("Citation: "), rate_content$poisson_regression$citation),
-      p(strong("Implemented via: "), code(rate_content$poisson_regression$backend))
+      p(strong("Implemented via: "), code(rate_content$poisson_regression$backend)),
+      hr(),
+      h4(rate_content$negative_binomial$title),
+      p(strong("Citation: "), rate_content$negative_binomial$citation),
+      p(strong("Implemented via: "), code(rate_content$negative_binomial$backend))
     )
   )
 }
@@ -128,7 +154,7 @@ mod_rate_server <- function(id) {
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
-      } else {
+      } else if (input$design == "poisson_regression") {
         req(input$beta0_pr, input$beta1_pr, input$mu_x1_pr, input$sigma2_x1_pr,
             input$mu_T_pr, input$phi_pr, input$alpha_pr, input$power_pr)
         tryCatch(
@@ -136,6 +162,18 @@ mod_rate_server <- function(id) {
             beta0 = input$beta0_pr, beta1 = input$beta1_pr, mu_x1 = input$mu_x1_pr,
             sigma2_x1 = input$sigma2_x1_pr, mu_T = input$mu_T_pr, phi = input$phi_pr,
             alpha = input$alpha_pr, power = input$power_pr
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$mu0_nb, input$rr_nb, input$theta_nb, input$duration_nb, input$ratio_nb,
+            input$approach_nb, input$alternative_nb, input$alpha_nb, input$power_nb)
+        tryCatch(
+          list(ok = TRUE, value = calc_negative_binomial_rates(
+            mu0 = input$mu0_nb, RR = input$rr_nb, theta = input$theta_nb,
+            duration = input$duration_nb, ssize_ratio = input$ratio_nb,
+            alpha = input$alpha_nb, power = input$power_nb,
+            alternative = input$alternative_nb, approach = as.numeric(input$approach_nb)
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -159,6 +197,11 @@ mod_rate_server <- function(id) {
         tagList(
           p(strong("Total sample size: "), v$n_total),
           p(sprintf("Exposed group: %d, Reference group: %d", v$n_exposed, v$n_reference))
+        )
+      } else if (input$design == "negative_binomial") {
+        tagList(
+          p(strong("Total sample size: "), v$n_total),
+          p(sprintf("Control group: %d, Treatment group: %d", v$n0, v$n1))
         )
       } else {
         tagList(

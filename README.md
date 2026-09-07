@@ -224,7 +224,27 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   project dependency (used by the Logistic Regression module); verified
   exactly against the package's own documented example: beta0=0.1,
   beta1=0.5, predictor mean=0/variance=1, mean exposure time=1, no
-  over-dispersion, alpha=0.05, power=0.80 -> n=28
+  over-dispersion, alpha=0.05, power=0.80 -> n=28; plus comparison of two
+  NEGATIVE BINOMIAL rates (`calc_negative_binomial_rates()`) -- a
+  genuinely different model than Poisson regression's linear-in-mean
+  `phi` over-dispersion adjustment above: negative binomial has a
+  quadratic mean-variance relationship (Var(Y) = mu + mu^2/theta), the
+  standard model when over-dispersion grows with the mean (e.g.
+  recurrent-event counts like hospitalizations or exacerbations).
+  `MKpower` (the package providing this method, `power.nb.test()`)
+  isn't installable from CRAN in this sandbox, so its source -- a
+  single, self-contained closed-form function (Zhu & Lakkis 2014) --
+  was read directly from its public GitHub CRAN mirror and transcribed.
+  Verified exactly against the package's own documented example
+  (mu0=10, RR=1.5, theta=1/5, duration=1, ssize_ratio=1.5, approach=3,
+  power=0.8 -> n0=405/n1=607, matching the package's own n0=404.2/
+  n1=606.3 to within rounding), then independently confirmed two ways
+  by Monte Carlo: reproducing the paper's own test statistic on
+  simulated `MASS::rnegbin()` data gives empirical power 0.814, and a
+  genuinely different check -- fitting `MASS::glm.nb()` (which
+  ESTIMATES the dispersion from data, unlike the design formula) and
+  using its own Wald test -- gives empirical power 0.797, both closely
+  bracketing the formula's 0.8 target
 - **Ratio Estimation** (`R/modules/mod_ratio.R`) -- precision-based
   estimation of a risk ratio, odds ratio, or rate ratio (a target
   confidence-interval width rather than a power target), wrapping

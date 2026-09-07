@@ -953,6 +953,19 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Incidence Rate",
        module_input_id = "rate-design", design_value = "poisson_regression"),
 
+  list(key = "negative_binomial_rates",
+       label = "Comparison of two negative binomial rates",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a given rate",
+         "ratio between two groups' recurrent-event counts (e.g.",
+         "hospitalizations, exacerbations, relapses), when the event",
+         "counts are over-dispersed beyond what a plain Poisson model",
+         "allows -- following the negative binomial model?\""
+       ),
+       outcome_type = "rate", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Incidence Rate",
+       module_input_id = "rate-design", design_value = "negative_binomial"),
+
   list(key = "ratio_risk_ratio",
        label = "Risk ratio -- precision-based",
        answers = paste(
@@ -1379,9 +1392,9 @@ study_design_families <- list(
        hint = "Precision-based estimation of a risk ratio, odds ratio, or rate ratio.",
        catalog_keys = c("ratio_risk_ratio", "ratio_odds_ratio", "ratio_rate_ratio")),
   list(id = "incidence_rate", label = "Incidence Rate",
-       hint = "Estimating or comparing incidence rates from person-time data, or Poisson regression with a continuous predictor.",
+       hint = "Estimating or comparing incidence rates from person-time data, Poisson regression with a continuous predictor, or comparing two over-dispersed (negative binomial) rates.",
        catalog_keys = c("incidence_rate_precision", "rate_comparison",
-                         "poisson_regression_continuous")),
+                         "poisson_regression_continuous", "negative_binomial_rates")),
   list(id = "exact_tests", label = "Exact Tests",
        hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, Boschloo's unconditional exact, sign test) and rates (exact Poisson).",
        catalog_keys = c("exact_binomial", "exact_fisher", "exact_boschloo",
