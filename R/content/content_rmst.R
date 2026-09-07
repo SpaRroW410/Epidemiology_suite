@@ -1,0 +1,90 @@
+# Metadata for the RMST Comparison module: formula text, plain-language
+# explanation, worked example, and citation. Content is data, rendered
+# generically by mod_rmst.R (SDD 4.2: "content is data, not hardcoded UI").
+
+rmst_content <- list(
+  comparison = list(
+    title = "Two-Arm Restricted Mean Survival Time (RMST) Comparison",
+    formula_latex = paste0(
+      "$$\\widehat{\\text{RMST}}_k(\\tau) = \\int_0^\\tau \\hat{S}_k(t)\\, dt ",
+      "\\quad\\text{(Kaplan-Meier area under the curve, arm } k\\text{)}$$",
+      "$$\\widehat{\\Delta} = \\widehat{\\text{RMST}}_1(\\tau) - \\widehat{\\text{RMST}}_0(\\tau), \\quad ",
+      "\\widehat{SE}(\\widehat{\\Delta}) = \\sqrt{\\widehat{Var}_1 + \\widehat{Var}_0}$$",
+      "$$\\text{Power} = \\Pr\\Big(\\widehat{\\Delta} - z_{1-\\alpha/2}\\,\\widehat{SE}(\\widehat{\\Delta}) > -\\text{margin}\\Big) ",
+      "\\quad\\text{(estimated by simulation)}$$"
+    ),
+    explanation = paste(
+      "The restricted mean survival time (RMST) up to a truncation time",
+      "tau -- the area under the Kaplan-Meier curve out to tau -- is a",
+      "model-free, directly clinically interpretable alternative to the",
+      "hazard ratio (it doesn't require the proportional-hazards",
+      "assumption). This design compares two arms' RMST via a",
+      "one-sided test: superiority (margin = 0) or non-inferiority",
+      "(margin > 0), following Uno et al. (2014, 2015).",
+      "",
+      "Because the RMST difference's sampling distribution has no simple",
+      "closed form once staggered accrual and administrative censoring",
+      "are involved, the method itself IS a Monte Carlo simulation:",
+      "repeatedly simulate the trial (Weibull event times, uniform",
+      "accrual over the enrollment period, censoring at the study's end),",
+      "compute the RMST-difference confidence interval on each simulated",
+      "trial, and report the fraction whose lower bound clears the",
+      "non-inferiority margin. This calculator reports two variance",
+      "estimators for that confidence interval:",
+      "",
+      "- **Separate variance** - each arm's RMST variance is estimated on",
+      "  its own data and the two are simply added (this is the same",
+      "  computation as the standard two-arm RMST test's \"unadjusted\"",
+      "  result, and is the method's primary/headline power).",
+      "- **Pooled variance** - a single variance is estimated from the",
+      "  combined two-arm data and rescaled by each arm's size.",
+      "",
+      "- **ac_period** - accrual period, i.e. the time of the last",
+      "  patient's enrollment.",
+      "- **tot_time** - total study time, i.e. the time of the final",
+      "  analysis (all patients are administratively censored here if",
+      "  they haven't already had the event).",
+      "- **tau** - the RMST truncation time (must be less than tot_time,",
+      "  and small enough that events/censoring are actually observed by",
+      "  tau in essentially every simulated trial).",
+      "- **shape0/scale0, shape1/scale1** - Weibull shape and scale",
+      "  parameters for arm 0 (control) and arm 1 (treatment); shape = 1",
+      "  is the exponential (constant-hazard) special case.",
+      "- **margin** - the non-inferiority margin (0 = superiority test).",
+      "- **allocation1** - the proportion of patients allocated to arm 1.",
+      "- **alpha, power** - as elsewhere (two-sided alpha).",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "The `SSRMST` package isn't installable from CRAN in this sandbox,",
+      "and its own `ssrmst()` function calls `survRM2::rmst2()` internally",
+      "-- also not installed. Both packages' actual source was read",
+      "directly from their public GitHub CRAN mirrors; `survRM2::rmst2()`'s",
+      "\"unadjusted\" RMST-difference test was confirmed to reduce exactly",
+      "to summing each arm's own RMST variance (computed by the same",
+      "Kaplan-Meier-area estimator `SSRMST` already carries internally,",
+      "credited there to survRM2), so both packages' methods were fully",
+      "reimplemented using only the `survival` package. Reproducing",
+      "`SSRMST`'s own documented example scenarios (ac_period = 35,",
+      "tot_time = 510, tau = 500): a non-inferiority test with identical",
+      "arms (scale0 = scale1 = 8500, margin = 18, target power = 0.8)",
+      "needs n = 206/arm, achieving simulated power 0.780 (separate) /",
+      "0.780 (pooled); a superiority test with a large true effect",
+      "(scale0 = 4000, scale1 = 8500, target power = 0.8) needs n =",
+      "432/arm, achieving simulated power 0.823 (separate) / 0.820",
+      "(pooled) -- both close to the 0.8 target, and monotonically",
+      "increasing required n for a higher target power (n_total = 680 at",
+      "power = 0.7, 950 at power = 0.9), as expected.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Uno H, Claggett B, Tian L, et al. Moving beyond the hazard ratio",
+      "in quantifying the between-group difference in survival analysis.",
+      "Journal of Clinical Oncology 2014, 32, 2380-2385. Uno H, Wittes J,",
+      "Fu H, et al. Alternatives to Hazard Ratios for Comparing the",
+      "Efficacy or Safety of Therapies in Non-Inferiority Studies. Annals",
+      "of Internal Medicine 2015, 163, 127-134."
+    ),
+    backend = "Monte Carlo reimplementation of SSRMST::ssrmst() + survRM2::rmst2()'s core estimator (via survival::survfit())"
+  )
+)

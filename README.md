@@ -542,6 +542,35 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   290 events/436 total; maximum joint test: 252 events/378 total;
   Bonferroni joint test: 288 events/430 total -- matching the package's
   own printed output exactly
+- **RMST Comparison** (`R/modules/mod_rmst.R`) -- sample size for a
+  two-arm comparison of restricted mean survival time (RMST), a
+  model-free, directly interpretable alternative to the hazard ratio
+  that doesn't require the proportional-hazards assumption (superiority,
+  margin=0, or non-inferiority, margin>0, per Uno et al. 2014, 2015).
+  Neither `SSRMST` (the checklist's named package) nor its own internal
+  dependency `survRM2` are installable from CRAN in this sandbox, so
+  both packages' actual source was read directly from their public
+  GitHub CRAN mirrors -- `SSRMST::ssrmst()` and `survRM2::rmst2()`. This
+  confirmed `rmst2()`'s "unadjusted" RMST-difference test reduces
+  exactly to summing each arm's own Kaplan-Meier-area RMST variance
+  (the same one-arm estimator `SSRMST` already carries internally,
+  credited there to survRM2), so `calc_rmst_comparison()` fully
+  reimplements both packages' method using only `survival::survfit()`
+  -- no new package dependency. The method itself IS Monte Carlo by
+  design (there's no closed form for the RMST-difference confidence
+  interval under staggered accrual and administrative censoring), so
+  this reuses the same exponential-search-then-bisection engine
+  (`.mc_search_n1()`) as the Nonparametric Tests and Bayesian Design
+  Analysis modules' simulation-based designs, reporting both of the
+  method's variance estimators (separate and pooled). Verified by
+  reproducing `SSRMST`'s own documented example scenarios (ac_period=35,
+  tot_time=510, tau=500): a non-inferiority test with identical arms
+  (scale0=scale1=8500, margin=18, target power=0.8) needs n=206/arm,
+  achieving simulated power 0.780; a superiority test with a large true
+  effect (scale0=4000, scale1=8500, target power=0.8) needs n=432/arm,
+  achieving simulated power 0.823; and required n increases
+  monotonically with target power (n_total=680 at power=0.7, 950 at
+  power=0.9)
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

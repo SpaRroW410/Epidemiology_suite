@@ -549,6 +549,19 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Competing Risks",
        module_input_id = NA, design_value = NA),
 
+  list(key = "rmst_comparison",
+       label = "Restricted mean survival time (RMST) comparison",
+       answers = paste(
+         "Answers: \"How many patients per arm do I need to detect a",
+         "difference in restricted mean survival time (RMST) between two",
+         "arms -- a model-free alternative to the hazard ratio that",
+         "doesn't require the proportional-hazards assumption -- for a",
+         "superiority or non-inferiority test?\""
+       ),
+       outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "RMST Comparison",
+       module_input_id = NA, design_value = NA),
+
   list(key = "cluster_deff",
        label = "Cluster / multistage sampling -- design effect (DEFF)",
        answers = paste(
@@ -1361,9 +1374,9 @@ study_design_families <- list(
        catalog_keys = c("exact_binomial", "exact_fisher", "exact_boschloo",
                          "exact_poisson", "sign_test")),
   list(id = "survival", label = "Survival",
-       hint = "Log-rank, Cox regression, stratified log-rank, accrual/follow-up based survival study designs, or a competing-risks joint hazard test.",
+       hint = "Log-rank, Cox regression, stratified log-rank, accrual/follow-up based survival study designs, a competing-risks joint hazard test, or an RMST comparison.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified",
-                         "survival_noncompliance", "competing_risks_joint")),
+                         "survival_noncompliance", "competing_risks_joint", "rmst_comparison")),
   list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
        hint = "Inflating an existing sample size for cluster-sampled surveys, or solving a full cluster survey design (WHO EPI-style) directly.",
        catalog_keys = c("cluster_deff", "cluster_survey")),
@@ -1467,9 +1480,9 @@ test_families <- list(
                          "correlation_partial", "correlation_spearman",
                          "regression_r2", "regression_r2_increase")),
   list(id = "survival_tests", label = "Survival Tests",
-       hint = "Log-rank test, Cox proportional-hazards regression, stratified log-rank, accrual/follow-up/noncompliance-adjusted log-rank, and a competing-risks joint hazard test for time-to-event outcomes.",
+       hint = "Log-rank test, Cox proportional-hazards regression, stratified log-rank, accrual/follow-up/noncompliance-adjusted log-rank, a competing-risks joint hazard test, and an RMST comparison for time-to-event outcomes.",
        catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified",
-                         "survival_noncompliance", "competing_risks_joint")),
+                         "survival_noncompliance", "competing_risks_joint", "rmst_comparison")),
   list(id = "agreement_statistics", label = "Agreement Statistics",
        hint = "Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman limits of agreement, and Lin's CCC.",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
