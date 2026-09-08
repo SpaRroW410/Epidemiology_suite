@@ -623,7 +623,8 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   achieving simulated power 0.823; and required n increases
   monotonically with target power (n_total=680 at power=0.7, 950 at
   power=0.9)
-- **Longitudinal Slope Difference** (`R/modules/mod_longitudinal.R`) --
+- **Longitudinal / MMRM** (`R/modules/mod_longitudinal.R`, renamed from
+  "Longitudinal Slope Difference" now that it covers a second method) --
   sample size for detecting a difference in linear SLOPE (rate of
   change) between two groups measured repeatedly at the same visit
   times, under a random-intercept + random-slope + residual-error
@@ -643,7 +644,20 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   variance=24, intercept-slope correlation=0.8, residual variance=10,
   alpha=0.05, target power=0.80 -> N=415 total (208/arm), matching the
   package's own vignette statement -- "the study would require about
-  207 subjects per arm" -- exactly (raw N=414.62, 207.31/arm)
+  207 subjects per arm" -- exactly (raw N=414.62, 207.31/arm). Plus a
+  second design, MMRM (mixed model of repeated measures) with dropout
+  under an AR(1) correlation structure (`calc_mmrm_ar1()`), wrapping
+  `longpower::power.mmrm.ar1()` -- from the same package, again a
+  single self-contained function, read from the same GitHub CRAN
+  mirror. Verified exactly against the package's own documented
+  "approximate simulation results from Table 5" of Lu, Luo & Chen
+  (2008): rho=0.6, arm-1 retention=(1,0.76,0.63,0.52), arm-2
+  retention=(1,0.87,0.81,0.78), sigma=1, delta=0.9,
+  lambda=sqrt(1.25/1.75), target power=0.904 -> N=81 total (37/44 per
+  arm), matching the package's own companion example exactly (which
+  fixes N=81 and solves back for rho, recovering rho=0.585, close to
+  the input 0.6 -- explained by N=81 being a rounded integer, not the
+  exact unrounded root 80.61)
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

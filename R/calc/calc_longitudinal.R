@@ -122,3 +122,105 @@ calc_longitudinal_slope_diff <- function(visit_times, delta, sigma2_intercept, s
                   alpha = alpha, power = power, alternative = alternative)
   )
 }
+
+# MMRM (mixed model repeated measures) with missing data, AR(1) structure,
+# Lu, Luo & Chen (2008).
+#
+# The checklist's named source is `longpower::power.mmrm`/`power.mmrm.ar1`
+# -- from the same `longpower` package already used above for the slope-
+# difference design. Its source was read directly from the package's
+# public GitHub CRAN mirror (https://raw.githubusercontent.com/cran/
+# longpower/master/R/power_mmrm.R) -- again a single, self-contained
+# function with no cross-file dependencies. This wraps `power.mmrm.ar1()`
+# (the AR(1)-correlation variant, one of the two input styles --
+# "correlation matrix or AR(1) rho" -- the checklist item itself lists,
+# and simpler for a form UI than supplying a full correlation matrix).
+#
+# Verified against the package's own documented "approximate simulation
+# results from Table 5" of Lu, Luo & Chen (2008): rho=0.6, per-visit
+# retention ra=(1,0.76,0.63,0.52), rb=(1,0.87,0.81,0.78), sigma=1,
+# delta=0.9, lambda=sqrt(1.25/1.75), target power=0.904 -> this
+# reimplementation gives N=80.61 (ceiling 81), matching the package's own
+# companion example, which fixes N=81 to solve back for rho and expects
+# to recover ~0.6 -- confirmed directly: solving for rho at N=81 recovers
+# rho=0.585 (close to 0.6, the small gap explained by N=81 being a
+# rounded integer, not the exact unrounded root 80.61). A second
+# round-trip (N=87, rho=0.6, lambda=1.25/1.75, power=0.910, solve for
+# delta) recovers delta=0.891 (close to the documented delta=0.9), the
+# same rounding-explained gap.
+
+#' Sample size for a mixed model of repeated measures (MMRM) with
+#' AR(1)-correlated, missing/dropout-affected repeated measures
+#' (Lu, Luo & Chen 2008)
+#'
+#' Solves for the total sample size needed to detect a between-arm
+#' difference `delta` in a repeated-measures trial where observations
+#' within a subject follow an AR(1) correlation structure and subjects
+#' may drop out (retention < 1) at later visits.
+#'
+#' @param rho AR(1) correlation parameter (0,1) -- correlation between
+#'   adjacent visits; correlation between visits j and k is
+#'   rho^(2*|times_j - times_k|)
+#' @param ra Numeric vector of cumulative retention proportions in arm 1
+#'   at each visit (non-increasing, first value typically 1); length
+#'   equals the number of visits
+#' @param rb Retention vector for arm 2; defaults to `ra` (equal
+#'   retention in both arms)
+#' @param sigma Residual standard deviation of the outcome at a single
+#'   visit (> 0)
+#' @param times Visit indices/times, same length as `ra`; defaults to
+#'   1, 2, ..., length(ra) (equally spaced visits)
+#' @param lambda Allocation ratio, n2/n1 (> 0), default 1
+#' @param delta Between-arm difference to detect (!= 0)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided" or "one.sided"
+#' @return list(n1, n2, n_total, inputs)
+calc_mmrm_ar1 <- function(rho, ra, rb = NULL, sigma, times = seq_along(ra), lambda = 1,
+                           delta, alpha = 0.05, power = 0.8, alternative = "two.sided") {
+  if (!is.numeric(rho) || length(rho) != 1 || is.na(rho) || rho <= 0 || rho >= 1) {
+    stop("rho must be a single number strictly between 0 and 1.")
+  }
+  if (!is.numeric(ra) || length(ra) < 2 || anyNA(ra) || any(ra <= 0) || any(ra > 1)) {
+    stop("ra must be a numeric vector of at least 2 retention proportions, each in (0, 1].")
+  }
+  if (any(diff(ra) > 0)) stop("ra must be non-increasing (retention cannot improve over time).")
+  if (!is.null(rb)) {
+    if (!is.numeric(rb) || length(rb) != length(ra) || anyNA(rb) || any(rb <= 0) || any(rb > 1)) {
+      stop("rb must be a numeric vector the same length as ra, each in (0, 1].")
+    }
+    if (any(diff(rb) > 0)) stop("rb must be non-increasing (retention cannot improve over time).")
+  }
+  .validate_positive(sigma, "sigma")
+  if (!is.numeric(times) || length(times) != length(ra) || anyNA(times)) {
+    stop("times must be a numeric vector the same length as ra.")
+  }
+  .validate_positive(lambda, "lambda")
+  if (!is.numeric(delta) || length(delta) != 1 || is.na(delta) || delta == 0) {
+    stop("delta must be a single non-zero number.")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (!alternative %in% c("two.sided", "one.sided")) {
+    stop('alternative must be "two.sided" or "one.sided".')
+  }
+
+  J <- length(ra)
+  phia <- 1 / ra[J] - sum(rho^(2 * (times[J] - times[-J])) * (1 / ra[-1] - 1 / ra[-J]))
+  if (!is.null(rb)) {
+    phib <- 1 / rb[J] - sum(rho^(2 * (times[J] - times[-J])) * (1 / rb[-1] - 1 / rb[-J]))
+  } else {
+    rb <- ra
+    phib <- phia
+  }
+
+  z_alpha <- if (alternative == "two.sided") qnorm(1 - alpha / 2) else qnorm(1 - alpha)
+  n1 <- (phia + lambda * phib) * (z_alpha + qnorm(power))^2 * sigma^2 / delta^2
+  n2 <- n1 / lambda
+
+  list(
+    n1 = ceiling(n1), n2 = ceiling(n2), n_total = ceiling(n1) + ceiling(n2),
+    inputs = list(rho = rho, ra = ra, rb = rb, sigma = sigma, times = times, lambda = lambda,
+                  delta = delta, alpha = alpha, power = power, alternative = alternative)
+  )
+}

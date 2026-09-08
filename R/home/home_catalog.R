@@ -598,8 +598,20 @@ calculator_catalog <- list(
          "slope covariance structure?\""
        ),
        outcome_type = "means", groups = NA, dependency = NA, reference_based = NA,
-       built = TRUE, nav_target = "Longitudinal Slope Difference",
-       module_input_id = NA, design_value = NA),
+       built = TRUE, nav_target = "Longitudinal / MMRM",
+       module_input_id = "longitudinal-design", design_value = "slope_diff"),
+
+  list(key = "mmrm_ar1",
+       label = "MMRM with dropout, AR(1) correlation (Lu, Luo & Chen)",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a longitudinal",
+         "trial comparing two arms' mean outcome using a mixed model of",
+         "repeated measures (MMRM), accounting for dropout/missing data",
+         "and an AR(1) correlation structure between visits?\""
+       ),
+       outcome_type = "means", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Longitudinal / MMRM",
+       module_input_id = "longitudinal-design", design_value = "mmrm_ar1"),
 
   list(key = "cluster_deff",
        label = "Cluster / multistage sampling -- design effect (DEFF)",
@@ -1488,9 +1500,9 @@ study_design_families <- list(
   list(id = "bayesian", label = "Bayesian Design Analysis",
        hint = "Sample size for a target prior-averaged power (assurance) when the true treatment effect is itself uncertain, rather than fixed at one assumed value, or a target probability that the actual Bayes factor reaches a chosen evidence threshold.",
        catalog_keys = c("bayesian_assurance_or", "bfda_ttest")),
-  list(id = "longitudinal", label = "Longitudinal Slope Difference",
-       hint = "Comparing two groups' rate of change (slope) over repeated visits in a longitudinal study, under a random-intercept/random-slope covariance structure (GEE/GLS framework).",
-       catalog_keys = c("longitudinal_slope_diff"))
+  list(id = "longitudinal", label = "Longitudinal / MMRM",
+       hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (GEE/GLS framework), or a mixed model of repeated measures (MMRM) with dropout and AR(1) correlation.",
+       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1"))
 )
 
 # Second index over the SAME calculator_catalog entries, grouped by
@@ -1574,8 +1586,8 @@ test_families <- list(
        hint = "Prior-averaged power (assurance) for a two-arm proportions trial when the true log odds ratio is itself uncertain, or Bayes Factor Design Analysis for a two-sample means comparison.",
        catalog_keys = c("bayesian_assurance_or", "bfda_ttest")),
   list(id = "longitudinal_tests", label = "Longitudinal / GEE Tests",
-       hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (the GLS/GEE framework of Liu & Liang 1997).",
-       catalog_keys = c("longitudinal_slope_diff"))
+       hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (the GLS/GEE framework of Liu & Liang 1997), or a mixed model of repeated measures (MMRM) with dropout and AR(1) correlation (Lu, Luo & Chen 2008).",
+       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1"))
 )
 
 catalog_entry <- function(key) {
