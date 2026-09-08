@@ -702,7 +702,16 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   against its own documented Alzheimer's-disease example (raw N=414.62)
   and independently against this module's own Liu & Liang design, which
   gives the identical raw N=414.62 for the mathematically-equivalent
-  scenario -- two different derivations landing on the same number
+  scenario -- two different derivations landing on the same number.
+  Plus the fourth and final `lmmpower()` method, `calc_longitudinal_hu()`
+  (`longpower::hu.mackey.thomas.linear.power()`, Hu, Mackey & Thomas
+  2021) -- the only one of the four that directly models monotone
+  study-subject attrition (dropout) rather than assuming complete data
+  throughout -- verified against 3 of the package's own documented
+  round-trip examples exactly (same ADAS-cog-style pilot estimates:
+  equal allocation/two-sided -> n=180/180; 2:1 allocation -> n=270/135;
+  one-sided -> n=142/142). All four `lmmpower()` methods are now
+  implemented in this module
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

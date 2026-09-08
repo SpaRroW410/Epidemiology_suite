@@ -180,3 +180,51 @@ test_that("calc_longitudinal_edland rejects invalid inputs", {
   expect_error(calc_longitudinal_edland(visit_times = t, delta = 1.5, sigma2_slope = -1, sigma2_residual = 10), "positive")
   expect_error(calc_longitudinal_edland(visit_times = t, delta = 1.5, sigma2_slope = 24, sigma2_residual = -1), "positive")
 })
+
+test_that("calc_longitudinal_hu matches longpower::hu.mackey.thomas.linear.power()'s own documented examples", {
+  # longpower::hu.mackey.thomas.linear.power() -- a single, self-
+  # contained function with no cross-file dependencies -- was read
+  # directly from its public GitHub CRAN mirror and transcribed.
+  # Verified against 3 of the package's own documented round-trip
+  # examples exactly (ADAS-cog-style pilot estimates, no attrition).
+  t <- seq(0, 1.5, 0.25)
+  p <- c(rep(0, 6), 1)
+
+  res1 <- calc_longitudinal_hu(visit_times = t, p = p, delta = 1.5, sigma2_slope = 24,
+                                sigma2_residual = 10, cor_intercept_slope = 0.5, power = 0.80)
+  expect_equal(res1$n1, 180)
+  expect_equal(res1$n2, 180)
+  expect_equal(res1$n_total, 360)
+
+  res2 <- calc_longitudinal_hu(visit_times = t, p = p, delta = 1.5, sigma2_slope = 24,
+                                sigma2_residual = 10, cor_intercept_slope = 0.5, lambda = 2, power = 0.80)
+  expect_equal(res2$n1, 270)
+  expect_equal(res2$n2, 135)
+
+  res3 <- calc_longitudinal_hu(visit_times = t, p = p, delta = 1.5, sigma2_slope = 24,
+                                sigma2_residual = 10, cor_intercept_slope = 0.5, power = 0.80,
+                                alternative = "one.sided")
+  expect_equal(res3$n1, 142)
+  expect_equal(res3$n2, 142)
+})
+
+test_that("calc_longitudinal_hu needs a larger sample size for more attrition earlier", {
+  t <- seq(0, 1.5, 0.25)
+  p_complete <- c(rep(0, 6), 1)
+  p_early_dropout <- c(0.3, rep(0, 5), 0.7)
+  res_complete <- calc_longitudinal_hu(visit_times = t, p = p_complete, delta = 1.5, sigma2_slope = 24,
+                                        sigma2_residual = 10, cor_intercept_slope = 0.5, power = 0.80)
+  res_dropout <- calc_longitudinal_hu(visit_times = t, p = p_early_dropout, delta = 1.5, sigma2_slope = 24,
+                                       sigma2_residual = 10, cor_intercept_slope = 0.5, power = 0.80)
+  expect_gt(res_dropout$n_total, res_complete$n_total)
+})
+
+test_that("calc_longitudinal_hu rejects invalid inputs", {
+  t <- seq(0, 1.5, 0.25)
+  p <- c(rep(0, 6), 1)
+  expect_error(calc_longitudinal_hu(visit_times = c(1, 2), p = c(0, 1), delta = 1, sigma2_slope = 1, sigma2_residual = 1), "must be 0")
+  expect_error(calc_longitudinal_hu(visit_times = t, p = c(0.3, 0.3, rep(0, 5)), delta = 1, sigma2_slope = 1, sigma2_residual = 1), "sum to 1")
+  expect_error(calc_longitudinal_hu(visit_times = t, p = p, delta = 0, sigma2_slope = 1, sigma2_residual = 1), "non-zero")
+  expect_error(calc_longitudinal_hu(visit_times = t, p = p, delta = 1, sigma2_slope = -1, sigma2_residual = 1), "positive")
+  expect_error(calc_longitudinal_hu(visit_times = t, p = p, delta = 1, sigma2_slope = 1, sigma2_residual = 1, cor_intercept_slope = 1.5), "\\[-1, 1\\]")
+})

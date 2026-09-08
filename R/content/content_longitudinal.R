@@ -228,5 +228,65 @@ longitudinal_content <- list(
       "2011;21(2):369-377."
     ),
     backend = "closed-form reimplementation of longpower::edland.linear.power()"
+  ),
+
+  hu = list(
+    title = "Longitudinal Group-Slope-Difference Test Under Attrition (Hu, Mackey & Thomas 2021 RCRM Method)",
+    formula_latex = paste0(
+      "$$N = \\frac{(1+\\lambda)^2}{\\lambda \\sum_i p_i c^*_i} ",
+      "\\left(\\frac{Z_{1-\\alpha/2} + Z_{power}}{|\\delta|}\\right)^2$$",
+      "$$c^*_i \\text{: per-visit information contribution, from the random-coefficient}$$",
+      "$$\\text{regression model given retention pattern } p, \\text{ visit } i$$"
+    ),
+    explanation = paste(
+      "A fourth method (alongside Liu & Liang, Diggle, and Ard & Edland",
+      "above) for the longitudinal group-slope-difference problem --",
+      "this one from a 2021 paper, and the only one of the four that",
+      "directly models MONOTONE STUDY-SUBJECT ATTRITION (dropout) rather",
+      "than assuming complete data throughout. Random coefficient",
+      "regression models (RCRM) are fit to each subject's repeated",
+      "measurements; this calculator sizes a two-arm trial to detect a",
+      "given slope difference, given the pattern of when subjects are",
+      "expected to drop out.",
+      "",
+      "- **visit_times** - the time of each planned repeated measurement",
+      "  (must start at 0).",
+      "- **p** - the expected ATTRITION pattern: p[i] is the proportion",
+      "  of subjects whose LAST observed visit is visit i (must sum to",
+      "  1). Put all the mass on the final visit (e.g. 0,0,...,0,1) for",
+      "  the no-attrition case.",
+      "- **delta** - the between-group difference in slope to detect.",
+      "- **sigma2_slope, sigma2_residual** - random-slope and residual",
+      "  error variances, from a REML fit to pilot data.",
+      "- **sigma2_intercept, cor_intercept_slope** - optional random-",
+      "  intercept variance and its correlation with the random slope",
+      "  (both default to 0/irrelevant if no random-intercept variance is",
+      "  specified).",
+      "- **lambda** - the allocation ratio (group 1 size / group 2 size).",
+      "- **alpha, power** - as elsewhere.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "`longpower::hu.mackey.thomas.linear.power()` -- a single, self-",
+      "contained function with no cross-file dependencies -- was read",
+      "directly from its public GitHub CRAN mirror and reimplemented.",
+      "Verified by reproducing 3 of the package's own documented round-",
+      "trip examples exactly (all using the same ADAS-cog-style pilot",
+      "estimates: random-slope variance=24, residual variance=10,",
+      "intercept-slope correlation=0.5, no attrition -- all mass on the",
+      "final of 7 visits from 0 to 1.5 years): (1) slope difference=1.5,",
+      "target power=0.80, equal allocation -> this calculator gives",
+      "n=180/180 (360 total), matching the package's own paired example",
+      "exactly; (2) same scenario but with a 2:1 allocation ratio ->",
+      "n=270/135 (405 total), again matching exactly; (3) same scenario",
+      "but one-sided -> n=142/142 (284 total), again matching exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Hu N, Mackey H, Thomas R. Power and sample size for random",
+      "coefficient regression models in randomized experiments with",
+      "monotone missing data. Biometrical Journal. 2021;63(4):806-824."
+    ),
+    backend = "closed-form reimplementation of longpower::hu.mackey.thomas.linear.power()"
   )
 )

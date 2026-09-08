@@ -358,3 +358,117 @@ calc_longitudinal_edland <- function(visit_times, delta, sigma2_slope, sigma2_re
                   alternative = alternative)
   )
 }
+
+# Hu, Mackey & Thomas (2021) "random coefficient regression model" (RCRM)
+# method -- the fourth and final method `longpower::lmmpower()` itself
+# offers (diggle, liuliang, edland already implemented above). Its
+# source (hu.mackey.thomas.linear.power.R) was read directly from
+# longpower's public GitHub CRAN mirror -- again a single, self-
+# contained function with no cross-file dependencies. Unlike the other
+# three methods, this one directly models monotone study-subject
+# attrition (a proportion vector `p`, where p[i] is the proportion of
+# subjects whose last observed visit is visit i) and an optional
+# random-intercept variance/intercept-slope correlation, rather than
+# assuming complete data throughout.
+#
+# Verified by reproducing 3 of the package's own documented round-trip
+# examples exactly (all using the same ADAS-cog-style pilot estimates,
+# sig2.s=24, sig2.e=10, cor.s.i=0.5, complete-data attrition pattern):
+# (1) delta=1.5, power=0.80 -> n=179.71 (ceiling 180), matching the
+# package's own paired example `hu.mackey.thomas.linear.power(n=180,
+# ...)`; (2) with lambda=2 (2:1 allocation), delta=1.5, power=0.80 ->
+# n1=269.56/n2=134.78 (ceiling 270/135), matching the package's own
+# n=270 example; (3) one-sided alternative, delta=1.5, power=0.80 ->
+# n=141.56 (ceiling 142), matching the package's own n=142 example.
+
+#' Sample size for a longitudinal group-difference-in-slopes test under
+#' monotone attrition (Hu, Mackey & Thomas 2021 random coefficient
+#' regression model)
+#'
+#' Solves for the sample size needed to detect a given difference in
+#' linear slopes between two groups, directly modeling monotone subject
+#' attrition (dropout) via a proportion vector describing when subjects'
+#' last observed visit occurs, in addition to random-slope, random-
+#' intercept, and residual error variances. This is the random
+#' coefficient regression model (RCRM) method of Hu, Mackey & Thomas
+#' (2021), assuming equal baseline values in both arms.
+#'
+#' @param visit_times Numeric vector of visit times, must start at 0 (length >= 2)
+#' @param p Proportion vector the same length as `visit_times`; `p[i]` is
+#'   the proportion of subjects whose last observed visit is visit `i`
+#'   (must sum to 1). Use all mass on the last visit (e.g. `c(0,...,0,1)`)
+#'   for the no-attrition case.
+#' @param delta Slope difference between the two groups to detect (!= 0)
+#' @param sigma2_slope Variance of the random slope (> 0)
+#' @param sigma2_residual Residual (within-subject) error variance (> 0)
+#' @param sigma2_intercept Variance of the random intercept (>= 0); default 0
+#' @param cor_intercept_slope Correlation between the random intercept and
+#'   random slope [-1,1]; default 0 (irrelevant when sigma2_intercept = 0)
+#' @param lambda Allocation ratio, group-1 size / group-2 size (> 0), default 1
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided" or "one.sided"
+#' @return list(n1, n2, n_total, inputs)
+calc_longitudinal_hu <- function(visit_times, p, delta, sigma2_slope, sigma2_residual,
+                                  sigma2_intercept = 0, cor_intercept_slope = 0, lambda = 1,
+                                  alpha = 0.05, power = 0.8, alternative = "two.sided") {
+  if (!is.numeric(visit_times) || length(visit_times) < 2 || any(is.na(visit_times))) {
+    stop("visit_times must be a numeric vector of at least 2 values.")
+  }
+  if (visit_times[1] != 0) stop("visit_times[1] must be 0.")
+  if (!is.numeric(p) || length(p) != length(visit_times) || anyNA(p) || any(p < 0) || any(p > 1)) {
+    stop("p must be a numeric vector the same length as visit_times, each value in [0, 1].")
+  }
+  if (abs(sum(p) - 1) > 1e-8) stop("p must sum to 1.")
+  if (!is.numeric(delta) || length(delta) != 1 || is.na(delta) || delta == 0) {
+    stop("delta must be a single non-zero number.")
+  }
+  .validate_positive(sigma2_slope, "sigma2_slope")
+  .validate_positive(sigma2_residual, "sigma2_residual")
+  if (!is.numeric(sigma2_intercept) || length(sigma2_intercept) != 1 || is.na(sigma2_intercept) || sigma2_intercept < 0) {
+    stop("sigma2_intercept must be a single number >= 0.")
+  }
+  if (!is.numeric(cor_intercept_slope) || length(cor_intercept_slope) != 1 || is.na(cor_intercept_slope) ||
+        cor_intercept_slope < -1 || cor_intercept_slope > 1) {
+    stop("cor_intercept_slope must be a single number in [-1, 1].")
+  }
+  .validate_positive(lambda, "lambda")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (!alternative %in% c("two.sided", "one.sided")) {
+    stop('alternative must be "two.sided" or "one.sided".')
+  }
+
+  t <- visit_times
+  m <- length(t)
+  cumsumt <- cumsum(t)
+  cumsumtsq <- cumsum(t^2)
+  k <- seq(0, m - 1)
+
+  cstar <- numeric(m)
+  for (i in 1:m) {
+    tbar_i <- cumsumt[i] / (k[i] + 1)
+    tbarsq_i <- cumsumtsq[i] / (k[i] + 1)
+    deno_i <- sigma2_residual^2 +
+      (k[i] + 1) * sigma2_residual * (sigma2_slope * tbarsq_i + sigma2_intercept +
+        2 * cor_intercept_slope * sqrt(sigma2_intercept) * sqrt(sigma2_slope) * tbar_i) +
+      (k[i] + 1)^2 * sigma2_intercept * sigma2_slope * (1 - cor_intercept_slope^2) * (tbarsq_i - tbar_i * tbar_i)
+    num_i <- (k[i] + 1) * (sigma2_residual * tbarsq_i + (k[i] + 1) * sigma2_intercept * (tbarsq_i - tbar_i * tbar_i))
+    cstar[i] <- p[i] * (num_i / deno_i)
+  }
+
+  z_alpha <- if (alternative == "two.sided") qnorm(1 - alpha / 2) else qnorm(1 - alpha)
+  n_part1 <- (1 + lambda)^2 / (lambda * sum(cstar))
+  n_part2 <- ((z_alpha + qnorm(power)) / abs(delta))^2
+  N <- n_part1 * n_part2
+  n1 <- lambda * N / (1 + lambda)
+  n2 <- N - n1
+
+  list(
+    n1 = ceiling(n1), n2 = ceiling(n2), n_total = ceiling(n1) + ceiling(n2),
+    inputs = list(visit_times = visit_times, p = p, delta = delta, sigma2_slope = sigma2_slope,
+                  sigma2_residual = sigma2_residual, sigma2_intercept = sigma2_intercept,
+                  cor_intercept_slope = cor_intercept_slope, lambda = lambda,
+                  alpha = alpha, power = power, alternative = alternative)
+  )
+}
