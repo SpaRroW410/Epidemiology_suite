@@ -207,7 +207,7 @@ for what to build next):
 | Rule of Three | Upper bound on unseen event rate; n to detect >= 1 event; detect >= 1 case with an imperfect test in a finite population (single or two-test series/parallel) | closed-form (Hanley & Lippman-Hand 1983); `epiR::epi.ssdetect()` | Live |
 | Group Sequential Design | Interim-monitoring trial design (continuous, binary, or survival outcome) with Pocock-to-O'Brien-Fleming efficacy/futility boundaries | `clinfun::gsdesign.normal()`/`.binomial()`/`.survival()` | Live |
 | Prediction Model | Model development (binary, continuous, survival); external validation (binary) | `pmsampsize::pmsampsize()` (Riley et al. 2019/2020/2021); external validation reimplements `pmvalsampsize` (package not installed, source verified) (Riley et al. 2021) | Live |
-| ROC / AUC | Single ROC AUC vs. chance (0.5) | `pROC::power.roc.test()` (Obuchowski et al. 2004) | Live |
+| ROC / AUC | Single ROC AUC vs. chance (0.5); compare two correlated (paired) AUCs | `pROC::power.roc.test()` (Obuchowski et al. 2004; Obuchowski & McClish 1997) | Live |
 | Cluster / design effect | Design-effect inflation of an existing base sample size; cluster survey precision (WHO EPI-style, proportion) | closed-form (Kish 1965); `epiR::epi.ssclus2estb()` | Live |
 | Stratified Sampling | Total size + per-stratum allocation (proportional/Neyman) | closed-form (Cochran 1977; Kauermann & Kuechenhoff 2011) | Live |
 | LQAS | Lot Quality Assurance Sampling (rapid area classification) | closed-form binomial operating-characteristic search (Robertson & Valadez 2006) | Live |

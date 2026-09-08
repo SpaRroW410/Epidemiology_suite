@@ -346,10 +346,20 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   SEs and `pROC::ci.auc()` CI widths on simulated data
 - **ROC / AUC** (`R/modules/mod_roc.R`) -- sample size for a single ROC
   curve's AUC against the chance diagonal (0.5), wrapping
-  `pROC::power.roc.test()` (Obuchowski, Lieber & Wians 2004); comparing two
-  AUCs was deliberately left out of scope for now, since that case needs
-  either fitted `roc` objects on real data or a full set of binormal
-  parameters rather than simple summary statistics
+  `pROC::power.roc.test()` (Obuchowski, Lieber & Wians 2004); plus a
+  "Compare two correlated (paired) AUCs" design, `calc_compare_two_aucs()`,
+  wrapping the same function's list/binormal-parameter method (Obuchowski
+  & McClish 1997) -- each curve described by its own binormal A/B shape
+  parameters, with separate case/control correlations between the two
+  tests; verified by literally reproducing Obuchowski & McClish (1997)'s
+  own Example 2 (also pROC's own documentation example): A1=2.6, B1=1,
+  A2=1.9, B2=1, rn=ra=0.6, delta=0.037, partial AUC restricted to FPR in
+  [0,0.2] -> raw ncases=ncontrols=107.02, matching the package's own
+  computation (this app's always-round-up convention gives 108/108/216;
+  the package's own doc illustrates with the nearest whole number, 107).
+  The unpaired-AUCs case is not implemented -- `power.roc.test()` itself
+  doesn't support it ("Power calculation for unpaired ROC curves is not
+  implemented", per the package's own documentation)
 - **Cluster / Design Effect** (`R/modules/mod_cluster.R`) -- inflates an
   already-computed simple-random-sample size for cluster/multistage
   sampling (villages, schools, health facilities), closed-form DEFF = 1 +

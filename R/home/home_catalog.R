@@ -1218,7 +1218,18 @@ calculator_catalog <- list(
        ),
        outcome_type = "roc", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "ROC / AUC",
-       module_input_id = NA, design_value = NA),
+       module_input_id = "roc-design", design_value = "single_auc"),
+
+  list(key = "roc_compare_two_aucs",
+       label = "Compare two correlated (paired) ROC AUCs",
+       answers = paste(
+         "Answers: \"How many cases and controls do I need to detect",
+         "that two diagnostic tests' AUCs differ, when both tests are",
+         "applied to the same subjects?\""
+       ),
+       outcome_type = "roc", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "ROC / AUC",
+       module_input_id = "roc-design", design_value = "compare_two"),
 
   list(key = "regression_r2",
        label = "Multiple linear regression, R-squared deviation from zero",
@@ -1539,8 +1550,8 @@ study_design_families <- list(
        catalog_keys = c("prediction_binary", "prediction_continuous", "prediction_survival",
                          "prediction_external_validation")),
   list(id = "roc", label = "ROC / AUC",
-       hint = "Diagnostic test discrimination via the area under the ROC curve.",
-       catalog_keys = c("roc_single_auc")),
+       hint = "Diagnostic test discrimination via the area under the ROC curve, single-curve or comparing two correlated curves.",
+       catalog_keys = c("roc_single_auc", "roc_compare_two_aucs")),
   list(id = "posthoc_power", label = "Post-hoc / Achieved Power",
        hint = "Achieved power for planning a replication study.",
        catalog_keys = character(0)),
