@@ -332,7 +332,18 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   prognostic model, wrapping `pmsampsize::pmsampsize()` (Riley et al. 2019
   Stat Med Parts I & II; Riley et al. 2020 BMJ 368:m441); the binary design
   additionally accepts either a Cox-Snell R² or a reported C-statistic
-  (converted via Riley et al. 2021 Stat Med 40:859-864's seeded simulation)
+  (converted via Riley et al. 2021 Stat Med 40:859-864's seeded simulation);
+  plus an "External validation (binary outcome)" design for sizing a study
+  that externally validates an *already-developed* model (Riley et al. 2021
+  Stat Med 40:4230-4251) -- `pmvalsampsize` is not installed in this
+  environment and CRAN is unreachable, so its `pmvalsampsize_bin.R` source
+  was read from its public GitHub CRAN mirror and directly transcribed for
+  the "normal" and "beta" linear-predictor-distribution options (O/E ratio,
+  calibration slope, C-statistic, and an optional standardised net benefit
+  criterion -- required n is the largest of whichever are requested);
+  verified against the package's own two worked examples exactly (n=4,563
+  and n=4,252) and independently against actual `glm()`-fitted calibration
+  SEs and `pROC::ci.auc()` CI widths on simulated data
 - **ROC / AUC** (`R/modules/mod_roc.R`) -- sample size for a single ROC
   curve's AUC against the chance diagonal (0.5), wrapping
   `pROC::power.roc.test()` (Obuchowski, Lieber & Wians 2004); comparing two

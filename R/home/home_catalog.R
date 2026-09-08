@@ -1162,6 +1162,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Prediction Model",
        module_input_id = "prediction-design", design_value = "survival"),
 
+  list(key = "prediction_external_validation",
+       label = "Prediction model external validation -- binary outcome",
+       answers = paste(
+         "Answers: \"How many subjects do I need to externally validate an",
+         "already-developed prediction model for a binary outcome, so its",
+         "O/E ratio, calibration slope, C-statistic (and optionally",
+         "standardised net benefit) are all estimated precisely?\""
+       ),
+       outcome_type = "prediction", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Prediction Model",
+       module_input_id = "prediction-design", design_value = "external_validation"),
+
   list(key = "roc_single_auc",
        label = "Single ROC AUC vs. chance (0.5)",
        answers = paste(
@@ -1478,8 +1490,9 @@ study_design_families <- list(
        catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required",
                          "rule_of_three_detect_imperfect")),
   list(id = "prediction", label = "Prediction Model Development",
-       hint = "Developing a new multivariable prediction/diagnostic model without excessive overfitting.",
-       catalog_keys = c("prediction_binary", "prediction_continuous", "prediction_survival")),
+       hint = "Developing a new multivariable prediction/diagnostic model without excessive overfitting, or externally validating an existing one.",
+       catalog_keys = c("prediction_binary", "prediction_continuous", "prediction_survival",
+                         "prediction_external_validation")),
   list(id = "roc", label = "ROC / AUC",
        hint = "Diagnostic test discrimination via the area under the ROC curve.",
        catalog_keys = c("roc_single_auc")),
