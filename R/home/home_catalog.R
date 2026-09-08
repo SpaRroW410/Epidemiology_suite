@@ -671,6 +671,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Resource Equation (Animal Studies)",
        module_input_id = "resource_equation-mode", design_value = "size"),
 
+  list(key = "subgroup_interaction",
+       label = "Subgroup / interaction testing sample-size inflation (4x rule)",
+       answers = paste(
+         "Answers: \"I've already sized my trial to detect a main",
+         "treatment effect -- how much bigger does it need to be to",
+         "reliably detect whether that effect DIFFERS between two",
+         "subgroups (a treatment-by-subgroup interaction)?\""
+       ),
+       outcome_type = "subgroup_interaction", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Subgroup / Interaction Testing",
+       module_input_id = NA, design_value = NA),
+
   list(key = "crossover_2x2",
        label = "2x2 crossover trial (continuous outcome) -- test for a difference",
        answers = paste(
@@ -1490,6 +1502,9 @@ study_design_families <- list(
   list(id = "resource_equation", label = "Resource Equation (Animal Studies)",
        hint = "Small exploratory animal studies with no prior effect-size estimate to power against -- Mead's error-degrees-of-freedom rule of thumb.",
        catalog_keys = c("resource_equation")),
+  list(id = "subgroup_interaction", label = "Subgroup / Interaction Testing",
+       hint = "Inflating an already-computed main-effect sample size to reliably test whether the effect differs between subgroups (Brookes et al.'s \"4x rule\").",
+       catalog_keys = c("subgroup_interaction")),
   list(id = "clinical_trials", label = "Clinical Trials",
        hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, non-inferiority, and group-sequential (interim-monitoring) testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",

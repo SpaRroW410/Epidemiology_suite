@@ -88,7 +88,9 @@ module_registry <- list(
   list(id = lqas_meta$id, title = lqas_meta$nav_title,
        ui = mod_lqas_ui, server = mod_lqas_server),
   list(id = resource_equation_meta$id, title = resource_equation_meta$nav_title,
-       ui = mod_resource_equation_ui, server = mod_resource_equation_server)
+       ui = mod_resource_equation_ui, server = mod_resource_equation_server),
+  list(id = subgroup_interaction_meta$id, title = subgroup_interaction_meta$nav_title,
+       ui = mod_subgroup_interaction_ui, server = mod_subgroup_interaction_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -111,7 +113,8 @@ module_groups <- list(
   list(title = "Agreement & Reliability",
        module_ids = c("agreement")),
   list(title = "Clinical Trials",
-       module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential")),
+       module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential",
+                       "subgroup_interaction")),
   list(title = "Survival Analysis",
        module_ids = c("logrank", "competing_risks", "rmst")),
   list(title = "Prediction Models",

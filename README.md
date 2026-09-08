@@ -391,6 +391,17 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   adequacy of a chosen one); pure arithmetic, no package needed; verified
   against Charan & Kantharia (2013)'s own worked example located via web
   search -- 5 groups of 10 rats each (N=50) -> E=45, "more than needed"
+- **Subgroup / Interaction Testing** (`R/modules/mod_subgroup_interaction.R`)
+  -- inflates an already-computed main-effect sample size to the size
+  needed to reliably detect a treatment-by-subgroup interaction (the
+  "4x rule"), `calc_subgroup_interaction()`, pure arithmetic
+  (4/effect_ratio^2) -- no package needed or exists for this general,
+  test-agnostic multiplier; verified against Brookes et al. (2004)'s own
+  two headline findings located via web search -- a same-magnitude
+  interaction needs exactly 4x the main-effect n (100 -> 400); a
+  half-magnitude interaction needs exactly 16x (100 -> 1,600) -- both
+  additionally re-derived independently from first-principles z-based
+  power formulas rather than only trusting the paper's summary numbers
 - **Crossover Trial (2x2)** (`R/modules/mod_crossover.R`) -- a 2x2
   crossover trial's sample size for a continuous outcome, testing for a
   difference (not equivalence -- see the Equivalence (TOST) module for
