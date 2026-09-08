@@ -159,3 +159,249 @@ calc_kruskal_wallis <- function(k, f, alpha = 0.05, power = 0.8) {
     inputs = list(k = k, f = f, alpha = alpha, power = power)
   )
 }
+
+#' Sample size for the Friedman test (k related/repeated measurements,
+#' distribution-free repeated-measures analysis)
+#'
+#' The Friedman test is the rank-based (distribution-free) analog of a
+#' one-group repeated-measures ANOVA -- e.g. comparing k time points or k
+#' treatment conditions measured on the SAME subjects, without assuming
+#' normality. No installed package provides a closed form for it (the
+#' same situation as Kruskal-Wallis above), so this follows the
+#' checklist's own suggested approach for this item ("RM-ANOVA basis"):
+#' solve the equivalent one-group within-subjects RM-ANOVA sample size
+#' (this module's own calc_rm_anova(type = "within"), already verified in
+#' an earlier batch) at the same Cohen's f effect size, then inflate by
+#' the asymptotic relative efficiency (ARE) of Friedman versus RM-ANOVA
+#' under normality.
+#'
+#' Unlike the plain 3/pi constant used for Wilcoxon/Kruskal-Wallis above
+#' (which holds regardless of the number of groups), Friedman's ARE
+#' relative to the RM-ANOVA F-test depends on k, the number of repeated
+#' measurements: ARE = (3/pi) * k/(k+1) (Zimmerman & Zumbo 1993, also
+#' expressed as ~0.955*k/(k+1) since 3/pi = 0.9549), converging to the
+#' familiar 3/pi limit only as k -> infinity. Using the plain 3/pi
+#' constant here (ignoring the k/(k+1) factor) would UNDERSTATE the
+#' needed sample size for small/moderate k -- e.g. at k=4 the correction
+#' factor is 0.8, meaningfully different from 1.
+#'
+#' Verified by two-sided Monte Carlo simulation (base R's own
+#' stats::friedman.test() and a matching from-scratch RM-ANOVA F-test
+#' computed on the identical simulated data, a
+#' random-intercept/compound-symmetry model with k=4 repeated
+#' measurements): searching for the n at which each test's *empirical*
+#' power crosses 80% gives n_friedman/n_rmanova ~ 1.28, closely matching
+#' this formula's predicted 1/ARE = pi/3 * (k+1)/k = 1.309 for k=4 --
+#' confirming the ARE ratio directly from simulated power curves rather
+#' than relying on calc_rm_anova()'s own internal Cohen's-f scaling
+#' convention (which was already verified independently in an earlier
+#' batch and is reused here as-is).
+#'
+#' @param k Number of repeated measurements/conditions (>= 3; use the
+#'   Wilcoxon signed-rank design above for k = 2)
+#' @param f Cohen's f effect size (> 0), same convention as
+#'   calc_rm_anova()'s within-subjects design
+#' @param nscor Nonsphericity correction coefficient in (0, 1]; 1 =
+#'   sphericity assumption met (default) -- same as calc_rm_anova()
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n, n_rm_anova, are, inputs)
+calc_friedman <- function(k, f, nscor = 1, alpha = 0.05, power = 0.8) {
+  if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 3 || k != round(k)) {
+    stop("k must be a whole number, at least 3 (use Wilcoxon signed-rank for k = 2).")
+  }
+  .validate_positive(f, "f")
+  if (!is.numeric(nscor) || length(nscor) != 1 || is.na(nscor) || nscor <= 0 || nscor > 1) {
+    stop("nscor must be a single number in (0, 1].")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  rm_fit <- calc_rm_anova(ng = 1, nm = k, f = f, nscor = nscor, alpha = alpha,
+                           power = power, type = "within")
+  are <- (3 / pi) * k / (k + 1)
+  n <- ceiling(rm_fit$n / are)
+
+  list(
+    n = n,
+    n_rm_anova = rm_fit$n,
+    are = are,
+    inputs = list(k = k, f = f, nscor = nscor, alpha = alpha, power = power)
+  )
+}
+
+#' Sample size for the Jonckheere-Terpstra test (ordered alternatives
+#' across k groups)
+#'
+#' The Jonckheere-Terpstra test looks for a monotonic trend in a
+#' continuous outcome across k *ordered* groups (e.g. increasing dose
+#' levels), without assuming normality. clinfun::jonckheere.test() itself
+#' documents that "the asymptotic version is equivalent to cor.test(x, g,
+#' method = \"k\")" -- i.e. the same statistic as Kendall's tau computed
+#' between the outcome and an ordinal group score -- a classical result
+#' (Terpstra 1952; Jonckheere 1954; see also Hollander & Wolfe,
+#' Nonparametric Statistical Methods). clinfun itself provides no sample
+#' size function at all (jonckheere.test() is an analysis-only function,
+#' like stats::kruskal.test()), so this is a thin wrapper around this
+#' module's own already-verified calc_kendall_tau() (TrialSize::
+#' Nonpara.Independ(), verified exactly against Chow, Shao & Wang (2003)
+#' Example 14.4) -- no new formula, no new verification risk, the same
+#' pattern as the Exact Tests module's sign-test wrap around the binomial
+#' test.
+#'
+#' @param p1 P((X1-X2)(Y1-Y2) > 0) -- concordance probability between the
+#'   outcome and the ordinal group score; 0.5 under no trend
+#' @param p2 Higher-order concordance probability (three independent
+#'   pairs sharing one member), needed for the variance under the
+#'   alternative
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n, tau, inputs)
+calc_jonckheere_terpstra <- function(p1, p2, alpha = 0.05, power = 0.8) {
+  base <- calc_kendall_tau(p1 = p1, p2 = p2, alpha = alpha, power = power)
+  list(
+    n = base$n,
+    tau = base$tau,
+    inputs = list(p1 = p1, p2 = p2, alpha = alpha, power = power)
+  )
+}
+
+#' Sample size for the two-sample Kolmogorov-Smirnov test, via Monte Carlo
+#' simulation
+#'
+#' Unlike the rank-based tests above, no closed-form power/sample-size
+#' formula exists for the two-sample KS test against a general
+#' alternative: its power depends on the FULL shape of the difference
+#' between the two distributions, not a single summary effect size, so
+#' asymptotic-relative-efficiency shortcuts don't apply the way they do
+#' for Wilcoxon/Kruskal-Wallis/Friedman above. This is exactly the
+#' situation this app's own checklist names "simulation (`simr`/custom
+#' Monte Carlo)" for -- so this directly simulates the actual test
+#' (repeatedly drawing two Normal samples under a location-shift
+#' alternative and running `stats::ks.test()` on each draw) rather than
+#' approximating it with any formula.
+#'
+#' The alternative used is a standardized mean shift between two Normal
+#' distributions with equal variance (comparable to Cohen's d for the
+#' t-test) -- a representative benchmark scenario, not a generality claim:
+#' true KS power for a different shape of distributional difference (a
+#' scale shift, a shape difference, a distribution with heavier tails)
+#' will differ from what this design reports.
+#'
+#' Sample size is found by exponential search (to bracket the target
+#' power) followed by bisection, evaluating empirical power at each
+#' candidate n via `nsim` replicates of the actual `ks.test()` -- so the
+#' result carries ordinary Monte Carlo sampling error, not formula error;
+#' `nsim` controls that error directly (halving as `nsim` quadruples). A
+#' fixed seed makes repeated calls with the same inputs reproducible.
+#'
+#' @param effect_size Standardized mean shift between the two Normal
+#'   distributions being compared (> 0; e.g. 0.5 for a "medium" shift,
+#'   comparable to Cohen's d)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param n_ratio Allocation ratio n2/n1 (> 0), default 1 (equal groups)
+#' @param nsim Monte Carlo replicates per sample-size candidate evaluated
+#'   during the search (>= 100; higher reduces sampling error at the cost
+#'   of runtime)
+#' @param seed RNG seed for reproducibility
+#' @return list(n1, n2, n_total, achieved_power, inputs)
+calc_ks_two_sample <- function(effect_size, alpha = 0.05, power = 0.8,
+                                n_ratio = 1, nsim = 500, seed = 20240607) {
+  .validate_positive(effect_size, "effect_size")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  .validate_positive(n_ratio, "n_ratio")
+  if (!is.numeric(nsim) || length(nsim) != 1 || is.na(nsim) || nsim < 100 || nsim != round(nsim)) {
+    stop("nsim must be a single whole number >= 100.")
+  }
+
+  empirical_power <- function(n1, reps) {
+    n2 <- max(2, round(n1 * n_ratio))
+    set.seed(seed)
+    rejections <- replicate(reps, {
+      x <- rnorm(n1, 0, 1)
+      y <- rnorm(n2, effect_size, 1)
+      suppressWarnings(ks.test(x, y)$p.value) < alpha
+    })
+    mean(rejections)
+  }
+
+  n1 <- .mc_search_n1(function(n) empirical_power(n, nsim), power)
+
+  list(
+    n1 = n1,
+    n2 = max(2, round(n1 * n_ratio)),
+    n_total = n1 + max(2, round(n1 * n_ratio)),
+    achieved_power = empirical_power(n1, nsim * 3),
+    inputs = list(effect_size = effect_size, alpha = alpha, power = power,
+                  n_ratio = n_ratio, nsim = nsim)
+  )
+}
+
+#' Sample size for the Wald-Wolfowitz two-sample runs test, via Monte
+#' Carlo simulation
+#'
+#' Like the two-sample Kolmogorov-Smirnov design above, the Wald-Wolfowitz
+#' runs test has no closed-form power/sample-size formula against a
+#' general alternative -- it is another omnibus, distribution-free test
+#' for whether two independent samples come from the same distribution,
+#' testing it by pooling both samples, sorting the pooled values, and
+#' counting "runs" (unbroken stretches) of same-group labels in the
+#' sorted sequence: too few runs indicates the two samples cluster
+#' separately (evidence of a genuine difference) rather than interleaving
+#' as they would under the null. This directly simulates the actual test
+#' -- reusing `tseries::runs.test()` (already installed; no new
+#' dependency, since `tseries` is a light, self-contained package) on the
+#' sorted pooled-and-labeled sequence -- exactly the same "no formula
+#' exists, so simulate it directly" approach as `calc_ks_two_sample()`,
+#' including reuse of the same exponential-search-then-bisection engine
+#' (`.mc_search_n1()`).
+#'
+#' As with the KS design, the alternative used is a standardized mean
+#' shift between two Normal distributions with equal variance (comparable
+#' to Cohen's d) -- a representative benchmark, not a generality claim.
+#'
+#' @param effect_size Standardized mean shift between the two Normal
+#'   distributions being compared (> 0)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param n_ratio Allocation ratio n2/n1 (> 0), default 1 (equal groups)
+#' @param nsim Monte Carlo replicates per sample-size candidate evaluated
+#'   during the search (>= 100)
+#' @param seed RNG seed for reproducibility
+#' @return list(n1, n2, n_total, achieved_power, inputs)
+calc_wald_wolfowitz_runs <- function(effect_size, alpha = 0.05, power = 0.8,
+                                      n_ratio = 1, nsim = 500, seed = 20240607) {
+  .validate_positive(effect_size, "effect_size")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  .validate_positive(n_ratio, "n_ratio")
+  if (!is.numeric(nsim) || length(nsim) != 1 || is.na(nsim) || nsim < 100 || nsim != round(nsim)) {
+    stop("nsim must be a single whole number >= 100.")
+  }
+
+  empirical_power <- function(n1, reps) {
+    n2 <- max(2, round(n1 * n_ratio))
+    set.seed(seed)
+    rejections <- replicate(reps, {
+      x <- rnorm(n1, 0, 1)
+      y <- rnorm(n2, effect_size, 1)
+      vals <- c(x, y)
+      labs <- factor(c(rep("A", n1), rep("B", n2)))
+      suppressWarnings(tseries::runs.test(labs[order(vals)])$p.value) < alpha
+    })
+    mean(rejections)
+  }
+
+  n1 <- .mc_search_n1(function(n) empirical_power(n, nsim), power)
+
+  list(
+    n1 = n1,
+    n2 = max(2, round(n1 * n_ratio)),
+    n_total = n1 + max(2, round(n1 * n_ratio)),
+    achieved_power = empirical_power(n1, nsim * 3),
+    inputs = list(effect_size = effect_size, alpha = alpha, power = power,
+                  n_ratio = n_ratio, nsim = nsim)
+  )
+}

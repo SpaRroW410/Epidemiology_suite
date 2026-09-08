@@ -180,5 +180,234 @@ nonparametric_content <- list(
       "as implemented by pwr::pwr.anova.test)."
     ),
     backend = "pwr::pwr.anova.test() inflated by the 3/pi asymptotic relative efficiency (Hodges & Lehmann 1956)"
+  ),
+
+  jonckheere_terpstra = list(
+    title = "Jonckheere-Terpstra Test (Ordered Alternatives)",
+    formula_latex = paste0(
+      "$$n = \\frac{\\left(Z_{1-\\alpha/2}/3 + ",
+      "Z_{1-\\beta}\\sqrt{2p_2 - 1 - (2p_1-1)^2}\\right)^2}{(2p_1-1)^2/4}$$",
+      "$$\\tau = 2p_1 - 1$$"
+    ),
+    explanation = paste(
+      "Use this to test for a monotonic trend in a continuous outcome",
+      "across k *ordered* groups (e.g. increasing dose levels, disease",
+      "severity stages) WITHOUT assuming normality -- the nonparametric",
+      "alternative to the Cochran-Armitage trend test's continuous-",
+      "outcome analog, and closely related to the Kruskal-Wallis design",
+      "above but specifically for ordered (not just categorical) groups.",
+      "",
+      "- **p1 (concordance probability)** - the probability that a",
+      "  randomly chosen pair of subjects has their outcome and their",
+      "  ordinal group both moving the same direction; exactly 0.5 under",
+      "  no trend. This directly determines Kendall's tau via",
+      "  tau = 2\\*p1 - 1.",
+      "- **p2** - a higher-order concordance probability (three",
+      "  independent pairs sharing one member) needed for the variance",
+      "  of the test statistic under the alternative.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "`clinfun::jonckheere.test()` -- the package this app already uses",
+      "for Simon's two-stage design and Kendall's tau -- provides no",
+      "sample-size function at all (it's an analysis-only function, like",
+      "`stats::kruskal.test()`), but its own documentation notes that",
+      "\"the asymptotic version is equivalent to",
+      "`cor.test(x, g, method = \"k\")`\" -- i.e. exactly Kendall's tau",
+      "computed between the outcome and an integer group score (Terpstra",
+      "1952; Jonckheere 1954). This calculator is therefore a thin wrapper",
+      "around the Kendall's Tau design above -- no new formula, since",
+      "they're mathematically the same statistic under this framing.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Using the same inputs as the Kendall's Tau worked example (p1 =",
+      "0.6, i.e. tau = 0.2, and p2 = 0.7), at alpha = 0.05 and 80% power,",
+      "this calculator returns n = 135 -- identical to Kendall's tau's own",
+      "verified answer (Chow, Shao & Wang (2003) Example 14.4), since the",
+      "two tests are the same computation under the asymptotic",
+      "equivalence noted above.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Jonckheere AR. A distribution-free k-sample test against ordered",
+      "alternatives. Biometrika. 1954;41(1-2):133-145; Terpstra TJ. The",
+      "asymptotic normality and consistency of Kendall's test against",
+      "trend, when ties are present in one ranking. Indagationes",
+      "Mathematicae. 1952;14:327-333; Hollander M, Wolfe DA.",
+      "Nonparametric Statistical Methods. 2nd ed. Wiley; 1999 (the",
+      "trend-test-as-Kendall's-tau equivalence)."
+    ),
+    backend = "TrialSize::Nonpara.Independ() (thin wrapper around this module's Kendall's tau design)"
+  ),
+
+  friedman = list(
+    title = "Friedman Test (k Related/Repeated Measurements)",
+    formula_latex = paste0(
+      "$$n_{\\text{RM-ANOVA}} \\text{ solved from } k, f, \\alpha, \\text{power (Cohen 1988)}$$",
+      "$$ARE = \\frac{3}{\\pi}\\cdot\\frac{k}{k+1} \\quad n_{\\text{Friedman}} = \\left\\lceil n_{\\text{RM-ANOVA}} / ARE \\right\\rceil$$"
+    ),
+    explanation = paste(
+      "Use this to compare k >= 3 related/repeated measurements (e.g. the",
+      "same subjects measured at k time points, or under k treatment",
+      "conditions) WITHOUT assuming normality -- the nonparametric",
+      "alternative to the one-group within-subjects design in the",
+      "RM-ANOVA / Mixed ANOVA module, based on within-subject ranks",
+      "rather than raw values.",
+      "",
+      "- **k** - the number of repeated measurements/conditions (use the",
+      "  Wilcoxon signed-rank design above for k = 2).",
+      "- **f (Cohen's f)** - the same standardized effect size the",
+      "  RM-ANOVA within-subjects design uses.",
+      "- **nscor** - nonsphericity correction (1 = sphericity assumption",
+      "  met), same as the RM-ANOVA module.",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "Like the Kruskal-Wallis design above, no installed package provides",
+      "a genuine closed form for the Friedman test's sample size -- so",
+      "this solves the equivalent one-group within-subjects RM-ANOVA",
+      "sample size at the same Cohen's f, then inflates it by the",
+      "asymptotic relative efficiency (ARE) of Friedman relative to",
+      "RM-ANOVA under normality. Unlike Kruskal-Wallis's constant 3/pi",
+      "(which applies for any number of groups), Friedman's ARE also",
+      "depends on k itself: ARE = (3/pi) x k/(k+1), only approaching the",
+      "familiar 3/pi limit as k grows large (Zimmerman & Zumbo 1993). This",
+      "is an asymptotic approximation, not an exact finite-sample formula.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "For k = 4 repeated measurements and a medium effect (f = 0.25) at",
+      "alpha = 0.05 and 80% power, the equivalent one-group within-subjects",
+      "RM-ANOVA needs n = 176; the ARE for k = 4 is (3/pi) x 4/5 = 0.764,",
+      "so this calculator inflates n to 231 for the Friedman test.",
+      "Independently confirmed by simulation: searching for the n at which",
+      "the actual `stats::friedman.test()` and a from-scratch RM-ANOVA",
+      "F-test each cross 80% empirical power, on identical simulated",
+      "compound-symmetric data (k = 4), gives a ratio",
+      "n_Friedman/n_RM-ANOVA of about 1.28 -- closely matching this",
+      "formula's predicted 1/ARE = pi/3 x 5/4 = 1.31.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Zimmerman DW, Zumbo BD. Relative power of the Wilcoxon test, the",
+      "Friedman test, and repeated-measures ANOVA on ranks. J Exp Educ.",
+      "1993;62(1):75-86 (ARE = (3/pi) x k/(k+1)); Cohen J. Statistical",
+      "Power Analysis for the Behavioral Sciences. 2nd ed. Lawrence",
+      "Erlbaum Associates; 1988 (repeated-measures ANOVA power analysis)."
+    ),
+    backend = "calc_rm_anova() inflated by the (3/pi)*k/(k+1) asymptotic relative efficiency (Zimmerman & Zumbo 1993)"
+  ),
+  ks_two_sample = list(
+    title = "Kolmogorov-Smirnov Test (Two Independent Samples), via Monte Carlo Simulation",
+    formula_latex = paste0(
+      "$$\\hat{\\text{power}}(n) = \\frac{1}{R}\\sum_{r=1}^{R} \\mathbb{1}\\left[",
+      "\\text{ks.test}(X_r, Y_r)_{p\\text{-value}} < \\alpha\\right]$$",
+      "$$X_r \\sim N(0,1)^{n_1}, \\quad Y_r \\sim N(\\delta,1)^{n_2}$$"
+    ),
+    explanation = paste(
+      "Unlike every other design in this module, the two-sample",
+      "Kolmogorov-Smirnov (KS) test has NO closed-form power/sample-size",
+      "formula against a general alternative -- its power depends on the",
+      "full shape of the difference between the two groups' distributions,",
+      "not a single effect-size number, so the asymptotic-relative-",
+      "efficiency shortcuts used elsewhere in this module don't apply.",
+      "This design instead does exactly what this app's own checklist",
+      "names for this situation: direct Monte Carlo simulation of the",
+      "actual test.",
+      "",
+      "- **effect_size** - a standardized mean shift between two Normal",
+      "  distributions with equal variance (comparable to Cohen's d for",
+      "  the t-test) -- a representative benchmark scenario for framing",
+      "  the KS test's sensitivity to a location shift, not a claim that",
+      "  real data will be exactly Normal. KS power for a genuinely",
+      "  different kind of distributional difference (a scale change, a",
+      "  shape change, heavy tails) will differ from what's reported here.",
+      "- **nsim** - the number of simulated datasets drawn per candidate",
+      "  sample size while searching; more replicates reduce the Monte",
+      "  Carlo sampling error in the reported n and achieved power, at the",
+      "  cost of runtime.",
+      "- **alpha, power, n_ratio** - as elsewhere.",
+      "",
+      "Because this searches by simulation, the result carries ordinary",
+      "Monte Carlo error (bigger than the negligible rounding error of a",
+      "closed-form calculation) -- re-running with a different seed or a",
+      "larger nsim will give a slightly different but converging answer.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "A medium shift (effect_size = 0.5, comparable to Cohen's d = 0.5),",
+      "alpha = 0.05, 80% power, equal groups, nsim = 500: this calculator",
+      "returns n = 91 per group (182 total), achieved simulated power",
+      "0.797. For comparison, the equivalent two-sample t-test (which IS",
+      "the optimal test against exactly this Normal location-shift",
+      "alternative) needs only n = 64/group -- the KS test's well-known",
+      "efficiency loss against a plain mean shift, since it is a",
+      "general-purpose omnibus test for ANY distributional difference,",
+      "not one tuned to detect a location shift specifically.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Massey FJ Jr. The Kolmogorov-Smirnov test for goodness of fit.",
+      "J Am Stat Assoc. 1951;46(253):68-78 (defines the two-sample KS",
+      "test statistic; no general power formula is given there or",
+      "anywhere else in the literature for an arbitrary alternative, which",
+      "is why direct simulation -- as this app's own checklist recommends",
+      "for this test -- is used here instead)."
+    ),
+    backend = "direct Monte Carlo simulation of stats::ks.test()"
+  ),
+  wald_wolfowitz = list(
+    title = "Wald-Wolfowitz Runs Test (Two Independent Samples), via Monte Carlo Simulation",
+    formula_latex = paste0(
+      "$$\\hat{\\text{power}}(n) = \\frac{1}{R}\\sum_{r=1}^{R} \\mathbb{1}\\left[",
+      "\\text{runs.test}(\\text{labels}_r)_{p\\text{-value}} < \\alpha\\right]$$",
+      "$$\\text{labels}_r = \\text{group labels of } (X_r, Y_r), ",
+      "\\text{ sorted by pooled value}$$"
+    ),
+    explanation = paste(
+      "Like the Kolmogorov-Smirnov design above, the Wald-Wolfowitz runs",
+      "test has NO closed-form power/sample-size formula against a",
+      "general alternative. It tests whether two independent samples come",
+      "from the same distribution by pooling both samples, sorting the",
+      "combined values, and counting \"runs\" -- unbroken stretches of the",
+      "same group's label -- in that sorted sequence: too few runs means",
+      "the two groups' values cluster apart from each other (evidence of",
+      "a real difference) rather than interleaving as they would if both",
+      "samples came from the same distribution.",
+      "",
+      "- **effect_size** - a standardized mean shift between two Normal",
+      "  distributions with equal variance (comparable to Cohen's d) --",
+      "  a representative benchmark scenario, not a generality claim.",
+      "- **nsim** - simulated datasets drawn per candidate sample size",
+      "  while searching; more replicates reduce Monte Carlo sampling",
+      "  error at the cost of runtime.",
+      "- **alpha, power, n_ratio** - as elsewhere.",
+      "",
+      "As with the KS design, the result carries ordinary Monte Carlo",
+      "sampling error rather than the negligible rounding error of a",
+      "closed-form calculation.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "A large shift (effect_size = 0.8), alpha = 0.05, 80% power, equal",
+      "groups, nsim = 500: this calculator returns n = 216 per group (432",
+      "total), simulated achieved power 0.817. This is far more than the",
+      "equivalent Kolmogorov-Smirnov design's n = 37/group at the same",
+      "effect size -- the runs test is known to be a comparatively weak",
+      "omnibus test against a plain location shift (it discards the",
+      "actual magnitude of each observation, using only its rank position",
+      "relative to the pooled sequence), so this large a gap between the",
+      "two general-purpose distribution-free tests is expected, not a",
+      "sign of an error.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Wald A, Wolfowitz J. On a test whether two samples are from the",
+      "same population. Ann Math Stat. 1940;11(2):147-162 (defines the",
+      "two-sample runs test; no general power formula is given there or",
+      "anywhere else in the literature for an arbitrary alternative,",
+      "which is why direct simulation -- as this app's own checklist",
+      "recommends for this test -- is used here instead)."
+    ),
+    backend = "direct Monte Carlo simulation of tseries::runs.test()"
   )
 )

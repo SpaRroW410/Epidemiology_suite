@@ -162,3 +162,34 @@ test_that("calc_means_posthoc_pairwise rejects invalid inputs", {
   expect_error(calc_means_posthoc_pairwise(tau = 2, sigma = 4, margin = 0), "must differ from 0")
   expect_error(calc_means_posthoc_pairwise(tau = 2, sigma = -1, margin = 3), "positive")
 })
+
+test_that("calc_means_welch reduces to TrialSize::TwoSampleMean.Equality()'s own example when variances are equal", {
+  # sigma1=sigma2=0.1, mu1=0.05, mu2=0.10, alpha=0.05, power=0.80, ratio=1
+  # -> n=63, matching Chow, Shao & Wang (2003) Example 3.2.4 exactly (the
+  # same example calc_means_2s_indep()'s pooled-variance formula matches).
+  res <- calc_means_welch(mu1 = 0.05, mu2 = 0.10, sd1 = 0.1, sd2 = 0.1,
+                           alpha = 0.05, power = 0.80, ratio = 1)
+  expect_equal(res$n1, 63)
+  expect_equal(res$n2, 63)
+  expect_equal(res$n_total, 126)
+})
+
+test_that("calc_means_welch matches hand computation for genuinely unequal variances", {
+  # mu1=0, mu2=0.5, sd1=1, sd2=2, alpha=0.05, power=0.80, ratio=1 -> n=157
+  # per group. Independently confirmed by a 5,000-replicate Monte Carlo
+  # simulation using R's own Welch t-test (stats::t.test(var.equal=FALSE)):
+  # empirical power 0.793, closely matching the 0.80 target.
+  res <- calc_means_welch(mu1 = 0, mu2 = 0.5, sd1 = 1, sd2 = 2,
+                           alpha = 0.05, power = 0.80, ratio = 1)
+  expect_equal(res$n1, 157)
+  expect_equal(res$n2, 157)
+  expect_equal(res$n_total, 314)
+})
+
+test_that("calc_means_welch rejects invalid inputs", {
+  expect_error(calc_means_welch(mu1 = 1, mu2 = 1, sd1 = 1, sd2 = 1), "must differ")
+  expect_error(calc_means_welch(mu1 = 1, mu2 = 2, sd1 = -1, sd2 = 1), "positive")
+  expect_error(calc_means_welch(mu1 = 1, mu2 = 2, sd1 = 1, sd2 = -1), "positive")
+  expect_error(calc_means_welch(mu1 = 1, mu2 = 2, sd1 = 1, sd2 = 1, ratio = -1), "positive")
+  expect_error(calc_means_welch(mu1 = 1, mu2 = 2, sd1 = 1, sd2 = 1, alpha = 0), "between 0 and 1")
+})

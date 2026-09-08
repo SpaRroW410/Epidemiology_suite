@@ -90,3 +90,65 @@ test_that("calc_correlation_partial rejects invalid inputs", {
   expect_error(calc_correlation_partial(r = 0.3, k = 1.5), "whole number, at least 1")
   expect_error(calc_correlation_partial(r = 0.3, k = 2, alpha = 0), "between 0 and 1")
 })
+
+test_that("calc_correlation_two_dependent matches the worked example (r_yx1=.4, r_yx2=.6, r_x1x2=.3 -> n=183)", {
+  # Verified against psych::r.test()'s exact implementation of Steiger
+  # (1980)'s raw-r t-test and by 5,000-replicate Monte Carlo simulation
+  # (empirical power 0.816 at this n, vs. the 0.80 target).
+  res <- calc_correlation_two_dependent(r_yx1 = 0.4, r_yx2 = 0.6, r_x1x2 = 0.3,
+                                         alpha = 0.05, power = 0.8)
+  expect_equal(round(res$c, 4), 0.1704)
+  expect_equal(res$n, 183)
+})
+
+test_that("calc_correlation_two_dependent reproduces Steiger (1980)'s own classic example's Z closely", {
+  # Steiger's own textbook case: r_yx1=.4, r_yx2=.5, r_x1x2=.1, n=103 -> the
+  # exact raw-r t-statistic (psych::r.test) gives t=-0.89. The Fisher-z
+  # version implemented here should give a very close Z at the same n (both
+  # are asymptotically equivalent tests of the same null hypothesis).
+  z1 <- atanh(0.4); z2 <- atanh(0.5)
+  rbar2 <- (0.4^2 + 0.5^2) / 2
+  c_term <- (0.1 * (1 - 2 * rbar2) - 0.5 * rbar2 * (1 - 2 * rbar2 - 0.1^2)) / (1 - rbar2)^2
+  Z <- (z1 - z2) * sqrt(103 - 3) / sqrt(2 - 2 * c_term)
+  expect_equal(round(Z, 2), -0.89)
+})
+
+test_that("calc_correlation_two_dependent rejects invalid inputs", {
+  expect_error(calc_correlation_two_dependent(1.1, 0.6, 0.3), "between -1 and 1")
+  expect_error(calc_correlation_two_dependent(0.4, 1.1, 0.3), "between -1 and 1")
+  expect_error(calc_correlation_two_dependent(0.4, 0.6, 1.1), "between -1 and 1")
+  expect_error(calc_correlation_two_dependent(0.4, 0.4, 0.3), "must differ")
+  expect_error(calc_correlation_two_dependent(0.9, -0.9, 0.0), "not a valid correlation matrix")
+  expect_error(calc_correlation_two_dependent(0.4, 0.6, 0.3, alpha = 0), "between 0 and 1")
+  expect_error(calc_correlation_two_dependent(0.4, 0.6, 0.3, power = 0), "between 0 and 1")
+})
+
+test_that("calc_correlation_spearman inflates the equivalent Pearson n by pi^2/9 exactly", {
+  # r=0.3, alpha=0.05, power=0.80: the equivalent Pearson design (this
+  # module's own calc_correlation()) gives n=85; inflating by 1/ARE =
+  # pi^2/9 gives n=94. Independently confirmed by a 3,000-replicate Monte
+  # Carlo simulation of the actual stats::cor.test(method="spearman") on
+  # simulated bivariate normal data at rho=0.3: empirical power 0.796 at
+  # n=94 (matching the 0.80 target), versus only 0.752 at the unadjusted
+  # n=85.
+  base <- calc_correlation(r = 0.3, alpha = 0.05, power = 0.8)
+  res <- calc_correlation_spearman(r = 0.3, alpha = 0.05, power = 0.8)
+  expect_equal(res$n_pearson, base$n)
+  expect_equal(res$n_pearson, 85)
+  expect_equal(res$n, ceiling(base$n / (9 / pi^2)))
+  expect_equal(res$n, 94)
+  expect_equal(res$are, 9 / pi^2)
+})
+
+test_that("calc_correlation_spearman needs a larger n for a smaller correlation", {
+  res_small <- calc_correlation_spearman(r = 0.15, alpha = 0.05, power = 0.8)
+  res_large <- calc_correlation_spearman(r = 0.5, alpha = 0.05, power = 0.8)
+  expect_gt(res_small$n, res_large$n)
+})
+
+test_that("calc_correlation_spearman rejects invalid inputs the same way as calc_correlation", {
+  expect_error(calc_correlation_spearman(r = 0), "must not be zero")
+  expect_error(calc_correlation_spearman(r = 1.5), "between -1 and 1")
+  expect_error(calc_correlation_spearman(r = 0.3, alpha = 0), "between 0 and 1")
+  expect_error(calc_correlation_spearman(r = 0.3, power = 0), "between 0 and 1")
+})

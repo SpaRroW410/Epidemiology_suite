@@ -160,3 +160,159 @@ calc_survival_stratified <- function(power, timeUnit, gVec, pVec, hr, lambda0Vec
                   hr = hr, lambda0Vec = lambda0Vec, alpha = alpha)
   )
 }
+
+# Weighted log-rank test (Fleming-Harrington G^rho family) under
+# non-proportional hazards, via Monte Carlo simulation.
+#
+# The checklist's named package, `npsurvSS`, is not installed and CRAN is
+# unreachable from this sandbox. Its source (read from its public GitHub
+# CRAN mirror, https://github.com/cran/npsurvSS) implements a general
+# two-parameter Fleming-Harrington G(rho,gamma) weighted log-rank family
+# via numerical integration over an "arm" S4-style class spanning 11
+# interdependent R files (survival/accrual/loss-to-follow-up
+# distributions, counting-process moments, etc.) -- too large and
+# tightly cross-referenced to safely reimplement and verify in one
+# sitting (the same judgment call already made for `gsDesign`). The
+# checklist item itself explicitly allows "npsurvSS/simulation", so this
+# instead directly simulates the actual test via `survival::survdiff()`
+# (already an installed project dependency, used elsewhere for Cox/RMST
+# designs), which implements the one-parameter Fleming-Harrington G^rho
+# family (`rho` argument: rho=0 is the ordinary log-rank test, rho=1 is
+# the Gehan-Breslow/Wilcoxon-type test that up-weights early-follow-up
+# differences via a weight of S(t-)^rho) -- Harrington & Fleming (1982).
+# This is a narrower (one-parameter, not the full two-parameter G(rho,
+# gamma)) but entirely genuine weighted log-rank family, not an
+# approximation of one.
+#
+# Verified against well-documented properties of this family under two
+# canonical non-proportional-hazards shapes: under a DELAYED treatment
+# effect (hazards equal at first, diverge later), rho=0 (log-rank)
+# outperforms rho=1 (which wastes power up-weighting the early period
+# where there's no difference yet); under an EARLY/FADING effect
+# (hazards diverge at first, converge later), rho=1 outperforms rho=0 --
+# the mirror-image result, both confirmed directly by simulation before
+# wiring into the app (see tests/testthat/test-calc_logrank.R).
+
+.simulate_wlr_trial <- function(n0, n1, hazard0, hr, change_time, effect_timing, accrual, tot_time) {
+  sim_arm <- function(n, haz_pre, haz_post) {
+    u <- runif(n)
+    cum_target <- -log(u)
+    cum_at_change <- haz_pre * change_time
+    is_before <- cum_target <= cum_at_change
+    ifelse(is_before, cum_target / haz_pre,
+           change_time + (cum_target - cum_at_change) / haz_post)
+  }
+  if (effect_timing == "delayed") {
+    E0 <- sim_arm(n0, hazard0, hazard0)
+    E1 <- sim_arm(n1, hazard0, hazard0 * hr)
+  } else {
+    E0 <- sim_arm(n0, hazard0, hazard0)
+    E1 <- sim_arm(n1, hazard0 * hr, hazard0)
+  }
+  C0 <- tot_time - runif(n0, 0, accrual)
+  C1 <- tot_time - runif(n1, 0, accrual)
+  time0 <- pmin(E0, C0); status0 <- as.numeric(E0 <= C0)
+  time1 <- pmin(E1, C1); status1 <- as.numeric(E1 <= C1)
+  data.frame(
+    time = c(time0, time1), status = c(status0, status1),
+    arm = c(rep(0, n0), rep(1, n1))
+  )
+}
+
+.wlr_empirical_power <- function(n0, n1, hazard0, hr, change_time, effect_timing,
+                                  accrual, tot_time, rho, alpha, reps, seed) {
+  set.seed(seed)
+  rejections <- replicate(reps, {
+    d <- .simulate_wlr_trial(n0, n1, hazard0, hr, change_time, effect_timing, accrual, tot_time)
+    d <- d[d$time > 0, ]
+    sd <- tryCatch(
+      survival::survdiff(survival::Surv(time, status) ~ arm, data = d, rho = rho),
+      error = function(e) NULL
+    )
+    if (is.null(sd)) return(FALSE)
+    (1 - pchisq(sd$chisq, df = 1)) < alpha
+  })
+  mean(rejections)
+}
+
+#' Sample size for a weighted log-rank test under non-proportional
+#' hazards, via Monte Carlo simulation
+#'
+#' Solves for the per-arm sample size needed for a target power against a
+#' non-proportional-hazards alternative, using the Fleming-Harrington
+#' G^rho family of weighted log-rank tests (`survival::survdiff(...,
+#' rho = rho)`; rho = 0 is the ordinary log-rank test). Two canonical
+#' non-PH shapes are supported: a DELAYED effect (both arms share the
+#' same hazard until `change_time`, after which the treatment arm's
+#' hazard becomes `hazard0 * hr`) and an EARLY/FADING effect (the arms
+#' differ by `hr` until `change_time`, after which they converge back to
+#' the same hazard). Both are exponential-hazard, staggered-accrual,
+#' administratively-censored designs.
+#'
+#' @param hazard0 Baseline (control-arm) hazard, > 0
+#' @param hr Treatment-arm hazard ratio during the "effect" period
+#'   (> 0, != 1)
+#' @param change_time Time at which the hazard ratio switches on
+#'   (`effect_timing = "early_fading"`) or off (`"delayed"`); must be
+#'   less than `tot_time`
+#' @param effect_timing `"delayed"` (no difference until `change_time`,
+#'   then `hr` applies) or `"early_fading"` (`hr` applies until
+#'   `change_time`, then no difference)
+#' @param accrual Accrual (enrollment) period length (> 0)
+#' @param tot_time Total study time (time of final analysis); must be
+#'   greater than `accrual` and `change_time`
+#' @param rho Fleming-Harrington weight parameter (>= 0); 0 = ordinary
+#'   log-rank, 1 = Gehan-Breslow/Wilcoxon-type (up-weights early-
+#'   follow-up differences)
+#' @param allocation1 Proportion of patients allocated to the treatment
+#'   arm (0,1), default 0.5
+#' @param alpha Significance level (0,1), default 0.05
+#' @param power Desired power (0,1), default 0.8
+#' @param nsim Monte Carlo replicates per sample-size candidate evaluated
+#'   during the search (>= 100)
+#' @param seed RNG seed for reproducibility
+#' @return list(n0, n1, n_total, achieved_power, inputs)
+calc_weighted_logrank <- function(hazard0, hr, change_time, effect_timing = "delayed",
+                                   accrual, tot_time, rho = 0, allocation1 = 0.5,
+                                   alpha = 0.05, power = 0.8, nsim = 300, seed = 20200601) {
+  .validate_positive(hazard0, "hazard0")
+  .validate_positive(hr, "hr")
+  if (isTRUE(all.equal(hr, 1))) stop("hr must differ from 1 (no effect to detect).")
+  .validate_positive(change_time, "change_time")
+  if (!effect_timing %in% c("delayed", "early_fading")) {
+    stop('effect_timing must be "delayed" or "early_fading".')
+  }
+  .validate_positive(accrual, "accrual")
+  .validate_positive(tot_time, "tot_time")
+  if (tot_time <= accrual) stop("tot_time must be greater than accrual.")
+  if (change_time >= tot_time) stop("change_time must be less than tot_time.")
+  if (!is.numeric(rho) || length(rho) != 1 || is.na(rho) || rho < 0) {
+    stop("rho must be a single number >= 0.")
+  }
+  .validate_unit_interval(allocation1, "allocation1")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (!is.numeric(nsim) || length(nsim) != 1 || is.na(nsim) || nsim < 100 || nsim != round(nsim)) {
+    stop("nsim must be a single whole number >= 100.")
+  }
+
+  ratio <- allocation1 / (1 - allocation1)
+
+  empirical_power <- function(n0, reps) {
+    n1 <- max(2, round(n0 * ratio))
+    .wlr_empirical_power(n0, n1, hazard0, hr, change_time, effect_timing,
+                         accrual, tot_time, rho, alpha, reps, seed)
+  }
+
+  n0 <- .mc_search_n1(function(n) empirical_power(n, nsim), power, n_lo = 10, n_hi = 20, n_max = 5000)
+  n1 <- max(2, round(n0 * ratio))
+
+  list(
+    n0 = n0, n1 = n1, n_total = n0 + n1,
+    achieved_power = empirical_power(n0, nsim * 3),
+    inputs = list(hazard0 = hazard0, hr = hr, change_time = change_time,
+                  effect_timing = effect_timing, accrual = accrual, tot_time = tot_time,
+                  rho = rho, allocation1 = allocation1, alpha = alpha, power = power,
+                  nsim = nsim)
+  )
+}

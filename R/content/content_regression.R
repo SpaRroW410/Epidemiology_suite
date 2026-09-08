@@ -46,5 +46,56 @@ regression_content <- list(
       "9.1 p. 424. (as implemented by pwr::pwr.f2.test)."
     ),
     backend = "pwr::pwr.f2.test()"
+  ),
+  r2_increase = list(
+    title = "Hierarchical Multiple Regression, R-Squared Increase",
+    formula_latex = paste0(
+      "$$f^2 = \\frac{R^2_{full} - R^2_{reduced}}{1 - R^2_{full}}$$",
+      "$$n = v + p_{total} + 1 \\quad \\text{(} u \\text{ = predictors added, } v \\text{ solved from } f^2, \\alpha, \\text{power)}$$"
+    ),
+    explanation = paste(
+      "This calculator finds the sample size needed to detect that adding a",
+      "set of new predictors to an existing (\"reduced\") regression model",
+      "significantly increases R-squared -- the \"fixed model, R-squared",
+      "increase\" test in Cohen (1988, section 9.7). This is a different",
+      "question than the plain R-squared-vs-zero test above: here the",
+      "reduced model's predictors are already in the model, and the",
+      "question is whether the *new* predictors add anything.",
+      "",
+      "- **r2_reduced** - the R-squared of the existing model, without the",
+      "  new predictors.",
+      "- **r2_full** - the R-squared of the full model, with the new",
+      "  predictors added (must exceed r2_reduced).",
+      "- **num_predictors_added** - the number of new predictors being",
+      "  added (a categorical predictor with k levels contributes k-1).",
+      "- **num_predictors_total** - the total number of predictors in the",
+      "  full model (reduced-model predictors plus the added ones).",
+      "- **alpha, power** - as elsewhere.",
+      "",
+      "f^2 = (R^2_full - R^2_reduced) / (1 - R^2_full) is Cohen's effect",
+      "size for this test, tested with u = the number of added predictors",
+      "and v = the full model's residual degrees of freedom.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "A reduced model with 3 predictors achieves R-squared = 0.30; adding",
+      "2 more predictors (5 total) raises it to R-squared = 0.40, giving",
+      "f^2 = (0.40 - 0.30) / (1 - 0.40) = 0.1667. At alpha = 0.05 and 80%",
+      "power, this calculator returns n = 64 (v = 58 denominator df from",
+      "pwr::pwr.f2.test(u = 2, f2 = 0.1667), plus 5 total predictors plus",
+      "1). Verified by simulation: fitting nested lm() models on 10,000",
+      "simulated datasets of size 64 and comparing via anova(reduced, full)",
+      "gives an empirical power of ~0.78-0.80, the same small gap seen when",
+      "simulating this app's own R-squared-vs-zero test the same way",
+      "(random, not fixed, predictor draws) -- the well-known fixed- vs",
+      "random-regressor distinction in Cohen (1988), not a formula error.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Cohen J. Statistical Power Analysis for the Behavioral Sciences.",
+      "2nd ed. Hillsdale, NJ: Lawrence Erlbaum Associates; 1988, Section",
+      "9.7. (as implemented by pwr::pwr.f2.test)."
+    ),
+    backend = "pwr::pwr.f2.test()"
   )
 )

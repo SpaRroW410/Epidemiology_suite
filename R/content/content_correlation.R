@@ -241,5 +241,123 @@ correlation_content <- list(
       "table, entered with n - k)."
     ),
     backend = "closed-form (Cohen 1988) via pwr::pwr.r.test()"
+  ),
+
+  two_dependent = list(
+    title = "Compare Two Dependent (Overlapping) Pearson Correlations",
+    formula_latex = paste0(
+      "$$c = \\frac{r_{x_1x_2}(1-2\\bar r^2) - \\tfrac{1}{2}\\bar r^2(1-2\\bar r^2-r_{x_1x_2}^2)}{(1-\\bar r^2)^2}, \\quad \\bar r^2 = \\frac{r_{yx_1}^2+r_{yx_2}^2}{2}$$",
+      "$$n = \\left(\\frac{(Z_{1-\\alpha/2}+Z_{1-\\beta})\\sqrt{2-2c}}{|Z'_{yx_1}-Z'_{yx_2}|}\\right)^2 + 3$$"
+    ),
+    explanation = paste(
+      "Use this to test whether a variable Y correlates more strongly",
+      "with X1 than with X2, when X1 and X2 are BOTH measured on the",
+      "SAME sample as Y -- e.g. \"is a new biomarker more strongly",
+      "correlated with disease severity than the old biomarker, measured",
+      "in the same patients?\" This needs a different formula than the",
+      "\"Compare two independent correlations\" design above, which",
+      "assumes r1 and r2 come from two separate, unrelated samples: here",
+      "the two correlations are statistically dependent (both involve Y),",
+      "so the test must account for that dependence via the third",
+      "pairwise correlation, r_x1x2 (the correlation between X1 and X2",
+      "themselves).",
+      "",
+      "- **r_yx1, r_yx2** - the correlations you expect between Y and each",
+      "  of X1 and X2; they must differ, since the test detects a",
+      "  difference between them.",
+      "- **r_x1x2** - the expected correlation between X1 and X2 (the two",
+      "  variables being compared, not involving Y). The three",
+      "  correlations together must form a valid (positive-definite) 3x3",
+      "  correlation matrix.",
+      "- **alpha, power, Alternative hypothesis** - as elsewhere.",
+      "",
+      "This is Steiger (1980)'s Fisher z'-transformation test for two",
+      "correlations sharing one variable in common: the covariance c",
+      "between the two z'-transformed correlations depends on r_x1x2, and",
+      "the sample-size formula solves the resulting Z-test for n directly",
+      "(c does not itself depend on n).",
+      "",
+      "Only the \"one variable in common\" case is covered here (comparing",
+      "r_yx1 to r_yx2). Comparing two correlations that share NO variable",
+      "at all (e.g. r_yx1 vs r_zx2, needing all six pairwise correlations",
+      "among four variables) is not covered.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "For r_yx1 = 0.4, r_yx2 = 0.6, r_x1x2 = 0.3, alpha = 0.05",
+      "(two-sided) and 80% power, this calculator returns n = 183.",
+      "Verified two ways: this formula's Z-statistic reproduces the",
+      "psych package's own exact implementation of Steiger's original",
+      "t-test (which itself reproduces Steiger (1980)'s own classic",
+      "textbook example -- r_yx1=.4, r_yx2=.5, r_x1x2=.1, n=103 ->",
+      "t=-0.89 -- exactly) within 0.01 of the t-value at every sample",
+      "size tested; and a 5,000-replicate Monte Carlo simulation at the",
+      "computed n=183 (generating trivariate normal data and testing each",
+      "replicate with the psych package's exact test) gives an empirical",
+      "power of 0.816, closely matching the 0.80 target.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Steiger JH. Tests for comparing elements of a correlation matrix.",
+      "Psychol Bull. 1980;87(2):245-251 (eq. 14-15, the Fisher",
+      "z'-transformation test for two correlations sharing one variable",
+      "in common). Cross-checked against psych::r.test()'s",
+      "implementation of the same paper's eq. 3-4 (exact raw-r t-test)."
+    ),
+    backend = "closed-form (Steiger 1980)"
+  ),
+  spearman = list(
+    title = "Spearman Rank Correlation Coefficient",
+    formula_latex = paste0(
+      "$$n_{\\text{Spearman}} = \\frac{n_{\\text{Pearson}}}{\\text{ARE}}, ",
+      "\\qquad \\text{ARE} = \\frac{9}{\\pi^2} \\approx 0.9119$$"
+    ),
+    explanation = paste(
+      "Use this to size a study whose primary analysis is Spearman's rank",
+      "correlation (rho) rather than Pearson's r -- e.g. when the",
+      "relationship is expected to be monotonic but not necessarily",
+      "linear, or the variables are ordinal.",
+      "",
+      "No installed package provides a Spearman-specific closed-form",
+      "sample-size formula (unlike Kendall's tau, already covered by the",
+      "Nonparametric Tests module's own direct closed form). This design",
+      "instead does exactly what this app's own checklist names for this",
+      "item: solves the equivalent Pearson-correlation n (via this",
+      "module's own `calc_correlation()`), then inflates it by the",
+      "classical asymptotic relative efficiency (ARE) of Spearman's rho",
+      "relative to Pearson's r under bivariate normality, 9/pi^2 ~ 0.9119",
+      "-- the same style of ARE-inflation shortcut already used by the",
+      "Nonparametric Tests module's Kruskal-Wallis (3/pi relative to",
+      "one-way ANOVA) and Friedman ((3/pi)*k/(k+1) relative to RM-ANOVA)",
+      "designs.",
+      "",
+      "- **r** - expected Spearman rank correlation coefficient.",
+      "- **alpha, power, alternative** - as elsewhere.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "r = 0.3, alpha = 0.05 (two-sided), 80% power: the equivalent",
+      "Pearson-correlation design (this module's own already-verified",
+      "`calc_correlation()`) gives n = 85; inflating by 1/ARE = pi^2/9 ~",
+      "1.0966 gives n = 94 for Spearman's rho. Independently confirmed by",
+      "a 3,000-replicate Monte Carlo simulation -- generating bivariate",
+      "normal data at rho = 0.3 and running the actual",
+      "`stats::cor.test(method=\"spearman\")` on each replicate -- gives",
+      "empirical power 0.796 at n = 94 (matching the 0.80 target closely),",
+      "versus only 0.752 at the unadjusted Pearson n = 85, confirming the",
+      "inflation is both necessary and closely calibrated.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Hotelling H, Pabst MR. Rank correlation and tests of significance",
+      "involving no assumption of normality. Ann Math Stat.",
+      "1936;7(1):29-43 (establishes the asymptotic relative efficiency of",
+      "rank correlation). Fieller EC, Hartley HO, Pearson ES. Tests for",
+      "rank correlation coefficients. I. Biometrika. 1957;44(3-4):470-481",
+      "(the standard citation for the precise 9/pi^2 ARE constant used",
+      "here, via the same Fisher z'-type transformation already used by",
+      "this module's own Pearson-correlation design)."
+    ),
+    backend = "closed-form wrapper around calc_correlation() (pwr::pwr.r.test()), ARE-inflated"
   )
 )

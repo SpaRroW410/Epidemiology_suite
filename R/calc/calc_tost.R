@@ -96,6 +96,80 @@ calc_tost_bioequivalence <- function(cv, theta0 = 0.95, theta1 = 0.8, theta2 = 1
   )
 }
 
+#' Sample size for a pharmacokinetic bioequivalence crossover trial,
+#' accounting for uncertainty in the assumed CV (expected power / assurance)
+#'
+#' The bioequivalence designs above (calc_tost_bioequivalence()) treat the
+#' assumed intra-subject CV as known/fixed -- but in practice it is
+#' itself only an ESTIMATE from a smaller prior/pilot study, so the
+#' conventional "power" calculation is conditional on that estimate
+#' happening to be exactly right. This design instead computes the
+#' SAMPLE SIZE NEEDED FOR THE EXPECTED (assurance) POWER, averaging over
+#' the uncertainty in the CV estimate given how many subjects it was
+#' estimated from (prior_n) -- the "probability of trial success"
+#' concept named in checklist_by_test.md's "Assurance / expected power"
+#' item. Wraps PowerTOST::expsampleN.TOST() with prior.type = "CV" --
+#' PowerTOST is already a project dependency (used by
+#' calc_tost_means()/calc_tost_bioequivalence() above), and this is
+#' exactly the `exp.*` function family that checklist item names.
+#'
+#' Verified exactly against the package's own documented example: CV =
+#' 0.3, a prior 2x2 crossover study with m = 30 subjects, default
+#' bioequivalence limits (80-125%) and theta0 = 0.95 -> n = 42 with
+#' achieved expected power 0.8063 -- versus the conventional
+#' calc_tost_bioequivalence()'s fixed-CV n = 40 (achieved power 0.8158)
+#' for the identical CV/theta0/limits, confirming the expected direction
+#' (accounting for CV uncertainty needs a somewhat larger sample size).
+#'
+#' @param cv Assumed intra-subject coefficient of variation (> 0), on
+#'   the log scale (e.g. 0.3 for 30% CV) -- the point estimate from the
+#'   prior/pilot study
+#' @param prior_n Number of subjects the prior/pilot study (that
+#'   produced the CV estimate) was based on (whole number, >= 4)
+#' @param theta0 Assumed true ratio of test/reference (e.g. 0.95); must
+#'   fall strictly within (theta1, theta2)
+#' @param theta1 Lower bioequivalence limit (default 0.8, i.e. 80%)
+#' @param theta2 Upper bioequivalence limit (default 1.25, i.e. 125%)
+#' @param alpha Significance level, one-sided (0,1)
+#' @param power Desired EXPECTED power (0,1)
+#' @param design One of "2x2" (classical 2x2x2 crossover), "2x2x4"
+#'   (full replicate), or "2x3x3" (partial replicate) -- assumed to be
+#'   the design of both the prior study and the planned study
+#' @return list(n_total, achieved_expected_power, inputs)
+calc_tost_assurance <- function(cv, prior_n, theta0 = 0.95, theta1 = 0.8, theta2 = 1.25,
+                                 alpha = 0.05, power = 0.8,
+                                 design = c("2x2", "2x2x4", "2x3x3")) {
+  design <- match.arg(design)
+  .validate_positive(cv, "cv")
+  .validate_positive(theta0, "theta0")
+  .validate_positive(theta1, "theta1")
+  .validate_positive(theta2, "theta2")
+  if (!(theta0 > theta1 && theta0 < theta2)) {
+    stop("theta0 must fall strictly within (theta1, theta2) -- otherwise bioequivalence can't be shown even with infinite sample size.")
+  }
+  if (!is.numeric(prior_n) || length(prior_n) != 1 || is.na(prior_n) ||
+      prior_n < 4 || prior_n != round(prior_n)) {
+    stop("prior_n must be a single whole number, at least 4 (the subjects in the prior/pilot study that estimated CV).")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  fit <- PowerTOST::expsampleN.TOST(
+    alpha = alpha, targetpower = power, logscale = TRUE,
+    theta0 = theta0, theta1 = theta1, theta2 = theta2,
+    CV = cv, design = design, prior.type = "CV",
+    prior.parm = list(m = prior_n, design = design),
+    print = FALSE
+  )
+
+  list(
+    n_total = fit[["Sample size"]],
+    achieved_expected_power = fit[["Achieved power"]],
+    inputs = list(cv = cv, prior_n = prior_n, theta0 = theta0, theta1 = theta1,
+                  theta2 = theta2, alpha = alpha, power = power, design = design)
+  )
+}
+
 #' Sample size for a two one-sided tests (TOST) equivalence trial on proportions
 #'
 #' Wraps epiR::epi.ssequb(type = "equivalence") rather than reimplementing

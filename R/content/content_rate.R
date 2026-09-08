@@ -89,5 +89,116 @@ rate_content <- list(
       "2018. (parameterization/worked example this was verified against)."
     ),
     backend = "Closed-form (Demidenko 2007's Poisson-regression Wald-test formula, as documented by WebPower::wp.poisson); no external package required"
+  ),
+
+  poisson_regression = list(
+    title = "Poisson Regression, Continuous Predictor",
+    formula_latex = paste0(
+      "$$\\log(\\mu_i) = \\beta_0 + \\beta_1 x_{1i}, \\quad x_1 \\sim N(\\mu_{x_1}, \\sigma^2_{x_1})$$",
+      "$$n = \\phi\\frac{\\left(Z_{1-\\alpha/2}\\sqrt{V(b_1|\\beta_1=0)} + Z_{power}\\sqrt{V(b_1|\\beta_1=\\theta_1)}\\right)^2}",
+      "{\\mu_T e^{\\beta_0}\\theta_1^2}$$"
+    ),
+    explanation = paste(
+      "The \"Comparison of Two Incidence Rates\" design above covers",
+      "Poisson regression with a single BINARY predictor (an exposed vs.",
+      "unexposed group indicator); this covers the continuous-predictor",
+      "case instead -- e.g. testing whether a continuous exposure or",
+      "biomarker level (assumed normally distributed) is associated with",
+      "an event rate.",
+      "",
+      "- **beta0** - the intercept (log scale) of the Poisson regression.",
+      "- **beta1** - the slope (log rate ratio per unit increase in the",
+      "  predictor) you want to detect; must differ from 0.",
+      "- **Predictor mean / variance (mu.x1, sigma2.x1)** - the assumed",
+      "  mean and variance of the (normally distributed) predictor.",
+      "- **Mean exposure time (mu.T)** - the average follow-up/exposure",
+      "  time per subject.",
+      "- **Over-dispersion (phi)** - the ratio var(y)/mean(y); 1 means a",
+      "  genuine Poisson distribution (no over-dispersion), values above 1",
+      "  inflate the required sample size to compensate for extra-Poisson",
+      "  variability often seen in real count data.",
+      "- **alpha, power** - as elsewhere (two-sided test).",
+      "",
+      "Wraps `powerMediation::sizePoisson()` -- already a project",
+      "dependency (used by the Logistic Regression module) -- which",
+      "directly implements Signorini (1991)'s closed-form Wald-test",
+      "sample-size formula for Poisson regression.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "powerMediation's own documented example: beta0 = 0.1, beta1 = 0.5,",
+      "predictor mean = 0 and variance = 1 (a standard normal predictor),",
+      "mean exposure time = 1, no over-dispersion (phi = 1), alpha = 0.05",
+      "(two-sided), 80% power. This calculator returns n = 28, matching",
+      "the package's own worked answer exactly.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Signorini DF. Sample size for Poisson regression. Biometrika.",
+      "1991;78(2):446-450."
+    ),
+    backend = "powerMediation::sizePoisson()"
+  ),
+
+  negative_binomial = list(
+    title = "Comparison of Two Negative Binomial Rates",
+    formula_latex = paste0(
+      "$$Y_i \\sim \\text{NegBin}(\\mu_i, \\theta), \\quad ",
+      "\\text{Var}(Y_i) = \\mu_i + \\mu_i^2/\\theta, \\quad k = 1/\\theta$$",
+      "$$n_0 = \\left(\\frac{Z_{1-\\alpha/2}\\sqrt{V_0} + Z_{power}\\sqrt{V_1}}{\\log(RR)}\\right)^2$$"
+    ),
+    explanation = paste(
+      "The Poisson-regression designs above assume the event-count",
+      "variance is proportional to the mean (or a constant multiple of",
+      "it, via the over-dispersion parameter phi) -- but many real",
+      "recurrent-event/count outcomes (hospitalizations, exacerbations,",
+      "seizures, relapses) show variance growing FASTER than the mean.",
+      "The negative binomial model captures this directly: Var(Y) = mu",
+      "+ mu^2/theta, a quadratic mean-variance relationship, where",
+      "smaller theta means more over-dispersion.",
+      "",
+      "- **mu0** - the expected event rate per time unit in the control",
+      "  group.",
+      "- **RR** - the rate ratio (treatment vs. control) you want to",
+      "  detect; must differ from 1.",
+      "- **theta** - the negative binomial dispersion parameter, in the",
+      "  same parameterization as `MASS::rnegbin()`/`MASS::glm.nb()`",
+      "  (Var(Y) = mu + mu^2/theta).",
+      "- **duration** - the average treatment/follow-up duration per",
+      "  subject.",
+      "- **ssize_ratio** - the ratio of the treatment group's sample size",
+      "  to the control group's.",
+      "- **approach** - one of three variance-estimator variants derived",
+      "  by Zhu & Lakkis (2014); their own simulation study recommends",
+      "  approach 2 or 3 (3 is the default here).",
+      "- **alpha, power** - as elsewhere.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "`MKpower` (the checklist's named package for this item) is not",
+      "installable from CRAN in this sandbox (no network access); its",
+      "`power.nb.test()` -- a single, self-contained closed-form",
+      "function with no cross-file dependencies -- was read directly",
+      "from its public GitHub CRAN mirror and reimplemented. Verified",
+      "against the package's own documented example (mu0=10, RR=1.5,",
+      "theta=1/5, duration=1, ssize_ratio=1.5, approach=3, target",
+      "power=0.8): this calculator gives n0=405, n1=607, matching the",
+      "package's own computed n0=404.2/n1=606.3 to within rounding.",
+      "Independently verified two ways by simulation: (1) generating",
+      "`MASS::rnegbin()` count data at this n and applying the paper's",
+      "own test statistic gives empirical power 0.814; (2) a genuinely",
+      "different check -- fitting `MASS::glm.nb()` (which ESTIMATES the",
+      "dispersion from the data, rather than assuming it known as the",
+      "design formula does) on the same simulated data and using its own",
+      "Wald test -- gives empirical power 0.797. Both closely bracket",
+      "the formula's 0.8 target.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Zhu H, Lakkis H. Sample size calculation for comparing two",
+      "negative binomial rates. Statistics in Medicine.",
+      "2014;33(3):376-387."
+    ),
+    backend = "closed-form reimplementation of MKpower::power.nb.test()"
   )
 )

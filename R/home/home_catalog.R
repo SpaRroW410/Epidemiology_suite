@@ -122,6 +122,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Means",
        module_input_id = "means-design", design_value = "two_sample_unequal_n"),
 
+  list(key = "means_welch",
+       label = "Two independent means, unequal variances (Welch's t-test)",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to detect a",
+         "difference between two independent groups' means, when the two",
+         "groups are expected to have genuinely different variability",
+         "(not just different sample sizes)?\""
+       ),
+       outcome_type = "means_welch", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Means",
+       module_input_id = "means-design", design_value = "welch"),
+
   list(key = "means_two_dep", label = "Two paired means (e.g. pre-post)",
        answers = "Answers: \"How many subjects do I need to detect a change in mean within the same subjects (pre-post)?\"",
        outcome_type = "mean", groups = "2", dependency = "dependent", reference_based = NA,
@@ -353,6 +365,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Correlation",
        module_input_id = "correlation-design", design_value = "two_independent"),
 
+  list(key = "correlation_two_dependent",
+       label = "Compare two dependent (overlapping) correlations",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect that a",
+         "variable Y correlates more strongly with X1 than with X2, when",
+         "X1 and X2 are both measured on the SAME subjects as Y?\""
+       ),
+       outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Correlation",
+       module_input_id = "correlation-design", design_value = "two_dependent"),
+
   list(key = "correlation_point_biserial",
        label = "Point-biserial correlation",
        answers = paste(
@@ -385,6 +408,18 @@ calculator_catalog <- list(
        outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Correlation",
        module_input_id = "correlation-design", design_value = "partial"),
+
+  list(key = "correlation_spearman",
+       label = "Spearman rank correlation (ARE-inflated)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a Spearman",
+         "rank correlation, when the relationship is expected to be",
+         "monotonic but not necessarily linear, or the variables are",
+         "ordinal?\""
+       ),
+       outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Correlation",
+       module_input_id = "correlation-design", design_value = "spearman"),
 
   # Chi-Square Tests entries: not a "how many groups" comparison in the
   # proportion/mean sense, so only reachable via "by study design" -- except
@@ -490,6 +525,69 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Log-Rank / Survival",
        module_input_id = "logrank-design", design_value = "stratified"),
 
+  list(key = "survival_noncompliance",
+       label = "Log-rank test with accrual, follow-up & noncompliance",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a survival trial with",
+         "gradual enrollment (accrual), a minimum follow-up period, and",
+         "some drop-in/non-adherence between arms diluting the treatment",
+         "effect?\""
+       ),
+       outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Log-Rank / Survival",
+       module_input_id = "logrank-design", design_value = "noncompliance"),
+
+  list(key = "weighted_logrank",
+       label = "Weighted log-rank test under non-proportional hazards (Monte Carlo)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a treatment",
+         "effect that isn't constant over time -- e.g. a DELAYED benefit",
+         "that only appears later, or an EARLY effect that fades -- using",
+         "a weighted (Fleming-Harrington G-rho family) log-rank test",
+         "rather than the ordinary log-rank test?\""
+       ),
+       outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Log-Rank / Survival",
+       module_input_id = "logrank-design", design_value = "weighted_logrank"),
+
+  list(key = "competing_risks_joint",
+       label = "Joint cause-specific/any-cause hazard test (competing risks)",
+       answers = paste(
+         "Answers: \"How many cause-1 events and total patients do I need",
+         "for a competing-risks trial that jointly tests the",
+         "cause-specific hazard and the any-cause hazard, rather than",
+         "either alone?\""
+       ),
+       outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Competing Risks",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "rmst_comparison",
+       label = "Restricted mean survival time (RMST) comparison",
+       answers = paste(
+         "Answers: \"How many patients per arm do I need to detect a",
+         "difference in restricted mean survival time (RMST) between two",
+         "arms -- a model-free alternative to the hazard ratio that",
+         "doesn't require the proportional-hazards assumption -- for a",
+         "superiority or non-inferiority test?\""
+       ),
+       outcome_type = "survival", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "RMST Comparison",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "longitudinal_slope_diff",
+       label = "Longitudinal group-slope-difference test (GEE/GLS, Liu & Liang)",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a longitudinal",
+         "trial (e.g. tracking cognitive decline or a biomarker over",
+         "repeated visits) to detect a difference in the RATE OF CHANGE",
+         "(slope) between two groups, under a random-intercept/random-",
+         "slope covariance structure?\""
+       ),
+       outcome_type = "means", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Longitudinal Slope Difference",
+       module_input_id = NA, design_value = NA),
+
   list(key = "cluster_deff",
        label = "Cluster / multistage sampling -- design effect (DEFF)",
        answers = paste(
@@ -566,6 +664,40 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Logistic Regression",
        module_input_id = "logistic-design", design_value = "continuous"),
 
+  list(key = "logistic_ordinal",
+       label = "Ordinal (proportional odds) regression, two groups",
+       answers = paste(
+         "Answers: \"How many subjects do I need to compare two groups on",
+         "an ordinal outcome with 3 or more ordered categories (e.g. a",
+         "pain severity scale), via a proportional-odds model?\""
+       ),
+       outcome_type = "ordinal", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Logistic Regression",
+       module_input_id = "logistic-design", design_value = "ordinal"),
+
+  list(key = "logistic_binary_adjusted",
+       label = "Multiple logistic regression, covariate-adjusted -- binary predictor",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a binary predictor in",
+         "a MULTIPLE logistic regression model, adjusting for its",
+         "correlation (R-squared) with other covariates in the model?\""
+       ),
+       outcome_type = "binary", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Logistic Regression",
+       module_input_id = "logistic-design", design_value = "binary_adjusted"),
+
+  list(key = "logistic_continuous_adjusted",
+       label = "Multiple logistic regression, covariate-adjusted -- continuous predictor",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a continuous",
+         "predictor in a MULTIPLE logistic regression model, adjusting for",
+         "its correlation (R-squared) with other covariates in the",
+         "model?\""
+       ),
+       outcome_type = "binary", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Logistic Regression",
+       module_input_id = "logistic-design", design_value = "continuous_adjusted"),
+
   list(key = "rm_anova_between",
        label = "Repeated-measures ANOVA -- between-subjects effect",
        answers = paste(
@@ -630,6 +762,52 @@ calculator_catalog <- list(
        outcome_type = "continuous", groups = "3+", dependency = "independent", reference_based = NA,
        built = TRUE, nav_target = "Nonparametric Tests",
        module_input_id = "nonparametric-design", design_value = "kruskal_wallis"),
+
+  list(key = "jonckheere_terpstra",
+       label = "Jonckheere-Terpstra test (ordered alternatives)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a monotonic",
+         "trend in a continuous outcome across ordered groups (e.g.",
+         "increasing dose levels), without assuming normality?\""
+       ),
+       outcome_type = "continuous", groups = "3+", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Nonparametric Tests",
+       module_input_id = "nonparametric-design", design_value = "jonckheere"),
+
+  list(key = "friedman",
+       label = "Friedman test (k related/repeated measurements)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a difference",
+         "among 3 or more repeated measurements/conditions on the SAME",
+         "subjects, without assuming normality?\""
+       ),
+       outcome_type = "continuous", groups = "3+", dependency = "paired", reference_based = NA,
+       built = TRUE, nav_target = "Nonparametric Tests",
+       module_input_id = "nonparametric-design", design_value = "friedman"),
+
+  list(key = "ks_two_sample",
+       label = "Kolmogorov-Smirnov test (two independent samples, Monte Carlo)",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to detect a",
+         "distributional difference between two independent samples via",
+         "the Kolmogorov-Smirnov test, when no closed-form power formula",
+         "exists?\""
+       ),
+       outcome_type = "continuous", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Nonparametric Tests",
+       module_input_id = "nonparametric-design", design_value = "ks"),
+
+  list(key = "wald_wolfowitz_runs",
+       label = "Wald-Wolfowitz runs test (two independent samples, Monte Carlo)",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to detect a",
+         "distributional difference between two independent samples via",
+         "the Wald-Wolfowitz runs test, when no closed-form power formula",
+         "exists?\""
+       ),
+       outcome_type = "continuous", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Nonparametric Tests",
+       module_input_id = "nonparametric-design", design_value = "runs"),
 
   list(key = "rm_anova_interaction",
        label = "Mixed (split-plot) ANOVA -- group x time interaction",
@@ -698,6 +876,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Equivalence (TOST)",
        module_input_id = "tost-design", design_value = "bioequivalence"),
 
+  list(key = "tost_assurance",
+       label = "Bioequivalence crossover, expected power (assurance)",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a bioequivalence",
+         "crossover study, accounting for the fact that my assumed CV is",
+         "itself only an estimate from a smaller prior/pilot study?\""
+       ),
+       outcome_type = "equivalence", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Equivalence (TOST)",
+       module_input_id = "tost-design", design_value = "assurance"),
+
   list(key = "noninferiority_means",
        label = "Non-inferiority trial, two means",
        answers = paste(
@@ -765,6 +954,30 @@ calculator_catalog <- list(
        outcome_type = "rate", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Incidence Rate",
        module_input_id = "rate-design", design_value = "comparison"),
+
+  list(key = "poisson_regression_continuous",
+       label = "Poisson regression, continuous predictor",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect an association",
+         "between a continuous exposure/biomarker and an event rate, via",
+         "Poisson regression?\""
+       ),
+       outcome_type = "rate", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Incidence Rate",
+       module_input_id = "rate-design", design_value = "poisson_regression"),
+
+  list(key = "negative_binomial_rates",
+       label = "Comparison of two negative binomial rates",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a given rate",
+         "ratio between two groups' recurrent-event counts (e.g.",
+         "hospitalizations, exacerbations, relapses), when the event",
+         "counts are over-dispersed beyond what a plain Poisson model",
+         "allows -- following the negative binomial model?\""
+       ),
+       outcome_type = "rate", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Incidence Rate",
+       module_input_id = "rate-design", design_value = "negative_binomial"),
 
   list(key = "ratio_risk_ratio",
        label = "Risk ratio -- precision-based",
@@ -943,7 +1156,18 @@ calculator_catalog <- list(
        ),
        outcome_type = "regression", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Multiple Regression",
-       module_input_id = NA, design_value = NA),
+       module_input_id = "regression-design", design_value = "r2"),
+
+  list(key = "regression_r2_increase",
+       label = "Hierarchical multiple regression, R-squared increase",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect that adding a",
+         "set of new predictors to my existing regression model",
+         "significantly increases R-squared?\""
+       ),
+       outcome_type = "regression", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Multiple Regression",
+       module_input_id = "regression-design", design_value = "r2_increase"),
 
   list(key = "rule_of_three_bound",
        label = "Upper bound on an unseen event rate (rule of three)",
@@ -1031,7 +1255,101 @@ calculator_catalog <- list(
        ),
        outcome_type = "variance", groups = "2", dependency = "independent", reference_based = NA,
        built = TRUE, nav_target = "Variance Tests",
-       module_input_id = "variance-design", design_value = "two")
+       module_input_id = "variance-design", design_value = "two"),
+
+  list(key = "multiplicity_proportion_1s",
+       label = "Multiplicity-adjusted: one proportion vs. reference",
+       answers = paste(
+         "Answers: \"I'm planning several simultaneous comparisons of a",
+         "proportion against a reference value -- how many subjects do I",
+         "need per comparison after a Bonferroni/Sidak alpha correction?\""
+       ),
+       outcome_type = "proportion", groups = "1", dependency = NA, reference_based = TRUE,
+       built = TRUE, nav_target = "Multiplicity Adjustment",
+       module_input_id = "multiplicity-design", design_value = "proportion_1s"),
+
+  list(key = "multiplicity_proportion_2s",
+       label = "Multiplicity-adjusted: two independent proportions",
+       answers = paste(
+         "Answers: \"I'm planning several simultaneous two-proportion",
+         "comparisons (e.g. several outcome variables) -- how many",
+         "subjects per group do I need after a Bonferroni/Sidak alpha",
+         "correction?\""
+       ),
+       outcome_type = "proportion", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Multiplicity Adjustment",
+       module_input_id = "multiplicity-design", design_value = "proportion_2s"),
+
+  list(key = "multiplicity_means_1s",
+       label = "Multiplicity-adjusted: one mean vs. reference",
+       answers = paste(
+         "Answers: \"I'm planning several simultaneous comparisons of a",
+         "mean against a reference value -- how many subjects do I need",
+         "per comparison after a Bonferroni/Sidak alpha correction?\""
+       ),
+       outcome_type = "means", groups = "1", dependency = NA, reference_based = TRUE,
+       built = TRUE, nav_target = "Multiplicity Adjustment",
+       module_input_id = "multiplicity-design", design_value = "means_1s"),
+
+  list(key = "multiplicity_means_2s",
+       label = "Multiplicity-adjusted: two independent means",
+       answers = paste(
+         "Answers: \"I'm planning several simultaneous two-mean",
+         "comparisons (e.g. several outcome variables) -- how many",
+         "subjects per group do I need after a Bonferroni/Sidak alpha",
+         "correction?\""
+       ),
+       outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Multiplicity Adjustment",
+       module_input_id = "multiplicity-design", design_value = "means_2s"),
+
+  list(key = "multiplicity_fdr_means_2s",
+       label = "Multiplicity-adjusted: two independent means, FDR (Benjamini-Hochberg)-controlled",
+       answers = paste(
+         "Answers: \"I'm planning m simultaneous two-mean comparisons where",
+         "only some are expected to show a real effect -- how many subjects",
+         "per group do I need to control the FALSE DISCOVERY RATE (rather",
+         "than the more conservative family-wise error rate)?\""
+       ),
+       outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Multiplicity Adjustment",
+       module_input_id = "multiplicity-design", design_value = "fdr_means_2s"),
+
+  list(key = "manova_hotelling",
+       label = "Two-group Hotelling's T-squared test (MANOVA, two groups)",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to compare two",
+         "independent groups on several continuous outcome variables",
+         "JOINTLY (e.g. several correlated symptom scores or",
+         "biomarkers), rather than testing each one separately?\""
+       ),
+       outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "MANOVA / Hotelling's T²",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "bayesian_assurance_or",
+       label = "Bayesian assurance, two-arm proportions trial (log odds ratio)",
+       answers = paste(
+         "Answers: \"Given a prior distribution (not a single fixed value)",
+         "for the true treatment effect, what sample size gives a target",
+         "probability (assurance) that the trial's confidence interval",
+         "will exclude a minimally-worthwhile effect?\""
+       ),
+       outcome_type = "proportions", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Bayesian Design Analysis",
+       module_input_id = "bayesian-design", design_value = "assurance_or"),
+
+  list(key = "bfda_ttest",
+       label = "Bayes Factor Design Analysis, two-sample means",
+       answers = paste(
+         "Answers: \"What sample size gives me a target PROBABILITY that",
+         "the actual Bayes factor will reach a chosen evidence threshold",
+         "(e.g. BF10 > 10), rather than a target probability of a",
+         "significant p-value?\""
+       ),
+       outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Bayesian Design Analysis",
+       module_input_id = "bayesian-design", design_value = "bfda")
 )
 
 # Families for the "by study design" finder -- mirrors docs/SDD.md #7's
@@ -1046,7 +1364,7 @@ study_design_families <- list(
   list(id = "means", label = "Means",
        hint = "Comparing a continuous measurement within or between groups.",
        catalog_keys = c("means_single_precision", "means_single", "means_two_indep",
-                         "means_two_indep_unequal_n", "means_two_dep", "means_k",
+                         "means_two_indep_unequal_n", "means_welch", "means_two_dep", "means_k",
                          "means_planned_contrast", "means_posthoc_pairwise")),
   list(id = "case_control", label = "Case-Control",
        hint = "Case-control study (unmatched, matched, nested, or case-cohort), odds ratio or hazard ratio based.",
@@ -1065,10 +1383,11 @@ study_design_families <- list(
                          "diagnostic_ppv_npv", "diagnostic_likelihood_ratio",
                          "diagnostic_odds_ratio")),
   list(id = "correlation", label = "Correlation",
-       hint = "Detecting a Pearson correlation between two continuous variables, comparing correlation strength between two independent groups, a point-biserial correlation, a simple regression slope, or a partial correlation.",
+       hint = "Detecting a Pearson correlation between two continuous variables, comparing correlation strength between two independent or two dependent (overlapping) groups, a point-biserial correlation, a simple regression slope, a partial correlation, or a Spearman rank correlation.",
        catalog_keys = c("correlation_pearson", "correlation_two_independent",
-                         "correlation_point_biserial", "correlation_regression_slope",
-                         "correlation_partial")),
+                         "correlation_two_dependent", "correlation_point_biserial",
+                         "correlation_regression_slope", "correlation_partial",
+                         "correlation_spearman")),
   list(id = "agreement", label = "Agreement / Reliability",
        hint = "Inter-rater/method agreement when there's no gold standard (Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman, Lin's CCC).",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
@@ -1086,15 +1405,18 @@ study_design_families <- list(
        hint = "Precision-based estimation of a risk ratio, odds ratio, or rate ratio.",
        catalog_keys = c("ratio_risk_ratio", "ratio_odds_ratio", "ratio_rate_ratio")),
   list(id = "incidence_rate", label = "Incidence Rate",
-       hint = "Estimating or comparing incidence rates from person-time data.",
-       catalog_keys = c("incidence_rate_precision", "rate_comparison")),
+       hint = "Estimating or comparing incidence rates from person-time data, Poisson regression with a continuous predictor, or comparing two over-dispersed (negative binomial) rates.",
+       catalog_keys = c("incidence_rate_precision", "rate_comparison",
+                         "poisson_regression_continuous", "negative_binomial_rates")),
   list(id = "exact_tests", label = "Exact Tests",
        hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, Boschloo's unconditional exact, sign test) and rates (exact Poisson).",
        catalog_keys = c("exact_binomial", "exact_fisher", "exact_boschloo",
                          "exact_poisson", "sign_test")),
   list(id = "survival", label = "Survival",
-       hint = "Log-rank, Cox regression, stratified log-rank, or accrual/follow-up based survival study designs.",
-       catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
+       hint = "Log-rank, Cox regression, stratified log-rank, accrual/follow-up based survival study designs, a weighted log-rank test for non-proportional hazards, a competing-risks joint hazard test, or an RMST comparison.",
+       catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified",
+                         "survival_noncompliance", "weighted_logrank", "competing_risks_joint",
+                         "rmst_comparison")),
   list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
        hint = "Inflating an existing sample size for cluster-sampled surveys, or solving a full cluster survey design (WHO EPI-style) directly.",
        catalog_keys = c("cluster_deff", "cluster_survey")),
@@ -1105,13 +1427,16 @@ study_design_families <- list(
        hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, non-inferiority, and group-sequential (interim-monitoring) testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",
                          "tost_means", "tost_proportions", "tost_bioequivalence",
+                         "tost_assurance",
                          "noninferiority_means", "noninferiority_proportions",
                          "noninferiority_or", "noninferiority_hr",
                          "group_sequential_normal", "group_sequential_binary",
                          "group_sequential_survival")),
   list(id = "regression", label = "Regression",
-       hint = "Testing whether a multiple regression model explains more variance than chance, or a logistic regression predictor's effect.",
-       catalog_keys = c("regression_r2", "logistic_binary", "logistic_continuous")),
+       hint = "Testing whether a multiple regression model explains more variance than chance, whether adding predictors increases R-squared, a logistic regression predictor's effect (simple or covariate-adjusted), or two groups on an ordinal outcome (proportional odds).",
+       catalog_keys = c("regression_r2", "regression_r2_increase", "logistic_binary",
+                         "logistic_continuous", "logistic_ordinal",
+                         "logistic_binary_adjusted", "logistic_continuous_adjusted")),
   list(id = "anova_general", label = "Factorial ANOVA / ANCOVA",
        hint = "Main effects, interactions, or covariate-adjusted group effects via the general linear model F-test.",
        catalog_keys = c("anova_general")),
@@ -1119,9 +1444,10 @@ study_design_families <- list(
        hint = "Between-subjects, within-subjects, or group-by-time interaction effects in a repeated-measures or split-plot design.",
        catalog_keys = c("rm_anova_between", "rm_anova_within", "rm_anova_interaction")),
   list(id = "nonparametric", label = "Nonparametric Tests",
-       hint = "Distribution-free alternatives to the t-test, one-way ANOVA, and correlation test, when normality can't be assumed.",
+       hint = "Distribution-free alternatives to the t-test, one-way ANOVA, repeated-measures ANOVA, correlation test, and trend test, when normality can't be assumed.",
        catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau",
-                         "kruskal_wallis")),
+                         "kruskal_wallis", "jonckheere_terpstra", "friedman", "ks_two_sample",
+                         "wald_wolfowitz_runs")),
   list(id = "safety_surveillance", label = "Safety / Surveillance",
        hint = "Bounding an unseen adverse-event rate, planning to catch a rare event, or proving disease/defect freedom in a finite population with an imperfect test.",
        catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required",
@@ -1137,7 +1463,21 @@ study_design_families <- list(
        catalog_keys = character(0)),
   list(id = "variance", label = "Variance Tests",
        hint = "Testing whether a population's variability differs from a reference value, or whether two groups' variability differs.",
-       catalog_keys = c("variance_single", "variance_two"))
+       catalog_keys = c("variance_single", "variance_two")),
+  list(id = "multiplicity", label = "Multiplicity Adjustment",
+       hint = "Sample size for a one- or two-sample proportion or mean comparison after a Bonferroni/Sidak correction, or a false-discovery-rate (FDR)-controlled two-mean comparison, for several planned simultaneous comparisons.",
+       catalog_keys = c("multiplicity_proportion_1s", "multiplicity_proportion_2s",
+                         "multiplicity_means_1s", "multiplicity_means_2s",
+                         "multiplicity_fdr_means_2s")),
+  list(id = "manova", label = "MANOVA / Hotelling's T-Squared",
+       hint = "Comparing two independent groups on several continuous outcome variables jointly, rather than testing each one separately.",
+       catalog_keys = c("manova_hotelling")),
+  list(id = "bayesian", label = "Bayesian Design Analysis",
+       hint = "Sample size for a target prior-averaged power (assurance) when the true treatment effect is itself uncertain, rather than fixed at one assumed value, or a target probability that the actual Bayes factor reaches a chosen evidence threshold.",
+       catalog_keys = c("bayesian_assurance_or", "bfda_ttest")),
+  list(id = "longitudinal", label = "Longitudinal Slope Difference",
+       hint = "Comparing two groups' rate of change (slope) over repeated visits in a longitudinal study, under a random-intercept/random-slope covariance structure (GEE/GLS framework).",
+       catalog_keys = c("longitudinal_slope_diff"))
 )
 
 # Second index over the SAME calculator_catalog entries, grouped by
@@ -1153,17 +1493,19 @@ study_design_families <- list(
 # study_design_families.
 test_families <- list(
   list(id = "t_tests", label = "t Tests",
-       hint = "Comparing one or two means, a Bonferroni-adjusted post-hoc pairwise comparison, or a point-biserial correlation (Student's t framework).",
+       hint = "Comparing one or two means (incl. Welch's unequal-variance test), a Bonferroni-adjusted post-hoc pairwise comparison, or a point-biserial correlation (Student's t framework).",
        catalog_keys = c("means_single", "means_two_indep",
-                         "means_two_indep_unequal_n", "means_two_dep",
+                         "means_two_indep_unequal_n", "means_welch", "means_two_dep",
                          "means_posthoc_pairwise", "correlation_point_biserial")),
   list(id = "z_tests", label = "z Tests",
-       hint = "Comparing proportions (incl. a Bonferroni-adjusted post-hoc pairwise comparison), or a logistic-regression predictor's effect (normal-approximation framework).",
+       hint = "Comparing proportions (incl. a Bonferroni-adjusted post-hoc pairwise comparison), a logistic-regression predictor's effect (simple or covariate-adjusted), or two groups on an ordinal outcome via proportional-odds regression (all normal-approximation frameworks).",
        catalog_keys = c("proportion_single", "proportion_two_indep",
-                         "proportion_posthoc_pairwise", "logistic_binary", "logistic_continuous")),
+                         "proportion_posthoc_pairwise", "logistic_binary",
+                         "logistic_continuous", "logistic_ordinal",
+                         "logistic_binary_adjusted", "logistic_continuous_adjusted")),
   list(id = "f_tests", label = "F Tests",
-       hint = "One-way/factorial ANOVA, ANCOVA, multiple regression, repeated-measures/mixed ANOVA, and planned linear contrasts (general linear model F-test framework).",
-       catalog_keys = c("means_k", "regression_r2", "anova_general",
+       hint = "One-way/factorial ANOVA, ANCOVA, multiple regression (incl. hierarchical R-squared increase), repeated-measures/mixed ANOVA, and planned linear contrasts (general linear model F-test framework).",
+       catalog_keys = c("means_k", "regression_r2", "regression_r2_increase", "anova_general",
                          "rm_anova_between", "rm_anova_within", "rm_anova_interaction",
                          "means_planned_contrast")),
   list(id = "chi_square_tests", label = "Chi-Square Tests",
@@ -1175,33 +1517,52 @@ test_families <- list(
        catalog_keys = c("exact_binomial", "exact_fisher", "exact_boschloo",
                          "exact_poisson", "sign_test")),
   list(id = "correlation_regression", label = "Correlation & Regression",
-       hint = "Pearson correlation (single or comparing two independent groups), a simple regression slope, a partial correlation, and multiple linear regression.",
+       hint = "Pearson correlation (single or comparing two independent or two dependent/overlapping groups), a simple regression slope, a partial correlation, a Spearman rank correlation, and multiple linear regression (incl. hierarchical R-squared increase).",
        catalog_keys = c("correlation_pearson", "correlation_two_independent",
-                         "correlation_regression_slope", "correlation_partial",
-                         "regression_r2")),
+                         "correlation_two_dependent", "correlation_regression_slope",
+                         "correlation_partial", "correlation_spearman",
+                         "regression_r2", "regression_r2_increase")),
   list(id = "survival_tests", label = "Survival Tests",
-       hint = "Log-rank test, Cox proportional-hazards regression, and stratified log-rank for time-to-event outcomes.",
-       catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified")),
+       hint = "Log-rank test, Cox proportional-hazards regression, stratified log-rank, accrual/follow-up/noncompliance-adjusted log-rank, a weighted log-rank test for non-proportional hazards, a competing-risks joint hazard test, and an RMST comparison for time-to-event outcomes.",
+       catalog_keys = c("logrank", "cox_binary", "cox_continuous", "survival_stratified",
+                         "survival_noncompliance", "weighted_logrank", "competing_risks_joint",
+                         "rmst_comparison")),
   list(id = "agreement_statistics", label = "Agreement Statistics",
        hint = "Cohen's kappa, ICC, Cronbach's alpha, Bland-Altman limits of agreement, and Lin's CCC.",
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
                          "agreement_bland_altman", "agreement_ccc")),
   list(id = "equivalence_noninferiority", label = "Equivalence / Non-Inferiority Test Forms",
-       hint = "Two one-sided tests (TOST) for equivalence, non-inferiority margins, and crossover designs.",
+       hint = "Two one-sided tests (TOST) for equivalence (incl. expected-power/assurance bioequivalence), non-inferiority margins, and crossover designs.",
        catalog_keys = c("tost_means", "tost_proportions", "tost_bioequivalence",
+                         "tost_assurance",
                          "noninferiority_means", "noninferiority_proportions",
                          "noninferiority_or", "noninferiority_hr", "crossover_2x2")),
   list(id = "nonparametric_tests", label = "Nonparametric Tests",
-       hint = "Distribution-free rank-based tests: Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau, and Kruskal-Wallis.",
+       hint = "Distribution-free rank-based tests: Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau, Kruskal-Wallis, Jonckheere-Terpstra, Friedman, Kolmogorov-Smirnov, and Wald-Wolfowitz runs (the last two via Monte Carlo).",
        catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau",
-                         "kruskal_wallis")),
+                         "kruskal_wallis", "jonckheere_terpstra", "friedman", "ks_two_sample",
+                         "wald_wolfowitz_runs")),
   list(id = "group_sequential_designs", label = "Group Sequential Designs",
        hint = "Interim-monitoring trial designs with Pocock-to-O'Brien-Fleming efficacy/futility boundaries, for continuous, binary, or time-to-event outcomes.",
        catalog_keys = c("group_sequential_normal", "group_sequential_binary",
                          "group_sequential_survival")),
   list(id = "variance_tests", label = "Variance Tests",
        hint = "Chi-squared test for a single variance against a reference value, and F test for comparing two variances.",
-       catalog_keys = c("variance_single", "variance_two"))
+       catalog_keys = c("variance_single", "variance_two")),
+  list(id = "multiplicity_adjustment", label = "Multiplicity Adjustment",
+       hint = "Bonferroni or Sidak alpha correction applied to a one- or two-sample proportion or mean test, or false-discovery-rate (FDR) control for a two-mean comparison, for several planned simultaneous comparisons.",
+       catalog_keys = c("multiplicity_proportion_1s", "multiplicity_proportion_2s",
+                         "multiplicity_means_1s", "multiplicity_means_2s",
+                         "multiplicity_fdr_means_2s")),
+  list(id = "manova_tests", label = "MANOVA / Hotelling's T-Squared",
+       hint = "Two-group Hotelling's T-squared test, comparing two independent groups on several continuous outcome variables jointly.",
+       catalog_keys = c("manova_hotelling")),
+  list(id = "bayesian_tests", label = "Bayesian Design Analysis",
+       hint = "Prior-averaged power (assurance) for a two-arm proportions trial when the true log odds ratio is itself uncertain, or Bayes Factor Design Analysis for a two-sample means comparison.",
+       catalog_keys = c("bayesian_assurance_or", "bfda_ttest")),
+  list(id = "longitudinal_tests", label = "Longitudinal / GEE Tests",
+       hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (the GLS/GEE framework of Liu & Liang 1997).",
+       catalog_keys = c("longitudinal_slope_diff"))
 )
 
 catalog_entry <- function(key) {
