@@ -114,7 +114,21 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   reproduce Steiger's own 1980 textbook example exactly: r_yx1=.4,
   r_yx2=.5, r_x1x2=.1, n=103 -> t=-0.89) and by simulation: r_yx1=0.4,
   r_yx2=0.6, r_x1x2=0.3, alpha=0.05, power=0.80 -> n=183, empirical power
-  0.816 at 5,000 replicates
+  0.816 at 5,000 replicates; and a Spearman rank correlation design -- no
+  installed package provides a Spearman-specific closed form, so this
+  does exactly what this app's own checklist names for this item:
+  solves the equivalent Pearson-correlation n via this module's own
+  `calc_correlation()`, then inflates it by the classical asymptotic
+  relative efficiency of Spearman's rho relative to Pearson's r under
+  bivariate normality, 9/pi^2 ~ 0.9119 (Hotelling & Pabst 1936; Fieller,
+  Hartley & Pearson 1957) -- the same ARE-inflation pattern already used
+  by the Nonparametric Tests module's Kruskal-Wallis and Friedman
+  designs. Verified: r=0.3, alpha=0.05, 80% power -> Pearson n=85,
+  Spearman n=94; independently confirmed by a 3,000-replicate Monte
+  Carlo simulation of the actual `stats::cor.test(method="spearman")` on
+  simulated bivariate normal data at rho=0.3 -- empirical power 0.796 at
+  n=94 (matching the 0.80 target) versus only 0.752 at the unadjusted
+  n=85
 - **Chi-Square Tests** (`R/modules/mod_chisq.R`) -- goodness of fit and test
   of independence/association for an R x C table (dynamic 2-5 x 2-5
   proportion-matrix UI), both wrapping `pwr::pwr.chisq.test()` +
@@ -175,7 +189,30 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   Hsieh & Lavori 2000); and a stratified log-rank test under exponential
   survival (per-stratum allocation, event rates under the null, and a
   common hazard ratio), wrapping `powerSurvEpi::ssize.stratify()` (Palta
-  & Amini 1985)
+  & Amini 1985); and a log-rank design with a non-uniform accrual period,
+  minimum follow-up time, and noncompliance (control-arm drop-ins and
+  intervention-arm non-adherers), wrapping `Hmisc::cpower()` (Peterson &
+  George 1993; Lachin & Foulkes 1986; Schoenfeld 1983) -- verified by
+  reproducing the package's own documented example exactly (18% control
+  mortality, 15% reduction, 1.5-year accrual, 5-year minimum follow-up,
+  15% drop-in/25% non-adherence, 80% power -> n=14,634 total, matching
+  the package's own `uniroot()` search to within rounding); and a
+  weighted log-rank design for NON-proportional hazards (`calc_weighted_
+  logrank()`) -- the checklist's named package, `npsurvSS`, isn't
+  installable from CRAN in this sandbox, and its own source (read from
+  its public GitHub CRAN mirror) implements an 11-file numerical-
+  integration engine judged too large to safely reimplement, so this
+  instead directly simulates the actual Fleming-Harrington G^rho
+  weighted log-rank test (Harrington & Fleming 1982) via the already-
+  installed `survival::survdiff(rho=...)`, under a DELAYED or an
+  EARLY/FADING non-PH effect shape. Verified by reproducing the well-
+  documented, opposite-direction behavior of this test family: with
+  hazard0=0.15, hr=0.5, change_time=4, accrual=12, tot_time=30, 80%
+  power -- for a DELAYED effect, rho=0 (ordinary log-rank) needs n=280
+  total vs. rho=1's n=1,080 (nearly 4x more, since rho=1 wastes weight
+  on the early no-difference period); for the mirror-image EARLY/FADING
+  effect, the ranking flips: rho=0 needs n=510 vs. rho=1's n=266 (fewer
+  than half) -- both directions matching textbook predictions exactly
 - **Incidence Rate** (`R/modules/mod_rate.R`) -- precision-based estimation
   of an incidence rate (number of events, then person-time, wrapping
   `presize::prec_rate()`), plus comparison of two rates via person-time
@@ -187,7 +224,27 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   project dependency (used by the Logistic Regression module); verified
   exactly against the package's own documented example: beta0=0.1,
   beta1=0.5, predictor mean=0/variance=1, mean exposure time=1, no
-  over-dispersion, alpha=0.05, power=0.80 -> n=28
+  over-dispersion, alpha=0.05, power=0.80 -> n=28; plus comparison of two
+  NEGATIVE BINOMIAL rates (`calc_negative_binomial_rates()`) -- a
+  genuinely different model than Poisson regression's linear-in-mean
+  `phi` over-dispersion adjustment above: negative binomial has a
+  quadratic mean-variance relationship (Var(Y) = mu + mu^2/theta), the
+  standard model when over-dispersion grows with the mean (e.g.
+  recurrent-event counts like hospitalizations or exacerbations).
+  `MKpower` (the package providing this method, `power.nb.test()`)
+  isn't installable from CRAN in this sandbox, so its source -- a
+  single, self-contained closed-form function (Zhu & Lakkis 2014) --
+  was read directly from its public GitHub CRAN mirror and transcribed.
+  Verified exactly against the package's own documented example
+  (mu0=10, RR=1.5, theta=1/5, duration=1, ssize_ratio=1.5, approach=3,
+  power=0.8 -> n0=405/n1=607, matching the package's own n0=404.2/
+  n1=606.3 to within rounding), then independently confirmed two ways
+  by Monte Carlo: reproducing the paper's own test statistic on
+  simulated `MASS::rnegbin()` data gives empirical power 0.814, and a
+  genuinely different check -- fitting `MASS::glm.nb()` (which
+  ESTIMATES the dispersion from data, unlike the design formula) and
+  using its own Wald test -- gives empirical power 0.797, both closely
+  bracketing the formula's 0.8 target
 - **Ratio Estimation** (`R/modules/mod_ratio.R`) -- precision-based
   estimation of a risk ratio, odds ratio, or rate ratio (a target
   confidence-interval width rather than a power target), wrapping
@@ -309,7 +366,14 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   study, 4 categories, p=(0.1,0.2,0.4,0.3), odds ratio=1.2, equal
   allocation, alpha=0.05, power=0.80 -> n=3149, efficiency 0.90 relative
   to a continuous response; cross-checked via `Hmisc::popower()` at
-  n=3148, reproducing power=0.80 exactly)
+  n=3148, reproducing power=0.80 exactly); plus two covariate-adjusted
+  (multiple regression) designs for the binary- and continuous-predictor
+  cases, applying Hsieh, Bloch & Larsen (1998)'s own 1/(1-R²) variance
+  inflation factor directly to the simple-model sample size above (R² =
+  the predictor of interest's squared multiple correlation with the
+  model's other covariates) -- at R²=0 both reduce exactly to the simple
+  case (n=1281 binary, n=317 continuous); at R²=0.5 the binary design's n
+  exactly doubles
 - **Self-Controlled Case Series** (`R/modules/mod_sccs.R`) -- sample size
   for an SCCS study of a transient exposure's association with an event,
   with an optional age-effect stratification (Musonda, Farrington &
@@ -360,8 +424,33 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   simulation searching for the n at which the real `stats::friedman.test()`
   and a from-scratch RM-ANOVA F-test each cross 80% empirical power on
   identical simulated data (k=4) -- ratio n_Friedman/n_RM-ANOVA ~1.30,
-  closely matching the formula's predicted 1/ARE = pi/3 x 5/4 = 1.309
-  (k=4, f=0.25, alpha=0.05, power=0.80 -> RM-ANOVA n=176, Friedman n=231)
+  closely matching the formula's predicted 1/ARE = pi/3 x 5/4 = 1.309;
+  plus the two-sample Kolmogorov-Smirnov test -- unlike every other
+  design in this module, no closed-form power formula exists against a
+  general alternative (KS power depends on the full shape of the
+  distributional difference, not one effect-size number), so this design
+  does exactly what this app's own checklist prescribes for it: direct
+  Monte Carlo simulation of the actual `stats::ks.test()`, under a
+  standardized-mean-shift Normal alternative comparable to Cohen's d,
+  found via exponential search then bisection over candidate n. A fixed
+  internal seed makes repeated calls with identical inputs reproducible.
+  Verified: effect_size=0.5 (medium shift), alpha=0.05, 80% power,
+  nsim=500 -> n=91/group, simulated achieved power 0.797 -- versus the
+  equivalent two-sample t-test's n=64/group, the expected efficiency loss
+  since KS is a general-purpose omnibus test, not tuned to a location
+  shift specifically; plus the two-sample Wald-Wolfowitz runs test --
+  another omnibus distribution-free test with no closed-form power
+  formula, built the same way: direct Monte Carlo simulation of
+  `tseries::runs.test()` (newly added dependency, already installed) on
+  the pooled-and-sorted group-label sequence, reusing the identical
+  exponential-search-then-bisection engine (factored out as a shared
+  `.mc_search_n1()` helper in `calc_utils.R`). Verified: effect_size=0.8
+  (large shift), alpha=0.05, 80% power, nsim=500 -> n=216/group,
+  simulated achieved power 0.817 -- far more than the equivalent KS
+  design's n=37/group at the same effect size, correctly reflecting that
+  the runs test discards each observation's magnitude and uses only its
+  rank position, a comparatively weak omnibus test against a plain
+  location shift
 - **Variance Tests** (`R/modules/mod_variance.R`) -- a single-variance test
   against a reference SD, and a two-variance test comparing two groups,
   both closed-form (chi-squared/F distribution respectively, solved via
@@ -390,7 +479,25 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   m=4, alpha=0.05, power=0.80) -> Bonferroni n=241/group (482 total) vs.
   n=170/group (340 total) unadjusted, Sidak n=240/group. Holm's
   step-down correction is not offered as a third method since its
-  threshold is data-dependent (no single a priori alpha to plan against)
+  threshold is data-dependent (no single a priori alpha to plan against);
+  plus a fifth design controlling the FALSE DISCOVERY RATE instead of the
+  family-wise error rate -- `calc_multiplicity_fdr_means()`, for two
+  independent means, given m total tests and an assumed proportion pi1
+  truly non-null. The checklist's own named package, `ssize.fdr`, is not
+  installed and CRAN is unreachable from this sandbox, so the closed form
+  (alpha* = fdr_level x m1 x power / (m0 x (1-fdr_level)), from the
+  expected-FDR self-consistency equation FDR = E[false rejections] /
+  E[total rejections]) was independently derived from the standard
+  Benjamini & Hochberg (1995) FDR definition, then independently verified
+  twice by directly simulating the ACTUAL Benjamini-Hochberg procedure
+  (`stats::p.adjust(method="BH")` on simulated two-sample t-test p-values
+  from a mix of true nulls and true non-nulls) at the resulting n: m=1000,
+  pi1=0.1 (m1=100), d=2, fdr_level=0.1, target average power=0.8 -> n=8/
+  group, 500-replicate simulation gives empirical average FDR 0.082
+  (target 0.1) and empirical average power 0.794 (target 0.8); m=500,
+  pi1=0.1 (m1=50), d=1, fdr_level=0.05, target average power=0.9 ->
+  n=36/group, 400-replicate simulation gives empirical average FDR 0.045
+  (target 0.05) and empirical average power 0.904 (target 0.9)
 - **MANOVA / Hotelling's T²** (`R/modules/mod_manova.R`) -- the two-group
   special case of MANOVA: comparing two independent groups on p >= 1
   continuous outcome variables JOINTLY via Hotelling's T-squared test.
@@ -409,6 +516,118 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   trivariate normal data gives empirical power 0.8068, closely matching
   the 0.80 target. Global (k>2 group) MANOVA and special-effects
   contrasts are not covered
+- **Bayesian Design Analysis** (`R/modules/mod_bayesian.R`, formerly
+  "Bayesian Assurance" -- renamed when a second, genuinely different
+  Bayesian method was added) -- sample size for a target *assurance*
+  (prior-averaged power) in a two-arm proportions trial on the log odds
+  ratio scale, when the true treatment effect is itself uncertain rather
+  than fixed at one assumed value. Places a Normal or Uniform prior on
+  the log odds ratio and reports the probability, averaged over that
+  prior, that the trial's confidence interval will exclude a
+  minimally-worthwhile effect (Spiegelhalter & Freedman 1986).
+  `calc_bayesian_assurance_or()` wraps `Hmisc::gbayes2()` (already a
+  project dependency; no new package needed) rather than reimplementing
+  its numerical-integration engine. Verified by reproducing the package's
+  own documented examples exactly: a Uniform(log(1.2), log(1.3)) prior,
+  p1=p2=0.3, equal allocation, alpha=0.05, target assurance=0.90 ->
+  n=2,120/arm, matching the package's own `uniroot()` example to within
+  rounding; and its 50:50 Gaussian-mixture-prior example reproduces the
+  package's own printed assurance value of 0.6133338 exactly; plus a
+  second, genuinely different design -- Bayes Factor Design Analysis
+  (BFDA) for two-sample means, `calc_bfda_ttest()`. Ordinary power
+  analysis asks what sample size gives X% probability of a significant
+  p-value; BFDA (Schönbrodt & Wagenmakers 2018) asks what sample size
+  gives X% probability that the actual Bayes factor (BF10, the JZS
+  default Bayesian t-test of Rouder et al. 2009, via
+  `BayesFactor::ttestBF()`) exceeds a chosen evidence threshold (e.g.
+  BF10 > 10, "strong evidence"). BFDA has no closed form by design -- the
+  method itself IS direct simulation -- so this reuses the same
+  exponential-search-then-bisection engine (`.mc_search_n1()`) as the
+  Nonparametric Tests module's KS/runs-test designs, but warm-started
+  from the classical two-sample t-test n (`pwr::pwr.t.test()`) since
+  `ttestBF()` is far slower per call (~7ms) than `ks.test()`/`runs.test()`
+  (~0.3ms). Verified: Cohen's d=0.5, BF10 threshold=10, target
+  probability=0.8, nsim=100 -> n=129/group, versus the classical test's
+  n=64/group -- BFDA needing roughly double the classical n to reach a
+  stringent evidence threshold matches the direction reported in the
+  original paper's own simulations. Independently confirmed by a
+  separate, larger (400-replicate) simulation: P(BF10>10)=0.835 at n=129
+  (matching the 0.80 target) vs. only 0.75 at n=110, confirming n=129 is
+  a genuine crossing point rather than search noise
+- **Competing Risks** (`R/modules/mod_competing_risks.R`) -- joint test of
+  a cause-specific hazard and the any-cause hazard in the presence of
+  competing risks (the setting Gray's test addresses). No installed
+  package covers this and CRAN is unreachable from this sandbox, so
+  rather than fabricate a formula, `powerCompRisk::powerCompRisk()`'s
+  actual algorithm was read directly from the package's own public source
+  on its read-only GitHub CRAN mirror
+  (`https://raw.githubusercontent.com/cran/powerCompRisk/master/R/powerCompRisk.R`)
+  -- the underlying published method (Yang, Fung & Li, "Sample size
+  determination for jointly testing a cause-specific hazard and the
+  any-cause hazard in the presence of competing risks," UCLA
+  Biostatistics Technical Report, 2017) does not change across package
+  versions, so a genuine archived/mirrored copy of the source is as valid
+  a "real" source as an installed package. `calc_competing_risks_joint()`
+  reimplements it as closed-form root-finding (`uniroot()` +
+  `mvtnorm::pmvnorm()` for the bivariate-normal joint test statistic),
+  computing all three of the package's reported designs -- chi-square
+  joint test, maximum joint test, and Bonferroni joint test. Verified by
+  reproducing the fetched source's own documented worked example exactly:
+  lambda_11=0.3, HR_1=1.44, HR_all=1.33, RR=0.8, accrual=1, follow_up=8,
+  attrition=0.1, a1=0.5, alpha=0.05, power=0.8 -> chi-square joint test:
+  290 events/436 total; maximum joint test: 252 events/378 total;
+  Bonferroni joint test: 288 events/430 total -- matching the package's
+  own printed output exactly
+- **RMST Comparison** (`R/modules/mod_rmst.R`) -- sample size for a
+  two-arm comparison of restricted mean survival time (RMST), a
+  model-free, directly interpretable alternative to the hazard ratio
+  that doesn't require the proportional-hazards assumption (superiority,
+  margin=0, or non-inferiority, margin>0, per Uno et al. 2014, 2015).
+  Neither `SSRMST` (the checklist's named package) nor its own internal
+  dependency `survRM2` are installable from CRAN in this sandbox, so
+  both packages' actual source was read directly from their public
+  GitHub CRAN mirrors -- `SSRMST::ssrmst()` and `survRM2::rmst2()`. This
+  confirmed `rmst2()`'s "unadjusted" RMST-difference test reduces
+  exactly to summing each arm's own Kaplan-Meier-area RMST variance
+  (the same one-arm estimator `SSRMST` already carries internally,
+  credited there to survRM2), so `calc_rmst_comparison()` fully
+  reimplements both packages' method using only `survival::survfit()`
+  -- no new package dependency. The method itself IS Monte Carlo by
+  design (there's no closed form for the RMST-difference confidence
+  interval under staggered accrual and administrative censoring), so
+  this reuses the same exponential-search-then-bisection engine
+  (`.mc_search_n1()`) as the Nonparametric Tests and Bayesian Design
+  Analysis modules' simulation-based designs, reporting both of the
+  method's variance estimators (separate and pooled). Verified by
+  reproducing `SSRMST`'s own documented example scenarios (ac_period=35,
+  tot_time=510, tau=500): a non-inferiority test with identical arms
+  (scale0=scale1=8500, margin=18, target power=0.8) needs n=206/arm,
+  achieving simulated power 0.780; a superiority test with a large true
+  effect (scale0=4000, scale1=8500, target power=0.8) needs n=432/arm,
+  achieving simulated power 0.823; and required n increases
+  monotonically with target power (n_total=680 at power=0.7, 950 at
+  power=0.9)
+- **Longitudinal Slope Difference** (`R/modules/mod_longitudinal.R`) --
+  sample size for detecting a difference in linear SLOPE (rate of
+  change) between two groups measured repeatedly at the same visit
+  times, under a random-intercept + random-slope + residual-error
+  covariance structure (the standard linear mixed model for
+  longitudinal data). `longpower` (the checklist's named package for
+  GEE-based longitudinal tests) isn't installable from CRAN in this
+  sandbox, so `liu.liang.linear.power()`'s source -- a single, self-
+  contained function with no cross-file dependencies -- was read
+  directly from its public GitHub CRAN mirror and reimplemented. Liu &
+  Liang (1997)'s general GLS/GEE-style method accepts arbitrary
+  covariate matrices, too general for a simple form UI, so
+  `calc_longitudinal_slope_diff()` wraps its single most common real-
+  world use (the two-group slope-difference case). Verified by
+  reproducing the function's own documented Alzheimer's-disease
+  vignette example exactly: 7 visits (0 to 1.5 years, step 0.25), slope
+  difference=1.5, random-intercept variance=55, random-slope
+  variance=24, intercept-slope correlation=0.8, residual variance=10,
+  alpha=0.05, target power=0.80 -> N=415 total (208/arm), matching the
+  package's own vignette statement -- "the study would require about
+  207 subjects per arm" -- exactly (raw N=414.62, 207.31/arm)
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4

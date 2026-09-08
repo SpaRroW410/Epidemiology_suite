@@ -265,3 +265,143 @@ calc_jonckheere_terpstra <- function(p1, p2, alpha = 0.05, power = 0.8) {
     inputs = list(p1 = p1, p2 = p2, alpha = alpha, power = power)
   )
 }
+
+#' Sample size for the two-sample Kolmogorov-Smirnov test, via Monte Carlo
+#' simulation
+#'
+#' Unlike the rank-based tests above, no closed-form power/sample-size
+#' formula exists for the two-sample KS test against a general
+#' alternative: its power depends on the FULL shape of the difference
+#' between the two distributions, not a single summary effect size, so
+#' asymptotic-relative-efficiency shortcuts don't apply the way they do
+#' for Wilcoxon/Kruskal-Wallis/Friedman above. This is exactly the
+#' situation this app's own checklist names "simulation (`simr`/custom
+#' Monte Carlo)" for -- so this directly simulates the actual test
+#' (repeatedly drawing two Normal samples under a location-shift
+#' alternative and running `stats::ks.test()` on each draw) rather than
+#' approximating it with any formula.
+#'
+#' The alternative used is a standardized mean shift between two Normal
+#' distributions with equal variance (comparable to Cohen's d for the
+#' t-test) -- a representative benchmark scenario, not a generality claim:
+#' true KS power for a different shape of distributional difference (a
+#' scale shift, a shape difference, a distribution with heavier tails)
+#' will differ from what this design reports.
+#'
+#' Sample size is found by exponential search (to bracket the target
+#' power) followed by bisection, evaluating empirical power at each
+#' candidate n via `nsim` replicates of the actual `ks.test()` -- so the
+#' result carries ordinary Monte Carlo sampling error, not formula error;
+#' `nsim` controls that error directly (halving as `nsim` quadruples). A
+#' fixed seed makes repeated calls with the same inputs reproducible.
+#'
+#' @param effect_size Standardized mean shift between the two Normal
+#'   distributions being compared (> 0; e.g. 0.5 for a "medium" shift,
+#'   comparable to Cohen's d)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param n_ratio Allocation ratio n2/n1 (> 0), default 1 (equal groups)
+#' @param nsim Monte Carlo replicates per sample-size candidate evaluated
+#'   during the search (>= 100; higher reduces sampling error at the cost
+#'   of runtime)
+#' @param seed RNG seed for reproducibility
+#' @return list(n1, n2, n_total, achieved_power, inputs)
+calc_ks_two_sample <- function(effect_size, alpha = 0.05, power = 0.8,
+                                n_ratio = 1, nsim = 500, seed = 20240607) {
+  .validate_positive(effect_size, "effect_size")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  .validate_positive(n_ratio, "n_ratio")
+  if (!is.numeric(nsim) || length(nsim) != 1 || is.na(nsim) || nsim < 100 || nsim != round(nsim)) {
+    stop("nsim must be a single whole number >= 100.")
+  }
+
+  empirical_power <- function(n1, reps) {
+    n2 <- max(2, round(n1 * n_ratio))
+    set.seed(seed)
+    rejections <- replicate(reps, {
+      x <- rnorm(n1, 0, 1)
+      y <- rnorm(n2, effect_size, 1)
+      suppressWarnings(ks.test(x, y)$p.value) < alpha
+    })
+    mean(rejections)
+  }
+
+  n1 <- .mc_search_n1(function(n) empirical_power(n, nsim), power)
+
+  list(
+    n1 = n1,
+    n2 = max(2, round(n1 * n_ratio)),
+    n_total = n1 + max(2, round(n1 * n_ratio)),
+    achieved_power = empirical_power(n1, nsim * 3),
+    inputs = list(effect_size = effect_size, alpha = alpha, power = power,
+                  n_ratio = n_ratio, nsim = nsim)
+  )
+}
+
+#' Sample size for the Wald-Wolfowitz two-sample runs test, via Monte
+#' Carlo simulation
+#'
+#' Like the two-sample Kolmogorov-Smirnov design above, the Wald-Wolfowitz
+#' runs test has no closed-form power/sample-size formula against a
+#' general alternative -- it is another omnibus, distribution-free test
+#' for whether two independent samples come from the same distribution,
+#' testing it by pooling both samples, sorting the pooled values, and
+#' counting "runs" (unbroken stretches) of same-group labels in the
+#' sorted sequence: too few runs indicates the two samples cluster
+#' separately (evidence of a genuine difference) rather than interleaving
+#' as they would under the null. This directly simulates the actual test
+#' -- reusing `tseries::runs.test()` (already installed; no new
+#' dependency, since `tseries` is a light, self-contained package) on the
+#' sorted pooled-and-labeled sequence -- exactly the same "no formula
+#' exists, so simulate it directly" approach as `calc_ks_two_sample()`,
+#' including reuse of the same exponential-search-then-bisection engine
+#' (`.mc_search_n1()`).
+#'
+#' As with the KS design, the alternative used is a standardized mean
+#' shift between two Normal distributions with equal variance (comparable
+#' to Cohen's d) -- a representative benchmark, not a generality claim.
+#'
+#' @param effect_size Standardized mean shift between the two Normal
+#'   distributions being compared (> 0)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param n_ratio Allocation ratio n2/n1 (> 0), default 1 (equal groups)
+#' @param nsim Monte Carlo replicates per sample-size candidate evaluated
+#'   during the search (>= 100)
+#' @param seed RNG seed for reproducibility
+#' @return list(n1, n2, n_total, achieved_power, inputs)
+calc_wald_wolfowitz_runs <- function(effect_size, alpha = 0.05, power = 0.8,
+                                      n_ratio = 1, nsim = 500, seed = 20240607) {
+  .validate_positive(effect_size, "effect_size")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  .validate_positive(n_ratio, "n_ratio")
+  if (!is.numeric(nsim) || length(nsim) != 1 || is.na(nsim) || nsim < 100 || nsim != round(nsim)) {
+    stop("nsim must be a single whole number >= 100.")
+  }
+
+  empirical_power <- function(n1, reps) {
+    n2 <- max(2, round(n1 * n_ratio))
+    set.seed(seed)
+    rejections <- replicate(reps, {
+      x <- rnorm(n1, 0, 1)
+      y <- rnorm(n2, effect_size, 1)
+      vals <- c(x, y)
+      labs <- factor(c(rep("A", n1), rep("B", n2)))
+      suppressWarnings(tseries::runs.test(labs[order(vals)])$p.value) < alpha
+    })
+    mean(rejections)
+  }
+
+  n1 <- .mc_search_n1(function(n) empirical_power(n, nsim), power)
+
+  list(
+    n1 = n1,
+    n2 = max(2, round(n1 * n_ratio)),
+    n_total = n1 + max(2, round(n1 * n_ratio)),
+    achieved_power = empirical_power(n1, nsim * 3),
+    inputs = list(effect_size = effect_size, alpha = alpha, power = power,
+                  n_ratio = n_ratio, nsim = nsim)
+  )
+}

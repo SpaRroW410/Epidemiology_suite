@@ -28,7 +28,8 @@ mod_multiplicity_ui <- function(id) {
           "One proportion vs. reference" = "proportion_1s",
           "Two independent proportions" = "proportion_2s",
           "One mean vs. reference" = "means_1s",
-          "Two independent means" = "means_2s"
+          "Two independent means" = "means_2s",
+          "Two independent means, FDR (Benjamini-Hochberg)-controlled" = "fdr_means_2s"
         ),
         selected = "proportion_2s"
       ),
@@ -54,20 +55,32 @@ mod_multiplicity_ui <- function(id) {
         numericInput(ns("mu2_means2s"), "mu2 (group 2 mean)", value = 12),
         numericInput(ns("sd_2s"), "sd (common/pooled standard deviation)", value = 5, min = 0.0001)
       ),
+      conditionalPanel(
+        condition = design_is("fdr_means_2s"),
+        numericInput(ns("d_fdr"), "Cohen's d (effect size for the truly non-null tests)",
+                     value = 1, min = 0.001, step = 0.1),
+        numericInput(ns("pi1_fdr"), "pi1 (assumed proportion of the m tests that are truly non-null)",
+                     value = 0.25, min = 0.001, max = 0.999, step = 0.01),
+        numericInput(ns("fdr_level"), "Target false discovery rate (FDR)",
+                     value = 0.05, min = 0.001, max = 0.5, step = 0.01)
+      ),
       hr(),
       numericInput(ns("m"), "Number of planned simultaneous comparisons (m)", value = 4, min = 1, step = 1),
-      radioButtons(
-        ns("method"), "Correction method",
-        choices = c("Bonferroni (always valid)" = "bonferroni",
-                    "Sidak (exact under independence)" = "sidak"),
-        selected = "bonferroni"
+      conditionalPanel(
+        condition = paste0("!(", design_is("fdr_means_2s"), ")"),
+        radioButtons(
+          ns("method"), "Correction method",
+          choices = c("Bonferroni (always valid)" = "bonferroni",
+                      "Sidak (exact under independence)" = "sidak"),
+          selected = "bonferroni"
+        ),
+        numericInput(ns("alpha"), "Family-wise significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        selectInput(
+          ns("alternative"), "Alternative hypothesis",
+          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+        )
       ),
-      numericInput(ns("alpha"), "Family-wise significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
-      numericInput(ns("power"), "Desired power (per comparison)", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-      selectInput(
-        ns("alternative"), "Alternative hypothesis",
-        choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
-      ),
+      numericInput(ns("power"), "Desired power (average power, for the FDR design)", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -79,14 +92,24 @@ mod_multiplicity_ui <- function(id) {
       render_formula_block(multiplicity_content$overview$formula_latex),
       shiny::markdown(multiplicity_content$overview$explanation),
       h5("Worked example"),
-      shiny::markdown(multiplicity_content$overview$worked_example)
+      shiny::markdown(multiplicity_content$overview$worked_example),
+      hr(),
+      h4(multiplicity_content$fdr$title),
+      render_formula_block(multiplicity_content$fdr$formula_latex),
+      shiny::markdown(multiplicity_content$fdr$explanation),
+      h5("Worked example"),
+      shiny::markdown(multiplicity_content$fdr$worked_example)
     ),
     tabPanel(
       "Reference",
       br(),
       h4(multiplicity_content$overview$title),
       p(strong("Citation: "), multiplicity_content$overview$citation),
-      p(strong("Implemented via: "), code(multiplicity_content$overview$backend))
+      p(strong("Implemented via: "), code(multiplicity_content$overview$backend)),
+      hr(),
+      h4(multiplicity_content$fdr$title),
+      p(strong("Citation: "), multiplicity_content$fdr$citation),
+      p(strong("Implemented via: "), code(multiplicity_content$fdr$backend))
     )
   )
 }
@@ -94,26 +117,26 @@ mod_multiplicity_ui <- function(id) {
 mod_multiplicity_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     result <- reactive({
-      req(input$design, input$m, input$method, input$alpha, input$power, input$alternative)
+      req(input$design, input$m, input$power)
       tryCatch(
         list(ok = TRUE, value = switch(
           input$design,
           proportion_1s = {
-            req(input$p0, input$p1_prop1s)
+            req(input$p0, input$p1_prop1s, input$method, input$alpha, input$alternative)
             calc_multiplicity_proportion_1s(
               p0 = input$p0, p1 = input$p1_prop1s, m = input$m, method = input$method,
               alpha = input$alpha, power = input$power, alternative = input$alternative
             )
           },
           proportion_2s = {
-            req(input$p1, input$p2)
+            req(input$p1, input$p2, input$method, input$alpha, input$alternative)
             calc_multiplicity_proportion_2s(
               p1 = input$p1, p2 = input$p2, m = input$m, method = input$method,
               alpha = input$alpha, power = input$power, alternative = input$alternative
             )
           },
           means_1s = {
-            req(input$mu0, input$mu1_means1s, input$sd_1s)
+            req(input$mu0, input$mu1_means1s, input$sd_1s, input$method, input$alpha, input$alternative)
             calc_multiplicity_means_1s(
               mu0 = input$mu0, mu1 = input$mu1_means1s, sd = input$sd_1s, m = input$m,
               method = input$method, alpha = input$alpha, power = input$power,
@@ -121,11 +144,18 @@ mod_multiplicity_server <- function(id) {
             )
           },
           means_2s = {
-            req(input$mu1_means2s, input$mu2_means2s, input$sd_2s)
+            req(input$mu1_means2s, input$mu2_means2s, input$sd_2s, input$method, input$alpha, input$alternative)
             calc_multiplicity_means_2s(
               mu1 = input$mu1_means2s, mu2 = input$mu2_means2s, sd = input$sd_2s, m = input$m,
               method = input$method, alpha = input$alpha, power = input$power,
               alternative = input$alternative
+            )
+          },
+          fdr_means_2s = {
+            req(input$d_fdr, input$pi1_fdr, input$fdr_level)
+            calc_multiplicity_fdr_means(
+              d = input$d_fdr, m = input$m, pi1 = input$pi1_fdr,
+              fdr_level = input$fdr_level, power = input$power
             )
           }
         )),
@@ -140,16 +170,24 @@ mod_multiplicity_server <- function(id) {
       }
 
       v <- res$value
-      n_line <- if (!is.null(v$n_total)) {
-        p(strong("Required sample size: "), v$n_per_group, " per group (", v$n_total, " total)")
+      if (!is.null(v$alpha_star)) {
+        tagList(
+          p(strong("Required sample size: "), v$n_per_group, " per group (", v$n_total, " total)"),
+          p(sprintf("Per-test alpha* = %.5f (m = %d, m1 = %d truly non-null, m0 = %d truly null, FDR level = %.3f)",
+                     v$alpha_star, v$m, v$m1, v$m0, v$inputs$fdr_level))
+        )
       } else {
-        p(strong("Required total sample size: "), v$n)
+        n_line <- if (!is.null(v$n_total)) {
+          p(strong("Required sample size: "), v$n_per_group, " per group (", v$n_total, " total)")
+        } else {
+          p(strong("Required total sample size: "), v$n)
+        }
+        tagList(
+          n_line,
+          p(sprintf("Adjusted per-comparison alpha = %.5f (from family-wise alpha = %.3f, m = %d, %s)",
+                     v$alpha_adjusted, v$inputs$alpha_family, v$m, v$method))
+        )
       }
-      tagList(
-        n_line,
-        p(sprintf("Adjusted per-comparison alpha = %.5f (from family-wise alpha = %.3f, m = %d, %s)",
-                   v$alpha_adjusted, v$inputs$alpha_family, v$m, v$method))
-      )
     })
   })
 }

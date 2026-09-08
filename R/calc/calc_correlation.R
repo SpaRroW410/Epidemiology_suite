@@ -283,3 +283,46 @@ calc_correlation_two_dependent <- function(r_yx1, r_yx2, r_x1x2, alpha = 0.05, p
                   power = power, alternative = alternative)
   )
 }
+
+# Asymptotic relative efficiency of Spearman's rank correlation coefficient
+# relative to Pearson's r under bivariate normality: 9/pi^2 ~ 0.9119
+# (Hotelling & Pabst 1936; the precise constant used here is from Fieller,
+# Hartley & Pearson 1957, who derive it via the same Fisher z'-type
+# transformation this app's own calc_correlation() already uses). A
+# rank-based test needs n / (9/pi^2) = n * pi^2/9 subjects to match the
+# power of the parametric Pearson test at the same effect size when the
+# data really are bivariate normal -- exactly the same style of ARE
+# shortcut already used by calc_kruskal_wallis() (3/pi relative to
+# one-way ANOVA) and calc_friedman() ((3/pi)*k/(k+1) relative to
+# RM-ANOVA) in calc_nonparametric.R.
+.ARE_SPEARMAN_NORMAL <- 9 / pi^2
+
+#' Sample size to detect a Spearman rank correlation
+#'
+#' No installed package provides a closed-form Spearman's-rho-specific
+#' sample-size formula (unlike Kendall's tau, which `TrialSize::
+#' Nonpara.Independ()` covers directly -- see the Nonparametric Tests
+#' module). This instead uses the checklist's own suggested approach for
+#' this item: solve the equivalent Pearson-correlation n via this app's
+#' own already-verified `calc_correlation()`, then inflate it by the
+#' classical asymptotic relative efficiency of Spearman's rho relative to
+#' Pearson's r under bivariate normality (9/pi^2), the same ARE-inflation
+#' pattern already used by `calc_kruskal_wallis()`/`calc_friedman()`.
+#'
+#' @param r Expected Spearman rank correlation coefficient (-1, 1), != 0
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided", "less", or "greater"
+#' @return list(n, n_pearson, are, inputs)
+calc_correlation_spearman <- function(r, alpha = 0.05, power = 0.8,
+                                       alternative = c("two.sided", "less", "greater")) {
+  alternative <- match.arg(alternative)
+  base <- calc_correlation(r = r, alpha = alpha, power = power, alternative = alternative)
+
+  list(
+    n = ceiling(base$n / .ARE_SPEARMAN_NORMAL),
+    n_pearson = base$n,
+    are = .ARE_SPEARMAN_NORMAL,
+    inputs = list(r = r, alpha = alpha, power = power, alternative = alternative)
+  )
+}

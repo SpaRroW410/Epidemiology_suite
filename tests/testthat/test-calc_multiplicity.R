@@ -64,3 +64,46 @@ test_that("multiplicity wrapper functions reject invalid m the same way as calc_
   expect_error(calc_multiplicity_proportion_2s(p1 = 0.5, p2 = 0.65, m = 0), ">= 1")
   expect_error(calc_multiplicity_means_2s(mu1 = 10, mu2 = 12, sd = 5, m = 1.5), ">= 1")
 })
+
+test_that("calc_multiplicity_fdr_means matches independently-verified worked examples exactly", {
+  # Worked example 1: m=1000, pi1=0.1 (m1=100), d=2, fdr_level=0.1, power=0.8.
+  # Independently re-derived alpha* = fdr_level*m1*power/(m0*(1-fdr_level))
+  # = 0.1*100*0.8/(900*0.9) = 0.00988, and separately confirmed by a
+  # 500-replicate simulation of the ACTUAL Benjamini-Hochberg procedure
+  # (stats::p.adjust(method="BH")) at the resulting n: empirical average
+  # FDR 0.082 (target 0.1), empirical average power 0.794 (target 0.8).
+  res1 <- calc_multiplicity_fdr_means(d = 2, m = 1000, pi1 = 0.1, fdr_level = 0.1, power = 0.8)
+  expect_equal(res1$n_per_group, 8)
+  expect_equal(res1$m1, 100)
+  expect_equal(res1$m0, 900)
+  expect_equal(res1$alpha_star, 0.1 * 100 * 0.8 / (900 * 0.9))
+
+  # Worked example 2: m=500, pi1=0.1 (m1=50), d=1, fdr_level=0.05, power=0.9.
+  # 400-replicate simulation at the resulting n: empirical average FDR
+  # 0.045 (target 0.05), empirical average power 0.904 (target 0.9).
+  res2 <- calc_multiplicity_fdr_means(d = 1, m = 500, pi1 = 0.1, fdr_level = 0.05, power = 0.9)
+  expect_equal(res2$n_per_group, 36)
+  expect_equal(res2$m1, 50)
+  expect_equal(res2$m0, 450)
+})
+
+test_that("calc_multiplicity_fdr_means reduces exactly to pwr::pwr.t.test() at its own alpha_star", {
+  res <- calc_multiplicity_fdr_means(d = 1.5, m = 200, pi1 = 0.2, fdr_level = 0.1, power = 0.85)
+  fit <- pwr::pwr.t.test(d = 1.5, sig.level = res$alpha_star, power = 0.85, type = "two.sample")
+  expect_equal(res$n_per_group, ceiling(fit$n))
+})
+
+test_that("calc_multiplicity_fdr_means needs a smaller n as pi1 increases (more true positives ease FDR control)", {
+  res_low <- calc_multiplicity_fdr_means(d = 1, m = 500, pi1 = 0.05, fdr_level = 0.05, power = 0.8)
+  res_high <- calc_multiplicity_fdr_means(d = 1, m = 500, pi1 = 0.3, fdr_level = 0.05, power = 0.8)
+  expect_lt(res_high$n_per_group, res_low$n_per_group)
+})
+
+test_that("calc_multiplicity_fdr_means rejects invalid inputs", {
+  expect_error(calc_multiplicity_fdr_means(d = -1, m = 100, pi1 = 0.1), "positive")
+  expect_error(calc_multiplicity_fdr_means(d = 1, m = 1, pi1 = 0.1), ">= 2")
+  expect_error(calc_multiplicity_fdr_means(d = 1, m = 100, pi1 = 1.5), "between 0 and 1")
+  expect_error(calc_multiplicity_fdr_means(d = 1, m = 100, pi1 = 0.001), "at least 1")
+  expect_error(calc_multiplicity_fdr_means(d = 1, m = 100, pi1 = 0.9, fdr_level = 0.9, power = 0.999),
+               "No feasible design")
+})

@@ -19,7 +19,9 @@ mod_logistic_ui <- function(id) {
       radioButtons(
         ns("design"), "Predictor type",
         choices = c("Binary predictor" = "binary", "Continuous predictor" = "continuous",
-                    "Ordinal outcome (proportional odds), two groups" = "ordinal")
+                    "Ordinal outcome (proportional odds), two groups" = "ordinal",
+                    "Binary predictor, covariate-adjusted (multiple regression)" = "binary_adjusted",
+                    "Continuous predictor, covariate-adjusted (multiple regression)" = "continuous_adjusted")
       ),
       conditionalPanel(
         condition = design_is("binary"),
@@ -48,6 +50,24 @@ mod_logistic_ui <- function(id) {
         numericInput(ns("alpha_ord"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_ord"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
       ),
+      conditionalPanel(
+        condition = design_is("binary_adjusted"),
+        numericInput(ns("p1_ba"), "Event rate at X = 0 (p1)", value = 0.4, min = 0.001, max = 0.999, step = 0.01),
+        numericInput(ns("p2_ba"), "Event rate at X = 1 (p2)", value = 0.5, min = 0.001, max = 0.999, step = 0.01),
+        numericInput(ns("prop_x1_ba"), "Proportion of sample with X = 1", value = 0.5, min = 0.001, max = 0.999, step = 0.01),
+        numericInput(ns("r2_ba"), "R-squared with other covariates", value = 0.3, min = 0, max = 0.999, step = 0.01),
+        numericInput(ns("alpha_ba"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_ba"), "Desired power", value = 0.95, min = 0.5, max = 0.999, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("continuous_adjusted"),
+        numericInput(ns("p1_ca"), "Event rate at the mean of the predictor (p1)",
+                     value = 0.5, min = 0.001, max = 0.999, step = 0.01),
+        numericInput(ns("or_ca"), "Expected odds ratio per one-SD increase", value = exp(0.405), min = 0.001, step = 0.1),
+        numericInput(ns("r2_ca"), "R-squared with other covariates", value = 0.3, min = 0, max = 0.999, step = 0.01),
+        numericInput(ns("alpha_ca"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_ca"), "Desired power", value = 0.95, min = 0.5, max = 0.999, step = 0.01)
+      ),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -71,7 +91,19 @@ mod_logistic_ui <- function(id) {
       render_formula_block(logistic_content$ordinal$formula_latex),
       shiny::markdown(logistic_content$ordinal$explanation),
       h5("Worked example"),
-      shiny::markdown(logistic_content$ordinal$worked_example)
+      shiny::markdown(logistic_content$ordinal$worked_example),
+      hr(),
+      h4(logistic_content$binary_adjusted$title),
+      render_formula_block(logistic_content$binary_adjusted$formula_latex),
+      shiny::markdown(logistic_content$binary_adjusted$explanation),
+      h5("Worked example"),
+      shiny::markdown(logistic_content$binary_adjusted$worked_example),
+      hr(),
+      h4(logistic_content$continuous_adjusted$title),
+      render_formula_block(logistic_content$continuous_adjusted$formula_latex),
+      shiny::markdown(logistic_content$continuous_adjusted$explanation),
+      h5("Worked example"),
+      shiny::markdown(logistic_content$continuous_adjusted$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -86,7 +118,15 @@ mod_logistic_ui <- function(id) {
       hr(),
       h4(logistic_content$ordinal$title),
       p(strong("Citation: "), logistic_content$ordinal$citation),
-      p(strong("Implemented via: "), code(logistic_content$ordinal$backend))
+      p(strong("Implemented via: "), code(logistic_content$ordinal$backend)),
+      hr(),
+      h4(logistic_content$binary_adjusted$title),
+      p(strong("Citation: "), logistic_content$binary_adjusted$citation),
+      p(strong("Implemented via: "), code(logistic_content$binary_adjusted$backend)),
+      hr(),
+      h4(logistic_content$continuous_adjusted$title),
+      p(strong("Citation: "), logistic_content$continuous_adjusted$citation),
+      p(strong("Implemented via: "), code(logistic_content$continuous_adjusted$backend))
     )
   )
 }
@@ -124,7 +164,7 @@ mod_logistic_server <- function(id) {
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
-      } else {
+      } else if (input$design == "ordinal") {
         req(input$k_ord, input$or_ord, input$fraction_ord, input$alpha_ord, input$power_ord)
         k <- as.integer(input$k_ord)
         p_vals <- sapply(seq_len(k), function(i) input[[paste0("ordcat_p_", i)]])
@@ -133,6 +173,24 @@ mod_logistic_server <- function(id) {
           list(ok = TRUE, value = calc_ordinal_proportional_odds(
             p = unlist(p_vals), odds_ratio = input$or_ord, fraction = input$fraction_ord,
             alpha = input$alpha_ord, power = input$power_ord
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else if (input$design == "binary_adjusted") {
+        req(input$p1_ba, input$p2_ba, input$prop_x1_ba, input$r2_ba, input$alpha_ba, input$power_ba)
+        tryCatch(
+          list(ok = TRUE, value = calc_logistic_binary_adjusted(
+            p1 = input$p1_ba, p2 = input$p2_ba, prop_x1 = input$prop_x1_ba, r2 = input$r2_ba,
+            alpha = input$alpha_ba, power = input$power_ba
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$p1_ca, input$or_ca, input$r2_ca, input$alpha_ca, input$power_ca)
+        tryCatch(
+          list(ok = TRUE, value = calc_logistic_continuous_adjusted(
+            p1 = input$p1_ca, or = input$or_ca, r2 = input$r2_ca,
+            alpha = input$alpha_ca, power = input$power_ca
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -149,6 +207,11 @@ mod_logistic_server <- function(id) {
         tagList(
           p(strong("Required total sample size: "), res$value$n),
           p(sprintf("Efficiency relative to a continuous response: %.3f", res$value$eff))
+        )
+      } else if (!is.null(res$value$n_unadjusted)) {
+        tagList(
+          p(strong("Required total sample size (covariate-adjusted): "), res$value$n),
+          p(sprintf("Unadjusted (simple-model) sample size: %d", res$value$n_unadjusted))
         )
       } else {
         tagList(

@@ -122,3 +122,33 @@ test_that("calc_correlation_two_dependent rejects invalid inputs", {
   expect_error(calc_correlation_two_dependent(0.4, 0.6, 0.3, alpha = 0), "between 0 and 1")
   expect_error(calc_correlation_two_dependent(0.4, 0.6, 0.3, power = 0), "between 0 and 1")
 })
+
+test_that("calc_correlation_spearman inflates the equivalent Pearson n by pi^2/9 exactly", {
+  # r=0.3, alpha=0.05, power=0.80: the equivalent Pearson design (this
+  # module's own calc_correlation()) gives n=85; inflating by 1/ARE =
+  # pi^2/9 gives n=94. Independently confirmed by a 3,000-replicate Monte
+  # Carlo simulation of the actual stats::cor.test(method="spearman") on
+  # simulated bivariate normal data at rho=0.3: empirical power 0.796 at
+  # n=94 (matching the 0.80 target), versus only 0.752 at the unadjusted
+  # n=85.
+  base <- calc_correlation(r = 0.3, alpha = 0.05, power = 0.8)
+  res <- calc_correlation_spearman(r = 0.3, alpha = 0.05, power = 0.8)
+  expect_equal(res$n_pearson, base$n)
+  expect_equal(res$n_pearson, 85)
+  expect_equal(res$n, ceiling(base$n / (9 / pi^2)))
+  expect_equal(res$n, 94)
+  expect_equal(res$are, 9 / pi^2)
+})
+
+test_that("calc_correlation_spearman needs a larger n for a smaller correlation", {
+  res_small <- calc_correlation_spearman(r = 0.15, alpha = 0.05, power = 0.8)
+  res_large <- calc_correlation_spearman(r = 0.5, alpha = 0.05, power = 0.8)
+  expect_gt(res_small$n, res_large$n)
+})
+
+test_that("calc_correlation_spearman rejects invalid inputs the same way as calc_correlation", {
+  expect_error(calc_correlation_spearman(r = 0), "must not be zero")
+  expect_error(calc_correlation_spearman(r = 1.5), "between -1 and 1")
+  expect_error(calc_correlation_spearman(r = 0.3, alpha = 0), "between 0 and 1")
+  expect_error(calc_correlation_spearman(r = 0.3, power = 0), "between 0 and 1")
+})

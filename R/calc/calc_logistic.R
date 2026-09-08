@@ -112,3 +112,69 @@ calc_logistic_continuous <- function(p1, or, alpha = 0.05, power = 0.8) {
     inputs = list(p1 = p1, or = or, alpha = alpha, power = power)
   )
 }
+
+#' Sample size for multiple logistic regression (covariate-adjusted),
+#' binary predictor of interest
+#'
+#' Hsieh, Bloch & Larsen (1998) -- the same paper `calc_logistic_binary()`
+#' already wraps -- note that when the predictor of interest is one of
+#' several covariates in a MULTIPLE logistic regression model, the simple
+#' (single-predictor) sample size above must be inflated by the variance
+#' inflation factor 1/(1 - R-squared), where R-squared is the squared
+#' multiple correlation between the predictor of interest and the other
+#' covariates in the model -- exactly the same style of adjustment already
+#' used elsewhere in this app for Cox regression (Hsieh & Lavori 2000's
+#' rho-squared term in `calc_cox_binary()`/`calc_cox_continuous()`), since
+#' both derive from the identical general Wald-test variance-inflation
+#' argument. This is a thin algebraic wrapper around `calc_logistic_binary()`
+#' -- no new formula or verification risk beyond the inflation itself.
+#'
+#' @param p1 Event rate at X=0 (0,1)
+#' @param p2 Event rate at X=1 (0,1)
+#' @param prop_x1 Proportion of the sample with X=1 (0,1)
+#' @param r2 Squared multiple correlation between the predictor of
+#'   interest and the other covariates in the model \[0, 1)
+#' @param alpha Significance level, two-sided (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n, n_unadjusted, inputs)
+calc_logistic_binary_adjusted <- function(p1, p2, prop_x1, r2, alpha = 0.05, power = 0.8) {
+  if (!is.numeric(r2) || length(r2) != 1 || is.na(r2) || r2 < 0 || r2 >= 1) {
+    stop("r2 must be a single number in [0, 1).")
+  }
+
+  base <- calc_logistic_binary(p1 = p1, p2 = p2, prop_x1 = prop_x1, alpha = alpha, power = power)
+
+  list(
+    n = ceiling(base$n / (1 - r2)),
+    n_unadjusted = base$n,
+    inputs = list(p1 = p1, p2 = p2, prop_x1 = prop_x1, r2 = r2, alpha = alpha, power = power)
+  )
+}
+
+#' Sample size for multiple logistic regression (covariate-adjusted),
+#' continuous predictor of interest
+#'
+#' Same variance-inflation adjustment as `calc_logistic_binary_adjusted()`
+#' above, applied instead to `calc_logistic_continuous()`'s single-predictor
+#' case.
+#'
+#' @param p1 Event rate at the mean of the predictor (0,1)
+#' @param or Expected odds ratio per one-SD increase in the predictor, > 0, != 1
+#' @param r2 Squared multiple correlation between the predictor of
+#'   interest and the other covariates in the model \[0, 1)
+#' @param alpha Significance level, two-sided (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n, n_unadjusted, inputs)
+calc_logistic_continuous_adjusted <- function(p1, or, r2, alpha = 0.05, power = 0.8) {
+  if (!is.numeric(r2) || length(r2) != 1 || is.na(r2) || r2 < 0 || r2 >= 1) {
+    stop("r2 must be a single number in [0, 1).")
+  }
+
+  base <- calc_logistic_continuous(p1 = p1, or = or, alpha = alpha, power = power)
+
+  list(
+    n = ceiling(base$n / (1 - r2)),
+    n_unadjusted = base$n,
+    inputs = list(p1 = p1, or = or, r2 = r2, alpha = alpha, power = power)
+  )
+}
