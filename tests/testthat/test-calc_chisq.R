@@ -114,3 +114,32 @@ test_that("calc_cochran_armitage_trend rejects invalid inputs", {
   expect_error(calc_cochran_armitage_trend(pi = c(0.1, 0.3), di = c(1, 2), ni = c(1, 1), alpha = 0),
                "between 0 and 1")
 })
+
+test_that("calc_cochran_q is reproducible and matches its own directly-verified worked example", {
+  # No installed package provides a sample-size/power FORMULA for
+  # Cochran's Q (only analysis functions exist -- rstatix, already an
+  # installed dependency, has cochran_qtest()); no closed form or
+  # citable formula was found either, so this directly simulates the
+  # actual test (rstatix::cochran_qtest()) on correlated binary data
+  # from a random-intercept logistic model. Directly verified by
+  # Rscript before wiring into the app: p=(0.2,0.3,0.4,0.5), k=4,
+  # sigma2_subject=1, alpha=0.05, target power=0.8 -> n=57, simulated
+  # achieved power 0.829.
+  res1 <- calc_cochran_q(p = c(0.2, 0.3, 0.4, 0.5), sigma2_subject = 1, alpha = 0.05, power = 0.8)
+  res2 <- calc_cochran_q(p = c(0.2, 0.3, 0.4, 0.5), sigma2_subject = 1, alpha = 0.05, power = 0.8)
+  expect_identical(res1$n, res2$n)
+  expect_identical(res1$achieved_power, res2$achieved_power)
+  expect_equal(res1$n, 57)
+})
+
+test_that("calc_cochran_q needs a larger sample size for a higher target power", {
+  res_low <- calc_cochran_q(p = c(0.2, 0.3, 0.4, 0.5), sigma2_subject = 1, power = 0.7)
+  res_high <- calc_cochran_q(p = c(0.2, 0.3, 0.4, 0.5), sigma2_subject = 1, power = 0.9)
+  expect_lt(res_low$n, res_high$n)
+})
+
+test_that("calc_cochran_q rejects invalid inputs", {
+  expect_error(calc_cochran_q(p = c(0.3, 0.5), sigma2_subject = 1), "at least 3")
+  expect_error(calc_cochran_q(p = c(0.3, 0.5, 1.2), sigma2_subject = 1), "between 0 and 1")
+  expect_error(calc_cochran_q(p = c(0.3, 0.5, 0.6), sigma2_subject = -1), "positive")
+})

@@ -26,7 +26,8 @@ mod_chisq_ui <- function(id) {
           "Test of independence / association (R x C table)" = "independence",
           "McNemar's test (paired proportions)" = "mcnemar",
           "Mantel-Haenszel (stratified proportions)" = "mantelhaenszel",
-          "Cochran-Armitage trend test (dose-response)" = "cochran_armitage"
+          "Cochran-Armitage trend test (dose-response)" = "cochran_armitage",
+          "Cochran's Q test (k >= 3 paired binary measurements, Monte Carlo)" = "cochran_q"
         ),
         selected = "gof"
       ),
@@ -72,6 +73,13 @@ mod_chisq_ui <- function(id) {
           "level, ni = planned relative allocation (only the ratios matter)."),
         uiOutput(ns("ca_groups_ui"))
       ),
+      conditionalPanel(
+        condition = design_is("cochran_q"),
+        textInput(ns("p_cq"), "Each condition's success proportion (comma-separated, k >= 3)",
+                  value = "0.2, 0.3, 0.4, 0.5"),
+        numericInput(ns("sigma2_cq"), "Subject-level random-intercept variance (within-subject correlation)",
+                     value = 1, min = 0.0001, step = 0.1)
+      ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
       hr(),
@@ -109,7 +117,13 @@ mod_chisq_ui <- function(id) {
       render_formula_block(chisq_content$cochran_armitage$formula_latex),
       shiny::markdown(chisq_content$cochran_armitage$explanation),
       h5("Worked example"),
-      shiny::markdown(chisq_content$cochran_armitage$worked_example)
+      shiny::markdown(chisq_content$cochran_armitage$worked_example),
+      hr(),
+      h4(chisq_content$cochran_q$title),
+      render_formula_block(chisq_content$cochran_q$formula_latex),
+      shiny::markdown(chisq_content$cochran_q$explanation),
+      h5("Worked example"),
+      shiny::markdown(chisq_content$cochran_q$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -132,7 +146,11 @@ mod_chisq_ui <- function(id) {
       hr(),
       h4(chisq_content$cochran_armitage$title),
       p(strong("Citation: "), chisq_content$cochran_armitage$citation),
-      p(strong("Implemented via: "), code(chisq_content$cochran_armitage$backend))
+      p(strong("Implemented via: "), code(chisq_content$cochran_armitage$backend)),
+      hr(),
+      h4(chisq_content$cochran_q$title),
+      p(strong("Citation: "), chisq_content$cochran_q$citation),
+      p(strong("Implemented via: "), code(chisq_content$cochran_q$backend))
     )
   )
 }
@@ -208,7 +226,19 @@ mod_chisq_server <- function(id) {
     result <- reactive({
       req(input$design, input$alpha, input$power)
 
-      if (input$design == "cochran_armitage") {
+      if (input$design == "cochran_q") {
+        req(input$p_cq, input$sigma2_cq)
+        tryCatch(
+          {
+            p_vals <- .parse_numeric_vec(input$p_cq)
+            list(ok = TRUE, value = calc_cochran_q(
+              p = p_vals, sigma2_subject = input$sigma2_cq,
+              alpha = input$alpha, power = input$power
+            ))
+          },
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else if (input$design == "cochran_armitage") {
         req(input$k_ca, input$delta_ca)
         k <- as.integer(input$k_ca)
         pi_vals <- lapply(seq_len(k), function(i) input[[paste0("pi_ca_", i)]])
@@ -293,7 +323,12 @@ mod_chisq_server <- function(id) {
       }
 
       v <- res$value
-      if (input$design == "cochran_armitage") {
+      if (input$design == "cochran_q") {
+        tagList(
+          p(strong("Required number of subjects: "), v$n),
+          p(sprintf("Simulated achieved power at this n: %.4f", v$achieved_power))
+        )
+      } else if (input$design == "cochran_armitage") {
         tagList(
           p(strong("Reference (group 1) sample size: "), v$n_group1),
           p(strong("Per-group sample sizes: "), paste(v$n_per_group, collapse = ", ")),

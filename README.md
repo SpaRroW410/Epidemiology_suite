@@ -150,7 +150,23 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   Shao & Wang (2003) Example 11.5 (n=8/group, 32 total). Note: the closely
   related `TrialSize::Dose.Response.binary()` was found broken in an
   earlier batch -- this is a different, independently verified function
-  from the same package
+  from the same package; plus Cochran's Q test for k >= 3 paired binary
+  measurements (`calc_cochran_q()`), generalizing McNemar's test beyond
+  two conditions. No installed package provides a sample-size/power
+  FORMULA for Cochran's Q specifically (only analysis functions exist --
+  `rstatix`, already an installed dependency, has `cochran_qtest()`;
+  `TrialSize::Stuart.Maxwell.Test()`, investigated for this item's
+  neighborhood in an earlier batch, was found genuinely broken).
+  Rather than fabricate a closed-form approximation, this directly
+  simulates the actual test -- `rstatix::cochran_qtest()` itself, run on
+  correlated binary data from a random-intercept logistic model (the
+  standard way to simulate correlated binary repeated measures) -- the
+  same "simulate the real test" approach already used for the KS,
+  Wald-Wolfowitz runs, and weighted log-rank designs. Verified directly
+  by Rscript: p=(0.2,0.3,0.4,0.5) across k=4 conditions,
+  sigma2_subject=1, alpha=0.05, target power=0.8 -> n=57, simulated
+  achieved power 0.829; required n increases monotonically with target
+  power (n=41 at power=0.7, n=72 at power=0.9)
 - **Pilot / Feasibility** (`R/modules/mod_pilot.R`) -- the flat 12/arm
   rule-of-thumb (Julious 2005) plus an interactive tool showing how precise
   a pilot's estimated SD is at a given n (95% CI multipliers on the observed

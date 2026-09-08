@@ -2,7 +2,8 @@
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(shiny, bslib, pwr, presize, epiR, clinfun, powerSurvEpi, PowerTOST, Exact,
-               pmsampsize, pROC, TrialSize, powerMediation, Hmisc, tseries, BayesFactor, mvtnorm)
+               pmsampsize, pROC, TrialSize, powerMediation, Hmisc, tseries, BayesFactor, mvtnorm,
+               rstatix)
 
 for (f in list.files("R/calc", pattern = "\\.R$", full.names = TRUE)) source(f)
 for (f in list.files("R/content", pattern = "\\.R$", full.names = TRUE)) source(f)
