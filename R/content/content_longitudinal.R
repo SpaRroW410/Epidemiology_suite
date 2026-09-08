@@ -124,5 +124,109 @@ longitudinal_content <- list(
       "data. International Journal of Biostatistics. 2008;4(1)."
     ),
     backend = "closed-form reimplementation of longpower::power.mmrm.ar1()"
+  ),
+
+  diggle = list(
+    title = "Longitudinal Group-Slope-Difference Test (Diggle et al 2002 Method)",
+    formula_latex = paste0(
+      "$$n_{\\text{per group}} = \\frac{2\\left(Z_{1-\\alpha/2} + Z_{power}\\right)^2 \\xi}{\\delta^2}, ",
+      "\\quad \\xi = \\left[\\begin{pmatrix}1 & t\\end{pmatrix} V^{-1} \\begin{pmatrix}1 \\\\ t\\end{pmatrix}\\right]^{-1}_{22}$$",
+      "$$V = \\sigma^2 R, \\quad R_{jk} = \\rho \\text{ (exchangeable working correlation)}$$"
+    ),
+    explanation = paste(
+      "A second method (alongside the Liu & Liang design above) for the",
+      "same longitudinal group-slope-difference problem, from Diggle,",
+      "Heagerty, Liang & Zeger's standard longitudinal-data-analysis",
+      "textbook. Rather than separately specifying random-intercept and",
+      "random-slope variances, this marginal/GEE-style method works",
+      "directly from the marginal (residual) variance at a single visit",
+      "and a working correlation between visits -- here, a single",
+      "exchangeable correlation (the same correlation between any two",
+      "visits, regardless of how far apart).",
+      "",
+      "- **visit_times** - the time of each planned repeated measurement.",
+      "- **delta** - the between-group difference in slope to detect.",
+      "- **sigma2** - the marginal (residual) variance at a single visit.",
+      "- **rho** - the exchangeable working correlation between any two",
+      "  visits (0 to 1).",
+      "- **alpha, power** - as elsewhere.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "`longpower::diggle.linear.power()` -- a single, self-contained",
+      "function with no cross-file dependencies -- was read directly",
+      "from its public GitHub CRAN mirror and reimplemented. Verified by",
+      "literally reproducing the printed table on page 29 of Diggle et",
+      "al (2002) -- the function's own documented example -- across a",
+      "3x3 grid of correlation (rho = 0.2, 0.5, 0.8) and residual",
+      "variance (sigma2 = 100, 200, 300), 3 visits at t = 0, 2, 5, delta",
+      "= 0.5, one-sided alpha = 0.05, power = 0.80: this calculator",
+      "exactly reproduces every cell of the table -- n = 313/625/938 at",
+      "rho=0.2, n = 196/391/586 at rho=0.5, n = 79/157/235 at rho=0.8",
+      "(per group).",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Diggle PJ, Heagerty PJ, Liang KY, Zeger SL. Analysis of",
+      "Longitudinal Data. 2nd ed. Oxford Statistical Science Series,",
+      "2002. Page 29."
+    ),
+    backend = "closed-form reimplementation of longpower::diggle.linear.power()"
+  ),
+
+  edland = list(
+    title = "Longitudinal Group-Slope-Difference Test (Ard & Edland 2011 Method)",
+    formula_latex = paste0(
+      "$$n_{\\text{per group}} = \\frac{2\\left(Z_{1-\\alpha/2} + Z_{power}\\right)^2}{\\delta^2}",
+      "\\left[\\begin{pmatrix}1 & t\\end{pmatrix}^\\top V^{-1} \\begin{pmatrix}1 & t\\end{pmatrix}\\right]^{-1}_{22}$$",
+      "$$V_{jk} = t_j t_k \\, \\sigma^2_{\\text{slope}} + \\sigma^2_{\\text{residual}}\\,\\mathbb{1}[j=k]$$"
+    ),
+    explanation = paste(
+      "A third method (alongside Liu & Liang and Diggle above) for the",
+      "same longitudinal group-slope-difference problem, designed",
+      "specifically to translate pilot mixed-model estimates (e.g. from",
+      "an `lmer`/`lme` REML fit) directly into a sample size -- as used",
+      "e.g. for Alzheimer's disease trial planning from ADAS-cog pilot",
+      "estimates. This calculator covers the method's default case:",
+      "equal variances across groups, equal allocation, and no subject",
+      "attrition (every subject completes all planned visits), with a",
+      "random slope but no random-intercept variance.",
+      "",
+      "- **visit_times** - the time of each planned repeated measurement.",
+      "- **delta** - the between-group difference in slope to detect.",
+      "- **sigma2_slope** - the variance of the random slope (how much",
+      "  subjects vary in their rate of change), from a REML fit to pilot",
+      "  data.",
+      "- **sigma2_residual** - the residual (within-subject) error",
+      "  variance, from the same fit.",
+      "- **alpha, power** - as elsewhere.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "`longpower::edland.linear.power()` -- a single, self-contained",
+      "function with no cross-file dependencies -- was read directly",
+      "from its public GitHub CRAN mirror and reimplemented. Verified",
+      "two ways: (1) reproducing the function's own documented",
+      "Alzheimer's-disease example exactly -- 7 visits from 0 to 1.5",
+      "years, slope difference to detect = 1.5, random-slope variance =",
+      "24, residual variance = 10, alpha = 0.05, target power = 0.80 ->",
+      "this calculator gives N = 416 total (208/arm), matching the raw,",
+      "unrounded N = 414.62 the package itself computes; and (2)",
+      "independently, this app's own already-verified Liu & Liang",
+      "implementation gives the identical raw N = 414.62 for the",
+      "equivalent scenario (near-zero random-intercept variance) -- two",
+      "mathematically distinct derivations landing on the same raw",
+      "number is strong cross-method confirmation (the two designs'",
+      "*rounded* totals differ by 1 -- 415 vs 416 -- purely because Liu &",
+      "Liang ceilings the total N directly while this design ceilings",
+      "the per-group n first, then doubles it).",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Ard MC, Edland SD. Power calculations for clinical trials in",
+      "Alzheimer's disease. Journal of Alzheimer's Disease.",
+      "2011;21(2):369-377."
+    ),
+    backend = "closed-form reimplementation of longpower::edland.linear.power()"
   )
 )

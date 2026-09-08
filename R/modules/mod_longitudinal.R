@@ -30,7 +30,9 @@ mod_longitudinal_ui <- function(id) {
         ns("design"), "Design",
         choices = c(
           "Group-slope difference (GEE/GLS, Liu & Liang)" = "slope_diff",
-          "MMRM with dropout, AR(1) correlation (Lu, Luo & Chen)" = "mmrm_ar1"
+          "MMRM with dropout, AR(1) correlation (Lu, Luo & Chen)" = "mmrm_ar1",
+          "Group-slope difference (Diggle et al)" = "diggle",
+          "Group-slope difference (Ard & Edland)" = "edland"
         )
       ),
       conditionalPanel(
@@ -60,6 +62,28 @@ mod_longitudinal_ui <- function(id) {
         numericInput(ns("alpha_mmrm"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_mmrm"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
       ),
+      conditionalPanel(
+        condition = design_is("diggle"),
+        textInput(ns("visit_times_diggle"), "Visit times (comma-separated)", value = "0, 2, 5"),
+        numericInput(ns("delta_diggle"), "Slope difference to detect (delta)", value = 0.5, step = 0.1),
+        numericInput(ns("sigma2_diggle"), "Marginal (residual) variance at a single visit", value = 100, min = 0.0001, step = 1),
+        numericInput(ns("rho_diggle"), "Exchangeable working correlation (rho)", value = 0.2, min = 0.001, max = 0.999, step = 0.01),
+        selectInput(ns("alternative_diggle"), "Alternative hypothesis",
+                    choices = c("Two-sided" = "two.sided", "One-sided" = "one.sided"), selected = "one.sided"),
+        numericInput(ns("alpha_diggle"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_diggle"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("edland"),
+        textInput(ns("visit_times_edland"), "Visit times (comma-separated)", value = "0, 0.25, 0.5, 0.75, 1, 1.25, 1.5"),
+        numericInput(ns("delta_edland"), "Slope difference to detect (delta)", value = 1.5, step = 0.1),
+        numericInput(ns("sigma2_slope_edland"), "Random-slope variance", value = 24, min = 0.0001, step = 1),
+        numericInput(ns("sigma2_residual_edland"), "Residual (within-subject) error variance", value = 10, min = 0.0001, step = 1),
+        selectInput(ns("alternative_edland"), "Alternative hypothesis",
+                    choices = c("Two-sided" = "two.sided", "One-sided" = "one.sided")),
+        numericInput(ns("alpha_edland"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_edland"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
+      ),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -77,7 +101,19 @@ mod_longitudinal_ui <- function(id) {
       render_formula_block(longitudinal_content$mmrm_ar1$formula_latex),
       shiny::markdown(longitudinal_content$mmrm_ar1$explanation),
       h5("Worked example"),
-      shiny::markdown(longitudinal_content$mmrm_ar1$worked_example)
+      shiny::markdown(longitudinal_content$mmrm_ar1$worked_example),
+      hr(),
+      h4(longitudinal_content$diggle$title),
+      render_formula_block(longitudinal_content$diggle$formula_latex),
+      shiny::markdown(longitudinal_content$diggle$explanation),
+      h5("Worked example"),
+      shiny::markdown(longitudinal_content$diggle$worked_example),
+      hr(),
+      h4(longitudinal_content$edland$title),
+      render_formula_block(longitudinal_content$edland$formula_latex),
+      shiny::markdown(longitudinal_content$edland$explanation),
+      h5("Worked example"),
+      shiny::markdown(longitudinal_content$edland$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -88,7 +124,15 @@ mod_longitudinal_ui <- function(id) {
       hr(),
       h4(longitudinal_content$mmrm_ar1$title),
       p(strong("Citation: "), longitudinal_content$mmrm_ar1$citation),
-      p(strong("Implemented via: "), code(longitudinal_content$mmrm_ar1$backend))
+      p(strong("Implemented via: "), code(longitudinal_content$mmrm_ar1$backend)),
+      hr(),
+      h4(longitudinal_content$diggle$title),
+      p(strong("Citation: "), longitudinal_content$diggle$citation),
+      p(strong("Implemented via: "), code(longitudinal_content$diggle$backend)),
+      hr(),
+      h4(longitudinal_content$edland$title),
+      p(strong("Citation: "), longitudinal_content$edland$citation),
+      p(strong("Implemented via: "), code(longitudinal_content$edland$backend))
     )
   )
 }
@@ -117,7 +161,7 @@ mod_longitudinal_server <- function(id) {
           },
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
-      } else {
+      } else if (input$design == "mmrm_ar1") {
         req(input$rho_mmrm, input$ra_mmrm, input$sigma_mmrm, input$lambda_mmrm,
             input$delta_mmrm, input$alternative_mmrm, input$alpha_mmrm, input$power_mmrm)
         tryCatch(
@@ -129,6 +173,35 @@ mod_longitudinal_server <- function(id) {
               lambda = input$lambda_mmrm, delta = input$delta_mmrm,
               alpha = input$alpha_mmrm, power = input$power_mmrm,
               alternative = input$alternative_mmrm
+            ))
+          },
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else if (input$design == "diggle") {
+        req(input$visit_times_diggle, input$delta_diggle, input$sigma2_diggle, input$rho_diggle,
+            input$alternative_diggle, input$alpha_diggle, input$power_diggle)
+        tryCatch(
+          {
+            visit_times <- .parse_visit_times(input$visit_times_diggle)
+            list(ok = TRUE, value = calc_longitudinal_diggle(
+              visit_times = visit_times, delta = input$delta_diggle, sigma2 = input$sigma2_diggle,
+              rho = input$rho_diggle, alpha = input$alpha_diggle, power = input$power_diggle,
+              alternative = input$alternative_diggle
+            ))
+          },
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$visit_times_edland, input$delta_edland, input$sigma2_slope_edland,
+            input$sigma2_residual_edland, input$alternative_edland, input$alpha_edland, input$power_edland)
+        tryCatch(
+          {
+            visit_times <- .parse_visit_times(input$visit_times_edland)
+            list(ok = TRUE, value = calc_longitudinal_edland(
+              visit_times = visit_times, delta = input$delta_edland,
+              sigma2_slope = input$sigma2_slope_edland, sigma2_residual = input$sigma2_residual_edland,
+              alpha = input$alpha_edland, power = input$power_edland,
+              alternative = input$alternative_edland
             ))
           },
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
@@ -148,10 +221,15 @@ mod_longitudinal_server <- function(id) {
           p(strong("Total sample size: "), v$n_total),
           p(sprintf("Group 1: %d, Group 0: %d", v$n1, v$n0))
         )
-      } else {
+      } else if (input$design == "mmrm_ar1") {
         tagList(
           p(strong("Total sample size: "), v$n_total),
           p(sprintf("Arm 1: %d, Arm 2: %d", v$n1, v$n2))
+        )
+      } else {
+        tagList(
+          p(strong("Total sample size: "), v$n_total),
+          p(sprintf("Per group: %d", v$n_per_group))
         )
       }
     })

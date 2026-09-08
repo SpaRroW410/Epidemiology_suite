@@ -689,7 +689,20 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   arm), matching the package's own companion example exactly (which
   fixes N=81 and solves back for rho, recovering rho=0.585, close to
   the input 0.6 -- explained by N=81 being a rounded integer, not the
-  exact unrounded root 80.61)
+  exact unrounded root 80.61). Plus two more slope-difference methods
+  (of `longpower::lmmpower()`'s four total; liuliang is above, hu
+  remains uncovered): `calc_longitudinal_diggle()`
+  (`longpower::diggle.linear.power()`, Diggle et al 2002) and
+  `calc_longitudinal_edland()` (`longpower::edland.linear.power()`, Ard
+  & Edland 2011), both read from the same GitHub CRAN mirror. Diggle
+  verified by literally reproducing the printed 3x3 table on page 29 of
+  Diggle et al (2002) (rho=0.2/0.5/0.8 x sigma2=100/200/300, delta=0.5,
+  one-sided alpha=0.05, power=0.80 -> exact match on every cell:
+  n=313/625/938, 196/391/586, 79/157/235 per group). Edland verified
+  against its own documented Alzheimer's-disease example (raw N=414.62)
+  and independently against this module's own Liu & Liang design, which
+  gives the identical raw N=414.62 for the mathematically-equivalent
+  scenario -- two different derivations landing on the same number
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
 (advanced survival designs, post-hoc power, and the much larger Stage 2-4
