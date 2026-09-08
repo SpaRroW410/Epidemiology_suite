@@ -647,6 +647,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Stratified Sampling",
        module_input_id = NA, design_value = NA),
 
+  list(key = "lqas",
+       label = "Lot Quality Assurance Sampling (LQAS)",
+       answers = paste(
+         "Answers: \"How many people do I need to sample in a rapid",
+         "program-monitoring survey to classify an area as high- or",
+         "low-performing against two coverage thresholds, controlling",
+         "both misclassification risks?\""
+       ),
+       outcome_type = "lqas", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "LQAS",
+       module_input_id = NA, design_value = NA),
+
   list(key = "crossover_2x2",
        label = "2x2 crossover trial (continuous outcome) -- test for a difference",
        answers = paste(
@@ -1460,6 +1472,9 @@ study_design_families <- list(
   list(id = "stratified_sampling", label = "Stratified Sampling",
        hint = "Surveys where the population is divided into strata, sampled independently within each.",
        catalog_keys = c("stratified_sampling")),
+  list(id = "lqas", label = "Lot Quality Assurance Sampling (LQAS)",
+       hint = "Rapid program-monitoring surveys that classify an area as high- or low-performing against two coverage thresholds, rather than estimating a proportion precisely.",
+       catalog_keys = c("lqas")),
   list(id = "clinical_trials", label = "Clinical Trials",
        hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, non-inferiority, and group-sequential (interim-monitoring) testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",

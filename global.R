@@ -84,7 +84,9 @@ module_registry <- list(
   list(id = rmst_meta$id, title = rmst_meta$nav_title,
        ui = mod_rmst_ui, server = mod_rmst_server),
   list(id = longitudinal_meta$id, title = longitudinal_meta$nav_title,
-       ui = mod_longitudinal_ui, server = mod_longitudinal_server)
+       ui = mod_longitudinal_ui, server = mod_longitudinal_server),
+  list(id = lqas_meta$id, title = lqas_meta$nav_title,
+       ui = mod_lqas_ui, server = mod_lqas_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -99,7 +101,7 @@ module_groups <- list(
   list(title = "Descriptive & Estimation",
        module_ids = c("proportion", "means", "rate", "ratio")),
   list(title = "Survey & Cross-Sectional",
-       module_ids = c("stratified", "cluster")),
+       module_ids = c("stratified", "cluster", "lqas")),
   list(title = "Observational Studies",
        module_ids = c("case_control", "cohort", "sccs")),
   list(title = "Diagnostic & Screening",

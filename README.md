@@ -370,6 +370,19 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   whose `Depends: pps, sampling, survey` chain is far heavier than this
   one formula needs -- verified to reproduce that package's own
   documented examples exactly
+- **LQAS** (`R/modules/mod_lqas.R`) -- Lot Quality Assurance Sampling:
+  classifies a small area/program "lot" as high- or low-performing
+  against two coverage thresholds, rather than estimating a proportion
+  precisely, `calc_lqas()`, closed-form (no package needed -- a direct
+  binomial operating-characteristic search over sample size n and
+  decision threshold d using base R's `pbinom()`) per Robertson & Valadez
+  (2006); verified against a real published worked example located via
+  web search -- the widely-used LQAS "n=19" rule for a 50%/80% coverage
+  threshold pair -- this calculator recovers exactly n=19, d=13 at
+  alpha=beta=0.10, matching the published rule's own reported
+  classification-error figures (alpha~6.8%, beta~8.4%, total ~15%),
+  independently cross-checked against a second, mirror-image published
+  example by binomial symmetry
 - **Crossover Trial (2x2)** (`R/modules/mod_crossover.R`) -- a 2x2
   crossover trial's sample size for a continuous outcome, testing for a
   difference (not equivalence -- see the Equivalence (TOST) module for
