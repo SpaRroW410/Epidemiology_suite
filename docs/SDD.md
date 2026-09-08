@@ -211,6 +211,7 @@ for what to build next):
 | Cluster / design effect | Design-effect inflation of an existing base sample size; cluster survey precision (WHO EPI-style, proportion) | closed-form (Kish 1965); `epiR::epi.ssclus2estb()` | Live |
 | Stratified Sampling | Total size + per-stratum allocation (proportional/Neyman) | closed-form (Cochran 1977; Kauermann & Kuechenhoff 2011) | Live |
 | LQAS | Lot Quality Assurance Sampling (rapid area classification) | closed-form binomial operating-characteristic search (Robertson & Valadez 2006) | Live |
+| Resource Equation (Animal Studies) | Recommend/check sample size via error degrees of freedom (E=N-T) | closed-form arithmetic (Mead 1988; Charan & Kantharia 2013) | Live |
 | Variance Tests | Single-variance test vs. a reference SD (chi-squared); two-variance test comparing two groups (F test) | closed-form (chi-squared/F distribution, `uniroot()` solve) | Live |
 | Crossover Trial (2x2) | Continuous outcome, test for a difference (not equivalence) | `TrialSize::TwoSampleCrossOver.Equality()` (Chow, Shao & Wang 2003) | Live |
 | Factorial ANOVA / ANCOVA | Main effects, interactions, ANCOVA group effects (general F-test) | `pwr::pwr.f2.test()` (Cohen 1988) | Live |

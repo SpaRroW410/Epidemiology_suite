@@ -383,6 +383,14 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   classification-error figures (alpha~6.8%, beta~8.4%, total ~15%),
   independently cross-checked against a second, mirror-image published
   example by binomial symmetry
+- **Resource Equation (Animal Studies)** (`R/modules/mod_resource_equation.R`)
+  -- sizes small, exploratory animal studies with no prior effect-size
+  estimate to power against, via Mead's error-degrees-of-freedom rule of
+  thumb (E = N - T, target E between 10 and 20), `calc_resource_equation_size()`
+  (recommend a sample size) / `calc_resource_equation_check()` (check the
+  adequacy of a chosen one); pure arithmetic, no package needed; verified
+  against Charan & Kantharia (2013)'s own worked example located via web
+  search -- 5 groups of 10 rats each (N=50) -> E=45, "more than needed"
 - **Crossover Trial (2x2)** (`R/modules/mod_crossover.R`) -- a 2x2
   crossover trial's sample size for a continuous outcome, testing for a
   difference (not equivalence -- see the Equivalence (TOST) module for

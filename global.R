@@ -86,7 +86,9 @@ module_registry <- list(
   list(id = longitudinal_meta$id, title = longitudinal_meta$nav_title,
        ui = mod_longitudinal_ui, server = mod_longitudinal_server),
   list(id = lqas_meta$id, title = lqas_meta$nav_title,
-       ui = mod_lqas_ui, server = mod_lqas_server)
+       ui = mod_lqas_ui, server = mod_lqas_server),
+  list(id = resource_equation_meta$id, title = resource_equation_meta$nav_title,
+       ui = mod_resource_equation_ui, server = mod_resource_equation_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -116,6 +118,8 @@ module_groups <- list(
        module_ids = c("prediction")),
   list(title = "Surveillance",
        module_ids = c("rule_of_three")),
+  list(title = "Preclinical / Animal Studies",
+       module_ids = c("resource_equation")),
   list(title = "General Statistical Tests",
        module_ids = c("correlation", "chisq", "regression", "anova_general",
                        "logistic", "exact_tests", "rm_anova", "nonparametric",

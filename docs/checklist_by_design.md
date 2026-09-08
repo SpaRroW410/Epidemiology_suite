@@ -157,7 +157,7 @@ Two complementary, copy-pasteable markdown files for your R Shiny sample size ca
 
 ### 14. Laboratory / animal / preclinical
 
-- [ ] **[ADV]** Resource equation method (E between 10–20) — *Mead; Charan & Kantharia*
+- [x] **[ADV]** Resource equation method (E between 10–20) — *Mead; Charan & Kantharia* — *(implemented: new standalone Resource Equation module, `calc_resource_equation_size()` (solve for a recommended N given a target E) and `calc_resource_equation_check()` (check the adequacy of a chosen N); pure arithmetic (E = N - T, Mead's degrees-of-freedom rule of thumb), no package needed or exists for this. Verified against Charan & Kantharia (2013)'s own worked example located via web search -- 5 groups of 10 rats each (N=50) -> E = 50-5 = 45, "more than needed" -- reproduced exactly by the "check adequacy" mode; the "recommend a size" mode with the same 5 groups and a target E=10 gives N=15 (3/group) as a smaller, still-adequate alternative)*
 - [ ] **[ADV]** Animal-study rank tests — `clinfun` (*Heller 2006, K-sample rank test, Lehmann alternative*)
 - [ ] **[ADV]** Method-comparison studies (Deming/Passing-Bablok) — `presize` LoA
 

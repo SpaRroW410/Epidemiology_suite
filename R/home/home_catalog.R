@@ -659,6 +659,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "LQAS",
        module_input_id = NA, design_value = NA),
 
+  list(key = "resource_equation",
+       label = "Resource equation method (animal studies)",
+       answers = paste(
+         "Answers: \"For a small exploratory animal study with no prior",
+         "effect-size estimate to power against, how many animals per",
+         "group gives an adequate (but not wasteful) error degrees of",
+         "freedom, per Mead's rule of thumb?\""
+       ),
+       outcome_type = "resource_equation", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Resource Equation (Animal Studies)",
+       module_input_id = "resource_equation-mode", design_value = "size"),
+
   list(key = "crossover_2x2",
        label = "2x2 crossover trial (continuous outcome) -- test for a difference",
        answers = paste(
@@ -1475,6 +1487,9 @@ study_design_families <- list(
   list(id = "lqas", label = "Lot Quality Assurance Sampling (LQAS)",
        hint = "Rapid program-monitoring surveys that classify an area as high- or low-performing against two coverage thresholds, rather than estimating a proportion precisely.",
        catalog_keys = c("lqas")),
+  list(id = "resource_equation", label = "Resource Equation (Animal Studies)",
+       hint = "Small exploratory animal studies with no prior effect-size estimate to power against -- Mead's error-degrees-of-freedom rule of thumb.",
+       catalog_keys = c("resource_equation")),
   list(id = "clinical_trials", label = "Clinical Trials",
        hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, non-inferiority, and group-sequential (interim-monitoring) testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",
