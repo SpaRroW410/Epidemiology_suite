@@ -213,6 +213,7 @@ for what to build next):
 | LQAS | Lot Quality Assurance Sampling (rapid area classification) | closed-form binomial operating-characteristic search (Robertson & Valadez 2006) | Live |
 | Resource Equation (Animal Studies) | Recommend/check sample size via error degrees of freedom (E=N-T) | closed-form arithmetic (Mead 1988; Charan & Kantharia 2013) | Live |
 | Subgroup / Interaction Testing | Inflate a main-effect sample size for a treatment-by-subgroup interaction test ("4x rule") | closed-form arithmetic (4/effect_ratio^2), Brookes et al. 2004 | Live |
+| Qualitative Sample Size Guidance | Reference guidance for qualitative interview studies (saturation, information power, purposive/theoretical sampling) -- no formula, no numeric output | Guest, Bunce & Johnson 2006; Malterud, Siersma & Guassora 2016; Glaser & Strauss 1967; Patton 2002/2015 | Live |
 | Variance Tests | Single-variance test vs. a reference SD (chi-squared); two-variance test comparing two groups (F test) | closed-form (chi-squared/F distribution, `uniroot()` solve) | Live |
 | Crossover Trial (2x2) | Continuous outcome, test for a difference (not equivalence) | `TrialSize::TwoSampleCrossOver.Equality()` (Chow, Shao & Wang 2003) | Live |
 | Factorial ANOVA / ANCOVA | Main effects, interactions, ANCOVA group effects (general F-test) | `pwr::pwr.f2.test()` (Cohen 1988) | Live |

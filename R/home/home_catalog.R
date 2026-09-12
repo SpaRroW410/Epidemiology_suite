@@ -683,6 +683,19 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Subgroup / Interaction Testing",
        module_input_id = NA, design_value = NA),
 
+  list(key = "qualitative_guidance",
+       label = "Qualitative / mixed methods sample size guidance",
+       answers = paste(
+         "Answers: \"I'm planning a qualitative interview study -- how",
+         "many participants do I need?\" (guidance, not a formula: this",
+         "presents saturation, information power, and purposive/",
+         "theoretical sampling frameworks rather than computing a",
+         "number)"
+       ),
+       outcome_type = "qualitative", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Qualitative Sample Size Guidance",
+       module_input_id = NA, design_value = NA),
+
   list(key = "crossover_2x2",
        label = "2x2 crossover trial (continuous outcome) -- test for a difference",
        answers = paste(
@@ -1516,6 +1529,9 @@ study_design_families <- list(
   list(id = "subgroup_interaction", label = "Subgroup / Interaction Testing",
        hint = "Inflating an already-computed main-effect sample size to reliably test whether the effect differs between subgroups (Brookes et al.'s \"4x rule\").",
        catalog_keys = c("subgroup_interaction")),
+  list(id = "qualitative", label = "Qualitative / Mixed Methods",
+       hint = "Reference guidance (saturation, information power, purposive/theoretical sampling) for planning a qualitative interview study -- not a formula.",
+       catalog_keys = c("qualitative_guidance")),
   list(id = "clinical_trials", label = "Clinical Trials",
        hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, non-inferiority, and group-sequential (interim-monitoring) testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",

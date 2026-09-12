@@ -141,9 +141,9 @@ Two complementary, copy-pasteable markdown files for your R Shiny sample size ca
 
 ### 11. Qualitative & mixed methods (non-formula — acknowledge, don't fake precision)
 
-- [ ] **[ADV]** Saturation-based guidance — *Guest, Bunce & Johnson (2006) Field Methods 18:59–82: "saturation occurred within the first twelve interviews, although basic elements for metathemes were present as early as six interviews."*
-- [ ] **[ADV]** Information power — *Malterud, Siersma & Guassora (2016) Qual Health Res 26:1753–1760* (n depends on aim, sample specificity, theory, dialogue quality, analysis strategy)
-- [ ] **[ADV]** Purposive/theoretical sampling narrative guidance (present as guidance panel, no numeric output)
+- [x] **[ADV]** Saturation-based guidance — *Guest, Bunce & Johnson (2006) Field Methods 18:59–82: "saturation occurred within the first twelve interviews, although basic elements for metathemes were present as early as six interviews."* — *(implemented, together with the two items below, as one new "Qualitative Sample Size Guidance" module — a guidance panel, not a calculator, per this section's own explicit framing ("non-formula -- acknowledge, don't fake precision"). Presents Guest et al's own quoted finding verbatim plus the caveat that it's specific to their homogeneous, narrowly-scoped study population)*
+- [x] **[ADV]** Information power — *Malterud, Siersma & Guassora (2016) Qual Health Res 26:1753–1760* (n depends on aim, sample specificity, theory, dialogue quality, analysis strategy) — *(implemented in the same guidance module: presents all five of the paper's own dimensions -- study aim, sample specificity, use of established theory, quality of dialogue, analysis strategy -- confirmed against the paper's own five-dimension framework located via web search)*
+- [x] **[ADV]** Purposive/theoretical sampling narrative guidance (present as guidance panel, no numeric output) — *(implemented in the same guidance module: purposive sampling per Patton (2002/2015)'s typology and theoretical sampling per Glaser & Strauss (1967)'s founding grounded-theory text, both citations located via web search)*
 
 ### 12. Health economics / outcomes
 

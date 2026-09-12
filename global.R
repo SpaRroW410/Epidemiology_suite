@@ -90,7 +90,9 @@ module_registry <- list(
   list(id = resource_equation_meta$id, title = resource_equation_meta$nav_title,
        ui = mod_resource_equation_ui, server = mod_resource_equation_server),
   list(id = subgroup_interaction_meta$id, title = subgroup_interaction_meta$nav_title,
-       ui = mod_subgroup_interaction_ui, server = mod_subgroup_interaction_server)
+       ui = mod_subgroup_interaction_ui, server = mod_subgroup_interaction_server),
+  list(id = qualitative_meta$id, title = qualitative_meta$nav_title,
+       ui = mod_qualitative_ui, server = mod_qualitative_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -123,6 +125,8 @@ module_groups <- list(
        module_ids = c("rule_of_three")),
   list(title = "Preclinical / Animal Studies",
        module_ids = c("resource_equation")),
+  list(title = "Qualitative / Mixed Methods",
+       module_ids = c("qualitative")),
   list(title = "General Statistical Tests",
        module_ids = c("correlation", "chisq", "regression", "anova_general",
                        "logistic", "exact_tests", "rm_anova", "nonparametric",

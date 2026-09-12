@@ -412,6 +412,24 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   half-magnitude interaction needs exactly 16x (100 -> 1,600) -- both
   additionally re-derived independently from first-principles z-based
   power formulas rather than only trusting the paper's summary numbers
+- **Qualitative Sample Size Guidance** (`R/modules/mod_qualitative.R`)
+  -- unlike every other module in this app, this one has NO formula and
+  computes NO number, per this checklist section's own explicit framing
+  ("non-formula -- acknowledge, don't fake precision"; "present as
+  guidance panel, no numeric output"). Presents the field's own three
+  established frameworks as reference content instead: saturation-based
+  guidance (Guest, Bunce & Johnson 2006, including their own quoted
+  finding -- "saturation occurred within the first twelve interviews...
+  present as early as six interviews" -- with the caveat that it's
+  specific to their homogeneous study population); information power
+  (Malterud, Siersma & Guassora 2016's five dimensions -- study aim,
+  sample specificity, use of established theory, quality of dialogue,
+  analysis strategy); and purposive/theoretical sampling (Patton
+  2002/2015's purposeful-sampling typology; Glaser & Strauss 1967's
+  founding grounded-theory theoretical-sampling method). No calc_*.R
+  file or numeric worked example exists for this module -- its tests
+  instead verify the content itself (every topic present, citations and
+  the Guest et al. quote reproduced accurately)
 - **Crossover Trial (2x2)** (`R/modules/mod_crossover.R`) -- a 2x2
   crossover trial's sample size for a continuous outcome, testing for a
   difference (not equivalence -- see the Equivalence (TOST) module for
