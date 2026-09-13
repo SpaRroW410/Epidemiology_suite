@@ -3,7 +3,7 @@
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(shiny, bslib, pwr, presize, epiR, clinfun, powerSurvEpi, PowerTOST, Exact,
                pmsampsize, pROC, TrialSize, powerMediation, Hmisc, tseries, BayesFactor, mvtnorm,
-               rstatix)
+               rstatix, lme4)
 
 for (f in list.files("R/calc", pattern = "\\.R$", full.names = TRUE)) source(f)
 for (f in list.files("R/content", pattern = "\\.R$", full.names = TRUE)) source(f)
@@ -92,7 +92,9 @@ module_registry <- list(
   list(id = subgroup_interaction_meta$id, title = subgroup_interaction_meta$nav_title,
        ui = mod_subgroup_interaction_ui, server = mod_subgroup_interaction_server),
   list(id = qualitative_meta$id, title = qualitative_meta$nav_title,
-       ui = mod_qualitative_ui, server = mod_qualitative_server)
+       ui = mod_qualitative_ui, server = mod_qualitative_server),
+  list(id = glmm_meta$id, title = glmm_meta$nav_title,
+       ui = mod_glmm_ui, server = mod_glmm_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -116,7 +118,7 @@ module_groups <- list(
        module_ids = c("agreement")),
   list(title = "Clinical Trials",
        module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential",
-                       "subgroup_interaction")),
+                       "subgroup_interaction", "glmm")),
   list(title = "Survival Analysis",
        module_ids = c("logrank", "competing_risks", "rmst")),
   list(title = "Prediction Models",

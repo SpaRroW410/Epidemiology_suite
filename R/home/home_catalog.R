@@ -696,6 +696,33 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Qualitative Sample Size Guidance",
        module_input_id = NA, design_value = NA),
 
+  list(key = "glmm_lmm_continuous",
+       label = "Cluster-randomized trial, continuous outcome (Monte Carlo LMM)",
+       answers = paste(
+         "Answers: \"How many clusters (clinics, schools, villages) do",
+         "I need for a cluster-randomized trial with a continuous",
+         "outcome, analyzed with a random-intercept linear mixed",
+         "model?\" (Monte Carlo: directly simulates and refits the",
+         "actual mixed-model analysis, since no closed-form formula",
+         "exists for it)"
+       ),
+       outcome_type = "glmm", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Monte Carlo GLMM (Cluster-Randomized Trial)",
+       module_input_id = "glmm-design", design_value = "lmm_continuous"),
+
+  list(key = "glmm_binary",
+       label = "Cluster-randomized trial, binary outcome (Monte Carlo GLMM)",
+       answers = paste(
+         "Answers: \"How many clusters do I need for a cluster-",
+         "randomized trial with a binary outcome, analyzed with a",
+         "random-intercept logistic mixed model (GLMM)?\" (Monte Carlo:",
+         "directly simulates and refits the actual mixed-model",
+         "analysis, since no closed-form formula exists for it)"
+       ),
+       outcome_type = "glmm", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Monte Carlo GLMM (Cluster-Randomized Trial)",
+       module_input_id = "glmm-design", design_value = "glmm_binary"),
+
   list(key = "crossover_2x2",
        label = "2x2 crossover trial (continuous outcome) -- test for a difference",
        answers = paste(
@@ -1532,6 +1559,9 @@ study_design_families <- list(
   list(id = "qualitative", label = "Qualitative / Mixed Methods",
        hint = "Reference guidance (saturation, information power, purposive/theoretical sampling) for planning a qualitative interview study -- not a formula.",
        catalog_keys = c("qualitative_guidance")),
+  list(id = "glmm", label = "Monte Carlo GLMM (Cluster-Randomized Trial)",
+       hint = "Cluster-randomized trials analyzed with a random-intercept (generalized) linear mixed model, sized by direct Monte Carlo simulation since no closed-form formula exists.",
+       catalog_keys = c("glmm_lmm_continuous", "glmm_binary")),
   list(id = "clinical_trials", label = "Clinical Trials",
        hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, non-inferiority, and group-sequential (interim-monitoring) testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",

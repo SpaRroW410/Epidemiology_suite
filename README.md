@@ -430,6 +430,40 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   file or numeric worked example exists for this module -- its tests
   instead verify the content itself (every topic present, citations and
   the Guest et al. quote reproduced accurately)
+- **Monte Carlo GLMM (Cluster-Randomized Trial)** (`R/modules/mod_glmm.R`)
+  -- built deliberately LAST in this project (per this checklist item's
+  own "niche/simulation" framing): sizes a two-arm cluster-randomized
+  trial (continuous outcome via `calc_glmm_lmm_power()`, or binary via
+  `calc_glmm_logistic_power()`) analyzed with the actual random-
+  intercept (generalized) linear mixed model. No closed-form power
+  formula exists for this test -- that's exactly why simulation-based
+  tools like `simr` exist -- so this directly simulates data, refits a
+  full and reduced model, and runs a likelihood-ratio test, repeated
+  many times per candidate number of clusters. `simr` itself is not
+  installed and its GitHub CRAN mirror is unreachable, but the technique
+  it wraps is standard in its own right (Bolker et al. 2009; Judd,
+  Westfall & Kenny 2017) and used directly via `lme4::lmer()`/`glmer()`
+  (already an installed project dependency), with no reimplementation
+  risk since this literally fits the actual model. Timing was carefully
+  scoped first (~0.023s/replicate for an LMM refit, ~0.072s for a GLMM
+  refit), tuning nsim down (50/30 respectively, both user-adjustable) to
+  keep full searches to ~5-20 seconds. Verified three ways: (1) type-I
+  error control under the null (~0.06 for LMM, ~0.035 for GLMM, both
+  close to nominal alpha=0.05); (2) monotonic power/n behavior for
+  effect size, ICC, odds ratio, and random-intercept variance; (3) an
+  independent cross-check against `lmerTest`'s Satterthwaite-corrected
+  t-test (a different, well-established method) on the identical
+  simulated scenario, recovering essentially the same required n as
+  this calculator's likelihood-ratio-test approach. That cross-check
+  also surfaced a genuine, non-obvious finding: even as ICC approaches
+  0, this Monte Carlo result needs MORE individuals than a naive
+  design-effect (DEFF) formula would suggest, because DEFF assumes an
+  idealized analysis that ignores clustering entirely, whereas this
+  simulates the REAL mixed-model analysis actually used on cluster-
+  randomized data -- exactly the kind of subtlety that justifies
+  simulation over closed-form approximation. This also gives adjacent
+  (if simulation-based) coverage for `checklist_by_design.md`'s
+  previously-declined cluster-randomized-trials item
 - **Crossover Trial (2x2)** (`R/modules/mod_crossover.R`) -- a 2x2
   crossover trial's sample size for a continuous outcome, testing for a
   difference (not equivalence -- see the Equivalence (TOST) module for
