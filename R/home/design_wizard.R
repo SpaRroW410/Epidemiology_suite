@@ -16,6 +16,18 @@ design_wizard_body <- function() {
       "check it. It only ever suggests; nothing is decided silently, and",
       "you can start over at any point if a question doesn't fit your study."
     )),
+    div(class = "card card-body bg-light mb-3",
+      p(class = "small text-muted",
+        paste("Optional: describe your study in a sentence or two and this",
+              "will pre-fill as many answers below as it can confidently",
+              "infer, then stop at the first question it isn't sure about --",
+              "check the pre-filled trail and continue manually from there.",
+              "This is keyword-based, not a language model: it never guesses",
+              "a final answer, it only skips questions it's confident about.")),
+      textAreaInput("design_wizard_freetext", NULL, rows = 2,
+                    placeholder = "e.g. \"We compared cases and controls, individually matched, for exposure to pesticide.\""),
+      actionButton("design_wizard_parse", "Suggest from this text", class = "btn-outline-primary btn-sm")
+    ),
     uiOutput("design_wizard_trace"),
     uiOutput("design_wizard_body")
   )
@@ -24,10 +36,20 @@ design_wizard_body <- function() {
 design_wizard_server <- function(input, output, session) {
   state <- reactiveValues(node_id = "root", trace = list(), flags = list())
 
+  observeEvent(input$design_wizard_parse, {
+    res <- walk_free_text(input$design_wizard_freetext)
+    state$node_id <- res$node_id
+    state$trace <- res$trace
+    state$flags <- res$flags
+  }, ignoreInit = TRUE)
+
   output$design_wizard_trace <- renderUI({
     if (length(state$trace) == 0) return(NULL)
     tags$ul(class = "text-muted small",
-      lapply(state$trace, function(t) tags$li(paste0(t$question, " -> ", t$answer))))
+      lapply(state$trace, function(t) tags$li(paste0(
+        t$question, " -> ", t$answer,
+        if (!is.null(t$confidence)) paste0(" (auto-suggested, ", t$confidence, " confidence)") else ""
+      ))))
   })
 
   output$design_wizard_body <- renderUI({
@@ -52,6 +74,7 @@ design_wizard_server <- function(input, output, session) {
     state$node_id <- "root"
     state$trace <- list()
     state$flags <- list()
+    updateTextAreaInput(session, "design_wizard_freetext", value = "")
   }, ignoreInit = TRUE)
 
   observeEvent(input$design_wizard_jump, {

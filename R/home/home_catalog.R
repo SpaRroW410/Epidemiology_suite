@@ -481,6 +481,19 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Chi-Square Tests",
        module_input_id = "chisq-design", design_value = "cochran_armitage"),
 
+  list(key = "cochran_q",
+       label = "Cochran's Q test (k >= 3 paired/repeated binary measurements)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to detect a difference",
+         "among k >= 3 related (repeated/paired) binary measurements'",
+         "success rates -- e.g. k raters, k diagnostic methods, or k",
+         "repeated time points on the same subjects -- generalizing",
+         "McNemar's test beyond two conditions?\""
+       ),
+       outcome_type = "chisq", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Chi-Square Tests",
+       module_input_id = "chisq-design", design_value = "cochran_q"),
+
   list(key = "logrank",
        label = "Log-rank test (comparing two survival curves)",
        answers = paste(
@@ -585,8 +598,20 @@ calculator_catalog <- list(
          "slope covariance structure?\""
        ),
        outcome_type = "means", groups = NA, dependency = NA, reference_based = NA,
-       built = TRUE, nav_target = "Longitudinal Slope Difference",
-       module_input_id = NA, design_value = NA),
+       built = TRUE, nav_target = "Longitudinal / MMRM",
+       module_input_id = "longitudinal-design", design_value = "slope_diff"),
+
+  list(key = "mmrm_ar1",
+       label = "MMRM with dropout, AR(1) correlation (Lu, Luo & Chen)",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a longitudinal",
+         "trial comparing two arms' mean outcome using a mixed model of",
+         "repeated measures (MMRM), accounting for dropout/missing data",
+         "and an AR(1) correlation structure between visits?\""
+       ),
+       outcome_type = "means", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Longitudinal / MMRM",
+       module_input_id = "longitudinal-design", design_value = "mmrm_ar1"),
 
   list(key = "cluster_deff",
        label = "Cluster / multistage sampling -- design effect (DEFF)",
@@ -621,6 +646,82 @@ calculator_catalog <- list(
        outcome_type = "stratified", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Stratified Sampling",
        module_input_id = NA, design_value = NA),
+
+  list(key = "lqas",
+       label = "Lot Quality Assurance Sampling (LQAS)",
+       answers = paste(
+         "Answers: \"How many people do I need to sample in a rapid",
+         "program-monitoring survey to classify an area as high- or",
+         "low-performing against two coverage thresholds, controlling",
+         "both misclassification risks?\""
+       ),
+       outcome_type = "lqas", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "LQAS",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "resource_equation",
+       label = "Resource equation method (animal studies)",
+       answers = paste(
+         "Answers: \"For a small exploratory animal study with no prior",
+         "effect-size estimate to power against, how many animals per",
+         "group gives an adequate (but not wasteful) error degrees of",
+         "freedom, per Mead's rule of thumb?\""
+       ),
+       outcome_type = "resource_equation", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Resource Equation (Animal Studies)",
+       module_input_id = "resource_equation-mode", design_value = "size"),
+
+  list(key = "subgroup_interaction",
+       label = "Subgroup / interaction testing sample-size inflation (4x rule)",
+       answers = paste(
+         "Answers: \"I've already sized my trial to detect a main",
+         "treatment effect -- how much bigger does it need to be to",
+         "reliably detect whether that effect DIFFERS between two",
+         "subgroups (a treatment-by-subgroup interaction)?\""
+       ),
+       outcome_type = "subgroup_interaction", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Subgroup / Interaction Testing",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "qualitative_guidance",
+       label = "Qualitative / mixed methods sample size guidance",
+       answers = paste(
+         "Answers: \"I'm planning a qualitative interview study -- how",
+         "many participants do I need?\" (guidance, not a formula: this",
+         "presents saturation, information power, and purposive/",
+         "theoretical sampling frameworks rather than computing a",
+         "number)"
+       ),
+       outcome_type = "qualitative", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Qualitative Sample Size Guidance",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "glmm_lmm_continuous",
+       label = "Cluster-randomized trial, continuous outcome (Monte Carlo LMM)",
+       answers = paste(
+         "Answers: \"How many clusters (clinics, schools, villages) do",
+         "I need for a cluster-randomized trial with a continuous",
+         "outcome, analyzed with a random-intercept linear mixed",
+         "model?\" (Monte Carlo: directly simulates and refits the",
+         "actual mixed-model analysis, since no closed-form formula",
+         "exists for it)"
+       ),
+       outcome_type = "glmm", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Monte Carlo GLMM (Cluster-Randomized Trial)",
+       module_input_id = "glmm-design", design_value = "lmm_continuous"),
+
+  list(key = "glmm_binary",
+       label = "Cluster-randomized trial, binary outcome (Monte Carlo GLMM)",
+       answers = paste(
+         "Answers: \"How many clusters do I need for a cluster-",
+         "randomized trial with a binary outcome, analyzed with a",
+         "random-intercept logistic mixed model (GLMM)?\" (Monte Carlo:",
+         "directly simulates and refits the actual mixed-model",
+         "analysis, since no closed-form formula exists for it)"
+       ),
+       outcome_type = "glmm", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Monte Carlo GLMM (Cluster-Randomized Trial)",
+       module_input_id = "glmm-design", design_value = "glmm_binary"),
 
   list(key = "crossover_2x2",
        label = "2x2 crossover trial (continuous outcome) -- test for a difference",
@@ -1137,6 +1238,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Prediction Model",
        module_input_id = "prediction-design", design_value = "survival"),
 
+  list(key = "prediction_external_validation",
+       label = "Prediction model external validation -- binary outcome",
+       answers = paste(
+         "Answers: \"How many subjects do I need to externally validate an",
+         "already-developed prediction model for a binary outcome, so its",
+         "O/E ratio, calibration slope, C-statistic (and optionally",
+         "standardised net benefit) are all estimated precisely?\""
+       ),
+       outcome_type = "prediction", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Prediction Model",
+       module_input_id = "prediction-design", design_value = "external_validation"),
+
   list(key = "roc_single_auc",
        label = "Single ROC AUC vs. chance (0.5)",
        answers = paste(
@@ -1145,7 +1258,18 @@ calculator_catalog <- list(
        ),
        outcome_type = "roc", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "ROC / AUC",
-       module_input_id = NA, design_value = NA),
+       module_input_id = "roc-design", design_value = "single_auc"),
+
+  list(key = "roc_compare_two_aucs",
+       label = "Compare two correlated (paired) ROC AUCs",
+       answers = paste(
+         "Answers: \"How many cases and controls do I need to detect",
+         "that two diagnostic tests' AUCs differ, when both tests are",
+         "applied to the same subjects?\""
+       ),
+       outcome_type = "roc", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "ROC / AUC",
+       module_input_id = "roc-design", design_value = "compare_two"),
 
   list(key = "regression_r2",
        label = "Multiple linear regression, R-squared deviation from zero",
@@ -1393,9 +1517,9 @@ study_design_families <- list(
        catalog_keys = c("agreement_kappa", "agreement_icc", "agreement_cronbach",
                          "agreement_bland_altman", "agreement_ccc")),
   list(id = "chi_square", label = "Chi-Square Tests",
-       hint = "Categorical distribution/association testing (goodness of fit, R x C tables, paired proportions, stratified/Mantel-Haenszel, dose-response trend).",
+       hint = "Categorical distribution/association testing (goodness of fit, R x C tables, paired proportions, stratified/Mantel-Haenszel, dose-response trend, k >= 3 paired binary measurements).",
        catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar",
-                         "chisq_mantelhaenszel", "chisq_cochran_armitage")),
+                         "chisq_mantelhaenszel", "chisq_cochran_armitage", "cochran_q")),
   list(id = "precision", label = "Precision-based (CI-width)",
        hint = "Estimating with a target confidence-interval width rather than testing a hypothesis.",
        catalog_keys = c("proportion_single_precision", "means_single_precision",
@@ -1423,6 +1547,21 @@ study_design_families <- list(
   list(id = "stratified_sampling", label = "Stratified Sampling",
        hint = "Surveys where the population is divided into strata, sampled independently within each.",
        catalog_keys = c("stratified_sampling")),
+  list(id = "lqas", label = "Lot Quality Assurance Sampling (LQAS)",
+       hint = "Rapid program-monitoring surveys that classify an area as high- or low-performing against two coverage thresholds, rather than estimating a proportion precisely.",
+       catalog_keys = c("lqas")),
+  list(id = "resource_equation", label = "Resource Equation (Animal Studies)",
+       hint = "Small exploratory animal studies with no prior effect-size estimate to power against -- Mead's error-degrees-of-freedom rule of thumb.",
+       catalog_keys = c("resource_equation")),
+  list(id = "subgroup_interaction", label = "Subgroup / Interaction Testing",
+       hint = "Inflating an already-computed main-effect sample size to reliably test whether the effect differs between subgroups (Brookes et al.'s \"4x rule\").",
+       catalog_keys = c("subgroup_interaction")),
+  list(id = "qualitative", label = "Qualitative / Mixed Methods",
+       hint = "Reference guidance (saturation, information power, purposive/theoretical sampling) for planning a qualitative interview study -- not a formula.",
+       catalog_keys = c("qualitative_guidance")),
+  list(id = "glmm", label = "Monte Carlo GLMM (Cluster-Randomized Trial)",
+       hint = "Cluster-randomized trials analyzed with a random-intercept (generalized) linear mixed model, sized by direct Monte Carlo simulation since no closed-form formula exists.",
+       catalog_keys = c("glmm_lmm_continuous", "glmm_binary")),
   list(id = "clinical_trials", label = "Clinical Trials",
        hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, non-inferiority, and group-sequential (interim-monitoring) testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",
@@ -1453,14 +1592,12 @@ study_design_families <- list(
        catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required",
                          "rule_of_three_detect_imperfect")),
   list(id = "prediction", label = "Prediction Model Development",
-       hint = "Developing a new multivariable prediction/diagnostic model without excessive overfitting.",
-       catalog_keys = c("prediction_binary", "prediction_continuous", "prediction_survival")),
+       hint = "Developing a new multivariable prediction/diagnostic model without excessive overfitting, or externally validating an existing one.",
+       catalog_keys = c("prediction_binary", "prediction_continuous", "prediction_survival",
+                         "prediction_external_validation")),
   list(id = "roc", label = "ROC / AUC",
-       hint = "Diagnostic test discrimination via the area under the ROC curve.",
-       catalog_keys = c("roc_single_auc")),
-  list(id = "posthoc_power", label = "Post-hoc / Achieved Power",
-       hint = "Achieved power for planning a replication study.",
-       catalog_keys = character(0)),
+       hint = "Diagnostic test discrimination via the area under the ROC curve, single-curve or comparing two correlated curves.",
+       catalog_keys = c("roc_single_auc", "roc_compare_two_aucs")),
   list(id = "variance", label = "Variance Tests",
        hint = "Testing whether a population's variability differs from a reference value, or whether two groups' variability differs.",
        catalog_keys = c("variance_single", "variance_two")),
@@ -1475,9 +1612,9 @@ study_design_families <- list(
   list(id = "bayesian", label = "Bayesian Design Analysis",
        hint = "Sample size for a target prior-averaged power (assurance) when the true treatment effect is itself uncertain, rather than fixed at one assumed value, or a target probability that the actual Bayes factor reaches a chosen evidence threshold.",
        catalog_keys = c("bayesian_assurance_or", "bfda_ttest")),
-  list(id = "longitudinal", label = "Longitudinal Slope Difference",
-       hint = "Comparing two groups' rate of change (slope) over repeated visits in a longitudinal study, under a random-intercept/random-slope covariance structure (GEE/GLS framework).",
-       catalog_keys = c("longitudinal_slope_diff"))
+  list(id = "longitudinal", label = "Longitudinal / MMRM",
+       hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (GEE/GLS framework), or a mixed model of repeated measures (MMRM) with dropout and AR(1) correlation.",
+       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1"))
 )
 
 # Second index over the SAME calculator_catalog entries, grouped by
@@ -1509,9 +1646,9 @@ test_families <- list(
                          "rm_anova_between", "rm_anova_within", "rm_anova_interaction",
                          "means_planned_contrast")),
   list(id = "chi_square_tests", label = "Chi-Square Tests",
-       hint = "Goodness of fit, tests of independence/association, paired-proportions (McNemar's), stratified/Mantel-Haenszel, and dose-response trend testing for categorical data.",
+       hint = "Goodness of fit, tests of independence/association, paired-proportions (McNemar's, or Cochran's Q for k >= 3), stratified/Mantel-Haenszel, and dose-response trend testing for categorical data.",
        catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar",
-                         "chisq_mantelhaenszel", "chisq_cochran_armitage")),
+                         "chisq_mantelhaenszel", "chisq_cochran_armitage", "cochran_q")),
   list(id = "exact_tests", label = "Exact Tests",
        hint = "Small-sample exact tests for proportions (binomial, Fisher's exact, Boschloo's unconditional exact, sign test) and rates (exact Poisson) where the normal approximation is unreliable.",
        catalog_keys = c("exact_binomial", "exact_fisher", "exact_boschloo",
@@ -1561,8 +1698,8 @@ test_families <- list(
        hint = "Prior-averaged power (assurance) for a two-arm proportions trial when the true log odds ratio is itself uncertain, or Bayes Factor Design Analysis for a two-sample means comparison.",
        catalog_keys = c("bayesian_assurance_or", "bfda_ttest")),
   list(id = "longitudinal_tests", label = "Longitudinal / GEE Tests",
-       hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (the GLS/GEE framework of Liu & Liang 1997).",
-       catalog_keys = c("longitudinal_slope_diff"))
+       hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (the GLS/GEE framework of Liu & Liang 1997), or a mixed model of repeated measures (MMRM) with dropout and AR(1) correlation (Lu, Luo & Chen 2008).",
+       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1"))
 )
 
 catalog_entry <- function(key) {

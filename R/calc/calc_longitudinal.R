@@ -122,3 +122,353 @@ calc_longitudinal_slope_diff <- function(visit_times, delta, sigma2_intercept, s
                   alpha = alpha, power = power, alternative = alternative)
   )
 }
+
+# MMRM (mixed model repeated measures) with missing data, AR(1) structure,
+# Lu, Luo & Chen (2008).
+#
+# The checklist's named source is `longpower::power.mmrm`/`power.mmrm.ar1`
+# -- from the same `longpower` package already used above for the slope-
+# difference design. Its source was read directly from the package's
+# public GitHub CRAN mirror (https://raw.githubusercontent.com/cran/
+# longpower/master/R/power_mmrm.R) -- again a single, self-contained
+# function with no cross-file dependencies. This wraps `power.mmrm.ar1()`
+# (the AR(1)-correlation variant, one of the two input styles --
+# "correlation matrix or AR(1) rho" -- the checklist item itself lists,
+# and simpler for a form UI than supplying a full correlation matrix).
+#
+# Verified against the package's own documented "approximate simulation
+# results from Table 5" of Lu, Luo & Chen (2008): rho=0.6, per-visit
+# retention ra=(1,0.76,0.63,0.52), rb=(1,0.87,0.81,0.78), sigma=1,
+# delta=0.9, lambda=sqrt(1.25/1.75), target power=0.904 -> this
+# reimplementation gives N=80.61 (ceiling 81), matching the package's own
+# companion example, which fixes N=81 to solve back for rho and expects
+# to recover ~0.6 -- confirmed directly: solving for rho at N=81 recovers
+# rho=0.585 (close to 0.6, the small gap explained by N=81 being a
+# rounded integer, not the exact unrounded root 80.61). A second
+# round-trip (N=87, rho=0.6, lambda=1.25/1.75, power=0.910, solve for
+# delta) recovers delta=0.891 (close to the documented delta=0.9), the
+# same rounding-explained gap.
+
+#' Sample size for a mixed model of repeated measures (MMRM) with
+#' AR(1)-correlated, missing/dropout-affected repeated measures
+#' (Lu, Luo & Chen 2008)
+#'
+#' Solves for the total sample size needed to detect a between-arm
+#' difference `delta` in a repeated-measures trial where observations
+#' within a subject follow an AR(1) correlation structure and subjects
+#' may drop out (retention < 1) at later visits.
+#'
+#' @param rho AR(1) correlation parameter (0,1) -- correlation between
+#'   adjacent visits; correlation between visits j and k is
+#'   rho^(2*|times_j - times_k|)
+#' @param ra Numeric vector of cumulative retention proportions in arm 1
+#'   at each visit (non-increasing, first value typically 1); length
+#'   equals the number of visits
+#' @param rb Retention vector for arm 2; defaults to `ra` (equal
+#'   retention in both arms)
+#' @param sigma Residual standard deviation of the outcome at a single
+#'   visit (> 0)
+#' @param times Visit indices/times, same length as `ra`; defaults to
+#'   1, 2, ..., length(ra) (equally spaced visits)
+#' @param lambda Allocation ratio, n2/n1 (> 0), default 1
+#' @param delta Between-arm difference to detect (!= 0)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided" or "one.sided"
+#' @return list(n1, n2, n_total, inputs)
+calc_mmrm_ar1 <- function(rho, ra, rb = NULL, sigma, times = seq_along(ra), lambda = 1,
+                           delta, alpha = 0.05, power = 0.8, alternative = "two.sided") {
+  if (!is.numeric(rho) || length(rho) != 1 || is.na(rho) || rho <= 0 || rho >= 1) {
+    stop("rho must be a single number strictly between 0 and 1.")
+  }
+  if (!is.numeric(ra) || length(ra) < 2 || anyNA(ra) || any(ra <= 0) || any(ra > 1)) {
+    stop("ra must be a numeric vector of at least 2 retention proportions, each in (0, 1].")
+  }
+  if (any(diff(ra) > 0)) stop("ra must be non-increasing (retention cannot improve over time).")
+  if (!is.null(rb)) {
+    if (!is.numeric(rb) || length(rb) != length(ra) || anyNA(rb) || any(rb <= 0) || any(rb > 1)) {
+      stop("rb must be a numeric vector the same length as ra, each in (0, 1].")
+    }
+    if (any(diff(rb) > 0)) stop("rb must be non-increasing (retention cannot improve over time).")
+  }
+  .validate_positive(sigma, "sigma")
+  if (!is.numeric(times) || length(times) != length(ra) || anyNA(times)) {
+    stop("times must be a numeric vector the same length as ra.")
+  }
+  .validate_positive(lambda, "lambda")
+  if (!is.numeric(delta) || length(delta) != 1 || is.na(delta) || delta == 0) {
+    stop("delta must be a single non-zero number.")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (!alternative %in% c("two.sided", "one.sided")) {
+    stop('alternative must be "two.sided" or "one.sided".')
+  }
+
+  J <- length(ra)
+  phia <- 1 / ra[J] - sum(rho^(2 * (times[J] - times[-J])) * (1 / ra[-1] - 1 / ra[-J]))
+  if (!is.null(rb)) {
+    phib <- 1 / rb[J] - sum(rho^(2 * (times[J] - times[-J])) * (1 / rb[-1] - 1 / rb[-J]))
+  } else {
+    rb <- ra
+    phib <- phia
+  }
+
+  z_alpha <- if (alternative == "two.sided") qnorm(1 - alpha / 2) else qnorm(1 - alpha)
+  n1 <- (phia + lambda * phib) * (z_alpha + qnorm(power))^2 * sigma^2 / delta^2
+  n2 <- n1 / lambda
+
+  list(
+    n1 = ceiling(n1), n2 = ceiling(n2), n_total = ceiling(n1) + ceiling(n2),
+    inputs = list(rho = rho, ra = ra, rb = rb, sigma = sigma, times = times, lambda = lambda,
+                  delta = delta, alpha = alpha, power = power, alternative = alternative)
+  )
+}
+
+# Diggle et al (2002) and Ard & Edland (2011) methods for the same
+# "difference in linear slopes between two groups" problem the Liu &
+# Liang design above solves, offered as two of the four methods
+# `longpower::lmmpower()` itself exposes (the checklist explicitly names
+# all four: diggle, liuliang, edland, hu -- liuliang is already covered
+# above). Both sources were read directly from longpower's public GitHub
+# CRAN mirror (diggle.linear.power.R, edland.linear.power.R) -- again
+# single, self-contained functions with no cross-file dependencies.
+#
+# calc_longitudinal_diggle() is verified against a literal reproduction
+# of the printed table on page 29 of Diggle, Heagerty, Liang & Zeger
+# (2002) -- itself the function's own documented example -- across a
+# 3x3 grid of correlation (rho=0.2/0.5/0.8) and residual variance
+# (sigma2=100/200/300): this reimplementation exactly reproduces
+# n=313/625/938 (rho=0.2), 196/391/586 (rho=0.5), 79/157/235 (rho=0.8).
+#
+# calc_longitudinal_edland() is verified two ways: (1) reproducing the
+# package's own documented Alzheimer's-disease example (delta=1.5,
+# t=seq(0,1.5,0.25), sig2.s=24, sig2.e=10, power=0.80) -> N=414.6202;
+# and (2) independently, this is bit-identical to this app's own
+# already-verified Liu & Liang implementation's result for the
+# equivalent scenario (N=414.62, ~207/arm) -- the two different methods
+# agreeing exactly is strong independent cross-validation, since Edland
+# and Liu & Liang are mathematically distinct derivations that happen to
+# coincide in this random-slope-only (no random-intercept variance),
+# equal-allocation, no-attrition special case.
+
+#' Sample size for a longitudinal group-difference-in-slopes test
+#' (Diggle et al 2002)
+#'
+#' Solves for the per-group sample size needed to detect a given
+#' difference in linear slopes between two groups, given the residual
+#' variance and a working correlation matrix (or a single exchangeable
+#' correlation rho) for the repeated measures within a subject. This is
+#' the marginal/GEE-style method from Diggle, Heagerty, Liang & Zeger
+#' (2002), "Analysis of Longitudinal Data", 2nd ed., page 29.
+#'
+#' @param visit_times Numeric vector of visit times (length >= 2)
+#' @param delta Slope difference between the two groups to detect (!= 0)
+#' @param sigma2 Residual variance (marginal variance at each visit, before
+#'   applying the correlation) (> 0)
+#' @param rho A single exchangeable working correlation between any two
+#'   visits (0,1)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided" or "one.sided"
+#' @return list(n_total, n_per_group, inputs)
+calc_longitudinal_diggle <- function(visit_times, delta, sigma2, rho,
+                                      alpha = 0.05, power = 0.8,
+                                      alternative = "two.sided") {
+  if (!is.numeric(visit_times) || length(visit_times) < 2 || any(is.na(visit_times))) {
+    stop("visit_times must be a numeric vector of at least 2 values.")
+  }
+  if (!is.numeric(delta) || length(delta) != 1 || is.na(delta) || delta == 0) {
+    stop("delta must be a single non-zero number.")
+  }
+  .validate_positive(sigma2, "sigma2")
+  .validate_unit_interval(rho, "rho")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (!alternative %in% c("two.sided", "one.sided")) {
+    stop('alternative must be "two.sided" or "one.sided".')
+  }
+
+  m <- length(visit_times)
+  R <- matrix(rho, m, m) + diag(1 - rho, m)
+  V <- sigma2 * R
+  xi <- solve(rbind(1, visit_times) %*% solve(V) %*% cbind(1, visit_times))[2, 2]
+  z_alpha <- if (alternative == "two.sided") qnorm(1 - alpha / 2) else qnorm(1 - alpha)
+  n <- 2 * (z_alpha + qnorm(power))^2 * xi / delta^2
+
+  list(
+    n_total = 2 * ceiling(n), n_per_group = ceiling(n),
+    inputs = list(visit_times = visit_times, delta = delta, sigma2 = sigma2, rho = rho,
+                  alpha = alpha, power = power, alternative = alternative)
+  )
+}
+
+#' Sample size for a longitudinal group-difference-in-slopes test
+#' (Ard & Edland 2011)
+#'
+#' Solves for the per-group sample size needed to detect a given
+#' difference in linear slopes between two groups, given the random-slope
+#' variance and residual error variance from a mixed-model fit (e.g. via
+#' REML) to pilot data -- assuming equal variances across groups, equal
+#' allocation, and no attrition. This is the method of Ard & Edland
+#' (2011), used e.g. for Alzheimer's disease trial planning from ADAS-cog
+#' pilot estimates.
+#'
+#' @param visit_times Numeric vector of visit times (length >= 2)
+#' @param delta Slope difference between the two groups to detect (!= 0)
+#' @param sigma2_slope Variance of the random slope (> 0)
+#' @param sigma2_residual Residual (within-subject) error variance (> 0)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided" or "one.sided"
+#' @return list(n_total, n_per_group, inputs)
+calc_longitudinal_edland <- function(visit_times, delta, sigma2_slope, sigma2_residual,
+                                      alpha = 0.05, power = 0.8,
+                                      alternative = "two.sided") {
+  if (!is.numeric(visit_times) || length(visit_times) < 2 || any(is.na(visit_times))) {
+    stop("visit_times must be a numeric vector of at least 2 values.")
+  }
+  if (!is.numeric(delta) || length(delta) != 1 || is.na(delta) || delta == 0) {
+    stop("delta must be a single non-zero number.")
+  }
+  .validate_positive(sigma2_slope, "sigma2_slope")
+  .validate_positive(sigma2_residual, "sigma2_residual")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (!alternative %in% c("two.sided", "one.sided")) {
+    stop('alternative must be "two.sided" or "one.sided".')
+  }
+
+  m <- length(visit_times)
+  X <- cbind(1, visit_times)
+  V <- matrix(0, m, m)
+  for (i in 1:m) {
+    for (j in 1:m) V[i, j] <- visit_times[i] * visit_times[j] * sigma2_slope
+  }
+  diag(V) <- diag(V) + sigma2_residual
+  term <- solve(t(X) %*% solve(V) %*% X)[2, 2]
+
+  z_alpha <- if (alternative == "two.sided") qnorm(1 - alpha / 2) else qnorm(1 - alpha)
+  n <- (z_alpha + qnorm(power))^2 * (2 * term) / delta^2
+
+  list(
+    n_total = 2 * ceiling(n), n_per_group = ceiling(n),
+    inputs = list(visit_times = visit_times, delta = delta, sigma2_slope = sigma2_slope,
+                  sigma2_residual = sigma2_residual, alpha = alpha, power = power,
+                  alternative = alternative)
+  )
+}
+
+# Hu, Mackey & Thomas (2021) "random coefficient regression model" (RCRM)
+# method -- the fourth and final method `longpower::lmmpower()` itself
+# offers (diggle, liuliang, edland already implemented above). Its
+# source (hu.mackey.thomas.linear.power.R) was read directly from
+# longpower's public GitHub CRAN mirror -- again a single, self-
+# contained function with no cross-file dependencies. Unlike the other
+# three methods, this one directly models monotone study-subject
+# attrition (a proportion vector `p`, where p[i] is the proportion of
+# subjects whose last observed visit is visit i) and an optional
+# random-intercept variance/intercept-slope correlation, rather than
+# assuming complete data throughout.
+#
+# Verified by reproducing 3 of the package's own documented round-trip
+# examples exactly (all using the same ADAS-cog-style pilot estimates,
+# sig2.s=24, sig2.e=10, cor.s.i=0.5, complete-data attrition pattern):
+# (1) delta=1.5, power=0.80 -> n=179.71 (ceiling 180), matching the
+# package's own paired example `hu.mackey.thomas.linear.power(n=180,
+# ...)`; (2) with lambda=2 (2:1 allocation), delta=1.5, power=0.80 ->
+# n1=269.56/n2=134.78 (ceiling 270/135), matching the package's own
+# n=270 example; (3) one-sided alternative, delta=1.5, power=0.80 ->
+# n=141.56 (ceiling 142), matching the package's own n=142 example.
+
+#' Sample size for a longitudinal group-difference-in-slopes test under
+#' monotone attrition (Hu, Mackey & Thomas 2021 random coefficient
+#' regression model)
+#'
+#' Solves for the sample size needed to detect a given difference in
+#' linear slopes between two groups, directly modeling monotone subject
+#' attrition (dropout) via a proportion vector describing when subjects'
+#' last observed visit occurs, in addition to random-slope, random-
+#' intercept, and residual error variances. This is the random
+#' coefficient regression model (RCRM) method of Hu, Mackey & Thomas
+#' (2021), assuming equal baseline values in both arms.
+#'
+#' @param visit_times Numeric vector of visit times, must start at 0 (length >= 2)
+#' @param p Proportion vector the same length as `visit_times`; `p[i]` is
+#'   the proportion of subjects whose last observed visit is visit `i`
+#'   (must sum to 1). Use all mass on the last visit (e.g. `c(0,...,0,1)`)
+#'   for the no-attrition case.
+#' @param delta Slope difference between the two groups to detect (!= 0)
+#' @param sigma2_slope Variance of the random slope (> 0)
+#' @param sigma2_residual Residual (within-subject) error variance (> 0)
+#' @param sigma2_intercept Variance of the random intercept (>= 0); default 0
+#' @param cor_intercept_slope Correlation between the random intercept and
+#'   random slope [-1,1]; default 0 (irrelevant when sigma2_intercept = 0)
+#' @param lambda Allocation ratio, group-1 size / group-2 size (> 0), default 1
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided" or "one.sided"
+#' @return list(n1, n2, n_total, inputs)
+calc_longitudinal_hu <- function(visit_times, p, delta, sigma2_slope, sigma2_residual,
+                                  sigma2_intercept = 0, cor_intercept_slope = 0, lambda = 1,
+                                  alpha = 0.05, power = 0.8, alternative = "two.sided") {
+  if (!is.numeric(visit_times) || length(visit_times) < 2 || any(is.na(visit_times))) {
+    stop("visit_times must be a numeric vector of at least 2 values.")
+  }
+  if (visit_times[1] != 0) stop("visit_times[1] must be 0.")
+  if (!is.numeric(p) || length(p) != length(visit_times) || anyNA(p) || any(p < 0) || any(p > 1)) {
+    stop("p must be a numeric vector the same length as visit_times, each value in [0, 1].")
+  }
+  if (abs(sum(p) - 1) > 1e-8) stop("p must sum to 1.")
+  if (!is.numeric(delta) || length(delta) != 1 || is.na(delta) || delta == 0) {
+    stop("delta must be a single non-zero number.")
+  }
+  .validate_positive(sigma2_slope, "sigma2_slope")
+  .validate_positive(sigma2_residual, "sigma2_residual")
+  if (!is.numeric(sigma2_intercept) || length(sigma2_intercept) != 1 || is.na(sigma2_intercept) || sigma2_intercept < 0) {
+    stop("sigma2_intercept must be a single number >= 0.")
+  }
+  if (!is.numeric(cor_intercept_slope) || length(cor_intercept_slope) != 1 || is.na(cor_intercept_slope) ||
+        cor_intercept_slope < -1 || cor_intercept_slope > 1) {
+    stop("cor_intercept_slope must be a single number in [-1, 1].")
+  }
+  .validate_positive(lambda, "lambda")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (!alternative %in% c("two.sided", "one.sided")) {
+    stop('alternative must be "two.sided" or "one.sided".')
+  }
+
+  t <- visit_times
+  m <- length(t)
+  cumsumt <- cumsum(t)
+  cumsumtsq <- cumsum(t^2)
+  k <- seq(0, m - 1)
+
+  cstar <- numeric(m)
+  for (i in 1:m) {
+    tbar_i <- cumsumt[i] / (k[i] + 1)
+    tbarsq_i <- cumsumtsq[i] / (k[i] + 1)
+    deno_i <- sigma2_residual^2 +
+      (k[i] + 1) * sigma2_residual * (sigma2_slope * tbarsq_i + sigma2_intercept +
+        2 * cor_intercept_slope * sqrt(sigma2_intercept) * sqrt(sigma2_slope) * tbar_i) +
+      (k[i] + 1)^2 * sigma2_intercept * sigma2_slope * (1 - cor_intercept_slope^2) * (tbarsq_i - tbar_i * tbar_i)
+    num_i <- (k[i] + 1) * (sigma2_residual * tbarsq_i + (k[i] + 1) * sigma2_intercept * (tbarsq_i - tbar_i * tbar_i))
+    cstar[i] <- p[i] * (num_i / deno_i)
+  }
+
+  z_alpha <- if (alternative == "two.sided") qnorm(1 - alpha / 2) else qnorm(1 - alpha)
+  n_part1 <- (1 + lambda)^2 / (lambda * sum(cstar))
+  n_part2 <- ((z_alpha + qnorm(power)) / abs(delta))^2
+  N <- n_part1 * n_part2
+  n1 <- lambda * N / (1 + lambda)
+  n2 <- N - n1
+
+  list(
+    n1 = ceiling(n1), n2 = ceiling(n2), n_total = ceiling(n1) + ceiling(n2),
+    inputs = list(visit_times = visit_times, p = p, delta = delta, sigma2_slope = sigma2_slope,
+                  sigma2_residual = sigma2_residual, sigma2_intercept = sigma2_intercept,
+                  cor_intercept_slope = cor_intercept_slope, lambda = lambda,
+                  alpha = alpha, power = power, alternative = alternative)
+  )
+}

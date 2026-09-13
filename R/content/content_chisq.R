@@ -248,5 +248,60 @@ chisq_content <- list(
       "Research. New York: Marcel Dekker; 2003. Section 11.5."
     ),
     backend = "TrialSize::Cochran.Armitage.Trend()"
+  ),
+
+  cochran_q = list(
+    title = "Cochran's Q Test (k >= 3 Paired/Repeated Binary Measurements)",
+    formula_latex = paste0(
+      "$$Q = k(k-1)\\frac{\\sum_j (C_j - \\bar{C})^2}{k\\sum_i R_i - \\sum_i R_i^2} ",
+      "\\;\\sim\\; \\chi^2_{k-1} \\text{ under } H_0$$",
+      "$$\\text{Power estimated by direct simulation of the actual test}$$"
+    ),
+    explanation = paste(
+      "McNemar's test compares two paired binary measurements; Cochran's",
+      "Q generalizes it to k >= 3 -- e.g. whether k different raters, k",
+      "diagnostic methods, or k repeated time points all have the SAME",
+      "success/failure rate on the same subjects. R_i is subject i's",
+      "total successes across the k conditions, C_j is condition j's",
+      "total successes across subjects.",
+      "",
+      "No installed package provides a sample-size/power FORMULA for",
+      "Cochran's Q specifically (only analysis functions exist).",
+      "Because no closed form or citable formula was found, this",
+      "directly simulates the actual test -- `rstatix::cochran_qtest()`",
+      "itself (already an installed dependency), run on real simulated",
+      "correlated binary data -- the same \"simulate the real test\"",
+      "approach already used for the Kolmogorov-Smirnov, Wald-Wolfowitz",
+      "runs, and weighted log-rank designs elsewhere in this app.",
+      "",
+      "Correlated binary data across the k conditions are generated via",
+      "a random-intercept LOGISTIC model -- the standard way to simulate",
+      "correlated binary repeated measures: each subject gets a latent",
+      "Normal(0, sigma2_subject) random intercept added to each",
+      "condition's logit(p_j) before drawing a Bernoulli outcome.",
+      "",
+      "- **p** - the k conditions' true success proportions (length >= 3)",
+      "  you want to detect a difference among.",
+      "- **sigma2_subject** - the variance of the subject-level random",
+      "  intercept; larger values mean a subject's responses across the",
+      "  k conditions are more consistent with each other (more within-",
+      "  subject correlation).",
+      "- **alpha, power** - as elsewhere.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Directly verified by Rscript before wiring into the app: p =",
+      "(0.2, 0.3, 0.4, 0.5) across k = 4 conditions, sigma2_subject = 1,",
+      "alpha = 0.05, target power = 0.8 -> n = 57 subjects, simulated",
+      "achieved power 0.829; required n increases monotonically with",
+      "target power (n = 41 at power = 0.7, n = 72 at power = 0.9),",
+      "confirming the search behaves as expected.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Cochran WG. The comparison of percentages in matched samples.",
+      "Biometrika. 1950;37(3/4):256-266."
+    ),
+    backend = "direct Monte Carlo simulation of rstatix::cochran_qtest()"
   )
 )

@@ -51,3 +51,77 @@ test_that("calc_prediction_survival rejects invalid inputs", {
   expect_error(calc_prediction_survival(parameters = 30, rate = 0.065, timepoint = 2,
                                          meanfup = 2.07, csrsquared = 1.5), "between 0 and 1")
 })
+
+test_that("calc_prediction_external_validation (normal LP) matches Riley et al (2021) worked example", {
+  # prevalence=0.018, cstatistic=0.8, LP~N(-5,2.5), oeciwidth=1 (defaults elsewhere)
+  # -> criterion 2 (c-slope) binds: n=4563, events=83. Verified against the
+  # pmvalsampsize package's own source (fetched from its GitHub CRAN mirror,
+  # since the package itself is not installed and CRAN is unreachable) at
+  # simobs=1e6, and independently against actual glm()-fitted calibration-
+  # slope SEs and pROC::ci.auc() CI widths on simulated data.
+  res <- calc_prediction_external_validation(
+    prevalence = 0.018, cstatistic = 0.8, lp_method = "normal",
+    lp_param1 = -5, lp_param2 = 2.5, oeciwidth = 1, simobs = 1e6
+  )
+  expect_equal(res$n1, 905)
+  expect_equal(res$n2, 4563)
+  expect_equal(res$n3, 4252)
+  expect_equal(res$n, 4563)
+  expect_equal(res$events, 83)
+})
+
+test_that("calc_prediction_external_validation (beta LP) matches Riley et al (2021) alternative example", {
+  # Same scenario but predicted-probability distribution ~ Beta(0.5,0.5)
+  # -> criterion 3 (C-statistic) binds instead: n=4252, events=77.
+  res <- calc_prediction_external_validation(
+    prevalence = 0.018, cstatistic = 0.8, lp_method = "beta",
+    lp_param1 = 0.5, lp_param2 = 0.5, oeciwidth = 1, simobs = 1e6
+  )
+  expect_equal(res$n1, 905)
+  expect_equal(res$n3, 4252)
+  expect_equal(res$n, 4252)
+  expect_equal(res$events, 77)
+})
+
+test_that("calc_prediction_external_validation is reproducible with a fixed seed", {
+  res1 <- calc_prediction_external_validation(
+    prevalence = 0.018, cstatistic = 0.8, lp_method = "normal",
+    lp_param1 = -5, lp_param2 = 2.5, oeciwidth = 1, simobs = 50000, seed = 42
+  )
+  res2 <- calc_prediction_external_validation(
+    prevalence = 0.018, cstatistic = 0.8, lp_method = "normal",
+    lp_param1 = -5, lp_param2 = 2.5, oeciwidth = 1, simobs = 50000, seed = 42
+  )
+  expect_identical(res1$n2, res2$n2)
+})
+
+test_that("calc_prediction_external_validation computes the optional net-benefit criterion", {
+  res <- calc_prediction_external_validation(
+    prevalence = 0.15, cstatistic = 0.75, lp_method = "normal",
+    lp_param1 = -2, lp_param2 = 1.5, sensitivity = 0.6, specificity = 0.7,
+    threshold = 0.2, simobs = 1e5
+  )
+  expect_false(is.null(res$n4))
+  expect_equal(res$n, max(res$n1, res$n2, res$n3, res$n4))
+})
+
+test_that("calc_prediction_external_validation omits the net-benefit criterion by default", {
+  res <- calc_prediction_external_validation(
+    prevalence = 0.018, cstatistic = 0.8, lp_method = "normal",
+    lp_param1 = -5, lp_param2 = 2.5, simobs = 1e5
+  )
+  expect_null(res$n4)
+  expect_equal(res$n, max(res$n1, res$n2, res$n3))
+})
+
+test_that("calc_prediction_external_validation rejects invalid inputs", {
+  expect_error(calc_prediction_external_validation(
+    prevalence = 1.5, cstatistic = 0.8, lp_method = "normal", lp_param1 = -5, lp_param2 = 2.5
+  ), "between 0 and 1")
+  expect_error(calc_prediction_external_validation(
+    prevalence = 0.1, cstatistic = 0.3, lp_method = "normal", lp_param1 = -5, lp_param2 = 2.5
+  ), "between 0.5 and 1")
+  expect_error(calc_prediction_external_validation(
+    prevalence = 0.1, cstatistic = 0.8, lp_method = "normal", lp_param1 = -5, lp_param2 = -1
+  ), "positive")
+})

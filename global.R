@@ -2,7 +2,8 @@
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(shiny, bslib, pwr, presize, epiR, clinfun, powerSurvEpi, PowerTOST, Exact,
-               pmsampsize, pROC, TrialSize, powerMediation, Hmisc, tseries, BayesFactor, mvtnorm)
+               pmsampsize, pROC, TrialSize, powerMediation, Hmisc, tseries, BayesFactor, mvtnorm,
+               rstatix, lme4)
 
 for (f in list.files("R/calc", pattern = "\\.R$", full.names = TRUE)) source(f)
 for (f in list.files("R/content", pattern = "\\.R$", full.names = TRUE)) source(f)
@@ -83,7 +84,17 @@ module_registry <- list(
   list(id = rmst_meta$id, title = rmst_meta$nav_title,
        ui = mod_rmst_ui, server = mod_rmst_server),
   list(id = longitudinal_meta$id, title = longitudinal_meta$nav_title,
-       ui = mod_longitudinal_ui, server = mod_longitudinal_server)
+       ui = mod_longitudinal_ui, server = mod_longitudinal_server),
+  list(id = lqas_meta$id, title = lqas_meta$nav_title,
+       ui = mod_lqas_ui, server = mod_lqas_server),
+  list(id = resource_equation_meta$id, title = resource_equation_meta$nav_title,
+       ui = mod_resource_equation_ui, server = mod_resource_equation_server),
+  list(id = subgroup_interaction_meta$id, title = subgroup_interaction_meta$nav_title,
+       ui = mod_subgroup_interaction_ui, server = mod_subgroup_interaction_server),
+  list(id = qualitative_meta$id, title = qualitative_meta$nav_title,
+       ui = mod_qualitative_ui, server = mod_qualitative_server),
+  list(id = glmm_meta$id, title = glmm_meta$nav_title,
+       ui = mod_glmm_ui, server = mod_glmm_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -98,7 +109,7 @@ module_groups <- list(
   list(title = "Descriptive & Estimation",
        module_ids = c("proportion", "means", "rate", "ratio")),
   list(title = "Survey & Cross-Sectional",
-       module_ids = c("stratified", "cluster")),
+       module_ids = c("stratified", "cluster", "lqas")),
   list(title = "Observational Studies",
        module_ids = c("case_control", "cohort", "sccs")),
   list(title = "Diagnostic & Screening",
@@ -106,13 +117,18 @@ module_groups <- list(
   list(title = "Agreement & Reliability",
        module_ids = c("agreement")),
   list(title = "Clinical Trials",
-       module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential")),
+       module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential",
+                       "subgroup_interaction", "glmm")),
   list(title = "Survival Analysis",
        module_ids = c("logrank", "competing_risks", "rmst")),
   list(title = "Prediction Models",
        module_ids = c("prediction")),
   list(title = "Surveillance",
        module_ids = c("rule_of_three")),
+  list(title = "Preclinical / Animal Studies",
+       module_ids = c("resource_equation")),
+  list(title = "Qualitative / Mixed Methods",
+       module_ids = c("qualitative")),
   list(title = "General Statistical Tests",
        module_ids = c("correlation", "chisq", "regression", "anova_general",
                        "logistic", "exact_tests", "rm_anova", "nonparametric",
