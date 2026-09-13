@@ -18,7 +18,7 @@
 - `- [ ]` = not yet implemented. **[CORE]** / **[ADV]** as in File 1.
 - **G*Power column:** Yes / Partial / No, with menu path where known. G*Power selection is two-step (Test family → Statistical test) or design-based (Tests menu → parameter class → design).
 - **Effect-size metrics** used across G*Power: d/dz (t), f & f² (F/ANOVA/regression), w (χ²), h (proportions), q (two correlations), r (correlation).
-- All five G*Power analysis types (a priori / post hoc / compromise / criterion / sensitivity) should be exposed per calculator where feasible; a priori (solve N) is the v1 default, post hoc (achieved power) is your planned second module.
+- Of G*Power's five analysis types, this app's v1 default is a priori (solve N); a dedicated post hoc (achieved power on an *observed* effect) module was considered and dropped entirely (see `docs/SDD.md` §10) as statistically discouraged practice, not merely deferred. Every already-shipped calculator's own "achieved power" result at a *pre-specified* effect size is unaffected.
 
 -----
 

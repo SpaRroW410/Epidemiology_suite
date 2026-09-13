@@ -787,9 +787,10 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   implemented in this module
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
-(advanced survival designs, post-hoc power, and the much larger Stage 2-4
-backlog in those two files) remains "coming soon" in the Home hub, per
-the staged build plan.
+(advanced survival designs and the much larger Phase 6 backlog in those two
+files) remains "coming soon" in the Home hub, per the staged build plan. A
+previously-planned post-hoc/achieved-power module was evaluated and dropped
+entirely, not deferred -- see `docs/SDD.md` §10.
 
 ### Top navbar: grouped by study design, simple to difficult
 
@@ -838,7 +839,20 @@ item:
   live module -- or an honest "not yet built" note (naming the module/
   backend/citation the checklists already call for) if that branch isn't
   implemented yet. `R/home/design_tree.R` holds the question/terminal node
-  registry. v1 scope is guided-tree only -- no free-text/PICO parsing yet.
+  registry. An optional free-text box above the questions
+  (`R/home/design_free_text.R`, `walk_free_text()`) implements Stage 0 of
+  the algorithm doc: describe your study in a sentence and it pre-fills as
+  many answers as a keyword-heuristic rule table can confidently infer --
+  e.g. "We compared cases and controls, individually matched, for exposure
+  to pesticide" resolves straight to the matched case-control terminal --
+  then stops honestly at the first question it isn't sure about (e.g.
+  "risk factors for diabetes" is deliberately left unrouted, matching the
+  algorithm doc's own "must ask" framing for that phrasing), leaving the
+  rest to the same manual click-through. Deliberately keyword-based, not
+  LLM-based: no LLM API is wired into this otherwise self-contained,
+  deterministically unit-tested app, and the algorithm doc itself names
+  keyword heuristics as the graceful-degrade design for offline/no-API
+  operation.
 - **"Formulas & LaTeX"** (`home_hub.R`'s `home_sandbox_ui()`) -- a short
   explainer of this app's `$$...$$`/MathJax formula convention, plus a live
   sandbox: type LaTeX and see it rendered instantly. See "Formula LaTeX
@@ -1097,5 +1111,4 @@ and stats-package call, then:
    pick it up.
 
 See `docs/SDD.md` §7 for the full calculator catalog and phase plan (means,
-case-control, cohort/RR, diagnostic accuracy, correlation, precision-based,
-post-hoc power).
+case-control, cohort/RR, diagnostic accuracy, correlation, precision-based).
