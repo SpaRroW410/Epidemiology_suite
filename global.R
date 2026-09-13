@@ -94,7 +94,13 @@ module_registry <- list(
   list(id = qualitative_meta$id, title = qualitative_meta$nav_title,
        ui = mod_qualitative_ui, server = mod_qualitative_server),
   list(id = glmm_meta$id, title = glmm_meta$nav_title,
-       ui = mod_glmm_ui, server = mod_glmm_server)
+       ui = mod_glmm_ui, server = mod_glmm_server),
+  list(id = capture_recapture_meta$id, title = capture_recapture_meta$nav_title,
+       ui = mod_capture_recapture_ui, server = mod_capture_recapture_server),
+  list(id = ecological_meta$id, title = ecological_meta$nav_title,
+       ui = mod_ecological_ui, server = mod_ecological_server),
+  list(id = efa_cfa_meta$id, title = efa_cfa_meta$nav_title,
+       ui = mod_efa_cfa_ui, server = mod_efa_cfa_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -109,9 +115,9 @@ module_groups <- list(
   list(title = "Descriptive & Estimation",
        module_ids = c("proportion", "means", "rate", "ratio")),
   list(title = "Survey & Cross-Sectional",
-       module_ids = c("stratified", "cluster", "lqas")),
+       module_ids = c("stratified", "cluster", "lqas", "capture_recapture")),
   list(title = "Observational Studies",
-       module_ids = c("case_control", "cohort", "sccs")),
+       module_ids = c("case_control", "cohort", "sccs", "ecological")),
   list(title = "Diagnostic & Screening",
        module_ids = c("diagnostic", "roc")),
   list(title = "Agreement & Reliability",
@@ -129,6 +135,8 @@ module_groups <- list(
        module_ids = c("resource_equation")),
   list(title = "Qualitative / Mixed Methods",
        module_ids = c("qualitative")),
+  list(title = "Psychometrics / Scale Development",
+       module_ids = c("efa_cfa")),
   list(title = "General Statistical Tests",
        module_ids = c("correlation", "chisq", "regression", "anova_general",
                        "logistic", "exact_tests", "rm_anova", "nonparametric",

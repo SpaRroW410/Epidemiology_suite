@@ -360,10 +360,10 @@ design_nodes <- list(
 
   term_ecological = list(id = "term_ecological", terminal = TRUE, guidance = TRUE,
     design = "Ecological study (unit of observation is a group/area)",
+    catalog_key = "ecological_guidance",
     note = paste(
       "The unit of analysis here is the group (e.g. district, PHC catchment),",
       "not the individual -- none of this app's individual-level calculators",
       "apply directly, and ecological analyses carry their own inference",
-      "caveats (the ecological fallacy). No calculator is planned for this",
-      "design yet."))
+      "caveats (the ecological fallacy). See the guidance panel below."))
 )

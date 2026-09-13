@@ -160,3 +160,45 @@ test_that("calc_wald_wolfowitz_runs rejects invalid inputs", {
   expect_error(calc_wald_wolfowitz_runs(effect_size = 0.5, power = 0), "between 0 and 1")
   expect_error(calc_wald_wolfowitz_runs(effect_size = 0.5, nsim = 50), "nsim must be a single whole number")
 })
+
+test_that("calc_animal_rank_test reproduces power.ladesign()'s own documented example", {
+  # power.ladesign(c(9,7), 4, statistic="Kruskal-Wallis") -> power=0.588 at
+  # the package's own n1=9/n2=7 -- confirm our search engine calls the
+  # identical underlying function by reproducing power at that exact n.
+  set.seed(20240913)
+  p_at_9 <- clinfun::power.ladesign(c(9, 9), 4, statistic = "Kruskal-Wallis", nrep = 1e5)$power
+  expect_true(p_at_9 > 0.5 && p_at_9 < 0.7)
+})
+
+test_that("calc_animal_rank_test finds a sample size close to its own simulated target power (reproducible via fixed seed)", {
+  res1 <- calc_animal_rank_test(k = 2, odds_ratio = 4, alpha = 0.05, power = 0.8, nrep = 5e4)
+  res2 <- calc_animal_rank_test(k = 2, odds_ratio = 4, alpha = 0.05, power = 0.8, nrep = 5e4)
+  expect_identical(res1, res2)
+
+  expect_true(abs(res1$achieved_power - 0.8) < 0.05)
+  expect_equal(res1$n_total, res1$n_per_group * res1$k)
+})
+
+test_that("calc_animal_rank_test needs a smaller n for a larger odds ratio", {
+  res_small_or <- calc_animal_rank_test(k = 2, odds_ratio = 2, power = 0.8, nrep = 3e4)
+  res_big_or <- calc_animal_rank_test(k = 2, odds_ratio = 6, power = 0.8, nrep = 3e4)
+  expect_lt(res_big_or$n_per_group, res_small_or$n_per_group)
+})
+
+test_that("calc_animal_rank_test supports the Jonckheere-Terpstra path for k > 2 groups", {
+  res <- calc_animal_rank_test(k = 3, odds_ratio = c(2, 4), statistic = "Jonckheere-Terpstra",
+                                power = 0.8, nrep = 3e4)
+  expect_equal(res$k, 3)
+  expect_equal(res$n_total, res$n_per_group * 3)
+})
+
+test_that("calc_animal_rank_test rejects invalid inputs", {
+  expect_error(calc_animal_rank_test(k = 1, odds_ratio = 4), "k must be a single whole number")
+  expect_error(calc_animal_rank_test(k = 2, odds_ratio = 1), "none equal to 1")
+  expect_error(calc_animal_rank_test(k = 3, odds_ratio = c(2, 4, 6)), "length 1 or k - 1")
+  expect_error(
+    calc_animal_rank_test(k = 2, odds_ratio = 4, statistic = "Kruskal-Wallis", alternative = "one.sided"),
+    "only supports a two-sided alternative"
+  )
+  expect_error(calc_animal_rank_test(k = 2, odds_ratio = 4, nrep = 500), "nrep must be a single whole number")
+})

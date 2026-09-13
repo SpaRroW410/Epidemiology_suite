@@ -158,5 +158,63 @@ multiplicity_content <- list(
       "could not be re-fetched from this sandboxed environment)."
     ),
     backend = "closed-form (independently derived + Monte Carlo verified) wrapping pwr::pwr.t.test()"
+  ),
+  dunnett = list(
+    title = "Dunnett-Adjusted Sample Size: Multi-Arm Trial vs. Common Control",
+    formula_latex = paste0(
+      "$$P\\!\\left(\\max_{i=1,\\dots,k} T_i > c\\right) = \\alpha, \\quad ",
+      "(T_1,\\dots,T_k) \\sim t_k(\\text{df}, \\; \\rho_{ij}=0.5)$$",
+      "$$\\text{power} = P\\!\\left(|T_i| > c \\mid \\text{ncp} = d\\sqrt{n/2}\\right)$$"
+    ),
+    explanation = paste(
+      "When k active treatment arms are all compared to the SAME common",
+      "control (not to each other), the k comparisons are not",
+      "independent -- they share the control arm's data, giving each pair",
+      "of comparisons a known correlation of rho = 0.5 for equal per-arm",
+      "n. Dunnett (1955) uses this exact correlation structure via the",
+      "true joint (multivariate t) distribution of the k t-statistics,",
+      "rather than treating them as independent/worst-case the way",
+      "Bonferroni and Sidak above do -- making Dunnett's critical value",
+      "provably smaller (less conservative) than either, for exactly this",
+      "common-control design.",
+      "",
+      "No installed package plans Dunnett-adjusted sample size directly",
+      "(`multcomp::glht(..., mcp(trt=\"Dunnett\"))` tests an already-fitted",
+      "model, it doesn't plan n in advance), so this design gets the exact",
+      "critical value from `mvtnorm::qmvt()` -- the same multivariate-t",
+      "machinery `multcomp` itself uses internally -- and searches over n",
+      "the same way this app's other iterative designs do.",
+      "",
+      "- **d** - Cohen's d effect size, assumed the SAME for every active",
+      "  arm vs. the control.",
+      "- **k** - number of active (non-control) arms; there are k",
+      "  comparisons total, all sharing the control.",
+      "- **Power** here is the standard per-comparison planning",
+      "  convention already used throughout this app: the probability",
+      "  that one specific comparison, at the assumed common effect size,",
+      "  clears the Dunnett-adjusted (rather than Bonferroni/Sidak-",
+      "  adjusted) critical value.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "k = 3 active arms vs. 1 common control, Cohen's d = 0.5 for every",
+      "arm, family alpha = 0.05 (two-sided), target power = 0.80, equal n",
+      "per arm: this calculator returns n = 83/arm (332 total), achieved",
+      "power 0.805, critical value 2.36 -- smaller than both Bonferroni's",
+      "n = 86/arm and Sidak's n = 85/arm on the identical inputs (m = 3),",
+      "correctly reflecting that Dunnett is less conservative for this",
+      "specific common-control design. The critical value itself was",
+      "independently verified against the classic published two-sided",
+      "Dunnett tables: k=2,3,4 at df=infinity give 2.212, 2.351, 2.442",
+      "(published) vs. 2.212, 2.350, 2.440 (this app's `qmvt()` call, a",
+      "negligible gap from the function's own small randomized-quadrature",
+      "tolerance).",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Dunnett CW. A multiple comparison procedure for comparing several",
+      "treatments with a control. J Am Stat Assoc. 1955;50(272):1096-1121."
+    ),
+    backend = "mvtnorm::qmvt() for the exact Dunnett critical value (multivariate-t quantile), noncentral-t power search (this app's own engine)"
   )
 )
