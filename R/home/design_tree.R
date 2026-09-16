@@ -333,7 +333,17 @@ design_nodes <- list(
   term_case_cohort = list(id = "term_case_cohort", terminal = TRUE,
     design = "Case-cohort study", would_use = "no lightweight verified package identified yet", citation = "-"),
   term_case_crossover = list(id = "term_case_crossover", terminal = TRUE,
-    design = "Case-crossover study", would_use = "no lightweight verified package identified yet", citation = "-"),
+    design = "Case-crossover study", catalog_key = "case_crossover",
+    note = paste(
+      "A case-crossover study is mathematically a 1:M matched case-control",
+      "design, with M control PERIODS per case instead of separately",
+      "sampled control people (Maclure 1991; Mittleman et al. 1995) -- so",
+      "this app's matched case-control calculator applies directly, with",
+      "inputs reinterpreted as control-period exposure prevalence/",
+      "correlation/count. Dharmarajan, Lee & Izem (2019), who confirm that",
+      "equivalence, also show this formula can UNDERESTIMATE the true",
+      "required N for case-crossover specifically -- treat the result as",
+      "an optimistic planning estimate, not a precise one.")),
   term_sccs = list(id = "term_sccs", terminal = TRUE,
     design = "Self-controlled case series (SCCS)", would_use = "no lightweight verified package identified yet", citation = "-"),
 

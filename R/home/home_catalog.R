@@ -299,6 +299,23 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Case-Control",
        module_input_id = "case_control-design", design_value = "matched"),
 
+  list(key = "case_crossover",
+       label = "Case-crossover study",
+       answers = paste(
+         "Answers: \"How many cases do I need for a case-crossover study,",
+         "comparing each case's own exposure in a hazard period to their",
+         "own exposure in one or more control periods?\" (uses the same",
+         "matched case-control calculator -- a case-crossover design is",
+         "mathematically a 1:M matched case-control design with M control",
+         "periods per case, per Maclure 1991/Mittleman et al. 1995,",
+         "confirmed by Dharmarajan, Lee & Izem 2019, who also document",
+         "that this formula can underestimate the true required N for",
+         "case-crossover specifically)"
+       ),
+       outcome_type = "case_control", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Case-Control",
+       module_input_id = "case_control-design", design_value = "matched"),
+
   list(key = "case_control_nested",
        label = "Nested case-control study",
        answers = paste(
@@ -1554,9 +1571,10 @@ study_design_families <- list(
                          "means_two_indep_unequal_n", "means_welch", "means_two_dep", "means_k",
                          "means_planned_contrast", "means_posthoc_pairwise")),
   list(id = "case_control", label = "Case-Control",
-       hint = "Case-control study (unmatched, matched, nested, or case-cohort), odds ratio or hazard ratio based.",
+       hint = "Case-control study (unmatched, matched, nested, case-cohort, or case-crossover), odds ratio or hazard ratio based.",
        catalog_keys = c("case_control_unmatched", "case_control_matched",
-                         "case_control_nested", "case_control_case_cohort")),
+                         "case_control_nested", "case_control_case_cohort",
+                         "case_crossover")),
   list(id = "cohort", label = "Cohort / Relative Risk",
        hint = "Cohort or cross-sectional study estimating relative risk.",
        catalog_keys = c("cohort_rr")),

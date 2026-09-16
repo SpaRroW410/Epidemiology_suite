@@ -37,6 +37,27 @@ test_that("calc_kappa: 2-rater worked example from content_agreement.R", {
   expect_equal(round(res$upr, 1), 0.7)
 })
 
+test_that("calc_kappa's >2-rater (Fleiss-generalization) support is genuine across all documented raters x n_category combinations", {
+  # kappaSize::CIBinary/CI3Cats/CI4Cats/CI5Cats (this app's backend, via
+  # presize::prec_kappa()) document raters = 2..6 as a real argument, not a
+  # workaround (Rotondi & Donner 2012's multi-rater generalization) --
+  # confirm every combination actually runs and returns a DECREASING n as
+  # more raters are added (more raters per subject means more information
+  # per subject about kappa, so fewer subjects are needed for the same CI
+  # width -- confirmed empirically here, not assumed).
+  for (n_category in 2:5) {
+    props <- rep(1 / n_category, n_category)
+    ns <- sapply(2:6, function(r) {
+      calc_kappa(kappa = 0.6, n_category = n_category, raters = r,
+                 props = props, conf_width = 0.2, conf_level = 0.95)$n
+    })
+    expect_length(ns, 5)
+    expect_true(all(ns > 0))
+    expect_true(all(diff(ns) <= 0),
+                info = paste("n_category =", n_category, "-> n not monotonic across raters:", paste(ns, collapse = ",")))
+  }
+})
+
 test_that("calc_kappa rejects invalid inputs", {
   expect_error(calc_kappa(kappa = 1, props = c(0.5, 0.5)), "between -1 and 1")
   expect_error(calc_kappa(kappa = 0.5, n_category = 1, props = c(1)), "between 2 and 5")
