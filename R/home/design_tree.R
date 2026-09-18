@@ -35,7 +35,26 @@ design_nodes <- list(
       list(label = "Build or validate a prediction/prognostic model", next_id = "term_prediction"),
       list(label = "Assess the accuracy of a diagnostic test", next_id = "diag_type"),
       list(label = "Assess agreement/reliability between raters or methods", next_id = "agree_scale"),
-      list(label = "Explore experiences or meanings (qualitative)", next_id = "term_qualitative")
+      list(label = "Explore experiences or meanings (qualitative)", next_id = "term_qualitative"),
+      list(label = "Plan or monitor a meta-analysis of trials (trial sequential analysis)", next_id = "tsa_outcome")
+    )
+  ),
+
+  # ---------------------------------------------------------------- §1F ----
+  tsa_outcome = list(
+    id = "tsa_outcome", stage = 1,
+    question = "What outcome metric will the meta-analysis pool?",
+    help = paste(
+      "Trial sequential analysis (TSA) computes the required/optimal",
+      "information size (RIS/OIS) -- the meta-analysis-level analogue of",
+      "a single trial's sample size -- for a planned or",
+      "cumulatively-updated meta-analysis of trials."
+    ),
+    options = list(
+      list(label = "Risk ratio (RR)", next_id = "term_tsa", set = list(tsa_outcome = "RR")),
+      list(label = "Odds ratio (OR)", next_id = "term_tsa", set = list(tsa_outcome = "OR")),
+      list(label = "Risk difference (RD)", next_id = "term_tsa", set = list(tsa_outcome = "RD")),
+      list(label = "Mean difference (MD)", next_id = "term_tsa", set = list(tsa_outcome = "MD"))
     )
   ),
 
@@ -327,6 +346,13 @@ design_nodes <- list(
     design = "Group sequential / adaptive design",
     would_use = "gsDesign; rpact",
     citation = "Jennison & Turnbull; O'Brien-Fleming; Pocock; Lan-DeMets alpha spending"),
+
+  term_tsa = list(id = "term_tsa", terminal = TRUE,
+    design = "Trial sequential analysis (required information size)",
+    catalog_key = function(flags) {
+      switch(if (is.null(flags$tsa_outcome)) "RR" else flags$tsa_outcome,
+             RR = "tsa_rr", OR = "tsa_or", RD = "tsa_rd", MD = "tsa_md")
+    }),
 
   term_nested_cc = list(id = "term_nested_cc", terminal = TRUE,
     design = "Nested case-control study", would_use = "no lightweight verified package identified yet", citation = "-"),

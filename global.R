@@ -100,7 +100,9 @@ module_registry <- list(
   list(id = ecological_meta$id, title = ecological_meta$nav_title,
        ui = mod_ecological_ui, server = mod_ecological_server),
   list(id = efa_cfa_meta$id, title = efa_cfa_meta$nav_title,
-       ui = mod_efa_cfa_ui, server = mod_efa_cfa_server)
+       ui = mod_efa_cfa_ui, server = mod_efa_cfa_server),
+  list(id = tsa_meta$id, title = tsa_meta$nav_title,
+       ui = mod_tsa_ui, server = mod_tsa_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -124,7 +126,7 @@ module_groups <- list(
        module_ids = c("agreement")),
   list(title = "Clinical Trials",
        module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential",
-                       "subgroup_interaction", "glmm")),
+                       "subgroup_interaction", "glmm", "tsa")),
   list(title = "Survival Analysis",
        module_ids = c("logrank", "competing_risks", "rmst")),
   list(title = "Prediction Models",

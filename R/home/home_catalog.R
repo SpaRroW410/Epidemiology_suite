@@ -1426,6 +1426,52 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Group Sequential Design",
        module_input_id = "group_sequential-design", design_value = "survival"),
 
+  list(key = "tsa_rr",
+       label = "Trial sequential analysis, risk ratio",
+       answers = paste(
+         "Answers: \"How large does the cumulative evidence base (across",
+         "all trials in a meta-analysis) need to be for adequate power",
+         "to detect an anticipated risk ratio, and what is the",
+         "information-size threshold used to build TSA monitoring",
+         "boundaries?\""
+       ),
+       outcome_type = "proportion", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Trial Sequential Analysis",
+       module_input_id = "tsa-outcome", design_value = "RR"),
+
+  list(key = "tsa_or",
+       label = "Trial sequential analysis, odds ratio",
+       answers = paste(
+         "Answers: \"How large does the cumulative evidence base need to",
+         "be for adequate power to detect an anticipated odds ratio in a",
+         "meta-analysis?\""
+       ),
+       outcome_type = "proportion", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Trial Sequential Analysis",
+       module_input_id = "tsa-outcome", design_value = "OR"),
+
+  list(key = "tsa_rd",
+       label = "Trial sequential analysis, risk difference",
+       answers = paste(
+         "Answers: \"How large does the cumulative evidence base need to",
+         "be for adequate power to detect an anticipated absolute risk",
+         "difference in a meta-analysis?\""
+       ),
+       outcome_type = "proportion", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Trial Sequential Analysis",
+       module_input_id = "tsa-outcome", design_value = "RD"),
+
+  list(key = "tsa_md",
+       label = "Trial sequential analysis, mean difference",
+       answers = paste(
+         "Answers: \"How large does the cumulative evidence base need to",
+         "be for adequate power to detect an anticipated mean difference",
+         "in a meta-analysis?\""
+       ),
+       outcome_type = "mean", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Trial Sequential Analysis",
+       module_input_id = "tsa-outcome", design_value = "MD"),
+
   list(key = "variance_single",
        label = "Single-variance test (vs. a reference SD)",
        answers = paste(
@@ -1786,6 +1832,9 @@ test_families <- list(
        hint = "Interim-monitoring trial designs with Pocock-to-O'Brien-Fleming efficacy/futility boundaries, for continuous, binary, or time-to-event outcomes.",
        catalog_keys = c("group_sequential_normal", "group_sequential_binary",
                          "group_sequential_survival")),
+  list(id = "trial_sequential_analysis", label = "Trial Sequential Analysis (Meta-Analysis)",
+       hint = "Fixed-effect required/optimal information size (RIS/OIS) for a planned or cumulatively-updated meta-analysis, across risk ratio, odds ratio, risk difference, and mean difference outcomes.",
+       catalog_keys = c("tsa_rr", "tsa_or", "tsa_rd", "tsa_md")),
   list(id = "variance_tests", label = "Variance Tests",
        hint = "Chi-squared test for a single variance against a reference value, F test for comparing two variances, and precision-based (CI-width) SD estimation.",
        catalog_keys = c("variance_single", "variance_two", "variance_sd_precision")),
