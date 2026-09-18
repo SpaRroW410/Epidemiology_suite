@@ -152,5 +152,72 @@ group_sequential_content <- list(
       "AA. Biometrics. 1987;43(1):193-199."
     ),
     backend = "clinfun::gsdesign.survival()"
+  ),
+
+  lan_demets_normal = list(
+    title = "Lan-DeMets Alpha-Spending Design: Continuous Outcome (2 Looks)",
+    formula_latex = paste0(
+      "$$\\alpha^*_{OF}(t) = 2\\left(1 - \\Phi\\!\\left(\\frac{z_{\\alpha/2}}{\\sqrt t}\\right)\\right), ",
+      "\\quad \\alpha^*_{Pocock}(t) = \\alpha \\ln(1+(e-1)t)$$",
+      "$$b_1 = \\Phi^{-1}(1-\\alpha^*(t_1)); \\quad ",
+      "P(Z_1 \\le b_1, Z_2 > b_2) = \\alpha - \\alpha^*(t_1), \\ \\text{corr}(Z_1,Z_2)=\\sqrt{t_1}$$"
+    ),
+    explanation = paste(
+      "This is the same interim-monitoring idea as the power-family design",
+      "above (an interim look plus a final look, spending some of the",
+      "overall alpha early), but using the literal **Lan-DeMets (1983)",
+      "alpha-spending function** approach instead of the power-family",
+      "reparameterization -- the method actually named \"Lan-DeMets alpha",
+      "spending\" in the wider literature, and a genuinely different",
+      "(though closely related) computation.",
+      "",
+      "- **delta, sd, r** - as in the continuous-outcome power-family",
+      "  design above.",
+      "- **Interim timing** - the information fraction (proportion of the",
+      "  final sample size) at which the single interim look happens.",
+      "- **Spending function** - O'Brien-Fleming-type (spends very little",
+      "  alpha early, boundary close to the fixed-design value at the",
+      "  final look -- small sample-size inflation) or Pocock-type (spends",
+      "  alpha more evenly, easier to stop early, but a noticeably larger",
+      "  maximum sample size).",
+      "",
+      "**Scope of this design**: exactly 2 looks (one interim, one final)",
+      "and a continuous (two-sample z-test) outcome -- the case with a",
+      "closed, directly verifiable two-look (bivariate-normal) boundary",
+      "solve. More than 2 looks needs a higher-dimensional numerical",
+      "integration/recursion not covered here; binary and time-to-event",
+      "outcomes are left open for a future batch.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "For an assumed difference of 0.5 (SD = 1), a single interim look",
+      "at 50% information, O'Brien-Fleming-type spending, two-sided",
+      "alpha = 0.05 and 80% power, this calculator returns n = 128 total",
+      "(64 per arm) -- a boundary of Z > 2.963 at the interim and",
+      "Z > 1.969 at the final look, matching real",
+      "`rpact::getDesignGroupSequential()` output exactly, and only a",
+      "1.9% sample-size inflation over the n = 126 a single-look fixed",
+      "design would need (O'Brien-Fleming spends almost no alpha early).",
+      "The same scenario with Pocock-type spending instead needs n = 142",
+      "total (a 13% inflation, and boundaries of Z > 2.157 at the interim",
+      "and Z > 2.201 at the final look) -- Pocock's more even alpha",
+      "spending makes it easier to stop early, at the cost of a stricter,",
+      "larger-sample final analysis.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Lan KKG, DeMets DL. Discrete sequential boundaries for clinical",
+      "trials. Biometrika. 1983;70(3):659-663.",
+      "",
+      "Spending functions and the 2-look boundary-solving procedure",
+      "independently derived and verified exactly against real",
+      "`rpact::getDesignGroupSequential()` output (O'Brien-Fleming-type",
+      "and Pocock-type spending, one-sided alpha, informationRates =",
+      "c(timing, 1)); the full sample-size solve was further verified by",
+      "simulating the actual two-stage two-sample z-test procedure on raw",
+      "data (300,000 replicates). Reimplemented from scratch rather than",
+      "depending on `rpact` at runtime, so this app stays self-contained."
+    ),
+    backend = "closed-form reimplementation (bivariate-normal boundary solve via mvtnorm)"
   )
 )

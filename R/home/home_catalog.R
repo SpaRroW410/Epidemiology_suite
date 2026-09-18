@@ -1451,6 +1451,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Group Sequential Design",
        module_input_id = "group_sequential-design", design_value = "survival"),
 
+  list(key = "lan_demets_normal",
+       label = "Lan-DeMets alpha-spending design, continuous outcome (2 looks)",
+       answers = paste(
+         "Answers: \"How large a trial do I need, at most, if I plan a",
+         "single interim look using the literal Lan-DeMets (O'Brien-",
+         "Fleming-type or Pocock-type) alpha-spending function, rather",
+         "than the power-family boundary reparameterization?\""
+       ),
+       outcome_type = "mean", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Group Sequential Design",
+       module_input_id = "group_sequential-design", design_value = "lan_demets_normal"),
+
   list(key = "tsa_rr",
        label = "Trial sequential analysis, risk ratio",
        answers = paste(
@@ -1744,7 +1756,7 @@ study_design_families <- list(
                          "noninferiority_means", "noninferiority_proportions",
                          "noninferiority_or", "noninferiority_hr",
                          "group_sequential_normal", "group_sequential_binary",
-                         "group_sequential_survival")),
+                         "group_sequential_survival", "lan_demets_normal")),
   list(id = "regression", label = "Regression",
        hint = "Testing whether a multiple regression model explains more variance than chance, whether adding predictors increases R-squared, a logistic regression predictor's effect (simple or covariate-adjusted), or two groups on an ordinal outcome (proportional odds).",
        catalog_keys = c("regression_r2", "regression_r2_increase", "logistic_binary",
@@ -1857,9 +1869,9 @@ test_families <- list(
                          "kruskal_wallis", "jonckheere_terpstra", "friedman", "ks_two_sample",
                          "wald_wolfowitz_runs", "animal_rank_test")),
   list(id = "group_sequential_designs", label = "Group Sequential Designs",
-       hint = "Interim-monitoring trial designs with Pocock-to-O'Brien-Fleming efficacy/futility boundaries, for continuous, binary, or time-to-event outcomes.",
+       hint = "Interim-monitoring trial designs with Pocock-to-O'Brien-Fleming efficacy/futility boundaries, for continuous, binary, or time-to-event outcomes; or the literal Lan-DeMets alpha-spending-function method for a continuous outcome (2 looks).",
        catalog_keys = c("group_sequential_normal", "group_sequential_binary",
-                         "group_sequential_survival")),
+                         "group_sequential_survival", "lan_demets_normal")),
   list(id = "trial_sequential_analysis", label = "Trial Sequential Analysis (Meta-Analysis)",
        hint = "Fixed-effect required/optimal information size (RIS/OIS) for a planned or cumulatively-updated meta-analysis, across risk ratio, odds ratio, risk difference, and mean difference outcomes.",
        catalog_keys = c("tsa_rr", "tsa_or", "tsa_rd", "tsa_md")),
