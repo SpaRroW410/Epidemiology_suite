@@ -655,6 +655,31 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Longitudinal / MMRM",
        module_input_id = "longitudinal-design", design_value = "slope_diff"),
 
+  list(key = "multilevel_two_level",
+       label = "Multilevel model, two-level (subjects, repeated measures)",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a longitudinal",
+         "trial analyzed with a random-intercept/random-slope",
+         "hierarchical (mixed) model, testing a treatment-group",
+         "difference in the RATE OF CHANGE over time?\""
+       ),
+       outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Multilevel / Hierarchical Model",
+       module_input_id = "multilevel-design", design_value = "two_level"),
+
+  list(key = "multilevel_three_level",
+       label = "Multilevel model, three-level (subjects nested in clusters)",
+       answers = paste(
+         "Answers: \"How many clusters (schools, clinics, wards) do I",
+         "need for a cluster-randomized longitudinal trial analyzed",
+         "with a 3-level hierarchical mixed model, testing a",
+         "treatment-group difference in the rate of change over",
+         "time?\""
+       ),
+       outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Multilevel / Hierarchical Model",
+       module_input_id = "multilevel-design", design_value = "three_level"),
+
   list(key = "mmrm_ar1",
        label = "MMRM with dropout, AR(1) correlation (Lu, Luo & Chen)",
        answers = paste(
@@ -1763,7 +1788,10 @@ study_design_families <- list(
        catalog_keys = c("bayesian_assurance_or", "bfda_ttest")),
   list(id = "longitudinal", label = "Longitudinal / MMRM",
        hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (GEE/GLS framework), or a mixed model of repeated measures (MMRM) with dropout and AR(1) correlation.",
-       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1"))
+       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1")),
+  list(id = "multilevel_models", label = "Multilevel / Hierarchical Models",
+       hint = "Two- and three-level hierarchical (mixed) models for a longitudinal trial, decomposing slope variance into subject- and (for 3-level) cluster-level components.",
+       catalog_keys = c("multilevel_two_level", "multilevel_three_level"))
 )
 
 # Second index over the SAME calculator_catalog entries, grouped by
@@ -1851,7 +1879,10 @@ test_families <- list(
        catalog_keys = c("bayesian_assurance_or", "bfda_ttest")),
   list(id = "longitudinal_tests", label = "Longitudinal / GEE Tests",
        hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (the GLS/GEE framework of Liu & Liang 1997), or a mixed model of repeated measures (MMRM) with dropout and AR(1) correlation (Lu, Luo & Chen 2008).",
-       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1"))
+       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1")),
+  list(id = "multilevel_model_tests", label = "Multilevel / Hierarchical Model Tests",
+       hint = "Testing a treatment-group slope difference under a 2- or 3-level hierarchical mixed model (extends Galbraith & Marschner 2002).",
+       catalog_keys = c("multilevel_two_level", "multilevel_three_level"))
 )
 
 catalog_entry <- function(key) {

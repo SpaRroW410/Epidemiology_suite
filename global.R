@@ -102,7 +102,9 @@ module_registry <- list(
   list(id = efa_cfa_meta$id, title = efa_cfa_meta$nav_title,
        ui = mod_efa_cfa_ui, server = mod_efa_cfa_server),
   list(id = tsa_meta$id, title = tsa_meta$nav_title,
-       ui = mod_tsa_ui, server = mod_tsa_server)
+       ui = mod_tsa_ui, server = mod_tsa_server),
+  list(id = multilevel_meta$id, title = multilevel_meta$nav_title,
+       ui = mod_multilevel_ui, server = mod_multilevel_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -143,5 +145,5 @@ module_groups <- list(
        module_ids = c("correlation", "chisq", "regression", "anova_general",
                        "logistic", "exact_tests", "rm_anova", "nonparametric",
                        "variance", "multiplicity", "manova", "bayesian",
-                       "longitudinal"))
+                       "longitudinal", "multilevel"))
 )
