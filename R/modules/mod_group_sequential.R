@@ -74,7 +74,20 @@ mod_group_sequential_ui <- function(id) {
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      conditionalPanel(
+        condition = design_is("lan_demets_normal"),
+        hr(),
+        checkboxInput(ns("has_interim"), "I have an observed interim result -- compute conditional power / SSR", value = FALSE),
+        conditionalPanel(
+          condition = sprintf("input['%s']", ns("has_interim")),
+          numericInput(ns("z1_interim"), "Observed interim Z-statistic", value = 1.5, step = 0.1),
+          numericInput(ns("target_cp"), "Target conditional power for re-estimation", value = 0.9, min = 0.5, max = 0.999, step = 0.01),
+          numericInput(ns("maxinc"), "Maximum fold-increase in sample size allowed", value = 3, min = 1.1, step = 0.5),
+          h5("Interim result"),
+          uiOutput(ns("interim_result"))
+        )
+      )
     ),
     tabPanel(
       "Formula / Help",
@@ -101,7 +114,13 @@ mod_group_sequential_ui <- function(id) {
       render_formula_block(group_sequential_content$lan_demets_normal$formula_latex),
       shiny::markdown(group_sequential_content$lan_demets_normal$explanation),
       h5("Worked example"),
-      shiny::markdown(group_sequential_content$lan_demets_normal$worked_example)
+      shiny::markdown(group_sequential_content$lan_demets_normal$worked_example),
+      hr(),
+      h4(group_sequential_content$conditional_power_ssr$title),
+      render_formula_block(group_sequential_content$conditional_power_ssr$formula_latex),
+      shiny::markdown(group_sequential_content$conditional_power_ssr$explanation),
+      h5("Worked example"),
+      shiny::markdown(group_sequential_content$conditional_power_ssr$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -120,7 +139,11 @@ mod_group_sequential_ui <- function(id) {
       hr(),
       h4(group_sequential_content$lan_demets_normal$title),
       p(strong("Citation: "), group_sequential_content$lan_demets_normal$citation),
-      p(strong("Implemented via: "), code(group_sequential_content$lan_demets_normal$backend))
+      p(strong("Implemented via: "), code(group_sequential_content$lan_demets_normal$backend)),
+      hr(),
+      h4(group_sequential_content$conditional_power_ssr$title),
+      p(strong("Citation: "), group_sequential_content$conditional_power_ssr$citation),
+      p(strong("Implemented via: "), code(group_sequential_content$conditional_power_ssr$backend))
     )
   )
 }
@@ -226,6 +249,47 @@ mod_group_sequential_server <- function(id) {
           boundary_rows
         )
       }
+    })
+
+    interim_result <- reactive({
+      req(input$design == "lan_demets_normal", isTRUE(input$has_interim))
+      res <- result()
+      req(res$ok)
+      req(input$z1_interim, input$target_cp, input$maxinc)
+
+      v <- res$value
+      tryCatch(
+        list(ok = TRUE, value = calc_ssr_normal(
+          z1 = input$z1_interim, timing = v$inputs$timing, n_max = v$n_total,
+          boundary_final = v$boundary_final, target_power = input$target_cp,
+          maxinc = input$maxinc
+        )),
+        error = function(e) list(ok = FALSE, message = conditionMessage(e))
+      )
+    })
+
+    output$interim_result <- renderUI({
+      res <- interim_result()
+      if (!res$ok) {
+        return(div(class = "text-danger", res$message))
+      }
+
+      v <- res$value
+      tagList(
+        p(strong("Observed trend (theta): "), round(v$theta, 4)),
+        p(strong("Conditional power at the originally planned sample size: "),
+          sprintf("%.1f%%", v$conditional_power_at_planned_n * 100)),
+        if (v$adapted) {
+          tagList(
+            p(class = "text-success",
+              sprintf("Recommendation: increase the total sample size to %d (%d more participants beyond the interim).",
+                       v$n_total_new, v$n_remaining)),
+            p(class = "text-muted", "This uses a fixed-weight inverse-normal combination test at the final analysis to preserve the type-I error -- do not simply re-test the pooled data at the new size with the original test statistic.")
+          )
+        } else {
+          p(class = "text-muted", "No sample-size adaptation recommended (the trend is non-positive, or conditional power at the planned size is already outside the adaptation window) -- keep the originally planned sample size.")
+        }
+      )
     })
   })
 }

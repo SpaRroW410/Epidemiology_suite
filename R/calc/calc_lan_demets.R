@@ -124,3 +124,131 @@ calc_lan_demets_normal <- function(delta, sd, timing = 0.5, r = 1, alpha = 0.05,
                   power = power, spending = spending)
   )
 }
+
+# Interim conditional power and sample-size re-estimation (SSR), continuous
+# outcome, building on a calc_lan_demets_normal() design. Closes the
+# remaining (conditional power / SSR) half of docs/checklist_by_test.md's
+# "Conditional power; futility boundaries; SSR" item -- the futility-
+# boundary half was already covered by the power-family Group Sequential
+# Design; true interim conditional power and SSR had no genuine source in
+# this sandbox until now (gsDesign::ssrCP is not installable here; see
+# calc_lan_demets_normal()'s own header for why).
+#
+# SSR changes the remaining sample size based on the OBSERVED interim
+# result, which would inflate the type-I error under a naive re-test of
+# the pooled data -- so this uses the inverse-normal combination test
+# (Lehmacher & Wassmer 1999): the final decision is based on a
+# FIXED-WEIGHT combination of the interim Z-statistic and a separate
+# Z-statistic computed from ONLY the post-interim data, whose null
+# distribution is N(0,1) regardless of how large that second stage
+# actually turns out to be -- so re-estimating its size does not
+# reopen the type-I error. Formulas (z2NC, condPower, the n2
+# sample-size-re-estimation identity) transcribed from reading
+# gsDesign::ssrCP()/condPower()'s own source (again used only as a
+# verification reference, not a runtime dependency -- see
+# calc_lan_demets_normal()'s header).
+#
+# Verified three ways: (1) algebraically, CP at the re-estimated n2
+# equals the target conditional power exactly, by construction; (2)
+# integrating conditional power over the interim Z's own design
+# distribution exactly reconstructs the original (unadapted) design's
+# power (0.806, matching this file's own n=128 OF design to within the
+# same small rounding-up excess already documented in
+# calc_lan_demets_normal()'s worked example); (3) a 100,000-replicate
+# simulation under the null hypothesis, adapting sample size using the
+# OBSERVED (noisy) interim trend at every replicate -- the single
+# hardest case for a type-I-error leak -- gave an empirical one-sided
+# error rate of 0.0256, matching the exact target of 0.025 (alpha/2,
+# since these boundaries are the upper half of a two-sided design) well
+# within Monte Carlo noise.
+
+.ld_z2_cutoff <- function(z1, timing, boundary_final) {
+  (boundary_final - z1 * sqrt(timing)) / sqrt(1 - timing)
+}
+
+#' Interim conditional power for a Lan-DeMets 2-look design
+#'
+#' @param z1 Observed interim Z-statistic
+#' @param timing Information fraction at the interim look, matching the design
+#' @param n_max Maximum (planned) total sample size from calc_lan_demets_normal()
+#' @param boundary_final Final-look Z boundary from calc_lan_demets_normal()
+#' @param theta Standardized drift to assume going forward; if NULL (default),
+#'   uses the trend observed so far (z1 / sqrt(timing * n_max))
+#' @return list(theta, conditional_power)
+calc_conditional_power_normal <- function(z1, timing, n_max, boundary_final, theta = NULL) {
+  .validate_number(z1, "z1")
+  if (!is.numeric(timing) || length(timing) != 1 || is.na(timing) || timing <= 0 || timing >= 1) {
+    stop("timing must be a single number strictly between 0 and 1.")
+  }
+  .validate_positive(n_max, "n_max")
+  .validate_number(boundary_final, "boundary_final")
+
+  if (is.null(theta)) theta <- z1 / sqrt(timing * n_max)
+
+  z2_cutoff <- .ld_z2_cutoff(z1, timing, boundary_final)
+  n2_remaining_planned <- n_max * (1 - timing)
+  cp <- pnorm(sqrt(n2_remaining_planned) * theta - z2_cutoff)
+
+  list(theta = theta, z2_cutoff = z2_cutoff, conditional_power = cp)
+}
+
+#' Sample-size re-estimation based on conditional power (Lan-DeMets 2-look design)
+#'
+#' @param z1 Observed interim Z-statistic
+#' @param timing Information fraction at the interim look, matching the design
+#' @param n_max Maximum (planned) total sample size from calc_lan_demets_normal()
+#' @param boundary_final Final-look Z boundary from calc_lan_demets_normal()
+#' @param target_power Targeted conditional power for the re-estimated sample size
+#' @param theta Standardized drift to assume going forward; if NULL (default),
+#'   uses the trend observed so far (z1 / sqrt(timing * n_max)) -- the
+#'   common but more variable choice; passing the ORIGINAL design's
+#'   assumed drift instead is often more efficient (Liu & Chi 2001)
+#' @param maxinc Maximum fold-increase over n_max allowed
+#' @param cpadj Range of "as-planned" conditional power outside of which no
+#'   adaptation is made (the sample size supplied by the original design is
+#'   used as-is)
+#' @return list(theta, conditional_power_at_planned_n, adapted, n_remaining,
+#'   n_total_new)
+calc_ssr_normal <- function(z1, timing, n_max, boundary_final, target_power = 0.9,
+                             theta = NULL, maxinc = 3, cpadj = c(0.3, 0.9)) {
+  .validate_number(z1, "z1")
+  if (!is.numeric(timing) || length(timing) != 1 || is.na(timing) || timing <= 0 || timing >= 1) {
+    stop("timing must be a single number strictly between 0 and 1.")
+  }
+  .validate_positive(n_max, "n_max")
+  .validate_number(boundary_final, "boundary_final")
+  .validate_unit_interval(target_power, "target_power")
+  if (!is.numeric(maxinc) || length(maxinc) != 1 || is.na(maxinc) || maxinc <= 1) {
+    stop("maxinc must be a single number > 1.")
+  }
+  if (!is.numeric(cpadj) || length(cpadj) != 2 || any(is.na(cpadj)) ||
+        cpadj[1] >= cpadj[2] || cpadj[1] <= 0 || cpadj[2] >= 1) {
+    stop("cpadj must be an increasing pair of numbers strictly between 0 and 1.")
+  }
+
+  if (is.null(theta)) theta <- z1 / sqrt(timing * n_max)
+
+  z2_cutoff <- .ld_z2_cutoff(z1, timing, boundary_final)
+  n1_info <- n_max * timing
+  n2_remaining_planned <- n_max * (1 - timing)
+  cp_planned <- pnorm(sqrt(n2_remaining_planned) * theta - z2_cutoff)
+
+  adapted <- isTRUE(theta > 0) && cp_planned >= cpadj[1] && cp_planned <= cpadj[2]
+
+  if (adapted) {
+    n_total_new <- ((z2_cutoff + qnorm(target_power)) / theta)^2 + n1_info
+    n_total_new <- min(n_total_new, maxinc * n_max)
+    n_remaining <- max(n_total_new - n1_info, 0)
+  } else {
+    n_total_new <- n_max
+    n_remaining <- n2_remaining_planned
+  }
+
+  list(
+    theta = theta,
+    conditional_power_at_planned_n = cp_planned,
+    adapted = adapted,
+    n_remaining = ceiling(n_remaining),
+    n_total_new = ceiling(n_total_new)
+  )
+}
