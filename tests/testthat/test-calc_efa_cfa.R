@@ -58,6 +58,28 @@ test_that("calc_sem_rmsea_samplesize matches semTools for a second, higher-power
   expect_equal(res$n, 131)
 })
 
+test_that("calc_irt_calibration_guidance returns the correct minimums for each model type", {
+  r1 <- calc_irt_calibration_guidance("rasch_1pl")
+  expect_equal(r1$n_minimum, 50)
+  expect_equal(r1$n_precise, 250)
+
+  r2 <- calc_irt_calibration_guidance("twopl")
+  expect_equal(r2$n_minimum, 500)
+
+  r3 <- calc_irt_calibration_guidance("threepl")
+  expect_equal(r3$n_minimum, 1000)
+
+  r4 <- calc_irt_calibration_guidance("polytomous")
+  expect_equal(r4$n_minimum, 500)
+
+  # 3PL (added guessing parameter) should need at least as much data as 2PL
+  expect_true(r3$n_minimum >= r2$n_minimum)
+})
+
+test_that("calc_irt_calibration_guidance rejects an invalid model", {
+  expect_error(calc_irt_calibration_guidance("invalid_model"))
+})
+
 test_that("calc_sem_rmsea_power rejects invalid inputs", {
   expect_error(calc_sem_rmsea_power(rmsea0 = -0.1, rmseaA = 0.08, df = 20, n = 200), ">= 0")
   expect_error(calc_sem_rmsea_power(rmsea0 = 0.05, rmseaA = 0.05, df = 20, n = 200), "differ")

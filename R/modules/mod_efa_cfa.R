@@ -5,7 +5,7 @@
 
 efa_cfa_meta <- list(
   id = "efa_cfa",
-  nav_title = "EFA/CFA Sample Size Guidance"
+  nav_title = "Psychometrics Sample Size Guidance"
 )
 
 mod_efa_cfa_ui <- function(id) {
@@ -21,7 +21,8 @@ mod_efa_cfa_ui <- function(id) {
         ns("design"), "Design",
         choices = c(
           "Rule-of-thumb (subjects-per-item)" = "rule_of_thumb",
-          "RMSEA-based power (CFA/SEM test of close fit)" = "rmsea"
+          "RMSEA-based power (CFA/SEM test of close fit)" = "rmsea",
+          "IRT item calibration (rule-of-thumb by model type)" = "irt_calibration"
         ),
         selected = "rule_of_thumb"
       ),
@@ -44,6 +45,21 @@ mod_efa_cfa_ui <- function(id) {
         numericInput(ns("alpha_rmsea"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_rmsea"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
       ),
+      conditionalPanel(
+        condition = design_is("irt_calibration"),
+        div(class = "alert alert-info",
+            strong("Rule of thumb, not a formula: "),
+            "there is no accepted power calculation for IRT item calibration -- ",
+            "these are published minimum-N guidelines from Monte Carlo parameter-",
+            "recovery studies, not a solved hypothesis test."),
+        selectInput(
+          ns("irt_model"), "IRT model",
+          choices = c("Rasch / 1PL (difficulty only)" = "rasch_1pl",
+                      "2PL (difficulty + discrimination)" = "twopl",
+                      "3PL (+ guessing)" = "threepl",
+                      "Polytomous (graded response / partial credit)" = "polytomous")
+        )
+      ),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -61,7 +77,13 @@ mod_efa_cfa_ui <- function(id) {
       render_formula_block(efa_cfa_content$rmsea$formula_latex),
       shiny::markdown(efa_cfa_content$rmsea$explanation),
       h5("Worked example"),
-      shiny::markdown(efa_cfa_content$rmsea$worked_example)
+      shiny::markdown(efa_cfa_content$rmsea$worked_example),
+      hr(),
+      h4(efa_cfa_content$irt_calibration$title),
+      render_formula_block(efa_cfa_content$irt_calibration$formula_latex),
+      shiny::markdown(efa_cfa_content$irt_calibration$explanation),
+      h5("Worked example"),
+      shiny::markdown(efa_cfa_content$irt_calibration$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -72,7 +94,11 @@ mod_efa_cfa_ui <- function(id) {
       hr(),
       h4(efa_cfa_content$rmsea$title),
       p(strong("Citation: "), efa_cfa_content$rmsea$citation),
-      p(strong("Implemented via: "), code(efa_cfa_content$rmsea$backend))
+      p(strong("Implemented via: "), code(efa_cfa_content$rmsea$backend)),
+      hr(),
+      h4(efa_cfa_content$irt_calibration$title),
+      p(strong("Citation: "), efa_cfa_content$irt_calibration$citation),
+      p(strong("Implemented via: "), code(efa_cfa_content$irt_calibration$backend))
     )
   )
 }
@@ -88,7 +114,7 @@ mod_efa_cfa_server <- function(id) {
           list(ok = TRUE, value = calc_efa_cfa_sample_size(n_items = input$n_items)),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
-      } else {
+      } else if (input$design == "rmsea") {
         req(input$df_rmsea, input$rmsea0, input$rmseaA, input$group_rmsea,
             input$alpha_rmsea, input$power_rmsea)
         tryCatch(
@@ -96,6 +122,12 @@ mod_efa_cfa_server <- function(id) {
             rmsea0 = input$rmsea0, rmseaA = input$rmseaA, df = input$df_rmsea,
             power = input$power_rmsea, alpha = input$alpha_rmsea, group = input$group_rmsea
           )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$irt_model)
+        tryCatch(
+          list(ok = TRUE, value = calc_irt_calibration_guidance(model = input$irt_model)),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
       }
@@ -123,10 +155,16 @@ mod_efa_cfa_server <- function(id) {
               "or factor overdetermination -- see the Formula/Help tab's caveat ",
               "(MacCallum et al. 1999) before treating any of these as a firm target.")
         )
-      } else {
+      } else if (input$design == "rmsea") {
         tagList(
           p(strong("Required total sample size: "), v$n),
           p(sprintf("Achieved power at this n: %.4f", v$achieved_power))
+        )
+      } else {
+        tagList(
+          p(strong("Conservative minimum N: "), v$n_minimum),
+          p(strong("N for more precise/stable calibration: "), v$n_precise),
+          div(class = "text-muted small", v$note)
         )
       }
     })

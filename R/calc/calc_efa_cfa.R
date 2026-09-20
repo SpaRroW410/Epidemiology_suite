@@ -153,3 +153,64 @@ calc_sem_rmsea_samplesize <- function(rmsea0, rmseaA, df, power = 0.8, alpha = 0
     inputs = list(rmsea0 = rmsea0, rmseaA = rmseaA, df = df, power = power, alpha = alpha, group = group)
   )
 }
+
+#' IRT item calibration rule-of-thumb minimum sample size, by model type
+#'
+#' There is no closed-form power/sample-size formula for IRT item
+#' calibration -- required N for adequate item-parameter recovery depends
+#' on the specific model, item discrimination/difficulty distribution,
+#' and test length, none of which reduce to a single hypothesis test. The
+#' field instead relies on Monte Carlo parameter-recovery studies that
+#' established minimum-N guidelines by model complexity, the same "genuine
+#' rule-of-thumb, not a solved formula" framing this app already uses for
+#' the EFA/CFA subjects-per-item ratios above and the Pilot/Feasibility
+#' module's Julious (2005) 12-per-arm rule.
+#'
+#' - Rasch/1PL: Linacre (1994) -- roughly 50 well-targeted examinees is a
+#'   conservative minimum for useful (if imprecise, ~1 logit) calibration;
+#'   100-150 for +/-0.5 logit precision; 250+ for the tightest, most
+#'   stable calibrations.
+#' - 2PL: Hulin, Lissak & Drasgow (1982) -- a Monte Carlo parameter-
+#'   recovery study (N = 200/500/1000/2000, tests of 15/30/60 items)
+#'   concluding N >= 500 is needed for adequate 2PL item-parameter
+#'   recovery.
+#' - 3PL: the same Hulin, Lissak & Drasgow (1982) study -- the added
+#'   guessing parameter needs substantially more data, N >= 1000.
+#' - Polytomous (graded response/partial credit): Reise & Yu (1990) --
+#'   N >= 500 needed for adequate discrimination-parameter recovery
+#'   (correlation >= 0.85 between estimated and true values) in the
+#'   graded response model.
+#'
+#' @param model Which IRT model is being calibrated: "rasch_1pl", "twopl",
+#'   "threepl", or "polytomous"
+#' @return list(model, n_minimum, n_precise, note, inputs)
+calc_irt_calibration_guidance <- function(model = c("rasch_1pl", "twopl", "threepl", "polytomous")) {
+  model <- match.arg(model)
+
+  vals <- switch(model,
+    rasch_1pl = list(
+      n_minimum = 50, n_precise = 250,
+      note = "50 well-targeted examinees is a conservative minimum for useful (~1 logit precision) calibration; 100-150 for +/-0.5 logit precision; 250+ for the tightest, most stable calibrations (Linacre 1994)."
+    ),
+    twopl = list(
+      n_minimum = 500, n_precise = 1000,
+      note = "N >= 500 for adequate 2PL item-parameter recovery, rising toward 1000+ for a more precisely-estimated discrimination parameter, especially with a shorter test (Hulin, Lissak & Drasgow 1982)."
+    ),
+    threepl = list(
+      n_minimum = 1000, n_precise = 2000,
+      note = "N >= 1000 for adequate 3PL item-parameter recovery -- the added guessing parameter needs substantially more data than the 2PL case; 2000+ for the most stable estimates (Hulin, Lissak & Drasgow 1982)."
+    ),
+    polytomous = list(
+      n_minimum = 500, n_precise = 1000,
+      note = "N >= 500 for adequate graded-response-model discrimination-parameter recovery (correlation >= 0.85 between estimated and true values); 1000+ for a longer polytomous scale or more response categories (Reise & Yu 1990)."
+    )
+  )
+
+  list(
+    model = model,
+    n_minimum = vals$n_minimum,
+    n_precise = vals$n_precise,
+    note = vals$note,
+    inputs = list(model = model)
+  )
+}

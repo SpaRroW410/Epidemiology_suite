@@ -395,7 +395,7 @@ calculator_catalog <- list(
          "not a solved hypothesis-test formula)"
        ),
        outcome_type = "efa_cfa", groups = NA, dependency = NA, reference_based = NA,
-       built = TRUE, nav_target = "EFA/CFA Sample Size Guidance",
+       built = TRUE, nav_target = "Psychometrics Sample Size Guidance",
        module_input_id = "efa_cfa-design", design_value = "rule_of_thumb"),
 
   list(key = "sem_rmsea",
@@ -409,8 +409,21 @@ calculator_catalog <- list(
          "thumb guidance above)"
        ),
        outcome_type = "efa_cfa", groups = NA, dependency = NA, reference_based = NA,
-       built = TRUE, nav_target = "EFA/CFA Sample Size Guidance",
+       built = TRUE, nav_target = "Psychometrics Sample Size Guidance",
        module_input_id = "efa_cfa-design", design_value = "rmsea"),
+
+  list(key = "irt_calibration",
+       label = "IRT item calibration -- minimum sample size by model type",
+       answers = paste(
+         "Answers: \"I'm calibrating items with Item Response Theory",
+         "(Rasch/1PL, 2PL, 3PL, or a polytomous graded-response/partial-",
+         "credit model) -- how many examinees do I need?\" (published",
+         "minimum-N guidelines from Monte Carlo parameter-recovery",
+         "studies, not a solved hypothesis test)"
+       ),
+       outcome_type = "efa_cfa", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Psychometrics Sample Size Guidance",
+       module_input_id = "efa_cfa-design", design_value = "irt_calibration"),
 
   list(key = "evpi",
        label = "Value of information (EVPI) for a cost-effectiveness decision",
@@ -1846,7 +1859,7 @@ study_design_families <- list(
        catalog_keys = c("ecological_guidance")),
   list(id = "efa_cfa", label = "Psychometrics / Scale Development",
        hint = "Subjects-per-item rule-of-thumb ratios for planning an exploratory or confirmatory factor analysis / scale validation study.",
-       catalog_keys = c("efa_cfa_guidance", "sem_rmsea")),
+       catalog_keys = c("efa_cfa_guidance", "sem_rmsea", "irt_calibration")),
   list(id = "evpi", label = "Health Economics / Value of Information",
        hint = "Expected Value of Perfect/Sample Information (EVPI/EVSI) and the sample size maximizing the Expected Net Benefit of Sampling (ENBS), for a cost-effectiveness decision already summarized by an incremental net benefit mean/SD.",
        catalog_keys = c("evpi", "evsi_enbs")),

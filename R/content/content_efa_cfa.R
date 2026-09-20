@@ -130,5 +130,74 @@ efa_cfa_content <- list(
       "runtime dependency."
     ),
     backend = "closed-form reimplementation (MacCallum, Browne & Sugawara 1996)"
+  ),
+
+  irt_calibration = list(
+    title = "IRT Item Calibration — Minimum Sample Size by Model Type",
+    formula_latex = paste0(
+      "$$N_{minimum} = \\text{lookup}(\\text{model type}), \\quad ",
+      "\\text{from published Monte Carlo parameter-recovery studies}$$"
+    ),
+    explanation = paste(
+      "Like the EFA/CFA ratios above, there is no closed-form power",
+      "formula for IRT (Item Response Theory) item calibration -- how",
+      "many examinees are needed depends on the specific model's",
+      "complexity (how many parameters each item has), not a single",
+      "hypothesis test. The field instead relies on published Monte",
+      "Carlo parameter-recovery studies -- simulating known \"true\" item",
+      "parameters, generating response data at various sample sizes, and",
+      "checking how well the fitted model recovers the true values --",
+      "which established the following widely-cited minimum-N",
+      "guidelines by model type:",
+      "",
+      "- **Rasch / 1PL** (one parameter per item: difficulty only) --",
+      "  the simplest and most data-efficient IRT model. Linacre (1994)",
+      "  recommends roughly 50 well-targeted examinees as a conservative",
+      "  minimum for useful (if imprecise, about +/-1 logit) item",
+      "  calibration, rising to 100-150 for +/-0.5 logit precision, and",
+      "  250+ for the tightest, most stable calibrations.",
+      "- **2PL** (difficulty + discrimination per item) -- Hulin, Lissak",
+      "  & Drasgow (1982)'s classic Monte Carlo recovery study",
+      "  (N = 200/500/1000/2000 examinees, tests of 15/30/60 items)",
+      "  found N >= 500 needed for adequate item-parameter recovery.",
+      "- **3PL** (difficulty + discrimination + guessing per item) --",
+      "  the same study found the added guessing parameter needs",
+      "  substantially more data, N >= 1000.",
+      "- **Polytomous** (graded response/partial credit, multiple",
+      "  ordered response categories per item) -- Reise & Yu (1990)",
+      "  found N >= 500 needed for the discrimination parameter to be",
+      "  recovered accurately (estimated-vs-true correlation >= 0.85).",
+      "",
+      "Treat these as a starting point, the same way the EFA/CFA ratios",
+      "above should be treated -- actual required N also depends on test",
+      "length, how well the test's difficulty range matches the",
+      "examinee population (\"targeting\"), and how much precision the",
+      "specific application needs.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Calibrating a new 20-item scale: if a simple Rasch/1PL model fits,",
+      "50 well-targeted examinees is a workable minimum for a pilot",
+      "calibration; if a 2PL model is needed (items differ meaningfully",
+      "in discrimination), at least 500 examinees are recommended; if a",
+      "3PL model is needed (e.g. a multiple-choice test where guessing",
+      "matters), at least 1000. A polytomous (Likert-type, graded",
+      "response) scale needs at least 500 examinees by the same logic --",
+      "notably MORE than the simplest dichotomous Rasch case, since",
+      "polytomous items carry more parameters to estimate per item.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Linacre JM. Sample size and item calibration [or person measure]",
+      "stability. Rasch Meas Trans. 1994;7(4):328.",
+      "",
+      "Hulin CL, Lissak RI, Drasgow F. Recovery of two- and three-",
+      "parameter logistic item characteristic curves: a Monte Carlo",
+      "study. Appl Psychol Meas. 1982;6(3):249-260.",
+      "",
+      "Reise SP, Yu J. Parameter recovery in the graded response model",
+      "using MULTILOG. J Educ Meas. 1990;27(2):133-144."
+    ),
+    backend = "rule-of-thumb lookup (Linacre 1994; Hulin, Lissak & Drasgow 1982; Reise & Yu 1990); no external package required"
   )
 )
