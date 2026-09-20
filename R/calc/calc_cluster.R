@@ -163,3 +163,80 @@ calc_cluster_survey_binary <- function(b, b_sd = NULL, p, epsilon,
                   rho = rho, N_psu = N_psu, conf_level = conf_level)
   )
 }
+
+#' Optimal two-stage (PPS) cluster sample allocation: PSUs and take-b
+#'
+#' Solves the classic Hansen, Hurwitz & Madow (1953) cost-optimization
+#' problem for a two-stage sample selected PPS (probability-proportional-
+#' to-size) at the first stage and SRS within each sampled cluster at the
+#' second: given the relative cost of adding a cluster (PSU) vs. adding an
+#' element within an already-sampled cluster, and the intracluster
+#' homogeneity (delta/ICC), what "take" (elements per cluster, b) MINIMIZES
+#' variance for a fixed budget, or MINIMIZES cost for a target precision
+#' (CV)? This directly answers the item this app's checklist names:
+#' the optimal take b depends only on the cost ratio and delta -- NOT on
+#' the number of PSUs -- while the number of PSUs (m) is then whatever the
+#' budget or target CV implies once b is fixed. This is the standard
+#' methodology behind DHS-style survey sample design (DHS Sampling and
+#' Household Listing Manual, Working Paper 30).
+#'
+#' Reimplemented from, and verified bit-for-bit against,
+#' `PracTools::clusOpt2()`'s own source (`PracTools` installed via the
+#' github.com/cran mirror as a verification oracle only -- not a runtime
+#' dependency, per this project's vendoring policy).
+#'
+#' @param cost_psu Cost of adding one more cluster (PSU) to the sample (> 0)
+#' @param cost_element Cost of adding one more element within an already-
+#'   sampled cluster (> 0)
+#' @param delta Intracluster homogeneity measure (ICC-like), (0, 1)
+#' @param unit_relvar Unit relvariance of the variable being measured
+#'   (> 0; 1 if unknown -- a conservative/neutral default)
+#' @param k Ratio of (between-PSU + within-PSU variance) to the unit
+#'   relvariance (> 0; 1 if unknown)
+#' @param mode "budget" (solve for the number of PSUs and achieved CV
+#'   given a fixed total budget) or "precision" (solve for the number of
+#'   PSUs and resulting cost given a target CV)
+#' @param total_budget Total variable-cost budget (> 0; required if
+#'   mode = "budget")
+#' @param target_cv Target coefficient of variation (> 0; required if
+#'   mode = "precision")
+#' @return list(n_opt, m_opt, cv, cost, inputs)
+calc_cluster_pps_optimal_allocation <- function(cost_psu, cost_element, delta,
+                                                 unit_relvar = 1, k = 1,
+                                                 mode = c("budget", "precision"),
+                                                 total_budget = NULL, target_cv = NULL) {
+  mode <- match.arg(mode)
+  .validate_positive(cost_psu, "cost_psu")
+  .validate_positive(cost_element, "cost_element")
+  if (!is.numeric(delta) || length(delta) != 1 || is.na(delta) || delta <= 0 || delta >= 1) {
+    stop("delta must be a single number in (0, 1).")
+  }
+  .validate_positive(unit_relvar, "unit_relvar")
+  .validate_positive(k, "k")
+
+  n_opt <- sqrt((cost_psu / cost_element) * (1 - delta) / delta)
+
+  if (mode == "budget") {
+    .validate_positive(total_budget, "total_budget")
+    m_opt <- total_budget / (cost_psu + cost_element * n_opt)
+    if (m_opt < 0) stop("Computed m_opt is negative -- check inputs.")
+    cv <- sqrt(unit_relvar / m_opt / n_opt * k * (1 + delta * (n_opt - 1)))
+    cost <- total_budget
+  } else {
+    .validate_positive(target_cv, "target_cv")
+    m_opt <- unit_relvar * k * (1 + delta * (n_opt - 1)) / n_opt / target_cv^2
+    if (m_opt < 0) stop("Computed m_opt is negative -- check inputs.")
+    cv <- target_cv
+    cost <- cost_psu * m_opt + cost_element * m_opt * n_opt
+  }
+
+  list(
+    n_opt = n_opt,
+    m_opt = m_opt,
+    cv = cv,
+    cost = cost,
+    inputs = list(cost_psu = cost_psu, cost_element = cost_element, delta = delta,
+                  unit_relvar = unit_relvar, k = k, mode = mode,
+                  total_budget = total_budget, target_cv = target_cv)
+  )
+}

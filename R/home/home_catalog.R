@@ -790,6 +790,20 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Cluster / Design Effect",
        module_input_id = "cluster-design", design_value = "survey"),
 
+  list(key = "cluster_pps_optimal",
+       label = "Two-stage PPS sampling -- optimal cluster allocation (take b)",
+       answers = paste(
+         "Answers: \"I'm designing a two-stage PPS (probability-",
+         "proportional-to-size) survey -- given the relative cost of",
+         "adding a cluster vs. an element within one, and the intra-",
+         "cluster homogeneity, what's the optimal number of elements per",
+         "cluster (take b), and how many clusters do I need for my",
+         "budget or target precision?\""
+       ),
+       outcome_type = "cluster", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Cluster / Design Effect",
+       module_input_id = "cluster-design", design_value = "pps_optimal"),
+
   list(key = "stepped_wedge_normal",
        label = "Stepped-wedge cluster-randomized trial (continuous outcome)",
        answers = paste(
@@ -1835,7 +1849,7 @@ study_design_families <- list(
                          "rmst_comparison")),
   list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
        hint = "Inflating an existing sample size for cluster-sampled surveys, or solving a full cluster survey design (WHO EPI-style) directly.",
-       catalog_keys = c("cluster_deff", "cluster_deff_variable", "cluster_survey")),
+       catalog_keys = c("cluster_deff", "cluster_deff_variable", "cluster_survey", "cluster_pps_optimal")),
   list(id = "capture_recapture", label = "Capture-Recapture",
        hint = "Planning a two-sample mark-recapture study's second-sample size for a target precision on an unknown population size.",
        catalog_keys = c("capture_recapture")),

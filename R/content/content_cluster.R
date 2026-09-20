@@ -202,5 +202,82 @@ cluster_content <- list(
       "expression, reimplemented from scratch."
     ),
     backend = "closed-form reimplementation (Donner & Klar 2000; Eldridge, Ukoumunne & Carlin 2009)"
+  ),
+
+  pps_optimal = list(
+    title = "Two-Stage PPS Sampling -- Optimal Cluster Allocation (Take b)",
+    formula_latex = paste0(
+      "$$n_{opt} = \\sqrt{\\frac{C_1}{C_2}\\cdot\\frac{1-\\delta}{\\delta}}$$",
+      "$$CV = \\sqrt{\\frac{k\\,[1+\\delta(n_{opt}-1)]}{m\\,n_{opt}}\\,V_1}, \\quad ",
+      "m_{opt} = \\frac{\\text{budget}}{C_1 + C_2\\,n_{opt}} \\ \\text{(fixed budget)}$$",
+      "$$m_{opt} = \\frac{k\\,[1+\\delta(n_{opt}-1)]\\,V_1}{n_{opt}\\,CV_0^2} ",
+      "\\ \\text{(target CV)}$$"
+    ),
+    explanation = paste(
+      "For a two-stage sample selected with probability-proportional-to-",
+      "size (PPS) at the first stage (clusters/PSUs) and simple random",
+      "sampling within each sampled cluster at the second stage, this",
+      "solves the classic Hansen, Hurwitz & Madow (1953) cost-",
+      "optimization problem: what \"take\" b (elements sampled per",
+      "cluster) minimizes variance for a fixed budget, or minimizes cost",
+      "for a target precision (CV)?",
+      "",
+      "**The key result this answers directly**: the OPTIMAL take, n_opt,",
+      "depends only on the RELATIVE COST of adding a cluster vs. adding an",
+      "element within one (C1/C2), and the intracluster homogeneity",
+      "(delta, an ICC-like quantity) -- it does NOT depend on the number",
+      "of clusters (PSUs) at all. The number of PSUs, m, is then whatever",
+      "the budget or target CV implies once the optimal take is fixed.",
+      "This is the standard methodology behind DHS-style survey design",
+      "(the DHS Sampling and Household Listing Manual, Working Paper 30),",
+      "generalizing this app's simpler Design-Effect calculator (which",
+      "takes m as a GIVEN input) to the case where the take itself is",
+      "being optimized alongside the number of clusters.",
+      "",
+      "- **Cost per PSU (C1)** - the cost of adding one more cluster to",
+      "  the sample (travel, listing, setup).",
+      "- **Cost per element (C2)** - the cost of sampling one more",
+      "  element within an already-sampled cluster.",
+      "- **delta** - the intracluster homogeneity measure (an ICC-like",
+      "  quantity, (0,1)).",
+      "- **Unit relvariance / k** - variance-structure inputs; leave both",
+      "  at 1 if not otherwise known (a neutral default).",
+      "- **Mode** - solve for the achieved CV given a fixed total budget,",
+      "  or solve for the required cost given a target CV.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "C1=750 (cost per cluster), C2=100 (cost per element), delta=0.05,",
+      "unit relvariance=1, k=1, total budget=100,000 -> optimal take",
+      "n_opt=11.9 elements/cluster, m_opt=51.4 clusters, achieved CV=0.0502",
+      "-- exactly matching a real `PracTools::clusOpt2()` call on the",
+      "same inputs (its own package documentation example). A second",
+      "scenario (delta=0.01, target CV=0.05) -> n_opt=27.2, m_opt=18.5,",
+      "required cost=64,399 -- also matching exactly. Notably, n_opt is",
+      "IDENTICAL in any scenario sharing the same cost ratio and delta,",
+      "regardless of whether the budget or target-CV route is used to",
+      "get there -- confirming the optimal take truly doesn't depend on",
+      "the number of clusters.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Hansen MH, Hurwitz WN, Madow WG. Sample Survey Methods and Theory,",
+      "Vol. I, ch. 6, sect. 16. John Wiley & Sons; 1953.",
+      "",
+      "Valliant R, Dever J, Kreuter F. Practical Tools for Designing and",
+      "Weighting Survey Samples. 2nd ed., sect. 9.3.1. Springer; 2018.",
+      "",
+      "Formula extracted from, and verified bit-for-bit against, real",
+      "`PracTools::clusOpt2()` calls (Valliant R, Dever JA, Kreuter F,",
+      "Zipf G. PracTools: Tools for Designing and Weighting Survey",
+      "Samples. R package, https://github.com/cran/PracTools) --",
+      "installed in this sandbox via the github.com/cran mirror",
+      "(`cran.r-project.org` itself is network-blocked here), used only",
+      "as a verification oracle. Per this project's vendoring policy, the",
+      "shipped calculator has no new runtime dependency: the formula is a",
+      "handful of closed-form arithmetic lines, reimplemented from",
+      "scratch."
+    ),
+    backend = "closed-form reimplementation (Hansen, Hurwitz & Madow 1953; Valliant, Dever & Kreuter 2018)"
   )
 )
