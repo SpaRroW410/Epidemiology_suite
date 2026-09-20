@@ -104,7 +104,9 @@ module_registry <- list(
   list(id = tsa_meta$id, title = tsa_meta$nav_title,
        ui = mod_tsa_ui, server = mod_tsa_server),
   list(id = multilevel_meta$id, title = multilevel_meta$nav_title,
-       ui = mod_multilevel_ui, server = mod_multilevel_server)
+       ui = mod_multilevel_ui, server = mod_multilevel_server),
+  list(id = evpi_meta$id, title = evpi_meta$nav_title,
+       ui = mod_evpi_ui, server = mod_evpi_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -141,6 +143,8 @@ module_groups <- list(
        module_ids = c("qualitative")),
   list(title = "Psychometrics / Scale Development",
        module_ids = c("efa_cfa")),
+  list(title = "Health Economics / Value of Information",
+       module_ids = c("evpi")),
   list(title = "General Statistical Tests",
        module_ids = c("correlation", "chisq", "regression", "anova_general",
                        "logistic", "exact_tests", "rm_anova", "nonparametric",

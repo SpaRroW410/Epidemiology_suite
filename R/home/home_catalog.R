@@ -398,6 +398,30 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "EFA/CFA Sample Size Guidance",
        module_input_id = NA, design_value = NA),
 
+  list(key = "evpi",
+       label = "Value of information (EVPI) for a cost-effectiveness decision",
+       answers = paste(
+         "Answers: \"Given the uncertainty in an existing cost-effectiveness",
+         "analysis (mean and SD of the incremental net benefit from a",
+         "probabilistic sensitivity analysis), is it worth doing more",
+         "research at all, and what's the maximum any future study could",
+         "be worth?\""
+       ),
+       outcome_type = "evpi", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Value of Information (EVPI/EVSI)",
+       module_input_id = "evpi-design", design_value = "evpi"),
+
+  list(key = "evsi_enbs",
+       label = "Value of sample information (EVSI) and optimal sample size (ENBS)",
+       answers = paste(
+         "Answers: \"How large should a specific proposed follow-up study",
+         "be, to maximize its expected net benefit once its cost is",
+         "weighed against the decision uncertainty it would resolve?\""
+       ),
+       outcome_type = "evpi", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Value of Information (EVPI/EVSI)",
+       module_input_id = "evpi-design", design_value = "evsi"),
+
   list(key = "correlation_pearson",
        label = "Pearson correlation",
        answers = paste(
@@ -1745,6 +1769,9 @@ study_design_families <- list(
   list(id = "efa_cfa", label = "Psychometrics / Scale Development",
        hint = "Subjects-per-item rule-of-thumb ratios for planning an exploratory or confirmatory factor analysis / scale validation study.",
        catalog_keys = c("efa_cfa_guidance")),
+  list(id = "evpi", label = "Health Economics / Value of Information",
+       hint = "Expected Value of Perfect/Sample Information (EVPI/EVSI) and the sample size maximizing the Expected Net Benefit of Sampling (ENBS), for a cost-effectiveness decision already summarized by an incremental net benefit mean/SD.",
+       catalog_keys = c("evpi", "evsi_enbs")),
   list(id = "glmm", label = "Monte Carlo GLMM (Cluster-Randomized Trial)",
        hint = "Cluster-randomized trials analyzed with a random-intercept (generalized) linear mixed model, sized by direct Monte Carlo simulation since no closed-form formula exists.",
        catalog_keys = c("glmm_lmm_continuous", "glmm_binary")),
