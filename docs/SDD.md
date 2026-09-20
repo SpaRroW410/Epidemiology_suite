@@ -16,16 +16,15 @@
 Define the architecture, module design, content model, and roadmap for an R Shiny
 application that provides sample size and power calculations relevant to community
 medicine, epidemiology, and clinical research — with an explained-formula help
-system, original-source citations, and a post-hoc power module — so the codebase
-stays maintainable as calculators are added over time by one primary developer,
-with possible future contributors.
+system and original-source citations — so the codebase stays maintainable as
+calculators are added over time by one primary developer, with possible future
+contributors.
 
 ### 1.2 In scope
 - Sample size / power calculators across common epidemiological and clinical
   study designs (see §7 catalog)
 - Per-calculator help content: formula, plain-language explanation, worked example
 - Per-calculator citation to the original methodological source
-- Post-hoc / achieved power module, appropriately caveated
 - Single-user, stateless, browser-based tool (no accounts, no saved sessions in v1)
 
 ### 1.3 Out of scope (v1)
@@ -41,9 +40,8 @@ with possible future contributors.
 Existing tools (OpenEpi, PS: Power and Sample Size, Epi Info StatCalc, and various
 single-purpose R/Shiny apps such as `presize`, `rashnu`) each cover part of this
 space, but none combine broad calculator coverage with an in-app, citation-backed
-explanation of each formula and a properly-framed post-hoc power module. This
-project's value is that combination, plus long-term extensibility — not novel
-statistical methodology.
+explanation of each formula. This project's value is that combination, plus
+long-term extensibility — not novel statistical methodology.
 
 ---
 
@@ -68,7 +66,6 @@ statistical methodology.
 │  UI Shell (bslib::page_navbar)               │
 │  - Home / About                              │
 │  - One nav tab per calculator family         │
-│  - Post-hoc Power tab                        │
 └───────────────┬───────────────────────────────┘
                 │
 ┌───────────────▼───────────────────────────────┐
@@ -132,8 +129,7 @@ sample-size-app/
 │   │   ├── mod_cohort.R
 │   │   ├── mod_diagnostic.R
 │   │   ├── mod_correlation.R
-│   │   ├── mod_precision.R
-│   │   └── mod_posthoc_power.R
+│   │   └── mod_precision.R
 │   ├── calc/                      # pure calculation functions (testable, no Shiny)
 │   │   ├── calc_proportion.R
 │   │   ├── calc_means.R
@@ -176,8 +172,9 @@ design, a statistician via test) — the same Shiny module serves both entry
 points, and both files' checkboxes are ticked with a `*(implemented: ...)*`
 note as each module goes live, so either file alone shows current build
 status. Both files also carry a shared staged build plan (Stage 1 CORE
-release through Stage 4 niche/simulation, plus Stage 1.5 and Stage 5 for the
-design-identification wizard's two halves — see §7.1) and a set of caveats (version-
+release through Stage 4 niche/simulation, Stage 1.5 and Stage 5 for the
+design-identification wizard's two halves, and Phase 6 for the remaining
+backlog — see §7.1) and a set of caveats (version-
 dependent vendor procedure counts, ARE-based non-parametric power, bio-
 equivalence input conventions, packages with no confirmed CRAN presence,
 etc.) — see those files rather than duplicating them here.
@@ -195,7 +192,7 @@ for what to build next):
 | Case-control | Unmatched; matched (1:1 or 1:m); nested (binary/continuous exposure); case-cohort | `epiR::epi.sscc()`; `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed-form (Cai & Zeng 2004) | Live |
 | Cohort / RR | Cohort, cross-sectional, relative risk | `epiR::epi.sscohortc()` | Live |
 | Correlation | Pearson correlation; comparing two independent correlations; comparing two dependent (overlapping) correlations; point-biserial correlation; simple regression slope; partial correlation; Spearman rank correlation | `pwr::pwr.r.test()`; closed-form (Cohen 1988); closed-form (Steiger 1980); `pwr::pwr.t.test()` via r-to-d conversion; `pwr::pwr.r.test()` via slope-to-r identity; `pwr::pwr.r.test()` + k covariates; `pwr::pwr.r.test()` inflated by 9/pi^2 ARE (Hotelling & Pabst 1936; Fieller, Hartley & Pearson 1957) | Live |
-| Chi-square tests | Goodness of fit; test of independence (R×C); McNemar's (paired proportions); Mantel-Haenszel (stratified proportions); Cochran-Armitage trend (dose-response) | `pwr::pwr.chisq.test()` (`ES.w1`/`ES.w2`); `TrialSize::McNemar.Test()`; `TrialSize::Propensity.Score.strata()`/`.nostrata()`; `TrialSize::Cochran.Armitage.Trend()` | Live |
+| Chi-square tests | Goodness of fit; test of independence (R×C); McNemar's (paired proportions); Mantel-Haenszel (stratified proportions); Cochran-Armitage trend (dose-response); Cochran's Q (k >= 3 paired binary measurements) | `pwr::pwr.chisq.test()` (`ES.w1`/`ES.w2`); `TrialSize::McNemar.Test()`; `TrialSize::Propensity.Score.strata()`/`.nostrata()`; `TrialSize::Cochran.Armitage.Trend()`; direct Monte Carlo simulation of `rstatix::cochran_qtest()` | Live |
 | Pilot / feasibility | Flat 12/arm rule-of-thumb; interactive CI-for-SD precision | rule-of-thumb (Julious 2005); closed-form chi-square CI theory | Live |
 | Simon two-stage | Phase II single-arm (minimax + optimal designs) | `clinfun::ph2simon()` | Live |
 | Equivalence (TOST) | Two one-sided tests, means, proportions, PK bioequivalence crossover (2x2, 2x2x4, 2x3x3), and bioequivalence crossover with expected power/assurance (CV uncertainty) | `PowerTOST::sampleN.TOST(logscale=FALSE/TRUE)`; `epiR::epi.ssequb()`; `PowerTOST::expsampleN.TOST(prior.type="CV")` | Live |
@@ -206,10 +203,15 @@ for what to build next):
 | Non-Inferiority | Means, proportions, odds ratio, hazard ratio (Cox PH) | `epiR::epi.ssninfc()`, `epi.ssninfb()`; `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
 | Rule of Three | Upper bound on unseen event rate; n to detect >= 1 event; detect >= 1 case with an imperfect test in a finite population (single or two-test series/parallel) | closed-form (Hanley & Lippman-Hand 1983); `epiR::epi.ssdetect()` | Live |
 | Group Sequential Design | Interim-monitoring trial design (continuous, binary, or survival outcome) with Pocock-to-O'Brien-Fleming efficacy/futility boundaries | `clinfun::gsdesign.normal()`/`.binomial()`/`.survival()` | Live |
-| Prediction Model | Model development — binary, continuous, survival | `pmsampsize::pmsampsize()` (Riley et al. 2019/2020/2021) | Live |
-| ROC / AUC | Single ROC AUC vs. chance (0.5) | `pROC::power.roc.test()` (Obuchowski et al. 2004) | Live |
+| Prediction Model | Model development (binary, continuous, survival); external validation (binary) | `pmsampsize::pmsampsize()` (Riley et al. 2019/2020/2021); external validation reimplements `pmvalsampsize` (package not installed, source verified) (Riley et al. 2021) | Live |
+| ROC / AUC | Single ROC AUC vs. chance (0.5); compare two correlated (paired) AUCs | `pROC::power.roc.test()` (Obuchowski et al. 2004; Obuchowski & McClish 1997) | Live |
 | Cluster / design effect | Design-effect inflation of an existing base sample size; cluster survey precision (WHO EPI-style, proportion) | closed-form (Kish 1965); `epiR::epi.ssclus2estb()` | Live |
 | Stratified Sampling | Total size + per-stratum allocation (proportional/Neyman) | closed-form (Cochran 1977; Kauermann & Kuechenhoff 2011) | Live |
+| LQAS | Lot Quality Assurance Sampling (rapid area classification) | closed-form binomial operating-characteristic search (Robertson & Valadez 2006) | Live |
+| Resource Equation (Animal Studies) | Recommend/check sample size via error degrees of freedom (E=N-T) | closed-form arithmetic (Mead 1988; Charan & Kantharia 2013) | Live |
+| Subgroup / Interaction Testing | Inflate a main-effect sample size for a treatment-by-subgroup interaction test ("4x rule") | closed-form arithmetic (4/effect_ratio^2), Brookes et al. 2004 | Live |
+| Qualitative Sample Size Guidance | Reference guidance for qualitative interview studies (saturation, information power, purposive/theoretical sampling) -- no formula, no numeric output | Guest, Bunce & Johnson 2006; Malterud, Siersma & Guassora 2016; Glaser & Strauss 1967; Patton 2002/2015 | Live |
+| Monte Carlo Mixed Models | Two-arm cluster-randomized trial (continuous LMM or binary GLMM outcome), or a longitudinal growth-curve model (group difference in slope) -- all analyzed via the actual mixed-model likelihood-ratio test, no closed-form formula exists, so directly simulated via `lme4::lmer()`/`glmer()` | Bolker et al. 2009; Judd, Westfall & Kenny 2017; Green & MacLeod 2016 (`simr`) | Live |
 | Variance Tests | Single-variance test vs. a reference SD (chi-squared); two-variance test comparing two groups (F test) | closed-form (chi-squared/F distribution, `uniroot()` solve) | Live |
 | Crossover Trial (2x2) | Continuous outcome, test for a difference (not equivalence) | `TrialSize::TwoSampleCrossOver.Equality()` (Chow, Shao & Wang 2003) | Live |
 | Factorial ANOVA / ANCOVA | Main effects, interactions, ANCOVA group effects (general F-test) | `pwr::pwr.f2.test()` (Cohen 1988) | Live |
@@ -221,12 +223,11 @@ for what to build next):
 | Multiplicity Adjustment | Bonferroni/Sidak-adjusted sample size for one-/two-sample proportion or mean tests, given m planned simultaneous comparisons; FDR (Benjamini-Hochberg)-controlled sample size for two independent means | closed-form correction wrapping this app's own `calc_proportion_1s()`/`_2s()`/`calc_means_1s()`/`_2s()`; FDR design via an independently-derived, Monte-Carlo-verified closed form wrapping `pwr::pwr.t.test()` (Benjamini & Hochberg 1995) | Live |
 | MANOVA / Hotelling's T² | Two-group Hotelling's T-squared test (p jointly-tested continuous outcomes) | closed-form noncentral F (Rencher 2002; Vonesh & Schork 1986 framework) | Live |
 | Bayesian Design Analysis | Prior-averaged power (assurance) for a two-arm proportions trial, log odds ratio, given a Normal or Uniform prior on the true effect; Bayes Factor Design Analysis for two-sample means | `Hmisc::gbayes2()` (Spiegelhalter & Freedman 1986); direct Monte Carlo simulation of `BayesFactor::ttestBF()` (Rouder et al. 2009; Schönbrodt & Wagenmakers 2018) | Live |
-| Longitudinal Slope Difference | Two-group difference in linear slope (rate of change) over repeated visits, random-intercept + random-slope + residual-error covariance | closed-form reimplementation of `longpower::liu.liang.linear.power()` (Liu & Liang 1997) | Live |
+| Longitudinal / MMRM | Two-group difference in linear slope (rate of change) over repeated visits, via all 4 `lmmpower()` methods (Liu & Liang, Diggle, Ard & Edland, Hu/Mackey/Thomas); or a mixed model of repeated measures (MMRM) with dropout, AR(1) correlation | closed-form reimplementation of `longpower::liu.liang.linear.power()` (Liu & Liang 1997), `diggle.linear.power()` (Diggle et al 2002), `edland.linear.power()` (Ard & Edland 2011), `hu.mackey.thomas.linear.power()` (Hu, Mackey & Thomas 2021), `power.mmrm.ar1()` (Lu, Luo & Chen 2008) | Live |
 | Competing Risks | Joint test of a cause-specific hazard and the any-cause hazard (Gray's-test setting) | closed-form root-finding (`uniroot()` + `mvtnorm::pmvnorm()`), reimplemented from `powerCompRisk::powerCompRisk()`'s own public source (package not installable from CRAN in this sandbox; source read from its GitHub CRAN mirror) per Yang, Fung & Li (2017) | Live |
 | RMST Comparison | Two-arm restricted mean survival time comparison (superiority or non-inferiority) | Monte Carlo simulation reimplemented from `SSRMST::ssrmst()` + `survRM2::rmst2()`'s own public source (neither package installable from CRAN in this sandbox; both read from their GitHub CRAN mirrors), using only `survival::survfit()`, per Uno et al. (2014, 2015) | Live |
 | Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
 | MANOVA (global, k>2 groups) | Global & special effects for k > 2 groups | Vonesh & Schork (1986) closed-form; not yet wrapped | Not started |
-| Post-hoc / achieved power | Given n and observed effect, compute achieved power | reuse each module's engine, solve for power | Not started |
 
 Each row above is (or will be) exactly one `mod_*.R` + `calc_*.R` +
 `content_*.R` file set, following the module contract in §8.
@@ -276,15 +277,18 @@ existing `design_wizard_server()`; `R/home/home_hub.R` composes it alongside
 "Home" nav panel — see §7 above and the top-navbar note there for why (26
 flat top-level tabs became unworkable once the module count reached 24).
 
-This is only the guided-tree half of the source document (its Stages 1–5;
+This is the guided-tree half of the source document (its Stages 1-5;
 build-plan **Stage 1.5**, done). Its Stage 0 — free-text/PICO input parsing
-(keyword heuristics and/or an LLM layer that pre-fills the wizard's answers
-instead of clicking through every question) — is the other half, and is
-deliberately deferred to build-plan **Stage 5**, after Stage 4, rather than
-bundled in here: every branch that reaches a calculator this app hasn't
-built yet degrades to an honest "not yet built" placeholder for now, and
-free-text parsing is worth adding once most of those placeholders have
-flipped to live modules, not before.
+that pre-fills the wizard's answers instead of clicking through every
+question — is the other half, build-plan **Stage 5**, also now done (see
+§14): a keyword-heuristic parser (`R/home/design_free_text.R`) that walks
+the same node registry a manual click-through would, stopping honestly at
+the first question it can't confidently infer rather than guessing a final
+module. An LLM parsing layer, floated in the source document as the more
+capable alternative, was deliberately not built — no LLM API is wired into
+this otherwise self-contained, deterministically-tested app, and keyword
+heuristics are the document's own documented graceful-degrade path for
+exactly that situation.
 
 ---
 
@@ -345,15 +349,23 @@ appending to `module_registry` and placing its id in the appropriate
 
 ---
 
-## 10. Post-hoc Power Module — Special Design Considerations
-- Framed explicitly as **"achieved power for planning a replication study"**,
-  not as a tool to explain a non-significant p-value
-- Formula/Help tab must include a short methodological note (citing Hoenig &
-  Heisey 2001, *"The Abuse of Power"*) on why observed power computed from a
-  study's own effect size is a monotonic function of the p-value and should not
-  be used to justify a null result
-- Consider a soft UI nudge: after computing achieved power, surface a link back
-  to the Precision-based (CI-width) module as the recommended alternative framing
+## 10. Post-hoc Power Module — Dropped
+
+A dedicated post-hoc/achieved-power module (given n and an *observed* effect,
+report the power that was achieved) was planned early on, then progressively
+deprioritized to "last, maybe cut" as the build order matured, and is now
+dropped as a planned deliverable entirely — not merely deferred. Decision
+(2026-09-13): the authoritative methodological literature this project
+already cited for it (Hoenig & Heisey 2001, *"The Abuse of Power"*) treats
+observed/retrospective power as a deterministic, monotonic function of the
+p-value — computing and displaying it is discouraged practice, not merely
+low-value, so building it at all would work against the app's own stated
+Transparency goal (§3) rather than serve it. No `mod_posthoc_power.R` was
+ever built; the only trace of the idea was an empty `study_design_families`
+catalog stub, now removed. Every already-shipped calculator's own "achieved
+power" *result* field (reporting the power its own solve-for-N formula
+achieves at a *pre-specified*, not observed, effect size) is unrelated and
+unaffected — that is standard, uncontroversial output, not this module.
 
 ---
 
@@ -403,10 +415,9 @@ maintained backlog. Summary:
 | 1.5 — study design identification wizard, guided-tree half | "Which calculator?" guided Q&A routing a research question to the right Stage-1 module (or an honest not-built note for anything later); see §7.1 and `docs/design_identification_algorithm.md` Stages 1-5 | Live — built deliberately right after Stage 1 finished and before Stage 2 starts, so every CORE module is reachable both by name and by guided description before the backlog grows further |
 | 2 — analytical depth | F-family completeness (factorial/RM-ANOVA, ANCOVA, MANOVA), full correlation/regression suite, matched case-control, ROC comparison, Bland-Altman/CCC/Cronbach, prediction-model development (`pmsampsize`) | In progress -- Cronbach's alpha, Bland-Altman LoA, and likelihood ratios (LR+/LR-) live; F-family completeness, correlation/regression suite, matched case-control, ROC/AUC, CCC, and prediction models still open |
 | 3 — advanced trial designs | Cluster-randomized/stepped-wedge, group-sequential/adaptive, survival extensions, bioequivalence replicate designs, longitudinal/MMRM | Bioequivalence replicate designs (2x2x4, 2x3x3) live in Equivalence (TOST); group-sequential designs (continuous/binary/survival, Pocock-to-O'Brien-Fleming boundaries) live in the new Group Sequential Design module; rest not started |
-| 4 — niche/simulation & non-formula | Genetic (`genpwr`), SEM (`semPower`), trial sequential analysis, `simr`-based simulation, guidance-only qualitative/animal-study panels | Not started |
-| 5 — study design identification wizard, free-text half | Stage 0 of `docs/design_identification_algorithm.md`: free-text/PICO input parsing (keyword heuristics and/or an LLM parsing layer) that pre-fills the guided wizard's answers instead of requiring every question to be clicked through manually. Deliberately deferred until after Stage 4, once the guided tree's terminals mostly point at live modules rather than "not yet built" notes | Not started |
-| — (last, maybe cut) | Post-hoc/achieved-power module | Deliberately deprioritized to the very end of the build order; may be dropped entirely if the app's scope grows large enough that it's not worth the added surface area (see the Post-hoc power caveat in §10 and the checklists) |
-| — | Deployment polish; evaluate Shinylive | Not started |
+| 4 — niche/simulation & non-formula | Genetic (`genpwr`), SEM (`semPower`), trial sequential analysis, `simr`-based simulation, guidance-only qualitative/animal-study panels | `simr`-based simulation live (Monte Carlo GLMM module, built deliberately last per this stage's own framing); guidance-only panels live (Qualitative Sample Size Guidance, Resource Equation for animal studies); genetic, SEM, and trial sequential analysis still open (no installed/reachable package or safe reimplementation path found) |
+| 5 — study design identification wizard, free-text half (done) | Stage 0 of `docs/design_identification_algorithm.md`: free-text/PICO input parsing that pre-fills the guided wizard's answers instead of requiring every question to be clicked through manually | Live — keyword-heuristic parser (`R/home/design_free_text.R`, `walk_free_text()`) covers the Stage-1 root branch, the estimation sub-branch, and the comparison path (allocation -> selection basis -> case-control matching -> outcome type -> groups -> dependence); wired into the wizard as an optional free-text box that pre-fills the trace and stops honestly at the first question it can't confidently infer (never guesses a final module). An LLM parsing layer was deliberately not built — no LLM API is wired into this otherwise self-contained, deterministically-tested app — and the RCT-internals branch (individual vs. cluster allocation, superiority vs. non-inferiority intent) has no rules yet, both left as documented gaps rather than unverifiable guesses |
+| 6 — remaining backlog | Everything not yet closed across `checklist_by_design.md`/`checklist_by_test.md`: Stage 3's unfinished advanced-trial-design items (cluster-randomized/stepped-wedge closed-form, group-sequential completeness), Stage 4's still-open niche items (genetic/`genpwr`, SEM/`semPower`, trial sequential analysis), plus the longer tail never batched (multilevel/`powerlmm`, health-economics/EVPI, meta-analysis power, real-world-evidence designs, and more) | Renumbered from the prior "Stage 2-4 backlog" framing now that Stage 5 is done — Stage 5 doesn't consume any of this backlog, it only makes already-built modules easier to reach by free text; deployment polish (evaluate Shinylive) also falls in this phase. Batch 1 (done): Capture-Recapture, Ecological Study Guidance, Animal-study rank tests (Nonparametric Tests module), Dunnett multi-arm-vs-control (Multiplicity module), EFA/CFA Sample Size Guidance — five items closed; Stepped-wedge CRT investigated and explicitly declined (no installed package, unverifiable formula) |
 
 The original Phase 1-6 table (superseded) is preserved in git history for
 reference; Phase 1 (app shell + Proportions template) and most of Phase 2
@@ -420,7 +431,6 @@ reference; Phase 1 (app shell + Proportions template) and most of Phase 2
 |---|---|
 | Formula errors silently produce wrong sample sizes | Mandatory unit test against a published worked example before a module is considered done |
 | Scope creep slows down v1 | Phase 1 strictly limited to one working module end-to-end |
-| Post-hoc power module misused/misinterpreted by users | In-app methodological caveat is non-optional, shown on the Calculate tab itself, not buried in Help |
 | Package API changes (pwr/epiR versions) break calculators | Pin package versions in a lockfile (`renv`) |
 
 ---

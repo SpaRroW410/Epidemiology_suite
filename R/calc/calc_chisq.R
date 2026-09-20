@@ -245,3 +245,90 @@ calc_cochran_armitage_trend <- function(pi, di, ni, delta = 0, alpha = 0.05, pow
     stop(sprintf("%s must sum to 1.", label))
   }
 }
+
+# Cochran's Q test (k >= 3 paired/repeated binary measurements per
+# subject), sample size via Monte Carlo simulation.
+#
+# No installed package provides a sample-size/power function for
+# Cochran's Q specifically (only analysis functions exist -- `rstatix`,
+# already an installed dependency, has `cochran_qtest()`; CRAN-only
+# alternatives like `RVAideMemoire`/`DescTools` are not installed and
+# CRAN is unreachable). Rather than fabricate a closed-form approximation
+# with no citable source, this directly simulates the actual test --
+# `rstatix::cochran_qtest()` itself, called on real simulated data -- the
+# same "no closed form/package exists, so simulate the real test" pattern
+# already used for the Kolmogorov-Smirnov, Wald-Wolfowitz runs, and
+# weighted log-rank designs elsewhere in this app.
+#
+# Correlated binary data across the k conditions are generated via a
+# random-intercept logistic model (the standard generative model for
+# correlated binary repeated measures): each subject gets a latent
+# Normal(0, sigma2_subject) random intercept added to each condition's
+# logit(p_j) before drawing a Bernoulli outcome -- i.e. exactly a
+# mixed-effects logistic model with a random subject intercept.
+
+.simulate_cochran_q <- function(n, p, sigma2_subject) {
+  k <- length(p)
+  latent <- rnorm(n, 0, sqrt(sigma2_subject))
+  logit_p <- qlogis(p)
+  Y <- vapply(seq_len(k), function(j) rbinom(n, 1, plogis(logit_p[j] + latent)), numeric(n))
+  data.frame(
+    id = rep(seq_len(n), k),
+    cond = factor(rep(seq_len(k), each = n)),
+    y = as.vector(Y)
+  )
+}
+
+#' Sample size for Cochran's Q test (k >= 3 paired binary measurements),
+#' via Monte Carlo simulation
+#'
+#' Solves for the number of subjects needed to detect a difference among
+#' k related (repeated/paired) binary measurements' success proportions,
+#' by directly simulating `rstatix::cochran_qtest()` -- the actual test
+#' -- on correlated binary data generated from a random-intercept
+#' logistic model.
+#'
+#' @param p Numeric vector (length >= 3) of the k conditions' success
+#'   proportions to detect a difference among; each strictly in (0,1)
+#' @param sigma2_subject Variance of the subject-level random intercept
+#'   (logit scale) controlling within-subject correlation across the k
+#'   measurements; > 0, larger = more consistent responses within a
+#'   subject
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param nsim Monte Carlo replicates per sample-size candidate evaluated
+#'   during the search (>= 100)
+#' @param seed RNG seed for reproducibility
+#' @return list(n, achieved_power, inputs)
+calc_cochran_q <- function(p, sigma2_subject, alpha = 0.05, power = 0.8,
+                            nsim = 80, seed = 20230914) {
+  if (!is.numeric(p) || length(p) < 3 || anyNA(p)) {
+    stop("p must be a numeric vector of at least 3 values (Cochran's Q needs k >= 3 conditions).")
+  }
+  if (any(p <= 0) || any(p >= 1)) stop("each value in p must be strictly between 0 and 1.")
+  .validate_positive(sigma2_subject, "sigma2_subject")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (!is.numeric(nsim) || length(nsim) != 1 || is.na(nsim) || nsim < 50 || nsim != round(nsim)) {
+    stop("nsim must be a single whole number >= 50.")
+  }
+
+  empirical_power <- function(n, reps) {
+    set.seed(seed)
+    rejections <- replicate(reps, {
+      df <- .simulate_cochran_q(n, p, sigma2_subject)
+      res <- tryCatch(rstatix::cochran_qtest(df, y ~ cond | id), error = function(e) NULL)
+      if (is.null(res)) return(FALSE)
+      res$p < alpha
+    })
+    mean(rejections)
+  }
+
+  n <- .mc_search_n1(function(x) empirical_power(x, nsim), power, n_lo = 10, n_hi = 20, n_max = 5000)
+
+  list(
+    n = n,
+    achieved_power = empirical_power(n, nsim * 3),
+    inputs = list(p = p, sigma2_subject = sigma2_subject, alpha = alpha, power = power, nsim = nsim)
+  )
+}

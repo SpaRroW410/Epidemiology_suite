@@ -103,5 +103,59 @@ variance_content <- list(
       "functions."
     ),
     backend = "closed-form (F distribution, uniroot solve)"
+  ),
+
+  sd_precision = list(
+    title = "Precision-Based SD Estimation (CI Width, No Hypothesis Test)",
+    formula_latex = paste0(
+      "$$(n-1)S^2/\\sigma^2 \\sim \\chi^2_{n-1} \\implies ",
+      "\\text{CI}(\\sigma) = S \\times \\left[\\sqrt{\\tfrac{n-1}{\\chi^2_{1-\\alpha/2,\\,n-1}}},\\ ",
+      "\\sqrt{\\tfrac{n-1}{\\chi^2_{\\alpha/2,\\,n-1}}}\\right]$$"
+    ),
+    explanation = paste(
+      "Unlike the two hypothesis tests above, this design has no null",
+      "hypothesis and no power target -- it answers a precision question",
+      "instead: \"how large a sample do I need so that a confidence",
+      "interval for the true SD is no wider than X, relative to whatever",
+      "SD I end up observing?\" The same chi-squared identity used by the",
+      "two tests above gives an exact CI-width-as-a-function-of-n",
+      "relationship (solved here for n via `uniroot()`, since it has no",
+      "closed algebraic inverse but is exact and monotonically",
+      "decreasing in n).",
+      "",
+      "This is the same multiplier interval this app's own",
+      "Pilot/Feasibility module already computes in the FORWARD direction",
+      "(given a pilot's n, how wide will the SD estimate's CI be?) --",
+      "this design solves the identical identity BACKWARD (given a",
+      "target width, what n achieves it?).",
+      "",
+      "- **target_width** - desired full width of the two-sided CI for",
+      "  sigma, expressed as a MULTIPLE of the sample SD you'll observe",
+      "  (e.g. 0.5 means the interval should span no more than 0.5x that",
+      "  SD) -- not an absolute unit, since the true SD is exactly what",
+      "  you don't know yet.",
+      "- **conf_level** - as elsewhere.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Target width = 0.5 (the 95% CI for sigma should span no more than",
+      "0.5x the observed SD), 95% confidence: this calculator returns",
+      "n = 36, with the CI spanning about 0.81x to 1.30x whatever SD is",
+      "observed (width 0.49, just under the 0.5 target after rounding n",
+      "up). A looser target width = 1.0 needs only n = 12 -- exactly this",
+      "app's own Pilot/Feasibility module default, and the same width",
+      "(0.99) that module's own forward-direction tool reports at n = 12,",
+      "confirming the two designs compute the identical identity in",
+      "opposite directions.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Standard chi-squared confidence interval for a normal variance;",
+      "see e.g. Rosner B. Fundamentals of Biostatistics. 8th ed. Cengage",
+      "Learning; 2015. Same identity already used by this app's",
+      "Pilot/Feasibility module (Julious 2005) in the forward (given-n)",
+      "direction."
+    ),
+    backend = "closed-form (chi-squared distribution, uniroot solve)"
   )
 )

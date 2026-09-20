@@ -2,7 +2,8 @@
 
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 pacman::p_load(shiny, bslib, pwr, presize, epiR, clinfun, powerSurvEpi, PowerTOST, Exact,
-               pmsampsize, pROC, TrialSize, powerMediation, Hmisc, tseries, BayesFactor, mvtnorm)
+               pmsampsize, pROC, TrialSize, powerMediation, Hmisc, tseries, BayesFactor, mvtnorm,
+               rstatix, lme4)
 
 for (f in list.files("R/calc", pattern = "\\.R$", full.names = TRUE)) source(f)
 for (f in list.files("R/content", pattern = "\\.R$", full.names = TRUE)) source(f)
@@ -83,7 +84,33 @@ module_registry <- list(
   list(id = rmst_meta$id, title = rmst_meta$nav_title,
        ui = mod_rmst_ui, server = mod_rmst_server),
   list(id = longitudinal_meta$id, title = longitudinal_meta$nav_title,
-       ui = mod_longitudinal_ui, server = mod_longitudinal_server)
+       ui = mod_longitudinal_ui, server = mod_longitudinal_server),
+  list(id = lqas_meta$id, title = lqas_meta$nav_title,
+       ui = mod_lqas_ui, server = mod_lqas_server),
+  list(id = resource_equation_meta$id, title = resource_equation_meta$nav_title,
+       ui = mod_resource_equation_ui, server = mod_resource_equation_server),
+  list(id = subgroup_interaction_meta$id, title = subgroup_interaction_meta$nav_title,
+       ui = mod_subgroup_interaction_ui, server = mod_subgroup_interaction_server),
+  list(id = qualitative_meta$id, title = qualitative_meta$nav_title,
+       ui = mod_qualitative_ui, server = mod_qualitative_server),
+  list(id = glmm_meta$id, title = glmm_meta$nav_title,
+       ui = mod_glmm_ui, server = mod_glmm_server),
+  list(id = capture_recapture_meta$id, title = capture_recapture_meta$nav_title,
+       ui = mod_capture_recapture_ui, server = mod_capture_recapture_server),
+  list(id = ecological_meta$id, title = ecological_meta$nav_title,
+       ui = mod_ecological_ui, server = mod_ecological_server),
+  list(id = efa_cfa_meta$id, title = efa_cfa_meta$nav_title,
+       ui = mod_efa_cfa_ui, server = mod_efa_cfa_server),
+  list(id = tsa_meta$id, title = tsa_meta$nav_title,
+       ui = mod_tsa_ui, server = mod_tsa_server),
+  list(id = multilevel_meta$id, title = multilevel_meta$nav_title,
+       ui = mod_multilevel_ui, server = mod_multilevel_server),
+  list(id = evpi_meta$id, title = evpi_meta$nav_title,
+       ui = mod_evpi_ui, server = mod_evpi_server),
+  list(id = stepped_wedge_meta$id, title = stepped_wedge_meta$nav_title,
+       ui = mod_stepped_wedge_ui, server = mod_stepped_wedge_server),
+  list(id = meta_power_meta$id, title = meta_power_meta$nav_title,
+       ui = mod_meta_power_ui, server = mod_meta_power_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -98,24 +125,33 @@ module_groups <- list(
   list(title = "Descriptive & Estimation",
        module_ids = c("proportion", "means", "rate", "ratio")),
   list(title = "Survey & Cross-Sectional",
-       module_ids = c("stratified", "cluster")),
+       module_ids = c("stratified", "cluster", "lqas", "capture_recapture")),
   list(title = "Observational Studies",
-       module_ids = c("case_control", "cohort", "sccs")),
+       module_ids = c("case_control", "cohort", "sccs", "ecological")),
   list(title = "Diagnostic & Screening",
        module_ids = c("diagnostic", "roc")),
   list(title = "Agreement & Reliability",
        module_ids = c("agreement")),
   list(title = "Clinical Trials",
-       module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential")),
+       module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential",
+                       "subgroup_interaction", "glmm", "tsa", "stepped_wedge")),
   list(title = "Survival Analysis",
        module_ids = c("logrank", "competing_risks", "rmst")),
   list(title = "Prediction Models",
        module_ids = c("prediction")),
   list(title = "Surveillance",
        module_ids = c("rule_of_three")),
+  list(title = "Preclinical / Animal Studies",
+       module_ids = c("resource_equation")),
+  list(title = "Qualitative / Mixed Methods",
+       module_ids = c("qualitative")),
+  list(title = "Psychometrics / Scale Development",
+       module_ids = c("efa_cfa")),
+  list(title = "Health Economics / Value of Information",
+       module_ids = c("evpi")),
   list(title = "General Statistical Tests",
        module_ids = c("correlation", "chisq", "regression", "anova_general",
                        "logistic", "exact_tests", "rm_anova", "nonparametric",
                        "variance", "multiplicity", "manova", "bayesian",
-                       "longitudinal"))
+                       "longitudinal", "multilevel", "meta_power"))
 )

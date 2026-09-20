@@ -150,7 +150,23 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   Shao & Wang (2003) Example 11.5 (n=8/group, 32 total). Note: the closely
   related `TrialSize::Dose.Response.binary()` was found broken in an
   earlier batch -- this is a different, independently verified function
-  from the same package
+  from the same package; plus Cochran's Q test for k >= 3 paired binary
+  measurements (`calc_cochran_q()`), generalizing McNemar's test beyond
+  two conditions. No installed package provides a sample-size/power
+  FORMULA for Cochran's Q specifically (only analysis functions exist --
+  `rstatix`, already an installed dependency, has `cochran_qtest()`;
+  `TrialSize::Stuart.Maxwell.Test()`, investigated for this item's
+  neighborhood in an earlier batch, was found genuinely broken).
+  Rather than fabricate a closed-form approximation, this directly
+  simulates the actual test -- `rstatix::cochran_qtest()` itself, run on
+  correlated binary data from a random-intercept logistic model (the
+  standard way to simulate correlated binary repeated measures) -- the
+  same "simulate the real test" approach already used for the KS,
+  Wald-Wolfowitz runs, and weighted log-rank designs. Verified directly
+  by Rscript: p=(0.2,0.3,0.4,0.5) across k=4 conditions,
+  sigma2_subject=1, alpha=0.05, target power=0.8 -> n=57, simulated
+  achieved power 0.829; required n increases monotonically with target
+  power (n=41 at power=0.7, n=72 at power=0.9)
 - **Pilot / Feasibility** (`R/modules/mod_pilot.R`) -- the flat 12/arm
   rule-of-thumb (Julious 2005) plus an interactive tool showing how precise
   a pilot's estimated SD is at a given n (95% CI multipliers on the observed
@@ -316,13 +332,34 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   prognostic model, wrapping `pmsampsize::pmsampsize()` (Riley et al. 2019
   Stat Med Parts I & II; Riley et al. 2020 BMJ 368:m441); the binary design
   additionally accepts either a Cox-Snell R² or a reported C-statistic
-  (converted via Riley et al. 2021 Stat Med 40:859-864's seeded simulation)
+  (converted via Riley et al. 2021 Stat Med 40:859-864's seeded simulation);
+  plus an "External validation (binary outcome)" design for sizing a study
+  that externally validates an *already-developed* model (Riley et al. 2021
+  Stat Med 40:4230-4251) -- `pmvalsampsize` is not installed in this
+  environment and CRAN is unreachable, so its `pmvalsampsize_bin.R` source
+  was read from its public GitHub CRAN mirror and directly transcribed for
+  the "normal" and "beta" linear-predictor-distribution options (O/E ratio,
+  calibration slope, C-statistic, and an optional standardised net benefit
+  criterion -- required n is the largest of whichever are requested);
+  verified against the package's own two worked examples exactly (n=4,563
+  and n=4,252) and independently against actual `glm()`-fitted calibration
+  SEs and `pROC::ci.auc()` CI widths on simulated data
 - **ROC / AUC** (`R/modules/mod_roc.R`) -- sample size for a single ROC
   curve's AUC against the chance diagonal (0.5), wrapping
-  `pROC::power.roc.test()` (Obuchowski, Lieber & Wians 2004); comparing two
-  AUCs was deliberately left out of scope for now, since that case needs
-  either fitted `roc` objects on real data or a full set of binormal
-  parameters rather than simple summary statistics
+  `pROC::power.roc.test()` (Obuchowski, Lieber & Wians 2004); plus a
+  "Compare two correlated (paired) AUCs" design, `calc_compare_two_aucs()`,
+  wrapping the same function's list/binormal-parameter method (Obuchowski
+  & McClish 1997) -- each curve described by its own binormal A/B shape
+  parameters, with separate case/control correlations between the two
+  tests; verified by literally reproducing Obuchowski & McClish (1997)'s
+  own Example 2 (also pROC's own documentation example): A1=2.6, B1=1,
+  A2=1.9, B2=1, rn=ra=0.6, delta=0.037, partial AUC restricted to FPR in
+  [0,0.2] -> raw ncases=ncontrols=107.02, matching the package's own
+  computation (this app's always-round-up convention gives 108/108/216;
+  the package's own doc illustrates with the nearest whole number, 107).
+  The unpaired-AUCs case is not implemented -- `power.roc.test()` itself
+  doesn't support it ("Power calculation for unpaired ROC curves is not
+  implemented", per the package's own documentation)
 - **Cluster / Design Effect** (`R/modules/mod_cluster.R`) -- inflates an
   already-computed simple-random-sample size for cluster/multistage
   sampling (villages, schools, health facilities), closed-form DEFF = 1 +
@@ -343,6 +380,90 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   whose `Depends: pps, sampling, survey` chain is far heavier than this
   one formula needs -- verified to reproduce that package's own
   documented examples exactly
+- **LQAS** (`R/modules/mod_lqas.R`) -- Lot Quality Assurance Sampling:
+  classifies a small area/program "lot" as high- or low-performing
+  against two coverage thresholds, rather than estimating a proportion
+  precisely, `calc_lqas()`, closed-form (no package needed -- a direct
+  binomial operating-characteristic search over sample size n and
+  decision threshold d using base R's `pbinom()`) per Robertson & Valadez
+  (2006); verified against a real published worked example located via
+  web search -- the widely-used LQAS "n=19" rule for a 50%/80% coverage
+  threshold pair -- this calculator recovers exactly n=19, d=13 at
+  alpha=beta=0.10, matching the published rule's own reported
+  classification-error figures (alpha~6.8%, beta~8.4%, total ~15%),
+  independently cross-checked against a second, mirror-image published
+  example by binomial symmetry
+- **Resource Equation (Animal Studies)** (`R/modules/mod_resource_equation.R`)
+  -- sizes small, exploratory animal studies with no prior effect-size
+  estimate to power against, via Mead's error-degrees-of-freedom rule of
+  thumb (E = N - T, target E between 10 and 20), `calc_resource_equation_size()`
+  (recommend a sample size) / `calc_resource_equation_check()` (check the
+  adequacy of a chosen one); pure arithmetic, no package needed; verified
+  against Charan & Kantharia (2013)'s own worked example located via web
+  search -- 5 groups of 10 rats each (N=50) -> E=45, "more than needed"
+- **Subgroup / Interaction Testing** (`R/modules/mod_subgroup_interaction.R`)
+  -- inflates an already-computed main-effect sample size to the size
+  needed to reliably detect a treatment-by-subgroup interaction (the
+  "4x rule"), `calc_subgroup_interaction()`, pure arithmetic
+  (4/effect_ratio^2) -- no package needed or exists for this general,
+  test-agnostic multiplier; verified against Brookes et al. (2004)'s own
+  two headline findings located via web search -- a same-magnitude
+  interaction needs exactly 4x the main-effect n (100 -> 400); a
+  half-magnitude interaction needs exactly 16x (100 -> 1,600) -- both
+  additionally re-derived independently from first-principles z-based
+  power formulas rather than only trusting the paper's summary numbers
+- **Qualitative Sample Size Guidance** (`R/modules/mod_qualitative.R`)
+  -- unlike every other module in this app, this one has NO formula and
+  computes NO number, per this checklist section's own explicit framing
+  ("non-formula -- acknowledge, don't fake precision"; "present as
+  guidance panel, no numeric output"). Presents the field's own three
+  established frameworks as reference content instead: saturation-based
+  guidance (Guest, Bunce & Johnson 2006, including their own quoted
+  finding -- "saturation occurred within the first twelve interviews...
+  present as early as six interviews" -- with the caveat that it's
+  specific to their homogeneous study population); information power
+  (Malterud, Siersma & Guassora 2016's five dimensions -- study aim,
+  sample specificity, use of established theory, quality of dialogue,
+  analysis strategy); and purposive/theoretical sampling (Patton
+  2002/2015's purposeful-sampling typology; Glaser & Strauss 1967's
+  founding grounded-theory theoretical-sampling method). No calc_*.R
+  file or numeric worked example exists for this module -- its tests
+  instead verify the content itself (every topic present, citations and
+  the Guest et al. quote reproduced accurately)
+- **Monte Carlo GLMM (Cluster-Randomized Trial)** (`R/modules/mod_glmm.R`)
+  -- built deliberately LAST in this project (per this checklist item's
+  own "niche/simulation" framing): sizes a two-arm cluster-randomized
+  trial (continuous outcome via `calc_glmm_lmm_power()`, or binary via
+  `calc_glmm_logistic_power()`) analyzed with the actual random-
+  intercept (generalized) linear mixed model. No closed-form power
+  formula exists for this test -- that's exactly why simulation-based
+  tools like `simr` exist -- so this directly simulates data, refits a
+  full and reduced model, and runs a likelihood-ratio test, repeated
+  many times per candidate number of clusters. `simr` itself is not
+  installed and its GitHub CRAN mirror is unreachable, but the technique
+  it wraps is standard in its own right (Bolker et al. 2009; Judd,
+  Westfall & Kenny 2017) and used directly via `lme4::lmer()`/`glmer()`
+  (already an installed project dependency), with no reimplementation
+  risk since this literally fits the actual model. Timing was carefully
+  scoped first (~0.023s/replicate for an LMM refit, ~0.072s for a GLMM
+  refit), tuning nsim down (50/30 respectively, both user-adjustable) to
+  keep full searches to ~5-20 seconds. Verified three ways: (1) type-I
+  error control under the null (~0.06 for LMM, ~0.035 for GLMM, both
+  close to nominal alpha=0.05); (2) monotonic power/n behavior for
+  effect size, ICC, odds ratio, and random-intercept variance; (3) an
+  independent cross-check against `lmerTest`'s Satterthwaite-corrected
+  t-test (a different, well-established method) on the identical
+  simulated scenario, recovering essentially the same required n as
+  this calculator's likelihood-ratio-test approach. That cross-check
+  also surfaced a genuine, non-obvious finding: even as ICC approaches
+  0, this Monte Carlo result needs MORE individuals than a naive
+  design-effect (DEFF) formula would suggest, because DEFF assumes an
+  idealized analysis that ignores clustering entirely, whereas this
+  simulates the REAL mixed-model analysis actually used on cluster-
+  randomized data -- exactly the kind of subtlety that justifies
+  simulation over closed-form approximation. This also gives adjacent
+  (if simulation-based) coverage for `checklist_by_design.md`'s
+  previously-declined cluster-randomized-trials item
 - **Crossover Trial (2x2)** (`R/modules/mod_crossover.R`) -- a 2x2
   crossover trial's sample size for a continuous outcome, testing for a
   difference (not equivalence -- see the Equivalence (TOST) module for
@@ -450,7 +571,19 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   design's n=37/group at the same effect size, correctly reflecting that
   the runs test discards each observation's magnitude and uses only its
   rank position, a comparatively weak omnibus test against a plain
-  location shift
+  location shift; plus an animal/preclinical K-sample rank test under
+  Heller (2006)'s Lehmann alternative -- `calc_animal_rank_test()`,
+  wrapping `clinfun::power.ladesign()` (already installed for Simon
+  two-stage and Group Sequential), the checklist's own named package and
+  citation for this item, expressing the treated-vs-control effect as an
+  odds ratio (Kruskal-Wallis, omnibus; or Jonckheere-Terpstra, ordered
+  trend) rather than a location-shift effect size, since that rarely
+  matches how a preclinical effect is actually anticipated. Reproduces the
+  package's own documented examples exactly
+  (`power.ladesign(c(9,7), 4, statistic="Kruskal-Wallis")` -> power=0.588;
+  the 3-group Jonckheere-Terpstra example -> power=0.659 two-sided/0.771
+  one-sided); worked example: k=2 (1 control, 1 treated), odds ratio=4,
+  alpha=0.05, 80% power -> n=13/group, achieved power 0.805
 - **Variance Tests** (`R/modules/mod_variance.R`) -- a single-variance test
   against a reference SD, and a two-variance test comparing two groups,
   both closed-form (chi-squared/F distribution respectively, solved via
@@ -497,7 +630,47 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   (target 0.1) and empirical average power 0.794 (target 0.8); m=500,
   pi1=0.1 (m1=50), d=1, fdr_level=0.05, target average power=0.9 ->
   n=36/group, 400-replicate simulation gives empirical average FDR 0.045
-  (target 0.05) and empirical average power 0.904 (target 0.9)
+  (target 0.05) and empirical average power 0.904 (target 0.9); plus a
+  sixth design for a multi-arm trial vs. a single common control
+  (Dunnett) -- `calc_multiplicity_dunnett()`, using the EXACT Dunnett
+  (1955) critical value (`mvtnorm::qmvt()`, already a project dependency)
+  rather than treating the k comparisons as independent the way
+  Bonferroni/Sidak do above, since they all share the same control arm
+  (a known correlation of rho=0.5 for equal per-arm n). Verified against
+  the classic published two-sided Dunnett critical-value tables (k=2,3,4
+  at df=infinity -> 2.212/2.351/2.442) and against this module's own
+  Bonferroni/Sidak designs at identical inputs: k=3 active arms, d=0.5,
+  alpha=0.05, power=0.80 -> Dunnett n=83/arm vs. Bonferroni n=86/arm and
+  Sidak n=85/arm, correctly smaller
+- **Capture-Recapture** (`R/modules/mod_capture_recapture.R`) -- plans a
+  two-sample mark-recapture study's second-sample size (n2) for a target
+  precision on an unknown population size N, given an already-fixed
+  first-sample (marking) size n1 and a planning guess at N.
+  `calc_capture_recapture_n2()` inverts the large-sample variance of the
+  Chapman (1951)-modified Petersen estimator (Seber 1982) -- no installed
+  package plans this (`Rcapture` and similar are analysis-only) -- and was
+  independently Monte-Carlo-verified against the actual discrete
+  hypergeometric mark-recapture process across several N/n1/precision
+  combinations: N=1000, n1=100, target CV=0.10 -> n2=474, simulated
+  CV=0.101
+- **Ecological Study Guidance** (`R/modules/mod_ecological.R`) -- like
+  Qualitative Sample Size Guidance, a no-numeric-formula reference panel:
+  the unit of analysis in an ecological study is a group (a district, a
+  PHC catchment), not an individual, so none of this app's individual-level
+  formulas transfer, and the resulting group-level association carries its
+  own well-documented interpretive hazard (the ecological fallacy)
+  regardless of group count. Covers unit-of-analysis framing (Morgenstern
+  1995) and the ecological fallacy (Robinson 1950; Piantadosi, Byar &
+  Green 1988; Greenland & Robins 1994)
+- **EFA/CFA Sample Size Guidance** (`R/modules/mod_efa_cfa.R`) -- a
+  rule-of-thumb calculator (deterministic ratio arithmetic + a published
+  lookup table, the same honest framing as the Pilot/Feasibility module's
+  Julious 2005 rule): Costello & Osborne (2005)'s 5:1/10:1/20:1
+  participant-to-item ratios for planning an exploratory or confirmatory
+  factor analysis, each labeled via Comrey & Lee (1992)'s absolute-N
+  adjective scale (50=very poor ... 1000=excellent), with MacCallum,
+  Widaman, Zhang & Hong (1999)'s communality/overdetermination caveat
+  stated explicitly rather than folded into the ratio arithmetic
 - **MANOVA / Hotelling's T²** (`R/modules/mod_manova.R`) -- the two-group
   special case of MANOVA: comparing two independent groups on p >= 1
   continuous outcome variables JOINTLY via Hotelling's T-squared test.
@@ -607,7 +780,8 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   achieving simulated power 0.823; and required n increases
   monotonically with target power (n_total=680 at power=0.7, 950 at
   power=0.9)
-- **Longitudinal Slope Difference** (`R/modules/mod_longitudinal.R`) --
+- **Longitudinal / MMRM** (`R/modules/mod_longitudinal.R`, renamed from
+  "Longitudinal Slope Difference" now that it covers a second method) --
   sample size for detecting a difference in linear SLOPE (rate of
   change) between two groups measured repeatedly at the same visit
   times, under a random-intercept + random-slope + residual-error
@@ -627,12 +801,48 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   variance=24, intercept-slope correlation=0.8, residual variance=10,
   alpha=0.05, target power=0.80 -> N=415 total (208/arm), matching the
   package's own vignette statement -- "the study would require about
-  207 subjects per arm" -- exactly (raw N=414.62, 207.31/arm)
+  207 subjects per arm" -- exactly (raw N=414.62, 207.31/arm). Plus a
+  second design, MMRM (mixed model of repeated measures) with dropout
+  under an AR(1) correlation structure (`calc_mmrm_ar1()`), wrapping
+  `longpower::power.mmrm.ar1()` -- from the same package, again a
+  single self-contained function, read from the same GitHub CRAN
+  mirror. Verified exactly against the package's own documented
+  "approximate simulation results from Table 5" of Lu, Luo & Chen
+  (2008): rho=0.6, arm-1 retention=(1,0.76,0.63,0.52), arm-2
+  retention=(1,0.87,0.81,0.78), sigma=1, delta=0.9,
+  lambda=sqrt(1.25/1.75), target power=0.904 -> N=81 total (37/44 per
+  arm), matching the package's own companion example exactly (which
+  fixes N=81 and solves back for rho, recovering rho=0.585, close to
+  the input 0.6 -- explained by N=81 being a rounded integer, not the
+  exact unrounded root 80.61). Plus two more slope-difference methods
+  (of `longpower::lmmpower()`'s four total; liuliang is above, hu
+  remains uncovered): `calc_longitudinal_diggle()`
+  (`longpower::diggle.linear.power()`, Diggle et al 2002) and
+  `calc_longitudinal_edland()` (`longpower::edland.linear.power()`, Ard
+  & Edland 2011), both read from the same GitHub CRAN mirror. Diggle
+  verified by literally reproducing the printed 3x3 table on page 29 of
+  Diggle et al (2002) (rho=0.2/0.5/0.8 x sigma2=100/200/300, delta=0.5,
+  one-sided alpha=0.05, power=0.80 -> exact match on every cell:
+  n=313/625/938, 196/391/586, 79/157/235 per group). Edland verified
+  against its own documented Alzheimer's-disease example (raw N=414.62)
+  and independently against this module's own Liu & Liang design, which
+  gives the identical raw N=414.62 for the mathematically-equivalent
+  scenario -- two different derivations landing on the same number.
+  Plus the fourth and final `lmmpower()` method, `calc_longitudinal_hu()`
+  (`longpower::hu.mackey.thomas.linear.power()`, Hu, Mackey & Thomas
+  2021) -- the only one of the four that directly models monotone
+  study-subject attrition (dropout) rather than assuming complete data
+  throughout -- verified against 3 of the package's own documented
+  round-trip examples exactly (same ADAS-cog-style pilot estimates:
+  equal allocation/two-sided -> n=180/180; 2:1 allocation -> n=270/135;
+  one-sided -> n=142/142). All four `lmmpower()` methods are now
+  implemented in this module
 
 Everything else in `docs/checklist_by_design.md` / `docs/checklist_by_test.md`
-(advanced survival designs, post-hoc power, and the much larger Stage 2-4
-backlog in those two files) remains "coming soon" in the Home hub, per
-the staged build plan.
+(advanced survival designs and the much larger Phase 6 backlog in those two
+files) remains "coming soon" in the Home hub, per the staged build plan. A
+previously-planned post-hoc/achieved-power module was evaluated and dropped
+entirely, not deferred -- see `docs/SDD.md` §10.
 
 ### Top navbar: grouped by study design, simple to difficult
 
@@ -681,7 +891,20 @@ item:
   live module -- or an honest "not yet built" note (naming the module/
   backend/citation the checklists already call for) if that branch isn't
   implemented yet. `R/home/design_tree.R` holds the question/terminal node
-  registry. v1 scope is guided-tree only -- no free-text/PICO parsing yet.
+  registry. An optional free-text box above the questions
+  (`R/home/design_free_text.R`, `walk_free_text()`) implements Stage 0 of
+  the algorithm doc: describe your study in a sentence and it pre-fills as
+  many answers as a keyword-heuristic rule table can confidently infer --
+  e.g. "We compared cases and controls, individually matched, for exposure
+  to pesticide" resolves straight to the matched case-control terminal --
+  then stops honestly at the first question it isn't sure about (e.g.
+  "risk factors for diabetes" is deliberately left unrouted, matching the
+  algorithm doc's own "must ask" framing for that phrasing), leaving the
+  rest to the same manual click-through. Deliberately keyword-based, not
+  LLM-based: no LLM API is wired into this otherwise self-contained,
+  deterministically unit-tested app, and the algorithm doc itself names
+  keyword heuristics as the graceful-degrade design for offline/no-API
+  operation.
 - **"Formulas & LaTeX"** (`home_hub.R`'s `home_sandbox_ui()`) -- a short
   explainer of this app's `$$...$$`/MathJax formula convention, plus a live
   sandbox: type LaTeX and see it rendered instantly. See "Formula LaTeX
@@ -940,5 +1163,4 @@ and stats-package call, then:
    pick it up.
 
 See `docs/SDD.md` §7 for the full calculator catalog and phase plan (means,
-case-control, cohort/RR, diagnostic accuracy, correlation, precision-based,
-post-hoc power).
+case-control, cohort/RR, diagnostic accuracy, correlation, precision-based).

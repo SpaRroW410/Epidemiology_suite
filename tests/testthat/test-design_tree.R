@@ -123,6 +123,18 @@ test_that("observational, selected on outcome, individually matched -> matched c
   expect_equal(res$node$catalog_key, "case_control_matched")
 })
 
+test_that("observational, each case is own control -> case-crossover, reuses matched case-control catalog entry", {
+  res <- .walk(c("Compare groups / test an association or hypothesis",
+                 "I only observe what happened naturally",
+                 "Each case is their own control, compared across different time windows (case-crossover)"))
+  expect_true(isTRUE(res$node$terminal))
+  expect_equal(res$node$catalog_key, "case_crossover")
+  entry <- catalog_entry(res$node$catalog_key)
+  expect_true(isTRUE(entry$built))
+  expect_equal(entry$module_input_id, "case_control-design")
+  expect_equal(entry$design_value, "matched")
+})
+
 test_that("observational, selected on exposure -> cohort/RR", {
   res <- .walk(c("Compare groups / test an association or hypothesis",
                  "I only observe what happened naturally",

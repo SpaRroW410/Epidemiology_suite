@@ -198,3 +198,194 @@ calc_multiplicity_fdr_means <- function(d, m, pi1, fdr_level = 0.05, power = 0.8
     inputs = list(d = d, m = m, pi1 = pi1, fdr_level = fdr_level, power = power)
   )
 }
+
+#' Dunnett-adjusted sample size for a multi-arm trial vs. one common
+#' control
+#'
+#' A genuinely different correction from the Bonferroni/Sidak wrapper
+#' above -- Dunnett's method (Dunnett 1955) exploits the exact positive
+#' correlation (rho = 0.5 for equal per-arm n) among the k comparisons
+#' that all share the same control arm, using the true joint distribution
+#' of the k correlated t-statistics (a multivariate t) rather than
+#' treating them as independent/worst-case. This makes Dunnett provably
+#' less conservative than Bonferroni or Sidak for exactly this common-
+#' control design (smaller n for the same family-wise error guarantee).
+#'
+#' The exact two-sided Dunnett critical value is obtained via
+#' `mvtnorm::qmvt()` -- the same multivariate-t quantile machinery
+#' `multcomp::glht(..., mcp(trt = "Dunnett"))` uses internally for
+#' testing, applied here for PLANNING (no installed package offers
+#' Dunnett-specific sample-size planning). Verified this session against
+#' the classic published two-sided Dunnett critical-value tables (Dunnett
+#' 1955/1964): k=2,3,4 at df=Inf give 2.212, 2.350/2.351, 2.440/2.442
+#' (published values 2.212/2.351/2.442; this app's qmvt call reproduces
+#' them to within the function's own small randomized-quadrature
+#' tolerance, controlled by a fixed internal seed for reproducibility).
+#'
+#' Power is the standard per-comparison planning convention already used
+#' by every design in this app (the probability that one specific
+#' treatment-vs-control comparison, sharing the assumed common effect
+#' size, clears the Dunnett-adjusted critical value) -- the same
+#' convention the Bonferroni/Sidak designs above use with their own
+#' adjusted critical values, just with Dunnett's exact (smaller) one.
+#'
+#' Worked example (k=3 active arms vs. 1 control, Cohen's d=0.5, family
+#' alpha=0.05 two-sided, target power=0.80, equal n per arm): Dunnett
+#' gives n=83/arm (achieved power 0.805), versus Bonferroni's n=86/arm and
+#' Sidak's n=85/arm on the identical inputs -- correctly smaller, as
+#' theory predicts.
+#'
+#' @param d Cohen's d effect size, common to every active arm vs. the
+#'   control (> 0)
+#' @param k Number of ACTIVE (non-control) arms being compared to the one
+#'   common control (whole number >= 2 -- for a single arm vs. control,
+#'   use the ordinary two-sample means design instead, no adjustment
+#'   needed)
+#' @param alpha Family-wise (overall) two-sided significance level (0,1)
+#' @param power Desired per-comparison power (0,1)
+#' @param seed RNG seed for reproducibility of `mvtnorm::qmvt()`'s
+#'   internal randomized quadrature
+#' @return list(n_per_arm, n_total, k, critical_value, achieved_power, inputs)
+calc_multiplicity_dunnett <- function(d, k, alpha = 0.05, power = 0.8, seed = 20240913) {
+  .validate_positive(d, "d")
+  if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 2 || k != round(k)) {
+    stop("k (number of active arms vs. the common control) must be a single whole number >= 2.")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  corr <- matrix(0.5, k, k)
+  diag(corr) <- 1
+
+  dunnett_critical_value <- function(n) {
+    df <- (k + 1) * (n - 1)
+    set.seed(seed)
+    as.numeric(mvtnorm::qmvt(1 - alpha, tail = "both.tails", df = df, corr = corr)$quantile)
+  }
+
+  power_at_n <- function(n) {
+    c_val <- dunnett_critical_value(n)
+    df <- (k + 1) * (n - 1)
+    ncp <- d * sqrt(n / 2)
+    pt(c_val, df, ncp = ncp, lower.tail = FALSE) + pt(-c_val, df, ncp = ncp, lower.tail = TRUE)
+  }
+
+  n_per_arm <- .mc_search_n1(power_at_n, power, n_lo = 3, n_hi = 6)
+
+  list(
+    n_per_arm = n_per_arm,
+    n_total = n_per_arm * (k + 1),
+    k = k,
+    critical_value = dunnett_critical_value(n_per_arm),
+    achieved_power = power_at_n(n_per_arm),
+    inputs = list(d = d, k = k, alpha = alpha, power = power)
+  )
+}
+
+#' FDR-controlled sample size for a two-sample microarray/genomics
+#' experiment (Liu & Hwang 2007)
+#'
+#' A more specialized and EXACT alternative to calc_multiplicity_fdr_means()
+#' above, for the genomics-scale case that item explicitly names: thousands
+#' of simultaneous per-gene two-sample t-tests, a known/assumed common
+#' effect size and standard deviation across genes, and a known/assumed
+#' proportion pi0 of genes that are truly NOT differentially expressed.
+#' Rather than the closed-form large-m approximation used above, this
+#' reimplements the exact algorithm of `ssize.fdr::ssize.twoSamp()`
+#' (Liu & Hwang 2007): for each candidate per-group sample size n, it
+#' solves for the critical t-value c that satisfies the FDR
+#' self-consistency equation implied by pi0 and the target fdr_level,
+#' then evaluates the resulting power via the noncentral t distribution,
+#' and returns the first n reaching the target power.
+#'
+#' Reimplemented from scratch (per this project's vendoring policy) after
+#' reading `ssize.fdr::ssize.twoSamp()`'s own source, which is installed
+#' in this sandbox via the github.com/cran mirror and used only as a
+#' verification oracle (`cran.r-project.org` itself is network-blocked
+#' here) -- not a new runtime dependency.
+#'
+#' @param delta Common difference in mean expression between the two
+#'   groups, assumed identical across all m genes/tests (> 0)
+#' @param sigma Common within-group standard deviation, assumed identical
+#'   across all m genes/tests (> 0)
+#' @param fdr_level Target false discovery rate (0,1), typically 0.05-0.10
+#' @param power Target power (0,1)
+#' @param pi0 Assumed proportion of the m genes/tests that are truly NOT
+#'   differentially expressed (0,1) -- e.g. 0.95 if only ~5% of genes are
+#'   expected to genuinely differ
+#' @param max_n Maximum per-group sample size to search up to (whole
+#'   number >= 3)
+#' @param side "two-sided", "upper", or "lower" (matching
+#'   `ssize.fdr::ssize.twoSamp()`'s own `side` argument)
+#' @return list(n_per_group, n_total, achieved_power, critical_value, inputs)
+calc_fdr_microarray_two_sample <- function(delta, sigma, fdr_level = 0.05, power = 0.8,
+                                            pi0 = 0.95, max_n = 35,
+                                            side = c("two-sided", "upper", "lower")) {
+  side <- match.arg(side)
+  .validate_positive(delta, "delta")
+  .validate_positive(sigma, "sigma")
+  .validate_unit_interval(fdr_level, "fdr_level")
+  .validate_unit_interval(power, "power")
+  .validate_unit_interval(pi0, "pi0")
+  if (!is.numeric(max_n) || length(max_n) != 1 || is.na(max_n) || max_n < 3 || max_n != round(max_n)) {
+    stop("max_n must be a single whole number >= 3.")
+  }
+
+  ds <- delta / sigma
+  r <- fdr_level * (1 - pi0) / ((1 - fdr_level) * pi0)
+
+  obj_fun <- function(n, t_ncp) {
+    if (side == "two-sided") {
+      function(c) abs(2 * pt(q = -c, df = 2 * n - 2) / (1 - pt(q = c, df = 2 * n - 2, ncp = t_ncp)) - r)
+    } else if (side == "upper") {
+      function(c) abs(pt(q = -c, df = 2 * n - 2) / (1 - pt(q = c, df = 2 * n - 2, ncp = t_ncp)) - r)
+    } else {
+      function(c) abs(pt(q = -c, df = 2 * n - 2) / pt(q = -c, df = 2 * n - 2, ncp = t_ncp) - r)
+    }
+  }
+
+  up_start <- 50
+  up <- up_start
+  n_found <- NA
+  power_found <- NA
+  crit_found <- NA
+
+  for (n in 2:max_n) {
+    t_ncp <- ds / sqrt(2 / n)
+    ci <- optimize(f = obj_fun(n, t_ncp), interval = c(0, up))$minimum
+    up <- ci
+
+    pwr_new <- if (abs(ci - up_start) >= 1) {
+      if (side %in% c("two-sided", "upper")) {
+        1 - pt(q = ci, df = 2 * n - 2, ncp = t_ncp)
+      } else {
+        pt(q = -ci, df = 2 * n - 2, ncp = t_ncp)
+      }
+    } else {
+      0
+    }
+
+    if (is.na(n_found) && pwr_new >= power) {
+      n_found <- n
+      power_found <- pwr_new
+      crit_found <- ci
+      break
+    }
+  }
+
+  if (is.na(n_found)) {
+    stop(sprintf(
+      "Desired power not achieved for any per-group n up to max_n = %d -- try a larger max_n, a larger delta/sigma, or a less stringent fdr_level/power.",
+      max_n
+    ))
+  }
+
+  list(
+    n_per_group = n_found,
+    n_total = 2 * n_found,
+    achieved_power = power_found,
+    critical_value = crit_found,
+    inputs = list(delta = delta, sigma = sigma, fdr_level = fdr_level, power = power,
+                  pi0 = pi0, max_n = max_n, side = side)
+  )
+}

@@ -27,7 +27,8 @@ mod_nonparametric_ui <- function(id) {
           "Jonckheere-Terpstra (ordered alternatives)" = "jonckheere",
           "Friedman (k related/repeated measurements)" = "friedman",
           "Kolmogorov-Smirnov (two independent samples, Monte Carlo)" = "ks",
-          "Wald-Wolfowitz runs test (two independent samples, Monte Carlo)" = "runs"
+          "Wald-Wolfowitz runs test (two independent samples, Monte Carlo)" = "runs",
+          "Animal/preclinical K-sample rank test (Lehmann alternative, Monte Carlo)" = "animal_rank"
         ),
         selected = "rank_sum"
       ),
@@ -86,6 +87,26 @@ mod_nonparametric_ui <- function(id) {
         p(class = "text-muted",
           "This design searches by simulation and may take several seconds.")
       ),
+      conditionalPanel(
+        condition = design_is("animal_rank"),
+        selectInput(ns("k_animal"), "Number of groups (k, including control)", choices = 2:6, selected = 2),
+        textInput(ns("odds_ratio_animal"), "Odds ratio(s) vs. control (comma-separated; one value applies to all)",
+                  value = "4"),
+        radioButtons(ns("statistic_animal"), "Test statistic",
+                     choices = c("Kruskal-Wallis (omnibus)" = "Kruskal-Wallis",
+                                 "Jonckheere-Terpstra (ordered trend)" = "Jonckheere-Terpstra"),
+                     selected = "Kruskal-Wallis"),
+        conditionalPanel(
+          condition = sprintf("input['%s'] == 'Jonckheere-Terpstra'", ns("statistic_animal")),
+          radioButtons(ns("alternative_animal"), "Alternative",
+                       choices = c("Two-sided" = "two.sided", "One-sided" = "one.sided"),
+                       selected = "two.sided")
+        ),
+        numericInput(ns("nrep_animal"), "Monte Carlo replicates per candidate n (nrep)",
+                     value = 100000, min = 1000, max = 1000000, step = 1000),
+        p(class = "text-muted",
+          "This design searches by simulation and may take several seconds. Kruskal-Wallis allows only a two-sided alternative.")
+      ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
       hr(),
@@ -141,7 +162,13 @@ mod_nonparametric_ui <- function(id) {
       render_formula_block(nonparametric_content$wald_wolfowitz$formula_latex),
       shiny::markdown(nonparametric_content$wald_wolfowitz$explanation),
       h5("Worked example"),
-      shiny::markdown(nonparametric_content$wald_wolfowitz$worked_example)
+      shiny::markdown(nonparametric_content$wald_wolfowitz$worked_example),
+      hr(),
+      h4(nonparametric_content$animal_rank_test$title),
+      render_formula_block(nonparametric_content$animal_rank_test$formula_latex),
+      shiny::markdown(nonparametric_content$animal_rank_test$explanation),
+      h5("Worked example"),
+      shiny::markdown(nonparametric_content$animal_rank_test$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -176,7 +203,11 @@ mod_nonparametric_ui <- function(id) {
       hr(),
       h4(nonparametric_content$wald_wolfowitz$title),
       p(strong("Citation: "), nonparametric_content$wald_wolfowitz$citation),
-      p(strong("Implemented via: "), code(nonparametric_content$wald_wolfowitz$backend))
+      p(strong("Implemented via: "), code(nonparametric_content$wald_wolfowitz$backend)),
+      hr(),
+      h4(nonparametric_content$animal_rank_test$title),
+      p(strong("Citation: "), nonparametric_content$animal_rank_test$citation),
+      p(strong("Implemented via: "), code(nonparametric_content$animal_rank_test$backend))
     )
   )
 }
@@ -227,11 +258,24 @@ mod_nonparametric_server <- function(id) {
             effect_size = input$effect_size_ks, alpha = input$alpha, power = input$power,
             nsim = input$nsim_ks
           )
-        } else {
+        } else if (input$design == "runs") {
           req(input$effect_size_runs, input$nsim_runs)
           calc_wald_wolfowitz_runs(
             effect_size = input$effect_size_runs, alpha = input$alpha, power = input$power,
             nsim = input$nsim_runs
+          )
+        } else {
+          req(input$k_animal, input$odds_ratio_animal, input$statistic_animal,
+              input$alternative_animal, input$nrep_animal)
+          odds_ratio <- suppressWarnings(as.numeric(trimws(strsplit(input$odds_ratio_animal, ",")[[1]])))
+          if (anyNA(odds_ratio) || length(odds_ratio) == 0) {
+            stop("Odds ratio(s) must be one or more comma-separated numbers.")
+          }
+          calc_animal_rank_test(
+            k = as.integer(input$k_animal), odds_ratio = odds_ratio,
+            alpha = input$alpha, power = input$power,
+            statistic = input$statistic_animal, alternative = input$alternative_animal,
+            nrep = input$nrep_animal
           )
         }
         list(ok = TRUE, design = input$design, value = value)
@@ -265,6 +309,12 @@ mod_nonparametric_server <- function(id) {
         tagList(
           p(strong("Required sample size per group: "), v$n1),
           p(strong("Total sample size: "), v$n_total),
+          p(sprintf("Simulated achieved power at this n: %.3f (Monte Carlo estimate)", v$achieved_power))
+        )
+      } else if (res$design == "animal_rank") {
+        tagList(
+          p(strong("Required sample size per group: "), v$n_per_group),
+          p(strong("Total sample size: "), v$n_total, sprintf(" (%d groups)", v$k)),
           p(sprintf("Simulated achieved power at this n: %.3f (Monte Carlo estimate)", v$achieved_power))
         )
       } else {

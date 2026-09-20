@@ -409,5 +409,62 @@ nonparametric_content <- list(
       "recommends for this test -- is used here instead)."
     ),
     backend = "direct Monte Carlo simulation of tseries::runs.test()"
+  ),
+
+  animal_rank_test = list(
+    title = "Animal / Preclinical K-Sample Rank Test (Lehmann Alternative)",
+    formula_latex = paste0(
+      "$$H_0: \\text{all } k \\text{ groups share the same distribution}$$",
+      "$$H_1 \\text{ (Lehmann alternative)}: \\quad ",
+      "1 - F_i(x) = [1 - F_1(x)]^{\\theta_i}, \\quad \\theta_i = OR_i$$"
+    ),
+    explanation = paste(
+      "Heller (2006) targets a specifically preclinical/animal-study",
+      "setting: small planned group sizes, one control group and one or",
+      "more treated groups, and an effect expressed as an odds ratio",
+      "under the Lehmann alternative -- a proportional-odds-style shift",
+      "in the whole outcome distribution -- rather than a location-shift",
+      "effect size like Cohen's d, which rarely matches how a preclinical",
+      "effect is actually anticipated (e.g. \"the treated group's",
+      "response is expected to be about 4x more likely to exceed any",
+      "given value than control's\").",
+      "",
+      "No closed-form solve-for-n exists for either rank statistic under",
+      "this alternative, so `clinfun::power.ladesign()` computes",
+      "power-given-n via its own internal Monte Carlo simulation of the",
+      "actual test statistic, and this design searches over n by calling",
+      "that engine directly -- the same pattern already used above for",
+      "the Kolmogorov-Smirnov and Wald-Wolfowitz designs.",
+      "",
+      "- **Kruskal-Wallis** - an omnibus test (any group differs from any",
+      "  other); two-sided only.",
+      "- **Jonckheere-Terpstra** - tests for an ORDERED trend across",
+      "  groups (e.g. a dose-response); supports a one-sided alternative",
+      "  when the expected direction of the trend is known in advance.",
+      "- **odds_ratio** - one value per non-control group (or a single",
+      "  value applied to all of them), each the assumed odds ratio of",
+      "  that group's outcome distribution vs. the control's under the",
+      "  Lehmann alternative.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "k = 2 groups (1 control, 1 treated), odds ratio = 4, alpha = 0.05,",
+      "80% power, Kruskal-Wallis statistic: this calculator returns n = 13",
+      "per group (26 total), simulated achieved power 0.805 -- reproducing",
+      "`power.ladesign()`'s own documented example exactly",
+      "(`power.ladesign(c(9,7), 4, statistic=\"Kruskal-Wallis\")` gives",
+      "power = 0.588 at the package's own n=9/n=7, confirming this",
+      "calculator's search engine calls the identical underlying",
+      "function). A 3-group Jonckheere-Terpstra example (odds ratios 2 and",
+      "4 vs. control) similarly reproduces the package's own power=0.659",
+      "(two-sided) / 0.771 (one-sided) at its own documented group sizes.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Heller G. Power calculations for preclinical studies using a",
+      "K-sample rank test and the Lehmann alternative hypothesis. Stat",
+      "Med. 2006;25(15):2543-2553."
+    ),
+    backend = "clinfun::power.ladesign() (own internal Monte Carlo simulation), searched over n via this app's shared exponential-search-then-bisection engine"
   )
 )

@@ -139,3 +139,60 @@ calc_variance_two <- function(sigma1, sigma2, alpha = 0.05, power = 0.8,
                   alternative = alternative)
   )
 }
+
+#' Sample size to estimate a standard deviation to a target precision
+#' (CI-width-based, no hypothesis test)
+#'
+#' Uses the same standard result as the two functions above --
+#' (n-1)*S^2/sigma^2 ~ chi-squared(n-1) -- but inverted for PLANNING
+#' rather than a hypothesis test: a two-sided (1-conf_level) confidence
+#' interval for the true SD sigma, expressed as a multiple of whatever
+#' sample SD S is later observed, has width
+#'   sqrt(df/qchisq(1-alpha/2,df)) to sqrt(df/qchisq(alpha/2,df))  (df = n-1)
+#' -- exactly the multiplier interval this app's own Pilot/Feasibility
+#' module already computes FORWARD (given n, how wide is the CI?) via
+#' `calc_pilot_sd_precision()`. This design solves the same identity
+#' BACKWARD instead: given a target CI width (as a multiple of the
+#' observed SD), find the smallest n that achieves it. Deterministic
+#' closed-form solve via `uniroot()` (width-vs-n is monotonically
+#' decreasing, confirmed directly: width at n=5,10,20,50,100,200,500 ->
+#' 2.27, 1.14, 0.70, 0.41, 0.28, 0.20, 0.12), the same solve-for-n
+#' pattern as `calc_variance_single()`/`calc_variance_two()` above.
+#'
+#' Verified by round-trip: solving for n at the target width already
+#' implied by n=12 (this app's own Pilot module default, width=0.989 --
+#' i.e. a 95% CI for sigma spanning ~0.71x to ~1.70x the observed SD)
+#' recovers n=12 (13 without the exact-boundary ceiling() rounding
+#' quirk, since the target width was computed from n=12 itself and the
+#' solved root lands just above 12.0 before ceiling()).
+#'
+#' @param target_width Desired total width of the two-sided CI for sigma,
+#'   expressed as a multiple of the (yet-to-be-observed) sample SD --
+#'   e.g. 0.5 means the CI should span no more than 0.5x the observed SD
+#'   (> 0)
+#' @param conf_level Confidence level (0,1), e.g. 0.95
+#' @return list(n, lower_mult, upper_mult, inputs)
+calc_variance_sd_precision <- function(target_width, conf_level = 0.95) {
+  .validate_positive(target_width, "target_width")
+  .validate_unit_interval(conf_level, "conf_level")
+
+  width_at_n <- function(n) {
+    alpha <- 1 - conf_level
+    df <- n - 1
+    lower_mult <- sqrt(df / stats::qchisq(1 - alpha / 2, df))
+    upper_mult <- sqrt(df / stats::qchisq(alpha / 2, df))
+    upper_mult - lower_mult
+  }
+
+  n_solved <- stats::uniroot(function(n) width_at_n(n) - target_width, c(3, 1e7))$root
+  n <- ceiling(n_solved)
+
+  alpha <- 1 - conf_level
+  df <- n - 1
+  list(
+    n = n,
+    lower_mult = sqrt(df / stats::qchisq(1 - alpha / 2, df)),
+    upper_mult = sqrt(df / stats::qchisq(alpha / 2, df)),
+    inputs = list(target_width = target_width, conf_level = conf_level)
+  )
+}

@@ -35,7 +35,26 @@ design_nodes <- list(
       list(label = "Build or validate a prediction/prognostic model", next_id = "term_prediction"),
       list(label = "Assess the accuracy of a diagnostic test", next_id = "diag_type"),
       list(label = "Assess agreement/reliability between raters or methods", next_id = "agree_scale"),
-      list(label = "Explore experiences or meanings (qualitative)", next_id = "term_qualitative")
+      list(label = "Explore experiences or meanings (qualitative)", next_id = "term_qualitative"),
+      list(label = "Plan or monitor a meta-analysis of trials (trial sequential analysis)", next_id = "tsa_outcome")
+    )
+  ),
+
+  # ---------------------------------------------------------------- §1F ----
+  tsa_outcome = list(
+    id = "tsa_outcome", stage = 1,
+    question = "What outcome metric will the meta-analysis pool?",
+    help = paste(
+      "Trial sequential analysis (TSA) computes the required/optimal",
+      "information size (RIS/OIS) -- the meta-analysis-level analogue of",
+      "a single trial's sample size -- for a planned or",
+      "cumulatively-updated meta-analysis of trials."
+    ),
+    options = list(
+      list(label = "Risk ratio (RR)", next_id = "term_tsa", set = list(tsa_outcome = "RR")),
+      list(label = "Odds ratio (OR)", next_id = "term_tsa", set = list(tsa_outcome = "OR")),
+      list(label = "Risk difference (RD)", next_id = "term_tsa", set = list(tsa_outcome = "RD")),
+      list(label = "Mean difference (MD)", next_id = "term_tsa", set = list(tsa_outcome = "MD"))
     )
   ),
 
@@ -328,12 +347,29 @@ design_nodes <- list(
     would_use = "gsDesign; rpact",
     citation = "Jennison & Turnbull; O'Brien-Fleming; Pocock; Lan-DeMets alpha spending"),
 
+  term_tsa = list(id = "term_tsa", terminal = TRUE,
+    design = "Trial sequential analysis (required information size)",
+    catalog_key = function(flags) {
+      switch(if (is.null(flags$tsa_outcome)) "RR" else flags$tsa_outcome,
+             RR = "tsa_rr", OR = "tsa_or", RD = "tsa_rd", MD = "tsa_md")
+    }),
+
   term_nested_cc = list(id = "term_nested_cc", terminal = TRUE,
     design = "Nested case-control study", would_use = "no lightweight verified package identified yet", citation = "-"),
   term_case_cohort = list(id = "term_case_cohort", terminal = TRUE,
     design = "Case-cohort study", would_use = "no lightweight verified package identified yet", citation = "-"),
   term_case_crossover = list(id = "term_case_crossover", terminal = TRUE,
-    design = "Case-crossover study", would_use = "no lightweight verified package identified yet", citation = "-"),
+    design = "Case-crossover study", catalog_key = "case_crossover",
+    note = paste(
+      "A case-crossover study is mathematically a 1:M matched case-control",
+      "design, with M control PERIODS per case instead of separately",
+      "sampled control people (Maclure 1991; Mittleman et al. 1995) -- so",
+      "this app's matched case-control calculator applies directly, with",
+      "inputs reinterpreted as control-period exposure prevalence/",
+      "correlation/count. Dharmarajan, Lee & Izem (2019), who confirm that",
+      "equivalence, also show this formula can UNDERESTIMATE the true",
+      "required N for case-crossover specifically -- treat the result as",
+      "an optimistic planning estimate, not a precise one.")),
   term_sccs = list(id = "term_sccs", terminal = TRUE,
     design = "Self-controlled case series (SCCS)", would_use = "no lightweight verified package identified yet", citation = "-"),
 
@@ -360,10 +396,10 @@ design_nodes <- list(
 
   term_ecological = list(id = "term_ecological", terminal = TRUE, guidance = TRUE,
     design = "Ecological study (unit of observation is a group/area)",
+    catalog_key = "ecological_guidance",
     note = paste(
       "The unit of analysis here is the group (e.g. district, PHC catchment),",
       "not the individual -- none of this app's individual-level calculators",
       "apply directly, and ecological analyses carry their own inference",
-      "caveats (the ecological fallacy). No calculator is planned for this",
-      "design yet."))
+      "caveats (the ecological fallacy). See the guidance panel below."))
 )
