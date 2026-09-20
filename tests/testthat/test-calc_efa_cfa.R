@@ -1,3 +1,4 @@
+source(file.path("..", "..", "R", "calc", "calc_utils.R"))
 source(file.path("..", "..", "R", "calc", "calc_efa_cfa.R"))
 
 test_that("calc_efa_cfa_sample_size computes the three ratio-based N's correctly", {
@@ -31,4 +32,37 @@ test_that("calc_efa_cfa_sample_size rejects invalid inputs", {
   expect_error(calc_efa_cfa_sample_size(n_items = 0), "must be a single whole number >= 1")
   expect_error(calc_efa_cfa_sample_size(n_items = 3.5), "must be a single whole number >= 1")
   expect_error(calc_efa_cfa_sample_size(n_items = NA), "must be a single whole number >= 1")
+})
+
+test_that("calc_sem_rmsea_samplesize/power match semTools::findRMSEAsamplesize()/findRMSEApower() bit-for-bit", {
+  # rmsea0=.05, rmseaA=.08, df=20, power=.80, alpha=.05 -- a MacCallum,
+  # Browne & Sugawara (1996)-style close-vs-poor-fit scenario. Real
+  # semTools::findRMSEAsamplesize() gives n=434; findRMSEApower() at
+  # that n gives power=0.8003669.
+  res <- calc_sem_rmsea_samplesize(rmsea0 = 0.05, rmseaA = 0.08, df = 20, power = 0.80, alpha = 0.05)
+  expect_equal(res$n, 434)
+  expect_equal(round(res$achieved_power, 7), 0.8003669)
+})
+
+test_that("calc_sem_rmsea_power matches semTools::findRMSEApower() bit-for-bit, including rmsea0 > rmseaA and multi-group", {
+  # rmsea0=.08, rmseaA=.03 (testing the "not-close-fit" direction),
+  # df=50, n=300, alpha=.05, group=2 -- real semTools gives power=0.8972491.
+  pw <- calc_sem_rmsea_power(rmsea0 = 0.08, rmseaA = 0.03, df = 50, n = 300, alpha = 0.05, group = 2)
+  expect_equal(round(pw, 7), 0.8972491)
+})
+
+test_that("calc_sem_rmsea_samplesize matches semTools for a second, higher-power/lower-alpha scenario", {
+  # rmsea0=.06, rmseaA=.10, df=100, power=.90, alpha=.01 -- real
+  # semTools::findRMSEAsamplesize() gives n=131.
+  res <- calc_sem_rmsea_samplesize(rmsea0 = 0.06, rmseaA = 0.10, df = 100, power = 0.90, alpha = 0.01)
+  expect_equal(res$n, 131)
+})
+
+test_that("calc_sem_rmsea_power rejects invalid inputs", {
+  expect_error(calc_sem_rmsea_power(rmsea0 = -0.1, rmseaA = 0.08, df = 20, n = 200), ">= 0")
+  expect_error(calc_sem_rmsea_power(rmsea0 = 0.05, rmseaA = 0.05, df = 20, n = 200), "differ")
+  expect_error(calc_sem_rmsea_power(rmsea0 = 0.05, rmseaA = 0.08, df = 0, n = 200), ">= 1")
+  expect_error(calc_sem_rmsea_power(rmsea0 = 0.05, rmseaA = 0.08, df = 20, n = 1), "> 1")
+  expect_error(calc_sem_rmsea_power(rmsea0 = 0.05, rmseaA = 0.08, df = 20, n = 200, alpha = 0), "between 0 and 1")
+  expect_error(calc_sem_rmsea_power(rmsea0 = 0.05, rmseaA = 0.08, df = 20, n = 200, group = 0), ">= 1")
 })

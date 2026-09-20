@@ -7,7 +7,7 @@
 
 glmm_meta <- list(
   id = "glmm",
-  nav_title = "Monte Carlo GLMM (Cluster-Randomized Trial)"
+  nav_title = "Monte Carlo Mixed Models"
 )
 
 mod_glmm_ui <- function(id) {
@@ -31,8 +31,9 @@ mod_glmm_ui <- function(id) {
       radioButtons(
         ns("design"), "Design",
         choices = c(
-          "Continuous outcome (LMM)" = "lmm_continuous",
-          "Binary outcome (GLMM, logistic)" = "glmm_binary"
+          "Cluster-randomized trial, continuous outcome (LMM)" = "lmm_continuous",
+          "Cluster-randomized trial, binary outcome (GLMM, logistic)" = "glmm_binary",
+          "Growth curve model, group difference in slope" = "growth_curve"
         )
       ),
       conditionalPanel(
@@ -57,6 +58,20 @@ mod_glmm_ui <- function(id) {
         numericInput(ns("nsim_glmm"), "Monte Carlo replicates per candidate n (nsim)", value = 30, min = 10, max = 300, step = 10),
         numericInput(ns("seed_glmm"), "Random seed", value = 12345, step = 1)
       ),
+      conditionalPanel(
+        condition = design_is("growth_curve"),
+        numericInput(ns("ntimes_gc"), "Time points per subject (T)", value = 4, min = 2, step = 1),
+        numericInput(ns("delta_slope_gc"), "Group difference in slope (rate of change) to detect", value = 0.4, step = 0.05),
+        numericInput(ns("sigma2_intercept_gc"), "Random-intercept variance", value = 1, min = 0.0001, step = 0.1),
+        numericInput(ns("sigma2_slope_gc"), "Random-slope variance", value = 0.2, min = 0.0001, step = 0.05),
+        numericInput(ns("cor_is_gc"), "Intercept-slope correlation", value = 0.1, min = -1, max = 1, step = 0.05),
+        numericInput(ns("sigma2_residual_gc"), "Residual variance", value = 1, min = 0.0001, step = 0.1),
+        numericInput(ns("baseline_slope_gc"), "Common (control-arm) slope", value = 0, step = 0.05),
+        numericInput(ns("alpha_gc"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_gc"), "Desired power", value = 0.8, min = 0.5, max = 0.95, step = 0.01),
+        numericInput(ns("nsim_gc"), "Monte Carlo replicates per candidate n (nsim)", value = 50, min = 10, max = 500, step = 10),
+        numericInput(ns("seed_gc"), "Random seed", value = 12345, step = 1)
+      ),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -74,7 +89,13 @@ mod_glmm_ui <- function(id) {
       render_formula_block(glmm_content$glmm_binary$formula_latex),
       shiny::markdown(glmm_content$glmm_binary$explanation),
       h5("Worked example"),
-      shiny::markdown(glmm_content$glmm_binary$worked_example)
+      shiny::markdown(glmm_content$glmm_binary$worked_example),
+      hr(),
+      h4(glmm_content$growth_curve$title),
+      render_formula_block(glmm_content$growth_curve$formula_latex),
+      shiny::markdown(glmm_content$growth_curve$explanation),
+      h5("Worked example"),
+      shiny::markdown(glmm_content$growth_curve$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -85,7 +106,11 @@ mod_glmm_ui <- function(id) {
       hr(),
       h4(glmm_content$glmm_binary$title),
       p(strong("Citation: "), glmm_content$glmm_binary$citation),
-      p(strong("Implemented via: "), code(glmm_content$glmm_binary$backend))
+      p(strong("Implemented via: "), code(glmm_content$glmm_binary$backend)),
+      hr(),
+      h4(glmm_content$growth_curve$title),
+      p(strong("Citation: "), glmm_content$growth_curve$citation),
+      p(strong("Implemented via: "), code(glmm_content$growth_curve$backend))
     )
   )
 }
@@ -106,7 +131,7 @@ mod_glmm_server <- function(id) {
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
-      } else {
+      } else if (input$design == "glmm_binary") {
         req(input$cluster_size_glmm, input$sigma_u, input$baseline_prob, input$or,
             input$alpha_glmm, input$power_glmm, input$nsim_glmm, input$seed_glmm)
         tryCatch(
@@ -115,6 +140,20 @@ mod_glmm_server <- function(id) {
             baseline_prob = input$baseline_prob, or = input$or,
             alpha = input$alpha_glmm, power = input$power_glmm,
             nsim = input$nsim_glmm, seed = input$seed_glmm
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$ntimes_gc, input$delta_slope_gc, input$sigma2_intercept_gc, input$sigma2_slope_gc,
+            input$cor_is_gc, input$sigma2_residual_gc, input$baseline_slope_gc,
+            input$alpha_gc, input$power_gc, input$nsim_gc, input$seed_gc)
+        tryCatch(
+          list(ok = TRUE, value = calc_growth_curve_power(
+            ntimes = input$ntimes_gc, delta_slope = input$delta_slope_gc,
+            sigma2_intercept = input$sigma2_intercept_gc, sigma2_slope = input$sigma2_slope_gc,
+            cor_intercept_slope = input$cor_is_gc, sigma2_residual = input$sigma2_residual_gc,
+            baseline_slope = input$baseline_slope_gc, alpha = input$alpha_gc, power = input$power_gc,
+            nsim = input$nsim_gc, seed = input$seed_gc
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -128,11 +167,19 @@ mod_glmm_server <- function(id) {
       }
 
       v <- res$value
-      tagList(
-        p(strong("Required number of clusters: "), v$n_clusters),
-        p(strong("Required total sample size: "), v$n_total),
-        p(sprintf("Achieved power at this n (Monte Carlo estimate): %.3f", v$achieved_power))
-      )
+      if (input$design == "growth_curve") {
+        tagList(
+          p(strong("Required subjects per group: "), v$n_per_group),
+          p(strong("Required total sample size: "), v$n_total),
+          p(sprintf("Achieved power at this n (Monte Carlo estimate): %.3f", v$achieved_power))
+        )
+      } else {
+        tagList(
+          p(strong("Required number of clusters: "), v$n_clusters),
+          p(strong("Required total sample size: "), v$n_total),
+          p(sprintf("Achieved power at this n (Monte Carlo estimate): %.3f", v$achieved_power))
+        )
+      }
     })
   })
 }

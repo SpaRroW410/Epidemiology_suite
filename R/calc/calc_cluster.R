@@ -1,7 +1,13 @@
-# Pure closed-form calculation function for cluster/multistage sampling's
+# Pure closed-form calculation functions for cluster/multistage sampling's
 # design effect (DEFF) inflation. No package needed; DEFF = 1 + (m-1)*rho is
 # a standard closed-form identity (Kish 1965), not something any CRAN
-# package wraps in a dedicated function. Also includes
+# package wraps in a dedicated function. calc_cluster_deff_variable()
+# generalizes this to variable (unequal) cluster sizes via a
+# coefficient-of-variation term; the formula was extracted from, and
+# verified bit-for-bit against, clusterPower::cpa.binary()/cpa.normal()'s
+# own internal DEFF/VIF computation (clusterPower installed via the
+# github.com/cran mirror as a verification oracle only -- not a runtime
+# dependency, per this project's vendoring policy). Also includes
 # calc_cluster_survey_binary(), which DOES wrap a package function
 # (epiR::epi.ssclus2estb()) directly, since that one solves the full
 # WHO-EPI-style cluster survey design (PSU + SSU counts together), not
@@ -41,6 +47,53 @@ calc_cluster_deff <- function(n_base, icc, cluster_size) {
     deff = deff,
     n_effective = n_effective,
     inputs = list(n_base = n_base, icc = icc, cluster_size = cluster_size)
+  )
+}
+
+#' Design-effect-inflated sample size allowing for variable cluster size
+#'
+#' Generalizes calc_cluster_deff() to the realistic case where cluster
+#' sizes are not all identical: real clusters (villages, clinics, schools)
+#' recruit different numbers of subjects, and that extra between-cluster
+#' variability in size itself inflates the required sample size beyond the
+#' constant-cluster-size Kish DEFF. Setting cv = 0 recovers
+#' calc_cluster_deff()'s formula exactly, since the coefficient-of-variation
+#' term then drops out.
+#'
+#' @param n_base Required sample size under simple random sampling (whole
+#'   number >= 1), e.g. from a single-proportion or single-mean calculator
+#' @param icc Intraclass correlation coefficient (ICC / rho) between
+#'   subjects in the same cluster, [0, 1)
+#' @param cluster_size Average number of subjects sampled per cluster (>= 1)
+#' @param cv Coefficient of variation of cluster sizes (SD / mean across
+#'   clusters), >= 0; 0 means every cluster has the same size
+#' @return list(deff, n_effective, inputs)
+calc_cluster_deff_variable <- function(n_base, icc, cluster_size, cv) {
+  if (!is.numeric(n_base) || length(n_base) != 1 || is.na(n_base) ||
+        n_base < 1 || n_base != round(n_base)) {
+    stop("n_base must be a single whole number >= 1.")
+  }
+  if (!is.numeric(icc) || length(icc) != 1 || is.na(icc) || icc < 0 || icc >= 1) {
+    stop("icc must be a single number in [0, 1).")
+  }
+  if (!is.numeric(cluster_size) || length(cluster_size) != 1 || is.na(cluster_size) ||
+        cluster_size < 1) {
+    stop("cluster_size must be a single number >= 1.")
+  }
+  if (!is.numeric(cv) || length(cv) != 1 || is.na(cv) || cv < 0) {
+    stop("cv must be a single number >= 0.")
+  }
+
+  deff <- 1 + ((cv^2 + 1) * cluster_size - 1) * icc
+  # round() before ceiling() guards against floating-point fuzz (e.g.
+  # 100 * 2.2 landing a hair above 220.0) inflating an exact whole-number
+  # result by one.
+  n_effective <- ceiling(round(n_base * deff, 6))
+
+  list(
+    deff = deff,
+    n_effective = n_effective,
+    inputs = list(n_base = n_base, icc = icc, cluster_size = cluster_size, cv = cv)
   )
 }
 

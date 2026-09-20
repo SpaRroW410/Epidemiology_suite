@@ -106,7 +106,11 @@ module_registry <- list(
   list(id = multilevel_meta$id, title = multilevel_meta$nav_title,
        ui = mod_multilevel_ui, server = mod_multilevel_server),
   list(id = evpi_meta$id, title = evpi_meta$nav_title,
-       ui = mod_evpi_ui, server = mod_evpi_server)
+       ui = mod_evpi_ui, server = mod_evpi_server),
+  list(id = stepped_wedge_meta$id, title = stepped_wedge_meta$nav_title,
+       ui = mod_stepped_wedge_ui, server = mod_stepped_wedge_server),
+  list(id = meta_power_meta$id, title = meta_power_meta$nav_title,
+       ui = mod_meta_power_ui, server = mod_meta_power_server)
 )
 
 # Top-navbar grouping: which module ids collapse under which dropdown menu, in
@@ -130,7 +134,7 @@ module_groups <- list(
        module_ids = c("agreement")),
   list(title = "Clinical Trials",
        module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential",
-                       "subgroup_interaction", "glmm", "tsa")),
+                       "subgroup_interaction", "glmm", "tsa", "stepped_wedge")),
   list(title = "Survival Analysis",
        module_ids = c("logrank", "competing_risks", "rmst")),
   list(title = "Prediction Models",
@@ -149,5 +153,5 @@ module_groups <- list(
        module_ids = c("correlation", "chisq", "regression", "anova_general",
                        "logistic", "exact_tests", "rm_anova", "nonparametric",
                        "variance", "multiplicity", "manova", "bayesian",
-                       "longitudinal", "multilevel"))
+                       "longitudinal", "multilevel", "meta_power"))
 )

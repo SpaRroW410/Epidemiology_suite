@@ -144,3 +144,49 @@ test_that("calc_multiplicity_dunnett rejects invalid inputs", {
   expect_error(calc_multiplicity_dunnett(d = 0.5, k = 2, alpha = 0), "between 0 and 1")
   expect_error(calc_multiplicity_dunnett(d = 0.5, k = 2, power = 0), "between 0 and 1")
 })
+
+test_that("calc_fdr_microarray_two_sample matches ssize.fdr::ssize.twoSamp()'s own documented example bit-for-bit", {
+  # Reproduces Figure 1(a) of Liu & Hwang (2007): delta=1, sigma=0.5,
+  # fdr=0.05, power=0.8, pi0 in {0.5, 0.9, 0.95}, maxN=20, two-sided ->
+  # real package gives n=6/9/11 with achieved power 0.8652188656/
+  # 0.8111276984/0.8654962587 respectively (verified directly against a
+  # real ssize.fdr::ssize.twoSamp() call this session).
+  res1 <- calc_fdr_microarray_two_sample(delta = 1, sigma = 0.5, fdr_level = 0.05,
+                                          power = 0.8, pi0 = 0.5, max_n = 20)
+  expect_equal(res1$n_per_group, 6)
+  expect_equal(res1$achieved_power, 0.8652188656, tolerance = 1e-9)
+
+  res2 <- calc_fdr_microarray_two_sample(delta = 1, sigma = 0.5, fdr_level = 0.05,
+                                          power = 0.8, pi0 = 0.9, max_n = 20)
+  expect_equal(res2$n_per_group, 9)
+  expect_equal(res2$achieved_power, 0.8111276984, tolerance = 1e-9)
+
+  res3 <- calc_fdr_microarray_two_sample(delta = 1, sigma = 0.5, fdr_level = 0.05,
+                                          power = 0.8, pi0 = 0.95, max_n = 20)
+  expect_equal(res3$n_per_group, 11)
+  expect_equal(res3$achieved_power, 0.8654962587, tolerance = 1e-9)
+  expect_equal(res3$n_total, 22)
+})
+
+test_that("calc_fdr_microarray_two_sample needs a larger n as pi0 increases (fewer true positives to spend FDR budget on)", {
+  res_low <- calc_fdr_microarray_two_sample(delta = 1, sigma = 0.5, pi0 = 0.5, max_n = 25)
+  res_high <- calc_fdr_microarray_two_sample(delta = 1, sigma = 0.5, pi0 = 0.95, max_n = 25)
+  expect_true(res_high$n_per_group >= res_low$n_per_group)
+})
+
+test_that("calc_fdr_microarray_two_sample rejects invalid inputs", {
+  expect_error(calc_fdr_microarray_two_sample(delta = -1, sigma = 0.5), "positive")
+  expect_error(calc_fdr_microarray_two_sample(delta = 1, sigma = 0), "positive")
+  expect_error(calc_fdr_microarray_two_sample(delta = 1, sigma = 0.5, fdr_level = 0), "between 0 and 1")
+  expect_error(calc_fdr_microarray_two_sample(delta = 1, sigma = 0.5, pi0 = 1), "between 0 and 1")
+  expect_error(calc_fdr_microarray_two_sample(delta = 1, sigma = 0.5, max_n = 2), ">= 3")
+  # ssize.fdr's own documented behavior: when the critical-value search
+  # can't bracket a solution (here, an implausibly tiny effect size), pt()
+  # emits a benign "full precision not achieved" warning many times over
+  # before this function reports the expected error -- suppressed to keep
+  # test output clean, matching this project's existing epiR test pattern.
+  expect_error(
+    suppressWarnings(calc_fdr_microarray_two_sample(delta = 0.01, sigma = 5, max_n = 5)),
+    "Desired power not achieved"
+  )
+})

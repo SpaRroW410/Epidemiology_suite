@@ -21,6 +21,30 @@ test_that("calc_cluster_deff rejects invalid inputs", {
   expect_error(calc_cluster_deff(n_base = 200, icc = 0.05, cluster_size = 0), ">= 1")
 })
 
+test_that("calc_cluster_deff_variable with cv=0 matches calc_cluster_deff exactly", {
+  res_var <- calc_cluster_deff_variable(n_base = 200, icc = 0.05, cluster_size = 10, cv = 0)
+  res_fixed <- calc_cluster_deff(n_base = 200, icc = 0.05, cluster_size = 10)
+  expect_equal(res_var$deff, res_fixed$deff)
+  expect_equal(res_var$n_effective, res_fixed$n_effective)
+})
+
+test_that("calc_cluster_deff_variable matches clusterPower::cpa.binary()'s internal DEFF/power bit-for-bit", {
+  # m=20, icc=0.05, cv=0.5 -> DEFF = 1 + [(0.5^2+1)*20 - 1]*0.05 = 2.2, verified
+  # against clusterPower::cpa.binary(nclusters=30, nsubjects=20, CV=0.5,
+  # p1=0.3, p2=0.2, ICC=0.05, alpha=0.05), which returns power = 0.7610850
+  # via the exact same DEFF value substituted into its own power formula.
+  res <- calc_cluster_deff_variable(n_base = 100, icc = 0.05, cluster_size = 20, cv = 0.5)
+  expect_equal(res$deff, 2.2)
+  expect_equal(res$n_effective, 220)
+})
+
+test_that("calc_cluster_deff_variable rejects invalid inputs", {
+  expect_error(calc_cluster_deff_variable(n_base = 0, icc = 0.05, cluster_size = 10, cv = 0.5), ">= 1")
+  expect_error(calc_cluster_deff_variable(n_base = 200, icc = 1, cluster_size = 10, cv = 0.5), "\\[0, 1\\)")
+  expect_error(calc_cluster_deff_variable(n_base = 200, icc = 0.05, cluster_size = 0, cv = 0.5), ">= 1")
+  expect_error(calc_cluster_deff_variable(n_base = 200, icc = 0.05, cluster_size = 10, cv = -1), ">= 0")
+})
+
 test_that("calc_cluster_survey_binary matches epiR::epi.ssclus2estb()'s own documented examples", {
   # b=20 (constant), p=0.20, epsilon=0.05 (absolute), rho=0.02, 95% CI ->
   # n.psu=17, n.ssu=340 (the package's own WHO-style example). epiR itself

@@ -11,17 +11,39 @@ efa_cfa_meta <- list(
 mod_efa_cfa_ui <- function(id) {
   ns <- NS(id)
 
+  design_is <- function(value) sprintf("input['%s'] == '%s'", ns("design"), value)
+
   tabsetPanel(
     tabPanel(
       "Calculate",
       br(),
-      div(class = "alert alert-info",
-          strong("Rule of thumb, not a formula: "),
-          "there is no accepted power calculation for factor analysis sample ",
-          "size -- these are published participant-to-item ratios, refined ",
-          "over decades of practice, not a solved hypothesis test."),
-      numericInput(ns("n_items"), "Number of items (EFA) or free parameters (CFA/SEM)",
-                   value = 20, min = 1, step = 1),
+      radioButtons(
+        ns("design"), "Design",
+        choices = c(
+          "Rule-of-thumb (subjects-per-item)" = "rule_of_thumb",
+          "RMSEA-based power (CFA/SEM test of close fit)" = "rmsea"
+        ),
+        selected = "rule_of_thumb"
+      ),
+      conditionalPanel(
+        condition = design_is("rule_of_thumb"),
+        div(class = "alert alert-info",
+            strong("Rule of thumb, not a formula: "),
+            "there is no accepted power calculation for factor analysis sample ",
+            "size -- these are published participant-to-item ratios, refined ",
+            "over decades of practice, not a solved hypothesis test."),
+        numericInput(ns("n_items"), "Number of items (EFA) or free parameters (CFA/SEM)",
+                     value = 20, min = 1, step = 1)
+      ),
+      conditionalPanel(
+        condition = design_is("rmsea"),
+        numericInput(ns("df_rmsea"), "Model degrees of freedom (df)", value = 20, min = 1, step = 1),
+        numericInput(ns("rmsea0"), "RMSEA0 (null, e.g. 0.05 = \"close fit\")", value = 0.05, min = 0, step = 0.01),
+        numericInput(ns("rmseaA"), "RMSEA_A (alternative, e.g. 0.08 = \"mediocre fit\")", value = 0.08, min = 0, step = 0.01),
+        numericInput(ns("group_rmsea"), "Number of groups", value = 1, min = 1, step = 1),
+        numericInput(ns("alpha_rmsea"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power_rmsea"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
+      ),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -33,14 +55,24 @@ mod_efa_cfa_ui <- function(id) {
       render_formula_block(efa_cfa_content$rule_of_thumb$formula_latex),
       shiny::markdown(efa_cfa_content$rule_of_thumb$explanation),
       h5("Worked example"),
-      shiny::markdown(efa_cfa_content$rule_of_thumb$worked_example)
+      shiny::markdown(efa_cfa_content$rule_of_thumb$worked_example),
+      hr(),
+      h4(efa_cfa_content$rmsea$title),
+      render_formula_block(efa_cfa_content$rmsea$formula_latex),
+      shiny::markdown(efa_cfa_content$rmsea$explanation),
+      h5("Worked example"),
+      shiny::markdown(efa_cfa_content$rmsea$worked_example)
     ),
     tabPanel(
       "Reference",
       br(),
       h4(efa_cfa_content$rule_of_thumb$title),
       p(strong("Citation: "), efa_cfa_content$rule_of_thumb$citation),
-      p(strong("Implemented via: "), code(efa_cfa_content$rule_of_thumb$backend))
+      p(strong("Implemented via: "), code(efa_cfa_content$rule_of_thumb$backend)),
+      hr(),
+      h4(efa_cfa_content$rmsea$title),
+      p(strong("Citation: "), efa_cfa_content$rmsea$citation),
+      p(strong("Implemented via: "), code(efa_cfa_content$rmsea$backend))
     )
   )
 }
@@ -48,11 +80,25 @@ mod_efa_cfa_ui <- function(id) {
 mod_efa_cfa_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     result <- reactive({
-      req(input$n_items)
-      tryCatch(
-        list(ok = TRUE, value = calc_efa_cfa_sample_size(n_items = input$n_items)),
-        error = function(e) list(ok = FALSE, message = conditionMessage(e))
-      )
+      req(input$design)
+
+      if (input$design == "rule_of_thumb") {
+        req(input$n_items)
+        tryCatch(
+          list(ok = TRUE, value = calc_efa_cfa_sample_size(n_items = input$n_items)),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$df_rmsea, input$rmsea0, input$rmseaA, input$group_rmsea,
+            input$alpha_rmsea, input$power_rmsea)
+        tryCatch(
+          list(ok = TRUE, value = calc_sem_rmsea_samplesize(
+            rmsea0 = input$rmsea0, rmseaA = input$rmseaA, df = input$df_rmsea,
+            power = input$power_rmsea, alpha = input$alpha_rmsea, group = input$group_rmsea
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      }
     })
 
     output$result <- renderUI({
@@ -62,20 +108,27 @@ mod_efa_cfa_server <- function(id) {
       }
 
       v <- res$value
-      tagList(
-        tags$table(class = "table table-sm",
-          tags$thead(tags$tr(tags$th("Ratio"), tags$th("Recommended N"), tags$th("Comrey & Lee (1992) label"))),
-          tags$tbody(
-            tags$tr(tags$td("5:1 (minimum)"), tags$td(v$n_5to1), tags$td(v$adjective_5to1)),
-            tags$tr(tags$td("10:1 (commonly recommended)"), tags$td(v$n_10to1), tags$td(v$adjective_10to1)),
-            tags$tr(tags$td("20:1 (more robust)"), tags$td(v$n_20to1), tags$td(v$adjective_20to1))
-          )
-        ),
-        div(class = "text-muted small",
-            "These ratios assume nothing else is known about expected communalities ",
-            "or factor overdetermination -- see the Formula/Help tab's caveat ",
-            "(MacCallum et al. 1999) before treating any of these as a firm target.")
-      )
+      if (input$design == "rule_of_thumb") {
+        tagList(
+          tags$table(class = "table table-sm",
+            tags$thead(tags$tr(tags$th("Ratio"), tags$th("Recommended N"), tags$th("Comrey & Lee (1992) label"))),
+            tags$tbody(
+              tags$tr(tags$td("5:1 (minimum)"), tags$td(v$n_5to1), tags$td(v$adjective_5to1)),
+              tags$tr(tags$td("10:1 (commonly recommended)"), tags$td(v$n_10to1), tags$td(v$adjective_10to1)),
+              tags$tr(tags$td("20:1 (more robust)"), tags$td(v$n_20to1), tags$td(v$adjective_20to1))
+            )
+          ),
+          div(class = "text-muted small",
+              "These ratios assume nothing else is known about expected communalities ",
+              "or factor overdetermination -- see the Formula/Help tab's caveat ",
+              "(MacCallum et al. 1999) before treating any of these as a firm target.")
+        )
+      } else {
+        tagList(
+          p(strong("Required total sample size: "), v$n),
+          p(sprintf("Achieved power at this n: %.4f", v$achieved_power))
+        )
+      }
     })
   })
 }

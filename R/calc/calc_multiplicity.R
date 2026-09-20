@@ -281,3 +281,111 @@ calc_multiplicity_dunnett <- function(d, k, alpha = 0.05, power = 0.8, seed = 20
     inputs = list(d = d, k = k, alpha = alpha, power = power)
   )
 }
+
+#' FDR-controlled sample size for a two-sample microarray/genomics
+#' experiment (Liu & Hwang 2007)
+#'
+#' A more specialized and EXACT alternative to calc_multiplicity_fdr_means()
+#' above, for the genomics-scale case that item explicitly names: thousands
+#' of simultaneous per-gene two-sample t-tests, a known/assumed common
+#' effect size and standard deviation across genes, and a known/assumed
+#' proportion pi0 of genes that are truly NOT differentially expressed.
+#' Rather than the closed-form large-m approximation used above, this
+#' reimplements the exact algorithm of `ssize.fdr::ssize.twoSamp()`
+#' (Liu & Hwang 2007): for each candidate per-group sample size n, it
+#' solves for the critical t-value c that satisfies the FDR
+#' self-consistency equation implied by pi0 and the target fdr_level,
+#' then evaluates the resulting power via the noncentral t distribution,
+#' and returns the first n reaching the target power.
+#'
+#' Reimplemented from scratch (per this project's vendoring policy) after
+#' reading `ssize.fdr::ssize.twoSamp()`'s own source, which is installed
+#' in this sandbox via the github.com/cran mirror and used only as a
+#' verification oracle (`cran.r-project.org` itself is network-blocked
+#' here) -- not a new runtime dependency.
+#'
+#' @param delta Common difference in mean expression between the two
+#'   groups, assumed identical across all m genes/tests (> 0)
+#' @param sigma Common within-group standard deviation, assumed identical
+#'   across all m genes/tests (> 0)
+#' @param fdr_level Target false discovery rate (0,1), typically 0.05-0.10
+#' @param power Target power (0,1)
+#' @param pi0 Assumed proportion of the m genes/tests that are truly NOT
+#'   differentially expressed (0,1) -- e.g. 0.95 if only ~5% of genes are
+#'   expected to genuinely differ
+#' @param max_n Maximum per-group sample size to search up to (whole
+#'   number >= 3)
+#' @param side "two-sided", "upper", or "lower" (matching
+#'   `ssize.fdr::ssize.twoSamp()`'s own `side` argument)
+#' @return list(n_per_group, n_total, achieved_power, critical_value, inputs)
+calc_fdr_microarray_two_sample <- function(delta, sigma, fdr_level = 0.05, power = 0.8,
+                                            pi0 = 0.95, max_n = 35,
+                                            side = c("two-sided", "upper", "lower")) {
+  side <- match.arg(side)
+  .validate_positive(delta, "delta")
+  .validate_positive(sigma, "sigma")
+  .validate_unit_interval(fdr_level, "fdr_level")
+  .validate_unit_interval(power, "power")
+  .validate_unit_interval(pi0, "pi0")
+  if (!is.numeric(max_n) || length(max_n) != 1 || is.na(max_n) || max_n < 3 || max_n != round(max_n)) {
+    stop("max_n must be a single whole number >= 3.")
+  }
+
+  ds <- delta / sigma
+  r <- fdr_level * (1 - pi0) / ((1 - fdr_level) * pi0)
+
+  obj_fun <- function(n, t_ncp) {
+    if (side == "two-sided") {
+      function(c) abs(2 * pt(q = -c, df = 2 * n - 2) / (1 - pt(q = c, df = 2 * n - 2, ncp = t_ncp)) - r)
+    } else if (side == "upper") {
+      function(c) abs(pt(q = -c, df = 2 * n - 2) / (1 - pt(q = c, df = 2 * n - 2, ncp = t_ncp)) - r)
+    } else {
+      function(c) abs(pt(q = -c, df = 2 * n - 2) / pt(q = -c, df = 2 * n - 2, ncp = t_ncp) - r)
+    }
+  }
+
+  up_start <- 50
+  up <- up_start
+  n_found <- NA
+  power_found <- NA
+  crit_found <- NA
+
+  for (n in 2:max_n) {
+    t_ncp <- ds / sqrt(2 / n)
+    ci <- optimize(f = obj_fun(n, t_ncp), interval = c(0, up))$minimum
+    up <- ci
+
+    pwr_new <- if (abs(ci - up_start) >= 1) {
+      if (side %in% c("two-sided", "upper")) {
+        1 - pt(q = ci, df = 2 * n - 2, ncp = t_ncp)
+      } else {
+        pt(q = -ci, df = 2 * n - 2, ncp = t_ncp)
+      }
+    } else {
+      0
+    }
+
+    if (is.na(n_found) && pwr_new >= power) {
+      n_found <- n
+      power_found <- pwr_new
+      crit_found <- ci
+      break
+    }
+  }
+
+  if (is.na(n_found)) {
+    stop(sprintf(
+      "Desired power not achieved for any per-group n up to max_n = %d -- try a larger max_n, a larger delta/sigma, or a less stringent fdr_level/power.",
+      max_n
+    ))
+  }
+
+  list(
+    n_per_group = n_found,
+    n_total = 2 * n_found,
+    achieved_power = power_found,
+    critical_value = crit_found,
+    inputs = list(delta = delta, sigma = sigma, fdr_level = fdr_level, power = power,
+                  pi0 = pi0, max_n = max_n, side = side)
+  )
+}

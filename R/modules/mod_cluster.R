@@ -25,6 +25,7 @@ mod_cluster_ui <- function(id) {
         ns("design"), "Design",
         choices = c(
           "Design-effect inflation (given a computed base n)" = "deff",
+          "Design-effect inflation (variable cluster size)" = "deff_variable",
           "Cluster survey precision (WHO EPI-style, proportion)" = "survey"
         ),
         selected = "deff"
@@ -37,6 +38,17 @@ mod_cluster_ui <- function(id) {
                      value = 0.05, min = 0, max = 0.999, step = 0.01),
         numericInput(ns("cluster_size"), "Average cluster size (subjects per cluster)",
                      value = 10, min = 1, step = 1)
+      ),
+      conditionalPanel(
+        condition = design_is("deff_variable"),
+        numericInput(ns("n_base_var"), "Base sample size (simple random sampling)",
+                     value = 100, min = 1, step = 1),
+        numericInput(ns("icc_var"), "Intraclass correlation coefficient (ICC / rho)",
+                     value = 0.05, min = 0, max = 0.999, step = 0.01),
+        numericInput(ns("cluster_size_var"), "Average cluster size (subjects per cluster)",
+                     value = 20, min = 1, step = 1),
+        numericInput(ns("cv_var"), "Coefficient of variation of cluster size (SD / mean)",
+                     value = 0.5, min = 0, step = 0.05)
       ),
       conditionalPanel(
         condition = design_is("survey"),
@@ -72,6 +84,12 @@ mod_cluster_ui <- function(id) {
       h5("Worked example"),
       shiny::markdown(cluster_content$deff$worked_example),
       hr(),
+      h4(cluster_content$deff_variable$title),
+      render_formula_block(cluster_content$deff_variable$formula_latex),
+      shiny::markdown(cluster_content$deff_variable$explanation),
+      h5("Worked example"),
+      shiny::markdown(cluster_content$deff_variable$worked_example),
+      hr(),
       h4(cluster_content$survey$title),
       render_formula_block(cluster_content$survey$formula_latex),
       shiny::markdown(cluster_content$survey$explanation),
@@ -84,6 +102,10 @@ mod_cluster_ui <- function(id) {
       h4(cluster_content$deff$title),
       p(strong("Citation: "), cluster_content$deff$citation),
       p(strong("Implemented via: "), code(cluster_content$deff$backend)),
+      hr(),
+      h4(cluster_content$deff_variable$title),
+      p(strong("Citation: "), cluster_content$deff_variable$citation),
+      p(strong("Implemented via: "), code(cluster_content$deff_variable$backend)),
       hr(),
       h4(cluster_content$survey$title),
       p(strong("Citation: "), cluster_content$survey$citation),
@@ -102,6 +124,15 @@ mod_cluster_server <- function(id) {
         tryCatch(
           list(ok = TRUE, value = calc_cluster_deff(
             n_base = input$n_base, icc = input$icc, cluster_size = input$cluster_size
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else if (input$design == "deff_variable") {
+        req(input$n_base_var, input$icc_var, input$cluster_size_var, input$cv_var)
+        tryCatch(
+          list(ok = TRUE, value = calc_cluster_deff_variable(
+            n_base = input$n_base_var, icc = input$icc_var,
+            cluster_size = input$cluster_size_var, cv = input$cv_var
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -133,6 +164,11 @@ mod_cluster_server <- function(id) {
       if (input$design == "deff") {
         tagList(
           p(strong("Design effect (DEFF): "), sprintf("%.3f", v$deff)),
+          p(strong("Cluster-adjusted (effective) sample size: "), v$n_effective)
+        )
+      } else if (input$design == "deff_variable") {
+        tagList(
+          p(strong("Design effect (DEFF, variable cluster size): "), sprintf("%.3f", v$deff)),
           p(strong("Cluster-adjusted (effective) sample size: "), v$n_effective)
         )
       } else {
