@@ -571,7 +571,19 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   design's n=37/group at the same effect size, correctly reflecting that
   the runs test discards each observation's magnitude and uses only its
   rank position, a comparatively weak omnibus test against a plain
-  location shift
+  location shift; plus an animal/preclinical K-sample rank test under
+  Heller (2006)'s Lehmann alternative -- `calc_animal_rank_test()`,
+  wrapping `clinfun::power.ladesign()` (already installed for Simon
+  two-stage and Group Sequential), the checklist's own named package and
+  citation for this item, expressing the treated-vs-control effect as an
+  odds ratio (Kruskal-Wallis, omnibus; or Jonckheere-Terpstra, ordered
+  trend) rather than a location-shift effect size, since that rarely
+  matches how a preclinical effect is actually anticipated. Reproduces the
+  package's own documented examples exactly
+  (`power.ladesign(c(9,7), 4, statistic="Kruskal-Wallis")` -> power=0.588;
+  the 3-group Jonckheere-Terpstra example -> power=0.659 two-sided/0.771
+  one-sided); worked example: k=2 (1 control, 1 treated), odds ratio=4,
+  alpha=0.05, 80% power -> n=13/group, achieved power 0.805
 - **Variance Tests** (`R/modules/mod_variance.R`) -- a single-variance test
   against a reference SD, and a two-variance test comparing two groups,
   both closed-form (chi-squared/F distribution respectively, solved via
@@ -618,7 +630,47 @@ further CORE items, and the start of Stage 2 (analytical depth) --
   (target 0.1) and empirical average power 0.794 (target 0.8); m=500,
   pi1=0.1 (m1=50), d=1, fdr_level=0.05, target average power=0.9 ->
   n=36/group, 400-replicate simulation gives empirical average FDR 0.045
-  (target 0.05) and empirical average power 0.904 (target 0.9)
+  (target 0.05) and empirical average power 0.904 (target 0.9); plus a
+  sixth design for a multi-arm trial vs. a single common control
+  (Dunnett) -- `calc_multiplicity_dunnett()`, using the EXACT Dunnett
+  (1955) critical value (`mvtnorm::qmvt()`, already a project dependency)
+  rather than treating the k comparisons as independent the way
+  Bonferroni/Sidak do above, since they all share the same control arm
+  (a known correlation of rho=0.5 for equal per-arm n). Verified against
+  the classic published two-sided Dunnett critical-value tables (k=2,3,4
+  at df=infinity -> 2.212/2.351/2.442) and against this module's own
+  Bonferroni/Sidak designs at identical inputs: k=3 active arms, d=0.5,
+  alpha=0.05, power=0.80 -> Dunnett n=83/arm vs. Bonferroni n=86/arm and
+  Sidak n=85/arm, correctly smaller
+- **Capture-Recapture** (`R/modules/mod_capture_recapture.R`) -- plans a
+  two-sample mark-recapture study's second-sample size (n2) for a target
+  precision on an unknown population size N, given an already-fixed
+  first-sample (marking) size n1 and a planning guess at N.
+  `calc_capture_recapture_n2()` inverts the large-sample variance of the
+  Chapman (1951)-modified Petersen estimator (Seber 1982) -- no installed
+  package plans this (`Rcapture` and similar are analysis-only) -- and was
+  independently Monte-Carlo-verified against the actual discrete
+  hypergeometric mark-recapture process across several N/n1/precision
+  combinations: N=1000, n1=100, target CV=0.10 -> n2=474, simulated
+  CV=0.101
+- **Ecological Study Guidance** (`R/modules/mod_ecological.R`) -- like
+  Qualitative Sample Size Guidance, a no-numeric-formula reference panel:
+  the unit of analysis in an ecological study is a group (a district, a
+  PHC catchment), not an individual, so none of this app's individual-level
+  formulas transfer, and the resulting group-level association carries its
+  own well-documented interpretive hazard (the ecological fallacy)
+  regardless of group count. Covers unit-of-analysis framing (Morgenstern
+  1995) and the ecological fallacy (Robinson 1950; Piantadosi, Byar &
+  Green 1988; Greenland & Robins 1994)
+- **EFA/CFA Sample Size Guidance** (`R/modules/mod_efa_cfa.R`) -- a
+  rule-of-thumb calculator (deterministic ratio arithmetic + a published
+  lookup table, the same honest framing as the Pilot/Feasibility module's
+  Julious 2005 rule): Costello & Osborne (2005)'s 5:1/10:1/20:1
+  participant-to-item ratios for planning an exploratory or confirmatory
+  factor analysis, each labeled via Comrey & Lee (1992)'s absolute-N
+  adjective scale (50=very poor ... 1000=excellent), with MacCallum,
+  Widaman, Zhang & Hong (1999)'s communality/overdetermination caveat
+  stated explicitly rather than folded into the ratio arithmetic
 - **MANOVA / Hotelling's T²** (`R/modules/mod_manova.R`) -- the two-group
   special case of MANOVA: comparing two independent groups on p >= 1
   continuous outcome variables JOINTLY via Hotelling's T-squared test.

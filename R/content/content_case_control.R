@@ -77,6 +77,24 @@ case_control_content <- list(
       "- **ratio (m)** - controls per case (1 for 1:1 matching, more for",
       "  1:m).",
       "- **alpha, power** - as elsewhere.",
+      "",
+      "**Also used for case-crossover studies.** A case-crossover design",
+      "(each case's exposure in a hazard/case period compared to their OWN",
+      "exposure in one or more control periods, rather than to a separate",
+      "matched person) is mathematically a 1:M matched case-control design",
+      "with M control periods per case (Maclure 1991; Mittleman, Maclure &",
+      "Robins 1995) -- so this same calculator, with p0/phi/ratio",
+      "reinterpreted as control-PERIOD exposure prevalence/correlation/",
+      "count, applies directly; that equivalence, and the standard use of",
+      "this Dupont (1988) formula for case-crossover planning, is",
+      "confirmed in Dharmarajan, Lee & Izem (2019). Their same paper,",
+      "however, shows this formula (and other pre-2019 methods) CAN",
+      "UNDERESTIMATE the true required N for case-crossover specifically",
+      "across a range of realistic inputs, and proposes corrected methods",
+      "that no R package currently implements -- treat a case-crossover",
+      "result from this calculator as an optimistic (possibly too small)",
+      "planning estimate, not a precise one, pending a package that",
+      "implements their correction.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -93,7 +111,15 @@ case_control_content <- list(
     ),
     citation = paste(
       "Dupont WD. Power calculations for matched case-control studies.",
-      "Biometrics. 1988;44(4):1157-1168."
+      "Biometrics. 1988;44(4):1157-1168. Case-crossover use: Maclure M.",
+      "The case-crossover design: a method for studying transient effects",
+      "on the risk of acute events. Am J Epidemiol. 1991;133(2):144-153;",
+      "Mittleman MA, Maclure M, Robins JM. Control sampling strategies for",
+      "case-crossover studies: an assessment of relative efficiency. Am J",
+      "Epidemiol. 1995;142(1):91-98; Dharmarajan S, Lee JY, Izem R. Sample",
+      "size estimation for case-crossover studies. Stat Med.",
+      "2019;38(6):956-968 (confirms the matched-case-control equivalence",
+      "and formula choice, and documents its underestimation risk)."
     ),
     backend = "epiR::epi.sscc(method = \"matched\")"
   ),

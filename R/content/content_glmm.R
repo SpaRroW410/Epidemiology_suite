@@ -85,7 +85,7 @@ glmm_content <- list(
       "with more than one random factor: designs, analytic models, and",
       "statistical power. Annu Rev Psychol. 2017;68:601-625."
     ),
-    backend = "Direct Monte Carlo simulate-and-refit via lme4::lmer() -- simr is not installed and its GitHub CRAN mirror is unreachable, so the same underlying technique it wraps is used directly"
+    backend = "Direct Monte Carlo simulate-and-refit via lme4::lmer() (simr is now installed as a verification oracle for the growth-curve design below, but this cluster-randomized design predates that; the same underlying technique simr wraps is used directly, no new runtime dependency)"
   ),
 
   glmm_binary = list(
@@ -138,6 +138,80 @@ glmm_content <- list(
       "models: a practical guide for ecology and evolution. Trends Ecol",
       "Evol. 2009;24(3):127-135."
     ),
-    backend = "Direct Monte Carlo simulate-and-refit via lme4::glmer() -- simr is not installed and its GitHub CRAN mirror is unreachable, so the same underlying technique it wraps is used directly"
+    backend = "Direct Monte Carlo simulate-and-refit via lme4::glmer() (simr is now installed as a verification oracle for the growth-curve design below, but this cluster-randomized design predates that; the same underlying technique simr wraps is used directly, no new runtime dependency)"
+  ),
+
+  growth_curve = list(
+    title = "Growth Curve Model, Group Difference in Slope (Monte Carlo LMM)",
+    formula_latex = paste0(
+      "$$y_{ij} = b_{0i} + (\\beta_1 + \\delta \\cdot group_i + b_{1i})\\,t_j + \\varepsilon_{ij}$$",
+      "$$\\text{power} = \\Pr\\!\\left(\\text{LRT}(y \\sim t + group + (t|subject) ",
+      "\\;\\text{vs}\\; y \\sim t*group + (t|subject)) < \\alpha\\right)$$"
+    ),
+    explanation = paste(
+      "Use this to size a LONGITUDINAL (repeated-measures) trial testing",
+      "whether two groups differ in their RATE OF CHANGE over time (a",
+      "\"growth curve\") -- e.g. does a treatment slow cognitive decline,",
+      "change in a biomarker, or growth trajectory faster/slower than",
+      "control -- rather than a difference at any single time point.",
+      "",
+      "- **Time points (T)** - the number of equally-spaced repeated",
+      "  measurements per subject.",
+      "- **Slope difference** - the group difference in rate of change",
+      "  per time unit to detect.",
+      "- **Random-intercept/random-slope variances** - how much subjects",
+      "  vary in their starting level (intercept) and in their own rate",
+      "  of change (slope), and the correlation between the two (e.g. a",
+      "  positive correlation means subjects who start higher also",
+      "  change faster).",
+      "- **Residual variance** - measurement-occasion-level noise, on",
+      "  top of each subject's own trajectory.",
+      "",
+      "Unlike the app's closed-form Longitudinal / MMRM and Multilevel",
+      "modules (which cover specific published closed-form cases --",
+      "Diggle/Liu & Liang/Edland/Hu, and powerlmm's classic no-dropout",
+      "case respectively), this directly simulates data from the random-",
+      "intercept/random-slope model and refits it via `lme4::lmer()`,",
+      "testing the group:time interaction via a likelihood-ratio test --",
+      "the same brute-force-but-exact technique `simr` (the checklist's",
+      "own named package for this item) wraps, verified directly against",
+      "it (see Reference tab).",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "T=4 time points, slope difference=0.4, random-intercept variance=1,",
+      "random-slope variance=0.2, intercept-slope correlation=0.1,",
+      "residual variance=1.5, alpha=0.05, target power=0.80, 50 Monte",
+      "Carlo replicates per candidate n -- finds 40 subjects per group",
+      "(80 total). A larger slope difference (0.8) or more time points,",
+      "other things equal, needs FEWER subjects per group -- the",
+      "expected direction, since both make the trend easier to detect",
+      "given the same amount of noise.",
+      "",
+      "This design's likelihood-ratio test was verified bit-for-bit",
+      "against `simr::doTest(model, fixed(\"time:group\", \"lr\"))` on 5",
+      "independently simulated datasets spanning different parameter",
+      "combinations -- every single p-value matched to full",
+      "floating-point precision, confirming this reimplementation runs",
+      "the identical statistical test simr itself would.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Green P, MacLeod CJ. simr: an R package for power analysis of",
+      "generalized linear mixed models by simulation. Methods Ecol Evol.",
+      "2016;7(4):493-498.",
+      "",
+      "Bolker BM, Brooks ME, Clark CJ, et al. Generalized linear mixed",
+      "models: a practical guide for ecology and evolution. Trends Ecol",
+      "Evol. 2009;24(3):127-135.",
+      "",
+      "Verified bit-for-bit against real `simr::doTest()` calls (installed",
+      "in this sandbox via the github.com/cran mirror -- `cran.r-project.org`",
+      "itself is network-blocked here -- used only as a verification",
+      "oracle). Per this project's vendoring policy, the shipped",
+      "calculator has no new runtime dependency: `lme4` (already",
+      "installed) is all this design needs."
+    ),
+    backend = "Direct Monte Carlo simulate-and-refit via lme4::lmer(), verified bit-for-bit against simr::doTest()"
   )
 )

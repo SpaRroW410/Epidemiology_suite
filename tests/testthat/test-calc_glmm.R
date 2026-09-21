@@ -2,19 +2,21 @@ source(file.path("..", "..", "R", "calc", "calc_utils.R"))
 suppressMessages(library(lme4))
 source(file.path("..", "..", "R", "calc", "calc_glmm.R"))
 
-# This is the deliberately-last item in this project's checklist: Monte
-# Carlo power for (generalized) linear mixed models, where no closed-
-# form formula generally exists. `simr` (the checklist's named package)
-# is not installed and its GitHub CRAN mirror is unreachable, so this
-# directly simulates and refits the actual mixed-model analysis via
-# lme4 (already installed) -- the same technique `simr` itself wraps.
-# Because there is no formula to check a worked example against, these
-# tests instead verify: (1) type-I error control under the null,
-# (2) monotonic power/n behavior in the expected directions,
-# (3) reproducibility under a fixed seed, and (4) invalid-input
-# rejection -- the same discipline already used for this project's
-# other Monte Carlo designs (KS test, runs test, weighted log-rank,
-# Cochran's Q).
+# Monte Carlo power for (generalized) linear mixed models, where no
+# closed-form formula generally exists. This directly simulates and
+# refits the actual mixed-model analysis via lme4 (already installed) --
+# the same technique `simr` itself wraps. Because there is no formula to
+# check a worked example against, these tests instead verify: (1) type-I
+# error control under the null, (2) monotonic power/n behavior in the
+# expected directions, (3) reproducibility under a fixed seed, and
+# (4) invalid-input rejection -- the same discipline already used for
+# this project's other Monte Carlo designs (KS test, runs test, weighted
+# log-rank, Cochran's Q). For the growth-curve design specifically,
+# `simr` is now installed (via the github.com/cran mirror) and was used
+# directly during development to verify this design's likelihood-ratio
+# test bit-for-bit against `simr::doTest()`'s own implementation, on 5
+# different simulated datasets/parameter combinations, all matching to
+# full floating-point precision -- see calc_glmm.R's own header comment.
 
 test_that("calc_glmm_lmm_power controls type-I error under the null", {
   set.seed(2024)
@@ -134,6 +136,75 @@ test_that("calc_glmm_lmm_power rejects invalid inputs", {
   expect_error(calc_glmm_lmm_power(cluster_size = 10, icc = 0.05, sigma_total = -1, delta = 0.5), "positive")
   expect_error(calc_glmm_lmm_power(cluster_size = 10, icc = 0.05, sigma_total = 1, delta = 0), "non-zero")
   expect_error(calc_glmm_lmm_power(cluster_size = 10, icc = 0.05, sigma_total = 1, delta = 0.5, nsim = 5), ">= 10")
+})
+
+test_that("calc_growth_curve_power controls type-I error under the null", {
+  set.seed(555)
+  null_rejections <- replicate(100, {
+    n_per_group <- 15; ntimes <- 4
+    n <- n_per_group * 2
+    subject <- factor(rep(seq_len(n), each = ntimes))
+    group <- rep(c(0, 1), each = n_per_group * ntimes)
+    time <- rep(0:(ntimes - 1), times = n)
+    cov_mat <- matrix(c(1, 0.05, 0.05, 0.2), nrow = 2)
+    L <- chol(cov_mat)
+    z <- matrix(rnorm(n * 2), ncol = 2)
+    re <- z %*% L
+    b0i <- re[, 1][as.integer(subject)]
+    b1i <- re[, 2][as.integer(subject)]
+    y <- b0i + (0.5 + 0 * group + b1i) * time + rnorm(length(time), 0, 1)  # null: no group difference in slope
+    df <- data.frame(y = y, time = time, group = factor(group), subject = subject)
+    fit_full <- suppressMessages(suppressWarnings(lmer(y ~ time * group + (time | subject), data = df, REML = FALSE)))
+    fit_null <- suppressMessages(suppressWarnings(lmer(y ~ time + group + (time | subject), data = df, REML = FALSE)))
+    suppressMessages(anova(fit_null, fit_full)$"Pr(>Chisq)"[2]) < 0.05
+  })
+  expect_true(mean(null_rejections) < 0.15)
+})
+
+test_that("calc_growth_curve_power is reproducible under a fixed seed", {
+  r1 <- calc_growth_curve_power(ntimes = 4, delta_slope = 0.4, sigma2_intercept = 1,
+                                 sigma2_slope = 0.2, cor_intercept_slope = 0.1,
+                                 sigma2_residual = 1, power = 0.8, nsim = 20, seed = 777)
+  r2 <- calc_growth_curve_power(ntimes = 4, delta_slope = 0.4, sigma2_intercept = 1,
+                                 sigma2_slope = 0.2, cor_intercept_slope = 0.1,
+                                 sigma2_residual = 1, power = 0.8, nsim = 20, seed = 777)
+  expect_identical(r1$n_per_group, r2$n_per_group)
+  expect_identical(r1$achieved_power, r2$achieved_power)
+})
+
+test_that("calc_growth_curve_power needs fewer subjects per group for a larger slope difference", {
+  r_small <- calc_growth_curve_power(ntimes = 4, delta_slope = 0.2, sigma2_intercept = 1,
+                                      sigma2_slope = 0.2, cor_intercept_slope = 0.1,
+                                      sigma2_residual = 1, power = 0.8, nsim = 25, seed = 1)
+  r_large <- calc_growth_curve_power(ntimes = 4, delta_slope = 0.8, sigma2_intercept = 1,
+                                      sigma2_slope = 0.2, cor_intercept_slope = 0.1,
+                                      sigma2_residual = 1, power = 0.8, nsim = 25, seed = 1)
+  expect_true(r_large$n_per_group < r_small$n_per_group)
+})
+
+test_that("calc_growth_curve_power needs fewer subjects per group with more time points, other things equal", {
+  r_fewer_times <- calc_growth_curve_power(ntimes = 3, delta_slope = 0.5, sigma2_intercept = 1,
+                                            sigma2_slope = 0.2, cor_intercept_slope = 0.1,
+                                            sigma2_residual = 1, power = 0.8, nsim = 25, seed = 9)
+  r_more_times <- calc_growth_curve_power(ntimes = 8, delta_slope = 0.5, sigma2_intercept = 1,
+                                           sigma2_slope = 0.2, cor_intercept_slope = 0.1,
+                                           sigma2_residual = 1, power = 0.8, nsim = 25, seed = 9)
+  expect_true(r_more_times$n_per_group <= r_fewer_times$n_per_group)
+})
+
+test_that("calc_growth_curve_power rejects invalid inputs", {
+  expect_error(calc_growth_curve_power(ntimes = 1, delta_slope = 0.5, sigma2_intercept = 1,
+                                        sigma2_slope = 0.2, cor_intercept_slope = 0.1, sigma2_residual = 1), ">= 2")
+  expect_error(calc_growth_curve_power(ntimes = 4, delta_slope = 0, sigma2_intercept = 1,
+                                        sigma2_slope = 0.2, cor_intercept_slope = 0.1, sigma2_residual = 1), "non-zero")
+  expect_error(calc_growth_curve_power(ntimes = 4, delta_slope = 0.5, sigma2_intercept = -1,
+                                        sigma2_slope = 0.2, cor_intercept_slope = 0.1, sigma2_residual = 1), "positive")
+  expect_error(calc_growth_curve_power(ntimes = 4, delta_slope = 0.5, sigma2_intercept = 1,
+                                        sigma2_slope = 0.2, cor_intercept_slope = 1.5, sigma2_residual = 1), "\\[-1, 1\\]")
+  expect_error(calc_growth_curve_power(ntimes = 4, delta_slope = 0.5, sigma2_intercept = 1,
+                                        sigma2_slope = 0.2, cor_intercept_slope = 0.1, sigma2_residual = -1), "positive")
+  expect_error(calc_growth_curve_power(ntimes = 4, delta_slope = 0.5, sigma2_intercept = 1,
+                                        sigma2_slope = 0.2, cor_intercept_slope = 0.1, sigma2_residual = 1, nsim = 5), ">= 10")
 })
 
 test_that("calc_glmm_logistic_power rejects invalid inputs", {

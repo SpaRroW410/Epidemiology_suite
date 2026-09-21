@@ -299,6 +299,23 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Case-Control",
        module_input_id = "case_control-design", design_value = "matched"),
 
+  list(key = "case_crossover",
+       label = "Case-crossover study",
+       answers = paste(
+         "Answers: \"How many cases do I need for a case-crossover study,",
+         "comparing each case's own exposure in a hazard period to their",
+         "own exposure in one or more control periods?\" (uses the same",
+         "matched case-control calculator -- a case-crossover design is",
+         "mathematically a 1:M matched case-control design with M control",
+         "periods per case, per Maclure 1991/Mittleman et al. 1995,",
+         "confirmed by Dharmarajan, Lee & Izem 2019, who also document",
+         "that this formula can underestimate the true required N for",
+         "case-crossover specifically)"
+       ),
+       outcome_type = "case_control", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Case-Control",
+       module_input_id = "case_control-design", design_value = "matched"),
+
   list(key = "case_control_nested",
        label = "Nested case-control study",
        answers = paste(
@@ -343,6 +360,94 @@ calculator_catalog <- list(
        outcome_type = "sccs", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Self-Controlled Case Series",
        module_input_id = NA, design_value = NA),
+
+  list(key = "capture_recapture",
+       label = "Two-sample mark-recapture (Chapman-Petersen), precision-based",
+       answers = paste(
+         "Answers: \"I'm planning a mark-recapture study to estimate an",
+         "unknown population size N -- given a first-sample (marking)",
+         "size and a rough planning guess at N, how large does my second",
+         "sample need to be to estimate N to a target precision?\""
+       ),
+       outcome_type = "capture_recapture", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Capture-Recapture",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "ecological_guidance",
+       label = "Ecological study guidance (group-level design, no formula)",
+       answers = paste(
+         "Answers: \"I'm planning an ecological (group-level) study -- how",
+         "many groups/areas do I need?\" (guidance, not a formula: unlike",
+         "this app's individual-level calculators, the unit of analysis",
+         "here is a group, and the design carries its own interpretive",
+         "hazard -- the ecological fallacy -- regardless of group count)"
+       ),
+       outcome_type = "ecological", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Ecological Study Guidance",
+       module_input_id = NA, design_value = NA),
+
+  list(key = "efa_cfa_guidance",
+       label = "EFA/CFA subjects-per-item sample size guidance",
+       answers = paste(
+         "Answers: \"I'm planning an exploratory or confirmatory factor",
+         "analysis / scale validation study -- how many participants do",
+         "I need relative to my number of items?\" (rule-of-thumb ratios,",
+         "not a solved hypothesis-test formula)"
+       ),
+       outcome_type = "efa_cfa", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Psychometrics Sample Size Guidance",
+       module_input_id = "efa_cfa-design", design_value = "rule_of_thumb"),
+
+  list(key = "sem_rmsea",
+       label = "CFA/SEM test of close fit via RMSEA",
+       answers = paste(
+         "Answers: \"How many participants do I need for a confirmatory",
+         "factor analysis or SEM to test whether the model achieves",
+         "close fit (or reject poor fit), given its degrees of freedom",
+         "and a null vs. alternative RMSEA value?\" (a genuine closed-",
+         "form hypothesis-test power calculation, unlike the rule-of-",
+         "thumb guidance above)"
+       ),
+       outcome_type = "efa_cfa", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Psychometrics Sample Size Guidance",
+       module_input_id = "efa_cfa-design", design_value = "rmsea"),
+
+  list(key = "irt_calibration",
+       label = "IRT item calibration -- minimum sample size by model type",
+       answers = paste(
+         "Answers: \"I'm calibrating items with Item Response Theory",
+         "(Rasch/1PL, 2PL, 3PL, or a polytomous graded-response/partial-",
+         "credit model) -- how many examinees do I need?\" (published",
+         "minimum-N guidelines from Monte Carlo parameter-recovery",
+         "studies, not a solved hypothesis test)"
+       ),
+       outcome_type = "efa_cfa", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Psychometrics Sample Size Guidance",
+       module_input_id = "efa_cfa-design", design_value = "irt_calibration"),
+
+  list(key = "evpi",
+       label = "Value of information (EVPI) for a cost-effectiveness decision",
+       answers = paste(
+         "Answers: \"Given the uncertainty in an existing cost-effectiveness",
+         "analysis (mean and SD of the incremental net benefit from a",
+         "probabilistic sensitivity analysis), is it worth doing more",
+         "research at all, and what's the maximum any future study could",
+         "be worth?\""
+       ),
+       outcome_type = "evpi", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Value of Information (EVPI/EVSI)",
+       module_input_id = "evpi-design", design_value = "evpi"),
+
+  list(key = "evsi_enbs",
+       label = "Value of sample information (EVSI) and optimal sample size (ENBS)",
+       answers = paste(
+         "Answers: \"How large should a specific proposed follow-up study",
+         "be, to maximize its expected net benefit once its cost is",
+         "weighed against the decision uncertainty it would resolve?\""
+       ),
+       outcome_type = "evpi", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Value of Information (EVPI/EVSI)",
+       module_input_id = "evpi-design", design_value = "evsi"),
 
   list(key = "correlation_pearson",
        label = "Pearson correlation",
@@ -601,6 +706,43 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Longitudinal / MMRM",
        module_input_id = "longitudinal-design", design_value = "slope_diff"),
 
+  list(key = "multilevel_two_level",
+       label = "Multilevel model, two-level (subjects, repeated measures)",
+       answers = paste(
+         "Answers: \"How many subjects do I need for a longitudinal",
+         "trial analyzed with a random-intercept/random-slope",
+         "hierarchical (mixed) model, testing a treatment-group",
+         "difference in the RATE OF CHANGE over time?\""
+       ),
+       outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Multilevel / Hierarchical Model",
+       module_input_id = "multilevel-design", design_value = "two_level"),
+
+  list(key = "multilevel_three_level",
+       label = "Multilevel model, three-level (subjects nested in clusters)",
+       answers = paste(
+         "Answers: \"How many clusters (schools, clinics, wards) do I",
+         "need for a cluster-randomized longitudinal trial analyzed",
+         "with a 3-level hierarchical mixed model, testing a",
+         "treatment-group difference in the rate of change over",
+         "time?\""
+       ),
+       outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Multilevel / Hierarchical Model",
+       module_input_id = "multilevel-design", design_value = "three_level"),
+
+  list(key = "meta_power_k",
+       label = "Required number of studies (k) for a planned meta-analysis",
+       answers = paste(
+         "Answers: \"How many studies (of a given size) do I need in a",
+         "planned meta-analysis to reliably detect a true summary",
+         "effect, accounting for between-study heterogeneity",
+         "(I-squared)?\""
+       ),
+       outcome_type = "meta_analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Meta-Analysis Power",
+       module_input_id = NA, design_value = NA),
+
   list(key = "mmrm_ar1",
        label = "MMRM with dropout, AR(1) correlation (Lu, Luo & Chen)",
        answers = paste(
@@ -624,6 +766,18 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Cluster / Design Effect",
        module_input_id = "cluster-design", design_value = "deff"),
 
+  list(key = "cluster_deff_variable",
+       label = "Cluster / multistage sampling -- design effect, variable cluster size",
+       answers = paste(
+         "Answers: \"Same as the design-effect calculator above, but my",
+         "clusters don't all recruit the same number of subjects -- how",
+         "does that extra variability in cluster size change how much",
+         "bigger my sample needs to be?\""
+       ),
+       outcome_type = "cluster", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Cluster / Design Effect",
+       module_input_id = "cluster-design", design_value = "deff_variable"),
+
   list(key = "cluster_survey",
        label = "Cluster survey precision (WHO EPI-style, proportion)",
        answers = paste(
@@ -635,6 +789,32 @@ calculator_catalog <- list(
        outcome_type = "cluster", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Cluster / Design Effect",
        module_input_id = "cluster-design", design_value = "survey"),
+
+  list(key = "cluster_pps_optimal",
+       label = "Two-stage PPS sampling -- optimal cluster allocation (take b)",
+       answers = paste(
+         "Answers: \"I'm designing a two-stage PPS (probability-",
+         "proportional-to-size) survey -- given the relative cost of",
+         "adding a cluster vs. an element within one, and the intra-",
+         "cluster homogeneity, what's the optimal number of elements per",
+         "cluster (take b), and how many clusters do I need for my",
+         "budget or target precision?\""
+       ),
+       outcome_type = "cluster", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Cluster / Design Effect",
+       module_input_id = "cluster-design", design_value = "pps_optimal"),
+
+  list(key = "stepped_wedge_normal",
+       label = "Stepped-wedge cluster-randomized trial (continuous outcome)",
+       answers = paste(
+         "Answers: \"How many clusters do I need for a stepped-wedge",
+         "cluster-randomized trial, where every cluster starts on control",
+         "and crosses over to the intervention at a randomized time,",
+         "rather than half staying on control throughout?\""
+       ),
+       outcome_type = "means", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Stepped-Wedge CRT",
+       module_input_id = NA, design_value = NA),
 
   list(key = "stratified_sampling",
        label = "Stratified sampling -- total size and per-stratum allocation",
@@ -707,7 +887,7 @@ calculator_catalog <- list(
          "exists for it)"
        ),
        outcome_type = "glmm", groups = NA, dependency = NA, reference_based = NA,
-       built = TRUE, nav_target = "Monte Carlo GLMM (Cluster-Randomized Trial)",
+       built = TRUE, nav_target = "Monte Carlo Mixed Models",
        module_input_id = "glmm-design", design_value = "lmm_continuous"),
 
   list(key = "glmm_binary",
@@ -720,8 +900,23 @@ calculator_catalog <- list(
          "analysis, since no closed-form formula exists for it)"
        ),
        outcome_type = "glmm", groups = NA, dependency = NA, reference_based = NA,
-       built = TRUE, nav_target = "Monte Carlo GLMM (Cluster-Randomized Trial)",
+       built = TRUE, nav_target = "Monte Carlo Mixed Models",
        module_input_id = "glmm-design", design_value = "glmm_binary"),
+
+  list(key = "growth_curve_lmm",
+       label = "Growth curve model, group difference in slope (Monte Carlo LMM)",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need for a",
+         "longitudinal trial testing whether two groups differ in their",
+         "RATE OF CHANGE over time (a growth curve), analyzed with a",
+         "random-intercept/random-slope linear mixed model?\" (Monte",
+         "Carlo: directly simulates and refits the actual mixed-model",
+         "analysis, since no closed-form formula exists for it -- the",
+         "same technique the `simr` package wraps)"
+       ),
+       outcome_type = "glmm", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Monte Carlo Mixed Models",
+       module_input_id = "glmm-design", design_value = "growth_curve"),
 
   list(key = "crossover_2x2",
        label = "2x2 crossover trial (continuous outcome) -- test for a difference",
@@ -909,6 +1104,19 @@ calculator_catalog <- list(
        outcome_type = "continuous", groups = "2", dependency = "independent", reference_based = NA,
        built = TRUE, nav_target = "Nonparametric Tests",
        module_input_id = "nonparametric-design", design_value = "runs"),
+
+  list(key = "animal_rank_test",
+       label = "Animal/preclinical K-sample rank test (Lehmann alternative, Monte Carlo)",
+       answers = paste(
+         "Answers: \"For a small preclinical/animal study with one control",
+         "group and one or more treated groups, how many animals per group",
+         "do I need to detect an assumed odds ratio under Heller (2006)'s",
+         "Lehmann alternative, via the Kruskal-Wallis or Jonckheere-Terpstra",
+         "rank statistic?\""
+       ),
+       outcome_type = "ordinal", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Nonparametric Tests",
+       module_input_id = "nonparametric-design", design_value = "animal_rank"),
 
   list(key = "rm_anova_interaction",
        label = "Mixed (split-plot) ANOVA -- group x time interaction",
@@ -1359,6 +1567,64 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Group Sequential Design",
        module_input_id = "group_sequential-design", design_value = "survival"),
 
+  list(key = "lan_demets_normal",
+       label = "Lan-DeMets alpha-spending design, continuous outcome (2 looks)",
+       answers = paste(
+         "Answers: \"How large a trial do I need, at most, if I plan a",
+         "single interim look using the literal Lan-DeMets (O'Brien-",
+         "Fleming-type or Pocock-type) alpha-spending function, rather",
+         "than the power-family boundary reparameterization?\""
+       ),
+       outcome_type = "mean", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Group Sequential Design",
+       module_input_id = "group_sequential-design", design_value = "lan_demets_normal"),
+
+  list(key = "tsa_rr",
+       label = "Trial sequential analysis, risk ratio",
+       answers = paste(
+         "Answers: \"How large does the cumulative evidence base (across",
+         "all trials in a meta-analysis) need to be for adequate power",
+         "to detect an anticipated risk ratio, and what is the",
+         "information-size threshold used to build TSA monitoring",
+         "boundaries?\""
+       ),
+       outcome_type = "proportion", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Trial Sequential Analysis",
+       module_input_id = "tsa-outcome", design_value = "RR"),
+
+  list(key = "tsa_or",
+       label = "Trial sequential analysis, odds ratio",
+       answers = paste(
+         "Answers: \"How large does the cumulative evidence base need to",
+         "be for adequate power to detect an anticipated odds ratio in a",
+         "meta-analysis?\""
+       ),
+       outcome_type = "proportion", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Trial Sequential Analysis",
+       module_input_id = "tsa-outcome", design_value = "OR"),
+
+  list(key = "tsa_rd",
+       label = "Trial sequential analysis, risk difference",
+       answers = paste(
+         "Answers: \"How large does the cumulative evidence base need to",
+         "be for adequate power to detect an anticipated absolute risk",
+         "difference in a meta-analysis?\""
+       ),
+       outcome_type = "proportion", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Trial Sequential Analysis",
+       module_input_id = "tsa-outcome", design_value = "RD"),
+
+  list(key = "tsa_md",
+       label = "Trial sequential analysis, mean difference",
+       answers = paste(
+         "Answers: \"How large does the cumulative evidence base need to",
+         "be for adequate power to detect an anticipated mean difference",
+         "in a meta-analysis?\""
+       ),
+       outcome_type = "mean", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Trial Sequential Analysis",
+       module_input_id = "tsa-outcome", design_value = "MD"),
+
   list(key = "variance_single",
        label = "Single-variance test (vs. a reference SD)",
        answers = paste(
@@ -1380,6 +1646,19 @@ calculator_catalog <- list(
        outcome_type = "variance", groups = "2", dependency = "independent", reference_based = NA,
        built = TRUE, nav_target = "Variance Tests",
        module_input_id = "variance-design", design_value = "two"),
+
+  list(key = "variance_sd_precision",
+       label = "Precision-based SD estimation (CI width, no hypothesis test)",
+       answers = paste(
+         "Answers: \"How many subjects do I need so that a confidence",
+         "interval for the true SD is no wider than a target multiple of",
+         "the SD I end up observing?\" (no hypothesis, no power target --",
+         "a precision question, the same chi-squared identity this app's",
+         "Pilot/Feasibility module already uses in the opposite direction)"
+       ),
+       outcome_type = "variance", groups = "1", dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Variance Tests",
+       module_input_id = "variance-design", design_value = "sd_precision"),
 
   list(key = "multiplicity_proportion_1s",
        label = "Multiplicity-adjusted: one proportion vs. reference",
@@ -1439,6 +1718,32 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Multiplicity Adjustment",
        module_input_id = "multiplicity-design", design_value = "fdr_means_2s"),
 
+  list(key = "multiplicity_fdr_microarray",
+       label = "Multiplicity-adjusted: two-sample microarray/genomics, FDR-controlled (exact)",
+       answers = paste(
+         "Answers: \"I'm planning a microarray/RNA-seq-style experiment",
+         "testing thousands of genes at once, with a known/assumed",
+         "proportion truly not differentially expressed -- how many",
+         "samples per group do I need for a target FALSE DISCOVERY RATE,",
+         "using the exact Liu & Hwang (2007) method?\""
+       ),
+       outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Multiplicity Adjustment",
+       module_input_id = "multiplicity-design", design_value = "fdr_microarray"),
+
+  list(key = "multiplicity_dunnett",
+       label = "Multi-arm trial vs. common control (Dunnett-adjusted)",
+       answers = paste(
+         "Answers: \"I'm planning a trial with several active treatment",
+         "arms all compared to the SAME common control -- how many",
+         "subjects per arm do I need, using the exact (less conservative",
+         "than Bonferroni/Sidak) Dunnett correction for the shared",
+         "control?\""
+       ),
+       outcome_type = "means", groups = "3plus", dependency = "independent", reference_based = NA,
+       built = TRUE, nav_target = "Multiplicity Adjustment",
+       module_input_id = "multiplicity-design", design_value = "dunnett"),
+
   list(key = "manova_hotelling",
        label = "Two-group Hotelling's T-squared test (MANOVA, two groups)",
        answers = paste(
@@ -1491,9 +1796,10 @@ study_design_families <- list(
                          "means_two_indep_unequal_n", "means_welch", "means_two_dep", "means_k",
                          "means_planned_contrast", "means_posthoc_pairwise")),
   list(id = "case_control", label = "Case-Control",
-       hint = "Case-control study (unmatched, matched, nested, or case-cohort), odds ratio or hazard ratio based.",
+       hint = "Case-control study (unmatched, matched, nested, case-cohort, or case-crossover), odds ratio or hazard ratio based.",
        catalog_keys = c("case_control_unmatched", "case_control_matched",
-                         "case_control_nested", "case_control_case_cohort")),
+                         "case_control_nested", "case_control_case_cohort",
+                         "case_crossover")),
   list(id = "cohort", label = "Cohort / Relative Risk",
        hint = "Cohort or cross-sectional study estimating relative risk.",
        catalog_keys = c("cohort_rr")),
@@ -1521,10 +1827,10 @@ study_design_families <- list(
        catalog_keys = c("chisq_gof", "chisq_independence", "chisq_mcnemar",
                          "chisq_mantelhaenszel", "chisq_cochran_armitage", "cochran_q")),
   list(id = "precision", label = "Precision-based (CI-width)",
-       hint = "Estimating with a target confidence-interval width rather than testing a hypothesis.",
+       hint = "Estimating with a target confidence-interval width rather than testing a hypothesis (Rothman-Greenland framing) -- a proportion, mean, incidence rate, ratio, or standard deviation.",
        catalog_keys = c("proportion_single_precision", "means_single_precision",
                          "incidence_rate_precision", "ratio_risk_ratio",
-                         "ratio_odds_ratio", "ratio_rate_ratio")),
+                         "ratio_odds_ratio", "ratio_rate_ratio", "variance_sd_precision")),
   list(id = "ratio_estimation", label = "Ratio Estimation",
        hint = "Precision-based estimation of a risk ratio, odds ratio, or rate ratio.",
        catalog_keys = c("ratio_risk_ratio", "ratio_odds_ratio", "ratio_rate_ratio")),
@@ -1543,7 +1849,10 @@ study_design_families <- list(
                          "rmst_comparison")),
   list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
        hint = "Inflating an existing sample size for cluster-sampled surveys, or solving a full cluster survey design (WHO EPI-style) directly.",
-       catalog_keys = c("cluster_deff", "cluster_survey")),
+       catalog_keys = c("cluster_deff", "cluster_deff_variable", "cluster_survey", "cluster_pps_optimal")),
+  list(id = "capture_recapture", label = "Capture-Recapture",
+       hint = "Planning a two-sample mark-recapture study's second-sample size for a target precision on an unknown population size.",
+       catalog_keys = c("capture_recapture")),
   list(id = "stratified_sampling", label = "Stratified Sampling",
        hint = "Surveys where the population is divided into strata, sampled independently within each.",
        catalog_keys = c("stratified_sampling")),
@@ -1559,9 +1868,18 @@ study_design_families <- list(
   list(id = "qualitative", label = "Qualitative / Mixed Methods",
        hint = "Reference guidance (saturation, information power, purposive/theoretical sampling) for planning a qualitative interview study -- not a formula.",
        catalog_keys = c("qualitative_guidance")),
-  list(id = "glmm", label = "Monte Carlo GLMM (Cluster-Randomized Trial)",
-       hint = "Cluster-randomized trials analyzed with a random-intercept (generalized) linear mixed model, sized by direct Monte Carlo simulation since no closed-form formula exists.",
-       catalog_keys = c("glmm_lmm_continuous", "glmm_binary")),
+  list(id = "ecological", label = "Ecological Studies",
+       hint = "Reference guidance (unit-of-analysis, the ecological fallacy) for planning a group-level (ecological) study -- not a formula.",
+       catalog_keys = c("ecological_guidance")),
+  list(id = "efa_cfa", label = "Psychometrics / Scale Development",
+       hint = "Subjects-per-item rule-of-thumb ratios for planning an exploratory or confirmatory factor analysis / scale validation study.",
+       catalog_keys = c("efa_cfa_guidance", "sem_rmsea", "irt_calibration")),
+  list(id = "evpi", label = "Health Economics / Value of Information",
+       hint = "Expected Value of Perfect/Sample Information (EVPI/EVSI) and the sample size maximizing the Expected Net Benefit of Sampling (ENBS), for a cost-effectiveness decision already summarized by an incremental net benefit mean/SD.",
+       catalog_keys = c("evpi", "evsi_enbs")),
+  list(id = "glmm", label = "Monte Carlo Mixed Models",
+       hint = "Cluster-randomized trials analyzed with a random-intercept (generalized) linear mixed model, or a longitudinal growth-curve model testing a group difference in slope, sized by direct Monte Carlo simulation since no closed-form formula exists.",
+       catalog_keys = c("glmm_lmm_continuous", "glmm_binary", "growth_curve_lmm")),
   list(id = "clinical_trials", label = "Clinical Trials",
        hint = "Pilot/feasibility studies, Phase II designs, crossover, equivalence, non-inferiority, and group-sequential (interim-monitoring) testing.",
        catalog_keys = c("pilot_feasibility", "simon_two_stage", "crossover_2x2",
@@ -1570,7 +1888,8 @@ study_design_families <- list(
                          "noninferiority_means", "noninferiority_proportions",
                          "noninferiority_or", "noninferiority_hr",
                          "group_sequential_normal", "group_sequential_binary",
-                         "group_sequential_survival")),
+                         "group_sequential_survival", "lan_demets_normal",
+                         "stepped_wedge_normal")),
   list(id = "regression", label = "Regression",
        hint = "Testing whether a multiple regression model explains more variance than chance, whether adding predictors increases R-squared, a logistic regression predictor's effect (simple or covariate-adjusted), or two groups on an ordinal outcome (proportional odds).",
        catalog_keys = c("regression_r2", "regression_r2_increase", "logistic_binary",
@@ -1586,7 +1905,7 @@ study_design_families <- list(
        hint = "Distribution-free alternatives to the t-test, one-way ANOVA, repeated-measures ANOVA, correlation test, and trend test, when normality can't be assumed.",
        catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau",
                          "kruskal_wallis", "jonckheere_terpstra", "friedman", "ks_two_sample",
-                         "wald_wolfowitz_runs")),
+                         "wald_wolfowitz_runs", "animal_rank_test")),
   list(id = "safety_surveillance", label = "Safety / Surveillance",
        hint = "Bounding an unseen adverse-event rate, planning to catch a rare event, or proving disease/defect freedom in a finite population with an imperfect test.",
        catalog_keys = c("rule_of_three_bound", "rule_of_three_n_required",
@@ -1599,13 +1918,13 @@ study_design_families <- list(
        hint = "Diagnostic test discrimination via the area under the ROC curve, single-curve or comparing two correlated curves.",
        catalog_keys = c("roc_single_auc", "roc_compare_two_aucs")),
   list(id = "variance", label = "Variance Tests",
-       hint = "Testing whether a population's variability differs from a reference value, or whether two groups' variability differs.",
-       catalog_keys = c("variance_single", "variance_two")),
+       hint = "Testing whether a population's variability differs from a reference value, whether two groups' variability differs, or planning a precision-based (no-test) estimate of an SD.",
+       catalog_keys = c("variance_single", "variance_two", "variance_sd_precision")),
   list(id = "multiplicity", label = "Multiplicity Adjustment",
-       hint = "Sample size for a one- or two-sample proportion or mean comparison after a Bonferroni/Sidak correction, or a false-discovery-rate (FDR)-controlled two-mean comparison, for several planned simultaneous comparisons.",
+       hint = "Sample size for a one- or two-sample proportion or mean comparison after a Bonferroni/Sidak correction, a false-discovery-rate (FDR)-controlled two-mean comparison, or a Dunnett-adjusted multi-arm-vs-control trial, for several planned simultaneous comparisons.",
        catalog_keys = c("multiplicity_proportion_1s", "multiplicity_proportion_2s",
                          "multiplicity_means_1s", "multiplicity_means_2s",
-                         "multiplicity_fdr_means_2s")),
+                         "multiplicity_fdr_means_2s", "multiplicity_fdr_microarray", "multiplicity_dunnett")),
   list(id = "manova", label = "MANOVA / Hotelling's T-Squared",
        hint = "Comparing two independent groups on several continuous outcome variables jointly, rather than testing each one separately.",
        catalog_keys = c("manova_hotelling")),
@@ -1614,7 +1933,13 @@ study_design_families <- list(
        catalog_keys = c("bayesian_assurance_or", "bfda_ttest")),
   list(id = "longitudinal", label = "Longitudinal / MMRM",
        hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (GEE/GLS framework), or a mixed model of repeated measures (MMRM) with dropout and AR(1) correlation.",
-       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1"))
+       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1")),
+  list(id = "multilevel_models", label = "Multilevel / Hierarchical Models",
+       hint = "Two- and three-level hierarchical (mixed) models for a longitudinal trial, decomposing slope variance into subject- and (for 3-level) cluster-level components.",
+       catalog_keys = c("multilevel_two_level", "multilevel_three_level")),
+  list(id = "meta_analysis_power", label = "Meta-Analysis Power",
+       hint = "Required number of studies (or achieved power) for a planned meta-analysis, under fixed-effect or heterogeneity-adjusted random-effects models, for Cohen's d, a correlation, or an odds ratio.",
+       catalog_keys = c("meta_power_k"))
 )
 
 # Second index over the SAME calculator_catalog entries, grouped by
@@ -1675,22 +2000,25 @@ test_families <- list(
                          "noninferiority_means", "noninferiority_proportions",
                          "noninferiority_or", "noninferiority_hr", "crossover_2x2")),
   list(id = "nonparametric_tests", label = "Nonparametric Tests",
-       hint = "Distribution-free rank-based tests: Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau, Kruskal-Wallis, Jonckheere-Terpstra, Friedman, Kolmogorov-Smirnov, and Wald-Wolfowitz runs (the last two via Monte Carlo).",
+       hint = "Distribution-free rank-based tests: Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau, Kruskal-Wallis, Jonckheere-Terpstra, Friedman, Kolmogorov-Smirnov, Wald-Wolfowitz runs, and an animal/preclinical K-sample rank test (the last three via Monte Carlo).",
        catalog_keys = c("wilcoxon_rank_sum", "wilcoxon_signed_rank", "kendall_tau",
                          "kruskal_wallis", "jonckheere_terpstra", "friedman", "ks_two_sample",
-                         "wald_wolfowitz_runs")),
+                         "wald_wolfowitz_runs", "animal_rank_test")),
   list(id = "group_sequential_designs", label = "Group Sequential Designs",
-       hint = "Interim-monitoring trial designs with Pocock-to-O'Brien-Fleming efficacy/futility boundaries, for continuous, binary, or time-to-event outcomes.",
+       hint = "Interim-monitoring trial designs with Pocock-to-O'Brien-Fleming efficacy/futility boundaries, for continuous, binary, or time-to-event outcomes; or the literal Lan-DeMets alpha-spending-function method for a continuous outcome (2 looks).",
        catalog_keys = c("group_sequential_normal", "group_sequential_binary",
-                         "group_sequential_survival")),
+                         "group_sequential_survival", "lan_demets_normal")),
+  list(id = "trial_sequential_analysis", label = "Trial Sequential Analysis (Meta-Analysis)",
+       hint = "Fixed-effect required/optimal information size (RIS/OIS) for a planned or cumulatively-updated meta-analysis, across risk ratio, odds ratio, risk difference, and mean difference outcomes.",
+       catalog_keys = c("tsa_rr", "tsa_or", "tsa_rd", "tsa_md")),
   list(id = "variance_tests", label = "Variance Tests",
-       hint = "Chi-squared test for a single variance against a reference value, and F test for comparing two variances.",
-       catalog_keys = c("variance_single", "variance_two")),
+       hint = "Chi-squared test for a single variance against a reference value, F test for comparing two variances, and precision-based (CI-width) SD estimation.",
+       catalog_keys = c("variance_single", "variance_two", "variance_sd_precision")),
   list(id = "multiplicity_adjustment", label = "Multiplicity Adjustment",
-       hint = "Bonferroni or Sidak alpha correction applied to a one- or two-sample proportion or mean test, or false-discovery-rate (FDR) control for a two-mean comparison, for several planned simultaneous comparisons.",
+       hint = "Bonferroni or Sidak alpha correction applied to a one- or two-sample proportion or mean test, false-discovery-rate (FDR) control for a two-mean comparison, or a Dunnett-adjusted multi-arm-vs-control trial, for several planned simultaneous comparisons.",
        catalog_keys = c("multiplicity_proportion_1s", "multiplicity_proportion_2s",
                          "multiplicity_means_1s", "multiplicity_means_2s",
-                         "multiplicity_fdr_means_2s")),
+                         "multiplicity_fdr_means_2s", "multiplicity_fdr_microarray", "multiplicity_dunnett")),
   list(id = "manova_tests", label = "MANOVA / Hotelling's T-Squared",
        hint = "Two-group Hotelling's T-squared test, comparing two independent groups on several continuous outcome variables jointly.",
        catalog_keys = c("manova_hotelling")),
@@ -1699,7 +2027,10 @@ test_families <- list(
        catalog_keys = c("bayesian_assurance_or", "bfda_ttest")),
   list(id = "longitudinal_tests", label = "Longitudinal / GEE Tests",
        hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (the GLS/GEE framework of Liu & Liang 1997), or a mixed model of repeated measures (MMRM) with dropout and AR(1) correlation (Lu, Luo & Chen 2008).",
-       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1"))
+       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1")),
+  list(id = "multilevel_model_tests", label = "Multilevel / Hierarchical Model Tests",
+       hint = "Testing a treatment-group slope difference under a 2- or 3-level hierarchical mixed model (extends Galbraith & Marschner 2002).",
+       catalog_keys = c("multilevel_two_level", "multilevel_three_level"))
 )
 
 catalog_entry <- function(key) {

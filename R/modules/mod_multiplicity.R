@@ -29,7 +29,9 @@ mod_multiplicity_ui <- function(id) {
           "Two independent proportions" = "proportion_2s",
           "One mean vs. reference" = "means_1s",
           "Two independent means" = "means_2s",
-          "Two independent means, FDR (Benjamini-Hochberg)-controlled" = "fdr_means_2s"
+          "Two independent means, FDR (Benjamini-Hochberg)-controlled" = "fdr_means_2s",
+          "Two-sample microarray/genomics, FDR-controlled (exact)" = "fdr_microarray",
+          "Multi-arm trial vs. common control (Dunnett)" = "dunnett"
         ),
         selected = "proportion_2s"
       ),
@@ -64,23 +66,54 @@ mod_multiplicity_ui <- function(id) {
         numericInput(ns("fdr_level"), "Target false discovery rate (FDR)",
                      value = 0.05, min = 0.001, max = 0.5, step = 0.01)
       ),
-      hr(),
-      numericInput(ns("m"), "Number of planned simultaneous comparisons (m)", value = 4, min = 1, step = 1),
       conditionalPanel(
-        condition = paste0("!(", design_is("fdr_means_2s"), ")"),
+        condition = design_is("fdr_microarray"),
+        numericInput(ns("delta_fdrma"), "delta (common difference in mean expression between groups)",
+                     value = 1, step = 0.1),
+        numericInput(ns("sigma_fdrma"), "sigma (common within-group standard deviation)",
+                     value = 0.5, min = 0.0001, step = 0.1),
+        numericInput(ns("pi0_fdrma"), "pi0 (assumed proportion of genes/tests that are truly NOT differentially expressed)",
+                     value = 0.95, min = 0.001, max = 0.999, step = 0.01),
+        numericInput(ns("fdr_level_fdrma"), "Target false discovery rate (FDR)",
+                     value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("max_n_fdrma"), "Maximum per-group sample size to search up to",
+                     value = 35, min = 3, step = 1),
+        selectInput(ns("side_fdrma"), "Alternative",
+                    choices = c("Two-sided" = "two-sided", "Upper" = "upper", "Lower" = "lower")),
+        numericInput(ns("power_fdrma"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("dunnett"),
+        numericInput(ns("d_dunnett"), "Cohen's d (same for every active arm vs. control)",
+                     value = 0.5, min = 0.001, step = 0.1),
+        numericInput(ns("k_dunnett"), "Number of active (non-control) arms, k", value = 3, min = 2, step = 1)
+      ),
+      hr(),
+      conditionalPanel(
+        condition = paste0("!(", design_is("dunnett", "fdr_microarray"), ")"),
+        numericInput(ns("m"), "Number of planned simultaneous comparisons (m)", value = 4, min = 1, step = 1)
+      ),
+      conditionalPanel(
+        condition = paste0("!(", design_is("fdr_means_2s", "fdr_microarray"), ")"),
+        numericInput(ns("alpha"), "Family-wise significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = paste0("!(", design_is("fdr_means_2s", "fdr_microarray", "dunnett"), ")"),
         radioButtons(
           ns("method"), "Correction method",
           choices = c("Bonferroni (always valid)" = "bonferroni",
                       "Sidak (exact under independence)" = "sidak"),
           selected = "bonferroni"
         ),
-        numericInput(ns("alpha"), "Family-wise significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         selectInput(
           ns("alternative"), "Alternative hypothesis",
           choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
         )
       ),
-      numericInput(ns("power"), "Desired power (average power, for the FDR design)", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
+      conditionalPanel(
+        condition = paste0("!(", design_is("fdr_microarray"), ")"),
+        numericInput(ns("power"), "Desired power (average power, for the FDR design; per-comparison power otherwise)", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
+      ),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -98,7 +131,19 @@ mod_multiplicity_ui <- function(id) {
       render_formula_block(multiplicity_content$fdr$formula_latex),
       shiny::markdown(multiplicity_content$fdr$explanation),
       h5("Worked example"),
-      shiny::markdown(multiplicity_content$fdr$worked_example)
+      shiny::markdown(multiplicity_content$fdr$worked_example),
+      hr(),
+      h4(multiplicity_content$fdr_microarray$title),
+      render_formula_block(multiplicity_content$fdr_microarray$formula_latex),
+      shiny::markdown(multiplicity_content$fdr_microarray$explanation),
+      h5("Worked example"),
+      shiny::markdown(multiplicity_content$fdr_microarray$worked_example),
+      hr(),
+      h4(multiplicity_content$dunnett$title),
+      render_formula_block(multiplicity_content$dunnett$formula_latex),
+      shiny::markdown(multiplicity_content$dunnett$explanation),
+      h5("Worked example"),
+      shiny::markdown(multiplicity_content$dunnett$worked_example)
     ),
     tabPanel(
       "Reference",
@@ -109,7 +154,15 @@ mod_multiplicity_ui <- function(id) {
       hr(),
       h4(multiplicity_content$fdr$title),
       p(strong("Citation: "), multiplicity_content$fdr$citation),
-      p(strong("Implemented via: "), code(multiplicity_content$fdr$backend))
+      p(strong("Implemented via: "), code(multiplicity_content$fdr$backend)),
+      hr(),
+      h4(multiplicity_content$fdr_microarray$title),
+      p(strong("Citation: "), multiplicity_content$fdr_microarray$citation),
+      p(strong("Implemented via: "), code(multiplicity_content$fdr_microarray$backend)),
+      hr(),
+      h4(multiplicity_content$dunnett$title),
+      p(strong("Citation: "), multiplicity_content$dunnett$citation),
+      p(strong("Implemented via: "), code(multiplicity_content$dunnett$backend))
     )
   )
 }
@@ -157,6 +210,23 @@ mod_multiplicity_server <- function(id) {
               d = input$d_fdr, m = input$m, pi1 = input$pi1_fdr,
               fdr_level = input$fdr_level, power = input$power
             )
+          },
+          fdr_microarray = {
+            req(input$delta_fdrma, input$sigma_fdrma, input$pi0_fdrma,
+                input$fdr_level_fdrma, input$max_n_fdrma, input$side_fdrma, input$power_fdrma)
+            calc_fdr_microarray_two_sample(
+              delta = input$delta_fdrma, sigma = input$sigma_fdrma,
+              fdr_level = input$fdr_level_fdrma, power = input$power_fdrma,
+              pi0 = input$pi0_fdrma, max_n = as.integer(input$max_n_fdrma),
+              side = input$side_fdrma
+            )
+          },
+          dunnett = {
+            req(input$d_dunnett, input$k_dunnett, input$alpha)
+            calc_multiplicity_dunnett(
+              d = input$d_dunnett, k = as.integer(input$k_dunnett),
+              alpha = input$alpha, power = input$power
+            )
           }
         )),
         error = function(e) list(ok = FALSE, message = conditionMessage(e))
@@ -170,11 +240,24 @@ mod_multiplicity_server <- function(id) {
       }
 
       v <- res$value
-      if (!is.null(v$alpha_star)) {
+      if (input$design == "fdr_microarray") {
+        tagList(
+          p(strong("Required sample size: "), v$n_per_group, " per group (", v$n_total, " total)"),
+          p(sprintf("Achieved power = %.4f (critical value = %.3f, pi0 = %.3f, FDR level = %.3f)",
+                     v$achieved_power, v$critical_value, v$inputs$pi0, v$inputs$fdr_level))
+        )
+      } else if (!is.null(v$alpha_star)) {
         tagList(
           p(strong("Required sample size: "), v$n_per_group, " per group (", v$n_total, " total)"),
           p(sprintf("Per-test alpha* = %.5f (m = %d, m1 = %d truly non-null, m0 = %d truly null, FDR level = %.3f)",
                      v$alpha_star, v$m, v$m1, v$m0, v$inputs$fdr_level))
+        )
+      } else if (!is.null(v$n_per_arm)) {
+        tagList(
+          p(strong("Required sample size: "), v$n_per_arm, " per arm (", v$n_total,
+            sprintf(" total, %d arms including control)", v$k + 1)),
+          p(sprintf("Dunnett critical value = %.3f (k = %d active arms vs. control); achieved power = %.3f",
+                     v$critical_value, v$k, v$achieved_power))
         )
       } else {
         n_line <- if (!is.null(v$n_total)) {

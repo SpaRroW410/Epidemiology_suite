@@ -405,3 +405,93 @@ calc_wald_wolfowitz_runs <- function(effect_size, alpha = 0.05, power = 0.8,
                   n_ratio = n_ratio, nsim = nsim)
   )
 }
+
+#' Sample size for a K-sample rank test under Heller (2006)'s Lehmann
+#' alternative, the checklist's own named method for preclinical/animal
+#' studies
+#'
+#' Heller G (2006, Statistics in Medicine 25:2543-2553) frames the
+#' preclinical setting explicitly: small planned group sizes, one control
+#' group and one or more treated groups, and a Lehmann-alternative effect
+#' expressed as an odds ratio between each treated group's outcome
+#' distribution and the control's -- rather than a location-shift effect
+#' size, which rarely matches how a preclinical effect is actually
+#' anticipated (e.g. "the treated group's outcome is expected to be
+#' stochastically about 4x more likely to exceed any given value"). No
+#' closed-form solve-for-n exists; `clinfun::power.ladesign()` (already
+#' installed -- `clinfun` is already a project dependency for Simon
+#' two-stage and the Group Sequential module) computes power-given-n via
+#' its own internal Monte Carlo simulation of the actual rank statistic
+#' (Kruskal-Wallis for an omnibus k-group test, or Jonckheere-Terpstra for
+#' an ordered-trend alternative), so this reuses the same
+#' "search over n by directly calling the real power engine" pattern as
+#' `calc_ks_two_sample()`/`calc_wald_wolfowitz_runs()` above (the shared
+#' `.mc_search_n1()` helper), just wrapping a package's own power-given-n
+#' function instead of simulating the test from scratch.
+#'
+#' Verified this session by reproducing `power.ladesign()`'s own documented
+#' examples exactly: `power.ladesign(c(9,7), 4, statistic="Kruskal-Wallis")`
+#' -> power=0.588; `power.ladesign(c(9,7,9), c(2,4), statistic=
+#' "Jonckheere-Terpstra")` -> power=0.659 (two-sided) / 0.771 (one-sided).
+#'
+#' @param k Number of groups, including the control (>= 2, integer)
+#' @param odds_ratio Odds ratio(s) of each non-control group vs. the
+#'   control under the Lehmann alternative (> 0, != 1); either a single
+#'   value (applied to every non-control group) or a vector of length
+#'   k - 1 (one per non-control group)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param statistic "Kruskal-Wallis" (omnibus k-group test; two-sided
+#'   only) or "Jonckheere-Terpstra" (ordered-trend alternative; supports a
+#'   one-sided test)
+#' @param alternative "two.sided" or "one.sided" (Jonckheere-Terpstra
+#'   only -- Kruskal-Wallis allows only "two.sided")
+#' @param nrep Monte Carlo replicates per candidate n passed straight
+#'   through to `power.ladesign()` (>= 1000)
+#' @param seed RNG seed for reproducibility
+#' @return list(n_per_group, n_total, k, achieved_power, inputs)
+calc_animal_rank_test <- function(k, odds_ratio, alpha = 0.05, power = 0.8,
+                                   statistic = c("Kruskal-Wallis", "Jonckheere-Terpstra"),
+                                   alternative = c("two.sided", "one.sided"),
+                                   nrep = 1e5, seed = 20240913) {
+  statistic <- match.arg(statistic)
+  alternative <- match.arg(alternative)
+  if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 2 || k != round(k)) {
+    stop("k must be a single whole number >= 2.")
+  }
+  if (!is.numeric(odds_ratio) || length(odds_ratio) < 1 || anyNA(odds_ratio) ||
+        any(odds_ratio <= 0) || any(odds_ratio == 1)) {
+    stop("odds_ratio must be one or more positive numbers, none equal to 1.")
+  }
+  if (length(odds_ratio) == 1) odds_ratio <- rep(odds_ratio, k - 1)
+  if (length(odds_ratio) != k - 1) {
+    stop(sprintf("odds_ratio must have length 1 or k - 1 (= %d), not %d.", k - 1, length(odds_ratio)))
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (statistic == "Kruskal-Wallis" && alternative == "one.sided") {
+    stop("Kruskal-Wallis only supports a two-sided alternative; use Jonckheere-Terpstra for a one-sided test.")
+  }
+  if (!is.numeric(nrep) || length(nrep) != 1 || is.na(nrep) || nrep < 1000 || nrep != round(nrep)) {
+    stop("nrep must be a single whole number >= 1000.")
+  }
+
+  empirical_power <- function(n) {
+    set.seed(seed)
+    clinfun::power.ladesign(
+      gsize = rep(n, k), odds.ratio = odds_ratio, sig.level = alpha,
+      statistic = statistic, alternative = alternative, nrep = nrep
+    )$power
+  }
+
+  n_per_group <- .mc_search_n1(empirical_power, power, n_lo = 3, n_hi = 6)
+
+  list(
+    n_per_group = n_per_group,
+    n_total = n_per_group * k,
+    k = k,
+    achieved_power = empirical_power(n_per_group),
+    inputs = list(k = k, odds_ratio = odds_ratio, alpha = alpha, power = power,
+                  statistic = statistic, alternative = alternative, nrep = nrep)
+  )
+}
