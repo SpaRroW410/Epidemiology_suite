@@ -58,7 +58,7 @@ cannot reach — see §4.
 | F7 | **Not yet package-shaped.** R packages need a flat `R/` directory (current code uses `R/calc/`, `R/modules/`, …), a `DESCRIPTION`/`NAMESPACE`, and no `source()`-based loading; tests `source()` files by relative path; `pacman::p_load()` auto-installs, which packages must not do | repo layout, `global.R`, test headers | Medium (blocks Track C) |
 | F8 | **Resolved by relicensing to GPL-3 (D2, 28 Sep 2026).** Background: the project was MIT, but several modules were built by reading and transcribing source from GPL-licensed packages (e.g. `PracTools` GPL-3, `ssize.fdr` GPL-3, `voi` GPL-3, `clusterPower` GPL≥2, `semTools` GPL≥2, `simr` GPL≥2, `metapower` GPL-2, `WebPower` GPL≥3, `rpact` LGPL-3). Mathematical formulas aren't copyrightable, but closely transcribed code may count as a derivative work. *Not legal advice.* GPL-3 is compatible with all of these (GPL-2-only `metapower` is the one to watch: it was a verification reference, not a code source to ship) | package `DESCRIPTION` licenses; module header comments | Resolved; keep module header comments naming each source |
 | F9 | **Partly addressed (28 Sep 2026).** Shiny runs one R process per app instance; a 5–25 s simulation (Monte Carlo Mixed Models, RMST, weighted log-rank, BFDA, KS/runs/animal-rank) used to recompute on every input change — fixed, see P1 item 7. Still true: one user's simulation blocks every other user on the same app instance while it runs — needs `ExtendedTask` (P1 item 7, second half) | observed during browser verification | Was Medium (High once hosted); recompute-storm risk resolved, cross-user blocking remains |
-| F10 | **No results export or report.** Users can't download results, a methods paragraph, or citations — the biggest gap versus how the output is actually used (protocols, theses, ethics submissions) | no download handlers anywhere | Medium |
+| F10 | **Partly addressed (28 Sep 2026).** Export infrastructure and a 2-module pilot are done (CSV/JSON/BibTeX/RIS download, a justification paragraph) — see P1 item 9. Still true for the other ~47 modules until their batches land | download handlers now exist for Proportions and Means | Was Medium; infrastructure risk resolved, coverage remains |
 | F11 | **Accessibility and mobile layout never audited.** Translations are not planned (English only, D5) | — | Low–Medium |
 
 ---
@@ -139,9 +139,35 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    agreement, TOST, log-rank, correlation, nonparametric, cluster/DEFF): all
    render correctly, no page errors. Item 8 is done; items 9-10 (export,
    power curves) can now build on `ss_result` across the whole catalog.
-9. **Results export (F10)** — per-result "copy" and CSV/JSON download, a
-   *sample-size justification paragraph* generator (design + inputs + result +
-   citation, ready to paste into a protocol), citation export (BibTeX/RIS).
+9. **Results export (F10) — infrastructure done, pilot batch done (28 Sep 2026).**
+   `R/calc/calc_export.R` (pure functions, unit-tested, no Shiny) generic
+   across every design via `ss_result` (item 8): `ss_result_to_csv()`/
+   `_to_json()` (a flat one-row/one-object dump; nested `inputs` become
+   dot-separated keys, a vector field collapses to a semicolon-separated
+   string), `format_justification()` (a ready-to-paste protocol paragraph:
+   design name + headline result(s) + inputs + citation/backend), and
+   `format_citation_bibtex()`/`_ris()` (a generic `@misc`/`GEN` entry with
+   the citation preserved verbatim in a note field — deliberately *not*
+   parsed into structured author/year/journal, since this app's citations
+   are free text and guessing those fields wrong is worse than not having
+   them). `mod_shared_ui.R`'s `export_controls_ui()`/`render_export_handlers()`
+   wire a "Copy paragraph" button + CSV/JSON/BibTeX/RIS downloads into a
+   module in two lines, filenamed from the design (e.g.
+   `sample2result_two_independent_proportions.csv`).
+   Found and fixed along the way (real bug, not sandbox-only — same root
+   cause could bite a deployment with a similarly minimal locale): this
+   sandbox has no working multibyte locale at all, under which R's own
+   `gsub()`/`intToUtf8()` can corrupt or error on non-ASCII text passed
+   through Shiny's dynamic (`renderText`) JSON serialization, though
+   *static* UI text is unaffected. Fixed by transliterating the (small,
+   audited) set of non-ASCII characters this app's citations actually use
+   to ASCII — at the raw-byte level (`charToRaw()`/`rawToChar()`, not
+   `gsub()`), since even locale-independent-looking string functions
+   proved unreliable here. Adopted for the same 2-module pilot as item 8
+   (Proportions, Means); Playwright-verified end to end (all 4 downloads +
+   the justification paragraph, across 3 designs, live file contents
+   checked) — remaining ~47 modules are tracked batch backlog (two lines
+   each: one in the UI function, one in the server function).
 10. **Power/sensitivity curves** for every closed-form design (n vs. effect size,
     n vs. power).
 11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
