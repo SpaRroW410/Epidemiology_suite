@@ -76,9 +76,16 @@ test_that("format_justification refuses a missing citation rather than silently 
   expect_error(format_justification("Two independent proportions", r, citation = NULL), "citation")
 })
 
-test_that("format_justification errors rather than silently producing an empty report when no headline field is recognized", {
+test_that("format_justification errors on a genuinely empty result (no fields besides inputs)", {
   r <- new_ss_result(list(inputs = list(x = 1)))
-  expect_error(format_justification("X", r, citation = "Y"), "headline")
+  expect_error(format_justification("X", r, citation = "Y"), "nothing to report")
+})
+
+test_that("format_justification falls back to every field when none match the n*/k*/*power* headline pattern -- e.g. EVPI's result is a monetary value, not a sample size", {
+  r <- new_ss_result(list(evpi_per_patient = 763, evpi_population = 763, inputs = list(mean_inb = 1000)))
+  para <- format_justification("EVPI", r, citation = "Y")
+  expect_match(para, "evpi_per_patient = 763", fixed = TRUE)
+  expect_match(para, "evpi_population = 763", fixed = TRUE)
 })
 
 test_that("format_citation_bibtex produces one well-formed @misc entry with the citation preserved verbatim", {

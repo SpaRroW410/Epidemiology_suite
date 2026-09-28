@@ -30,7 +30,8 @@ mod_cohort_ui <- function(id) {
                    value = NA, min = 1),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -81,5 +82,7 @@ mod_cohort_server <- function(id) {
         p(sprintf("Implied relative risk (RR): %.3f", v$rr))
       )
     })
+
+    render_export_handlers(output, result, function() cohort_content$cohort)
   })
 }

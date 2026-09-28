@@ -70,7 +70,8 @@ mod_bayesian_ui <- function(id) {
       ),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -182,5 +183,7 @@ mod_bayesian_server <- function(id) {
         )
       }
     })
+
+    render_export_handlers(output, result, function() bayesian_content[[input$design]])
   })
 }

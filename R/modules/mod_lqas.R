@@ -22,7 +22,8 @@ mod_lqas_ui <- function(id) {
       numericInput(ns("beta"), "Consumer's risk (beta)", value = 0.10, min = 0.001, max = 0.5, step = 0.01),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -70,5 +71,7 @@ mod_lqas_server <- function(id) {
         p(sprintf("Achieved consumer's risk (beta): %.4f", v$beta_achieved))
       )
     })
+
+    render_export_handlers(output, result, function() lqas_content$standard)
   })
 }

@@ -55,7 +55,8 @@ mod_meta_power_ui <- function(id) {
       ),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -125,5 +126,8 @@ mod_meta_power_server <- function(id) {
                    power_res$effect_size_used, power_res$variance))
       )
     })
+
+    render_export_handlers(output, result, function() meta_power_content$power,
+                            value_fn = function(res) res$k_res)
   })
 }

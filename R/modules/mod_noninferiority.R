@@ -68,7 +68,8 @@ mod_noninferiority_ui <- function(id) {
       ),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -190,5 +191,7 @@ mod_noninferiority_server <- function(id) {
         p(strong("Required total sample size: "), v$n)
       }
     })
+
+    render_export_handlers(output, result, function() noninferiority_content[[input$design]])
   })
 }

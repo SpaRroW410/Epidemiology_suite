@@ -22,7 +22,8 @@ mod_subgroup_interaction_ui <- function(id) {
                    value = 1, min = 0.001, step = 0.1),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -67,5 +68,7 @@ mod_subgroup_interaction_server <- function(id) {
         p(sprintf("Inflation multiplier vs. the main-effect sample size: %.2fx", v$multiplier))
       )
     })
+
+    render_export_handlers(output, result, function() subgroup_interaction_content$standard)
   })
 }

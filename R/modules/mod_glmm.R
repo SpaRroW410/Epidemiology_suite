@@ -75,7 +75,8 @@ mod_glmm_ui <- function(id) {
       monte_carlo_calculate_ui(ns),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -189,5 +190,7 @@ mod_glmm_server <- function(id) {
         )
       }
     })
+
+    render_export_handlers(output, result, function() glmm_content[[input$design]])
   })
 }

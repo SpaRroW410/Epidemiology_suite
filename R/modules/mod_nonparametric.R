@@ -115,7 +115,8 @@ mod_nonparametric_ui <- function(id) {
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -337,6 +338,12 @@ mod_nonparametric_server <- function(id) {
       } else {
         p(strong("Required sample size: "), v$n)
       }
+    })
+
+    render_export_handlers(output, result, function() {
+      key <- input$design
+      remap <- c("rank_sum" = "wilcoxon_rank_sum", "signed_rank" = "wilcoxon_signed_rank", "kendall" = "kendall_tau", "jonckheere" = "jonckheere_terpstra", "ks" = "ks_two_sample", "runs" = "wald_wolfowitz", "animal_rank" = "animal_rank_test")
+      nonparametric_content[[if (key %in% names(remap)) remap[[key]] else key]]
     })
   })
 }

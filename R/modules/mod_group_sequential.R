@@ -75,6 +75,7 @@ mod_group_sequential_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
+      export_controls_ui(ns),
       conditionalPanel(
         condition = design_is("lan_demets_normal"),
         hr(),
@@ -291,5 +292,7 @@ mod_group_sequential_server <- function(id) {
         }
       )
     })
+
+    render_export_handlers(output, result, function() group_sequential_content[[input$design]])
   })
 }

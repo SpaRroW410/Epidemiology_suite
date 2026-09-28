@@ -58,7 +58,7 @@ cannot reach — see §4.
 | F7 | **Not yet package-shaped.** R packages need a flat `R/` directory (current code uses `R/calc/`, `R/modules/`, …), a `DESCRIPTION`/`NAMESPACE`, and no `source()`-based loading; tests `source()` files by relative path; `pacman::p_load()` auto-installs, which packages must not do | repo layout, `global.R`, test headers | Medium (blocks Track C) |
 | F8 | **Resolved by relicensing to GPL-3 (D2, 28 Sep 2026).** Background: the project was MIT, but several modules were built by reading and transcribing source from GPL-licensed packages (e.g. `PracTools` GPL-3, `ssize.fdr` GPL-3, `voi` GPL-3, `clusterPower` GPL≥2, `semTools` GPL≥2, `simr` GPL≥2, `metapower` GPL-2, `WebPower` GPL≥3, `rpact` LGPL-3). Mathematical formulas aren't copyrightable, but closely transcribed code may count as a derivative work. *Not legal advice.* GPL-3 is compatible with all of these (GPL-2-only `metapower` is the one to watch: it was a verification reference, not a code source to ship) | package `DESCRIPTION` licenses; module header comments | Resolved; keep module header comments naming each source |
 | F9 | **Partly addressed (28 Sep 2026).** Shiny runs one R process per app instance; a 5–25 s simulation (Monte Carlo Mixed Models, RMST, weighted log-rank, BFDA, KS/runs/animal-rank) used to recompute on every input change — fixed, see P1 item 7. Still true: one user's simulation blocks every other user on the same app instance while it runs — needs `ExtendedTask` (P1 item 7, second half) | observed during browser verification | Was Medium (High once hosted); recompute-storm risk resolved, cross-user blocking remains |
-| F10 | **Partly addressed (28 Sep 2026).** Export infrastructure and a 2-module pilot are done (CSV/JSON/BibTeX/RIS download, a justification paragraph) — see P1 item 9. Still true for the other ~47 modules until their batches land | download handlers now exist for Proportions and Means | Was Medium; infrastructure risk resolved, coverage remains |
+| F10 | **Resolved (28 Sep 2026).** Every module (except the two guidance-only ones) now offers CSV/JSON/BibTeX/RIS download and a justification paragraph — see P1 item 9 | download handlers exist for all 47 calculator modules | Was Medium; resolved |
 | F11 | **Accessibility and mobile layout never audited.** Translations are not planned (English only, D5) | — | Low–Medium |
 
 ---
@@ -139,7 +139,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    agreement, TOST, log-rank, correlation, nonparametric, cluster/DEFF): all
    render correctly, no page errors. Item 8 is done; items 9-10 (export,
    power curves) can now build on `ss_result` across the whole catalog.
-9. **Results export (F10) — infrastructure done, pilot batch done (28 Sep 2026).**
+9. **Results export (F10) — done for every module (28 Sep 2026).**
    `R/calc/calc_export.R` (pure functions, unit-tested, no Shiny) generic
    across every design via `ss_result` (item 8): `ss_result_to_csv()`/
    `_to_json()` (a flat one-row/one-object dump; nested `inputs` become
@@ -163,11 +163,68 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    audited) set of non-ASCII characters this app's citations actually use
    to ASCII — at the raw-byte level (`charToRaw()`/`rawToChar()`, not
    `gsub()`), since even locale-independent-looking string functions
-   proved unreliable here. Adopted for the same 2-module pilot as item 8
-   (Proportions, Means); Playwright-verified end to end (all 4 downloads +
-   the justification paragraph, across 3 designs, live file contents
-   checked) — remaining ~47 modules are tracked batch backlog (two lines
-   each: one in the UI function, one in the server function).
+   proved unreliable here. Adopted first for the same 2-module pilot as
+   item 8 (Proportions, Means), then rolled out to all 45 remaining
+   modules (every module except the two guidance-only ones, Ecological
+   and Qualitative, which compute no numeric result).
+
+   For the ~23 modules whose design-radio values match their `content_*.R`
+   keys 1:1, `content_fn` is the direct `<id>_content[[input$design]]`.
+   Five needed an explicit remap from radio value to real content key,
+   found by diffing every module's actual radio choices against its
+   content file's keys *before* wiring anything (not discovered after the
+   fact): `correlation` ("single" → `pearson`), `exact_tests` ("sign" →
+   `sign_test`), `roc` ("compare_two" → `compare_two_aucs`),
+   `multiplicity` (four Bonferroni/Sidak designs share one `overview`
+   entry, `fdr_means_2s` → `fdr`), `nonparametric` (7 of 9 radio values
+   use short internal codes differing from the content file's full test
+   names). Two further special cases: TSA dispatches on "outcome"
+   (RR/OR/RD/MD, lower-cased) rather than "design"; Meta-Analysis Power's
+   result bundles two companion `ss_result`s (required-k and
+   achieved-power), so `render_export_handlers()` gained an optional
+   `value_fn` parameter (default `res$value`) to pick the headline one.
+   16 modules have only one design, so `content_fn` is a fixed
+   `<id>_content$<key>` constant.
+
+   **Two more real bugs found by a verification pass before committing**
+   (a background pass ran the full test suite clean, then caught these
+   live in the browser — exactly the failure mode unit tests can't see,
+   since they test `calc_*()` functions directly, never a module's own
+   `content_fn` wiring):
+   - *Citation-merge bug (TSA, EVPI, Multilevel).* These three
+     `content_*.R` files factor a `shared` entry holding the common
+     `explanation`/`worked_example`/**`citation`** out of their per-design
+     entries (which carry only `title`/`backend`) — so `content_fn`'s
+     naive `X_content[[input$design]]` returned an entry with
+     `citation = NULL`, and `format_justification()` correctly refused to
+     silently omit the source, surfacing as a live, page-visible
+     `shiny-output-error` on the justification text (and would have broken
+     the BibTeX/RIS downloads too, same dependency). Fixed with
+     `modifyList(X_content[[key]], list(citation = X_content$shared$citation))`
+     in each of the three modules; the whole `R/content/*.R` tree was
+     checked for the same `shared`-entry shape (`grep -l "shared = list("`)
+     to confirm no other module has it.
+   - *Headline-fallback bug (EVPI).* `format_justification()` refused to
+     report a result with no field matching the `n*`/`k*`/`*power*`
+     headline pattern — correct for catching a genuinely malformed
+     result, but EVPI's own result is a monetary value
+     (`evpi_per_patient`), not a sample size, by design (it answers "is
+     more research worth it," not "how many subjects"). Fixed by falling
+     back to reporting every top-level field when none match the pattern,
+     rather than erroring; the function now only errors on a truly empty
+     result (no fields besides `inputs`), which would indicate a bug
+     elsewhere, not a design choice like EVPI's.
+
+   Verified: full fast test suite (503 tests, 0 failures/0 errors, 27
+   expected Monte Carlo skips) after every fix, not just once at the end;
+   Playwright against a running instance — the original 2-module pilot
+   (4 downloads + justification, 3 designs), a spot-check across 6 more
+   diverse modules (one per dispatch shape: plain design radio, the TSA
+   outcome case, three of the five remap cases, the Meta-Analysis Power
+   value_fn case), and a full re-check of all three citation-merge fixes
+   plus the EVPI fallback fix (justification text, and the BibTeX/RIS
+   downloads specifically, since they share the same citation field) —
+   all render correctly, no page errors, no server-log errors.
 10. **Power/sensitivity curves** for every closed-form design (n vs. effect size,
     n vs. power).
 11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).

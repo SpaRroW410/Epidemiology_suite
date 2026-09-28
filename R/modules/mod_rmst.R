@@ -27,7 +27,8 @@ mod_rmst_ui <- function(id) {
       monte_carlo_calculate_ui(ns),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -85,5 +86,7 @@ mod_rmst_server <- function(id) {
         p(strong("Achieved power (pooled variance): "), sprintf("%.3f", v$achieved_power_pooled))
       )
     })
+
+    render_export_handlers(output, result, function() rmst_content$comparison)
   })
 }

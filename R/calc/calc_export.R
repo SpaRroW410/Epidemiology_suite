@@ -242,14 +242,21 @@ format_justification <- function(design_title, result, citation, backend = NULL)
   citation <- .ascii_safe(citation)
   if (!is.null(backend)) backend <- .ascii_safe(backend)
 
+  # Same headline detection as format.ss_result(), but not every design
+  # computes a sample size in the first place -- e.g. EVPI's result is a
+  # monetary value (evpi_per_patient), not an n/k/power field at all -- so
+  # this falls back to every other top-level field rather than treating
+  # "no n*/k*/*power* field" as an error. Only a genuinely empty result
+  # (no fields besides `inputs`) is treated as the real bug it would be.
   nms <- setdiff(names(result), "inputs")
+  if (length(nms) == 0) {
+    stop("result has no fields besides inputs -- nothing to report.")
+  }
   headline <- Filter(.ss_result_is_headline, nms)
+  if (length(headline) == 0) headline <- nms
   headline_txt <- vapply(headline, function(nm) {
     sprintf("%s = %s", nm, .ss_result_fmt_value(result[[nm]]))
   }, character(1))
-  if (length(headline_txt) == 0) {
-    stop("result has no field format.ss_result()'s own headline detector recognizes (n*/k*/*power*) -- nothing to report.")
-  }
 
   input_txt <- character(0)
   if (!is.null(result$inputs) && is.list(result$inputs) && length(result$inputs) > 0) {

@@ -72,7 +72,8 @@ mod_agreement_ui <- function(id) {
       ),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -232,5 +233,7 @@ mod_agreement_server <- function(id) {
         p(strong("Required sample size: "), v$n)
       }
     })
+
+    render_export_handlers(output, result, function() agreement_content[[input$design]])
   })
 }

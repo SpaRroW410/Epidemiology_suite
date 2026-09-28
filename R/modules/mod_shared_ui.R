@@ -106,12 +106,18 @@ export_controls_ui <- function(ns) {
 #'   read inside it already establishes the right dependency) returning
 #'   that design's `content_*.R` entry: `list(title, citation, backend)`
 #'   (`backend` optional).
-render_export_handlers <- function(output, result, content_fn) {
+#' @param value_fn Extracts the `ss_result` from what `result()` returns;
+#'   defaults to `res$value`, the shape every module's dispatch already
+#'   uses. Override only for the rare module whose `result` reactive
+#'   returns more than one `ss_result` in one go (e.g. Meta-Analysis Power
+#'   bundles a required-k result with a companion achieved-power one) --
+#'   pick whichever one is this module's own headline answer.
+render_export_handlers <- function(output, result, content_fn, value_fn = function(res) res$value) {
   build <- function(fn) {
     res <- result()
     req(res$ok)
     entry <- content_fn()
-    fn(res$value, entry)
+    fn(value_fn(res), entry)
   }
   # Reuses calc_export.R's own BibTeX-key slugifier so a design's exported
   # files are named after it (e.g. "sample2result_two_independent_

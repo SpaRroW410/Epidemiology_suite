@@ -116,7 +116,8 @@ mod_multiplicity_ui <- function(id) {
       ),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -271,6 +272,12 @@ mod_multiplicity_server <- function(id) {
                      v$alpha_adjusted, v$inputs$alpha_family, v$m, v$method))
         )
       }
+    })
+
+    render_export_handlers(output, result, function() {
+      key <- input$design
+      remap <- c("proportion_1s" = "overview", "proportion_2s" = "overview", "means_1s" = "overview", "means_2s" = "overview", "fdr_means_2s" = "fdr")
+      multiplicity_content[[if (key %in% names(remap)) remap[[key]] else key]]
     })
   })
 }

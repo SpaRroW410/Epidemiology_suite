@@ -88,7 +88,8 @@ mod_case_control_ui <- function(id) {
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -212,5 +213,7 @@ mod_case_control_server <- function(id) {
         )
       }
     })
+
+    render_export_handlers(output, result, function() case_control_content[[input$design]])
   })
 }

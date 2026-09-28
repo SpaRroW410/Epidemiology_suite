@@ -72,7 +72,8 @@ mod_correlation_ui <- function(id) {
       ),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -248,6 +249,12 @@ mod_correlation_server <- function(id) {
       } else {
         p(strong("Required sample size: "), v$n)
       }
+    })
+
+    render_export_handlers(output, result, function() {
+      key <- input$design
+      remap <- c("single" = "pearson")
+      correlation_content[[if (key %in% names(remap)) remap[[key]] else key]]
     })
   })
 }

@@ -57,7 +57,8 @@ mod_rule_of_three_ui <- function(id) {
       ),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -167,5 +168,7 @@ mod_rule_of_three_server <- function(id) {
         )
       }
     })
+
+    render_export_handlers(output, result, function() rule_of_three_content[[input$design]])
   })
 }
