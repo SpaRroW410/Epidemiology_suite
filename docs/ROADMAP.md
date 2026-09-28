@@ -18,6 +18,9 @@
   verification evidence behind every shipped sample-size design.
 - [`SDD.md`](SDD.md) — architecture, module contract, conventions.
 - [`project-brief.md`](project-brief.md) — the original brief (historical).
+- [`sample size calculator review.pdf`](sample%20size%20calculator%20review.pdf) — the
+  scope checklist sent for colleague review (94 designs + 72 tests). Cross-checked
+  on 28 Sep 2026: every row is either done in the checklists or listed in §4 below.
 
 ---
 
@@ -183,6 +186,11 @@ moves into the current priority tier.
 | Ordinal / multinomial regression | Nominal (multinomial) half |
 | Agreement | Weighted kappa |
 | Free-text study-design parser | RCT internals (individual vs. cluster, superiority vs. non-inferiority) |
+| Non-inferiority margins (RR / OR / HR / difference) | True **relative-risk-scale** margin. `TrialSize::RelativeRisk.NIS()` is really odds-ratio-based, so it ships as the OR design; no verified RR-scale source yet. *Added 28 Sep 2026 from the review-PDF cross-check* |
+| Holm / FDR | **Holm's step-down** as its own design. Bonferroni (shipped) is Holm's most conservative step; Holm's later thresholds depend on the observed p-values, so there is no single planning alpha — needs a simulation-based design. *Added 28 Sep 2026* |
+| Value of information (EVPI / EVSI) | Multi-parameter EVPPI and non-Normal outcomes (only the single-parameter, known-SD case ships). *Added 28 Sep 2026* |
+| Bioequivalence (TOST) | Reference-scaled designs for highly variable drugs (RSABE / ABEL): the 2×2, 2×2×4 and 2×3×3 designs ship with fixed 80–125% limits; `PowerTOST::sampleN.RSABE()`/`sampleN.scABEL()` exist in a runtime package but are simulation-based and not wired in. (Named in the checklist, not in the review PDF.) *Added 28 Sep 2026* |
+| Multi-arm vs. common control | Dunnett for **binary** outcomes (means only; the wizard falls back to Bonferroni/Sidak two-proportion n). *Added 28 Sep 2026* |
 
 ---
 
