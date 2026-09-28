@@ -1,5 +1,10 @@
 # Project Brief: Comprehensive Sample Size Calculator (R Shiny)
 
+> *Historical document — the original brief the project started from (August 2026).
+> Kept as written. For the current state see [`../README.md`](../README.md); for
+> where the project is going see [`ROADMAP.md`](ROADMAP.md). Note that the Phase 4
+> post-hoc power module below was later dropped (see `SDD.md` §10).*
+
 ## Context
 I'm a community medicine / public health faculty member (India). I want to build an
 extensive, well-documented R Shiny web app for sample size calculation, aimed at

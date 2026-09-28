@@ -185,6 +185,12 @@ Two complementary, copy-pasteable markdown files for your R Shiny sample size ca
 
 ## Recommendations (staged build plan)
 
+> **Forward plan moved (2026-09-28):** the stages below are the historical build plan
+> and are effectively complete. What comes next — the priority list, the
+> epidemiology-suite expansion, the R package, deployment (hosted, Shinylive/PWA,
+> Android APK), Phase 8, and every item still open here with its unblock condition —
+> is in [`ROADMAP.md`](ROADMAP.md). Nothing below has been removed.
+
 **Stage 1 — v1 CORE release (target ~25 modules).** Build everything tagged **[CORE]** in both files. These map almost 1:1 to what OpenEpi, Epi Info StatCalc, nMaster and the `pwr`/`epiR`/`presize`/`pROC` packages already cover, so wrapping is fast and validation is easy (cross-check outputs against OpenEpi/G*Power). Prioritize, in order: single proportion, single mean, two means (t), two proportions, unmatched case-control, cohort/RR, one-way ANOVA, correlation, chi-square (GoF + independence), diagnostic Se/Sp, ICC, kappa, log-rank, Simon two-stage, pilot rules-of-thumb, TOST equivalence. This set answers the large majority of Indian community-medicine/public-health protocol needs.
 
 **Stage 1.5 — study design identification wizard, guided-tree half (done).** Between finishing Stage 1 CORE and starting Stage 2, built the "Which calculator?" guided decision tree (`docs/design_identification_algorithm.md` Stages 1-5, `R/home/design_tree.R`, `R/home/design_wizard.R`) — deliberately sequenced here rather than at the very end, so every Stage-1 module is reachable by a guided Q&A (not just by name) before the backlog of unbuilt designs grows large enough to make "not yet built" the most common answer. Routes to built modules now; every unbuilt terminal still names its intended module/backend/citation so the tree doesn't need reworking as Stage 2+ modules land — they just flip existing terminals from "not built" to a live catalog jump. This is only half of the source document, though — its Stage 0 (free-text/PICO parsing) is **Stage 5** below (done), not bundled in here.
