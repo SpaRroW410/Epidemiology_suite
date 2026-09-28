@@ -105,7 +105,8 @@ mod_logrank_ui <- function(id) {
                      value = 0, min = 0, step = 0.5),
         numericInput(ns("allocation1_wlr"), "Allocation proportion to treatment arm", value = 0.5, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("alpha_wlr"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
-        numericInput(ns("power_wlr"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
+        numericInput(ns("power_wlr"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
+        monte_carlo_calculate_ui(ns)
       ),
       hr(),
       h5("Result"),
@@ -197,9 +198,17 @@ mod_logrank_server <- function(id) {
       }))
     })
 
+    # weighted_logrank is Monte Carlo (ROADMAP F9/P1#7): once selected,
+    # recompute only on Calculate, not on every keystroke -- see
+    # monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
+    SLOW_DESIGNS <- "weighted_logrank"
+
     result <- reactive({
       req(input$design)
+      is_slow <- input$design %in% SLOW_DESIGNS
+      if (is_slow) input$calculate
 
+      compute <- function() {
       if (input$design == "logrank") {
         req(input$pE, input$pC, input$hr_logrank, input$ratio, input$alpha_logrank, input$power_logrank)
         tryCatch(
@@ -272,6 +281,9 @@ mod_logrank_server <- function(id) {
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
       }
+      }
+
+      if (is_slow) isolate(compute()) else compute()
     })
 
     output$result <- renderUI({

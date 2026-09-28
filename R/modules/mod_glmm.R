@@ -72,6 +72,7 @@ mod_glmm_ui <- function(id) {
         numericInput(ns("nsim_gc"), "Monte Carlo replicates per candidate n (nsim)", value = 50, min = 10, max = 500, step = 10),
         numericInput(ns("seed_gc"), "Random seed", value = 12345, step = 1)
       ),
+      monte_carlo_calculate_ui(ns),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -117,8 +118,13 @@ mod_glmm_ui <- function(id) {
 
 mod_glmm_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # Monte Carlo (ROADMAP F9/P1#7): recompute only when the design changes
+    # or Calculate is clicked, not on every keystroke -- see
+    # monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
     result <- reactive({
       req(input$design)
+      input$calculate
+      isolate({
 
       if (input$design == "lmm_continuous") {
         req(input$cluster_size_lmm, input$icc, input$sigma_total, input$delta_lmm,
@@ -158,6 +164,8 @@ mod_glmm_server <- function(id) {
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
       }
+
+      })
     })
 
     output$result <- renderUI({

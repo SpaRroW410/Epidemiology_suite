@@ -66,8 +66,7 @@ mod_bayesian_ui <- function(id) {
                      value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_bfda"), "Target probability BF10 exceeds the threshold",
                      value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-        p(class = "text-muted",
-          "This design searches by simulation and may take up to 10-15 seconds.")
+        monte_carlo_calculate_ui(ns, "may take up to 10-15 seconds. Set the inputs above, then click Calculate.")
       ),
       hr(),
       h5("Result"),
@@ -104,9 +103,17 @@ mod_bayesian_ui <- function(id) {
 
 mod_bayesian_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # bfda is Monte Carlo (ROADMAP F9/P1#7): once that design is selected,
+    # recompute only on Calculate, not on every keystroke -- see
+    # monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
+    SLOW_DESIGNS <- "bfda"
+
     result <- reactive({
       req(input$design)
+      is_slow <- input$design %in% SLOW_DESIGNS
+      if (is_slow) input$calculate
 
+      compute <- function() {
       if (input$design == "assurance_or") {
         req(input$p1, input$p2, input$prior_type, input$delta_w, input$n_ratio,
             input$alpha_or, input$power_or)
@@ -145,6 +152,9 @@ mod_bayesian_server <- function(id) {
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
       }
+      }
+
+      if (is_slow) isolate(compute()) else compute()
     })
 
     output$result <- renderUI({

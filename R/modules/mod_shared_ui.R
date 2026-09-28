@@ -40,3 +40,19 @@ render_formula_block <- function(latex) {
     )
   )
 }
+
+# Explicit "Calculate" button for Monte Carlo designs (ROADMAP F9/P1#7):
+# these simulate (and refit models, or search over thousands of replicates)
+# rather than solve a closed form, so recomputing on every keystroke would
+# make one user's slow design freeze the single R process for everyone else
+# on the same app instance. Paired with the server-side pattern in each
+# affected module: the reactive depends on the design radio (so switching
+# TO a Monte Carlo design still computes once with its current defaults)
+# and the Calculate button, but isolates every other input so typing in a
+# numeric field no longer re-triggers the simulation.
+monte_carlo_calculate_ui <- function(ns, note = "can take a few seconds. Set the inputs above, then click Calculate.") {
+  tagList(
+    div(class = "alert alert-warning small", strong("Monte Carlo simulation: "), note),
+    actionButton(ns("calculate"), "Calculate", class = "btn-primary")
+  )
+}

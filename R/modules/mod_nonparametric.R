@@ -107,6 +107,10 @@ mod_nonparametric_ui <- function(id) {
         p(class = "text-muted",
           "This design searches by simulation and may take several seconds. Kruskal-Wallis allows only a two-sided alternative.")
       ),
+      conditionalPanel(
+        condition = paste(design_is("ks"), design_is("runs"), design_is("animal_rank"), sep = " || "),
+        monte_carlo_calculate_ui(ns)
+      ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
       hr(),
@@ -214,8 +218,18 @@ mod_nonparametric_ui <- function(id) {
 
 mod_nonparametric_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # ks/runs/animal_rank are Monte Carlo (ROADMAP F9/P1#7): once one of
+    # them is selected, recompute only on Calculate, not on every keystroke
+    # -- see monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
+    SLOW_DESIGNS <- c("ks", "runs", "animal_rank")
+
     result <- reactive({
-      req(input$design, input$alpha, input$power)
+      req(input$design)
+      is_slow <- input$design %in% SLOW_DESIGNS
+      if (is_slow) input$calculate
+
+      compute <- function() {
+      req(input$alpha, input$power)
 
       tryCatch({
         value <- if (input$design == "rank_sum") {
@@ -280,6 +294,9 @@ mod_nonparametric_server <- function(id) {
         }
         list(ok = TRUE, design = input$design, value = value)
       }, error = function(e) list(ok = FALSE, message = conditionMessage(e)))
+      }
+
+      if (is_slow) isolate(compute()) else compute()
     })
 
     output$result <- renderUI({

@@ -24,6 +24,7 @@ mod_rmst_ui <- function(id) {
       numericInput(ns("allocation1"), "Allocation proportion to arm 1", value = 0.5, min = 0.001, max = 0.999, step = 0.01),
       numericInput(ns("alpha"), "Significance level (alpha, two-sided)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
+      monte_carlo_calculate_ui(ns),
       hr(),
       h5("Result"),
       uiOutput(ns("result"))
@@ -49,19 +50,24 @@ mod_rmst_ui <- function(id) {
 
 mod_rmst_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # Monte Carlo (ROADMAP F9/P1#7): recompute only on Calculate, not on every
+    # keystroke -- see monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
     result <- reactive({
-      req(input$ac_period, input$tot_time, input$tau, input$shape0, input$scale0,
-          input$shape1, input$scale1, input$margin, input$allocation1, input$alpha, input$power)
-      tryCatch(
-        list(ok = TRUE, value = calc_rmst_comparison(
-          ac_period = input$ac_period, tot_time = input$tot_time, tau = input$tau,
-          shape0 = input$shape0, scale0 = input$scale0,
-          shape1 = input$shape1, scale1 = input$scale1,
-          margin = input$margin, allocation1 = input$allocation1,
-          alpha = input$alpha, power = input$power
-        )),
-        error = function(e) list(ok = FALSE, message = conditionMessage(e))
-      )
+      input$calculate
+      isolate({
+        req(input$ac_period, input$tot_time, input$tau, input$shape0, input$scale0,
+            input$shape1, input$scale1, input$margin, input$allocation1, input$alpha, input$power)
+        tryCatch(
+          list(ok = TRUE, value = calc_rmst_comparison(
+            ac_period = input$ac_period, tot_time = input$tot_time, tau = input$tau,
+            shape0 = input$shape0, scale0 = input$scale0,
+            shape1 = input$shape1, scale1 = input$scale1,
+            margin = input$margin, allocation1 = input$allocation1,
+            alpha = input$alpha, power = input$power
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      })
     })
 
     output$result <- renderUI({

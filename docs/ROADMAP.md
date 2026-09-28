@@ -57,7 +57,7 @@ cannot reach — see §4.
 | F6 | **No automated UI tests in the repo.** Every browser check so far was an ad-hoc Playwright script in a scratch directory | nothing under `tests/` beyond `testthat` unit tests | Medium |
 | F7 | **Not yet package-shaped.** R packages need a flat `R/` directory (current code uses `R/calc/`, `R/modules/`, …), a `DESCRIPTION`/`NAMESPACE`, and no `source()`-based loading; tests `source()` files by relative path; `pacman::p_load()` auto-installs, which packages must not do | repo layout, `global.R`, test headers | Medium (blocks Track C) |
 | F8 | **Resolved by relicensing to GPL-3 (D2, 28 Sep 2026).** Background: the project was MIT, but several modules were built by reading and transcribing source from GPL-licensed packages (e.g. `PracTools` GPL-3, `ssize.fdr` GPL-3, `voi` GPL-3, `clusterPower` GPL≥2, `semTools` GPL≥2, `simr` GPL≥2, `metapower` GPL-2, `WebPower` GPL≥3, `rpact` LGPL-3). Mathematical formulas aren't copyrightable, but closely transcribed code may count as a derivative work. *Not legal advice.* GPL-3 is compatible with all of these (GPL-2-only `metapower` is the one to watch: it was a verification reference, not a code source to ship) | package `DESCRIPTION` licenses; module header comments | Resolved; keep module header comments naming each source |
-| F9 | **Monte Carlo modules block the server.** Shiny runs one R process per app instance; a 5–25 s simulation (Monte Carlo Mixed Models, RMST, weighted log-rank, BFDA, KS/runs) freezes every other user on that instance, and these modules recompute on every input change | observed during browser verification | Medium (High once hosted for many users) |
+| F9 | **Partly addressed (28 Sep 2026).** Shiny runs one R process per app instance; a 5–25 s simulation (Monte Carlo Mixed Models, RMST, weighted log-rank, BFDA, KS/runs/animal-rank) used to recompute on every input change — fixed, see P1 item 7. Still true: one user's simulation blocks every other user on the same app instance while it runs — needs `ExtendedTask` (P1 item 7, second half) | observed during browser verification | Was Medium (High once hosted); recompute-storm risk resolved, cross-user blocking remains |
 | F10 | **No results export or report.** Users can't download results, a methods paragraph, or citations — the biggest gap versus how the output is actually used (protocols, theses, ethics submissions) | no download handlers anywhere | Medium |
 | F11 | **Accessibility and mobile layout never audited.** Translations are not planned (English only, D5) | — | Low–Medium |
 
@@ -98,9 +98,17 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
 
 ### P1 — foundations for the suite
 
-7. **Explicit "Calculate" button + async for Monte Carlo modules (F9)** — first
-   `bindEvent()` on a button (no new deps), then `shiny::ExtendedTask` with a
-   background process so one user's simulation never freezes another's.
+7. **Explicit "Calculate" button for Monte Carlo modules (F9), first half done
+   (28 Sep 2026).** All 8 Monte Carlo designs (Monte Carlo Mixed Models' 3
+   designs, RMST, weighted log-rank, BFDA, KS, Wald-Wolfowitz runs, animal rank
+   test) now gate their `calc_*()` call behind a "Calculate" button
+   (`monte_carlo_calculate_ui()`, `mod_shared_ui.R`) instead of recomputing on
+   every keystroke — the reactive depends only on the design radio and the
+   button (`isolate()`-wrapped otherwise), a no-new-deps pattern that doesn't
+   need `bindEvent()`. Fast, closed-form designs in the same modules stay live.
+   Still open: `shiny::ExtendedTask` with a background process, so one user's
+   still-running simulation doesn't block others on the same app instance —
+   the button alone doesn't fix that; it only stops *unwanted* recomputes.
 8. **Standard result object** — have every `calc_*()` return a common S3 class
    (`n`, achieved power, inputs, method, citation) with `print`/`format`. Unblocks
    export, reports, the package API, and power curves in one go.
