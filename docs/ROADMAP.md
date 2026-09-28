@@ -109,9 +109,24 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    Still open: `shiny::ExtendedTask` with a background process, so one user's
    still-running simulation doesn't block others on the same app instance —
    the button alone doesn't fix that; it only stops *unwanted* recomputes.
-8. **Standard result object** — have every `calc_*()` return a common S3 class
-   (`n`, achieved power, inputs, method, citation) with `print`/`format`. Unblocks
-   export, reports, the package API, and power curves in one go.
+8. **Standard result object, infrastructure + pilot batch done (28 Sep 2026).**
+   `R/calc/calc_result.R`'s `new_ss_result()` wraps a `calc_*()` function's
+   existing return list in class `ss_result` — additive only (every existing
+   field name/value is kept exactly as-is, so `res$n` etc. keeps working
+   unchanged; confirmed no test in this project compares a whole result object
+   by identity, only by field) — plus generic `print.ss_result()`/
+   `format.ss_result()` methods that recognize any `n*`/`k*`/`*power*`-named
+   field as the headline, so no per-design method is needed. Deliberately
+   does *not* try to force a single canonical field name (e.g. always `n`)
+   across all ~156 designs, since that would mean rewriting each function's
+   actual return shape, not just wrapping it — field names stay
+   design-specific; export/reports (item 9) reads them via the catalog
+   metadata already keyed by design, not by guessing a common name.
+   Adopted so far (13 of ~156 designs, all of `calc_proportion.R` and
+   `calc_means.R`): both files' tests still pass with 0 failures after
+   adoption. Remaining ~48 `calc_*.R` files are a tracked batch backlog, same
+   incremental pattern as the rest of this project — wrap the function's
+   final `list(...)` in `new_ss_result(list(...))`, no other change.
 9. **Results export (F10)** — per-result "copy" and CSV/JSON download, a
    *sample-size justification paragraph* generator (design + inputs + result +
    citation, ready to paste into a protocol), citation export (BibTeX/RIS).
