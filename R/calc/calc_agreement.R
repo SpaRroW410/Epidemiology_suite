@@ -54,13 +54,13 @@ calc_kappa <- function(kappa, n_category = 2, raters = 2, props,
                               raters = raters, n_category = n_category,
                               props = props, conf.level = conf_level)
 
-  list(
+  new_ss_result(list(
     n = ceiling(res$n),
     lwr = res$lwr,
     upr = res$upr,
     inputs = list(kappa = kappa, n_category = n_category, raters = raters,
                   props = props, conf_width = conf_width, conf_level = conf_level)
-  )
+  ))
 }
 
 #' Sample size for the intraclass correlation coefficient (continuous
@@ -89,10 +89,10 @@ calc_icc <- function(rho, k, conf_width = 0.2, conf_level = 0.95) {
   res <- presize::prec_icc(rho = rho, k = k, conf.width = conf_width,
                             conf.level = conf_level)
 
-  list(
+  new_ss_result(list(
     n = ceiling(res$n),
     inputs = list(rho = rho, k = k, conf_width = conf_width, conf_level = conf_level)
-  )
+  ))
 }
 
 #' Sample size for Cronbach's alpha (scale internal consistency)
@@ -115,12 +115,12 @@ calc_agreement_cronbach <- function(k, calpha, conf_width = 0.1, conf_level = 0.
   res <- presize::prec_cronb(k = k, calpha = calpha, n = NULL,
                               conf.level = conf_level, conf.width = conf_width)
 
-  list(
+  new_ss_result(list(
     n = ceiling(res$n),
     lwr = res$lwr,
     upr = res$upr,
     inputs = list(k = k, calpha = calpha, conf_width = conf_width, conf_level = conf_level)
-  )
+  ))
 }
 
 #' Sample size for Lin's Concordance Correlation Coefficient (CCC)
@@ -175,11 +175,11 @@ calc_agreement_ccc <- function(rho_c, rho, u = 0, conf_width = 0.2, conf_level =
   n <- ceiling(2 + 4 * zv^2 * A / conf_width^2)
   achieved_width <- 2 * zv * sqrt(A / (n - 2))
 
-  list(
+  new_ss_result(list(
     n = n,
     achieved_width = achieved_width,
     inputs = list(rho_c = rho_c, rho = rho, u = u, conf_width = conf_width, conf_level = conf_level)
-  )
+  ))
 }
 
 #' Sample size for Bland-Altman limits of agreement
@@ -199,8 +199,8 @@ calc_agreement_bland_altman <- function(conf_width = 1, conf_level = 0.95) {
 
   res <- presize::prec_lim_agree(n = NULL, conf.width = conf_width, conf.level = conf_level)
 
-  list(
+  new_ss_result(list(
     n = ceiling(res$n),
     inputs = list(conf_width = conf_width, conf_level = conf_level)
-  )
+  ))
 }

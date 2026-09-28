@@ -109,7 +109,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    Still open: `shiny::ExtendedTask` with a background process, so one user's
    still-running simulation doesn't block others on the same app instance —
    the button alone doesn't fix that; it only stops *unwanted* recomputes.
-8. **Standard result object, infrastructure + pilot batch done (28 Sep 2026).**
+8. **Standard result object — done for every `calc_*.R` file (28 Sep 2026).**
    `R/calc/calc_result.R`'s `new_ss_result()` wraps a `calc_*()` function's
    existing return list in class `ss_result` — additive only (every existing
    field name/value is kept exactly as-is, so `res$n` etc. keeps working
@@ -122,11 +122,23 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    actual return shape, not just wrapping it — field names stay
    design-specific; export/reports (item 9) reads them via the catalog
    metadata already keyed by design, not by guessing a common name.
-   Adopted so far (13 of ~156 designs, all of `calc_proportion.R` and
-   `calc_means.R`): both files' tests still pass with 0 failures after
-   adoption. Remaining ~48 `calc_*.R` files are a tracked batch backlog, same
-   incremental pattern as the rest of this project — wrap the function's
-   final `list(...)` in `new_ss_result(list(...))`, no other change.
+   Adopted across all 51 `calc_*.R` files (156 designs): pilot batch first
+   (`calc_proportion.R`/`calc_means.R`, 13 designs), then every remaining
+   file's matching final `list(...)` return wrapped mechanically, verified
+   safe first (every match confirmed to be an unconditional final-statement
+   return, none mid-function) and two non-matching cases fixed by hand
+   (`calc_lan_demets.R`'s single-line return, `calc_lqas.R`'s `return(list(...))`
+   inside a loop). A few functions were deliberately left unwrapped: internal
+   numeric-only helpers never exposed to a module (e.g. `calc_sem_rmsea_power()`),
+   and functions that already return an `ss_result` transitively by calling an
+   already-wrapped one (e.g. `calc_sign_test()` calls `calc_binomial_exact()`;
+   all four Bonferroni/Sidak `calc_multiplicity_*` wrappers call the now-wrapped
+   proportion/means functions). Full suite (`S2R_SLOW_TESTS=true`, all 487
+   tests including the 27 Monte Carlo ones): 0 failures, 0 errors. Playwright
+   spot-check across 8 modules spanning different families (cohort, diagnostic,
+   agreement, TOST, log-rank, correlation, nonparametric, cluster/DEFF): all
+   render correctly, no page errors. Item 8 is done; items 9-10 (export,
+   power curves) can now build on `ss_result` across the whole catalog.
 9. **Results export (F10)** — per-result "copy" and CSV/JSON download, a
    *sample-size justification paragraph* generator (design + inputs + result +
    citation, ready to paste into a protocol), citation export (BibTeX/RIS).

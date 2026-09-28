@@ -48,10 +48,10 @@ calc_wilcoxon_rank_sum <- function(k = 1, p1, p2, p3, alpha = 0.05, power = 0.8)
 
   n <- TrialSize::Nonpara.Two.Sample(alpha = alpha, beta = 1 - power, k = k, p1 = p1, p2 = p2, p3 = p3)
 
-  list(
+  new_ss_result(list(
     n = ceiling(n),
     inputs = list(k = k, p1 = p1, p2 = p2, p3 = p3, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for the Wilcoxon signed-rank test, one sample (or paired
@@ -79,10 +79,10 @@ calc_wilcoxon_signed_rank <- function(p2, p3, p4, alpha = 0.05, power = 0.8) {
 
   n <- TrialSize::Nonpara.One.Sample(alpha = alpha, beta = 1 - power, p2 = p2, p3 = p3, p4 = p4)
 
-  list(
+  new_ss_result(list(
     n = ceiling(n),
     inputs = list(p2 = p2, p3 = p3, p4 = p4, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for a nonparametric test of association (Kendall's tau)
@@ -110,11 +110,11 @@ calc_kendall_tau <- function(p1, p2, alpha = 0.05, power = 0.8) {
 
   n <- TrialSize::Nonpara.Independ(alpha = alpha, beta = 1 - power, p1 = p1, p2 = p2)
 
-  list(
+  new_ss_result(list(
     n = ceiling(n),
     tau = 2 * p1 - 1,
     inputs = list(p1 = p1, p2 = p2, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for the Kruskal-Wallis test (k independent groups,
@@ -152,12 +152,12 @@ calc_kruskal_wallis <- function(k, f, alpha = 0.05, power = 0.8) {
   n_anova <- ceiling(fit$n)
   n_per_group <- ceiling(n_anova / .ARE_WILCOXON_NORMAL)
 
-  list(
+  new_ss_result(list(
     n_per_group = n_per_group,
     n_total = n_per_group * k,
     n_anova_per_group = n_anova,
     inputs = list(k = k, f = f, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for the Friedman test (k related/repeated measurements,
@@ -222,12 +222,12 @@ calc_friedman <- function(k, f, nscor = 1, alpha = 0.05, power = 0.8) {
   are <- (3 / pi) * k / (k + 1)
   n <- ceiling(rm_fit$n / are)
 
-  list(
+  new_ss_result(list(
     n = n,
     n_rm_anova = rm_fit$n,
     are = are,
     inputs = list(k = k, f = f, nscor = nscor, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for the Jonckheere-Terpstra test (ordered alternatives
@@ -259,11 +259,11 @@ calc_friedman <- function(k, f, nscor = 1, alpha = 0.05, power = 0.8) {
 #' @return list(n, tau, inputs)
 calc_jonckheere_terpstra <- function(p1, p2, alpha = 0.05, power = 0.8) {
   base <- calc_kendall_tau(p1 = p1, p2 = p2, alpha = alpha, power = power)
-  list(
+  new_ss_result(list(
     n = base$n,
     tau = base$tau,
     inputs = list(p1 = p1, p2 = p2, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for the two-sample Kolmogorov-Smirnov test, via Monte Carlo
@@ -329,14 +329,14 @@ calc_ks_two_sample <- function(effect_size, alpha = 0.05, power = 0.8,
 
   n1 <- .mc_search_n1(function(n) empirical_power(n, nsim), power)
 
-  list(
+  new_ss_result(list(
     n1 = n1,
     n2 = max(2, round(n1 * n_ratio)),
     n_total = n1 + max(2, round(n1 * n_ratio)),
     achieved_power = empirical_power(n1, nsim * 3),
     inputs = list(effect_size = effect_size, alpha = alpha, power = power,
                   n_ratio = n_ratio, nsim = nsim)
-  )
+  ))
 }
 
 #' Sample size for the Wald-Wolfowitz two-sample runs test, via Monte
@@ -396,14 +396,14 @@ calc_wald_wolfowitz_runs <- function(effect_size, alpha = 0.05, power = 0.8,
 
   n1 <- .mc_search_n1(function(n) empirical_power(n, nsim), power)
 
-  list(
+  new_ss_result(list(
     n1 = n1,
     n2 = max(2, round(n1 * n_ratio)),
     n_total = n1 + max(2, round(n1 * n_ratio)),
     achieved_power = empirical_power(n1, nsim * 3),
     inputs = list(effect_size = effect_size, alpha = alpha, power = power,
                   n_ratio = n_ratio, nsim = nsim)
-  )
+  ))
 }
 
 #' Sample size for a K-sample rank test under Heller (2006)'s Lehmann
@@ -486,12 +486,12 @@ calc_animal_rank_test <- function(k, odds_ratio, alpha = 0.05, power = 0.8,
 
   n_per_group <- .mc_search_n1(empirical_power, power, n_lo = 3, n_hi = 6)
 
-  list(
+  new_ss_result(list(
     n_per_group = n_per_group,
     n_total = n_per_group * k,
     k = k,
     achieved_power = empirical_power(n_per_group),
     inputs = list(k = k, odds_ratio = odds_ratio, alpha = alpha, power = power,
                   statistic = statistic, alternative = alternative, nrep = nrep)
-  )
+  ))
 }

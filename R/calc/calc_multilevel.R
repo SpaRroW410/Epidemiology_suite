@@ -67,13 +67,13 @@ calc_multilevel_two_level <- function(n1, T_end, var_ratio, delta, sigma_error =
   root <- uniroot(function(n2) power_at_n2(n2) - power, interval = c(3, 1e6))$root
   n2 <- ceiling(root)
 
-  list(
+  new_ss_result(list(
     n_per_arm = n2,
     n_total = 2 * n2,
     achieved_power = power_at_n2(n2),
     inputs = list(n1 = n1, T_end = T_end, var_ratio = var_ratio, delta = delta,
                   sigma_error = sigma_error, alpha = alpha, power = power)
-  )
+  ))
 }
 
 calc_multilevel_three_level <- function(n1, n2, T_end, var_ratio, icc_slope, delta,
@@ -105,7 +105,7 @@ calc_multilevel_three_level <- function(n1, n2, T_end, var_ratio, icc_slope, del
   root <- uniroot(function(n3) power_at_n3(n3) - power, interval = c(2, 1e5))$root
   n3 <- ceiling(root)
 
-  list(
+  new_ss_result(list(
     n_clusters_per_arm = n3,
     n_subjects_per_cluster = n2,
     n_total_clusters = 2 * n3,
@@ -113,5 +113,5 @@ calc_multilevel_three_level <- function(n1, n2, T_end, var_ratio, icc_slope, del
     achieved_power = power_at_n3(n3),
     inputs = list(n1 = n1, n2 = n2, T_end = T_end, var_ratio = var_ratio, icc_slope = icc_slope,
                   delta = delta, sigma_error = sigma_error, alpha = alpha, power = power)
-  )
+  ))
 }

@@ -73,11 +73,11 @@ calc_variance_single <- function(sigma0, sigma1, alpha = 0.05, power = 0.8,
 
   n_solved <- stats::uniroot(function(n) power_at_n(n) - power, c(3, 1e6))$root
 
-  list(
+  new_ss_result(list(
     n = ceiling(n_solved),
     inputs = list(sigma0 = sigma0, sigma1 = sigma1, alpha = alpha, power = power,
                   alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size to compare two variances (equal group sizes)
@@ -132,12 +132,12 @@ calc_variance_two <- function(sigma1, sigma2, alpha = 0.05, power = 0.8,
   n_solved <- stats::uniroot(function(n) power_at_n(n) - power, c(3, 1e6))$root
   n_per_group <- ceiling(n_solved)
 
-  list(
+  new_ss_result(list(
     n_per_group = n_per_group,
     n_total = n_per_group * 2,
     inputs = list(sigma1 = sigma1, sigma2 = sigma2, alpha = alpha, power = power,
                   alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size to estimate a standard deviation to a target precision
@@ -189,10 +189,10 @@ calc_variance_sd_precision <- function(target_width, conf_level = 0.95) {
 
   alpha <- 1 - conf_level
   df <- n - 1
-  list(
+  new_ss_result(list(
     n = n,
     lower_mult = sqrt(df / stats::qchisq(1 - alpha / 2, df)),
     upper_mult = sqrt(df / stats::qchisq(alpha / 2, df)),
     inputs = list(target_width = target_width, conf_level = conf_level)
-  )
+  ))
 }

@@ -43,11 +43,11 @@ calc_cluster_deff <- function(n_base, icc, cluster_size) {
   deff <- 1 + (cluster_size - 1) * icc
   n_effective <- ceiling(n_base * deff)
 
-  list(
+  new_ss_result(list(
     deff = deff,
     n_effective = n_effective,
     inputs = list(n_base = n_base, icc = icc, cluster_size = cluster_size)
-  )
+  ))
 }
 
 #' Design-effect-inflated sample size allowing for variable cluster size
@@ -90,11 +90,11 @@ calc_cluster_deff_variable <- function(n_base, icc, cluster_size, cv) {
   # result by one.
   n_effective <- ceiling(round(n_base * deff, 6))
 
-  list(
+  new_ss_result(list(
     deff = deff,
     n_effective = n_effective,
     inputs = list(n_base = n_base, icc = icc, cluster_size = cluster_size, cv = cv)
-  )
+  ))
 }
 
 #' Sample size for a cluster survey estimating a proportion (WHO EPI-style)
@@ -155,13 +155,13 @@ calc_cluster_survey_binary <- function(b, b_sd = NULL, p, epsilon,
     conf.level = conf_level
   )
 
-  list(
+  new_ss_result(list(
     n_psu = fit$n.psu,
     n_ssu = fit$n.ssu,
     deff = fit$DEF,
     inputs = list(b = b, b_sd = b_sd, p = p, epsilon = epsilon, error = error,
                   rho = rho, N_psu = N_psu, conf_level = conf_level)
-  )
+  ))
 }
 
 #' Optimal two-stage (PPS) cluster sample allocation: PSUs and take-b
@@ -230,7 +230,7 @@ calc_cluster_pps_optimal_allocation <- function(cost_psu, cost_element, delta,
     cost <- cost_psu * m_opt + cost_element * m_opt * n_opt
   }
 
-  list(
+  new_ss_result(list(
     n_opt = n_opt,
     m_opt = m_opt,
     cv = cv,
@@ -238,5 +238,5 @@ calc_cluster_pps_optimal_allocation <- function(cost_psu, cost_element, delta,
     inputs = list(cost_psu = cost_psu, cost_element = cost_element, delta = delta,
                   unit_relvar = unit_relvar, k = k, mode = mode,
                   total_budget = total_budget, target_cv = target_cv)
-  )
+  ))
 }

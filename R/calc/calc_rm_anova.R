@@ -73,10 +73,10 @@ calc_rm_anova <- function(ng, nm, f, nscor = 1, alpha = 0.05, power = 0.8,
 
   n <- ceiling(uniroot(function(n) power_given_n(n) - power, c(n_lower, n_upper))$root)
 
-  list(
+  new_ss_result(list(
     n = n,
     achieved_power = power_given_n(n),
     inputs = list(ng = ng, nm = nm, f = f, nscor = nscor, alpha = alpha,
                   power = power, type = type)
-  )
+  ))
 }

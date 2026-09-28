@@ -35,12 +35,12 @@ calc_logrank <- function(pE, pC, hr, ratio = 1, alpha = 0.05, power = 0.8) {
   n_exp <- ceiling(fit[["nE"]])
   n_control <- ceiling(fit[["nC"]])
 
-  list(
+  new_ss_result(list(
     n_exp = n_exp,
     n_control = n_control,
     n_total = n_exp + n_control,
     inputs = list(pE = pE, pC = pC, hr = hr, ratio = ratio, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for Cox proportional-hazards regression, binary covariate
@@ -73,10 +73,10 @@ calc_cox_binary <- function(power, theta, p, psi, rho2 = 0, alpha = 0.05) {
   n <- powerSurvEpi::ssizeEpi.default(power = power, theta = theta, p = p,
                                       psi = psi, rho2 = rho2, alpha = alpha)
 
-  list(
+  new_ss_result(list(
     n = ceiling(n),
     inputs = list(power = power, theta = theta, p = p, psi = psi, rho2 = rho2, alpha = alpha)
-  )
+  ))
 }
 
 #' Sample size for Cox proportional-hazards regression, continuous (or
@@ -107,11 +107,11 @@ calc_cox_continuous <- function(power, theta, sigma2, psi, rho2 = 0, alpha = 0.0
   n <- powerSurvEpi::ssizeEpiCont.default(power = power, theta = theta, sigma2 = sigma2,
                                           psi = psi, rho2 = rho2, alpha = alpha)
 
-  list(
+  new_ss_result(list(
     n = ceiling(n),
     inputs = list(power = power, theta = theta, sigma2 = sigma2, psi = psi,
                   rho2 = rho2, alpha = alpha)
-  )
+  ))
 }
 
 #' Sample size for a stratified log-rank test, exponential survival,
@@ -154,11 +154,11 @@ calc_survival_stratified <- function(power, timeUnit, gVec, pVec, hr, lambda0Vec
                                     PVec = pVec, HR = hr, lambda0Vec = lambda0Vec,
                                     alpha = alpha, verbose = FALSE)
 
-  list(
+  new_ss_result(list(
     n_total = ceiling(n),
     inputs = list(power = power, timeUnit = timeUnit, gVec = gVec, pVec = pVec,
                   hr = hr, lambda0Vec = lambda0Vec, alpha = alpha)
-  )
+  ))
 }
 
 # Weighted log-rank test (Fleming-Harrington G^rho family) under
@@ -307,12 +307,12 @@ calc_weighted_logrank <- function(hazard0, hr, change_time, effect_timing = "del
   n0 <- .mc_search_n1(function(n) empirical_power(n, nsim), power, n_lo = 10, n_hi = 20, n_max = 5000)
   n1 <- max(2, round(n0 * ratio))
 
-  list(
+  new_ss_result(list(
     n0 = n0, n1 = n1, n_total = n0 + n1,
     achieved_power = empirical_power(n0, nsim * 3),
     inputs = list(hazard0 = hazard0, hr = hr, change_time = change_time,
                   effect_timing = effect_timing, accrual = accrual, tot_time = tot_time,
                   rho = rho, allocation1 = allocation1, alpha = alpha, power = power,
                   nsim = nsim)
-  )
+  ))
 }

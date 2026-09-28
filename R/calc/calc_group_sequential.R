@@ -171,7 +171,7 @@ calc_group_sequential_survival <- function(haz_ratio, n_looks, r = 1, alpha = 0.
     delta.eb = boundary_shape, delta.fb = delta_fb, alternative = alternative
   )
 
-  list(
+  new_ss_result(list(
     n_events_total = ceiling(fit$num.events),
     ifrac = fit$ifrac,
     efficacy_boundary = fit$effbdry,
@@ -179,7 +179,7 @@ calc_group_sequential_survival <- function(haz_ratio, n_looks, r = 1, alpha = 0.
     inputs = list(haz_ratio = haz_ratio, n_looks = n_looks, r = r, alpha = alpha,
                   power = power, alternative = alternative,
                   boundary_shape = boundary_shape, futility = futility)
-  )
+  ))
 }
 
 .validate_n_looks <- function(n_looks) {
@@ -201,7 +201,7 @@ calc_group_sequential_survival <- function(haz_ratio, n_looks, r = 1, alpha = 0.
   n_control <- ceiling(n_total * 1 / (r + 1))
   n_experimental <- n_total - n_control
 
-  list(
+  new_ss_result(list(
     n_total = n_total,
     n_control = n_control,
     n_experimental = n_experimental,
@@ -209,5 +209,5 @@ calc_group_sequential_survival <- function(haz_ratio, n_looks, r = 1, alpha = 0.
     efficacy_boundary = fit$effbdry,
     futility_boundary = fit$futbdry,
     inputs = inputs
-  )
+  ))
 }

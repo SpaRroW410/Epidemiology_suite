@@ -39,12 +39,12 @@ calc_precision_riskratio <- function(p1, p2, r = 1, conf_width = 1, conf_level =
   achieved <- presize::prec_riskratio(p1 = p1, p2 = p2, n1 = n1, r = r,
                                        conf.level = conf_level, method = method)
 
-  list(
+  new_ss_result(list(
     n1 = n1, n2 = n2, n_total = n1 + n2,
     achieved_width = achieved$conf.width,
     inputs = list(p1 = p1, p2 = p2, r = r, conf_width = conf_width,
                   conf_level = conf_level, method = method)
-  )
+  ))
 }
 
 #' Sample size for estimating an odds ratio to a target precision
@@ -77,12 +77,12 @@ calc_precision_or <- function(p1, p2, r = 1, conf_width = 1, conf_level = 0.95,
   achieved <- presize::prec_or(p1 = p1, p2 = p2, n1 = n1, r = r,
                                 conf.level = conf_level, method = method)
 
-  list(
+  new_ss_result(list(
     n1 = n1, n2 = n2, n_total = n1 + n2,
     achieved_width = achieved$conf.width,
     inputs = list(p1 = p1, p2 = p2, r = r, conf_width = conf_width,
                   conf_level = conf_level, method = method)
-  )
+  ))
 }
 
 #' Sample size for estimating a rate ratio to a target precision
@@ -117,10 +117,10 @@ calc_precision_rateratio <- function(rate1, rate2, r = 1, prec_level = 2, conf_l
   achieved <- presize::prec_rateratio(n1 = n1, rate1 = rate1, rate2 = rate2,
                                        r = r, conf.level = conf_level)
 
-  list(
+  new_ss_result(list(
     n1 = n1, n2 = n2, n_total = n1 + n2,
     achieved_prec_level = achieved$prec.level,
     inputs = list(rate1 = rate1, rate2 = rate2, r = r, prec_level = prec_level,
                   conf_level = conf_level)
-  )
+  ))
 }

@@ -1,3 +1,4 @@
+source(file.path("..", "..", "R", "calc", "calc_result.R"))
 source(file.path("..", "..", "R", "calc", "calc_utils.R"))
 suppressMessages(library(lme4))
 source(file.path("..", "..", "R", "calc", "calc_glmm.R"))

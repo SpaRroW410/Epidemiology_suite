@@ -39,7 +39,7 @@ calc_diagnostic_accuracy <- function(sens, spec, prevalence,
   n <- max(n_sens_ceil, n_spec_ceil)
   binding <- if (n_sens_ceil >= n_spec_ceil) "sensitivity" else "specificity"
 
-  list(
+  new_ss_result(list(
     n = n,
     n_sens = n_sens_ceil,
     n_spec = n_spec_ceil,
@@ -50,7 +50,7 @@ calc_diagnostic_accuracy <- function(sens, spec, prevalence,
     inputs = list(sens = sens, spec = spec, prevalence = prevalence,
                   prec_sens = prec_sens, prec_spec = prec_spec,
                   conf_level = conf_level)
-  )
+  ))
 }
 
 # Z critical value for a hypothesis test, alpha split per alternative -- used
@@ -112,7 +112,7 @@ calc_diagnostic_vs_reference <- function(sens0, sens1, spec0, spec1, prevalence,
   n <- max(n_sens, n_spec)
   binding <- if (n_sens >= n_spec) "sensitivity" else "specificity"
 
-  list(
+  new_ss_result(list(
     n = n,
     n_sens = n_sens,
     n_spec = n_spec,
@@ -122,7 +122,7 @@ calc_diagnostic_vs_reference <- function(sens0, sens1, spec0, spec1, prevalence,
     inputs = list(sens0 = sens0, sens1 = sens1, spec0 = spec0, spec1 = spec1,
                   prevalence = prevalence, alpha = alpha, power = power,
                   alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size to compare a metric (sensitivity or specificity) of two
@@ -159,12 +159,12 @@ calc_diagnostic_two_indep <- function(p1, p2, alpha = 0.05, power = 0.8,
               zb * sqrt(p1 * (1 - p1) + p2 * (1 - p2)))^2 / (p1 - p2)^2
   n_per_group <- ceiling(.yates_correction(n_raw, p1, p2))
 
-  list(
+  new_ss_result(list(
     n_per_group = n_per_group,
     n_total = n_per_group * 2,
     inputs = list(p1 = p1, p2 = p2, alpha = alpha, power = power,
                   alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size to compare a metric (sensitivity or specificity) of two paired
@@ -206,14 +206,14 @@ calc_diagnostic_two_paired <- function(p1, p2, alpha = 0.05, power = 0.8,
   n_min <- ceiling(.yates_correction(.raw_n(psi_min), p1, p2))
   n_max <- ceiling(.yates_correction(.raw_n(psi_max), p1, p2))
 
-  list(
+  new_ss_result(list(
     n_min = n_min,
     n_max = n_max,
     psi_min = psi_min,
     psi_max = psi_max,
     inputs = list(p1 = p1, p2 = p2, alpha = alpha, power = power,
                   alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for predictive values (PPV/NPV), precision-based
@@ -261,7 +261,7 @@ calc_diagnostic_ppv_npv <- function(sens, spec, prevalence,
   n <- max(n_ppv_total, n_npv_total)
   binding <- if (n_ppv_total >= n_npv_total) "PPV" else "NPV"
 
-  list(
+  new_ss_result(list(
     n = n,
     n_ppv = n_ppv_total,
     n_npv = n_npv_total,
@@ -271,7 +271,7 @@ calc_diagnostic_ppv_npv <- function(sens, spec, prevalence,
     z = z,
     inputs = list(sens = sens, spec = spec, prevalence = prevalence,
                   prec_ppv = prec_ppv, prec_npv = prec_npv, conf_level = conf_level)
-  )
+  ))
 }
 
 #' Sample size to test a diagnostic odds ratio (DOR) against 1 (no
@@ -311,14 +311,14 @@ calc_diagnostic_odds_ratio <- function(sens, spec, alpha = 0.05, power = 0.8,
                                      alternative = alternative)
   dor <- (p1 / (1 - p1)) / (p2 / (1 - p2))
 
-  list(
+  new_ss_result(list(
     n_diseased = base$n_per_group,
     n_healthy = base$n_per_group,
     n_total = base$n_total,
     dor = dor,
     inputs = list(sens = sens, spec = spec, alpha = alpha, power = power,
                   alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for a likelihood ratio (LR+ or LR-), precision-based
@@ -353,7 +353,7 @@ calc_diagnostic_likelihood_ratio <- function(sens, spec, prevalence,
                           n = NULL, conf.width = conf_width, conf.level = conf_level)
   }
 
-  list(
+  new_ss_result(list(
     n = ceiling(res$n),
     n_diseased = ceiling(res$n1),
     n_healthy = ceiling(res$n2),
@@ -362,5 +362,5 @@ calc_diagnostic_likelihood_ratio <- function(sens, spec, prevalence,
     upr = res$upr,
     inputs = list(sens = sens, spec = spec, prevalence = prevalence, type = type,
                   conf_width = conf_width, conf_level = conf_level)
-  )
+  ))
 }

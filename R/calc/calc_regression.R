@@ -32,12 +32,12 @@ calc_regression_f2 <- function(r2, num_predictors, alpha = 0.05, power = 0.8) {
   v <- ceiling(fit$v)
   n <- v + num_predictors + 1
 
-  list(
+  new_ss_result(list(
     n = n,
     f2 = f2,
     v = v,
     inputs = list(r2 = r2, num_predictors = num_predictors, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for hierarchical multiple regression, R-squared increase
@@ -101,7 +101,7 @@ calc_regression_r2_increase <- function(r2_reduced, r2_full, num_predictors_adde
   v <- ceiling(fit$v)
   n <- v + num_predictors_total + 1
 
-  list(
+  new_ss_result(list(
     n = n,
     f2 = f2,
     v = v,
@@ -109,5 +109,5 @@ calc_regression_r2_increase <- function(r2_reduced, r2_full, num_predictors_adde
                   num_predictors_added = num_predictors_added,
                   num_predictors_total = num_predictors_total,
                   alpha = alpha, power = power)
-  )
+  ))
 }

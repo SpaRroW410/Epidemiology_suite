@@ -116,14 +116,14 @@ calc_meta_analysis_power <- function(effect_size = NULL, study_size, k, i2, es_t
     random_power <- 1 - .meta_power_cdf(c_alpha, k, ncp, i2)
   }
 
-  list(
+  new_ss_result(list(
     fixed_power = fixed_power,
     random_power = random_power,
     effect_size_used = effect_size_used,
     variance = variance,
     inputs = list(effect_size = effect_size, study_size = study_size, k = k, i2 = i2,
                   es_type = es_type, test_type = test_type, alpha = alpha, con_table = con_table)
-  )
+  ))
 }
 
 #' Required number of studies (k) for a target meta-analysis power
@@ -168,11 +168,11 @@ calc_meta_analysis_k <- function(effect_size = NULL, study_size, i2, es_type = c
     if (power_at_k(mid) >= power) k_hi <- mid else k_lo <- mid
   }
 
-  list(
+  new_ss_result(list(
     k = k_hi,
     achieved_power = power_at_k(k_hi),
     model = model,
     inputs = list(effect_size = effect_size, study_size = study_size, i2 = i2, es_type = es_type,
                   test_type = test_type, alpha = alpha, power = power, con_table = con_table)
-  )
+  ))
 }

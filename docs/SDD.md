@@ -305,11 +305,16 @@ proportion_content <- list(
 ```
 
 **Calculation function** — pure R, no Shiny; validates with the shared helpers in
-`calc_utils.R`, returns a plain list (inputs echoed back). Monte Carlo designs use
+`calc_utils.R`, returns its result wrapped in `new_ss_result()` (`calc_result.R`,
+ROADMAP P1 item 8) — a named list (inputs echoed back) with class `ss_result`
+added on top, so every field (`n`, `n_total`, whatever that design calls its own
+headline number, `inputs`, ...) is exactly what the function would have returned
+anyway; the class only adds a generic `print()`/`format()`. Monte Carlo designs use
 `.mc_search_n1()` and a fixed `seed` argument for reproducibility.
 ```r
 calc_proportion_1s <- function(p0, p1, alpha = 0.05, power = 0.8, alternative = "two.sided") {
-  # validate, compute, return list(n = ..., inputs = ...)
+  # validate, compute
+  new_ss_result(list(n = ..., inputs = ...))
 }
 ```
 

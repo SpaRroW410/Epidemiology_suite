@@ -31,9 +31,9 @@ calc_crossover_2x2 <- function(delta, sigma, alpha = 0.05, power = 0.8) {
     alpha = alpha, beta = 1 - power, sigma = sigma, margin = delta
   ))
 
-  list(
+  new_ss_result(list(
     n_per_sequence = n_per_sequence,
     n_total = n_per_sequence * 2,
     inputs = list(delta = delta, sigma = sigma, alpha = alpha, power = power)
-  )
+  ))
 }

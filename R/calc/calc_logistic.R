@@ -55,12 +55,12 @@ calc_ordinal_proportional_odds <- function(p, odds_ratio, fraction = 0.5,
   fit <- Hmisc::posamsize(p = p, odds.ratio = odds_ratio, fraction = fraction,
                            alpha = alpha, power = power)
 
-  list(
+  new_ss_result(list(
     n = ceiling(fit$n),
     eff = fit$eff,
     inputs = list(p = p, odds_ratio = odds_ratio, fraction = fraction,
                   alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for simple logistic regression with a binary predictor
@@ -83,10 +83,10 @@ calc_logistic_binary <- function(p1, p2, prop_x1, alpha = 0.05, power = 0.8) {
 
   n <- powerMediation::SSizeLogisticBin(p1 = p1, p2 = p2, B = prop_x1, alpha = alpha, power = power)
 
-  list(
+  new_ss_result(list(
     n = ceiling(n),
     inputs = list(p1 = p1, p2 = p2, prop_x1 = prop_x1, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for simple logistic regression with a continuous predictor
@@ -107,10 +107,10 @@ calc_logistic_continuous <- function(p1, or, alpha = 0.05, power = 0.8) {
 
   n <- powerMediation::SSizeLogisticCon(p1 = p1, OR = or, alpha = alpha, power = power)
 
-  list(
+  new_ss_result(list(
     n = ceiling(n),
     inputs = list(p1 = p1, or = or, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for multiple logistic regression (covariate-adjusted),
@@ -144,11 +144,11 @@ calc_logistic_binary_adjusted <- function(p1, p2, prop_x1, r2, alpha = 0.05, pow
 
   base <- calc_logistic_binary(p1 = p1, p2 = p2, prop_x1 = prop_x1, alpha = alpha, power = power)
 
-  list(
+  new_ss_result(list(
     n = ceiling(base$n / (1 - r2)),
     n_unadjusted = base$n,
     inputs = list(p1 = p1, p2 = p2, prop_x1 = prop_x1, r2 = r2, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for multiple logistic regression (covariate-adjusted),
@@ -172,9 +172,9 @@ calc_logistic_continuous_adjusted <- function(p1, or, r2, alpha = 0.05, power = 
 
   base <- calc_logistic_continuous(p1 = p1, or = or, alpha = alpha, power = power)
 
-  list(
+  new_ss_result(list(
     n = ceiling(base$n / (1 - r2)),
     n_unadjusted = base$n,
     inputs = list(p1 = p1, or = or, r2 = r2, alpha = alpha, power = power)
-  )
+  ))
 }

@@ -40,9 +40,9 @@ calc_simon <- function(pu, pa, alpha = 0.1, beta = 0.1, nmax = 100) {
   minimax_row <- fit$out[1, ]
   optimal_row <- fit$out[which.min(fit$out[, "EN(p0)"]), ]
 
-  list(
+  new_ss_result(list(
     minimax = .row_to_list(minimax_row),
     optimal = .row_to_list(optimal_row),
     inputs = list(pu = pu, pa = pa, alpha = alpha, beta = beta, nmax = nmax)
-  )
+  ))
 }

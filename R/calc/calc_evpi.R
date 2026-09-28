@@ -63,11 +63,11 @@ calc_evpi_normal <- function(mean_inb, sd_inb, population = 1) {
 
   evpi_per_patient <- .evpi_unit_normal_loss(mean_inb, sd_inb)
 
-  list(
+  new_ss_result(list(
     evpi_per_patient = evpi_per_patient,
     evpi_population = evpi_per_patient * population,
     inputs = list(mean_inb = mean_inb, sd_inb = sd_inb, population = population)
-  )
+  ))
 }
 
 #' Expected Value of Sample Information for a proposed study of size n,
@@ -92,12 +92,12 @@ calc_evsi_normal <- function(mean_inb, sd_inb, sampling_sd, n, population = 1) {
   prepost_sd <- sqrt(sd_inb^2 - post_var)
   evsi_per_patient <- .evpi_unit_normal_loss(mean_inb, prepost_sd)
 
-  list(
+  new_ss_result(list(
     evsi_per_patient = evsi_per_patient,
     evsi_population = evsi_per_patient * population,
     inputs = list(mean_inb = mean_inb, sd_inb = sd_inb, sampling_sd = sampling_sd,
                   n = n, population = population)
-  )
+  ))
 }
 
 #' Sample size that maximizes the Expected Net Benefit of Sampling (ENBS)
@@ -141,7 +141,7 @@ calc_enbs_optimal_n <- function(mean_inb, sd_inb, sampling_sd, cost_per_patient,
 
   evpi_per_patient <- .evpi_unit_normal_loss(mean_inb, sd_inb)
 
-  list(
+  new_ss_result(list(
     n_optimal = n_optimal,
     evsi_at_optimal = evsi_fn(n_optimal) * population,
     enbs_at_optimal = enbs_fn(n_optimal),
@@ -150,5 +150,5 @@ calc_enbs_optimal_n <- function(mean_inb, sd_inb, sampling_sd, cost_per_patient,
     inputs = list(mean_inb = mean_inb, sd_inb = sd_inb, sampling_sd = sampling_sd,
                   cost_per_patient = cost_per_patient, population = population,
                   fixed_cost = fixed_cost, n_max = n_max)
-  )
+  ))
 }

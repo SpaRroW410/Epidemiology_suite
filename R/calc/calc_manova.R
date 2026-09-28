@@ -66,10 +66,10 @@ calc_manova_hotelling <- function(p, d2, alpha = 0.05, power = 0.8) {
 
   n <- ceiling(uniroot(function(n) power_given_n(n) - power, c(n_lower, n_upper))$root)
 
-  list(
+  new_ss_result(list(
     n_per_group = n,
     n_total = n * 2,
     achieved_power = power_given_n(n),
     inputs = list(p = p, d2 = d2, alpha = alpha, power = power)
-  )
+  ))
 }

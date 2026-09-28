@@ -78,7 +78,7 @@ calc_stepped_wedge_normal <- function(nsubjects, ntimes, d, icc, rho_c, rho_s, v
   )
   nclusters <- ceiling(round(nclusters_raw, 6))
 
-  list(
+  new_ss_result(list(
     nclusters = nclusters,
     achieved_power = power_at_n(nclusters),
     deff_cluster = deff_cluster,
@@ -86,5 +86,5 @@ calc_stepped_wedge_normal <- function(nsubjects, ntimes, d, icc, rho_c, rho_s, v
     vif = vif,
     inputs = list(nsubjects = nsubjects, ntimes = ntimes, d = d, icc = icc,
                   rho_c = rho_c, rho_s = rho_s, vart = vart, alpha = alpha, power = power)
-  )
+  ))
 }

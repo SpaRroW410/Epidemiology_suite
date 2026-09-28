@@ -38,13 +38,13 @@ calc_case_control_unmatched <- function(p0, OR, power = 0.8, ratio = 1,
                          design = 1, sided.test = sided, nfractional = FALSE,
                          conf.level = 1 - alpha, method = "unmatched", fleiss = FALSE)
 
-  list(
+  new_ss_result(list(
     n_total = ceiling(res$n.total),
     n_case = ceiling(res$n.case),
     n_control = ceiling(res$n.control),
     inputs = list(p0 = p0, OR = OR, power = power, ratio = ratio, alpha = alpha,
                   alternative = alternative, N = N)
-  )
+  ))
 }
 
 #' Sample size for a matched case-control study (1:1 or 1:m)
@@ -86,13 +86,13 @@ calc_case_control_matched <- function(p0, OR, phi_coef = 0.2, power = 0.8, ratio
                          design = 1, sided.test = sided, nfractional = FALSE,
                          conf.level = 1 - alpha, method = "matched", fleiss = FALSE)
 
-  list(
+  new_ss_result(list(
     n_total = ceiling(res$n.total),
     n_case = ceiling(res$n.case),
     n_control = ceiling(res$n.control),
     inputs = list(p0 = p0, OR = OR, phi_coef = phi_coef, power = power,
                   ratio = ratio, alpha = alpha, alternative = alternative, N = N)
-  )
+  ))
 }
 
 .validate_positive_integer <- function(x, label) {
@@ -134,11 +134,11 @@ calc_case_control_nested_binary <- function(OR, pE, nD, nH, R2 = 0, alpha = 0.05
   n <- powerSurvEpi::powerConLogistic.bin(N = NULL, power = power, OR = OR, pE = pE,
                                            nD = nD, nH = nH, R2 = R2, alpha = alpha)
 
-  list(
+  new_ss_result(list(
     n_sets = ceiling(n),
     n_total = ceiling(n) * (nD + nH),
     inputs = list(OR = OR, pE = pE, nD = nD, nH = nH, R2 = R2, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for a nested case-control study, continuous exposure
@@ -170,11 +170,11 @@ calc_case_control_nested_continuous <- function(OR, sigma, nD, nH, R2 = 0, alpha
   n <- powerSurvEpi::powerConLogistic.con(N = NULL, power = power, OR = OR, sigma = sigma,
                                            nD = nD, nH = nH, R2 = R2, alpha = alpha)
 
-  list(
+  new_ss_result(list(
     n_sets = ceiling(n),
     n_total = ceiling(n) * (nD + nH),
     inputs = list(OR = OR, sigma = sigma, nD = nD, nH = nH, R2 = R2, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size (required subcohort size) for a case-cohort study
@@ -217,9 +217,9 @@ calc_case_control_case_cohort <- function(n, pD, p1, hr, alpha = 0.05, power = 0
     ))
   }
 
-  list(
+  new_ss_result(list(
     subcohort_n = ceiling(m),
     full_cohort_n = n,
     inputs = list(n = n, pD = pD, p1 = p1, hr = hr, alpha = alpha, power = power)
-  )
+  ))
 }

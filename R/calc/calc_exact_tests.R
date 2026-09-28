@@ -56,12 +56,12 @@ calc_fisher_exact <- function(p1, p2, alpha = 0.05, power = 0.8, ratio = 1,
   }
   n2 <- ceiling(n1 * ratio)
 
-  list(
+  new_ss_result(list(
     n1 = n1, n2 = n2, n_total = n1 + n2,
     achieved_power = power_at(n1),
     inputs = list(p1 = p1, p2 = p2, alpha = alpha, power = power, ratio = ratio,
                   alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for Boschloo's exact test (two independent proportions,
@@ -119,12 +119,12 @@ calc_boschloo_exact <- function(p1, p2, alpha = 0.05, power = 0.8, ratio = 1,
   }
   n2 <- ceiling(n1 * ratio)
 
-  list(
+  new_ss_result(list(
     n1 = n1, n2 = n2, n_total = n1 + n2,
     achieved_power = power_at(n1),
     inputs = list(p1 = p1, p2 = p2, alpha = alpha, power = power, ratio = ratio,
                   alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for the exact binomial test (single proportion)
@@ -172,11 +172,11 @@ calc_binomial_exact <- function(p0, p1, alpha = 0.05, power = 0.8,
     if (n > n_max) stop("No solution found up to n = ", n_max, ".")
   }
 
-  list(
+  new_ss_result(list(
     n = n,
     achieved_power = power_at(n),
     inputs = list(p0 = p0, p1 = p1, alpha = alpha, power = power, alternative = alternative)
-  )
+  ))
 }
 
 #' Person-time needed for the exact Poisson test (single rate vs. a
@@ -232,13 +232,13 @@ calc_poisson_exact <- function(rate0, rate1, alpha = 0.05, power = 0.8,
     if (t > t_max) stop("No solution found up to person-time = ", t_max, ".")
   }
 
-  list(
+  new_ss_result(list(
     person_time = t,
     expected_events = rate1 * t,
     achieved_power = power_at(t),
     inputs = list(rate0 = rate0, rate1 = rate1, alpha = alpha, power = power,
                   alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for the sign test (paired data, or one-sample median test)

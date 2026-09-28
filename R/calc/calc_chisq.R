@@ -28,12 +28,12 @@ calc_chisq_gof <- function(P0, P1, alpha = 0.05, power = 0.8) {
 
   fit <- pwr::pwr.chisq.test(w = w, df = df, sig.level = alpha, power = power)
 
-  list(
+  new_ss_result(list(
     N = ceiling(fit$N),
     w = w,
     df = df,
     inputs = list(P0 = P0, P1 = P1, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for a chi-squared test of independence/association
@@ -64,12 +64,12 @@ calc_chisq_independence <- function(P, alpha = 0.05, power = 0.8) {
 
   fit <- pwr::pwr.chisq.test(w = w, df = df, sig.level = alpha, power = power)
 
-  list(
+  new_ss_result(list(
     N = ceiling(fit$N),
     w = w,
     df = df,
     inputs = list(P = P, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for McNemar's test (paired/matched proportions)
@@ -100,10 +100,10 @@ calc_mcnemar <- function(p10, p01, alpha = 0.05, power = 0.8) {
 
   n <- TrialSize::McNemar.Test(alpha = alpha, beta = 1 - power, psai = psai, paid = paid)
 
-  list(
+  new_ss_result(list(
     n = ceiling(n),
     inputs = list(p10 = p10, p01 = p01, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for a stratified (Mantel-Haenszel) comparison of two
@@ -159,11 +159,11 @@ calc_mantelhaenszel <- function(alpha = 0.05, power = 0.8, a, b, p1, phi) {
     alpha = alpha, beta = 1 - power, J = J, a = a, b = b, p1 = p1, phi = phi
   )
 
-  list(
+  new_ss_result(list(
     n_stratified = ceiling(n_stratified),
     n_pooled = ceiling(n_pooled),
     inputs = list(alpha = alpha, power = power, a = a, b = b, p1 = p1, phi = phi)
-  )
+  ))
 }
 
 #' Sample size for the Cochran-Armitage trend test (dose-response
@@ -226,12 +226,12 @@ calc_cochran_armitage_trend <- function(pi, di, ni, delta = 0, alpha = 0.05, pow
   ratios <- ni / ni[1]
   n_per_group <- ceiling(ratios * n1)
 
-  list(
+  new_ss_result(list(
     n_group1 = ceiling(n1),
     n_per_group = n_per_group,
     n_total = sum(n_per_group),
     inputs = list(pi = pi, di = di, ni = ni, delta = delta, alpha = alpha, power = power)
-  )
+  ))
 }
 
 .validate_prob_vector <- function(P, label) {
@@ -326,9 +326,9 @@ calc_cochran_q <- function(p, sigma2_subject, alpha = 0.05, power = 0.8,
 
   n <- .mc_search_n1(function(x) empirical_power(x, nsim), power, n_lo = 10, n_hi = 20, n_max = 5000)
 
-  list(
+  new_ss_result(list(
     n = n,
     achieved_power = empirical_power(n, nsim * 3),
     inputs = list(p = p, sigma2_subject = sigma2_subject, alpha = alpha, power = power, nsim = nsim)
-  )
+  ))
 }

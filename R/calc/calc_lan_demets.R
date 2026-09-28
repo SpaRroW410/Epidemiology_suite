@@ -112,7 +112,7 @@ calc_lan_demets_normal <- function(delta, sd, timing = 0.5, r = 1, alpha = 0.05,
 
   n_fixed <- (1 + r)^2 / r * sd^2 * (qnorm(1 - alpha / 2) + qnorm(power))^2 / delta^2
 
-  list(
+  new_ss_result(list(
     n_total = n_total,
     n_control = n_control,
     n_experimental = n_experimental,
@@ -122,7 +122,7 @@ calc_lan_demets_normal <- function(delta, sd, timing = 0.5, r = 1, alpha = 0.05,
     inflation_factor = n_total / n_fixed,
     inputs = list(delta = delta, sd = sd, timing = timing, r = r, alpha = alpha,
                   power = power, spending = spending)
-  )
+  ))
 }
 
 # Interim conditional power and sample-size re-estimation (SSR), continuous
@@ -189,7 +189,7 @@ calc_conditional_power_normal <- function(z1, timing, n_max, boundary_final, the
   n2_remaining_planned <- n_max * (1 - timing)
   cp <- pnorm(sqrt(n2_remaining_planned) * theta - z2_cutoff)
 
-  list(theta = theta, z2_cutoff = z2_cutoff, conditional_power = cp)
+  new_ss_result(list(theta = theta, z2_cutoff = z2_cutoff, conditional_power = cp))
 }
 
 #' Sample-size re-estimation based on conditional power (Lan-DeMets 2-look design)
@@ -244,11 +244,11 @@ calc_ssr_normal <- function(z1, timing, n_max, boundary_final, target_power = 0.
     n_remaining <- n2_remaining_planned
   }
 
-  list(
+  new_ss_result(list(
     theta = theta,
     conditional_power_at_planned_n = cp_planned,
     adapted = adapted,
     n_remaining = ceiling(n_remaining),
     n_total_new = ceiling(n_total_new)
-  )
+  ))
 }

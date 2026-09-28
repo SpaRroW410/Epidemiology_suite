@@ -114,13 +114,13 @@ calc_longitudinal_slope_diff <- function(visit_times, delta, sigma2_intercept, s
   N <- .liu_liang_n(delta = delta, u = u, v = v, R = R, Pi = Pi,
                      alpha = alpha, power = power, alternative = alternative)
 
-  list(
+  new_ss_result(list(
     n_total = ceiling(N), n1 = ceiling(N * allocation1), n0 = ceiling(N * (1 - allocation1)),
     inputs = list(visit_times = visit_times, delta = delta, sigma2_intercept = sigma2_intercept,
                   sigma2_slope = sigma2_slope, cov_intercept_slope = cov_intercept_slope,
                   sigma2_residual = sigma2_residual, allocation1 = allocation1,
                   alpha = alpha, power = power, alternative = alternative)
-  )
+  ))
 }
 
 # MMRM (mixed model repeated measures) with missing data, AR(1) structure,
@@ -218,11 +218,11 @@ calc_mmrm_ar1 <- function(rho, ra, rb = NULL, sigma, times = seq_along(ra), lamb
   n1 <- (phia + lambda * phib) * (z_alpha + qnorm(power))^2 * sigma^2 / delta^2
   n2 <- n1 / lambda
 
-  list(
+  new_ss_result(list(
     n1 = ceiling(n1), n2 = ceiling(n2), n_total = ceiling(n1) + ceiling(n2),
     inputs = list(rho = rho, ra = ra, rb = rb, sigma = sigma, times = times, lambda = lambda,
                   delta = delta, alpha = alpha, power = power, alternative = alternative)
-  )
+  ))
 }
 
 # Diggle et al (2002) and Ard & Edland (2011) methods for the same
@@ -296,11 +296,11 @@ calc_longitudinal_diggle <- function(visit_times, delta, sigma2, rho,
   z_alpha <- if (alternative == "two.sided") qnorm(1 - alpha / 2) else qnorm(1 - alpha)
   n <- 2 * (z_alpha + qnorm(power))^2 * xi / delta^2
 
-  list(
+  new_ss_result(list(
     n_total = 2 * ceiling(n), n_per_group = ceiling(n),
     inputs = list(visit_times = visit_times, delta = delta, sigma2 = sigma2, rho = rho,
                   alpha = alpha, power = power, alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for a longitudinal group-difference-in-slopes test
@@ -351,12 +351,12 @@ calc_longitudinal_edland <- function(visit_times, delta, sigma2_slope, sigma2_re
   z_alpha <- if (alternative == "two.sided") qnorm(1 - alpha / 2) else qnorm(1 - alpha)
   n <- (z_alpha + qnorm(power))^2 * (2 * term) / delta^2
 
-  list(
+  new_ss_result(list(
     n_total = 2 * ceiling(n), n_per_group = ceiling(n),
     inputs = list(visit_times = visit_times, delta = delta, sigma2_slope = sigma2_slope,
                   sigma2_residual = sigma2_residual, alpha = alpha, power = power,
                   alternative = alternative)
-  )
+  ))
 }
 
 # Hu, Mackey & Thomas (2021) "random coefficient regression model" (RCRM)
@@ -464,11 +464,11 @@ calc_longitudinal_hu <- function(visit_times, p, delta, sigma2_slope, sigma2_res
   n1 <- lambda * N / (1 + lambda)
   n2 <- N - n1
 
-  list(
+  new_ss_result(list(
     n1 = ceiling(n1), n2 = ceiling(n2), n_total = ceiling(n1) + ceiling(n2),
     inputs = list(visit_times = visit_times, p = p, delta = delta, sigma2_slope = sigma2_slope,
                   sigma2_residual = sigma2_residual, sigma2_intercept = sigma2_intercept,
                   cor_intercept_slope = cor_intercept_slope, lambda = lambda,
                   alpha = alpha, power = power, alternative = alternative)
-  )
+  ))
 }
