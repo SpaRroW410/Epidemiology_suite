@@ -86,7 +86,8 @@ test_that("RCT superiority, individual allocation, 2 independent continuous grou
                  "Show one arm is better (superiority)",
                  "Continuous (e.g. BP, Hb, BMI, a score)",
                  "2 groups",
-                 "Independent"))
+                 "Independent",
+                 "No -- equal group sizes and similar variances (t-test)"))
   expect_true(isTRUE(res$node$terminal))
   key <- res$node$catalog_key(res$flags)
   expect_equal(key, "means_two_indep")
@@ -99,7 +100,8 @@ test_that("RCT superiority, cluster allocation, 2 independent binary groups -> t
                  "Show one arm is better (superiority)",
                  "Binary (e.g. cured/not, positive/negative)",
                  "2 groups",
-                 "Independent"))
+                 "Independent",
+                 "Standard large-sample test (z / chi-square)"))
   expect_true(isTRUE(res$node$terminal))
   expect_true(isTRUE(res$flags$cluster))
   key <- res$node$catalog_key(res$flags)
@@ -147,7 +149,8 @@ test_that("comparison, time-to-event outcome -> log-rank", {
                  "I (the investigator) assign it",
                  "Individual subjects",
                  "Show one arm is better (superiority)",
-                 "Time-to-event (e.g. survival, time to recurrence)"))
+                 "Time-to-event (e.g. survival, time to recurrence)",
+                 "Log-rank test (two survival curves)"))
   expect_equal(res$node$catalog_key, "logrank")
 })
 
@@ -206,11 +209,11 @@ test_that("estimation -> single mean precision and incidence rate precision now 
   expect_true(isTRUE(catalog_entry(res_rate$node$catalog_key)$built))
 })
 
-test_that("qualitative branch is a guidance terminal with no catalog_key", {
+test_that("qualitative branch is a guidance terminal pointing at the guidance module", {
   res <- .walk(c("Explore experiences or meanings (qualitative)"))
   expect_true(isTRUE(res$node$terminal))
   expect_true(isTRUE(res$node$guidance))
-  expect_null(res$node$catalog_key)
+  expect_equal(res$node$catalog_key, "qualitative_guidance")
 })
 
 test_that("diagnostic -> PPV/NPV now routes to a built module", {
@@ -225,7 +228,81 @@ test_that("comparison, count/rate outcome -> comparison of two incidence rates, 
                  "I (the investigator) assign it",
                  "Individual subjects",
                  "Show one arm is better (superiority)",
-                 "Count / rate (e.g. episodes per person-time)"))
+                 "Count / rate (e.g. episodes per person-time)",
+                 "Two groups' incidence rates (Poisson)"))
   expect_equal(res$node$catalog_key, "rate_comparison")
   expect_true(isTRUE(catalog_entry(res$node$catalog_key)$built))
+})
+
+test_that("paired binary outcome -> McNemar (paired proportions), now built", {
+  res <- .walk(c("Compare groups / test an association or hypothesis",
+                 "I (the investigator) assign it",
+                 "Individual subjects",
+                 "Show one arm is better (superiority)",
+                 "Binary (e.g. cured/not, positive/negative)",
+                 "2 groups",
+                 "Paired / dependent (before-after, matched pairs)"))
+  expect_equal(res$node$catalog_key, "proportion_two_dep")
+  expect_equal(catalog_entry(res$node$catalog_key)$design_value, "mcnemar")
+})
+
+test_that("3+ groups branches by question and outcome type", {
+  base <- c("Compare groups / test an association or hypothesis",
+            "I (the investigator) assign it",
+            "Individual subjects",
+            "Show one arm is better (superiority)")
+  trend_cont <- .walk(c(base, "Continuous (e.g. BP, Hb, BMI, a score)", "3 or more groups",
+                        "Is there a trend across ordered groups? (dose-response)"))
+  expect_equal(trend_cont$node$catalog_key(trend_cont$flags), "means_planned_contrast")
+  trend_bin <- .walk(c(base, "Binary (e.g. cured/not, positive/negative)", "3 or more groups",
+                       "Is there a trend across ordered groups? (dose-response)"))
+  expect_equal(trend_bin$node$catalog_key(trend_bin$flags), "chisq_cochran_armitage")
+  ctrl <- .walk(c(base, "Continuous (e.g. BP, Hb, BMI, a score)", "3 or more groups",
+                  "Does each group differ from one common control?"))
+  expect_equal(ctrl$node$catalog_key(ctrl$flags), "multiplicity_dunnett")
+})
+
+test_that("prediction branch routes development and validation to the Prediction Model module", {
+  res <- .walk(c("Build or validate a prediction/prognostic model",
+                 "Develop a model -- binary outcome (logistic)"))
+  expect_equal(res$node$catalog_key, "prediction_binary")
+  paused <- .walk(c("Build or validate a prediction/prognostic model",
+                    "Externally validate an existing model -- time-to-event outcome"))
+  expect_null(paused$node$catalog_key)
+  expect_match(paused$node$would_use, "paused")
+})
+
+test_that("browse-by-test branch reaches a family's calculators", {
+  res <- .walk(c("I already know which statistical test I'll use -- browse by test family",
+                 "Nonparametric Tests",
+                 catalog_entry("kruskal_wallis")$label))
+  expect_true(isTRUE(res$node$terminal))
+  expect_equal(res$node$catalog_key, "kruskal_wallis")
+})
+
+test_that("every built catalog entry is reachable from the wizard root", {
+  built <- vapply(Filter(function(e) isTRUE(e$built), calculator_catalog), `[[`, character(1), "key")
+  expect_equal(setdiff(built, design_reachable_keys()), character(0))
+})
+
+test_that("every node is reachable from root (no orphaned questions or terminals)", {
+  reached <- attr(design_reachable_keys(), "nodes_reached")
+  expect_equal(setdiff(names(design_nodes), reached), character(0))
+})
+
+test_that("every not-built terminal is tracked in docs/ROADMAP.md", {
+  roadmap <- paste(readLines(file.path("..", "..", "docs", "ROADMAP.md"), warn = FALSE, encoding = "UTF-8"), collapse = "\n")
+  # One distinctive ROADMAP phrase per open terminal; update both together.
+  tracked <- c(term_n_of_1 = "N-of-1", term_auc_unpaired = "Unpaired AUCs", term_mrmc = "MRMC",
+               term_deming = "Deming / Passing-Bablok", term_pred_extval_tte = "time-to-event (Riley et al. 2022)",
+               term_pred_updating = "Model updating", term_nma = "Network meta-analysis",
+               term_dose_finding = "Dose-finding", term_platform = "Platform / basket",
+               term_surv_one_sample = "One-sample survival", term_psm = "Propensity-score",
+               term_time_varying = "Time-varying exposure", term_gwas = "GWAS",
+               term_gxe = "environment interaction")
+  open_terms <- names(Filter(function(n) isTRUE(n$terminal) && is.null(n$catalog_key) && !isTRUE(n$guidance), design_nodes))
+  expect_setequal(open_terms, names(tracked))
+  for (id in names(tracked)) {
+    expect_true(grepl(tracked[[id]], roadmap, fixed = TRUE), info = paste(id, "->", tracked[[id]]))
+  }
 })

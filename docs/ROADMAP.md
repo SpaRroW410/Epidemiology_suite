@@ -1,10 +1,12 @@
-# Roadmap — from Sample Size Calculator to Epidemiology Suite
+# Roadmap — sample2result: from Sample Size Calculator to Epidemiology Suite
 
 | | |
 |---|---|
 | **Status** | Active — authoritative forward plan |
 | **Last reviewed** | 28 September 2026 (full codebase + docs review) |
 | **Owner** | Dr. Mukul Maheshwari |
+| **Name** | **sample2result** (app, package and suite — decision D3) |
+| **Licence** | GPL-3 (decision D2) |
 
 **How the docs fit together**
 
@@ -24,12 +26,12 @@
 | Measure | Value |
 |---|---|
 | Calculator modules | **49**, in 14 navbar groups |
-| Individual designs | **~155** (152 in the Browse catalog + 3 Longitudinal designs missing from it, see F2) |
+| Individual designs | **156**, all in the Browse catalog (F2 fixed) |
 | Checklist coverage | By design: **81 / 94** done (13 open) · By test: **69 / 74** done (5 open) |
-| Unit tests | **474** `test_that()` blocks across 54 files, every design checked against a published worked example, a real package (oracle), or simulation |
+| Unit tests | **487** `test_that()` blocks across 55 files, every design checked against a published worked example, a real package (oracle), or simulation |
 | Runtime packages | **19** in `global.R` + `survival`/`stats` from base R |
 | Verification-only packages | ~30 more (installed from the `github.com/cran` mirror, used only to check reimplementations — never shipped) |
-| Wizard coverage | "Which calculator?" reaches **14 / 49** modules (see F1) |
+| Wizard coverage | "Which calculator?" reaches **49 / 49** modules and all 156 catalog entries, enforced by tests (F1 fixed) |
 | Distribution | Source-only (clone + `shiny::runApp()`); no package, no CI, no hosted build |
 
 The sample-size catalog is now effectively complete within the project's own rules
@@ -44,17 +46,17 @@ cannot reach — see §4.
 
 | # | Finding | Evidence | Severity |
 |---|---|---|---|
-| F1 | **Wizard is badly out of sync with the app.** Only 14 of 49 modules are reachable from "Which calculator?", and 16 wizard endpoints still say "not yet built" for things that *are* built (ROC/AUC, Bland-Altman, CCC, Cronbach's alpha, ratio precision, crossover, stepped-wedge, bioequivalence, group sequential, nested case-control, case-cohort, SCCS, ordinal outcome, McNemar, prediction models) | `R/home/design_tree.R` terminals with `would_use` instead of `catalog_key` | **High** — the wizard is the main entry point for students and it currently gives wrong "not built" answers |
-| F2 | **Browse catalog gaps.** "Two paired/dependent proportions" is marked `built = FALSE` though McNemar's test is live in Chi-Square Tests; Longitudinal's Diggle, Edland and Hu designs have no catalog entry, so they can't be found from Browse | `calculator_catalog` vs. each module's `design` radio values | Medium |
+| F1 | **Fixed (28 Sep 2026).** ~~Wizard is badly out of sync with the app.~~ Only 14 of 49 modules are reachable from "Which calculator?", and 16 wizard endpoints still say "not yet built" for things that *are* built (ROC/AUC, Bland-Altman, CCC, Cronbach's alpha, ratio precision, crossover, stepped-wedge, bioequivalence, group sequential, nested case-control, case-cohort, SCCS, ordinal outcome, McNemar, prediction models) | `R/home/design_tree.R` terminals with `would_use` instead of `catalog_key` | Was **High**. Now: every built entry is reachable (curated branches + a generated "I already know which test" branch); the 14 remaining "not built" endpoints are exactly the open/paused items in §4, and a test checks each one is listed there |
+| F2 | **Fixed (28 Sep 2026).** ~~Browse catalog gaps.~~ "Two paired/dependent proportions" is marked `built = FALSE` though McNemar's test is live in Chi-Square Tests; Longitudinal's Diggle, Edland and Hu designs have no catalog entry, so they can't be found from Browse | `calculator_catalog` vs. each module's `design` radio values; now checked by `tests/testthat/test-catalog_consistency.R` | Was Medium |
 | F3 | **Stale documentation.** README described 24 modules, SDD's roadmap marked finished stages "not started", SDD appendix listed packages never used (`WebPower`, `pwrss`, `precisely`); one ticked checklist note (logistic covariate adjustment) still says "not covered" | fixed in this refresh (README, SDD, and the checklist note) | Low (fixed) |
 | F4 | **No CI and no dependency lock.** Environment is rebuilt by `.claude/hooks/session-start.sh` from latest GitHub-mirror sources — not reproducible, and a package update could silently change a result | no `.github/`, no `renv.lock` | Medium |
 | F5 | **Slow test suite.** Full run takes ~6–10 min, dominated by Monte Carlo tests (`test-calc_glmm.R` alone several minutes); there is no fast/slow split | observed across every batch | Medium |
 | F6 | **No automated UI tests in the repo.** Every browser check so far was an ad-hoc Playwright script in a scratch directory | nothing under `tests/` beyond `testthat` unit tests | Medium |
 | F7 | **Not yet package-shaped.** R packages need a flat `R/` directory (current code uses `R/calc/`, `R/modules/`, …), a `DESCRIPTION`/`NAMESPACE`, and no `source()`-based loading; tests `source()` files by relative path; `pacman::p_load()` auto-installs, which packages must not do | repo layout, `global.R`, test headers | Medium (blocks Track C) |
-| F8 | **Licensing check needed before any public package release.** The project is MIT, but several modules were built by reading and transcribing source from GPL-licensed packages (e.g. `PracTools` GPL-3, `ssize.fdr` GPL-3, `voi` GPL-3, `clusterPower` GPL≥2, `semTools` GPL≥2, `simr` GPL≥2, `metapower` GPL-2, `WebPower` GPL≥3, `rpact` LGPL-3). Mathematical formulas aren't copyrightable, but closely transcribed code may count as a derivative work. *Not legal advice* — see decision D2 | package `DESCRIPTION` licenses; module header comments | **High** for Track C/D, none for private use |
+| F8 | **Resolved by relicensing to GPL-3 (D2, 28 Sep 2026).** Background: the project was MIT, but several modules were built by reading and transcribing source from GPL-licensed packages (e.g. `PracTools` GPL-3, `ssize.fdr` GPL-3, `voi` GPL-3, `clusterPower` GPL≥2, `semTools` GPL≥2, `simr` GPL≥2, `metapower` GPL-2, `WebPower` GPL≥3, `rpact` LGPL-3). Mathematical formulas aren't copyrightable, but closely transcribed code may count as a derivative work. *Not legal advice.* GPL-3 is compatible with all of these (GPL-2-only `metapower` is the one to watch: it was a verification reference, not a code source to ship) | package `DESCRIPTION` licenses; module header comments | Resolved; keep module header comments naming each source |
 | F9 | **Monte Carlo modules block the server.** Shiny runs one R process per app instance; a 5–25 s simulation (Monte Carlo Mixed Models, RMST, weighted log-rank, BFDA, KS/runs) freezes every other user on that instance, and these modules recompute on every input change | observed during browser verification | Medium (High once hosted for many users) |
 | F10 | **No results export or report.** Users can't download results, a methods paragraph, or citations — the biggest gap versus how the output is actually used (protocols, theses, ethics submissions) | no download handlers anywhere | Medium |
-| F11 | **Accessibility, mobile layout and i18n never audited.** | — | Low–Medium |
+| F11 | **Accessibility and mobile layout never audited.** Translations are not planned (English only, D5) | — | Low–Medium |
 
 ---
 
@@ -65,14 +67,16 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
 
 ### P0 — hygiene, do next (small, high value)
 
-1. **Re-sync the wizard (F1):** point all 16 stale terminals at their live catalog
-   keys; add routes for the ~35 unreachable modules where the decision tree has a
-   natural branch (survey/sampling, trials, survival, prediction, psychometrics,
-   health economics, meta-analysis); add a unit test asserting every wizard
-   terminal with a `catalog_key` resolves to a `built = TRUE` entry.
-2. **Re-sync the catalog (F2):** point "paired proportions" at McNemar; add
-   Diggle/Edland/Hu entries; add a unit test that every module `design` radio value
-   has a catalog entry (the check used in this review, made permanent).
+1. ~~**Re-sync the wizard (F1).**~~ Done: stale terminals point at live modules;
+   new branches for relationships, survey sampling, psychometrics, rare events,
+   animal studies, pilots, value of information, genetics, meta-analysis,
+   prediction, survival, rates, longitudinal, 3+ groups, multiplicity, Bayesian and
+   group-sequential designs; plus a generated "I already know which test" branch
+   from `test_families`. Tests: every built entry and every node reachable; every
+   open terminal listed in §4.
+2. ~~**Re-sync the catalog (F2).**~~ Done: paired proportions → McNemar;
+   Diggle/Edland/Hu entries added; `test-catalog_consistency.R` checks navbar ↔
+   catalog ↔ each module's `design` radio values, both ways.
 3. ~~Fix the stale logistic covariate-adjustment checklist note (F3).~~ Done in this
    refresh.
 4. **Fast/slow test split (F5):** skip Monte Carlo tests unless an env var is set
@@ -94,7 +98,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    citation, ready to paste into a protocol), citation export (BibTeX/RIS).
 10. **Power/sensitivity curves** for every closed-form design (n vs. effect size,
     n vs. power).
-11. **Package skeleton (Track C1)** + **licence decision (D2)**.
+11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
 
 ### P2 — first suite expansion + portability
@@ -114,9 +118,10 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
 19. r-universe release, then CRAN (Track C4).
 20. Survey/field-epi tools (B3), outbreak & surveillance (B4), ID modelling for
     teaching (B5).
-21. Decide on (and possibly build) the raw-data analysis workbench (B6) and
+21. Raw-data analysis workbench (B6) — **deferred by D1** (summary-data only for now);
+    evidence synthesis (B7) from study summaries stays in scope, and
     evidence synthesis (B7).
-22. Accessibility/mobile audit, dark mode, translations (F11).
+22. Accessibility/mobile audit, dark mode (F11). Translations: not planned (D5, English only).
 
 ---
 
@@ -194,22 +199,22 @@ published worked example.
 | **B1 Analyze from summary data** ("OpenEpi parity") | 2×2 tables: RR, OR, RD, attributable risk, PAF, NNT with CIs; stratified Mantel-Haenszel + homogeneity; CIs for proportions (Wilson, exact, …) and means; person-time rates and rate ratios; direct/indirect standardization and SMR; diagnostic-test evaluation from counts (Se, Sp, PPV, NPV, LRs with CIs); kappa from a table; McNemar/matched-pair analysis; chi-square for trend; vaccine efficacy | Almost all in **`epiR`** (already a dependency: `epi.2by2`, `epi.conf`, `epi.tests`, `epi.directadj`, `epi.indirectadj`, `epi.kappa`, …) — near-zero new dependencies; benchmark against OpenEpi and `epiR`'s own examples | **P2 — first** | Medium |
 | **B2 Study planning tools** | Randomization lists (simple, block, stratified; seeded, reproducible), allocation-concealment guidance, attrition / non-response inflation, sample-size justification text (also in P1 export) | Base R | P2 | Low |
 | **B3 Survey & field epidemiology** | Sampling-frame selection (SRS, systematic, PPS systematic), EPI 30×7 cluster selection, design weights, non-response adjustment | Base R; `PracTools` logic already studied | P3 | Low–Medium |
-| **B4 Outbreak investigation & surveillance** | Attack rates, secondary attack rate, case-fatality; epidemic curves from an uploaded line list; R0/Rt; aberration detection (EARS C1–C3, CUSUM) | Needs data upload; `ggplot2`; `EpiEstim` for Rt (check WebAssembly availability first) | P3 | Medium–High |
+| **B4 Outbreak investigation & surveillance** | Attack rates, secondary attack rate, case-fatality; epidemic curves from an uploaded line list; R0/Rt; aberration detection (EARS C1–C3, CUSUM) | Needs data upload; `ggplot2`; `EpiEstim` for Rt (check WebAssembly availability first). Under D1 the rates-from-counts parts are in scope; line-list upload, epidemic curves and Rt are deferred with B6 | P3 | Medium–High |
 | **B5 Infectious-disease modelling (teaching)** | SIR/SEIR with vaccination, herd-immunity threshold, coverage needed | Base-R ODE stepping to stay light (or `deSolve`, compiled) | P3 | Medium |
-| **B6 Raw-data analysis workbench** | Upload CSV → descriptive "Table 1", crude/adjusted estimates, Kaplan-Meier | Many new deps; data-privacy policy needed | P3 — **scope decision first (D1)** | High |
+| **B6 Raw-data analysis workbench** | Upload CSV → descriptive "Table 1", crude/adjusted estimates, Kaplan-Meier | Many new deps; data-privacy policy needed | **Deferred (D1: summary-data calculators only).** Kept here; revisit after B1 ships | High |
 | **B7 Evidence synthesis** | Pooling from study summaries (fixed/random effects), forest plots | `metafor` (heavy) | P3 | Medium |
 | **B8 Teaching mode** | Interactive power curves, sampling-distribution and CI-coverage demos | Base R + plotting | Rides on P1 item 10 | Low–Medium |
 
 **Cross-cutting features** (benefit every workbench): common result object and export
 (P1), bookmarkable/shareable URLs (Shiny bookmarking), dark mode
-(`bslib::input_dark_mode()`), accessibility (WCAG AA), translations.
+(`bslib::input_dark_mode()`), accessibility (WCAG AA). English only (D5) — no translation layer planned.
 
 **Navigation redesign needed.** 14 dropdowns already fill the navbar and `bslib`
 dropdowns can't nest. With several workbenches, move to a top level of workbenches
 (Plan / Collect / Analyze / Report / Learn) with a sidebar or grouped dropdown
 (header items + separators) inside each. The Home hub's Browse catalog and wizard
 extend to cover analysis tasks too. The app title also changes from "Sample Size
-Calculator" to the suite name (D3).
+Calculator" to **sample2result** (D3).
 
 ---
 
@@ -235,14 +240,17 @@ adopt the common result class (P1 item 8), write one vignette per family, publis
 
 **C3 — split for CRAN (P3).** A computation-only core package (no Shiny, CRAN-friendly)
 plus an app package that depends on it. CRAN needs: Monte Carlo tests behind
-`skip_on_cran()`, fast examples, ASCII-only code (escape `²` etc.), the licence
-question resolved (F8/D2), and ≤ 20 Imports (Phase 8 helps).
+`skip_on_cran()`, fast examples, ASCII-only code (escape `²` etc.), the GPL-3
+licence declared (D2), and ≤ 20 Imports (Phase 8 helps).
 
 **C4 — release channels (P3).** GitHub → **r-universe** (automatic binaries,
 including WebAssembly builds for webR, which Track D3 needs) → CRAN.
 
-**Name.** To be decided (D3). Check CRAN/Bioconductor for collisions first — e.g.
-`epicalc` is an archived CRAN package, and `epiR`/`epitools`/`epibasix` exist.
+**Name.** `sample2result` (D3). It is a valid R package name (starts with a letter,
+letters and digits only). A web search on 28 Sep 2026 found no existing package with
+that name; confirm with `available::available("sample2result")` (checks CRAN,
+Bioconductor and GitHub) before the first public release. Rename the GitHub
+repository and the app title as part of C1.
 
 ---
 
@@ -302,25 +310,25 @@ reconsider removing it at that point.
 
 ---
 
-## 10. Decisions needed from the owner
+## 10. Owner decisions
 
-| # | Decision | Why it matters | Suggested default |
+Recorded 28 September 2026.
+
+| # | Question | Decision | Consequences |
 |---|---|---|---|
-| D1 | Suite scope: summary-data calculators only, or also a raw-data analysis workbench? | B6 roughly doubles the project's size and adds data-privacy duties | Summary-data first (B1–B5); revisit B6 after B1 ships |
-| D2 | Licence: keep MIT (with a clean-room policy and re-derivation of transcribed code) or relicense to GPL-3? | Needed before any public package/CRAN release (F8) | GPL-3 is the simplest fit with the source packages; get advice if the institution has a policy |
-| D3 | Suite and package name; one package or core + app split | Everything user-facing and the CRAN submission | Pick the name now; single package until CRAN, then split |
-| D4 | Primary distribution target: hosted web, or offline/APK first? | Sets the urgency of Phase 8 and the D3 spike | Hosted + R package first; APK after the D3 spike succeeds |
-| D5 | Languages: English only, or add Hindi/regional languages? | Affects how UI text is stored (translation keys vs. literals) | English now, but store new UI text so it can be translated later |
-| D6 | When to reopen the two paused items (A.2) | They're waiting on paper access | Reopen once paper access is available |
-
----
+| D1 | Suite scope: summary-data calculators only, or also a raw-data analysis workbench? | **Summary-data calculators only, for now** | B1–B5 and B7 (from summaries) stay in scope; B6 and the line-list parts of B4 are deferred, not dropped |
+| D2 | Licence: keep MIT or relicense to GPL-3? | **GPL-3** | `LICENSE` replaced with the GPL-3 text; resolves F8. The package `DESCRIPTION` will say `License: GPL-3` |
+| D3 | Suite and package name | **`sample2result`** | Used for the package (C1), the app title and the suite; single package until CRAN, then consider a core + app split (C3) |
+| D4 | Primary distribution target: hosted web, or offline/APK first? | **Offline / APK later** | Hosted web + R package first (D1, D2); the Shinylive spike (D3) and APK (D5a) stay at P2/P3 |
+| D5 | Languages | **English only** | No translation layer; F11 narrows to accessibility and mobile layout |
+| D6 | When to reopen the two paused items (A.2) | *Open* | Suggested: once paper access is available |
 
 ## 11. Suggested milestones
 
 | Milestone | Contents | Exit criterion |
 |---|---|---|
-| **M0 Hygiene** | P0 items 1–6 | Wizard and catalog tests pass; CI green; fast suite < 2 min |
-| **M1 Foundations** | Calculate button + async, result object, export + justification text, power curves, package skeleton, licence decision | `run_app()` works from an installed package; results downloadable |
+| **M0 Hygiene** | P0 items 1–6 | Wizard and catalog tests pass (done); CI green; fast suite < 2 min |
+| **M1 Foundations** | Calculate button + async, result object, export + justification text, power curves, `sample2result` package skeleton | `run_app()` works from an installed package; results downloadable |
 | **M2 Analyze v1** | B1 calculators + navigation redesign | Reproduces OpenEpi/`epiR` worked examples; wizard covers analysis tasks |
 | **M3 Portability** | Shinylive spike, Phase 8 tier 1, pkgdown site | Go/no-go on offline/APK, with evidence |
 | **M4 Planning & field tools** | B2, B3 | Randomization lists reproducible by seed |

@@ -1,5 +1,5 @@
 # Software Design Document
-## Comprehensive Sample Size Calculator for Community Medicine / Epidemiology
+## sample2result — Comprehensive Sample Size Calculator for Community Medicine / Epidemiology
 
 | | |
 |---|---|
@@ -63,7 +63,7 @@ combination, plus long-term extensibility — not novel statistical methodology.
 | Correctness | Every design matches a published worked example, a real package used as an oracle, or a Monte Carlo check of the actual test | Met for every shipped design (474 test blocks) |
 | Extensibility | A new calculator is three new files plus registry/catalog entries, with no changes to other modules or `app.R` | Met |
 | Transparency | Every result traceable to a stated formula, a cited source, and a named backend | Met |
-| Usability | A student with no statistics background can get a correct result using in-app guidance alone | Partly — the wizard reaches only 14 of 49 modules (ROADMAP F1) |
+| Usability | A student with no statistics background can get a correct result using in-app guidance alone | Yes for routing — the wizard reaches all 49 modules and all 156 designs (test-enforced) |
 | Maintainability | Understandable and modifiable by one part-time developer | Met; docs drift and no CI are the current risks (ROADMAP F3/F4) |
 
 ---
@@ -153,7 +153,8 @@ Sample_size_all/
 │   ├── modules/           # mod_*.R — Shiny UI + server; mod_shared_ui.R
 │   └── home/              # home_catalog.R, home_finder.R, home_hub.R,
 │                          # design_tree.R, design_wizard.R, design_free_text.R
-├── tests/testthat/        # test-calc_*.R, test-design_tree.R, test-design_free_text.R, ...
+├── tests/testthat/        # test-calc_*.R, test-design_tree.R, test-design_free_text.R,
+│                          # test-catalog_consistency.R, ...
 ├── docs/
 │   ├── ROADMAP.md         # forward plan (authoritative for "what next")
 │   ├── SDD.md             # this document
@@ -162,7 +163,7 @@ Sample_size_all/
 │   └── project-brief.md   # original brief (historical)
 ├── .claude/               # SessionStart hook + settings
 ├── README.md
-└── LICENSE                # MIT
+└── LICENSE                # GPL-3 (relicensed from MIT, ROADMAP D2)
 ```
 
 ---
@@ -265,10 +266,23 @@ implements Stage 0: a keyword-heuristic parser that pre-fills answers by walking
 same registry and stops at the first question it can't infer. No LLM layer —
 deliberately, to keep the app self-contained and deterministic.
 
-**Known gap (ROADMAP F1, P0):** the tree was built when ~15 modules existed and was
-not extended as the catalog grew. It reaches 14 of 49 modules, and 16 terminals still
-say "not yet built" for designs that are live. The RCT-internals branch has no
-free-text rules yet.
+**Coverage.** Root offers ten aims: estimate, compare, prediction, diagnostic
+accuracy, agreement, qualitative, meta-analysis, relationships (correlation /
+regression), "something else" (survey sampling, scale development, rare events,
+animal studies, pilots, value of information, genetics), and "I already know which
+test". The last branch is generated from `home_catalog.R`'s `test_families` at source
+time, so `global.R` sources `home_catalog.R` before the rest of `R/home/`.
+Terminals are built with `.term(id, design, key)` (key may be `.by_outcome(cont,
+bin)`) or `.term_open(id, design, would_use, citation)`; the open ones are exactly the
+not-built items in ROADMAP §4. Cluster-randomised paths show a design-effect note
+with jump buttons to Cluster / Design Effect and Monte Carlo Mixed Models.
+
+Enforced by tests: every node and every built catalog entry is reachable from root;
+every terminal resolves to a built entry, guidance, or an open item listed in the
+ROADMAP; `test-catalog_consistency.R` checks navbar ↔ catalog ↔ module `design`
+radio values in both directions. Option order matters where free-text rules exist
+(rules refer to options by position), so options are only appended there. The
+RCT-internals branch still has no free-text rules.
 
 ---
 
@@ -304,7 +318,7 @@ calc_proportion_1s <- function(p0, p1, alpha = 0.05, power = 0.8, alternative = 
 
 **Wiring** — a `module_registry` entry and a `module_groups` placement in `global.R`;
 one `calculator_catalog` entry per design plus family-index keys in
-`home_catalog.R`; a wizard route in `design_tree.R` where a branch fits; tests; and a
+`home_catalog.R`; a wizard route in `design_tree.R` (the tests require one); tests; and a
 tick in both checklists. `app.R` never changes.
 
 ---
@@ -360,9 +374,9 @@ standard output and unaffected.
 - **Browser checks**: each new design is exercised in the running app with Playwright
   before commit (currently ad-hoc scripts, not in the repo).
 - **Runtime**: the full suite takes ~6–10 min, mostly `test-calc_glmm.R`.
-- **Planned** (ROADMAP P0/P1): fast/slow split, CI, `shinytest2` smoke tests, and
-  consistency tests that every wizard terminal and module design resolves to a built
-  catalog entry.
+- **Consistency tests**: `test-design_tree.R` (reachability of every node and built
+  entry) and `test-catalog_consistency.R` (navbar ↔ catalog ↔ module design radios).
+- **Planned** (ROADMAP P0/P1): fast/slow split, CI, `shinytest2` smoke tests.
 
 ---
 
@@ -382,7 +396,7 @@ The forward plan is [`ROADMAP.md`](ROADMAP.md). The build stages used so far:
 | Stage | Scope | Status |
 |---|---|---|
 | 1 — v1 CORE | Proportions, means, case-control, cohort, ANOVA, correlation, chi-square, diagnostic Se/Sp, ICC, kappa, log-rank, Simon, pilot, TOST | **Done** |
-| 1.5 — wizard, guided tree | "Which calculator?" Q&A | **Done** (coverage needs updating — ROADMAP F1) |
+| 1.5 — wizard, guided tree | "Which calculator?" Q&A | **Done** — full coverage since 28 Sep 2026 (ROADMAP F1) |
 | 2 — analytical depth | F-family, correlation/regression suite, matched case-control, ROC, Bland-Altman/CCC/Cronbach, prediction models | **Done** (open halves in ROADMAP A.3: MANOVA k>2, non-common-index dependent r, multinomial) |
 | 3 — advanced trial designs | Cluster-randomized, stepped-wedge, group-sequential/adaptive, survival extensions, bioequivalence replicates, longitudinal/MMRM | **Done** (open halves: stepped-wedge binary, Lan-DeMets 3+ looks, multilevel with dropout) |
 | 4 — niche/simulation & guidance | `simr`-style simulation, SEM, TSA, qualitative/animal guidance, genetics | **Done except genetics** (GWAS / G×E open — ROADMAP A.1) |
@@ -406,7 +420,7 @@ time-to-event models and model updating/recalibration.
 | Development environment lost on container reset | SessionStart hook rebuilds it; `renv` will make it exact |
 | Development sandbox cannot reach CRAN or journal sites | `github.com/cran` mirror + apt for packages; web search for citations; items needing paper access stay open rather than guessed |
 | Monte Carlo designs block other users on a shared server | Calculate button + `ExtendedTask` before hosting widely (ROADMAP F9) |
-| Licence of reimplementations transcribed from GPL packages | Decide before any public package release (ROADMAP F8 / D2) |
+| Licence of reimplementations transcribed from GPL packages | Resolved: project relicensed to GPL-3 (ROADMAP F8 / D2); module headers keep naming each source package |
 | Scope creep as the project grows into a suite | Workbench-by-workbench milestones with exit criteria (ROADMAP §11) |
 
 ---

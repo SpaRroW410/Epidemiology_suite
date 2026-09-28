@@ -1,4 +1,4 @@
-# Sample Size Calculator
+# sample2result — Sample Size Calculator
 
 An R Shiny web app for sample size and power calculations in community medicine,
 epidemiology and clinical research. Every calculator comes with its formula
@@ -6,8 +6,8 @@ epidemiology and clinical research. Every calculator comes with its formula
 example, the original methodological citation, and the name of the package or
 formula that implements it.
 
-**Current state:** 49 calculator modules, ~155 individual designs, 474 unit-test
-blocks. The sample-size catalog is essentially complete; the project is now
+**Current state:** 49 calculator modules, 156 individual designs, 487 unit-test
+blocks. The project, app and future package are named **sample2result**. The sample-size catalog is essentially complete; the project is now
 planning its next step — growing into a wider **epidemiology suite**, an installable
 **R package**, and offline/mobile distribution. See
 [`docs/ROADMAP.md`](docs/ROADMAP.md).
@@ -112,9 +112,11 @@ The **Home** tab has three helpers:
 - **Which calculator? (guided wizard)** — asks one question at a time (aim,
   experimental vs. observational, selection basis, outcome, groups) and shows its
   reasoning. An optional free-text box pre-fills the answers from a one-sentence
-  description of the study. *Known gap:* the wizard currently reaches 14 of the 49
-  modules and still labels some built designs "not yet built" — first item on the
-  roadmap.
+  description of the study. Every one of the 156 designs can be reached from it,
+  either through the study-design questions or through its last option, "I
+  already know which statistical test I'll use", which browses by test family.
+  Designs that are not built yet say so, and say what would unblock them
+  (`docs/ROADMAP.md` §4). Tests enforce both.
 - **Formulas & LaTeX** — how formulas are written in this app, plus a live LaTeX
   sandbox.
 
@@ -202,7 +204,11 @@ Every calculator is three files plus registry entries.
 3. Add one `calculator_catalog` entry per design in `R/home/home_catalog.R`
    (`built = TRUE`, `nav_target`, `module_input_id`, `design_value`) and list the
    keys in a `study_design_families` and a `test_families` entry.
-4. Route to it from the wizard if a branch fits (`R/home/design_tree.R`).
+4. Route to it from the wizard (`R/home/design_tree.R`): add an option and a
+   `.term()` terminal where a study-design branch fits. The "browse by test" branch
+   picks up new `test_families` keys automatically. `test-design_tree.R` fails if
+   any built catalog entry is unreachable, and `test-catalog_consistency.R` fails if
+   the catalog, the navbar and the module's `design` radio values disagree.
 5. Add `tests/testthat/test-calc_<name>.R` with a published worked example.
 6. Tick the item in both checklists with a short verification note.
 
@@ -236,5 +242,14 @@ Every calculator is three files plus registry entries.
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE). Before any public package release, see the licensing
-note in [`docs/ROADMAP.md`](docs/ROADMAP.md) (finding F8, decision D2).
+Copyright (C) 2026 Dr. Mukul Maheshwari.
+
+sample2result is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, version 3 — see [`LICENSE`](LICENSE). It is distributed in the hope that
+it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+The project was relicensed from MIT to GPL-3 on 28 September 2026, because several
+modules reimplement code read from GPL-licensed packages (see
+[`docs/ROADMAP.md`](docs/ROADMAP.md), finding F8 and decision D2).

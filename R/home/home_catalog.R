@@ -72,7 +72,8 @@ calculator_catalog <- list(
          "in proportion within the same subjects (or matched pairs)?\""
        ),
        outcome_type = "proportion", groups = "2", dependency = "dependent", reference_based = NA,
-       built = FALSE, nav_target = NA, module_input_id = NA, design_value = NA),
+       built = TRUE, nav_target = "Chi-Square Tests",
+       module_input_id = "chisq-design", design_value = "mcnemar"),
 
   list(key = "proportion_k", label = "Three or more group proportions",
        answers = "Answers: \"How many subjects per group do I need to detect any difference across 3+ group proportions?\"",
@@ -705,6 +706,40 @@ calculator_catalog <- list(
        outcome_type = "means", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Longitudinal / MMRM",
        module_input_id = "longitudinal-design", design_value = "slope_diff"),
+
+  list(key = "longitudinal_diggle",
+       label = "Longitudinal group-slope difference (Diggle et al.)",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to detect a",
+         "difference in rate of change, assuming an exchangeable",
+         "(compound-symmetry) correlation between visits?\" (Diggle,",
+         "Heagerty, Liang & Zeger 2002)"
+       ),
+       outcome_type = "means", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Longitudinal / MMRM",
+       module_input_id = "longitudinal-design", design_value = "diggle"),
+
+  list(key = "longitudinal_edland",
+       label = "Longitudinal group-slope difference (Ard & Edland)",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to detect a",
+         "difference in slopes under a random-slope mixed model, from",
+         "pilot variance-component estimates?\" (Ard & Edland 2011)"
+       ),
+       outcome_type = "means", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Longitudinal / MMRM",
+       module_input_id = "longitudinal-design", design_value = "edland"),
+
+  list(key = "longitudinal_hu",
+       label = "Longitudinal group-slope difference with dropout (Hu, Mackey & Thomas)",
+       answers = paste(
+         "Answers: \"How many subjects per group do I need to detect a",
+         "difference in slopes when some subjects drop out before the",
+         "last visit?\" (Hu, Mackey & Thomas 2021)"
+       ),
+       outcome_type = "means", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Longitudinal / MMRM",
+       module_input_id = "longitudinal-design", design_value = "hu"),
 
   list(key = "multilevel_two_level",
        label = "Multilevel model, two-level (subjects, repeated measures)",
@@ -1933,7 +1968,8 @@ study_design_families <- list(
        catalog_keys = c("bayesian_assurance_or", "bfda_ttest")),
   list(id = "longitudinal", label = "Longitudinal / MMRM",
        hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (GEE/GLS framework), or a mixed model of repeated measures (MMRM) with dropout and AR(1) correlation.",
-       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1")),
+       catalog_keys = c("longitudinal_slope_diff", "longitudinal_diggle", "longitudinal_edland",
+                         "longitudinal_hu", "mmrm_ar1")),
   list(id = "multilevel_models", label = "Multilevel / Hierarchical Models",
        hint = "Two- and three-level hierarchical (mixed) models for a longitudinal trial, decomposing slope variance into subject- and (for 3-level) cluster-level components.",
        catalog_keys = c("multilevel_two_level", "multilevel_three_level")),
@@ -2027,7 +2063,8 @@ test_families <- list(
        catalog_keys = c("bayesian_assurance_or", "bfda_ttest")),
   list(id = "longitudinal_tests", label = "Longitudinal / GEE Tests",
        hint = "Comparing two groups' rate of change (slope) over repeated visits, under a random-intercept/random-slope covariance structure (the GLS/GEE framework of Liu & Liang 1997), or a mixed model of repeated measures (MMRM) with dropout and AR(1) correlation (Lu, Luo & Chen 2008).",
-       catalog_keys = c("longitudinal_slope_diff", "mmrm_ar1")),
+       catalog_keys = c("longitudinal_slope_diff", "longitudinal_diggle", "longitudinal_edland",
+                         "longitudinal_hu", "mmrm_ar1")),
   list(id = "multilevel_model_tests", label = "Multilevel / Hierarchical Model Tests",
        hint = "Testing a treatment-group slope difference under a 2- or 3-level hierarchical mixed model (extends Galbraith & Marschner 2002).",
        catalog_keys = c("multilevel_two_level", "multilevel_three_level"))
