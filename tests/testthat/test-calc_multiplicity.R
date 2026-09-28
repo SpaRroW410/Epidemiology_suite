@@ -129,6 +129,7 @@ test_that("calc_multiplicity_dunnett is less conservative than Bonferroni/Sidak 
 })
 
 test_that("calc_multiplicity_dunnett is deterministic (fixed internal seed) and needs a larger n for more arms", {
+  skip_if_not_slow()
   res1 <- calc_multiplicity_dunnett(d = 0.5, k = 3, alpha = 0.05, power = 0.8)
   res2 <- calc_multiplicity_dunnett(d = 0.5, k = 3, alpha = 0.05, power = 0.8)
   expect_identical(res1, res2)

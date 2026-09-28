@@ -132,6 +132,11 @@ The **Home** tab has three helpers:
   `survival` and `stats` come with R.
 - `testthat` to run the tests.
 
+Exact versions are recorded in [`renv.lock`](renv.lock) (R 4.3.3); CI restores
+from it. To reproduce that environment: `renv::restore()`. After adding or updating
+a package, re-snapshot the runtime and test packages with
+`renv::snapshot(packages = c(<the p_load() list>, "pacman", "testthat", "withr", "lmerTest"))`.
+
 In Claude Code on the web, `.claude/hooks/session-start.sh` rebuilds this
 environment automatically on a fresh container (Ubuntu `r-cran-*` binaries where
 available, otherwise the `github.com/cran` mirror).
@@ -150,10 +155,19 @@ or `Rscript -e 'shiny::runApp()'` from a shell.
 testthat::test_dir("tests/testthat")
 ```
 
-The full suite currently takes roughly 6–10 minutes, mostly in the Monte Carlo
-tests (`test-calc_glmm.R`). To run one file:
-`testthat::test_file("tests/testthat/test-calc_proportion.R")`. A fast/slow split
-is on the roadmap (P0).
+This takes about a minute: the 27 slowest tests (Monte Carlo simulations, ≥ 5 s
+each) are skipped. To run everything (~13 minutes, mostly `test-calc_glmm.R`):
+
+```sh
+S2R_SLOW_TESTS=true Rscript -e 'testthat::test_dir("tests/testthat")'
+```
+
+A new Monte Carlo test should start with `skip_if_not_slow()`
+(`tests/testthat/helper-slow.R`). To run one file:
+`testthat::test_file("tests/testthat/test-calc_proportion.R")`.
+
+CI (`.github/workflows/tests.yml`) runs the fast suite on every push and pull
+request, and the full suite weekly or on demand from the Actions tab.
 
 ---
 
@@ -167,9 +181,11 @@ R/
 ├── content/           per-module formula / explanation / example / citation (content_*.R)
 ├── modules/           Shiny UI + server per module (mod_*.R) + mod_shared_ui.R
 └── home/              Home hub: catalog, browse finder, wizard, free-text parser
-tests/testthat/        unit tests on the calc_*.R functions
+tests/testthat/        unit tests (calc_*.R functions, wizard, catalog consistency)
 docs/                  roadmap, SDD, checklists, algorithm doc, original brief
 .claude/               SessionStart hook that rebuilds the R environment
+.github/workflows/     CI (tests.yml)
+renv.lock              locked package versions
 ```
 
 ## Module contract

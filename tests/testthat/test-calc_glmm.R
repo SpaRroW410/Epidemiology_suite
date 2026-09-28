@@ -19,6 +19,7 @@ source(file.path("..", "..", "R", "calc", "calc_glmm.R"))
 # full floating-point precision -- see calc_glmm.R's own header comment.
 
 test_that("calc_glmm_lmm_power controls type-I error under the null", {
+  skip_if_not_slow()
   set.seed(2024)
   null_rejections <- replicate(150, {
     n <- 20; cluster_size <- 10
@@ -40,6 +41,7 @@ test_that("calc_glmm_lmm_power controls type-I error under the null", {
 })
 
 test_that("calc_glmm_lmm_power is reproducible under a fixed seed", {
+  skip_if_not_slow()
   r1 <- calc_glmm_lmm_power(cluster_size = 10, icc = 0.05, sigma_total = 1, delta = 0.5,
                              power = 0.8, nsim = 30, seed = 777)
   r2 <- calc_glmm_lmm_power(cluster_size = 10, icc = 0.05, sigma_total = 1, delta = 0.5,
@@ -49,6 +51,7 @@ test_that("calc_glmm_lmm_power is reproducible under a fixed seed", {
 })
 
 test_that("calc_glmm_lmm_power needs fewer clusters for a larger effect size", {
+  skip_if_not_slow()
   r_small <- calc_glmm_lmm_power(cluster_size = 10, icc = 0.05, sigma_total = 1, delta = 0.3,
                                   power = 0.8, nsim = 30, seed = 1)
   r_large <- calc_glmm_lmm_power(cluster_size = 10, icc = 0.05, sigma_total = 1, delta = 0.8,
@@ -57,6 +60,7 @@ test_that("calc_glmm_lmm_power needs fewer clusters for a larger effect size", {
 })
 
 test_that("calc_glmm_lmm_power needs more clusters for a higher ICC", {
+  skip_if_not_slow()
   r_low_icc <- calc_glmm_lmm_power(cluster_size = 10, icc = 0.02, sigma_total = 1, delta = 0.5,
                                     power = 0.8, nsim = 30, seed = 5)
   r_high_icc <- calc_glmm_lmm_power(cluster_size = 10, icc = 0.3, sigma_total = 1, delta = 0.5,
@@ -65,6 +69,7 @@ test_that("calc_glmm_lmm_power needs more clusters for a higher ICC", {
 })
 
 test_that("calc_glmm_lmm_power's likelihood-ratio-test result is independently confirmed by a Satterthwaite-corrected t-test (lmerTest)", {
+  skip_if_not_slow()
   skip_if_not_installed("lmerTest")
   # At near-zero ICC, cluster_size=10, sigma_total=1, delta=0.5, this
   # calculator's LRT approach finds n_clusters=16 (160 total) needed for
@@ -95,6 +100,7 @@ test_that("calc_glmm_lmm_power's likelihood-ratio-test result is independently c
 })
 
 test_that("calc_glmm_logistic_power is reproducible and needs fewer clusters for a larger OR", {
+  skip_if_not_slow()
   r1 <- calc_glmm_logistic_power(cluster_size = 20, sigma_u = 0.3, baseline_prob = 0.3, or = 2,
                                   power = 0.8, nsim = 20, seed = 42)
   r1b <- calc_glmm_logistic_power(cluster_size = 20, sigma_u = 0.3, baseline_prob = 0.3, or = 2,
@@ -107,6 +113,7 @@ test_that("calc_glmm_logistic_power is reproducible and needs fewer clusters for
 })
 
 test_that("calc_glmm_logistic_power controls type-I error under the null", {
+  skip_if_not_slow()
   set.seed(321)
   null_rejections <- replicate(100, {
     n_clusters <- 20; cluster_size <- 15
@@ -139,6 +146,7 @@ test_that("calc_glmm_lmm_power rejects invalid inputs", {
 })
 
 test_that("calc_growth_curve_power controls type-I error under the null", {
+  skip_if_not_slow()
   set.seed(555)
   null_rejections <- replicate(100, {
     n_per_group <- 15; ntimes <- 4
@@ -162,6 +170,7 @@ test_that("calc_growth_curve_power controls type-I error under the null", {
 })
 
 test_that("calc_growth_curve_power is reproducible under a fixed seed", {
+  skip_if_not_slow()
   r1 <- calc_growth_curve_power(ntimes = 4, delta_slope = 0.4, sigma2_intercept = 1,
                                  sigma2_slope = 0.2, cor_intercept_slope = 0.1,
                                  sigma2_residual = 1, power = 0.8, nsim = 20, seed = 777)
@@ -173,6 +182,7 @@ test_that("calc_growth_curve_power is reproducible under a fixed seed", {
 })
 
 test_that("calc_growth_curve_power needs fewer subjects per group for a larger slope difference", {
+  skip_if_not_slow()
   r_small <- calc_growth_curve_power(ntimes = 4, delta_slope = 0.2, sigma2_intercept = 1,
                                       sigma2_slope = 0.2, cor_intercept_slope = 0.1,
                                       sigma2_residual = 1, power = 0.8, nsim = 25, seed = 1)
@@ -183,6 +193,7 @@ test_that("calc_growth_curve_power needs fewer subjects per group for a larger s
 })
 
 test_that("calc_growth_curve_power needs fewer subjects per group with more time points, other things equal", {
+  skip_if_not_slow()
   r_fewer_times <- calc_growth_curve_power(ntimes = 3, delta_slope = 0.5, sigma2_intercept = 1,
                                             sigma2_slope = 0.2, cor_intercept_slope = 0.1,
                                             sigma2_residual = 1, power = 0.8, nsim = 25, seed = 9)

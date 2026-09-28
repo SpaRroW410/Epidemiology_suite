@@ -32,7 +32,7 @@
 | Runtime packages | **19** in `global.R` + `survival`/`stats` from base R |
 | Verification-only packages | ~30 more (installed from the `github.com/cran` mirror, used only to check reimplementations — never shipped) |
 | Wizard coverage | "Which calculator?" reaches **49 / 49** modules and all 156 catalog entries, enforced by tests (F1 fixed) |
-| Distribution | Source-only (clone + `shiny::runApp()`); no package, no CI, no hosted build |
+| Distribution | Source-only (clone + `shiny::runApp()`); no package, no hosted build. CI on GitHub Actions; versions locked in `renv.lock` |
 
 The sample-size catalog is now effectively complete within the project's own rules
 (every formula traceable to a published source and verified numerically; no new
@@ -49,8 +49,8 @@ cannot reach — see §4.
 | F1 | **Fixed (28 Sep 2026).** ~~Wizard is badly out of sync with the app.~~ Only 14 of 49 modules are reachable from "Which calculator?", and 16 wizard endpoints still say "not yet built" for things that *are* built (ROC/AUC, Bland-Altman, CCC, Cronbach's alpha, ratio precision, crossover, stepped-wedge, bioequivalence, group sequential, nested case-control, case-cohort, SCCS, ordinal outcome, McNemar, prediction models) | `R/home/design_tree.R` terminals with `would_use` instead of `catalog_key` | Was **High**. Now: every built entry is reachable (curated branches + a generated "I already know which test" branch); the 14 remaining "not built" endpoints are exactly the open/paused items in §4, and a test checks each one is listed there |
 | F2 | **Fixed (28 Sep 2026).** ~~Browse catalog gaps.~~ "Two paired/dependent proportions" is marked `built = FALSE` though McNemar's test is live in Chi-Square Tests; Longitudinal's Diggle, Edland and Hu designs have no catalog entry, so they can't be found from Browse | `calculator_catalog` vs. each module's `design` radio values; now checked by `tests/testthat/test-catalog_consistency.R` | Was Medium |
 | F3 | **Stale documentation.** README described 24 modules, SDD's roadmap marked finished stages "not started", SDD appendix listed packages never used (`WebPower`, `pwrss`, `precisely`); one ticked checklist note (logistic covariate adjustment) still says "not covered" | fixed in this refresh (README, SDD, and the checklist note) | Low (fixed) |
-| F4 | **No CI and no dependency lock.** Environment is rebuilt by `.claude/hooks/session-start.sh` from latest GitHub-mirror sources — not reproducible, and a package update could silently change a result | no `.github/`, no `renv.lock` | Medium |
-| F5 | **Slow test suite.** Full run takes ~6–10 min, dominated by Monte Carlo tests (`test-calc_glmm.R` alone several minutes); there is no fast/slow split | observed across every batch | Medium |
+| F4 | **Addressed (28 Sep 2026)** — CI + `renv.lock` added (P0 items 5–6). Was: ~~No CI and no dependency lock.~~ Environment is rebuilt by `.claude/hooks/session-start.sh` from latest GitHub-mirror sources — not reproducible, and a package update could silently change a result | no `.github/`, no `renv.lock` | Medium |
+| F5 | **Fixed (28 Sep 2026)** — default run ~1 min, 27 Monte Carlo tests behind `S2R_SLOW_TESTS=true`. Was: ~~Slow test suite.~~ Full run takes ~6–10 min, dominated by Monte Carlo tests (`test-calc_glmm.R` alone several minutes); there is no fast/slow split | observed across every batch | Medium |
 | F6 | **No automated UI tests in the repo.** Every browser check so far was an ad-hoc Playwright script in a scratch directory | nothing under `tests/` beyond `testthat` unit tests | Medium |
 | F7 | **Not yet package-shaped.** R packages need a flat `R/` directory (current code uses `R/calc/`, `R/modules/`, …), a `DESCRIPTION`/`NAMESPACE`, and no `source()`-based loading; tests `source()` files by relative path; `pacman::p_load()` auto-installs, which packages must not do | repo layout, `global.R`, test headers | Medium (blocks Track C) |
 | F8 | **Resolved by relicensing to GPL-3 (D2, 28 Sep 2026).** Background: the project was MIT, but several modules were built by reading and transcribing source from GPL-licensed packages (e.g. `PracTools` GPL-3, `ssize.fdr` GPL-3, `voi` GPL-3, `clusterPower` GPL≥2, `semTools` GPL≥2, `simr` GPL≥2, `metapower` GPL-2, `WebPower` GPL≥3, `rpact` LGPL-3). Mathematical formulas aren't copyrightable, but closely transcribed code may count as a derivative work. *Not legal advice.* GPL-3 is compatible with all of these (GPL-2-only `metapower` is the one to watch: it was a verification reference, not a code source to ship) | package `DESCRIPTION` licenses; module header comments | Resolved; keep module header comments naming each source |
@@ -79,11 +79,19 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    catalog ↔ each module's `design` radio values, both ways.
 3. ~~Fix the stale logistic covariate-adjustment checklist note (F3).~~ Done in this
    refresh.
-4. **Fast/slow test split (F5):** skip Monte Carlo tests unless an env var is set
-   (`SSC_SLOW_TESTS=true`); target < 2 min for the default run.
-5. **Add CI (F4):** GitHub Actions running the fast suite on every push, slow suite
-   weekly/manual.
-6. **Lock dependencies (F4):** add `renv.lock`; point the SessionStart hook at it.
+4. ~~**Fast/slow test split (F5).**~~ Done: every test that took ≥ 5 s (27, all
+   Monte Carlo or simulation-based) calls `skip_if_not_slow()`
+   (`tests/testthat/helper-slow.R`) and runs only with `S2R_SLOW_TESTS=true`.
+   Default run: ~1 min (was ~13 min); full run unchanged.
+5. ~~**Add CI (F4).**~~ Done: `.github/workflows/tests.yml` runs the fast suite on
+   every push and pull request, and the full suite weekly (Monday) or on demand.
+6. ~~**Lock dependencies (F4).**~~ Done: `renv.lock` records R 4.3.3 and the 179
+   packages (runtime + `testthat`/`withr`/`lmerTest` and their dependencies) the
+   development environment actually runs; CI restores exactly these. The
+   SessionStart hook cannot restore from it, because `cran.r-project.org` is
+   blocked in the web sandbox — it keeps installing Ubuntu binaries and
+   `github.com/cran` mirrors, and `renv.lock` is re-snapshotted after any package
+   change (`renv::snapshot(packages = ...)`, see README).
 
 ### P1 — foundations for the suite
 
@@ -279,10 +287,10 @@ Phase 8 dependency reduction matters beyond tidiness.
 
 | Item | Detail | Tier |
 |---|---|---|
-| CI | GitHub Actions: fast suite on push, slow suite weekly/manual | P0 |
-| Reproducible environment | `renv.lock`; SessionStart hook restores from it | P0 |
-| Test split | Env-var-gated Monte Carlo tests; default run < 2 min | P0 |
-| Consistency tests | Every wizard terminal and module design resolves to a built catalog entry | P0 |
+| CI | GitHub Actions: fast suite on push, slow suite weekly/manual | Done |
+| Reproducible environment | `renv.lock`, restored by CI (the sandbox hook can't reach CRAN) | Done |
+| Test split | Env-var-gated Monte Carlo tests; default run < 2 min | Done |
+| Consistency tests | Every wizard terminal and module design resolves to a built catalog entry | Done |
 | UI tests | `shinytest2`, one smoke test per module | P1 |
 | Async compute | Calculate button, then `ExtendedTask` for Monte Carlo modules | P1 |
 | Result object | Common S3 class across all `calc_*()` | P1 |
@@ -327,7 +335,7 @@ Recorded 28 September 2026.
 
 | Milestone | Contents | Exit criterion |
 |---|---|---|
-| **M0 Hygiene** | P0 items 1–6 | Wizard and catalog tests pass (done); CI green; fast suite < 2 min |
+| **M0 Hygiene** | P0 items 1–6 | Wizard and catalog tests pass (done); fast suite < 2 min (done, ~1 min); CI green |
 | **M1 Foundations** | Calculate button + async, result object, export + justification text, power curves, `sample2result` package skeleton | `run_app()` works from an installed package; results downloadable |
 | **M2 Analyze v1** | B1 calculators + navigation redesign | Reproduces OpenEpi/`epiR` worked examples; wizard covers analysis tasks |
 | **M3 Portability** | Shinylive spike, Phase 8 tier 1, pkgdown site | Go/no-go on offline/APK, with evidence |

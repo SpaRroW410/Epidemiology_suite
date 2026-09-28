@@ -64,7 +64,7 @@ combination, plus long-term extensibility — not novel statistical methodology.
 | Extensibility | A new calculator is three new files plus registry/catalog entries, with no changes to other modules or `app.R` | Met |
 | Transparency | Every result traceable to a stated formula, a cited source, and a named backend | Met |
 | Usability | A student with no statistics background can get a correct result using in-app guidance alone | Yes for routing — the wizard reaches all 49 modules and all 156 designs (test-enforced) |
-| Maintainability | Understandable and modifiable by one part-time developer | Met; docs drift and no CI are the current risks (ROADMAP F3/F4) |
+| Maintainability | Understandable and modifiable by one part-time developer | Met; CI and consistency tests now guard against drift |
 
 ---
 
@@ -134,8 +134,8 @@ combination, plus long-term extensibility — not novel statistical methodology.
 | Modularity | Shiny modules (`NS()`, `moduleServer()`) | |
 | Runtime stats packages | `pwr`, `presize`, `epiR`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `rstatix`, `lme4` (+ `survival`, `stats`) | 19 loaded by `pacman::p_load()` incl. `shiny`/`bslib` |
 | Verification-only packages | e.g. `longpower`, `powerlmm`, `RTSA`, `rpact`, `clusterPower`, `ssize.fdr`, `metapower`, `semTools`, `simr`, `voi`, `PracTools`, `WebPower` | installed from `github.com/cran/<pkg>` during development; never loaded by the app |
-| Testing | `testthat` unit tests; manual browser checks with Playwright | `shinytest2` + CI planned (ROADMAP P0/P1) |
-| Dev environment | `.claude/hooks/session-start.sh` rebuilds R + packages on a fresh container | `renv` lockfile planned (ROADMAP P0) |
+| Testing | `testthat` unit tests (fast/slow split), GitHub Actions CI; manual browser checks with Playwright | `shinytest2` planned (ROADMAP P1) |
+| Dev environment | `.claude/hooks/session-start.sh` rebuilds R + packages on a fresh container; `renv.lock` records the versions (CI restores from it) | — |
 | Version control | Git / GitHub | |
 | Deployment | Source + `shiny::runApp()` today | hosted, package, Shinylive/PWA/APK options in ROADMAP Track D |
 
@@ -162,6 +162,8 @@ Sample_size_all/
 │   ├── design_identification_algorithm.md
 │   └── project-brief.md   # original brief (historical)
 ├── .claude/               # SessionStart hook + settings
+├── .github/workflows/     # tests.yml — CI
+├── renv.lock              # locked package versions
 ├── README.md
 └── LICENSE                # GPL-3 (relicensed from MIT, ROADMAP D2)
 ```
@@ -373,10 +375,14 @@ standard output and unaffected.
   effect → smaller n), and reproducibility under a fixed seed.
 - **Browser checks**: each new design is exercised in the running app with Playwright
   before commit (currently ad-hoc scripts, not in the repo).
-- **Runtime**: the full suite takes ~6–10 min, mostly `test-calc_glmm.R`.
+- **Runtime**: the default run takes ~1 min. The 27 slowest tests (Monte Carlo,
+  ≥ 5 s each) call `skip_if_not_slow()` and run only with `S2R_SLOW_TESTS=true`;
+  the full suite takes ~13 min, mostly `test-calc_glmm.R`.
+- **CI**: `.github/workflows/tests.yml` — fast suite on every push/PR, full suite
+  weekly or on demand, packages restored from `renv.lock`.
 - **Consistency tests**: `test-design_tree.R` (reachability of every node and built
   entry) and `test-catalog_consistency.R` (navbar ↔ catalog ↔ module design radios).
-- **Planned** (ROADMAP P0/P1): fast/slow split, CI, `shinytest2` smoke tests.
+- **Planned** (ROADMAP P1): `shinytest2` smoke tests.
 
 ---
 
@@ -415,9 +421,9 @@ time-to-event models and model updating/recalibration.
 | Risk | Mitigation |
 |---|---|
 | Formula errors silently produce wrong sample sizes | Mandatory numeric verification before shipping (§12) |
-| Package updates change results | Lock versions with `renv` (ROADMAP P0) |
+| Package updates change results | Versions locked in `renv.lock`; CI runs against them |
 | Docs and navigation drift from the code | Consistency tests (ROADMAP P0); ROADMAP as the single forward-looking doc |
-| Development environment lost on container reset | SessionStart hook rebuilds it; `renv` will make it exact |
+| Development environment lost on container reset | SessionStart hook rebuilds it; `renv.lock` records the exact versions |
 | Development sandbox cannot reach CRAN or journal sites | `github.com/cran` mirror + apt for packages; web search for citations; items needing paper access stay open rather than guessed |
 | Monte Carlo designs block other users on a shared server | Calculate button + `ExtendedTask` before hosting widely (ROADMAP F9) |
 | Licence of reimplementations transcribed from GPL packages | Resolved: project relicensed to GPL-3 (ROADMAP F8 / D2); module headers keep naming each source package |
@@ -436,7 +442,7 @@ time-to-event models and model updating/recalibration.
 - **Reference links:** link citations to DOIs where available? (Useful for the
   planned citation export.)
 
-Resolved since v0.1: `renv` — yes, planned (ROADMAP P0). Checklist maintenance — to be
+Resolved since v0.1: `renv` — yes, `renv.lock` added. Checklist maintenance — to be
 enforced by consistency tests rather than habit.
 
 ---

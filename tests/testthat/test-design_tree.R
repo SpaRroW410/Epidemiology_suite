@@ -13,46 +13,58 @@ source(file.path("..", "..", "R", "home", "design_tree.R"))
 
 .resolve <- function(field, flags) if (is.function(field)) field(flags) else field
 
+# The structural checks below collect every problem and assert once: with
+# ~320 nodes x 4 flag combinations, one expectation per check made this file
+# take over half a minute.
+
 test_that("every next_id (static or dynamic) points at a real node", {
+  bad <- character(0)
   for (node in design_nodes) {
     if (isTRUE(node$terminal)) next
     for (opt in node$options) {
       for (flags in .flag_combos) {
         nid <- .resolve(opt$next_id, flags)
-        expect_true(!is.null(nid) && nid %in% names(design_nodes),
-                    info = paste0("node '", node$id, "' option '", opt$label, "' -> missing node '", nid, "'"))
+        if (is.null(nid) || !(nid %in% names(design_nodes))) {
+          bad <- c(bad, paste0("node '", node$id, "' option '", opt$label, "' -> missing node '", nid, "'"))
+        }
       }
     }
   }
+  expect_equal(unique(bad), character(0))
 })
 
 test_that("every terminal is either a built catalog entry, an explicit not-built note, or guidance", {
+  bad <- character(0)
   terminals <- Filter(function(n) isTRUE(n$terminal), design_nodes)
   for (node in terminals) {
     for (flags in .flag_combos) {
       key <- .resolve(node$catalog_key, flags)
       if (!is.null(key)) {
         entry <- catalog_entry(key)
-        expect_false(is.null(entry), info = paste0("terminal '", node$id, "' catalog_key '", key, "' not in calculator_catalog"))
-        expect_true(isTRUE(entry$built), info = paste0("terminal '", node$id, "' points at an unbuilt catalog entry '", key, "'"))
-      } else {
-        expect_true(isTRUE(node$guidance) || !is.null(node$would_use),
-                    info = paste0("terminal '", node$id, "' has no catalog_key, isn't guidance, and has no would_use note"))
+        if (is.null(entry)) {
+          bad <- c(bad, paste0("terminal '", node$id, "' catalog_key '", key, "' not in calculator_catalog"))
+        } else if (!isTRUE(entry$built)) {
+          bad <- c(bad, paste0("terminal '", node$id, "' points at an unbuilt catalog entry '", key, "'"))
+        }
+      } else if (!isTRUE(node$guidance) && is.null(node$would_use)) {
+        bad <- c(bad, paste0("terminal '", node$id, "' has no catalog_key, isn't guidance, and has no would_use note"))
       }
     }
   }
+  expect_equal(unique(bad), character(0))
 })
 
 test_that("no node id collides with itself as its own next_id (no accidental infinite loop)", {
+  bad <- character(0)
   for (node in design_nodes) {
     if (isTRUE(node$terminal)) next
     for (opt in node$options) {
       for (flags in .flag_combos) {
-        nid <- .resolve(opt$next_id, flags)
-        expect_false(identical(nid, node$id), info = paste0("node '", node$id, "' loops back to itself"))
+        if (identical(.resolve(opt$next_id, flags), node$id)) bad <- c(bad, node$id)
       }
     }
   }
+  expect_equal(unique(bad), character(0))
 })
 
 # --- Spot-check full paths end-to-end, mirroring how the wizard server walks

@@ -66,6 +66,7 @@ test_that("calc_bayesian_assurance_or rejects invalid inputs", {
 })
 
 test_that("calc_bfda_ttest is reproducible via its fixed internal seed", {
+  skip_if_not_slow()
   res1 <- calc_bfda_ttest(effect_size = 0.5, bf_threshold = 10, alpha = 0.05, power = 0.8, nsim = 50)
   res2 <- calc_bfda_ttest(effect_size = 0.5, bf_threshold = 10, alpha = 0.05, power = 0.8, nsim = 50)
   expect_identical(res1, res2)
@@ -74,12 +75,14 @@ test_that("calc_bfda_ttest is reproducible via its fixed internal seed", {
 })
 
 test_that("calc_bfda_ttest needs a larger n than the classical two-sample t-test at the same d/alpha/power", {
+  skip_if_not_slow()
   res <- calc_bfda_ttest(effect_size = 0.5, bf_threshold = 10, alpha = 0.05, power = 0.8, nsim = 50)
   expect_equal(res$n_classical, 64) # pwr::pwr.t.test(d=0.5, power=0.8) -> n=64
   expect_gt(res$n1, res$n_classical)
 })
 
 test_that("calc_bfda_ttest computes the classical warm-start n correctly regardless of the simulation outcome", {
+  skip_if_not_slow()
   res <- calc_bfda_ttest(effect_size = 0.8, bf_threshold = 3, alpha = 0.05, power = 0.8, nsim = 50)
   fit <- pwr::pwr.t.test(d = 0.8, sig.level = 0.05, power = 0.8, type = "two.sample")
   expect_equal(res$n_classical, ceiling(fit$n))
