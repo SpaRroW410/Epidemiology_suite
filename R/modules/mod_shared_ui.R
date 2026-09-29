@@ -148,3 +148,70 @@ render_export_handlers <- function(output, result, content_fn, value_fn = functi
     }
   )
 }
+
+# Power / sensitivity curves (ROADMAP P1 item 10): "required n vs. effect
+# size" and "required n vs. power", computed by calc_curve.R's
+# ss_curve_points() from the design's own calc_*() function and current
+# inputs -- base R graphics (plot()), no new dependency.
+power_curves_ui <- function(ns) {
+  tagList(
+    hr(),
+    h5("Power / sensitivity curves"),
+    p(class = "text-muted small",
+      "Every other input held at its current value. A point where the",
+      "formula has no solution (e.g. an effect size outside its valid",
+      "range) is simply omitted, not fabricated."),
+    uiOutput(ns("curve_unavailable")),
+    plotOutput(ns("curve_effect"), height = "260px"),
+    plotOutput(ns("curve_power"), height = "260px")
+  )
+}
+
+#' Wire power_curves_ui() outputs into a module's server
+#'
+#' @param output The module's own `output`.
+#' @param curve_spec A plain function (not a reactive -- called from inside
+#'   each output's own reactive context, like `content_fn` in
+#'   `render_export_handlers()`, so a bare `input$design` read inside it
+#'   already establishes the right dependency) returning either `NULL`
+#'   (this design has no curve wiring yet) or
+#'   `list(calc_fn, args, effect = list(param, values, label), power =
+#'   list(param, values))` -- `power` may be omitted/NULL for a design with
+#'   no power argument to vary (e.g. a precision-based design).
+render_power_curves <- function(output, curve_spec) {
+  output$curve_unavailable <- renderUI({
+    spec <- curve_spec()
+    if (is.null(spec)) {
+      div(class = "text-muted small", "Power curves are not yet available for this design.")
+    }
+  })
+
+  .plot_curve <- function(spec, which) {
+    axis <- spec[[which]]
+    req(axis)
+    pts <- ss_curve_points(spec$calc_fn, spec$args, axis$param, axis$values)
+    req(nrow(pts) > 0)
+    label <- if (!is.null(axis$label)) axis$label else axis$param
+    main <- if (which == "power") "Required n vs. power" else "Required n vs. effect size"
+    plot(pts$x, pts$y, type = "l", lwd = 2, xlab = label, ylab = "Required n", main = main)
+
+    current <- tryCatch(do.call(spec$calc_fn, spec$args), error = function(e) NULL)
+    if (!is.null(current)) {
+      fname <- .ss_curve_n_field(current)
+      if (!is.null(fname)) {
+        points(spec$args[[axis$param]], current[[fname]], pch = 19, col = "firebrick")
+      }
+    }
+  }
+
+  output$curve_effect <- renderPlot({
+    spec <- curve_spec()
+    req(spec)
+    .plot_curve(spec, "effect")
+  })
+  output$curve_power <- renderPlot({
+    spec <- curve_spec()
+    req(spec)
+    .plot_curve(spec, "power")
+  })
+}

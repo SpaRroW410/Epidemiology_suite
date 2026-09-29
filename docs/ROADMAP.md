@@ -225,8 +225,62 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    plus the EVPI fallback fix (justification text, and the BibTeX/RIS
    downloads specifically, since they share the same citation field) —
    all render correctly, no page errors, no server-log errors.
-10. **Power/sensitivity curves** for every closed-form design (n vs. effect size,
-    n vs. power).
+10. **Power/sensitivity curves (F6-adjacent) — infrastructure + pilot batch
+    (28 Sep 2026).** `R/calc/calc_curve.R` (pure, unit-tested, no Shiny):
+    `ss_curve_points(calc_fn, args, vary_param, vary_values)` recomputes a
+    design's own headline n/k field (`.ss_curve_n_field()`, a narrower match
+    than `calc_result.R`'s own headline detector -- deliberately excludes a
+    `*power*`-named field, since the whole point of one of the two curves
+    is to put power on the x axis while n stays the y axis throughout) by
+    calling the *same* `calc_*()` function the point estimate already used,
+    across a grid of one varying argument, holding every other argument at
+    its current value; a grid point outside the formula's valid domain
+    (e.g. an effect size the design's own validation rejects) is simply
+    omitted, never fabricated. Three generic scan-range helpers
+    (`curve_range_proportion()`, `curve_range_around()`,
+    `curve_range_power()`) are shared across every module's wiring so each
+    one only has to pick the right helper and parameter name, not invent
+    its own grid.
+
+    `mod_shared_ui.R`'s `power_curves_ui()`/`render_power_curves()` render
+    two `plotOutput()`s (base R graphics via `renderPlot()` -- no new
+    dependency, unlike a `ggplot2`/`plotly` route) per module: "required n
+    vs. effect size" and "required n vs. power", each marking the current
+    on-screen values with a point. `render_power_curves()` takes a
+    `curve_spec` function (same calling convention as
+    `render_export_handlers()`'s `content_fn`) that returns either `NULL`
+    (renders "Power curves are not yet available for this design.") or
+    `list(calc_fn, args, effect = list(param, values, label), power =
+    list(param, values))` for the current design.
+
+    Adopted for the pilot pair (Proportions, Means) used for items 8/9,
+    but only for the designs with one scalar effect parameter *and* a power
+    argument to vary against a fixed effect size:
+    - Proportions: `single`, `two_sample`.
+    - Means: `single`, `two_sample`, `welch`, `paired`.
+
+    Deliberately left unwired (backlog for the next rollout batch, same
+    incremental pattern as items 8/9): designs with no power argument
+    because they aren't a hypothesis test (`precision`,
+    `single_precision`) and designs whose effect is a vector rather than
+    one scalar (`anova`, `planned_contrast` -- k group means; `welch`
+    already covers the two-scalar-SD case). `posthoc_pairwise` (both
+    modules) has a single scalar effect pair too but is left for the next
+    batch rather than squeezed in here. The remaining ~45 modules
+    (~140 designs) are the batch backlog, wired the same two-lines-per-
+    design way once their own effect/power parameter names are identified
+    per design (mirrors item 9's per-module remap work, not item 8's
+    fully mechanical wrap).
+
+    Verified: full fast test suite (all pre-existing tests plus 8 new
+    `test-calc_curve.R` tests, 0 failures/0 errors, 27 expected Monte Carlo
+    skips) after `global.R` was confirmed to source cleanly; Playwright
+    against a running instance across all 6 wired designs (both plots
+    render, current-value point present, no page/console errors) and the
+    5 explicitly-unwired designs checked in the same pass (`precision`,
+    `posthoc_pairwise` x2, `anova`, `single_precision` -- each correctly
+    shows the "not yet available" message and no stale plot from a
+    previously-selected design lingers after switching).
 11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
 

@@ -80,7 +80,8 @@ mod_proportion_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -217,5 +218,34 @@ mod_proportion_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() proportion_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): wired for the two designs with a
+    # single scalar effect parameter and a power argument to vary.
+    # "precision" has no power argument (it isn't a hypothesis test);
+    # "posthoc_pairwise" is left for a later batch, same incremental
+    # rollout as items 8/9.
+    render_power_curves(output, function() {
+      if (input$design == "single") {
+        req(input$p0, input$p1_single, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_proportion_1s,
+          args = list(p0 = input$p0, p1 = input$p1_single, alpha = input$alpha,
+                       power = input$power, alternative = input$alternative),
+          effect = list(param = "p1", values = curve_range_proportion(), label = "p1 (expected proportion)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "two_sample") {
+        req(input$p1_two, input$p2_two, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_proportion_2s,
+          args = list(p1 = input$p1_two, p2 = input$p2_two, alpha = input$alpha,
+                       power = input$power, alternative = input$alternative),
+          effect = list(param = "p2", values = curve_range_proportion(), label = "p2 (group 2 proportion)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }

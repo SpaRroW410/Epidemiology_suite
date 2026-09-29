@@ -138,7 +138,8 @@ mod_means_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -442,5 +443,59 @@ mod_means_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() means_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): wired for the four designs with a
+    # single scalar effect parameter and a power argument to vary.
+    # "single_precision" has no power argument; "anova"/"planned_contrast"
+    # have a vector of group means rather than one scalar effect size;
+    # "posthoc_pairwise" is left for a later batch -- same incremental
+    # rollout as items 8/9.
+    render_power_curves(output, function() {
+      if (input$design == "single") {
+        req(input$mu0, input$mu1_single, input$sd_single, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_means_1s,
+          args = list(mu0 = input$mu0, mu1 = input$mu1_single, sd = input$sd_single,
+                       alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "mu1", values = curve_range_around(input$mu0, 3 * input$sd_single),
+                        label = "mu1 (expected mean)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "two_sample") {
+        req(input$mu1_two, input$mu2_two, input$sd_two, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_means_2s_indep,
+          args = list(mu1 = input$mu1_two, mu2 = input$mu2_two, sd = input$sd_two,
+                       alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "mu2", values = curve_range_around(input$mu1_two, 3 * input$sd_two),
+                        label = "mu2 (group 2 mean)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "welch") {
+        req(input$mu1_welch, input$mu2_welch, input$sd1_welch, input$sd2_welch,
+            input$ratio_welch, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_means_welch,
+          args = list(mu1 = input$mu1_welch, mu2 = input$mu2_welch,
+                       sd1 = input$sd1_welch, sd2 = input$sd2_welch, ratio = input$ratio_welch,
+                       alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "mu2", values = curve_range_around(input$mu1_welch, 3 * input$sd1_welch),
+                        label = "mu2 (group 2 mean)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "paired") {
+        req(input$mean_diff, input$sd_diff, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_means_paired,
+          args = list(mean_diff = input$mean_diff, sd_diff = input$sd_diff,
+                       alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "mean_diff", values = curve_range_around(0, 3 * input$sd_diff),
+                        label = "mean_diff (mean of paired differences)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }
