@@ -95,3 +95,14 @@ curve_range_ratio <- function(lower = 0.2, upper = 5, n = 40) {
   v <- exp(seq(log(lower), log(upper), length.out = n))
   v[abs(v - 1) > 1e-9]
 }
+
+#' A scan range strictly inside an explicit (lower, upper) bound, e.g. a
+#' TOST/bioequivalence effect that must fall strictly within its own
+#' equivalence margin or limits (not merely bounded like a proportion, but
+#' bounded by another *input*, so this can't be a fixed grid). A small
+#' fractional pad keeps the grid off both open-interval endpoints, which
+#' every such design's own validation rejects exactly at the boundary.
+curve_range_within <- function(lower, upper, n = 40, margin_frac = 0.02) {
+  pad <- (upper - lower) * margin_frac
+  seq(lower + pad, upper - pad, length.out = n)
+}

@@ -244,11 +244,16 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     falling back to n/k as a whole underscore-separated token anywhere in
     the name only when nothing strict matches (catches
     `calc_case_control_case_cohort()`'s `subcohort_n` -- a real sample
-    size, just not spelled with an n/k *prefix*). Five generic scan-range
+    size, just not spelled with an n/k *prefix*). Six generic scan-range
     helpers (`curve_range_proportion()`, `curve_range_correlation()`,
-    `curve_range_ratio()`, `curve_range_around()`, `curve_range_power()`)
-    are shared across every module's wiring so each one only has to pick
-    the right helper and parameter name, not invent its own grid.
+    `curve_range_ratio()`, `curve_range_within()`, `curve_range_around()`,
+    `curve_range_power()`) are shared across every module's wiring so each
+    one only has to pick the right helper and parameter name, not invent
+    its own grid. `curve_range_within(lower, upper)` is the newest: a
+    fractional-padded grid strictly inside an explicit bound set by
+    *another input*, not a fixed domain -- needed for a TOST/
+    bioequivalence effect that must stay strictly within its own
+    equivalence margin or limits.
 
     `mod_shared_ui.R`'s `power_curves_ui()`/`render_power_curves()` render
     two `plotOutput()`s (base R graphics via `renderPlot()` -- no new
@@ -274,6 +279,12 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       `spearman` -- effect = a correlation via the new
       `curve_range_correlation()`, or for `regression_slope`, the slope
       itself via `curve_range_around(0, 3 * abs(current slope))`).
+    - **Batch 3 (29 Sep 2026):** Crossover Trial 2x2 (its one design),
+      Equivalence/TOST (`means`, `proportions`, `bioequivalence`,
+      `assurance` -- effect = the test/reference difference or ratio via
+      the new `curve_range_within()`, kept strictly inside the design's
+      own margin/limits), Non-Inferiority (`means`, `proportions`,
+      `odds_ratio`, `hazard_ratio`).
 
     Deliberately left unwired (backlog for the next rollout batch, same
     incremental pattern as items 8/9): designs with no power argument
@@ -284,21 +295,22 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     `nested` -- R2/nD/nH structure; Correlation's `two_dependent` -- three
     jointly-constrained correlations). `posthoc_pairwise` (Proportions,
     Means) is left for a later batch despite having a single scalar
-    effect pair. The remaining ~41 modules are the batch backlog, wired
+    effect pair. The remaining ~38 modules are the batch backlog, wired
     the same two-lines-per-design way once their own effect/power
     parameter names are identified per design (mirrors item 9's
     per-module remap work, not item 8's fully mechanical wrap).
 
-    Verified: full fast test suite (all pre-existing tests plus 28
+    Verified: full fast test suite (all pre-existing tests plus 30
     `test-calc_curve.R` tests -- extended from 8 for batch 2's two-tier
-    headline matcher and the two new range helpers -- 0 failures/0
-    errors, 27 expected Monte Carlo skips) after `global.R` was confirmed
-    to source cleanly each time; Playwright against a running instance
-    across all 16 wired designs across both batches (both plots render,
-    current-value point present, no page/console errors) and every
-    explicitly-unwired design checked in the same passes (each correctly
-    shows the "not yet available" message, no stale plot from a
-    previously-selected design lingers after switching).
+    headline matcher and two new range helpers, then to 30 for batch 3's
+    `curve_range_within()` -- 0 failures/0 errors, 27 expected Monte Carlo
+    skips) after `global.R` was confirmed to source cleanly each time;
+    Playwright against a running instance across all 25 wired designs
+    across the three batches (both plots render, current-value point
+    present, no page/console errors) and every explicitly-unwired design
+    checked in the same passes (each correctly shows the "not yet
+    available" message, no stale plot from a previously-selected design
+    lingers after switching).
 11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
 

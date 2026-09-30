@@ -22,7 +22,8 @@ mod_crossover_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -69,5 +70,15 @@ mod_crossover_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() crossover_content$crossover_2x2)
+
+    render_power_curves(output, function() {
+      req(input$delta, input$sigma, input$alpha, input$power)
+      list(
+        calc_fn = calc_crossover_2x2,
+        args = list(delta = input$delta, sigma = input$sigma, alpha = input$alpha, power = input$power),
+        effect = list(param = "delta", values = curve_range_around(0, 3 * input$sigma), label = "delta (true mean difference)"),
+        power = list(param = "power", values = curve_range_power())
+      )
+    })
   })
 }

@@ -116,6 +116,12 @@ test_that("curve_range_correlation stays within (-1, 1) and excludes zero", {
   expect_false(0 %in% v)
 })
 
+test_that("curve_range_within stays strictly inside its own (lower, upper) bound", {
+  v <- curve_range_within(0.8, 1.25)
+  expect_true(all(v > 0.8 & v < 1.25))
+  expect_equal(length(v), 40)
+})
+
 test_that("curve_range_ratio is a positive, log-spaced grid excluding 1", {
   v <- curve_range_ratio()
   expect_true(all(v > 0))

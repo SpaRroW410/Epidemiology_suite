@@ -81,7 +81,8 @@ mod_tost_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -214,5 +215,55 @@ mod_tost_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() tost_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): all four designs have a single
+    # scalar effect parameter and a power argument.
+    render_power_curves(output, function() {
+      if (input$design == "means") {
+        req(input$mean_diff, input$margin, input$sd, input$alpha, input$power)
+        list(
+          calc_fn = calc_tost_means,
+          args = list(mean_diff = input$mean_diff, margin = input$margin, sd = input$sd,
+                       alpha = input$alpha, power = input$power),
+          effect = list(param = "mean_diff", values = curve_range_within(-input$margin, input$margin),
+                        label = "mean_diff (test - reference)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "proportions") {
+        req(input$p_new, input$p_standard, input$margin_prop, input$alpha_prop,
+            input$power_prop, input$ratio_prop)
+        list(
+          calc_fn = calc_tost_proportions,
+          args = list(p_new = input$p_new, p_standard = input$p_standard, margin = input$margin_prop,
+                       alpha = input$alpha_prop, power = input$power_prop, ratio = input$ratio_prop),
+          effect = list(param = "p_new", values = curve_range_proportion(), label = "p (new-treatment group)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "bioequivalence") {
+        req(input$cv_be, input$theta0_be, input$theta1_be, input$theta2_be,
+            input$alpha_be, input$power_be, input$design_be)
+        list(
+          calc_fn = calc_tost_bioequivalence,
+          args = list(cv = input$cv_be, theta0 = input$theta0_be, theta1 = input$theta1_be,
+                       theta2 = input$theta2_be, alpha = input$alpha_be, power = input$power_be,
+                       design = input$design_be),
+          effect = list(param = "theta0", values = curve_range_within(input$theta1_be, input$theta2_be),
+                        label = "theta0 (assumed true test/reference ratio)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        req(input$cv_as, input$prior_n_as, input$theta0_as, input$theta1_as, input$theta2_as,
+            input$alpha_as, input$power_as, input$design_as)
+        list(
+          calc_fn = calc_tost_assurance,
+          args = list(cv = input$cv_as, prior_n = input$prior_n_as, theta0 = input$theta0_as,
+                       theta1 = input$theta1_as, theta2 = input$theta2_as,
+                       alpha = input$alpha_as, power = input$power_as, design = input$design_as),
+          effect = list(param = "theta0", values = curve_range_within(input$theta1_as, input$theta2_as),
+                        label = "theta0 (assumed true test/reference ratio)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      }
+    })
   })
 }
