@@ -225,8 +225,8 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    plus the EVPI fallback fix (justification text, and the BibTeX/RIS
    downloads specifically, since they share the same citation field) —
    all render correctly, no page errors, no server-log errors.
-10. **Power/sensitivity curves (F6-adjacent) — infrastructure + pilot batch
-    (28 Sep 2026).** `R/calc/calc_curve.R` (pure, unit-tested, no Shiny):
+10. **Power/sensitivity curves (F6-adjacent) -- infrastructure + rollout in
+    progress.** `R/calc/calc_curve.R` (pure, unit-tested, no Shiny):
     `ss_curve_points(calc_fn, args, vary_param, vary_values)` recomputes a
     design's own headline n/k field (`.ss_curve_n_field()`, a narrower match
     than `calc_result.R`'s own headline detector -- deliberately excludes a
@@ -235,12 +235,20 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     calling the *same* `calc_*()` function the point estimate already used,
     across a grid of one varying argument, holding every other argument at
     its current value; a grid point outside the formula's valid domain
-    (e.g. an effect size the design's own validation rejects) is simply
-    omitted, never fabricated. Three generic scan-range helpers
-    (`curve_range_proportion()`, `curve_range_around()`,
-    `curve_range_power()`) are shared across every module's wiring so each
-    one only has to pick the right helper and parameter name, not invent
-    its own grid.
+    (e.g. an effect size the design's own validation rejects, or --
+    `case_cohort` -- a hazard ratio too close to 1 for any feasible
+    subcohort at this cohort size) is simply omitted, never fabricated.
+    `.ss_curve_n_field()` matches in two tiers: a strict "starts with n/k"
+    pattern first (preserves the exact field every already-wired design
+    uses, e.g. `calc_means_welch()`'s `n_total` over its own `n1`/`n2`),
+    falling back to n/k as a whole underscore-separated token anywhere in
+    the name only when nothing strict matches (catches
+    `calc_case_control_case_cohort()`'s `subcohort_n` -- a real sample
+    size, just not spelled with an n/k *prefix*). Five generic scan-range
+    helpers (`curve_range_proportion()`, `curve_range_correlation()`,
+    `curve_range_ratio()`, `curve_range_around()`, `curve_range_power()`)
+    are shared across every module's wiring so each one only has to pick
+    the right helper and parameter name, not invent its own grid.
 
     `mod_shared_ui.R`'s `power_curves_ui()`/`render_power_curves()` render
     two `plotOutput()`s (base R graphics via `renderPlot()` -- no new
@@ -253,33 +261,43 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     `list(calc_fn, args, effect = list(param, values, label), power =
     list(param, values))` for the current design.
 
-    Adopted for the pilot pair (Proportions, Means) used for items 8/9,
-    but only for the designs with one scalar effect parameter *and* a power
-    argument to vary against a fixed effect size:
-    - Proportions: `single`, `two_sample`.
-    - Means: `single`, `two_sample`, `welch`, `paired`.
+    Adopted so far, one incremental batch at a time (same pattern as
+    items 8/9), for the designs with one scalar effect parameter *and* a
+    power argument to vary against a fixed effect size:
+    - **Batch 1 (pilot, 28 Sep 2026):** Proportions (`single`,
+      `two_sample`), Means (`single`, `two_sample`, `welch`, `paired`).
+    - **Batch 2 (29 Sep 2026):** Cohort (its one design), Case-Control
+      (`unmatched`, `matched`, `case_cohort` -- effect = OR or HR via the
+      new `curve_range_ratio()`), Diagnostic Accuracy (`vs_reference`,
+      `two_indep`, `two_paired`, `odds_ratio`), Correlation (`single`,
+      `two_independent`, `point_biserial`, `regression_slope`, `partial`,
+      `spearman` -- effect = a correlation via the new
+      `curve_range_correlation()`, or for `regression_slope`, the slope
+      itself via `curve_range_around(0, 3 * abs(current slope))`).
 
     Deliberately left unwired (backlog for the next rollout batch, same
     incremental pattern as items 8/9): designs with no power argument
     because they aren't a hypothesis test (`precision`,
-    `single_precision`) and designs whose effect is a vector rather than
-    one scalar (`anova`, `planned_contrast` -- k group means; `welch`
-    already covers the two-scalar-SD case). `posthoc_pairwise` (both
-    modules) has a single scalar effect pair too but is left for the next
-    batch rather than squeezed in here. The remaining ~45 modules
-    (~140 designs) are the batch backlog, wired the same two-lines-per-
-    design way once their own effect/power parameter names are identified
-    per design (mirrors item 9's per-module remap work, not item 8's
-    fully mechanical wrap).
+    `single_precision`, Diagnostic's `precision`/`ppv_npv`/
+    `likelihood_ratio`) and designs whose effect isn't one scalar
+    (`anova`, `planned_contrast` -- k group means; Case-Control's
+    `nested` -- R2/nD/nH structure; Correlation's `two_dependent` -- three
+    jointly-constrained correlations). `posthoc_pairwise` (Proportions,
+    Means) is left for a later batch despite having a single scalar
+    effect pair. The remaining ~41 modules are the batch backlog, wired
+    the same two-lines-per-design way once their own effect/power
+    parameter names are identified per design (mirrors item 9's
+    per-module remap work, not item 8's fully mechanical wrap).
 
-    Verified: full fast test suite (all pre-existing tests plus 8 new
-    `test-calc_curve.R` tests, 0 failures/0 errors, 27 expected Monte Carlo
-    skips) after `global.R` was confirmed to source cleanly; Playwright
-    against a running instance across all 6 wired designs (both plots
-    render, current-value point present, no page/console errors) and the
-    5 explicitly-unwired designs checked in the same pass (`precision`,
-    `posthoc_pairwise` x2, `anova`, `single_precision` -- each correctly
-    shows the "not yet available" message and no stale plot from a
+    Verified: full fast test suite (all pre-existing tests plus 28
+    `test-calc_curve.R` tests -- extended from 8 for batch 2's two-tier
+    headline matcher and the two new range helpers -- 0 failures/0
+    errors, 27 expected Monte Carlo skips) after `global.R` was confirmed
+    to source cleanly each time; Playwright against a running instance
+    across all 16 wired designs across both batches (both plots render,
+    current-value point present, no page/console errors) and every
+    explicitly-unwired design checked in the same passes (each correctly
+    shows the "not yet available" message, no stale plot from a
     previously-selected design lingers after switching).
 11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.

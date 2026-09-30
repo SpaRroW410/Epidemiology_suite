@@ -108,7 +108,8 @@ mod_diagnostic_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -327,5 +328,54 @@ mod_diagnostic_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() diagnostic_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): wired for the four designs with a
+    # power argument and one clear scalar effect to vary.
+    # "precision"/"ppv_npv"/"likelihood_ratio" are precision-based (no
+    # power argument) and are left out, same as items 8/9's own
+    # not-a-hypothesis-test exclusions.
+    render_power_curves(output, function() {
+      if (input$design == "vs_reference") {
+        req(input$sens0, input$sens1, input$spec0, input$spec1,
+            input$prevalence_ref, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_diagnostic_vs_reference,
+          args = list(sens0 = input$sens0, sens1 = input$sens1, spec0 = input$spec0,
+                       spec1 = input$spec1, prevalence = input$prevalence_ref,
+                       alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "sens1", values = curve_range_proportion(), label = "sens1 (expected sensitivity of new test)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "two_indep") {
+        req(input$p1_indep, input$p2_indep, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_diagnostic_two_indep,
+          args = list(p1 = input$p1_indep, p2 = input$p2_indep, alpha = input$alpha,
+                       power = input$power, alternative = input$alternative),
+          effect = list(param = "p2", values = curve_range_proportion(), label = "P2 (test 2's expected Sn or Sp)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "two_paired") {
+        req(input$p1_paired, input$p2_paired, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_diagnostic_two_paired,
+          args = list(p1 = input$p1_paired, p2 = input$p2_paired, alpha = input$alpha,
+                       power = input$power, alternative = input$alternative),
+          effect = list(param = "p2", values = curve_range_proportion(), label = "P2 (test 2's expected Sn or Sp)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "odds_ratio") {
+        req(input$sens_dor, input$spec_dor, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_diagnostic_odds_ratio,
+          args = list(sens = input$sens_dor, spec = input$spec_dor, alpha = input$alpha,
+                       power = input$power, alternative = input$alternative),
+          effect = list(param = "sens", values = curve_range_proportion(), label = "sens (expected sensitivity)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }

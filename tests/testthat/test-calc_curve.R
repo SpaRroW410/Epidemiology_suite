@@ -3,6 +3,7 @@ source(file.path("..", "..", "R", "calc", "calc_curve.R"))
 source(file.path("..", "..", "R", "calc", "calc_utils.R"))
 source(file.path("..", "..", "R", "calc", "calc_proportion.R"))
 source(file.path("..", "..", "R", "calc", "calc_means.R"))
+source(file.path("..", "..", "R", "calc", "calc_case_control.R"))
 
 test_that("ss_curve_points traces n_per_group across a grid of p2, holding p1/alpha/power fixed", {
   pts <- ss_curve_points(
@@ -57,6 +58,41 @@ test_that(".ss_curve_n_field picks the first n/k-shaped field, never a power-sha
   expect_equal(.ss_curve_n_field(r2), "n_total")
 })
 
+test_that(".ss_curve_n_field prefers a strict n/k-prefixed field over a wider token match, even when a wider match would otherwise sort first", {
+  # calc_means_welch()'s own shape: n1/n2 (only a token match) precede
+  # n_total (a strict match) in field order -- n_total must still win.
+  r <- new_ss_result(list(n1 = 50, n2 = 50, n_total = 100, inputs = list()))
+  expect_equal(.ss_curve_n_field(r), "n_total")
+})
+
+test_that(".ss_curve_n_field falls back to a wider n/k-as-a-token match when no field starts with n/k", {
+  # calc_case_control_case_cohort()'s own shape: neither field starts with
+  # n/k, but "subcohort_n" is still the design's own headline sample size.
+  r <- new_ss_result(list(subcohort_n = 120, full_cohort_n = 15792, inputs = list()))
+  expect_equal(.ss_curve_n_field(r), "subcohort_n")
+})
+
+test_that("ss_curve_points traces the case_cohort design's subcohort_n across a grid of hr", {
+  pts <- ss_curve_points(
+    calc_case_control_case_cohort,
+    list(n = 15792, pD = 0.03, p1 = 0.25, alpha = 0.05, power = 0.8),
+    "hr", c(1.35, 1.5, 1.6)
+  )
+  expect_equal(nrow(pts), 3)
+  expect_true(all(diff(pts$y) <= 0)) # a larger hazard ratio needs a smaller subcohort
+})
+
+test_that("ss_curve_points silently skips an hr for which no feasible subcohort exists", {
+  # hr = 1.2 is infeasible at these inputs (required subcohort > full cohort)
+  pts <- ss_curve_points(
+    calc_case_control_case_cohort,
+    list(n = 15792, pD = 0.03, p1 = 0.25, alpha = 0.05, power = 0.8),
+    "hr", c(1.2, 1.35)
+  )
+  expect_equal(nrow(pts), 1)
+  expect_equal(pts$x, 1.35)
+})
+
 test_that("curve_range_proportion stays within (0, 1)", {
   v <- curve_range_proportion()
   expect_true(all(v > 0 & v < 1))
@@ -72,4 +108,19 @@ test_that("curve_range_around excludes its own center and is symmetric around it
 test_that("curve_range_power stays within the app's own (0.5, 0.99) power domain", {
   v <- curve_range_power()
   expect_true(all(v >= 0.5 & v <= 0.99))
+})
+
+test_that("curve_range_correlation stays within (-1, 1) and excludes zero", {
+  v <- curve_range_correlation()
+  expect_true(all(v > -1 & v < 1))
+  expect_false(0 %in% v)
+})
+
+test_that("curve_range_ratio is a positive, log-spaced grid excluding 1", {
+  v <- curve_range_ratio()
+  expect_true(all(v > 0))
+  expect_false(1 %in% v)
+  # log-spaced: consecutive ratios (v[i+1]/v[i]) are constant
+  ratios <- v[-1] / v[-length(v)]
+  expect_equal(ratios, rep(ratios[1], length(ratios)), tolerance = 1e-8)
 })

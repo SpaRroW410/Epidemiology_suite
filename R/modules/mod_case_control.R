@@ -89,7 +89,8 @@ mod_case_control_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -215,5 +216,46 @@ mod_case_control_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() case_control_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): wired for the three designs with a
+    # single scalar effect parameter (an odds/hazard ratio). "nested" has a
+    # more complex R2/nD/nH structure and is left for a later batch, same
+    # incremental rollout as items 8/9.
+    render_power_curves(output, function() {
+      if (input$design == "unmatched") {
+        req(input$p0, input$OR, input$ratio, input$alpha, input$power, input$alternative)
+        N <- input$N
+        if (is.null(N) || is.na(N)) N <- NULL
+        list(
+          calc_fn = calc_case_control_unmatched,
+          args = list(p0 = input$p0, OR = input$OR, power = input$power, ratio = input$ratio,
+                       alpha = input$alpha, alternative = input$alternative, N = N),
+          effect = list(param = "OR", values = curve_range_ratio(), label = "Odds ratio (OR)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "matched") {
+        req(input$p0, input$OR, input$phi_coef, input$ratio, input$alpha, input$power, input$alternative)
+        N <- input$N
+        if (is.null(N) || is.na(N)) N <- NULL
+        list(
+          calc_fn = calc_case_control_matched,
+          args = list(p0 = input$p0, OR = input$OR, phi_coef = input$phi_coef, power = input$power,
+                       ratio = input$ratio, alpha = input$alpha, alternative = input$alternative, N = N),
+          effect = list(param = "OR", values = curve_range_ratio(), label = "Odds ratio (OR)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "case_cohort") {
+        req(input$n_full, input$pD, input$p1, input$hr, input$alpha, input$power)
+        list(
+          calc_fn = calc_case_control_case_cohort,
+          args = list(n = input$n_full, pD = input$pD, p1 = input$p1, hr = input$hr,
+                       alpha = input$alpha, power = input$power),
+          effect = list(param = "hr", values = curve_range_ratio(), label = "Hazard ratio (HR)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }
