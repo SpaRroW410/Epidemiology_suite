@@ -190,13 +190,13 @@ calc_multiplicity_fdr_means <- function(d, m, pi1, fdr_level = 0.05, power = 0.8
 
   fit <- pwr::pwr.t.test(d = d, sig.level = alpha_star, power = power, type = "two.sample")
 
-  list(
+  new_ss_result(list(
     n_per_group = ceiling(fit$n),
     n_total = 2 * ceiling(fit$n),
     alpha_star = alpha_star,
     m = m, m1 = m1, m0 = m0, pi1 = pi1,
     inputs = list(d = d, m = m, pi1 = pi1, fdr_level = fdr_level, power = power)
-  )
+  ))
 }
 
 #' Dunnett-adjusted sample size for a multi-arm trial vs. one common
@@ -272,14 +272,14 @@ calc_multiplicity_dunnett <- function(d, k, alpha = 0.05, power = 0.8, seed = 20
 
   n_per_arm <- .mc_search_n1(power_at_n, power, n_lo = 3, n_hi = 6)
 
-  list(
+  new_ss_result(list(
     n_per_arm = n_per_arm,
     n_total = n_per_arm * (k + 1),
     k = k,
     critical_value = dunnett_critical_value(n_per_arm),
     achieved_power = power_at_n(n_per_arm),
     inputs = list(d = d, k = k, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' FDR-controlled sample size for a two-sample microarray/genomics
@@ -380,12 +380,12 @@ calc_fdr_microarray_two_sample <- function(delta, sigma, fdr_level = 0.05, power
     ))
   }
 
-  list(
+  new_ss_result(list(
     n_per_group = n_found,
     n_total = 2 * n_found,
     achieved_power = power_found,
     critical_value = crit_found,
     inputs = list(delta = delta, sigma = sigma, fdr_level = fdr_level, power = power,
                   pi0 = pi0, max_n = max_n, side = side)
-  )
+  ))
 }

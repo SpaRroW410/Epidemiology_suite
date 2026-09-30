@@ -31,12 +31,12 @@ calc_means_1s <- function(mu0, mu1, sd, alpha = 0.05, power = 0.8,
   fit <- pwr::pwr.t.test(d = d, sig.level = alpha, power = power,
                           type = "one.sample", alternative = alternative)
 
-  list(
+  new_ss_result(list(
     n = ceiling(fit$n),
     d = d,
     inputs = list(mu0 = mu0, mu1 = mu1, sd = sd, alpha = alpha, power = power,
                   alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for two independent means (equal allocation, common SD)
@@ -66,13 +66,13 @@ calc_means_2s_indep <- function(mu1, mu2, sd, alpha = 0.05, power = 0.8,
                           type = "two.sample", alternative = alternative)
   n_per_group <- ceiling(fit$n)
 
-  list(
+  new_ss_result(list(
     n_per_group = n_per_group,
     n_total = n_per_group * 2,
     d = d,
     inputs = list(mu1 = mu1, mu2 = mu2, sd = sd, alpha = alpha, power = power,
                   alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for paired means (paired t-test, e.g. pre-post)
@@ -99,12 +99,12 @@ calc_means_paired <- function(mean_diff, sd_diff, alpha = 0.05, power = 0.8,
   fit <- pwr::pwr.t.test(d = d, sig.level = alpha, power = power,
                           type = "paired", alternative = alternative)
 
-  list(
+  new_ss_result(list(
     n = ceiling(fit$n),
     d = d,
     inputs = list(mean_diff = mean_diff, sd_diff = sd_diff, alpha = alpha,
                   power = power, alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for three or more independent group means (one-way ANOVA)
@@ -137,12 +137,12 @@ calc_means_anova <- function(group_means, sd, alpha = 0.05, power = 0.8) {
   fit <- pwr::pwr.anova.test(k = k, f = f, sig.level = alpha, power = power)
   n_per_group <- ceiling(fit$n)
 
-  list(
+  new_ss_result(list(
     n_per_group = n_per_group,
     n_total = n_per_group * k,
     f = f,
     inputs = list(group_means = group_means, sd = sd, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for a single mean, precision-based (no hypothesis test)
@@ -183,12 +183,12 @@ calc_means_single_precision <- function(mean, sd, epsilon,
     nfractional = FALSE, conf.level = conf_level
   )
 
-  list(
+  new_ss_result(list(
     n = n,
     N = N,
     inputs = list(mean = mean, sd = sd, epsilon = epsilon, error = error,
                   conf_level = conf_level, N = N)
-  )
+  ))
 }
 
 #' Sample size for two independent means with unequal group sizes
@@ -226,14 +226,14 @@ calc_means_2s_unequal_n <- function(mu1, mu2, sd, n1, alpha = 0.05, power = 0.8,
                             power = power, alternative = alternative)
   n2 <- ceiling(fit$n2)
 
-  list(
+  new_ss_result(list(
     n1 = n1,
     n2 = n2,
     n_total = n1 + n2,
     d = d,
     inputs = list(mu1 = mu1, mu2 = mu2, sd = sd, n1 = n1, alpha = alpha,
                   power = power, alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for a planned linear contrast among k group means
@@ -293,11 +293,11 @@ calc_means_planned_contrast <- function(mu, sigma, ci, fi, alpha = 0.05, power =
   )
   n_total <- ceiling(n_solved)
 
-  list(
+  new_ss_result(list(
     n_total = n_total,
     n_per_group = ceiling(n_total * fi),
     inputs = list(mu = mu, sigma = sigma, ci = ci, fi = fi, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for a Bonferroni-adjusted post-hoc pairwise comparison of
@@ -344,10 +344,10 @@ calc_means_posthoc_pairwise <- function(tau, sigma, margin, alpha = 0.05, power 
     alpha = alpha, beta = 1 - power, tau = tau, sigma = sigma, margin = margin
   )
 
-  list(
+  new_ss_result(list(
     n_per_group = ceiling(n_solved),
     inputs = list(tau = tau, sigma = sigma, margin = margin, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for two independent means with unequal variances (Welch's
@@ -404,13 +404,13 @@ calc_means_welch <- function(mu1, mu2, sd1, sd2, alpha = 0.05, power = 0.8,
   n1 <- ceiling((za + zb)^2 * (sd1^2 + sd2^2 / ratio) / delta^2)
   n2 <- ceiling(ratio * n1)
 
-  list(
+  new_ss_result(list(
     n1 = n1,
     n2 = n2,
     n_total = n1 + n2,
     inputs = list(mu1 = mu1, mu2 = mu2, sd1 = sd1, sd2 = sd2, alpha = alpha,
                   power = power, ratio = ratio, alternative = alternative)
-  )
+  ))
 }
 
 # Shared .validate_number() / .validate_positive() / .validate_unit_interval()

@@ -37,13 +37,13 @@ calc_tost_means <- function(mean_diff, margin, sd, alpha = 0.05, power = 0.8) {
   n_total <- fit[["Sample size"]]
   n_per_group <- ceiling(n_total / 2)
 
-  list(
+  new_ss_result(list(
     n_total = n_per_group * 2,
     n_per_group = n_per_group,
     achieved_power = fit[["Achieved power"]],
     inputs = list(mean_diff = mean_diff, margin = margin, sd = sd,
                   alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for a pharmacokinetic bioequivalence crossover trial
@@ -88,12 +88,12 @@ calc_tost_bioequivalence <- function(cv, theta0 = 0.95, theta1 = 0.8, theta2 = 1
     CV = cv, design = design, print = FALSE
   )
 
-  list(
+  new_ss_result(list(
     n_total = fit[["Sample size"]],
     achieved_power = fit[["Achieved power"]],
     inputs = list(cv = cv, theta0 = theta0, theta1 = theta1, theta2 = theta2,
                   alpha = alpha, power = power, design = design)
-  )
+  ))
 }
 
 #' Sample size for a pharmacokinetic bioequivalence crossover trial,
@@ -162,12 +162,12 @@ calc_tost_assurance <- function(cv, prior_n, theta0 = 0.95, theta1 = 0.8, theta2
     print = FALSE
   )
 
-  list(
+  new_ss_result(list(
     n_total = fit[["Sample size"]],
     achieved_expected_power = fit[["Achieved power"]],
     inputs = list(cv = cv, prior_n = prior_n, theta0 = theta0, theta1 = theta1,
                   theta2 = theta2, alpha = alpha, power = power, design = design)
-  )
+  ))
 }
 
 #' Sample size for a two one-sided tests (TOST) equivalence trial on proportions
@@ -200,11 +200,11 @@ calc_tost_proportions <- function(p_new, p_standard, margin,
                            n = NA, power = power, r = ratio, type = "equivalence",
                            nfractional = FALSE, alpha = alpha)
 
-  list(
+  new_ss_result(list(
     n_total = fit$n.total,
     n_new = fit$n.treat,
     n_standard = fit$n.control,
     inputs = list(p_new = p_new, p_standard = p_standard, margin = margin,
                   alpha = alpha, power = power, ratio = ratio)
-  )
+  ))
 }

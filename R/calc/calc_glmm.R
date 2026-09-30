@@ -145,11 +145,11 @@ calc_glmm_lmm_power <- function(cluster_size, icc, sigma_total, delta,
   n_clusters <- max(4, round(n_clusters / 2) * 2)
   achieved_power <- empirical_power(n_clusters)
 
-  list(
+  new_ss_result(list(
     n_clusters = n_clusters, n_total = n_clusters * cluster_size, achieved_power = achieved_power,
     inputs = list(cluster_size = cluster_size, icc = icc, sigma_total = sigma_total, delta = delta,
                   alpha = alpha, power = power, nsim = nsim, seed = seed)
-  )
+  ))
 }
 
 #' Monte Carlo sample size (number of clusters) for a cluster-randomized
@@ -206,11 +206,11 @@ calc_glmm_logistic_power <- function(cluster_size, sigma_u, baseline_prob, or,
   n_clusters <- max(4, round(n_clusters / 2) * 2)
   achieved_power <- empirical_power(n_clusters)
 
-  list(
+  new_ss_result(list(
     n_clusters = n_clusters, n_total = n_clusters * cluster_size, achieved_power = achieved_power,
     inputs = list(cluster_size = cluster_size, sigma_u = sigma_u, baseline_prob = baseline_prob, or = or,
                   alpha = alpha, power = power, nsim = nsim, seed = seed)
-  )
+  ))
 }
 
 # Simulates one two-arm growth-curve (longitudinal) trial: subjects with a
@@ -321,11 +321,11 @@ calc_growth_curve_power <- function(ntimes, delta_slope, sigma2_intercept, sigma
   n_per_group <- .mc_search_n1(empirical_power, target_power = power, n_lo = 5, n_hi = 10, n_max = 2000)
   achieved_power <- empirical_power(n_per_group)
 
-  list(
+  new_ss_result(list(
     n_per_group = n_per_group, n_total = n_per_group * 2, achieved_power = achieved_power,
     inputs = list(ntimes = ntimes, delta_slope = delta_slope, sigma2_intercept = sigma2_intercept,
                   sigma2_slope = sigma2_slope, cor_intercept_slope = cor_intercept_slope,
                   sigma2_residual = sigma2_residual, baseline_slope = baseline_slope,
                   alpha = alpha, power = power, nsim = nsim, seed = seed)
-  )
+  ))
 }

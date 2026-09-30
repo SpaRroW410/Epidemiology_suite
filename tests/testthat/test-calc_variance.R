@@ -1,3 +1,4 @@
+source(file.path("..", "..", "R", "calc", "calc_result.R"))
 source(file.path("..", "..", "R", "calc", "calc_utils.R"))
 source(file.path("..", "..", "R", "calc", "calc_variance.R"))
 

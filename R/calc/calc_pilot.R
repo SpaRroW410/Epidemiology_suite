@@ -32,9 +32,9 @@ calc_pilot_sd_precision <- function(n, conf_level = 0.95) {
   lower_mult <- sqrt(df / stats::qchisq(1 - alpha / 2, df))
   upper_mult <- sqrt(df / stats::qchisq(alpha / 2, df))
 
-  list(
+  new_ss_result(list(
     lower_mult = lower_mult,
     upper_mult = upper_mult,
     inputs = list(n = n, conf_level = conf_level)
-  )
+  ))
 }

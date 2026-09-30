@@ -41,14 +41,14 @@ calc_efa_cfa_sample_size <- function(n_items) {
   n_10to1 <- 10 * n_items
   n_20to1 <- 20 * n_items
 
-  list(
+  new_ss_result(list(
     n_items = n_items,
     n_5to1 = n_5to1, n_10to1 = n_10to1, n_20to1 = n_20to1,
     adjective_5to1 = .comrey_lee_adjective(n_5to1),
     adjective_10to1 = .comrey_lee_adjective(n_10to1),
     adjective_20to1 = .comrey_lee_adjective(n_20to1),
     inputs = list(n_items = n_items)
-  )
+  ))
 }
 
 #' Comrey & Lee (1992) absolute-N adjective scale for factor analysis
@@ -147,11 +147,11 @@ calc_sem_rmsea_samplesize <- function(rmsea0, rmseaA, df, power = 0.8, alpha = 0
   }
 
   n <- n_candidates[hit]
-  list(
+  new_ss_result(list(
     n = n,
     achieved_power = calc_sem_rmsea_power(rmsea0, rmseaA, df, n, alpha, group),
     inputs = list(rmsea0 = rmsea0, rmseaA = rmseaA, df = df, power = power, alpha = alpha, group = group)
-  )
+  ))
 }
 
 #' IRT item calibration rule-of-thumb minimum sample size, by model type
@@ -206,11 +206,11 @@ calc_irt_calibration_guidance <- function(model = c("rasch_1pl", "twopl", "three
     )
   )
 
-  list(
+  new_ss_result(list(
     model = model,
     n_minimum = vals$n_minimum,
     n_precise = vals$n_precise,
     note = vals$note,
     inputs = list(model = model)
-  )
+  ))
 }

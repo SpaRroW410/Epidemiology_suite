@@ -67,11 +67,11 @@ calc_capture_recapture_n2 <- function(N, n1, precision, conf_level = 0.95) {
   achieved_cv <- sqrt(var_approx) / N
   achieved_precision <- z * achieved_cv
 
-  list(
+  new_ss_result(list(
     n1 = n1, n2 = n2, N = N, precision = precision, conf_level = conf_level,
     expected_recaptures = expected_recaptures,
     achieved_cv = achieved_cv,
     achieved_precision = achieved_precision,
     inputs = list(N = N, n1 = n1, precision = precision, conf_level = conf_level)
-  )
+  ))
 }

@@ -75,9 +75,9 @@ calc_sccs_samplesize <- function(eexpo, risk, astart, aend, p = 1, alpha = 0.05,
   zb <- qnorm(power, lower.tail = TRUE)
   n <- ((za + zb * sqrt(B))^2) / A
 
-  list(
+  new_ss_result(list(
     n = ceiling(n),
     inputs = list(eexpo = eexpo, risk = risk, astart = astart, aend = aend, p = p,
                   alpha = alpha, power = power, eage = eage, agegrp = agegrp)
-  )
+  ))
 }

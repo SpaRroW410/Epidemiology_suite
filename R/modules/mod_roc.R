@@ -57,7 +57,8 @@ mod_roc_ui <- function(id) {
       ),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -134,6 +135,12 @@ mod_roc_server <- function(id) {
         p(strong("Required controls (non-diseased): "), v$n_controls),
         p(strong("Total sample size: "), v$n_total)
       )
+    })
+
+    render_export_handlers(output, result, function() {
+      key <- input$design
+      remap <- c("compare_two" = "compare_two_aucs")
+      roc_content[[if (key %in% names(remap)) remap[[key]] else key]]
     })
   })
 }

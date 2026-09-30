@@ -27,11 +27,11 @@ calc_rule_of_three_bound <- function(n, conf_level = 0.95) {
   approx_bound <- -log(alpha) / n
   exact_bound <- 1 - alpha^(1 / n)
 
-  list(
+  new_ss_result(list(
     approx_bound = approx_bound,
     exact_bound = exact_bound,
     inputs = list(n = n, conf_level = conf_level)
-  )
+  ))
 }
 
 #' Sample size to have a target probability of observing at least one
@@ -52,11 +52,11 @@ calc_rule_of_three_n <- function(p, conf_level = 0.95) {
   n_exact <- ceiling(log(alpha) / log(1 - p))
   n_approx <- ceiling(-log(alpha) / p)
 
-  list(
+  new_ss_result(list(
     n_exact = n_exact,
     n_approx = n_approx,
     inputs = list(p = p, conf_level = conf_level)
-  )
+  ))
 }
 
 #' Sample size to detect at least one case in a finite population, with
@@ -109,12 +109,12 @@ calc_detect_event_imperfect_test <- function(N, prev, se, sp,
     conf.level = conf_level
   )
 
-  list(
+  new_ss_result(list(
     n_hypergeometric = unname(fit$sample.size["hypergeo"]),
     n_binomial = unname(fit$sample.size["binom"]),
     combined_se = fit$performance$se,
     combined_sp = fit$performance$sp,
     inputs = list(N = N, prev = prev, se = se, sp = sp,
                   interpretation = interpretation, conf_level = conf_level)
-  )
+  ))
 }

@@ -129,7 +129,7 @@ calc_competing_risks_joint <- function(lambda_11, hr_1, hr_all, rr, accrual, fol
   samplesize_bon <- ceiling(min(n1, n2))
   d_bon <- ceiling(min(n1, n2) * p_1)
 
-  list(
+  new_ss_result(list(
     chi2_events = ceiling(d_chi / 2) * 2,
     chi2_n = ceiling(samplesize_chi / 2) * 2,
     max_events = ceiling(d_max / 2) * 2,
@@ -141,5 +141,5 @@ calc_competing_risks_joint <- function(lambda_11, hr_1, hr_all, rr, accrual, fol
       accrual = accrual, follow_up = follow_up, attrition = attrition,
       a1 = a1, alpha = alpha, power = power
     )
-  )
+  ))
 }

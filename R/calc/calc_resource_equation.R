@@ -34,10 +34,10 @@ calc_resource_equation_size <- function(k_groups, e_target = 10) {
   n_total <- e_target + k_groups
   n_per_group <- ceiling(n_total / k_groups)
 
-  list(
+  new_ss_result(list(
     n_total = n_total, n_per_group = n_per_group, e = e_target,
     inputs = list(k_groups = k_groups, e_target = e_target)
-  )
+  ))
 }
 
 #' Check the adequacy of a chosen (or already-run) animal study's sample size
@@ -70,8 +70,8 @@ calc_resource_equation_check <- function(k_groups, n_per_group) {
     "adequate"
   }
 
-  list(
+  new_ss_result(list(
     n_total = n_total, e = e, verdict = verdict,
     inputs = list(k_groups = k_groups, n_per_group = n_per_group)
-  )
+  ))
 }

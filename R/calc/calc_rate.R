@@ -38,13 +38,13 @@ calc_rate_precision <- function(rate, conf_width, conf_level = 0.95,
   achieved <- presize::prec_rate(r = rate, x = n_events,
                                   conf.level = conf_level, method = method)
 
-  list(
+  new_ss_result(list(
     n_events = n_events,
     person_time = n_events / rate,
     achieved_conf_width = achieved$conf.width,
     inputs = list(rate = rate, conf_width = conf_width,
                   conf_level = conf_level, method = method)
-  )
+  ))
 }
 
 #' Sample size to compare two incidence rates (Poisson regression, single
@@ -104,13 +104,13 @@ calc_rate_comparison <- function(rate_ref, rate_ratio, prop_exposed = 0.5,
   n_total <- ceiling(n_solved)
   n_exposed <- ceiling(n_total * prop_exposed)
 
-  list(
+  new_ss_result(list(
     n_total = n_total,
     n_exposed = n_exposed,
     n_reference = n_total - n_exposed,
     inputs = list(rate_ref = rate_ref, rate_ratio = rate_ratio, prop_exposed = prop_exposed,
                   alpha = alpha, power = power, alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for Poisson regression with a continuous, normally
@@ -166,11 +166,11 @@ calc_poisson_regression_continuous <- function(beta0, beta1, mu_x1, sigma2_x1,
                                     sigma2.x1 = sigma2_x1, mu.T = mu_T, phi = phi,
                                     alpha = alpha, power = power)
 
-  list(
+  new_ss_result(list(
     n_total = ceiling(n),
     inputs = list(beta0 = beta0, beta1 = beta1, mu_x1 = mu_x1, sigma2_x1 = sigma2_x1,
                   mu_T = mu_T, phi = phi, alpha = alpha, power = power)
-  )
+  ))
 }
 
 # Comparison of two negative binomial rates, Zhu & Lakkis (2014).
@@ -266,10 +266,10 @@ calc_negative_binomial_rates <- function(mu0, RR, theta, duration = 1, ssize_rat
   }
   n1 <- ssize_ratio * n0
 
-  list(
+  new_ss_result(list(
     n0 = ceiling(n0), n1 = ceiling(n1), n_total = ceiling(n0) + ceiling(n1),
     inputs = list(mu0 = mu0, RR = RR, theta = theta, duration = duration,
                   ssize_ratio = ssize_ratio, alpha = alpha, power = power,
                   alternative = alternative, approach = approach)
-  )
+  ))
 }

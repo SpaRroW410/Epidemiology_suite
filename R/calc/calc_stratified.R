@@ -60,10 +60,10 @@ calc_stratified_sampling <- function(Nh, Sh, e, conf_level = 0.95,
   n_total <- ceiling(n_total)
   nh <- round(n_total * alloc_wh)
 
-  list(
+  new_ss_result(list(
     n_total = n_total,
     nh = nh,
     wh = alloc_wh,
     inputs = list(Nh = Nh, Sh = Sh, e = e, conf_level = conf_level, type = type)
-  )
+  ))
 }

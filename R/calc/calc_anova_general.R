@@ -48,11 +48,11 @@ calc_anova_general <- function(u, effect_size, effect_size_type = c("f2", "eta2"
   v <- ceiling(fit$v)
   n_total <- v + u + 1
 
-  list(
+  new_ss_result(list(
     n_total = n_total,
     v = v,
     f2 = f2,
     inputs = list(u = u, effect_size = effect_size, effect_size_type = effect_size_type,
                   alpha = alpha, power = power)
-  )
+  ))
 }

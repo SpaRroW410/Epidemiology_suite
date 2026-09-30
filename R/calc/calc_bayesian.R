@@ -77,7 +77,7 @@ calc_bayesian_assurance_or <- function(p1, p2,
   n1 <- ceiling(uniroot(function(n1) assurance_given_n1(n1) - power, c(n1_lower, n1_upper))$root)
   n2 <- ceiling(n1 * n_ratio)
 
-  list(
+  new_ss_result(list(
     n1 = n1,
     n2 = n2,
     n_total = n1 + n2,
@@ -88,7 +88,7 @@ calc_bayesian_assurance_or <- function(p1, p2,
       prior_lower = prior_lower, prior_upper = prior_upper,
       delta_w = delta_w, n_ratio = n_ratio, alpha = alpha, power = power
     )
-  )
+  ))
 }
 
 #' Bayes Factor Design Analysis for a two-sample t-test, via Monte Carlo
@@ -154,7 +154,7 @@ calc_bfda_ttest <- function(effect_size, bf_threshold = 10, alpha = 0.05, power 
   n_hi <- max(10, n_classical)
   n1 <- .mc_search_n1(function(n) empirical_power(n, nsim), power, n_lo = n_lo, n_hi = n_hi, n_max = 5000)
 
-  list(
+  new_ss_result(list(
     n1 = n1,
     n2 = n1,
     n_total = n1 * 2,
@@ -162,5 +162,5 @@ calc_bfda_ttest <- function(effect_size, bf_threshold = 10, alpha = 0.05, power 
     achieved_power = empirical_power(n1, nsim * 3),
     inputs = list(effect_size = effect_size, bf_threshold = bf_threshold,
                   alpha = alpha, power = power, nsim = nsim)
-  )
+  ))
 }

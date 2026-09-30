@@ -21,7 +21,9 @@ mod_crossover_ui <- function(id) {
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -64,6 +66,18 @@ mod_crossover_server <- function(id) {
       tagList(
         p(strong("Subjects per sequence: "), v$n_per_sequence),
         p(strong("Total sample size (both sequences): "), v$n_total)
+      )
+    })
+
+    render_export_handlers(output, result, function() crossover_content$crossover_2x2)
+
+    render_power_curves(output, function() {
+      req(input$delta, input$sigma, input$alpha, input$power)
+      list(
+        calc_fn = calc_crossover_2x2,
+        args = list(delta = input$delta, sigma = input$sigma, alpha = input$alpha, power = input$power),
+        effect = list(param = "delta", values = curve_range_around(0, 3 * input$sigma), label = "delta (true mean difference)"),
+        power = list(param = "power", values = curve_range_power())
       )
     })
   })

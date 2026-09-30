@@ -53,7 +53,7 @@ calc_tsa_information_size <- function(outcome = c("RR", "OR", "RD", "MD"),
 
   n_total <- ceiling(2 * (qnorm(1 - alpha / side) + qnorm(1 - beta))^2 * 2 * var_mc / mc_nf^2)
 
-  list(
+  new_ss_result(list(
     n_total = n_total,
     var_mc = var_mc,
     mc_nf = mc_nf,
@@ -61,5 +61,5 @@ calc_tsa_information_size <- function(outcome = c("RR", "OR", "RD", "MD"),
       outcome = outcome, mc = mc, pC = pC, p1 = p1, sd_mc = sd_mc,
       alpha = alpha, beta = beta, side = side
     )
-  )
+  ))
 }

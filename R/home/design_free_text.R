@@ -47,6 +47,12 @@ free_text_rules <- list(
     list(pattern = "risk ratio|odds ratio|rate ratio", option_index = 4, confidence = "Medium")
   ),
 
+  ratio_type = list(
+    list(pattern = "risk ratio|relative risk", option_index = 1, confidence = "High"),
+    list(pattern = "odds ratio",               option_index = 2, confidence = "High"),
+    list(pattern = "rate ratio",               option_index = 3, confidence = "High")
+  ),
+
   allocation = list(
     list(pattern = "randomi[sz]ed|allocated|\\btrial\\b|\\barm\\b",
          option_index = 1, confidence = "High"),

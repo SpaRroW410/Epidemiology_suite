@@ -26,7 +26,8 @@ mod_pilot_ui <- function(id) {
       numericInput(ns("conf_level"), "Confidence level", value = 0.95, min = 0.5, max = 0.999, step = 0.01),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -72,5 +73,7 @@ mod_pilot_server <- function(id) {
         }
       )
     })
+
+    render_export_handlers(output, result, function() pilot_content$rule_of_thumb)
   })
 }

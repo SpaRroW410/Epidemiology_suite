@@ -72,7 +72,7 @@ calc_survival_noncompliance <- function(tref, mc, pct_reduction, accrual, tmin,
   n_total <- ceiling(uniroot(function(n) power_given_n(n) - power, c(n_lower, n_upper))$root)
   n_total <- n_total + (n_total %% 2) # cpower splits n evenly between the two arms
 
-  list(
+  new_ss_result(list(
     n_total = n_total,
     n_per_group = n_total / 2,
     achieved_power = unname(power_given_n(n_total)),
@@ -82,5 +82,5 @@ calc_survival_noncompliance <- function(tref, mc, pct_reduction, accrual, tmin,
       noncomp_c = noncomp_c, noncomp_i = noncomp_i,
       alpha = alpha, power = power
     )
-  )
+  ))
 }

@@ -7,7 +7,11 @@ pacman::p_load(shiny, bslib, pwr, presize, epiR, clinfun, powerSurvEpi, PowerTOS
 
 for (f in list.files("R/calc", pattern = "\\.R$", full.names = TRUE)) source(f)
 for (f in list.files("R/content", pattern = "\\.R$", full.names = TRUE)) source(f)
-for (f in list.files("R/home", pattern = "\\.R$", full.names = TRUE)) source(f)
+# home_catalog.R first: design_tree.R builds its "browse by test" branch from
+# test_families at source time.
+source("R/home/home_catalog.R")
+for (f in setdiff(list.files("R/home", pattern = "\\.R$", full.names = TRUE),
+                  "R/home/home_catalog.R")) source(f)
 for (f in list.files("R/modules", pattern = "\\.R$", full.names = TRUE)) source(f)
 
 # Module registry: adding a calculator means appending one entry here, not

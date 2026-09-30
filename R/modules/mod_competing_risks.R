@@ -27,7 +27,8 @@ mod_competing_risks_ui <- function(id) {
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -80,5 +81,7 @@ mod_competing_risks_server <- function(id) {
           sprintf("%d cause-1 events, %d total patients", v$bonferroni_events, v$bonferroni_n))
       )
     })
+
+    render_export_handlers(output, result, function() competing_risks_content$joint)
   })
 }

@@ -87,7 +87,8 @@ mod_exact_tests_ui <- function(id) {
       ),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -232,6 +233,12 @@ mod_exact_tests_server <- function(id) {
           p(sprintf("Achieved exact power at this n: %.4f", v$achieved_power))
         )
       }
+    })
+
+    render_export_handlers(output, result, function() {
+      key <- input$design
+      remap <- c("sign" = "sign_test")
+      exact_tests_content[[if (key %in% names(remap)) remap[[key]] else key]]
     })
   })
 }

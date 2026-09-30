@@ -78,13 +78,15 @@ mod_chisq_ui <- function(id) {
         textInput(ns("p_cq"), "Each condition's success proportion (comma-separated, k >= 3)",
                   value = "0.2, 0.3, 0.4, 0.5"),
         numericInput(ns("sigma2_cq"), "Subject-level random-intercept variance (within-subject correlation)",
-                     value = 1, min = 0.0001, step = 0.1)
+                     value = 1, min = 0.0001, step = 0.1),
+        monte_carlo_calculate_ui(ns)
       ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -223,8 +225,18 @@ mod_chisq_server <- function(id) {
       }))
     })
 
+    # cochran_q is Monte Carlo (ROADMAP F9/P1#7): once selected, recompute
+    # only on Calculate, not on every keystroke -- see
+    # monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
+    SLOW_DESIGNS <- "cochran_q"
+
     result <- reactive({
-      req(input$design, input$alpha, input$power)
+      req(input$design)
+      is_slow <- input$design %in% SLOW_DESIGNS
+      if (is_slow) input$calculate
+
+      compute <- function() {
+      req(input$alpha, input$power)
 
       if (input$design == "cochran_q") {
         req(input$p_cq, input$sigma2_cq)
@@ -314,6 +326,9 @@ mod_chisq_server <- function(id) {
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
       }
+      }
+
+      if (is_slow) isolate(compute()) else compute()
     })
 
     output$result <- renderUI({
@@ -350,5 +365,7 @@ mod_chisq_server <- function(id) {
         )
       }
     })
+
+    render_export_handlers(output, result, function() chisq_content[[input$design]])
   })
 }

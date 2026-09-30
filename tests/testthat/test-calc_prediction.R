@@ -1,3 +1,4 @@
+source(file.path("..", "..", "R", "calc", "calc_result.R"))
 source(file.path("..", "..", "R", "calc", "calc_utils.R"))
 source(file.path("..", "..", "R", "calc", "calc_prediction.R"))
 
@@ -9,6 +10,7 @@ test_that("calc_prediction_binary (csrsquared) matches Riley et al (2019, Part I
 })
 
 test_that("calc_prediction_binary (cstatistic) reproduces the csrsquared-based answer closely", {
+  skip_if_not_slow()
   # Same scenario, but starting from a reported C-statistic of 0.89
   # instead -- approximates csrsquared via simulation (seeded), so we
   # expect a very close but not necessarily identical n.

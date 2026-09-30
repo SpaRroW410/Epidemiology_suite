@@ -28,12 +28,12 @@ calc_roc_auc <- function(auc, alpha = 0.05, power = 0.8, kappa = 1) {
   n_cases <- ceiling(res$ncases)
   n_controls <- ceiling(res$ncontrols)
 
-  list(
+  new_ss_result(list(
     n_cases = n_cases,
     n_controls = n_controls,
     n_total = n_cases + n_controls,
     inputs = list(auc = auc, alpha = alpha, power = power, kappa = kappa)
-  )
+  ))
 }
 
 #' Sample size to compare two correlated (paired) ROC curves' AUCs
@@ -101,12 +101,12 @@ calc_compare_two_aucs <- function(A1, B1, A2, B2, rn, ra, delta,
   n_cases <- ceiling(res$ncases)
   n_controls <- ceiling(res$ncontrols)
 
-  list(
+  new_ss_result(list(
     n_cases = n_cases,
     n_controls = n_controls,
     n_total = n_cases + n_controls,
     inputs = list(A1 = A1, B1 = B1, A2 = A2, B2 = B2, rn = rn, ra = ra, delta = delta,
                   alpha = alpha, power = power, kappa = kappa,
                   fpr11 = fpr11, fpr12 = fpr12, fpr21 = fpr21, fpr22 = fpr22)
-  )
+  ))
 }

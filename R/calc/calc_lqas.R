@@ -51,11 +51,11 @@ calc_lqas <- function(p_upper, p_lower, alpha = 0.10, beta = 0.10, n_max = 2000)
     valid <- which(alpha_d <= alpha & beta_d <= beta)
     if (length(valid) > 0) {
       best <- valid[which.min(alpha_d[valid] + beta_d[valid])]
-      return(list(
+      return(new_ss_result(list(
         n = n, d = ds[best],
         alpha_achieved = alpha_d[best], beta_achieved = beta_d[best],
         inputs = list(p_upper = p_upper, p_lower = p_lower, alpha = alpha, beta = beta)
-      ))
+      )))
     }
   }
   stop(sprintf("No feasible sample size found up to n_max=%d (thresholds likely too close together).", n_max))

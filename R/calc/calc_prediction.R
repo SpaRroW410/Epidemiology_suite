@@ -44,7 +44,7 @@ calc_prediction_binary <- function(parameters, prevalence, csrsquared = NULL,
     cstatistic = if (is.null(cstatistic)) NA else cstatistic
   )
 
-  list(
+  new_ss_result(list(
     n = res$sample_size,
     events = ceiling(res$events),
     csrsquared = res$rsquared,
@@ -53,7 +53,7 @@ calc_prediction_binary <- function(parameters, prevalence, csrsquared = NULL,
     epp = res$EPP,
     inputs = list(parameters = parameters, prevalence = prevalence,
                   csrsquared = csrsquared, cstatistic = cstatistic, shrinkage = shrinkage)
-  )
+  ))
 }
 
 #' Sample size for developing a prediction model with a continuous outcome
@@ -84,7 +84,7 @@ calc_prediction_continuous <- function(parameters, intercept, sd, rsquared,
   res <- pmsampsize::pmsampsize(type = "c", parameters = parameters, intercept = intercept,
                                  sd = sd, rsquared = rsquared, shrinkage = shrinkage, mmoe = mmoe)
 
-  list(
+  new_ss_result(list(
     n = res$sample_size,
     rsquared = res$r2a,
     spp = res$SPP,
@@ -92,7 +92,7 @@ calc_prediction_continuous <- function(parameters, intercept, sd, rsquared,
     intercept_uci = res$int_uci,
     inputs = list(parameters = parameters, intercept = intercept, sd = sd,
                   rsquared = rsquared, shrinkage = shrinkage, mmoe = mmoe)
-  )
+  ))
 }
 
 #' Sample size for developing a prediction model with a survival (time-to-event) outcome
@@ -123,7 +123,7 @@ calc_prediction_survival <- function(parameters, rate, timepoint, meanfup,
                                  timepoint = timepoint, meanfup = meanfup,
                                  csrsquared = csrsquared, shrinkage = shrinkage)
 
-  list(
+  new_ss_result(list(
     n = res$sample_size,
     events = ceiling(res$events),
     csrsquared = res$r2a,
@@ -132,7 +132,7 @@ calc_prediction_survival <- function(parameters, rate, timepoint, meanfup,
     epp = res$EPP,
     inputs = list(parameters = parameters, rate = rate, timepoint = timepoint,
                   meanfup = meanfup, csrsquared = csrsquared, shrinkage = shrinkage)
-  )
+  ))
 }
 
 #' Sample size for externally validating an existing prediction model with a binary outcome
@@ -275,7 +275,7 @@ calc_prediction_external_validation <- function(prevalence, cstatistic,
 
   nfinal <- max(n1, n2, n3, n4, na.rm = TRUE)
 
-  list(
+  new_ss_result(list(
     n1 = n1, n2 = n2, n3 = n3, n4 = if (has_nb) n4 else NULL,
     n = nfinal, events = ceiling(nfinal * prevalence),
     se_oe = se_oe, se_cslope = se_cslope, se_cstat = se_cstat,
@@ -286,5 +286,5 @@ calc_prediction_external_validation <- function(prevalence, cstatistic,
                   cslope = cslope, csciwidth = csciwidth, cstatciwidth = cstatciwidth,
                   sensitivity = sensitivity, specificity = specificity, threshold = threshold,
                   nbciwidth = nbciwidth)
-  )
+  ))
 }

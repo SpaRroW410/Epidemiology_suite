@@ -197,7 +197,7 @@ calc_rmst_comparison <- function(ac_period, tot_time, tau, shape0 = 1, scale0, s
   final <- .rmst_simulate(n0, n1, ac_period, tot_time, tau, shape0, scale0, shape1, scale1,
                           margin, one_sided_alpha, nsim * 3, seed)
 
-  list(
+  new_ss_result(list(
     n0 = n0, n1 = n1, n_total = n0 + n1,
     n0_events = final$n0_events, n1_events = final$n1_events,
     achieved_power_separate = final$power1, achieved_power_pooled = final$power2,
@@ -205,5 +205,5 @@ calc_rmst_comparison <- function(ac_period, tot_time, tau, shape0 = 1, scale0, s
                   shape0 = shape0, scale0 = scale0, shape1 = shape1, scale1 = scale1,
                   margin = margin, allocation1 = allocation1, alpha = alpha, power = power,
                   nsim = nsim)
-  )
+  ))
 }

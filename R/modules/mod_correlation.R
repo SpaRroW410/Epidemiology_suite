@@ -72,7 +72,9 @@ mod_correlation_ui <- function(id) {
       ),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -247,6 +249,72 @@ mod_correlation_server <- function(id) {
         )
       } else {
         p(strong("Required sample size: "), v$n)
+      }
+    })
+
+    render_export_handlers(output, result, function() {
+      key <- input$design
+      remap <- c("single" = "pearson")
+      correlation_content[[if (key %in% names(remap)) remap[[key]] else key]]
+    })
+
+    # Power curves (ROADMAP P1 item 10): wired for the six designs with one
+    # scalar correlation-like (or slope) effect. "two_dependent" needs
+    # three jointly-constrained correlations and is left for a later
+    # batch, same incremental rollout as items 8/9.
+    render_power_curves(output, function() {
+      if (input$design == "single") {
+        req(input$r, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_correlation,
+          args = list(r = input$r, alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "r", values = curve_range_correlation(), label = "r (expected correlation)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "two_independent") {
+        req(input$r1, input$r2, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_correlation_two_independent,
+          args = list(r1 = input$r1, r2 = input$r2, alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "r2", values = curve_range_correlation(), label = "r2 (group 2 correlation)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "point_biserial") {
+        req(input$r_pb, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_correlation_point_biserial,
+          args = list(r = input$r_pb, alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "r", values = curve_range_correlation(), label = "r (point-biserial correlation)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "regression_slope") {
+        req(input$slope_reg, input$sdx_reg, input$sdy_reg, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_regression_slope,
+          args = list(slope = input$slope_reg, sd_x = input$sdx_reg, sd_y = input$sdy_reg,
+                       alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "slope", values = curve_range_around(0, 3 * abs(input$slope_reg)), label = "Regression slope"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "partial") {
+        req(input$r_partial, input$k_partial, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_correlation_partial,
+          args = list(r = input$r_partial, k = input$k_partial, alpha = input$alpha,
+                       power = input$power, alternative = input$alternative),
+          effect = list(param = "r", values = curve_range_correlation(), label = "r (partial correlation)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "spearman") {
+        req(input$r_spearman, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_correlation_spearman,
+          args = list(r = input$r_spearman, alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "r", values = curve_range_correlation(), label = "r (Spearman correlation)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
       }
     })
   })

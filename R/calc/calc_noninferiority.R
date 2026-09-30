@@ -35,13 +35,13 @@ calc_noninferiority_means <- function(mean_new, mean_standard, sd, margin,
                             delta = margin, n = NA, power = power, r = ratio,
                             nfractional = FALSE, alpha = alpha)
 
-  list(
+  new_ss_result(list(
     n_total = fit$n.total,
     n_new = fit$n.treat,
     n_standard = fit$n.control,
     inputs = list(mean_new = mean_new, mean_standard = mean_standard, sd = sd,
                   margin = margin, alpha = alpha, power = power, ratio = ratio)
-  )
+  ))
 }
 
 #' Sample size for a non-inferiority trial, binary (proportions) outcome
@@ -71,13 +71,13 @@ calc_noninferiority_proportions <- function(p_new, p_standard, margin,
                             n = NA, power = power, r = ratio,
                             nfractional = FALSE, alpha = alpha)
 
-  list(
+  new_ss_result(list(
     n_total = fit$n.total,
     n_new = fit$n.treat,
     n_standard = fit$n.control,
     inputs = list(p_new = p_new, p_standard = p_standard, margin = margin,
                   alpha = alpha, power = power, ratio = ratio)
-  )
+  ))
 }
 
 #' Sample size for a non-inferiority trial, odds ratio outcome
@@ -124,11 +124,11 @@ calc_noninferiority_or <- function(pt, pc, margin, k = 1, alpha = 0.05, power = 
   n_control <- ceiling(n_control)
   n_test <- ceiling(n_control * k)
 
-  list(
+  new_ss_result(list(
     n_control = n_control, n_test = n_test, n_total = n_control + n_test,
     or = or,
     inputs = list(pt = pt, pc = pc, margin = margin, k = k, alpha = alpha, power = power)
-  )
+  ))
 }
 
 #' Sample size for a non-inferiority trial, hazard ratio (Cox PH) outcome
@@ -162,8 +162,8 @@ calc_noninferiority_hr <- function(hr, margin, p1 = 0.5, d = 0.8, alpha = 0.05, 
   n <- TrialSize::Cox.NIS(alpha = alpha, beta = 1 - power, loghr = loghr,
                            p1 = p1, d = d, delta = margin)
 
-  list(
+  new_ss_result(list(
     n = ceiling(n), hr = hr,
     inputs = list(hr = hr, margin = margin, p1 = p1, d = d, alpha = alpha, power = power)
-  )
+  ))
 }

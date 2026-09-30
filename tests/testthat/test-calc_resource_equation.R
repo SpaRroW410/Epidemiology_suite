@@ -1,3 +1,4 @@
+source(file.path("..", "..", "R", "calc", "calc_result.R"))
 source(file.path("..", "..", "R", "calc", "calc_resource_equation.R"))
 
 test_that("calc_resource_equation_check reproduces Charan & Kantharia (2013)'s own worked example", {

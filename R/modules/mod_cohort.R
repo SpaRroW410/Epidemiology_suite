@@ -30,7 +30,9 @@ mod_cohort_ui <- function(id) {
                    value = NA, min = 1),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -79,6 +81,21 @@ mod_cohort_server <- function(id) {
         p(strong("Total sample size: "), v$n_total),
         p(sprintf("Exposed: %d, Unexposed: %d", v$n_exposed, v$n_unexposed)),
         p(sprintf("Implied relative risk (RR): %.3f", v$rr))
+      )
+    })
+
+    render_export_handlers(output, result, function() cohort_content$cohort)
+
+    render_power_curves(output, function() {
+      req(input$p0, input$p1, input$ratio, input$alpha, input$power, input$alternative)
+      N <- input$N
+      if (is.null(N) || is.na(N)) N <- NULL
+      list(
+        calc_fn = calc_cohort,
+        args = list(p0 = input$p0, p1 = input$p1, ratio = input$ratio, alpha = input$alpha,
+                     power = input$power, alternative = input$alternative, N = N),
+        effect = list(param = "p1", values = curve_range_proportion(), label = "p1 (incidence risk in exposed group)"),
+        power = list(param = "power", values = curve_range_power())
       )
     })
   })

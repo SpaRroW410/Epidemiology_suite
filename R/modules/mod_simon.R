@@ -21,7 +21,8 @@ mod_simon_ui <- function(id) {
       numericInput(ns("nmax"), "Maximum total sample size to search", value = 100, min = 10, max = 1000, step = 10),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -75,5 +76,7 @@ mod_simon_server <- function(id) {
         p(sprintf("EN(pu) = %.2f, PET(pu) = %.3f", op$EN, op$PET))
       )
     })
+
+    render_export_handlers(output, result, function() simon_content$ph2simon)
   })
 }

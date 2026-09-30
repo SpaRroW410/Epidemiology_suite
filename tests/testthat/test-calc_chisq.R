@@ -1,3 +1,4 @@
+source(file.path("..", "..", "R", "calc", "calc_result.R"))
 source(file.path("..", "..", "R", "calc", "calc_utils.R"))
 source(file.path("..", "..", "R", "calc", "calc_chisq.R"))
 
@@ -116,6 +117,7 @@ test_that("calc_cochran_armitage_trend rejects invalid inputs", {
 })
 
 test_that("calc_cochran_q is reproducible and matches its own directly-verified worked example", {
+  skip_if_not_slow()
   # No installed package provides a sample-size/power FORMULA for
   # Cochran's Q (only analysis functions exist -- rstatix, already an
   # installed dependency, has cochran_qtest()); no closed form or
@@ -133,6 +135,7 @@ test_that("calc_cochran_q is reproducible and matches its own directly-verified 
 })
 
 test_that("calc_cochran_q needs a larger sample size for a higher target power", {
+  skip_if_not_slow()
   res_low <- calc_cochran_q(p = c(0.2, 0.3, 0.4, 0.5), sigma2_subject = 1, power = 0.7)
   res_high <- calc_cochran_q(p = c(0.2, 0.3, 0.4, 0.5), sigma2_subject = 1, power = 0.9)
   expect_lt(res_low$n, res_high$n)

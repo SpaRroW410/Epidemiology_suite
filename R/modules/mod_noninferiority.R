@@ -68,7 +68,9 @@ mod_noninferiority_ui <- function(id) {
       ),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -188,6 +190,53 @@ mod_noninferiority_server <- function(id) {
         )
       } else {
         p(strong("Required total sample size: "), v$n)
+      }
+    })
+
+    render_export_handlers(output, result, function() noninferiority_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): all four designs have a single
+    # scalar effect parameter and a power argument.
+    render_power_curves(output, function() {
+      if (input$design == "means") {
+        req(input$mean_new, input$mean_standard, input$sd, input$margin,
+            input$alpha, input$power, input$ratio)
+        list(
+          calc_fn = calc_noninferiority_means,
+          args = list(mean_new = input$mean_new, mean_standard = input$mean_standard, sd = input$sd,
+                       margin = input$margin, alpha = input$alpha, power = input$power, ratio = input$ratio),
+          effect = list(param = "mean_new", values = curve_range_around(input$mean_standard, 3 * input$sd),
+                        label = "mean_new (new-treatment group)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "proportions") {
+        req(input$p_new, input$p_standard, input$margin_prop, input$alpha_prop,
+            input$power_prop, input$ratio_prop)
+        list(
+          calc_fn = calc_noninferiority_proportions,
+          args = list(p_new = input$p_new, p_standard = input$p_standard, margin = input$margin_prop,
+                       alpha = input$alpha_prop, power = input$power_prop, ratio = input$ratio_prop),
+          effect = list(param = "p_new", values = curve_range_proportion(), label = "p (new-treatment group)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "odds_ratio") {
+        req(input$pt_or, input$pc_or, input$margin_or, input$k_or, input$alpha_or, input$power_or)
+        list(
+          calc_fn = calc_noninferiority_or,
+          args = list(pt = input$pt_or, pc = input$pc_or, margin = input$margin_or,
+                       k = input$k_or, alpha = input$alpha_or, power = input$power_or),
+          effect = list(param = "pt", values = curve_range_proportion(), label = "pt (test/new-treatment group)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        req(input$hr_val, input$margin_hr, input$p1_hr, input$d_hr, input$alpha_hr, input$power_hr)
+        list(
+          calc_fn = calc_noninferiority_hr,
+          args = list(hr = input$hr_val, margin = input$margin_hr, p1 = input$p1_hr,
+                       d = input$d_hr, alpha = input$alpha_hr, power = input$power_hr),
+          effect = list(param = "hr", values = curve_range_ratio(), label = "Hazard ratio (HR)"),
+          power = list(param = "power", values = curve_range_power())
+        )
       }
     })
   })

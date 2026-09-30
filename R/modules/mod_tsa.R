@@ -54,7 +54,8 @@ mod_tsa_ui <- function(id) {
                   choices = c("Two-sided" = "2", "One-sided" = "1")),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -129,6 +130,13 @@ mod_tsa_server <- function(id) {
           "Divide by the anticipated number of participants per trial to estimate",
           "the minimum number of trials the meta-analysis needs.")
       )
+    })
+
+    # tsa_content's per-outcome entries (rr/or/rd/md) carry title/backend
+    # but not citation -- that's on the shared entry, same as evpi_content
+    # and multilevel_content (see mod_evpi.R/mod_multilevel.R).
+    render_export_handlers(output, result, function() {
+      modifyList(tsa_content[[tolower(input$outcome)]], list(citation = tsa_content$shared$citation))
     })
   })
 }

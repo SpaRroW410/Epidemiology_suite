@@ -39,12 +39,12 @@ calc_cohort <- function(p0, p1, power = 0.8, ratio = 1, alpha = 0.05,
                               finite.correction = !is.null(N), nfractional = FALSE,
                               conf.level = 1 - alpha)
 
-  list(
+  new_ss_result(list(
     n_total = ceiling(res$n.total),
     n_exposed = ceiling(res$n.exp1),
     n_unexposed = ceiling(res$n.exp0),
     rr = res$irr,
     inputs = list(p0 = p0, p1 = p1, power = power, ratio = ratio, alpha = alpha,
                   alternative = alternative, N = N)
-  )
+  ))
 }

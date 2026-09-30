@@ -79,14 +79,16 @@ design_wizard_server <- function(input, output, session) {
 
   observeEvent(input$design_wizard_jump, {
     node <- design_nodes[[state$node_id]]
-    key <- if (is.function(node$catalog_key)) node$catalog_key(state$flags) else node$catalog_key
-    req(key)
-    entry <- catalog_entry(key)
-    req(entry)
-    nav_select("main_nav", entry$nav_target, session = session)
-    if (!is.na(entry$module_input_id)) {
-      updateRadioButtons(session, entry$module_input_id, selected = entry$design_value)
-    }
+    .design_wizard_go(session, .terminal_catalog_key(node, state$flags))
+  }, ignoreInit = TRUE)
+
+  # Cluster-randomised paths: the per-arm n from the matched module still
+  # needs inflating, so offer the two modules that do that.
+  observeEvent(input$design_wizard_jump_deff, {
+    .design_wizard_go(session, "cluster_deff")
+  }, ignoreInit = TRUE)
+  observeEvent(input$design_wizard_jump_glmm, {
+    .design_wizard_go(session, if (identical(state$flags$outcome, "binary")) "glmm_binary" else "glmm_lmm_continuous")
   }, ignoreInit = TRUE)
 }
 
@@ -105,8 +107,28 @@ design_wizard_server <- function(input, output, session) {
   )
 }
 
+.terminal_catalog_key <- function(node, flags) {
+  if (is.function(node$catalog_key)) node$catalog_key(flags) else node$catalog_key
+}
+
+.design_wizard_go <- function(session, key) {
+  req(key)
+  entry <- catalog_entry(key)
+  req(entry)
+  nav_select("main_nav", entry$nav_target, session = session)
+  if (!is.na(entry$module_input_id)) {
+    updateRadioButtons(session, entry$module_input_id, selected = entry$design_value)
+  }
+}
+
+# Terminals that already account for clustering themselves -- no need to
+# tell the user to inflate their n afterwards.
+.cluster_aware_keys <- c("cluster_deff", "cluster_deff_variable", "cluster_survey",
+                         "cluster_pps_optimal", "stepped_wedge_normal",
+                         "glmm_lmm_continuous", "glmm_binary", "multilevel_three_level")
+
 .render_design_terminal <- function(node, flags) {
-  key <- if (is.function(node$catalog_key)) node$catalog_key(flags) else node$catalog_key
+  key <- .terminal_catalog_key(node, flags)
   entry <- if (!is.null(key)) catalog_entry(key) else NULL
 
   body <- if (!is.null(entry) && isTRUE(entry$built)) {
@@ -114,24 +136,26 @@ design_wizard_server <- function(input, output, session) {
       if (!is.null(entry$answers) && !is.na(entry$answers)) p(class = "text-muted", entry$answers),
       actionButton("design_wizard_jump", paste("Go to:", entry$nav_target), class = "btn-success")
     )
-  } else if (isTRUE(node$guidance)) {
-    div(class = "alert alert-info", p(node$note))
-  } else {
+  } else if (!isTRUE(node$guidance)) {
     div(class = "alert alert-warning",
         p(strong("Not yet built in this app.")),
-        if (!is.null(node$would_use)) p("Would use: ", code(node$would_use)),
+        if (!is.null(node$would_use)) p("What it needs: ", code(node$would_use)),
         if (!is.null(node$citation) && !identical(node$citation, "-")) p(class = "text-muted small", node$citation),
-        p("See ", code("docs/checklist_by_design.md"), " for the roadmap."))
+        p("This item is tracked, with what would unblock it, in ", code("docs/ROADMAP.md"), " (section 4)."))
   }
 
   tagList(
     h4(node$design),
-    if (!is.null(node$note) && !isTRUE(node$guidance)) div(class = "alert alert-info small", node$note),
-    if (isTRUE(flags$cluster)) div(class = "alert alert-info small", paste(
-      "This was reached via a cluster-randomised design -- apply a design",
-      "effect (DEFF = 1 + (m-1) x ICC) to the base n this module returns.",
-      "This app doesn't compute DEFF automatically yet (Stage 5 modifier,",
-      "see docs/design_identification_algorithm.md).")),
+    if (!is.null(node$note)) div(class = "alert alert-info small", node$note),
+    if (isTRUE(flags$cluster) && !any(key %in% .cluster_aware_keys)) div(class = "alert alert-info small",
+      p(paste(
+        "This was reached via a cluster-randomised design. The module below",
+        "returns the n for individually randomised subjects -- inflate it by",
+        "the design effect, DEFF = 1 + (m - 1) x ICC (or the unequal-cluster-size",
+        "version), or simulate the mixed-model analysis directly.")),
+      actionButton("design_wizard_jump_deff", "Go to: Cluster / Design Effect", class = "btn-light btn-sm"),
+      " ",
+      actionButton("design_wizard_jump_glmm", "Go to: Monte Carlo Mixed Models", class = "btn-light btn-sm")),
     body,
     br(), br(),
     actionButton("design_wizard_restart", "Start over / this isn't my design", class = "btn-link")

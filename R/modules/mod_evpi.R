@@ -40,7 +40,8 @@ mod_evpi_ui <- function(id) {
       ),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -114,6 +115,13 @@ mod_evpi_server <- function(id) {
           boundary_note
         )
       }
+    })
+
+    # evpi_content's per-design entries carry title/backend but not
+    # citation -- that's on the shared entry (see the Reference tab above,
+    # and mod_tsa.R/mod_multilevel.R for the same shape).
+    render_export_handlers(output, result, function() {
+      modifyList(evpi_content[[input$design]], list(citation = evpi_content$shared$citation))
     })
   })
 }

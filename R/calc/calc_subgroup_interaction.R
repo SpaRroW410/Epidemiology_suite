@@ -55,9 +55,9 @@ calc_subgroup_interaction <- function(n_main_total, effect_ratio = 1) {
   multiplier <- 4 / effect_ratio^2
   n_interaction_total <- ceiling(n_main_total * multiplier)
 
-  list(
+  new_ss_result(list(
     n_interaction_total = n_interaction_total,
     multiplier = multiplier,
     inputs = list(n_main_total = n_main_total, effect_ratio = effect_ratio)
-  )
+  ))
 }

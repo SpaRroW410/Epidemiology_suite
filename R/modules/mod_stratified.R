@@ -25,7 +25,8 @@ mod_stratified_ui <- function(id) {
                                "Optimal / Neyman (allocate by size x SD)" = "optimal")),
       hr(),
       h5("Result"),
-      uiOutput(ns("result"))
+      uiOutput(ns("result")),
+      export_controls_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -91,5 +92,7 @@ mod_stratified_server <- function(id) {
           paste(sprintf("stratum %d = %d", seq_along(v$nh), v$nh), collapse = "; "))
       )
     })
+
+    render_export_handlers(output, result, function() stratified_content$stratified)
   })
 }

@@ -25,10 +25,10 @@ calc_correlation <- function(r, alpha = 0.05, power = 0.8,
   fit <- pwr::pwr.r.test(r = r, sig.level = alpha, power = power,
                           alternative = alternative)
 
-  list(
+  new_ss_result(list(
     n = ceiling(fit$n),
     inputs = list(r = r, alpha = alpha, power = power, alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size to compare two independent Pearson correlations
@@ -65,11 +65,11 @@ calc_correlation_two_independent <- function(r1, r2, alpha = 0.05, power = 0.8,
   z_beta <- qnorm(power)
   n <- ((z_alpha + z_beta) / q)^2 + 3
 
-  list(
+  new_ss_result(list(
     n_per_group = ceiling(n),
     q = q,
     inputs = list(r1 = r1, r2 = r2, alpha = alpha, power = power, alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for a point-biserial correlation (continuous outcome vs. a
@@ -107,12 +107,12 @@ calc_correlation_point_biserial <- function(r, alpha = 0.05, power = 0.8,
                           type = "two.sample", alternative = alternative)
   n_per_group <- ceiling(fit$n)
 
-  list(
+  new_ss_result(list(
     n_per_group = n_per_group,
     n_total = n_per_group * 2,
     d = d,
     inputs = list(r = r, alpha = alpha, power = power, alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for a simple linear regression slope (bivariate regression
@@ -155,12 +155,12 @@ calc_regression_slope <- function(slope, sd_x, sd_y, alpha = 0.05, power = 0.8,
 
   fit <- pwr::pwr.r.test(r = r, sig.level = alpha, power = power, alternative = alternative)
 
-  list(
+  new_ss_result(list(
     n = ceiling(fit$n),
     r = r,
     inputs = list(slope = slope, sd_x = sd_x, sd_y = sd_y, alpha = alpha,
                   power = power, alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size for a partial correlation (controlling for k covariates)
@@ -201,10 +201,10 @@ calc_correlation_partial <- function(r, k, alpha = 0.05, power = 0.8,
 
   fit <- pwr::pwr.r.test(r = r, sig.level = alpha, power = power, alternative = alternative)
 
-  list(
+  new_ss_result(list(
     n = ceiling(fit$n) + k,
     inputs = list(r = r, k = k, alpha = alpha, power = power, alternative = alternative)
-  )
+  ))
 }
 
 #' Sample size to compare two dependent (overlapping) Pearson correlations
@@ -276,12 +276,12 @@ calc_correlation_two_dependent <- function(r_yx1, r_yx2, r_x1x2, alpha = 0.05, p
   z_beta <- qnorm(power)
   n <- ((z_alpha + z_beta) * sqrt(2 - 2 * c_term) / abs(z1 - z2))^2 + 3
 
-  list(
+  new_ss_result(list(
     n = ceiling(n),
     c = c_term,
     inputs = list(r_yx1 = r_yx1, r_yx2 = r_yx2, r_x1x2 = r_x1x2, alpha = alpha,
                   power = power, alternative = alternative)
-  )
+  ))
 }
 
 # Asymptotic relative efficiency of Spearman's rank correlation coefficient
@@ -319,10 +319,10 @@ calc_correlation_spearman <- function(r, alpha = 0.05, power = 0.8,
   alternative <- match.arg(alternative)
   base <- calc_correlation(r = r, alpha = alpha, power = power, alternative = alternative)
 
-  list(
+  new_ss_result(list(
     n = ceiling(base$n / .ARE_SPEARMAN_NORMAL),
     n_pearson = base$n,
     are = .ARE_SPEARMAN_NORMAL,
     inputs = list(r = r, alpha = alpha, power = power, alternative = alternative)
-  )
+  ))
 }
