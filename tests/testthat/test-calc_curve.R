@@ -122,6 +122,14 @@ test_that("curve_range_within stays strictly inside its own (lower, upper) bound
   expect_equal(length(v), 40)
 })
 
+test_that("curve_range_multiplicative stays positive and excludes its own center", {
+  v <- curve_range_multiplicative(10, lower_mult = 0.3, upper_mult = 3)
+  expect_true(all(v > 0))
+  expect_false(10 %in% v)
+  expect_equal(min(v), 3) # 10 * 0.3
+  expect_equal(max(v), 30) # 10 * 3
+})
+
 test_that("curve_range_ratio is a positive, log-spaced grid excluding 1", {
   v <- curve_range_ratio()
   expect_true(all(v > 0))

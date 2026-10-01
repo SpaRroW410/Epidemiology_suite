@@ -58,7 +58,8 @@ mod_roc_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -141,6 +142,24 @@ mod_roc_server <- function(id) {
       key <- input$design
       remap <- c("compare_two" = "compare_two_aucs")
       roc_content[[if (key %in% names(remap)) remap[[key]] else key]]
+    })
+
+    # Power curves (ROADMAP P1 item 10): wired for "single_auc" only.
+    # "compare_two" has 8+ scalar inputs (binormal A/B parameters for two
+    # curves, two correlations, an optional partial-AUC restriction) with
+    # no single obvious effect parameter, and is left for a later batch.
+    render_power_curves(output, function() {
+      if (input$design == "single_auc") {
+        req(input$auc, input$alpha, input$power, input$kappa)
+        list(
+          calc_fn = calc_roc_auc,
+          args = list(auc = input$auc, alpha = input$alpha, power = input$power, kappa = input$kappa),
+          effect = list(param = "auc", values = curve_range_within(0.5, 1), label = "Expected AUC"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
+      }
     })
   })
 }

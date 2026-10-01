@@ -285,32 +285,47 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       the new `curve_range_within()`, kept strictly inside the design's
       own margin/limits), Non-Inferiority (`means`, `proportions`,
       `odds_ratio`, `hazard_ratio`).
+    - **Batch 4 (1 Oct 2026):** ROC/AUC (`single_auc` only -- effect = AUC
+      via `curve_range_within(0.5, 1)`), Chi-Square Tests (`mcnemar`
+      only), RM-ANOVA/Mixed ANOVA (all three effects: `between`, `within`,
+      `interaction` -- one `calc_rm_anova()` dispatched by a `type` arg
+      held fixed, effect = Cohen's f via the new
+      `curve_range_multiplicative()`), Multiple Regression (`r2`, effect
+      via `curve_range_proportion()`; `r2_increase`, effect = the full
+      model's R-squared via `curve_range_within(r2_reduced, 1)`),
+      Variance Tests (`single`, `two` -- effect = the varying SD via
+      `curve_range_multiplicative()` around the fixed reference SD).
 
     Deliberately left unwired (backlog for the next rollout batch, same
     incremental pattern as items 8/9): designs with no power argument
     because they aren't a hypothesis test (`precision`,
     `single_precision`, Diagnostic's `precision`/`ppv_npv`/
-    `likelihood_ratio`) and designs whose effect isn't one scalar
-    (`anova`, `planned_contrast` -- k group means; Case-Control's
-    `nested` -- R2/nD/nH structure; Correlation's `two_dependent` -- three
-    jointly-constrained correlations). `posthoc_pairwise` (Proportions,
-    Means) is left for a later batch despite having a single scalar
-    effect pair. The remaining ~38 modules are the batch backlog, wired
-    the same two-lines-per-design way once their own effect/power
-    parameter names are identified per design (mirrors item 9's
-    per-module remap work, not item 8's fully mechanical wrap).
+    `likelihood_ratio`, Variance's `sd_precision`) and designs whose
+    effect isn't one scalar (`anova`, `planned_contrast` -- k group means;
+    Case-Control's `nested` -- R2/nD/nH structure; Correlation's
+    `two_dependent` -- three jointly-constrained correlations; ROC's
+    `compare_two` -- 8+ binormal/correlation inputs with no single obvious
+    effect; Chi-Square's `gof`/`independence`/`mantelhaenszel`/
+    `cochran_armitage` -- vectors or matrices of proportions;
+    `cochran_q` -- Monte Carlo). `posthoc_pairwise` (Proportions, Means)
+    is left for a later batch despite having a single scalar effect pair.
+    The remaining ~33 modules are the batch backlog, wired the same
+    two-lines-per-design way once their own effect/power parameter names
+    are identified per design (mirrors item 9's per-module remap work,
+    not item 8's fully mechanical wrap).
 
-    Verified: full fast test suite (all pre-existing tests plus 30
-    `test-calc_curve.R` tests -- extended from 8 for batch 2's two-tier
-    headline matcher and two new range helpers, then to 30 for batch 3's
-    `curve_range_within()` -- 0 failures/0 errors, 27 expected Monte Carlo
-    skips) after `global.R` was confirmed to source cleanly each time;
-    Playwright against a running instance across all 25 wired designs
-    across the three batches (both plots render, current-value point
-    present, no page/console errors) and every explicitly-unwired design
-    checked in the same passes (each correctly shows the "not yet
-    available" message, no stale plot from a previously-selected design
-    lingers after switching).
+    Verified: full fast test suite (all pre-existing tests plus 34
+    `test-calc_curve.R` tests -- grown from 8 through batches 2-4's
+    two-tier headline matcher and four new range helpers
+    (`curve_range_correlation()`/`curve_range_ratio()`/
+    `curve_range_within()`/`curve_range_multiplicative()`) -- 0
+    failures/0 errors, 27 expected Monte Carlo skips) after `global.R` was
+    confirmed to source cleanly each time; Playwright against a running
+    instance across all 33 wired designs across the four batches (both
+    plots render, current-value point present, no page/console errors)
+    and every explicitly-unwired design checked in the same passes (each
+    correctly shows the "not yet available" message, no stale plot from a
+    previously-selected design lingers after switching).
 11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
 

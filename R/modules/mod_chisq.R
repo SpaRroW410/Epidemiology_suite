@@ -86,7 +86,8 @@ mod_chisq_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -367,5 +368,23 @@ mod_chisq_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() chisq_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): wired for "mcnemar" only -- every
+    # other design here takes a vector/matrix of proportions (gof,
+    # independence, mantelhaenszel, cochran_armitage) or is Monte Carlo
+    # (cochran_q), none of which has one scalar effect parameter to vary.
+    render_power_curves(output, function() {
+      if (input$design == "mcnemar") {
+        req(input$p10, input$p01, input$alpha, input$power)
+        list(
+          calc_fn = calc_mcnemar,
+          args = list(p10 = input$p10, p01 = input$p01, alpha = input$alpha, power = input$power),
+          effect = list(param = "p10", values = curve_range_proportion(), label = "p10 (positive to negative)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }
