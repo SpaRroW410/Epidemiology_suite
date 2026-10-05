@@ -28,7 +28,8 @@ mod_competing_risks_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -83,5 +84,19 @@ mod_competing_risks_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() competing_risks_content$joint)
+
+    render_power_curves(output, function() {
+      req(input$lambda_11, input$hr_1, input$hr_all, input$rr, input$accrual,
+          input$follow_up, input$attrition, input$a1, input$alpha, input$power)
+      list(
+        calc_fn = calc_competing_risks_joint,
+        args = list(lambda_11 = input$lambda_11, hr_1 = input$hr_1, hr_all = input$hr_all,
+                     rr = input$rr, accrual = input$accrual, follow_up = input$follow_up,
+                     attrition = input$attrition, a1 = input$a1,
+                     alpha = input$alpha, power = input$power),
+        effect = list(param = "hr_1", values = curve_range_ratio(), label = "Cause-1 hazard ratio (hr_1)"),
+        power = list(param = "power", values = curve_range_power())
+      )
+    })
   })
 }

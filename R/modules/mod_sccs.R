@@ -42,7 +42,8 @@ mod_sccs_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -106,5 +107,21 @@ mod_sccs_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() sccs_content$samplesize)
+
+    # Power curves (ROADMAP P1 item 10): wired only for the flat (no
+    # age-effects) branch, whose p is a single scalar; the age-groups
+    # branch's p/eage/agegrp are vectors and are left for a later batch.
+    render_power_curves(output, function() {
+      if (input$age_effects != "no") return(NULL)
+      req(input$eexpo, input$risk, input$astart, input$aend, input$p_flat,
+          input$alpha, input$power)
+      list(
+        calc_fn = calc_sccs_samplesize,
+        args = list(eexpo = input$eexpo, risk = input$risk, astart = input$astart,
+                     aend = input$aend, p = input$p_flat, alpha = input$alpha, power = input$power),
+        effect = list(param = "eexpo", values = curve_range_ratio(), label = "Design relative incidence (eexpo)"),
+        power = list(param = "power", values = curve_range_power())
+      )
+    })
   })
 }

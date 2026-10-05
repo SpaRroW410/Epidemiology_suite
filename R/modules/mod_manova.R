@@ -4,7 +4,7 @@
 
 manova_meta <- list(
   id = "manova",
-  nav_title = "MANOVA / Hotelling's T²"
+  nav_title = "MANOVA / Hotelling's T-squared"
 )
 
 mod_manova_ui <- function(id) {
@@ -22,7 +22,8 @@ mod_manova_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -70,5 +71,15 @@ mod_manova_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() manova_content$hotelling)
+
+    render_power_curves(output, function() {
+      req(input$p, input$d2, input$alpha, input$power)
+      list(
+        calc_fn = calc_manova_hotelling,
+        args = list(p = input$p, d2 = input$d2, alpha = input$alpha, power = input$power),
+        effect = list(param = "d2", values = curve_range_multiplicative(input$d2), label = "D-squared (Mahalanobis distance)"),
+        power = list(param = "power", values = curve_range_power())
+      )
+    })
   })
 }

@@ -1788,7 +1788,7 @@ calculator_catalog <- list(
          "biomarkers), rather than testing each one separately?\""
        ),
        outcome_type = "means", groups = "2", dependency = "independent", reference_based = NA,
-       built = TRUE, nav_target = "MANOVA / Hotelling's T²",
+       built = TRUE, nav_target = "MANOVA / Hotelling's T-squared",
        module_input_id = NA, design_value = NA),
 
   list(key = "bayesian_assurance_or",

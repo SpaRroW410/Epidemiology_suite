@@ -295,6 +295,44 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       model's R-squared via `curve_range_within(r2_reduced, 1)`),
       Variance Tests (`single`, `two` -- effect = the varying SD via
       `curve_range_multiplicative()` around the fixed reference SD).
+    - **Batch 5 (5 Oct 2026):** Factorial ANOVA/ANCOVA (effect dynamically
+      follows whichever effect-size input is selected -- `f2` via
+      `curve_range_multiplicative()`, `eta2` via `curve_range_proportion()`),
+      Self-Controlled Case Series (flat/no-age-effects branch only --
+      effect = `eexpo` via `curve_range_ratio()`), Competing Risks (its
+      one design -- effect = `hr_1`), MANOVA/Hotelling's T-squared (its
+      one design -- effect = `d2` via `curve_range_multiplicative()`),
+      Multiplicity Adjustment (`proportion_1s`, `proportion_2s`,
+      `means_1s`, `means_2s` -- each re-runs an already-wired base test
+      with an adjusted alpha).
+
+      Found and fixed a real, pre-existing bug while Playwright-checking
+      this batch's MANOVA module, unrelated to the curves work itself:
+      its nav_title ("MANOVA / Hotelling's T²") rendered in the navbar
+      dropdown as literal garbled text ("T<c2><b2>"), the same no-
+      multibyte-locale root cause documented under item 9 -- except that
+      bug was previously believed confined to *dynamic* `renderText`
+      output; this shows a *static* UI string (a module's own
+      `nav_title`, built once at app start) can hit it too. Fixed by
+      renaming to the ASCII `"MANOVA / Hotelling's T-squared"` (matching
+      the spelled-out-word convention this app already uses for other
+      squared quantities, e.g. "R-squared", "D-squared") in both
+      `mod_manova.R` and the one cross-reference in `R/home/home_catalog.R`
+      that has to name it exactly for wizard navigation; confirmed via
+      `test-catalog_consistency.R`/`test-design_tree.R` and a fresh
+      Playwright check of the rendered menu text.
+
+      Found and fixed a real performance problem before shipping it, not
+      after: Multiplicity's `dunnett` design has a single scalar effect
+      (Cohen's d) and looked wireable like the rest of this batch, but
+      `calc_multiplicity_dunnett()`'s internal `mvtnorm::qmvt()` root
+      search measured ~1.4s *per call* -- a 40-point curve would take
+      ~47s, and two curves per design would mean roughly a minute of
+      unresponsiveness on every keystroke. Left unwired rather than
+      shipped slow; a real fix needs a Calculate-button-gated pattern
+      like the Monte Carlo designs (item 7's `monte_carlo_calculate_ui()`),
+      not a plain live curve -- noted in `mod_multiplicity.R` as a
+      dedicated follow-up, not silently dropped.
 
     Deliberately left unwired (backlog for the next rollout batch, same
     incremental pattern as items 8/9): designs with no power argument
@@ -307,12 +345,14 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     `compare_two` -- 8+ binormal/correlation inputs with no single obvious
     effect; Chi-Square's `gof`/`independence`/`mantelhaenszel`/
     `cochran_armitage` -- vectors or matrices of proportions;
-    `cochran_q` -- Monte Carlo). `posthoc_pairwise` (Proportions, Means)
-    is left for a later batch despite having a single scalar effect pair.
-    The remaining ~33 modules are the batch backlog, wired the same
-    two-lines-per-design way once their own effect/power parameter names
-    are identified per design (mirrors item 9's per-module remap work,
-    not item 8's fully mechanical wrap).
+    `cochran_q` -- Monte Carlo; SCCS's age-groups branch -- vectors).
+    `posthoc_pairwise` (Proportions, Means) is left for a later batch
+    despite having a single scalar effect pair, and Multiplicity's
+    `dunnett` (above) and both FDR designs (a different power concept)
+    are deferred for their own reasons. The remaining ~28 modules are the
+    batch backlog, wired the same two-lines-per-design way once their own
+    effect/power parameter names are identified per design (mirrors item
+    9's per-module remap work, not item 8's fully mechanical wrap).
 
     Verified: full fast test suite (all pre-existing tests plus 34
     `test-calc_curve.R` tests -- grown from 8 through batches 2-4's
@@ -321,11 +361,19 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     `curve_range_within()`/`curve_range_multiplicative()`) -- 0
     failures/0 errors, 27 expected Monte Carlo skips) after `global.R` was
     confirmed to source cleanly each time; Playwright against a running
-    instance across all 33 wired designs across the four batches (both
-    plots render, current-value point present, no page/console errors)
-    and every explicitly-unwired design checked in the same passes (each
-    correctly shows the "not yet available" message, no stale plot from a
-    previously-selected design lingers after switching).
+    instance across all wired designs in every batch (both plots render,
+    current-value point present, no page/console errors) and every
+    explicitly-unwired design checked in the same passes (each correctly
+    shows the "not yet available" message, no stale plot from a
+    previously-selected design lingers after switching) -- including a
+    direct per-call timing measurement (not just a visual check) for
+    every batch-5 design before deciding whether to ship its curve.
+    Running total, recounted directly from each module's own
+    `render_power_curves()` wiring rather than carried forward from
+    memory (the carried-forward figure quietly drifted off by a few each
+    batch -- RM-ANOVA's three designs share one unconditional code path,
+    which a naive per-batch tally undercounted): **46 designs wired
+    across 19 modules**, five batches.
 11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
 
