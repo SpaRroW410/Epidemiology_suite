@@ -71,7 +71,8 @@ mod_logistic_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -222,5 +223,49 @@ mod_logistic_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() logistic_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): wired for the four scalar-effect
+    # designs. "ordinal" takes a vector of category probabilities and is
+    # left for a later batch.
+    render_power_curves(output, function() {
+      if (input$design == "binary") {
+        req(input$p1_b, input$p2_b, input$prop_x1, input$alpha_b, input$power_b)
+        list(
+          calc_fn = calc_logistic_binary,
+          args = list(p1 = input$p1_b, p2 = input$p2_b, prop_x1 = input$prop_x1,
+                       alpha = input$alpha_b, power = input$power_b),
+          effect = list(param = "p2", values = curve_range_proportion(), label = "p2 (event rate at X = 1)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "continuous") {
+        req(input$p1_c, input$or, input$alpha_c, input$power_c)
+        list(
+          calc_fn = calc_logistic_continuous,
+          args = list(p1 = input$p1_c, or = input$or, alpha = input$alpha_c, power = input$power_c),
+          effect = list(param = "or", values = curve_range_ratio(), label = "Odds ratio per 1-SD increase"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "binary_adjusted") {
+        req(input$p1_ba, input$p2_ba, input$prop_x1_ba, input$r2_ba, input$alpha_ba, input$power_ba)
+        list(
+          calc_fn = calc_logistic_binary_adjusted,
+          args = list(p1 = input$p1_ba, p2 = input$p2_ba, prop_x1 = input$prop_x1_ba, r2 = input$r2_ba,
+                       alpha = input$alpha_ba, power = input$power_ba),
+          effect = list(param = "p2", values = curve_range_proportion(), label = "p2 (event rate at X = 1)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "continuous_adjusted") {
+        req(input$p1_ca, input$or_ca, input$r2_ca, input$alpha_ca, input$power_ca)
+        list(
+          calc_fn = calc_logistic_continuous_adjusted,
+          args = list(p1 = input$p1_ca, or = input$or_ca, r2 = input$r2_ca,
+                       alpha = input$alpha_ca, power = input$power_ca),
+          effect = list(param = "or", values = curve_range_ratio(), label = "Odds ratio per 1-SD increase"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }

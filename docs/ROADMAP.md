@@ -333,47 +333,76 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       like the Monte Carlo designs (item 7's `monte_carlo_calculate_ui()`),
       not a plain live curve -- noted in `mod_multiplicity.R` as a
       dedicated follow-up, not silently dropped.
+    - **Batch 6 (7 Oct 2026):** Logistic Regression (`binary`,
+      `continuous`, `binary_adjusted`, `continuous_adjusted` -- effect =
+      `p2` or the odds ratio via `curve_range_ratio()`), Incidence Rate
+      (`comparison`, `poisson_regression`, `negative_binomial` -- effect
+      = a rate ratio via `curve_range_ratio()`, or for
+      `poisson_regression`, the log-rate-ratio slope `beta1` via
+      `curve_range_around(0, 3 * abs(current beta1))`).
+
+      Investigated and explicitly declined three more modules before
+      writing any wiring, each for a documented reason rather than
+      silently skipped:
+      - **Agreement/Reliability** (kappa, ICC, Cronbach's alpha,
+        Bland-Altman, CCC): every design is precision-based (a target CI
+        width, not a power/alpha hypothesis test) -- none has a `power`
+        argument at all, so the whole effect/power curve pair this
+        feature is built around doesn't apply. A "required n vs.
+        precision" curve would be the right analog but is a different
+        feature, not a drop-in reuse of `render_power_curves()`.
+      - **Pilot/Feasibility**: same reason -- it's a precision
+        illustration around a fixed rule-of-thumb n, not a hypothesis
+        test, so there is no effect size or power to vary.
+      - **Exact Tests** (binomial, Fisher, Boschloo, exact Poisson, sign
+        test): each design has a power argument and looked wireable, but
+        every one of them does an iterative/exact search per call --
+        measured directly (not assumed) at ~0.39s (binomial), ~0.73s
+        (Fisher), ~2.1s (Boschloo), ~0.21s (sign test), and only exact
+        Poisson was fast (~0.05s). A default 40-point grid would take
+        2-84 seconds per curve depending on design. Deferred whole, same
+        reasoning as Multiplicity's `dunnett` in batch 5 -- needs either
+        a design-specific reduced grid size or a Calculate-button gate,
+        not a blanket live curve.
 
     Deliberately left unwired (backlog for the next rollout batch, same
     incremental pattern as items 8/9): designs with no power argument
     because they aren't a hypothesis test (`precision`,
     `single_precision`, Diagnostic's `precision`/`ppv_npv`/
-    `likelihood_ratio`, Variance's `sd_precision`) and designs whose
-    effect isn't one scalar (`anova`, `planned_contrast` -- k group means;
-    Case-Control's `nested` -- R2/nD/nH structure; Correlation's
-    `two_dependent` -- three jointly-constrained correlations; ROC's
-    `compare_two` -- 8+ binormal/correlation inputs with no single obvious
-    effect; Chi-Square's `gof`/`independence`/`mantelhaenszel`/
-    `cochran_armitage` -- vectors or matrices of proportions;
-    `cochran_q` -- Monte Carlo; SCCS's age-groups branch -- vectors).
-    `posthoc_pairwise` (Proportions, Means) is left for a later batch
-    despite having a single scalar effect pair, and Multiplicity's
-    `dunnett` (above) and both FDR designs (a different power concept)
-    are deferred for their own reasons. The remaining ~28 modules are the
-    batch backlog, wired the same two-lines-per-design way once their own
-    effect/power parameter names are identified per design (mirrors item
-    9's per-module remap work, not item 8's fully mechanical wrap).
+    `likelihood_ratio`, Variance's `sd_precision`, every Agreement design,
+    Pilot) and designs whose effect isn't one scalar (`anova`,
+    `planned_contrast` -- k group means; Case-Control's `nested` -- R2/
+    nD/nH structure; Correlation's `two_dependent` -- three jointly-
+    constrained correlations; ROC's `compare_two` -- 8+ binormal/
+    correlation inputs with no single obvious effect; Chi-Square's
+    `gof`/`independence`/`mantelhaenszel`/`cochran_armitage` -- vectors or
+    matrices of proportions; `cochran_q` -- Monte Carlo; SCCS's age-groups
+    branch -- vectors; Logistic's `ordinal` -- a vector of category
+    probabilities). `posthoc_pairwise` (Proportions, Means) is left for a
+    later batch despite having a single scalar effect pair, and
+    Multiplicity's `dunnett` and all of Exact Tests are deferred for
+    being too slow for a plain 40-point live grid (measured, not
+    assumed). The remaining ~26 modules are the batch backlog, wired the
+    same two-lines-per-design way once their own effect/power parameter
+    names are identified per design (mirrors item 9's per-module remap
+    work, not item 8's fully mechanical wrap).
 
-    Verified: full fast test suite (all pre-existing tests plus 34
-    `test-calc_curve.R` tests -- grown from 8 through batches 2-4's
-    two-tier headline matcher and four new range helpers
-    (`curve_range_correlation()`/`curve_range_ratio()`/
-    `curve_range_within()`/`curve_range_multiplicative()`) -- 0
-    failures/0 errors, 27 expected Monte Carlo skips) after `global.R` was
-    confirmed to source cleanly each time; Playwright against a running
-    instance across all wired designs in every batch (both plots render,
-    current-value point present, no page/console errors) and every
-    explicitly-unwired design checked in the same passes (each correctly
-    shows the "not yet available" message, no stale plot from a
-    previously-selected design lingers after switching) -- including a
-    direct per-call timing measurement (not just a visual check) for
-    every batch-5 design before deciding whether to ship its curve.
+    Verified: full fast test suite (0 failures/0 errors, 27 expected
+    Monte Carlo skips) after `global.R` was confirmed to source cleanly
+    each time; Playwright against a running instance across all wired
+    designs in every batch (both plots render, current-value point
+    present, no page/console errors) and every explicitly-unwired design
+    checked in the same passes (each correctly shows the "not yet
+    available" message, no stale plot from a previously-selected design
+    lingers after switching) -- including a direct per-call timing
+    measurement (not just a visual check) for every candidate design
+    before deciding whether to ship its curve, batches 5 and 6 alike.
     Running total, recounted directly from each module's own
     `render_power_curves()` wiring rather than carried forward from
     memory (the carried-forward figure quietly drifted off by a few each
     batch -- RM-ANOVA's three designs share one unconditional code path,
-    which a naive per-batch tally undercounted): **46 designs wired
-    across 19 modules**, five batches.
+    which a naive per-batch tally undercounted): **53 designs wired
+    across 21 modules**, six batches.
 11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
 

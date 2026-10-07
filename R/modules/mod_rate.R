@@ -79,7 +79,8 @@ mod_rate_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -212,5 +213,48 @@ mod_rate_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() rate_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): wired for the three designs with
+    # a power argument. "precision" has none (it isn't a hypothesis test).
+    render_power_curves(output, function() {
+      if (input$design == "comparison") {
+        req(input$rate_ref, input$rate_ratio, input$prop_exposed,
+            input$alpha_comp, input$power_comp, input$alternative_comp)
+        list(
+          calc_fn = calc_rate_comparison,
+          args = list(rate_ref = input$rate_ref, rate_ratio = input$rate_ratio,
+                       prop_exposed = input$prop_exposed, alpha = input$alpha_comp,
+                       power = input$power_comp, alternative = input$alternative_comp),
+          effect = list(param = "rate_ratio", values = curve_range_ratio(), label = "Rate ratio (exposed / reference)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "poisson_regression") {
+        req(input$beta0_pr, input$beta1_pr, input$mu_x1_pr, input$sigma2_x1_pr,
+            input$mu_T_pr, input$phi_pr, input$alpha_pr, input$power_pr)
+        list(
+          calc_fn = calc_poisson_regression_continuous,
+          args = list(beta0 = input$beta0_pr, beta1 = input$beta1_pr, mu_x1 = input$mu_x1_pr,
+                       sigma2_x1 = input$sigma2_x1_pr, mu_T = input$mu_T_pr, phi = input$phi_pr,
+                       alpha = input$alpha_pr, power = input$power_pr),
+          effect = list(param = "beta1", values = curve_range_around(0, 3 * abs(input$beta1_pr)),
+                        label = "beta1 (log rate ratio per unit increase)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "negative_binomial") {
+        req(input$mu0_nb, input$rr_nb, input$theta_nb, input$duration_nb, input$ratio_nb,
+            input$approach_nb, input$alternative_nb, input$alpha_nb, input$power_nb)
+        list(
+          calc_fn = calc_negative_binomial_rates,
+          args = list(mu0 = input$mu0_nb, RR = input$rr_nb, theta = input$theta_nb,
+                       duration = input$duration_nb, ssize_ratio = input$ratio_nb,
+                       alpha = input$alpha_nb, power = input$power_nb,
+                       alternative = input$alternative_nb, approach = as.numeric(input$approach_nb)),
+          effect = list(param = "RR", values = curve_range_ratio(), label = "Rate ratio (treatment / control)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }
