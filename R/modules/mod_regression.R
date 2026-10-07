@@ -51,7 +51,8 @@ mod_regression_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -134,5 +135,31 @@ mod_regression_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() regression_content[[input$design]])
+
+    render_power_curves(output, function() {
+      if (input$design == "r2") {
+        req(input$r2, input$num_predictors, input$alpha, input$power)
+        list(
+          calc_fn = calc_regression_f2,
+          args = list(r2 = input$r2, num_predictors = input$num_predictors,
+                       alpha = input$alpha, power = input$power),
+          effect = list(param = "r2", values = curve_range_proportion(), label = "Expected R-squared"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        req(input$r2_reduced, input$r2_full, input$num_predictors_added,
+            input$num_predictors_total, input$alpha, input$power)
+        list(
+          calc_fn = calc_regression_r2_increase,
+          args = list(r2_reduced = input$r2_reduced, r2_full = input$r2_full,
+                       num_predictors_added = input$num_predictors_added,
+                       num_predictors_total = input$num_predictors_total,
+                       alpha = input$alpha, power = input$power),
+          effect = list(param = "r2_full", values = curve_range_within(input$r2_reduced, 1),
+                        label = "R-squared of the full model"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      }
+    })
   })
 }

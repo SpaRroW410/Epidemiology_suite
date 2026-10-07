@@ -106,3 +106,13 @@ curve_range_within <- function(lower, upper, n = 40, margin_frac = 0.02) {
   pad <- (upper - lower) * margin_frac
   seq(lower + pad, upper - pad, length.out = n)
 }
+
+#' A log-spaced scan range around a positive center value (e.g. a
+#' reference SD, a Cohen's f effect size), guaranteed to stay positive --
+#' unlike curve_range_around(), which is symmetric in raw units and can go
+#' negative or zero for a center not far from it. The center itself is
+#' excluded, same reasoning as curve_range_around().
+curve_range_multiplicative <- function(center, lower_mult = 0.3, upper_mult = 3, n = 40) {
+  v <- exp(seq(log(center * lower_mult), log(center * upper_mult), length.out = n))
+  v[abs(v - center) > 1e-9]
+}

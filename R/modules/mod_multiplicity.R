@@ -117,7 +117,8 @@ mod_multiplicity_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -278,6 +279,65 @@ mod_multiplicity_server <- function(id) {
       key <- input$design
       remap <- c("proportion_1s" = "overview", "proportion_2s" = "overview", "means_1s" = "overview", "means_2s" = "overview", "fdr_means_2s" = "fdr")
       multiplicity_content[[if (key %in% names(remap)) remap[[key]] else key]]
+    })
+
+    # Power curves (ROADMAP P1 item 10): wired for the four designs that
+    # re-run an already-wired single-effect base test (proportion_1s/2s,
+    # means_1s/2s). "fdr_means_2s" and "fdr_microarray" use a different
+    # power concept (average/FDR-level power, not family-wise alpha) and
+    # are left for a later batch. "dunnett" has a single scalar effect
+    # (Cohen's d) but calc_multiplicity_dunnett() is NOT wired here: each
+    # call does an internal mvtnorm::qmvt() root search (~1.4s), so a
+    # 40-point grid takes ~47s per curve (measured) -- unusable in a plain
+    # reactive. It would need a Calculate-button-gated pattern like the
+    # Monte Carlo designs (item 7's monte_carlo_calculate_ui()), not a
+    # live curve; left for a dedicated follow-up.
+    render_power_curves(output, function() {
+      if (input$design == "proportion_1s") {
+        req(input$p0, input$p1_prop1s, input$m, input$method, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_multiplicity_proportion_1s,
+          args = list(p0 = input$p0, p1 = input$p1_prop1s, m = input$m, method = input$method,
+                       alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "p1", values = curve_range_proportion(), label = "p1 (expected proportion)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "proportion_2s") {
+        req(input$p1, input$p2, input$m, input$method, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_multiplicity_proportion_2s,
+          args = list(p1 = input$p1, p2 = input$p2, m = input$m, method = input$method,
+                       alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "p2", values = curve_range_proportion(), label = "p2 (group 2 proportion)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "means_1s") {
+        req(input$mu0, input$mu1_means1s, input$sd_1s, input$m, input$method,
+            input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_multiplicity_means_1s,
+          args = list(mu0 = input$mu0, mu1 = input$mu1_means1s, sd = input$sd_1s, m = input$m,
+                       method = input$method, alpha = input$alpha, power = input$power,
+                       alternative = input$alternative),
+          effect = list(param = "mu1", values = curve_range_around(input$mu0, 3 * input$sd_1s),
+                        label = "mu1 (expected mean)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "means_2s") {
+        req(input$mu1_means2s, input$mu2_means2s, input$sd_2s, input$m, input$method,
+            input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_multiplicity_means_2s,
+          args = list(mu1 = input$mu1_means2s, mu2 = input$mu2_means2s, sd = input$sd_2s, m = input$m,
+                       method = input$method, alpha = input$alpha, power = input$power,
+                       alternative = input$alternative),
+          effect = list(param = "mu2", values = curve_range_around(input$mu1_means2s, 3 * input$sd_2s),
+                        label = "mu2 (group 2 mean)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
+      }
     })
   })
 }

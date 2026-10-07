@@ -36,7 +36,8 @@ mod_anova_general_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -88,5 +89,22 @@ mod_anova_general_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() anova_general_content$anova_general)
+
+    render_power_curves(output, function() {
+      es <- if (input$effect_size_type == "f2") input$f2 else input$eta2
+      req(input$u, input$effect_size_type, es, input$alpha, input$power)
+      effect_values <- if (input$effect_size_type == "f2") {
+        curve_range_multiplicative(es)
+      } else {
+        curve_range_proportion()
+      }
+      list(
+        calc_fn = calc_anova_general,
+        args = list(u = input$u, effect_size = es, effect_size_type = input$effect_size_type,
+                     alpha = input$alpha, power = input$power),
+        effect = list(param = "effect_size", values = effect_values, label = "Effect size"),
+        power = list(param = "power", values = curve_range_power())
+      )
+    })
   })
 }

@@ -57,7 +57,8 @@ mod_variance_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -152,5 +153,33 @@ mod_variance_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() variance_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): wired for "single"/"two".
+    # "sd_precision" has no power argument (it isn't a hypothesis test).
+    render_power_curves(output, function() {
+      if (input$design == "single") {
+        req(input$sigma0, input$sigma1, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_variance_single,
+          args = list(sigma0 = input$sigma0, sigma1 = input$sigma1, alpha = input$alpha,
+                       power = input$power, alternative = input$alternative),
+          effect = list(param = "sigma1", values = curve_range_multiplicative(input$sigma0),
+                        label = "sigma1 (assumed true SD)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "two") {
+        req(input$sigma1_two, input$sigma2_two, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_variance_two,
+          args = list(sigma1 = input$sigma1_two, sigma2 = input$sigma2_two, alpha = input$alpha,
+                       power = input$power, alternative = input$alternative),
+          effect = list(param = "sigma2", values = curve_range_multiplicative(input$sigma1_two),
+                        label = "sigma2 (group 2 SD)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }

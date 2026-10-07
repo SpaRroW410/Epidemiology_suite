@@ -36,7 +36,8 @@ mod_rm_anova_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -105,5 +106,16 @@ mod_rm_anova_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() rm_anova_content[[input$design]])
+
+    render_power_curves(output, function() {
+      req(input$ng, input$nm, input$f, input$nscor, input$alpha, input$power, input$design)
+      list(
+        calc_fn = calc_rm_anova,
+        args = list(ng = input$ng, nm = input$nm, f = input$f, nscor = input$nscor,
+                     alpha = input$alpha, power = input$power, type = input$design),
+        effect = list(param = "f", values = curve_range_multiplicative(input$f), label = "Cohen's f effect size"),
+        power = list(param = "power", values = curve_range_power())
+      )
+    })
   })
 }

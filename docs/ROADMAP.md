@@ -285,32 +285,124 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       the new `curve_range_within()`, kept strictly inside the design's
       own margin/limits), Non-Inferiority (`means`, `proportions`,
       `odds_ratio`, `hazard_ratio`).
+    - **Batch 4 (1 Oct 2026):** ROC/AUC (`single_auc` only -- effect = AUC
+      via `curve_range_within(0.5, 1)`), Chi-Square Tests (`mcnemar`
+      only), RM-ANOVA/Mixed ANOVA (all three effects: `between`, `within`,
+      `interaction` -- one `calc_rm_anova()` dispatched by a `type` arg
+      held fixed, effect = Cohen's f via the new
+      `curve_range_multiplicative()`), Multiple Regression (`r2`, effect
+      via `curve_range_proportion()`; `r2_increase`, effect = the full
+      model's R-squared via `curve_range_within(r2_reduced, 1)`),
+      Variance Tests (`single`, `two` -- effect = the varying SD via
+      `curve_range_multiplicative()` around the fixed reference SD).
+    - **Batch 5 (5 Oct 2026):** Factorial ANOVA/ANCOVA (effect dynamically
+      follows whichever effect-size input is selected -- `f2` via
+      `curve_range_multiplicative()`, `eta2` via `curve_range_proportion()`),
+      Self-Controlled Case Series (flat/no-age-effects branch only --
+      effect = `eexpo` via `curve_range_ratio()`), Competing Risks (its
+      one design -- effect = `hr_1`), MANOVA/Hotelling's T-squared (its
+      one design -- effect = `d2` via `curve_range_multiplicative()`),
+      Multiplicity Adjustment (`proportion_1s`, `proportion_2s`,
+      `means_1s`, `means_2s` -- each re-runs an already-wired base test
+      with an adjusted alpha).
+
+      Found and fixed a real, pre-existing bug while Playwright-checking
+      this batch's MANOVA module, unrelated to the curves work itself:
+      its nav_title ("MANOVA / Hotelling's T²") rendered in the navbar
+      dropdown as literal garbled text ("T<c2><b2>"), the same no-
+      multibyte-locale root cause documented under item 9 -- except that
+      bug was previously believed confined to *dynamic* `renderText`
+      output; this shows a *static* UI string (a module's own
+      `nav_title`, built once at app start) can hit it too. Fixed by
+      renaming to the ASCII `"MANOVA / Hotelling's T-squared"` (matching
+      the spelled-out-word convention this app already uses for other
+      squared quantities, e.g. "R-squared", "D-squared") in both
+      `mod_manova.R` and the one cross-reference in `R/home/home_catalog.R`
+      that has to name it exactly for wizard navigation; confirmed via
+      `test-catalog_consistency.R`/`test-design_tree.R` and a fresh
+      Playwright check of the rendered menu text.
+
+      Found and fixed a real performance problem before shipping it, not
+      after: Multiplicity's `dunnett` design has a single scalar effect
+      (Cohen's d) and looked wireable like the rest of this batch, but
+      `calc_multiplicity_dunnett()`'s internal `mvtnorm::qmvt()` root
+      search measured ~1.4s *per call* -- a 40-point curve would take
+      ~47s, and two curves per design would mean roughly a minute of
+      unresponsiveness on every keystroke. Left unwired rather than
+      shipped slow; a real fix needs a Calculate-button-gated pattern
+      like the Monte Carlo designs (item 7's `monte_carlo_calculate_ui()`),
+      not a plain live curve -- noted in `mod_multiplicity.R` as a
+      dedicated follow-up, not silently dropped.
+    - **Batch 6 (7 Oct 2026):** Logistic Regression (`binary`,
+      `continuous`, `binary_adjusted`, `continuous_adjusted` -- effect =
+      `p2` or the odds ratio via `curve_range_ratio()`), Incidence Rate
+      (`comparison`, `poisson_regression`, `negative_binomial` -- effect
+      = a rate ratio via `curve_range_ratio()`, or for
+      `poisson_regression`, the log-rate-ratio slope `beta1` via
+      `curve_range_around(0, 3 * abs(current beta1))`).
+
+      Investigated and explicitly declined three more modules before
+      writing any wiring, each for a documented reason rather than
+      silently skipped:
+      - **Agreement/Reliability** (kappa, ICC, Cronbach's alpha,
+        Bland-Altman, CCC): every design is precision-based (a target CI
+        width, not a power/alpha hypothesis test) -- none has a `power`
+        argument at all, so the whole effect/power curve pair this
+        feature is built around doesn't apply. A "required n vs.
+        precision" curve would be the right analog but is a different
+        feature, not a drop-in reuse of `render_power_curves()`.
+      - **Pilot/Feasibility**: same reason -- it's a precision
+        illustration around a fixed rule-of-thumb n, not a hypothesis
+        test, so there is no effect size or power to vary.
+      - **Exact Tests** (binomial, Fisher, Boschloo, exact Poisson, sign
+        test): each design has a power argument and looked wireable, but
+        every one of them does an iterative/exact search per call --
+        measured directly (not assumed) at ~0.39s (binomial), ~0.73s
+        (Fisher), ~2.1s (Boschloo), ~0.21s (sign test), and only exact
+        Poisson was fast (~0.05s). A default 40-point grid would take
+        2-84 seconds per curve depending on design. Deferred whole, same
+        reasoning as Multiplicity's `dunnett` in batch 5 -- needs either
+        a design-specific reduced grid size or a Calculate-button gate,
+        not a blanket live curve.
 
     Deliberately left unwired (backlog for the next rollout batch, same
     incremental pattern as items 8/9): designs with no power argument
     because they aren't a hypothesis test (`precision`,
     `single_precision`, Diagnostic's `precision`/`ppv_npv`/
-    `likelihood_ratio`) and designs whose effect isn't one scalar
-    (`anova`, `planned_contrast` -- k group means; Case-Control's
-    `nested` -- R2/nD/nH structure; Correlation's `two_dependent` -- three
-    jointly-constrained correlations). `posthoc_pairwise` (Proportions,
-    Means) is left for a later batch despite having a single scalar
-    effect pair. The remaining ~38 modules are the batch backlog, wired
-    the same two-lines-per-design way once their own effect/power
-    parameter names are identified per design (mirrors item 9's
-    per-module remap work, not item 8's fully mechanical wrap).
+    `likelihood_ratio`, Variance's `sd_precision`, every Agreement design,
+    Pilot) and designs whose effect isn't one scalar (`anova`,
+    `planned_contrast` -- k group means; Case-Control's `nested` -- R2/
+    nD/nH structure; Correlation's `two_dependent` -- three jointly-
+    constrained correlations; ROC's `compare_two` -- 8+ binormal/
+    correlation inputs with no single obvious effect; Chi-Square's
+    `gof`/`independence`/`mantelhaenszel`/`cochran_armitage` -- vectors or
+    matrices of proportions; `cochran_q` -- Monte Carlo; SCCS's age-groups
+    branch -- vectors; Logistic's `ordinal` -- a vector of category
+    probabilities). `posthoc_pairwise` (Proportions, Means) is left for a
+    later batch despite having a single scalar effect pair, and
+    Multiplicity's `dunnett` and all of Exact Tests are deferred for
+    being too slow for a plain 40-point live grid (measured, not
+    assumed). The remaining ~26 modules are the batch backlog, wired the
+    same two-lines-per-design way once their own effect/power parameter
+    names are identified per design (mirrors item 9's per-module remap
+    work, not item 8's fully mechanical wrap).
 
-    Verified: full fast test suite (all pre-existing tests plus 30
-    `test-calc_curve.R` tests -- extended from 8 for batch 2's two-tier
-    headline matcher and two new range helpers, then to 30 for batch 3's
-    `curve_range_within()` -- 0 failures/0 errors, 27 expected Monte Carlo
-    skips) after `global.R` was confirmed to source cleanly each time;
-    Playwright against a running instance across all 25 wired designs
-    across the three batches (both plots render, current-value point
+    Verified: full fast test suite (0 failures/0 errors, 27 expected
+    Monte Carlo skips) after `global.R` was confirmed to source cleanly
+    each time; Playwright against a running instance across all wired
+    designs in every batch (both plots render, current-value point
     present, no page/console errors) and every explicitly-unwired design
     checked in the same passes (each correctly shows the "not yet
     available" message, no stale plot from a previously-selected design
-    lingers after switching).
+    lingers after switching) -- including a direct per-call timing
+    measurement (not just a visual check) for every candidate design
+    before deciding whether to ship its curve, batches 5 and 6 alike.
+    Running total, recounted directly from each module's own
+    `render_power_curves()` wiring rather than carried forward from
+    memory (the carried-forward figure quietly drifted off by a few each
+    batch -- RM-ANOVA's three designs share one unconditional code path,
+    which a naive per-batch tally undercounted): **53 designs wired
+    across 21 modules**, six batches.
 11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
 
