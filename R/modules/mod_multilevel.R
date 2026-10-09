@@ -42,7 +42,8 @@ mod_multilevel_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -121,6 +122,33 @@ mod_multilevel_server <- function(id) {
     # the same shape).
     render_export_handlers(output, result, function() {
       modifyList(multilevel_content[[input$design]], list(citation = multilevel_content$shared$citation))
+    })
+
+    render_power_curves(output, function() {
+      req(input$design, input$n1, input$T_end, input$var_ratio, input$delta,
+          input$sigma_error, input$alpha, input$power)
+      effect <- list(param = "delta", values = curve_range_around(0, 3 * abs(input$delta)),
+                     label = "delta (difference between arms by end of study)")
+      if (input$design == "two_level") {
+        list(
+          calc_fn = calc_multilevel_two_level,
+          args = list(n1 = input$n1, T_end = input$T_end, var_ratio = input$var_ratio,
+                       delta = input$delta, sigma_error = input$sigma_error,
+                       alpha = input$alpha, power = input$power),
+          effect = effect,
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        req(input$n2, input$icc_slope)
+        list(
+          calc_fn = calc_multilevel_three_level,
+          args = list(n1 = input$n1, n2 = input$n2, T_end = input$T_end, var_ratio = input$var_ratio,
+                       icc_slope = input$icc_slope, delta = input$delta, sigma_error = input$sigma_error,
+                       alpha = input$alpha, power = input$power),
+          effect = effect,
+          power = list(param = "power", values = curve_range_power())
+        )
+      }
     })
   })
 }

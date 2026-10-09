@@ -72,6 +72,14 @@ test_that(".ss_curve_n_field falls back to a wider n/k-as-a-token match when no 
   expect_equal(.ss_curve_n_field(r), "subcohort_n")
 })
 
+test_that(".ss_curve_n_field last-resort tier finds an n<word> count like nclusters, but never outranks an earlier tier", {
+  r <- new_ss_result(list(achieved_power = 0.82, nclusters = 8, deff = 1.4, inputs = list()))
+  expect_equal(.ss_curve_n_field(r), "nclusters")
+
+  r2 <- new_ss_result(list(nclusters = 8, subcohort_n = 120, inputs = list()))
+  expect_equal(.ss_curve_n_field(r2), "subcohort_n")
+})
+
 test_that("ss_curve_points traces the case_cohort design's subcohort_n across a grid of hr", {
   pts <- ss_curve_points(
     calc_case_control_case_cohort,

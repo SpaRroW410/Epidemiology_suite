@@ -56,7 +56,8 @@ mod_meta_power_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -129,5 +130,34 @@ mod_meta_power_server <- function(id) {
 
     render_export_handlers(output, result, function() meta_power_content$power,
                             value_fn = function(res) res$k_res)
+
+    # Power curves (ROADMAP P1 item 10): required k vs. effect size / power
+    # for the d and r effect types. The "or" type takes a whole 2x2 table
+    # rather than one scalar effect and is left for a later batch.
+    render_power_curves(output, function() {
+      req(input$es_type, input$study_size, input$i2, input$test_type,
+          input$alpha, input$power, input$model)
+      if (input$es_type == "d") {
+        req(input$d_effect)
+        effect_size <- input$d_effect
+        values <- curve_range_around(0, 3 * abs(input$d_effect))
+        label <- "Assumed true effect size (Cohen's d)"
+      } else if (input$es_type == "r") {
+        req(input$r_effect)
+        effect_size <- input$r_effect
+        values <- curve_range_correlation()
+        label <- "Assumed true correlation (r)"
+      } else {
+        return(NULL)
+      }
+      list(
+        calc_fn = calc_meta_analysis_k,
+        args = list(effect_size = effect_size, study_size = input$study_size, i2 = input$i2,
+                     es_type = input$es_type, test_type = input$test_type, alpha = input$alpha,
+                     power = input$power, con_table = NULL, model = input$model),
+        effect = list(param = "effect_size", values = values, label = label),
+        power = list(param = "power", values = curve_range_power())
+      )
+    })
   })
 }

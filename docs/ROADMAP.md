@@ -341,9 +341,32 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       `poisson_regression`, the log-rate-ratio slope `beta1` via
       `curve_range_around(0, 3 * abs(current beta1))`).
 
-      Investigated and explicitly declined three more modules before
-      writing any wiring, each for a documented reason rather than
-      silently skipped:
+    - **Batch 7 (9 Oct 2026):** Log-Rank/Survival (`logrank`,
+      `cox_binary`, `cox_continuous` -- effect = a hazard ratio via
+      `curve_range_ratio()`), Stepped-Wedge CRT (its one design, effect =
+      `d`), Trial Sequential Analysis (all four outcome types RR/OR/RD/MD
+      -- `calc_tsa_information_size()` takes `beta`, not `power`, so the
+      module wraps it in a tiny adapter exposing a `power` argument and
+      the power axis reads as power), Meta-Analysis Power (`d` and `r`
+      effect types; the `or` type takes a whole 2x2 table), Multilevel
+      (`two_level`, `three_level` -- effect = `delta`).
+      - `.ss_curve_n_field()` gained a third, last-resort tier
+        (`^n[A-Za-z]`) for a count spelled with no underscore at all --
+        `calc_stepped_wedge_normal()`'s `nclusters` matched neither of
+        the first two tiers, so its first curve came back with zero rows
+        (caught by timing the candidates, which printed `rows=0`); it can
+        never outrank an earlier tier, and has its own unit test.
+      - Declined on measured cost, same rule as Dunnett/Exact Tests:
+        Log-Rank's `noncompliance` (`Hmisc::cpower` search, ~6.3s for a
+        *single* call). `logrank` itself measured ~95ms/call (~3.8s for
+        40 points), so that one design uses a 20-point grid for both its
+        curves rather than being dropped.
+      - Declined (no power argument): Subgroup/Interaction Testing
+        (only `n_main_total` and an effect ratio).
+
+      Earlier-batch exclusions, investigated before writing any wiring
+      and each declined for a documented reason rather than silently
+      skipped:
       - **Agreement/Reliability** (kappa, ICC, Cronbach's alpha,
         Bland-Altman, CCC): every design is precision-based (a target CI
         width, not a power/alpha hypothesis test) -- none has a `power`
@@ -378,11 +401,14 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     `gof`/`independence`/`mantelhaenszel`/`cochran_armitage` -- vectors or
     matrices of proportions; `cochran_q` -- Monte Carlo; SCCS's age-groups
     branch -- vectors; Logistic's `ordinal` -- a vector of category
-    probabilities). `posthoc_pairwise` (Proportions, Means) is left for a
+    probabilities; Log-Rank's `stratified` -- vectors; Meta-Analysis
+    Power's `or` -- a 2x2 table; Subgroup/Interaction Testing -- no power
+    argument; Log-Rank's `noncompliance` and `weighted_logrank` -- slow /
+    Monte Carlo). `posthoc_pairwise` (Proportions, Means) is left for a
     later batch despite having a single scalar effect pair, and
     Multiplicity's `dunnett` and all of Exact Tests are deferred for
     being too slow for a plain 40-point live grid (measured, not
-    assumed). The remaining ~26 modules are the batch backlog, wired the
+    assumed). The remaining ~21 modules are the batch backlog, wired the
     same two-lines-per-design way once their own effect/power parameter
     names are identified per design (mirrors item 9's per-module remap
     work, not item 8's fully mechanical wrap).
@@ -401,8 +427,8 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     `render_power_curves()` wiring rather than carried forward from
     memory (the carried-forward figure quietly drifted off by a few each
     batch -- RM-ANOVA's three designs share one unconditional code path,
-    which a naive per-batch tally undercounted): **53 designs wired
-    across 21 modules**, six batches.
+    which a naive per-batch tally undercounted): **65 designs wired
+    across 26 modules**, seven batches.
 11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
 

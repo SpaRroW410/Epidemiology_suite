@@ -55,7 +55,8 @@ mod_tsa_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -137,6 +138,49 @@ mod_tsa_server <- function(id) {
     # and multilevel_content (see mod_evpi.R/mod_multilevel.R).
     render_export_handlers(output, result, function() {
       modifyList(tsa_content[[tolower(input$outcome)]], list(citation = tsa_content$shared$citation))
+    })
+
+    # Power curves (ROADMAP P1 item 10): calc_tsa_information_size() takes
+    # beta (= 1 - power), not power, so the curve calls it through a small
+    # adapter that exposes a `power` argument -- the power axis then reads
+    # as power, not beta.
+    tsa_by_power <- function(outcome, mc, pC = NULL, p1 = NULL, sd_mc = NULL, alpha, power, side) {
+      calc_tsa_information_size(outcome = outcome, mc = mc, pC = pC, p1 = p1, sd_mc = sd_mc,
+                                alpha = alpha, beta = 1 - power, side = side)
+    }
+    render_power_curves(output, function() {
+      req(input$outcome, input$alpha, input$power, input$side)
+      side <- as.integer(input$side)
+      if (input$outcome %in% c("RR", "OR")) {
+        req(input$pC_ratio, input$mc_ratio)
+        list(
+          calc_fn = tsa_by_power,
+          args = list(outcome = input$outcome, mc = input$mc_ratio, pC = input$pC_ratio,
+                       alpha = input$alpha, power = input$power, side = side),
+          effect = list(param = "mc", values = curve_range_ratio(), label = paste("Anticipated", input$outcome)),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$outcome == "RD") {
+        req(input$pC_rd, input$p1_rd, input$mc_rd)
+        list(
+          calc_fn = tsa_by_power,
+          args = list(outcome = "RD", mc = input$mc_rd, pC = input$pC_rd, p1 = input$p1_rd,
+                       alpha = input$alpha, power = input$power, side = side),
+          effect = list(param = "mc", values = curve_range_around(0, 3 * abs(input$mc_rd)),
+                        label = "Anticipated risk difference (mc)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        req(input$mc_md, input$sd_md)
+        list(
+          calc_fn = tsa_by_power,
+          args = list(outcome = "MD", mc = input$mc_md, sd_mc = input$sd_md,
+                       alpha = input$alpha, power = input$power, side = side),
+          effect = list(param = "mc", values = curve_range_around(0, 3 * input$sd_md),
+                        label = "Anticipated mean difference (mc)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      }
     })
   })
 }

@@ -26,10 +26,15 @@
   strict <- Find(function(nm) grepl("^(n|k)(_|$)", nm) && is_scalar_numeric(nm), nms)
   if (!is.null(strict)) return(strict)
 
-  Find(function(nm) {
+  wide <- Find(function(nm) {
     tokens <- strsplit(nm, "_", fixed = TRUE)[[1]]
     any(grepl("^(n|k)[0-9]*$", tokens)) && is_scalar_numeric(nm)
   }, nms)
+  if (!is.null(wide)) return(wide)
+
+  # Last resort: a count spelled as n<word> with no underscore, e.g.
+  # calc_stepped_wedge_normal()'s nclusters.
+  Find(function(nm) grepl("^n[A-Za-z]", nm) && is_scalar_numeric(nm), nms)
 }
 
 #' Recompute a calc_*() result's headline field across a grid of one varying argument

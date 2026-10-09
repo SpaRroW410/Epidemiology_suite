@@ -111,7 +111,8 @@ mod_logrank_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -322,5 +323,44 @@ mod_logrank_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() logrank_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): wired for logrank, cox_binary and
+    # cox_continuous. "logrank" uses a 20-point grid -- powerSurvEpi's
+    # ssizeCT.default() measured ~95ms/call, so a 40-point grid would take
+    # ~3.8s per curve. Not wired: "stratified" (vectors), "noncompliance"
+    # (Hmisc::cpower search, measured ~6.3s for ONE call) and
+    # "weighted_logrank" (Monte Carlo).
+    render_power_curves(output, function() {
+      if (input$design == "logrank") {
+        req(input$pE, input$pC, input$hr_logrank, input$ratio, input$alpha_logrank, input$power_logrank)
+        list(
+          calc_fn = calc_logrank,
+          args = list(pE = input$pE, pC = input$pC, hr = input$hr_logrank, ratio = input$ratio,
+                       alpha = input$alpha_logrank, power = input$power_logrank),
+          effect = list(param = "hr", values = curve_range_ratio(n = 20), label = "Hazard ratio (HR)"),
+          power = list(param = "power", values = curve_range_power(n = 20))
+        )
+      } else if (input$design == "cox_binary") {
+        req(input$power_b, input$theta_b, input$p_b, input$psi_b, input$rho2_b, input$alpha_b)
+        list(
+          calc_fn = calc_cox_binary,
+          args = list(power = input$power_b, theta = input$theta_b, p = input$p_b,
+                       psi = input$psi_b, rho2 = input$rho2_b, alpha = input$alpha_b),
+          effect = list(param = "theta", values = curve_range_ratio(), label = "Hazard ratio (theta)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "cox_continuous") {
+        req(input$power_c, input$theta_c, input$sigma2_c, input$psi_c, input$rho2_c, input$alpha_c)
+        list(
+          calc_fn = calc_cox_continuous,
+          args = list(power = input$power_c, theta = input$theta_c, sigma2 = input$sigma2_c,
+                       psi = input$psi_c, rho2 = input$rho2_c, alpha = input$alpha_c),
+          effect = list(param = "theta", values = curve_range_ratio(), label = "Hazard ratio per unit (theta)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }

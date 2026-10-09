@@ -32,7 +32,8 @@ mod_stepped_wedge_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -84,5 +85,18 @@ mod_stepped_wedge_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() stepped_wedge_content$normal)
+
+    render_power_curves(output, function() {
+      req(input$nsubjects, input$ntimes, input$d, input$icc, input$rho_c,
+          input$rho_s, input$vart, input$alpha, input$power)
+      list(
+        calc_fn = calc_stepped_wedge_normal,
+        args = list(nsubjects = input$nsubjects, ntimes = input$ntimes, d = input$d,
+                     icc = input$icc, rho_c = input$rho_c, rho_s = input$rho_s,
+                     vart = input$vart, alpha = input$alpha, power = input$power),
+        effect = list(param = "d", values = curve_range_multiplicative(input$d), label = "d (treatment effect)"),
+        power = list(param = "power", values = curve_range_power())
+      )
+    })
   })
 }
