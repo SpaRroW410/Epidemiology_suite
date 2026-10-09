@@ -22,7 +22,8 @@ mod_simon_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -78,5 +79,30 @@ mod_simon_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() simon_content$ph2simon)
+
+    # Power curves (ROADMAP P1 item 10): Simon's design takes a type II
+    # error beta (power = 1 - beta) and returns nested minimax/optimal
+    # designs, so it is called through an adapter that exposes `power` and
+    # flattens the two designs' maximum n into top-level fields -- the
+    # curve then plots the minimax design's maximum n. ph2simon measured
+    # ~60ms/call, so a 20-point grid is used.
+    simon_by_power <- function(pu, pa, alpha, power, nmax) {
+      r <- calc_simon(pu = pu, pa = pa, alpha = alpha, beta = 1 - power, nmax = nmax)
+      new_ss_result(list(
+        n_minimax = r$minimax$n, n_optimal = r$optimal$n,
+        inputs = list(pu = pu, pa = pa, alpha = alpha, power = power, nmax = nmax)
+      ))
+    }
+    render_power_curves(output, function() {
+      req(input$pu, input$pa, input$alpha, input$beta, input$nmax)
+      list(
+        calc_fn = simon_by_power,
+        args = list(pu = input$pu, pa = input$pa, alpha = input$alpha,
+                     power = 1 - input$beta, nmax = input$nmax),
+        effect = list(param = "pa", values = curve_range_within(input$pu, 1, n = 20),
+                      label = "pa (desirable response rate) -- minimax design's maximum n"),
+        power = list(param = "power", values = curve_range_power(n = 20))
+      )
+    })
   })
 }

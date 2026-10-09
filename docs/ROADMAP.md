@@ -364,6 +364,33 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       - Declined (no power argument): Subgroup/Interaction Testing
         (only `n_main_total` and an effect ratio).
 
+    - **Batch 8 (9 Oct 2026):** Group Sequential Design (all four:
+      `normal`, `binary`, `survival`, `lan_demets_normal`), Longitudinal/
+      MMRM (all five: `slope_diff`, `mmrm_ar1`, `diggle`, `edland`, `hu` --
+      effect = `delta`), Nonparametric Tests (`kruskal_wallis`,
+      `friedman` -- effect = Cohen's f).
+      - Measured, not assumed: the three power-family group-sequential
+        designs cost ~140ms/call (boundary computation), so they use a
+        12-point grid (~1.7s per curve); the Lan-DeMets 2-look design
+        (~14ms/call) and every longitudinal design (<=0.35s for 40
+        points) keep the full grid.
+      - Two more modules turned out to have a power analog under another
+        name -- found only because the "no power input" claim was checked
+        against the actual inputs rather than just a `grep power`: LQAS
+        (consumer's risk `beta`) and Simon Two-Stage (type II error
+        `beta`). Both are wired through a small adapter exposing
+        `power = 1 - beta`; Simon's adapter also flattens its nested
+        minimax/optimal designs so the curve plots the minimax design's
+        maximum n (20-point grid, ~60ms/call). Simon's first draft of
+        this note had wrongly listed it as having no power input.
+      - Declined on measured cost: Bayesian `assurance_or` (~1.1s/call),
+        EFA/CFA `rmsea` (~0.31s/call, a brute-force scan over n).
+      - Declined on semantics: Nonparametric's `rank_sum`, `signed_rank`,
+        `kendall`, `jonckheere` take tuples of jointly-constrained
+        probabilities (e.g. p2 is bounded by p1), so varying one alone
+        would plot an inconsistent input set -- not a fabricated point,
+        but a meaningless one.
+
       Earlier-batch exclusions, investigated before writing any wiring
       and each declined for a documented reason rather than silently
       skipped:
@@ -408,10 +435,23 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     later batch despite having a single scalar effect pair, and
     Multiplicity's `dunnett` and all of Exact Tests are deferred for
     being too slow for a plain 40-point live grid (measured, not
-    assumed). The remaining ~21 modules are the batch backlog, wired the
-    same two-lines-per-design way once their own effect/power parameter
-    names are identified per design (mirrors item 9's per-module remap
-    work, not item 8's fully mechanical wrap).
+    assumed). The 16 modules still without curves (47 eligible minus the 31
+    wired, grep-verified) were each checked and none is a plain wiring
+    job left over: **no power or type-II-error input at all** in the
+    module (precision- or design-based) -- Agreement, Pilot, Cluster/
+    Design Effect, Stratified Sampling, Ratio Estimation, Prediction
+    Model, Resource Equation, Subgroup/Interaction, Capture-Recapture,
+    Value of Information, Rule of Three; **Monte Carlo** --
+    GLMM, RMST (their Calculate-button pattern from item 7 would also
+    have to drive the curve); **too slow per call for a live grid** --
+    Exact Tests, Bayesian (`assurance_or`), EFA/CFA (`rmsea`). What is
+    left is therefore not more wiring but three different pieces of
+    work: a "required n vs. precision" curve for the precision-based
+    modules (a different feature from this effect/power pair), a
+    Calculate-button-gated curve for the slow and Monte Carlo designs
+    (Dunnett, Exact Tests, Log-Rank noncompliance, Bayesian assurance,
+    EFA/CFA RMSEA, GLMM, RMST), and the per-design leftovers listed
+    above (e.g. `posthoc_pairwise`, `compare_two`).
 
     Verified: full fast test suite (0 failures/0 errors, 27 expected
     Monte Carlo skips) after `global.R` was confirmed to source cleanly
@@ -427,8 +467,8 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     `render_power_curves()` wiring rather than carried forward from
     memory (the carried-forward figure quietly drifted off by a few each
     batch -- RM-ANOVA's three designs share one unconditional code path,
-    which a naive per-batch tally undercounted): **65 designs wired
-    across 26 modules**, seven batches.
+    which a naive per-batch tally undercounted): **78 designs wired
+    across 31 modules**, eight batches.
 11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
 

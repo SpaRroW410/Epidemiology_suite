@@ -104,7 +104,8 @@ mod_longitudinal_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -281,5 +282,90 @@ mod_longitudinal_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() longitudinal_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): all five designs; effect = delta
+    # in each, scanned symmetrically around 0 (0 itself is excluded).
+    render_power_curves(output, function() {
+      req(input$design)
+      axis_power <- list(param = "power", values = curve_range_power())
+      delta_axis <- function(delta) {
+        list(param = "delta", values = curve_range_around(0, 3 * abs(delta)), label = "delta (treatment effect)")
+      }
+      parse_or_null <- function(expr) tryCatch(expr, error = function(e) NULL)
+
+      if (input$design == "slope_diff") {
+        req(input$visit_times, input$delta, input$sigma2_intercept, input$sigma2_slope,
+            input$corr_intercept_slope, input$sigma2_residual, input$allocation1,
+            input$alternative, input$alpha, input$power)
+        visit_times <- parse_or_null(.parse_visit_times(input$visit_times))
+        req(visit_times)
+        list(
+          calc_fn = calc_longitudinal_slope_diff,
+          args = list(visit_times = visit_times, delta = input$delta,
+                       sigma2_intercept = input$sigma2_intercept, sigma2_slope = input$sigma2_slope,
+                       cov_intercept_slope = input$corr_intercept_slope *
+                         sqrt(input$sigma2_intercept) * sqrt(input$sigma2_slope),
+                       sigma2_residual = input$sigma2_residual, allocation1 = input$allocation1,
+                       alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = delta_axis(input$delta), power = axis_power
+        )
+      } else if (input$design == "mmrm_ar1") {
+        req(input$rho_mmrm, input$ra_mmrm, input$sigma_mmrm, input$lambda_mmrm,
+            input$delta_mmrm, input$alternative_mmrm, input$alpha_mmrm, input$power_mmrm)
+        ra <- parse_or_null(.parse_visit_times(input$ra_mmrm))
+        req(ra)
+        rb <- if (nzchar(trimws(input$rb_mmrm))) parse_or_null(.parse_visit_times(input$rb_mmrm)) else NULL
+        list(
+          calc_fn = calc_mmrm_ar1,
+          args = list(rho = input$rho_mmrm, ra = ra, rb = rb, sigma = input$sigma_mmrm,
+                       lambda = input$lambda_mmrm, delta = input$delta_mmrm,
+                       alpha = input$alpha_mmrm, power = input$power_mmrm,
+                       alternative = input$alternative_mmrm),
+          effect = delta_axis(input$delta_mmrm), power = axis_power
+        )
+      } else if (input$design == "diggle") {
+        req(input$visit_times_diggle, input$delta_diggle, input$sigma2_diggle, input$rho_diggle,
+            input$alternative_diggle, input$alpha_diggle, input$power_diggle)
+        visit_times <- parse_or_null(.parse_visit_times(input$visit_times_diggle))
+        req(visit_times)
+        list(
+          calc_fn = calc_longitudinal_diggle,
+          args = list(visit_times = visit_times, delta = input$delta_diggle, sigma2 = input$sigma2_diggle,
+                       rho = input$rho_diggle, alpha = input$alpha_diggle, power = input$power_diggle,
+                       alternative = input$alternative_diggle),
+          effect = delta_axis(input$delta_diggle), power = axis_power
+        )
+      } else if (input$design == "edland") {
+        req(input$visit_times_edland, input$delta_edland, input$sigma2_slope_edland,
+            input$sigma2_residual_edland, input$alternative_edland, input$alpha_edland, input$power_edland)
+        visit_times <- parse_or_null(.parse_visit_times(input$visit_times_edland))
+        req(visit_times)
+        list(
+          calc_fn = calc_longitudinal_edland,
+          args = list(visit_times = visit_times, delta = input$delta_edland,
+                       sigma2_slope = input$sigma2_slope_edland, sigma2_residual = input$sigma2_residual_edland,
+                       alpha = input$alpha_edland, power = input$power_edland,
+                       alternative = input$alternative_edland),
+          effect = delta_axis(input$delta_edland), power = axis_power
+        )
+      } else {
+        req(input$visit_times_hu, input$p_hu, input$delta_hu, input$sigma2_slope_hu,
+            input$sigma2_residual_hu, input$sigma2_intercept_hu, input$corr_intercept_slope_hu,
+            input$lambda_hu, input$alternative_hu, input$alpha_hu, input$power_hu)
+        visit_times <- parse_or_null(.parse_visit_times(input$visit_times_hu))
+        p <- parse_or_null(.parse_visit_times(input$p_hu))
+        req(visit_times, p)
+        list(
+          calc_fn = calc_longitudinal_hu,
+          args = list(visit_times = visit_times, p = p, delta = input$delta_hu,
+                       sigma2_slope = input$sigma2_slope_hu, sigma2_residual = input$sigma2_residual_hu,
+                       sigma2_intercept = input$sigma2_intercept_hu,
+                       cor_intercept_slope = input$corr_intercept_slope_hu,
+                       lambda = input$lambda_hu, alpha = input$alpha_hu, power = input$power_hu,
+                       alternative = input$alternative_hu),
+          effect = delta_axis(input$delta_hu), power = axis_power
+        )
+      }
+    })
   })
 }

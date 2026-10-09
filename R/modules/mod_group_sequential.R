@@ -76,6 +76,7 @@ mod_group_sequential_ui <- function(id) {
       h5("Result"),
       uiOutput(ns("result")),
       export_controls_ui(ns),
+      power_curves_ui(ns),
       conditionalPanel(
         condition = design_is("lan_demets_normal"),
         hr(),
@@ -294,5 +295,65 @@ mod_group_sequential_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() group_sequential_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): all four designs. The three
+    # power-family designs measured ~140ms/call (boundary computation), so
+    # they use a 12-point grid (~1.7s per curve) instead of 40; the
+    # Lan-DeMets 2-look design is fast (~14ms/call) and keeps the full grid.
+    render_power_curves(output, function() {
+      req(input$design, input$r, input$alpha, input$power)
+      if (input$design == "lan_demets_normal") {
+        req(input$delta_ld, input$sd_ld, input$timing_ld, input$spending_ld)
+        return(list(
+          calc_fn = calc_lan_demets_normal,
+          args = list(delta = input$delta_ld, sd = input$sd_ld, timing = input$timing_ld,
+                       r = input$r, alpha = input$alpha, power = input$power,
+                       spending = input$spending_ld),
+          effect = list(param = "delta", values = curve_range_multiplicative(abs(input$delta_ld)),
+                        label = "delta (difference in means)"),
+          power = list(param = "power", values = curve_range_power())
+        ))
+      }
+
+      req(input$n_looks, input$boundary_shape, input$alternative)
+      n_looks <- as.integer(input$n_looks)
+      power_axis <- list(param = "power", values = curve_range_power(n = 12))
+      if (input$design == "normal") {
+        req(input$delta_normal, input$sd_normal)
+        list(
+          calc_fn = calc_group_sequential_normal,
+          args = list(delta = input$delta_normal, sd = input$sd_normal, n_looks = n_looks,
+                       r = input$r, alpha = input$alpha, power = input$power,
+                       alternative = input$alternative, boundary_shape = input$boundary_shape,
+                       futility = input$futility),
+          effect = list(param = "delta", values = curve_range_around(0, 3 * abs(input$delta_normal), n = 12),
+                        label = "delta (difference in means)"),
+          power = power_axis
+        )
+      } else if (input$design == "binary") {
+        req(input$pC_binary, input$pE_binary)
+        list(
+          calc_fn = calc_group_sequential_binary,
+          args = list(pC = input$pC_binary, pE = input$pE_binary, n_looks = n_looks,
+                       r = input$r, alpha = input$alpha, power = input$power,
+                       alternative = input$alternative, boundary_shape = input$boundary_shape,
+                       futility = input$futility),
+          effect = list(param = "pE", values = curve_range_proportion(n = 12),
+                        label = "pE (experimental-arm probability)"),
+          power = power_axis
+        )
+      } else {
+        req(input$hr_survival)
+        list(
+          calc_fn = calc_group_sequential_survival,
+          args = list(haz_ratio = input$hr_survival, n_looks = n_looks,
+                       r = input$r, alpha = input$alpha, power = input$power,
+                       alternative = input$alternative, boundary_shape = input$boundary_shape,
+                       futility = input$futility),
+          effect = list(param = "haz_ratio", values = curve_range_ratio(n = 12), label = "Hazard ratio"),
+          power = power_axis
+        )
+      }
+    })
   })
 }

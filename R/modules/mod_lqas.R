@@ -23,7 +23,8 @@ mod_lqas_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -73,5 +74,24 @@ mod_lqas_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() lqas_content$standard)
+
+    # Power curves (ROADMAP P1 item 10): LQAS has no power input, but its
+    # consumer's risk beta is the type II error -- the chance a bad lot
+    # (p = p_lower) is wrongly accepted -- so power = 1 - beta. calc_lqas()
+    # is called through an adapter that exposes it as `power`.
+    lqas_by_power <- function(p_upper, p_lower, alpha, power) {
+      calc_lqas(p_upper = p_upper, p_lower = p_lower, alpha = alpha, beta = 1 - power)
+    }
+    render_power_curves(output, function() {
+      req(input$p_upper, input$p_lower, input$alpha, input$beta)
+      list(
+        calc_fn = lqas_by_power,
+        args = list(p_upper = input$p_upper, p_lower = input$p_lower, alpha = input$alpha,
+                     power = 1 - input$beta),
+        effect = list(param = "p_lower", values = curve_range_within(0, input$p_upper),
+                      label = "p_lower (unacceptable proportion)"),
+        power = list(param = "power", values = curve_range_power())
+      )
+    })
   })
 }

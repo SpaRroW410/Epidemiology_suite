@@ -116,7 +116,8 @@ mod_nonparametric_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -344,6 +345,34 @@ mod_nonparametric_server <- function(id) {
       key <- input$design
       remap <- c("rank_sum" = "wilcoxon_rank_sum", "signed_rank" = "wilcoxon_signed_rank", "kendall" = "kendall_tau", "jonckheere" = "jonckheere_terpstra", "ks" = "ks_two_sample", "runs" = "wald_wolfowitz", "animal_rank" = "animal_rank_test")
       nonparametric_content[[if (key %in% names(remap)) remap[[key]] else key]]
+    })
+
+    # Power curves (ROADMAP P1 item 10): wired for kruskal_wallis and
+    # friedman, whose effect is one scalar (Cohen's f). Not wired:
+    # rank_sum / signed_rank / kendall / jonckheere (jointly-constrained
+    # probability tuples -- varying one alone gives an inconsistent set) and
+    # the Monte Carlo designs (ks, runs, animal_rank).
+    render_power_curves(output, function() {
+      if (input$design == "kruskal_wallis") {
+        req(input$k_kw, input$f_kw, input$alpha, input$power)
+        list(
+          calc_fn = calc_kruskal_wallis,
+          args = list(k = as.integer(input$k_kw), f = input$f_kw, alpha = input$alpha, power = input$power),
+          effect = list(param = "f", values = curve_range_multiplicative(input$f_kw), label = "Cohen's f"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "friedman") {
+        req(input$k_fr, input$f_fr, input$nscor_fr, input$alpha, input$power)
+        list(
+          calc_fn = calc_friedman,
+          args = list(k = as.integer(input$k_fr), f = input$f_fr, nscor = input$nscor_fr,
+                       alpha = input$alpha, power = input$power),
+          effect = list(param = "f", values = curve_range_multiplicative(input$f_fr), label = "Cohen's f"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else {
+        NULL
+      }
     })
   })
 }
