@@ -602,6 +602,9 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       from epiR are deliberate: the case-control exposed attributable fraction uses the
       sample OR (epiR uses the conditional MLE), and a zero cell leaves the affected
       interval undefined and flagged instead of silently adding 0.5.
+    - **Suite result.** Full fast suite including the browser UI tests (the new module is
+      opened by `test-ui_smoke.R` like the other 49): 639 tests, 2659 assertions, 0
+      failures/errors/warnings, 77 skips (27 Monte Carlo + 50 every-design UI tests).
     - **Wiring.** Three catalog entries (one per design radio value, as the consistency
       tests require), a study-design family and a test family, and a new wizard root
       option "Analyze counts I already have" -> "How were the subjects sampled?".
