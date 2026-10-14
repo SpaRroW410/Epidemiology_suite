@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_pilot.R"))
-
 test_that("calc_pilot_sd_precision matches the well-known n=12 illustration", {
   # At n = 12, a 95% CI for the true SD spans ~0.708x to ~1.698x the
   # observed sample SD -- the standard illustration of why 12/arm is only

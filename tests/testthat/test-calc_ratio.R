@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_ratio.R"))
-
 # Each design's forward direction (n -> width/prec.level) is checked directly
 # against presize's own documented examples for exact formula fidelity. The
 # reverse direction (width/prec.level -> n) is checked with a +/-1 tolerance

@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_evpi.R"))
-
 test_that("calc_evpi_normal matches real voi::evpi() (mean=100, sd=200 -> 39.55931)", {
   # Verified against real voi::evpi() Monte Carlo estimates converging to
   # this value as nsim grows (39.559 at nsim=5,000,000), and against an

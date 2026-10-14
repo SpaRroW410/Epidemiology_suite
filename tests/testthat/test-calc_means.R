@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_means.R"))
-
 test_that("calc_means_1s matches Cohen (1988) published one-sample t-test tables", {
   # Cohen (1988): one-sample t-test, alpha = .05 two-tailed, power = .80,
   # medium conventional effect size d = 0.5, gives n = 34.

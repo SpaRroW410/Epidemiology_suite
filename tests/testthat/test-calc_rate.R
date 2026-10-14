@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_rate.R"))
-
 test_that("calc_rate_precision matches presize::prec_rate()'s own documented example", {
   # presize's own doc example: r=2.5, conf.width=2.243, score method ->
   # x = 20.005 events (ceiling 21), time = x/r.

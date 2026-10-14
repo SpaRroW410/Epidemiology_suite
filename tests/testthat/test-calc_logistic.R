@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_logistic.R"))
-
 test_that("calc_logistic_binary matches Hsieh, Bloch & Larsen (1998) Table I exactly", {
   # p1=0.4, p2=0.5, B=0.5, alpha=0.05, power=0.95 -> n=1281
   # (Balanced design with high event rates).

@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_roc.R"))
-
 test_that("calc_roc_auc matches pROC's own worked example (aSAH S100B biomarker)", {
   # auc=0.73, alpha=.05, power=.95, kappa=1.7 -> ncases=29.67, ncontrols=50.44
   # (ceiling 30/51).

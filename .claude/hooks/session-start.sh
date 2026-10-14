@@ -1,5 +1,5 @@
 #!/bin/bash
-# Installs R plus every package this Shiny app's global.R loads (and the
+# Installs R plus every package this Shiny app's DESCRIPTION imports (and the
 # testthat suite needs) whenever a fresh Claude Code on the web container
 # starts. This is a full app dependency, not a repo-tracked artifact -- the
 # container is ephemeral and nothing installed outside the git repo survives

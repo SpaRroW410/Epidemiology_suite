@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_exact_tests.R"))
-
 test_that("calc_fisher_exact finds the first stable n1 crossing the target power", {
   # p1=0.15, p2=0.60, ratio=2, alpha=.05, power=.8, two-sided. Power is
   # non-monotonic in n1 (Chernick & Liu 2002); n1=14 is the first n1 where

@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_group_sequential.R"))
-
 test_that("calc_group_sequential_normal: n_looks=1 (fixed design) is close to pwr::pwr.t.test", {
   # delta=0.5, sd=1 (d=0.5), alpha=0.05, power=0.8, two-sided, equal
   # allocation. gsdesign.normal uses a z-test approximation (not pwr's

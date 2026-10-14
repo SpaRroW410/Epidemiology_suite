@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_stepped_wedge.R"))
-
 test_that("calc_stepped_wedge_normal matches clusterPower::cpa.sw.normal()'s own documented example", {
   # The package's own Examples section: nsubjects=50, ntimes=5, d=1.5,
   # ICC=0.2, rho_c=0.80, rho_s=0, vart=16 -> nclusters=1.288772 (raw),

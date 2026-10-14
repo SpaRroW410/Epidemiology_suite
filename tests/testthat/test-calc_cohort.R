@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_cohort.R"))
-
 test_that("calc_cohort matches epiR::epi.sscohortc's own documented example", {
   # Anoestrus-in-dairy-cattle example: p1 = 0.30 (exposed/treatment),
   # p0 = 0.15 (unexposed/control), power = 0.80, two-sided alpha = 0.05,

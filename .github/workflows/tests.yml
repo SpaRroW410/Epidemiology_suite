@@ -1,0 +1,51 @@
+# Unit tests (docs/ROADMAP.md, P0 items 4-6).
+# - Every push / pull request: the fast suite (slow Monte Carlo tests skipped).
+# - Weekly, or on demand from the Actions tab: the full suite, S2R_SLOW_TESTS=true.
+# Packages are restored from renv.lock so CI runs the same versions as the
+# development environment.
+name: tests
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      slow:
+        description: "Also run the slow Monte Carlo tests"
+        type: boolean
+        default: true
+
+jobs:
+  test:
+    # Pinned so the apt package names below stay valid.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      S2R_SLOW_TESTS: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.slow)) && 'true' || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # System libraries for packages renv builds from source (the locked
+      # versions are older than the binaries on the package manager):
+      # systemfonts/textshaping/ragg/gdtools (fonts, cairo, images), units
+      # (udunits2) and sf (GDAL/GEOS/PROJ) -- all pulled in by epiR.
+      - name: Install system libraries
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libfontconfig1-dev libfreetype-dev libharfbuzz-dev libfribidi-dev \
+            libpng-dev libtiff-dev libjpeg-dev libwebp-dev libcairo2-dev \
+            libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite3-dev \
+            libabsl-dev libssl-dev libcurl4-openssl-dev libxml2-dev
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: renv
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-renv@v2
+
+      - name: Run tests
+        run: Rscript -e 'testthat::test_local(".", stop_on_failure = TRUE)'

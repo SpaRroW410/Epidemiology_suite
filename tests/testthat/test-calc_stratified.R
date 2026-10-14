@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_stratified.R"))
-
 test_that("calc_stratified_sampling matches samplingbook::stratasize()'s own documented example (proportional)", {
   # Nh=c(100000,300000,600000), Sh=c(1,2,3), e=0.1, level=0.95 -> n=2568
   # (samplingbook's own stratasize() worked example, reproduced without

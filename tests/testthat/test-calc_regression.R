@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_regression.R"))
-
 test_that("calc_regression_f2: r2=0.1, 5 predictors, alpha=.05, power=.8 -> n=122", {
   res <- calc_regression_f2(r2 = 0.1, num_predictors = 5, alpha = 0.05, power = 0.8)
   expect_equal(round(res$f2, 4), 0.1111)

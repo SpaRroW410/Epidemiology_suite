@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_efa_cfa.R"))
-
 test_that("calc_efa_cfa_sample_size computes the three ratio-based N's correctly", {
   res <- calc_efa_cfa_sample_size(n_items = 20)
   expect_equal(res$n_5to1, 100)

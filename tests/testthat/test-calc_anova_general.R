@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_anova_general.R"))
-
 test_that("calc_anova_general cross-validates against pwr::pwr.anova.test()'s one-way ANOVA special case", {
   # A one-way ANOVA with k=4 groups, Cohen's f=0.25 (medium), alpha=0.05,
   # power=0.8 is the special case u = k-1 = 3 of the general F-test

@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "home", "home_catalog.R"))
-source(file.path("..", "..", "R", "home", "design_tree.R"))
-source(file.path("..", "..", "R", "home", "design_free_text.R"))
-
 .terminal_key <- function(res) {
   node <- design_nodes[[res$node_id]]
   if (!isTRUE(node$terminal)) return(NULL)
@@ -46,11 +42,11 @@ test_that("qualitative phrasing resolves to the guidance terminal (no numeric N)
   expect_true(isTRUE(node$guidance))
 })
 
-test_that("prediction-model phrasing resolves to the (not-yet-built) prediction terminal", {
+test_that("prediction-model phrasing stops at the development/validation sub-question", {
   res <- walk_free_text("We aim to develop and validate a prognostic risk score")
-  expect_true(res$reached_terminal)
-  expect_null(design_nodes[[res$node_id]]$catalog_key)
-  expect_false(is.null(design_nodes[[res$node_id]]$would_use))
+  expect_false(res$reached_terminal)
+  expect_equal(res$node_id, "pred_type")
+  expect_length(res$trace, 1)
 })
 
 test_that("a comparator mentioned alongside an estimation-sounding word still routes to comparison", {

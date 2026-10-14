@@ -1,7 +1,5 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_rmst.R"))
-
 test_that("calc_rmst_comparison is reproducible under a fixed seed", {
+  skip_if_not_slow()
   res1 <- calc_rmst_comparison(
     ac_period = 35, tot_time = 510, tau = 500,
     scale0 = 8500, scale1 = 8500, margin = 18, power = 0.8
@@ -15,6 +13,7 @@ test_that("calc_rmst_comparison is reproducible under a fixed seed", {
 })
 
 test_that("calc_rmst_comparison reproduces SSRMST's own documented example scenarios", {
+  skip_if_not_slow()
   # SSRMST::ssrmst()'s own roxygen example uses ac_rate=15, ac_period=35,
   # tot_time=510, tau=500 for both its non-inferiority and superiority
   # illustrations. SSRMST isn't installable from CRAN in this sandbox
@@ -43,6 +42,7 @@ test_that("calc_rmst_comparison reproduces SSRMST's own documented example scena
 })
 
 test_that("calc_rmst_comparison needs a larger sample size for a higher target power", {
+  skip_if_not_slow()
   res_low <- calc_rmst_comparison(
     ac_period = 35, tot_time = 510, tau = 500,
     scale0 = 4000, scale1 = 8500, margin = 0, power = 0.7

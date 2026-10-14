@@ -1,59 +1,70 @@
 # Software Design Document
-## Comprehensive Sample Size Calculator for Community Medicine / Epidemiology
+## epidemiologicasuite — Comprehensive Sample Size Calculator for Community Medicine / Epidemiology
 
 | | |
 |---|---|
-| **Status** | Draft v0.1 |
-| **Date** | 18 August 2026 |
+| **Status** | v0.2 — sample-size catalog essentially complete; suite expansion planned |
+| **Date** | 28 September 2026 (v0.1: 18 August 2026) |
 | **Author** | Mukul |
 | **Type** | R Shiny web application |
+
+Forward planning (priorities, the epidemiology-suite expansion, R package, deployment
+and every open/blocked item) lives in [`ROADMAP.md`](ROADMAP.md). This document
+describes the design as built.
 
 ---
 
 ## 1. Purpose & Scope
 
 ### 1.1 Purpose
-Define the architecture, module design, content model, and roadmap for an R Shiny
+Define the architecture, module design, content model, and conventions for an R Shiny
 application that provides sample size and power calculations relevant to community
 medicine, epidemiology, and clinical research — with an explained-formula help
 system and original-source citations — so the codebase stays maintainable as
 calculators are added over time by one primary developer, with possible future
 contributors.
 
-### 1.2 In scope
-- Sample size / power calculators across common epidemiological and clinical
-  study designs (see §7 catalog)
+### 1.2 In scope (as built)
+- Sample size / power calculators across epidemiological and clinical study designs
+  (49 modules, ~155 designs — see §7)
 - Per-calculator help content: formula, plain-language explanation, worked example
-- Per-calculator citation to the original methodological source
-- Single-user, stateless, browser-based tool (no accounts, no saved sessions in v1)
+- Per-calculator citation to the original methodological source and the implementing
+  package/formula
+- Three ways to find a calculator: browse by design, browse by test family, guided
+  wizard (with free-text pre-fill)
+- Single-user, stateless, browser-based tool (no accounts, no saved sessions)
 
-### 1.3 Out of scope (v1)
-- User accounts, saved calculation history, PDF report export
-- Full study design consulting (randomization, blinding, analysis plans)
-- Meta-analysis / systematic review sample size pooling
-- Mobile-native app (responsive web only)
+### 1.3 Out of scope for the sample-size app — and where each now stands
+| Item | Status |
+|---|---|
+| User accounts, saved calculation history | Still out of scope |
+| Results / report export (PDF, DOCX, methods text) | Planned — ROADMAP P1 |
+| Study-design consulting (randomization, protocol text) | Partly planned — ROADMAP Track B2 |
+| Meta-analysis pooling | Meta-analysis *power* is built; pooling planned — ROADMAP B7 |
+| Mobile-native app | Planned via PWA / Android TWA — ROADMAP Track D |
+| Analysis of collected data | Planned as the "Analyze" workbench — ROADMAP Track B1/B6 |
 
 ---
 
 ## 2. Background
 
-Existing tools (OpenEpi, PS: Power and Sample Size, Epi Info StatCalc, and various
+Existing tools (OpenEpi, PS: Power and Sample Size, Epi Info StatCalc, G*Power, and
 single-purpose R/Shiny apps such as `presize`, `rashnu`) each cover part of this
 space, but none combine broad calculator coverage with an in-app, citation-backed
-explanation of each formula. This project's value is that combination, plus
-long-term extensibility — not novel statistical methodology.
+explanation of each formula and visible verification. This project's value is that
+combination, plus long-term extensibility — not novel statistical methodology.
 
 ---
 
 ## 3. Goals & Success Criteria
 
-| Goal | Success criterion |
-|---|---|
-| Correctness | Every calculator's output matches published worked examples and/or cross-checks against OpenEpi/PS within rounding tolerance |
-| Extensibility | A new calculator can be added by creating one new module file, without touching existing modules |
-| Transparency | Every result is traceable to a stated formula and a cited original source |
-| Usability | A student with no statistics background can get a correct result using in-app guidance alone |
-| Maintainability | Codebase understandable and modifiable by one part-time developer over months/years |
+| Goal | Success criterion | Status |
+|---|---|---|
+| Correctness | Every design matches a published worked example, a real package used as an oracle, or a Monte Carlo check of the actual test | Met for every shipped design (474 test blocks) |
+| Extensibility | A new calculator is three new files plus registry/catalog entries, with no changes to other modules or `run_app.R` | Met |
+| Transparency | Every result traceable to a stated formula, a cited source, and a named backend | Met |
+| Usability | A student with no statistics background can get a correct result using in-app guidance alone | Yes for routing — the wizard reaches all 49 modules and all 156 designs (test-enforced) |
+| Maintainability | Understandable and modifiable by one part-time developer | Met; CI and consistency tests now guard against drift |
 
 ---
 
@@ -62,40 +73,55 @@ long-term extensibility — not novel statistical methodology.
 ### 4.1 High-level layers
 
 ```
-┌─────────────────────────────────────────────┐
-│  UI Shell (bslib::page_navbar)               │
-│  - Home / About                              │
-│  - One nav tab per calculator family         │
-└───────────────┬───────────────────────────────┘
-                │
-┌───────────────▼───────────────────────────────┐
-│  Calculator Modules (mod_*.R)                 │
-│  Each = {UI fn, server fn, metadata}          │
-│  Sub-tabs: Calculate | Formula/Help | Reference│
-└───────────────┬───────────────────────────────┘
-                │
-┌───────────────▼───────────────────────────────┐
-│  Computation Layer                            │
-│  Thin wrappers around pwr / presize / epiR /  │
-│  WebPower / pwrss / TrialSize                 │
-└───────────────┬───────────────────────────────┘
-                │
-┌───────────────▼───────────────────────────────┐
-│  Content Layer                                │
-│  Per-module metadata: formula (LaTeX string), │
-│  explanation text, citation, package/function │
-└─────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│  UI shell  (R/run_app.R — bslib::page_navbar)                  │
+│  Home hub + 14 nav_menu dropdowns built from module_groups     │
+└──────────────┬──────────────────────────────┬─────────────────┘
+               │                              │
+┌──────────────▼───────────────┐   ┌──────────▼──────────────────┐
+│  Home hub (R/home_*.R)        │   │  Calculator modules          │
+│  home_catalog.R  — 152 design │   │  (R/mod_*.R)                 │
+│    entries, two family indexes│   │  UI fn + server fn + meta    │
+│  home_finder.R — Browse       │──▶│  Calculate | Formula/Help |  │
+│  design_tree/_wizard.R — wizard│  │  Reference                   │
+│  design_free_text.R — pre-fill│   └──────────┬──────────────────┘
+└───────────────────────────────┘              │
+                                    ┌──────────▼──────────────────┐
+                                    │  Computation (R/calc_*.R)    │
+                                    │  pure functions, no Shiny    │
+                                    │  wrap a runtime package, or  │
+                                    │  a verified reimplementation,│
+                                    │  or a seeded Monte Carlo     │
+                                    └──────────┬──────────────────┘
+                                    ┌──────────▼──────────────────┐
+                                    │  Content (R/content_*.R)     │
+                                    │  formula LaTeX, explanation, │
+                                    │  worked example, citation,   │
+                                    │  backend                     │
+                                    └──────────────────────────────┘
 ```
 
+The app is the R package `epidemiologicasuite` (`DESCRIPTION`, `NAMESPACE`, flat `R/`).
+`R/registry.R` defines `module_registry()` (id, nav title, UI, server for each
+module) and `module_groups` (which modules sit in which navbar dropdown);
+`R/run_app.R` builds the navbar from them (`epidemiologicasuite_app()`; `run_app()` runs it). The Home hub jumps to a module with
+`bslib::nav_select()` and presets its design with `updateRadioButtons()`.
+
 ### 4.2 Design principles
-- **Modules are self-contained.** A module owns its inputs, its calculation call,
-  and its help/reference content. No shared mutable state between modules.
-- **Computation is separated from presentation.** Each module's server function
-  calls a plain R function (testable outside Shiny) that wraps the underlying
-  package call — this makes unit testing possible without spinning up the app.
-- **Content is data, not hardcoded UI.** Formula text, explanation, and citation
-  live in a metadata list/YAML per module, rendered generically — adding a
-  calculator means adding data + one calculation function, not new UI code.
+- **Modules are self-contained.** A module owns its inputs, its calculation call, and
+  its help/reference content. No shared mutable state between modules.
+- **Computation is separated from presentation.** Each module's server calls a plain R
+  function (testable without Shiny).
+- **Content is data, not hardcoded UI.** Formula, explanation and citation live in a
+  per-module list rendered generically.
+- **Verify before shipping.** A design ships only after a numeric check against a
+  published example, a package oracle, or a simulation of the real test; otherwise it
+  stays open (see ROADMAP §4).
+- **Vendoring rule.** Wrap a package when it is already a runtime dependency.
+  Packages found during development are used only as verification oracles; the shipped
+  app reimplements the verified formula rather than adding a runtime dependency.
+  (The original "wrap, don't reimplement" preference still applies to existing
+  runtime packages.)
 
 ---
 
@@ -103,325 +129,299 @@ long-term extensibility — not novel statistical methodology.
 
 | Layer | Choice | Notes |
 |---|---|---|
-| App framework | R Shiny | matches existing R fluency |
-| UI theme/layout | `bslib::page_navbar()` | modern Bootstrap 5 theming, tabs |
-| Formula rendering | MathJax via `withMathJax()` | built into Shiny |
-| Modularity | Shiny modules (`NS()`, `moduleServer()`) | standard pattern |
-| Stats backends | `pwr`, `presize`, `epiR`, `WebPower`, `pwrss`, `TrialSize` | wrap, don't reimplement |
-| Testing | `testthat` | unit tests on computation functions |
+| App framework | R Shiny | |
+| UI theme/layout | `bslib::page_navbar()` + `nav_menu()`, Bootswatch "litera", Source Serif 4 | 14 grouped dropdowns |
+| Formula rendering | MathJax via `withMathJax()`, wrapped by `render_formula_block()` | adds a copyable LaTeX view |
+| Modularity | Shiny modules (`NS()`, `moduleServer()`) | |
+| Runtime stats packages | `pwr`, `presize`, `epiR`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `rstatix`, `lme4` (+ `survival`, `stats`) | 19 loaded by `pacman::p_load()` incl. `shiny`/`bslib` |
+| Verification-only packages | e.g. `longpower`, `powerlmm`, `RTSA`, `rpact`, `clusterPower`, `ssize.fdr`, `metapower`, `semTools`, `simr`, `voi`, `PracTools`, `WebPower` | installed from `github.com/cran/<pkg>` during development; never loaded by the app |
+| Testing | `testthat` unit tests (fast/slow split), GitHub Actions CI; manual browser checks with Playwright | `shinytest2` planned (ROADMAP P1) |
+| Dev environment | `.claude/hooks/session-start.sh` rebuilds R + packages on a fresh container; `renv.lock` records the versions (CI restores from it) | — |
 | Version control | Git / GitHub | |
-| Deployment (v1) | shinyapps.io free tier | |
-| Deployment (future option) | Shinylive (WebAssembly, static hosting) | flagged for later; see §11 |
+| Deployment | Installable R package (`remotes::install_github()` + `run_app()`) | hosted, package, Shinylive/PWA/APK options in ROADMAP Track D |
 
 ---
 
 ## 6. Repository Structure
 
 ```
-sample-size-app/
-├── app.R                      # entry point: builds navbar, wires modules
-├── global.R                   # library() calls, source() of R/ files
-├── R/
-│   ├── modules/
-│   │   ├── mod_proportion.R       # UI + server + metadata
-│   │   ├── mod_means.R
-│   │   ├── mod_case_control.R
-│   │   ├── mod_cohort.R
-│   │   ├── mod_diagnostic.R
-│   │   ├── mod_correlation.R
-│   │   └── mod_precision.R
-│   ├── calc/                      # pure calculation functions (testable, no Shiny)
-│   │   ├── calc_proportion.R
-│   │   ├── calc_means.R
-│   │   └── ...
-│   └── content/                   # per-module metadata: formula, text, citation
-│       ├── content_proportion.R
-│       └── ...
-├── tests/
-│   └── testthat/
-│       ├── test-calc_proportion.R
-│       └── ...
-├── www/                        # any custom CSS/JS, logo
+Sample_size_all/
+├── DESCRIPTION, NAMESPACE # package metadata (hand-maintained, no roxygen2)
+├── app.R                  # development entry point: pkgload::load_all() + epidemiologicasuite_app()
+├── R/                     # flat (R requires it); grouped by file-name prefix
+│   ├── run_app.R          # run_app(), epidemiologicasuite_app(): navbar + Home hub from the registry
+│   ├── registry.R         # module_registry(), module_groups
+│   ├── calc_*.R           # pure functions; calc_utils.R — validators, MC search
+│   ├── content_*.R        # formula, explanation, example, citation, backend
+│   ├── mod_*.R            # Shiny UI + server; mod_shared_ui.R
+│   └── home_*.R, design_*.R   # home_catalog.R, home_finder.R, home_hub.R,
+│                          # home_design_tree.R, design_wizard.R, design_free_text.R
+├── tests/testthat/        # test-calc_*.R, test-design_tree.R, test-design_free_text.R,
+│                          # test-catalog_consistency.R, ...
 ├── docs/
-│   ├── project-brief.md
-│   └── SDD.md                  # this document
-└── README.md
+│   ├── ROADMAP.md         # forward plan (authoritative for "what next")
+│   ├── SDD.md             # this document
+│   ├── checklist_by_design.md, checklist_by_test.md
+│   ├── design_identification_algorithm.md
+│   └── project-brief.md   # original brief (historical)
+├── .claude/               # SessionStart hook + settings
+├── .github/workflows/     # tests.yml — CI
+├── renv.lock              # locked package versions
+├── README.md
+└── LICENSE                # GPL-3 (relicensed from MIT, ROADMAP D2)
 ```
 
 ---
 
 ## 7. Functional Design — Calculator Catalog
 
-The full, detailed calculator backlog — ~90 scenarios across both a study-design
-view and a statistical-test view (mirroring and extending G*Power's catalog) —
-lives in two living checklist documents, not in this table:
+The detailed backlog lives in two checklists, which are the source of truth for build
+status and verification evidence:
 
-- **[`checklist_by_design.md`](checklist_by_design.md)** — organized the way a
-  medical researcher thinks ("I'm doing a case-control study"): 17 sections
-  from descriptive/estimation studies through repeated-measures/longitudinal
-  designs, each item tagged **[CORE]** (v1) or **[ADV]** (later), with typical
-  inputs, the suggested R package/function, and the original citation.
-- **[`checklist_by_test.md`](checklist_by_test.md)** — the same catalog
-  organized by statistical test family (t / z / F / χ² / Exact, plus
-  non-parametric, survival, agreement, equivalence, multilevel, Bayesian, and
-  simulation-based methods), explicitly cross-referenced against G*Power's own
-  test families and analysis types (Faul et al. 2007, 2009).
+- **[`checklist_by_design.md`](checklist_by_design.md)** — by study design (81 of 94
+  items done).
+- **[`checklist_by_test.md`](checklist_by_test.md)** — by statistical test family,
+  cross-referenced to G*Power (69 of 74 items done).
 
-Every calculator should be reachable from *both* files (a researcher lands via
-design, a statistician via test) — the same Shiny module serves both entry
-points, and both files' checkboxes are ticked with a `*(implemented: ...)*`
-note as each module goes live, so either file alone shows current build
-status. Both files also carry a shared staged build plan (Stage 1 CORE
-release through Stage 4 niche/simulation, Stage 1.5 and Stage 5 for the
-design-identification wizard's two halves, and Phase 6 for the remaining
-backlog — see §7.1) and a set of caveats (version-
-dependent vendor procedure counts, ARE-based non-parametric power, bio-
-equivalence input conventions, packages with no confirmed CRAN presence,
-etc.) — see those files rather than duplicating them here.
+Every calculator should be reachable from both files, from the Home hub's Browse
+catalog, and — where the decision tree has a branch — from the wizard.
 
-The table below is now just a snapshot of what's *actually live*, kept in
-sync with the two checklists above (do not treat it as the source of truth
-for what to build next):
+The table below is a snapshot of what is live (28 Sep 2026).
 
-| Family | Designs covered | Backend package/function | Status |
+| Family (module) | Designs | Backend | Status |
 |---|---|---|---|
-| Proportions | Precision-based (Cochran, +FPC); vs. known value; two independent; Bonferroni-adjusted post-hoc pairwise | closed-form (Cochran); `pwr::pwr.p.test`, `pwr::pwr.2p.test`, `TrialSize::OneWayANOVA.PairwiseComparison()` | Live |
-| Means | Precision-based; one-sample, two-sample (equal + unequal n), two-sample unequal variances (Welch), paired, one-way ANOVA (3+ groups), planned linear contrast, Bonferroni-adjusted post-hoc pairwise | `epiR::epi.sssimpleestc()`; `pwr::pwr.t.test`, `pwr::pwr.t2n.test`, `pwr::pwr.anova.test`, closed-form normal approximation (Julious 2004) for Welch, `TrialSize::Dose.Response.Linear()`, `TrialSize::OneWayANOVA.pairwise()` | Live |
-| Diagnostic accuracy | Precision-based (Buderer); vs. reference value; two tests, unpaired/paired; PPV/NPV; likelihood ratios (LR+/LR-); diagnostic odds ratio | closed-form (Buderer; Casagrande-Pike; Connor; Altman & Bland), all + Yates' correction; `presize::prec_pos_lr()`/`prec_neg_lr()` (Simel et al 1991); DOR reuses the two-independent-tests engine | Live |
-| Agreement / reliability | Cohen's kappa; ICC; Cronbach's alpha; Bland-Altman LoA; Lin's CCC | `presize::prec_kappa()` (→ `kappaSize`); `presize::prec_icc()` (Bonett 2002); `presize::prec_cronb()` (Bonett & Wright 2015); `presize::prec_lim_agree()` (Bland & Altman 1986); closed-form (Lin 1989/2000, formula as used internally by `epiR::epi.ccc()`) | Live |
-| Case-control | Unmatched; matched (1:1 or 1:m); nested (binary/continuous exposure); case-cohort | `epiR::epi.sscc()`; `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed-form (Cai & Zeng 2004) | Live |
-| Cohort / RR | Cohort, cross-sectional, relative risk | `epiR::epi.sscohortc()` | Live |
-| Correlation | Pearson correlation; comparing two independent correlations; comparing two dependent (overlapping) correlations; point-biserial correlation; simple regression slope; partial correlation; Spearman rank correlation | `pwr::pwr.r.test()`; closed-form (Cohen 1988); closed-form (Steiger 1980); `pwr::pwr.t.test()` via r-to-d conversion; `pwr::pwr.r.test()` via slope-to-r identity; `pwr::pwr.r.test()` + k covariates; `pwr::pwr.r.test()` inflated by 9/pi^2 ARE (Hotelling & Pabst 1936; Fieller, Hartley & Pearson 1957) | Live |
-| Chi-square tests | Goodness of fit; test of independence (R×C); McNemar's (paired proportions); Mantel-Haenszel (stratified proportions); Cochran-Armitage trend (dose-response); Cochran's Q (k >= 3 paired binary measurements) | `pwr::pwr.chisq.test()` (`ES.w1`/`ES.w2`); `TrialSize::McNemar.Test()`; `TrialSize::Propensity.Score.strata()`/`.nostrata()`; `TrialSize::Cochran.Armitage.Trend()`; direct Monte Carlo simulation of `rstatix::cochran_qtest()` | Live |
-| Pilot / feasibility | Flat 12/arm rule-of-thumb; interactive CI-for-SD precision | rule-of-thumb (Julious 2005); closed-form chi-square CI theory | Live |
-| Simon two-stage | Phase II single-arm (minimax + optimal designs) | `clinfun::ph2simon()` | Live |
-| Equivalence (TOST) | Two one-sided tests, means, proportions, PK bioequivalence crossover (2x2, 2x2x4, 2x3x3), and bioequivalence crossover with expected power/assurance (CV uncertainty) | `PowerTOST::sampleN.TOST(logscale=FALSE/TRUE)`; `epiR::epi.ssequb()`; `PowerTOST::expsampleN.TOST(prior.type="CV")` | Live |
-| Log-rank / survival | Two-arm time-to-event, cumulative event probabilities; Cox PH regression (binary or continuous covariate); stratified log-rank (exponential survival); accrual/follow-up with drop-in/non-adherence; weighted log-rank under non-proportional hazards | `powerSurvEpi::ssizeCT()`; `ssizeEpi.default()`; `ssizeEpiCont.default()`; `ssize.stratify()` (Palta & Amini 1985); `Hmisc::cpower()` (Peterson & George 1993; Lachin & Foulkes 1986); direct Monte Carlo simulation of `survival::survdiff(rho=...)` (Fleming-Harrington G^rho family; Harrington & Fleming 1982) | Live |
-| Incidence Rate | Precision-based, events + person-time; comparison of two rates; Poisson regression with a continuous predictor; comparison of two negative binomial (over-dispersed) rates | `presize::prec_rate()`; closed-form (Demidenko 2007); `powerMediation::sizePoisson()` (Signorini 1991); closed-form reimplementation of `MKpower::power.nb.test()` (Zhu & Lakkis 2014) | Live |
-| Exact Tests | Binomial test (single proportion); Fisher's exact (two proportions); Boschloo's exact (unconditional, two proportions); exact Poisson (single rate); sign test | `stats::binom.test()` search; `Exact::power.exact.test()` search (methods "fisher"/"boschloo"); `stats::poisson.test()` search; `stats::binom.test()` search (p0 = 0.5) | Live |
-| Multiple Regression | R-squared deviation from zero; R-squared increase (hierarchical) | `pwr::pwr.f2.test()` | Live |
-| Non-Inferiority | Means, proportions, odds ratio, hazard ratio (Cox PH) | `epiR::epi.ssninfc()`, `epi.ssninfb()`; `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
-| Rule of Three | Upper bound on unseen event rate; n to detect >= 1 event; detect >= 1 case with an imperfect test in a finite population (single or two-test series/parallel) | closed-form (Hanley & Lippman-Hand 1983); `epiR::epi.ssdetect()` | Live |
-| Group Sequential Design | Interim-monitoring trial design (continuous, binary, or survival outcome) with Pocock-to-O'Brien-Fleming efficacy/futility boundaries | `clinfun::gsdesign.normal()`/`.binomial()`/`.survival()` | Live |
-| Prediction Model | Model development (binary, continuous, survival); external validation (binary) | `pmsampsize::pmsampsize()` (Riley et al. 2019/2020/2021); external validation reimplements `pmvalsampsize` (package not installed, source verified) (Riley et al. 2021) | Live |
-| ROC / AUC | Single ROC AUC vs. chance (0.5); compare two correlated (paired) AUCs | `pROC::power.roc.test()` (Obuchowski et al. 2004; Obuchowski & McClish 1997) | Live |
-| Cluster / design effect | Design-effect inflation of an existing base sample size; cluster survey precision (WHO EPI-style, proportion) | closed-form (Kish 1965); `epiR::epi.ssclus2estb()` | Live |
-| Stratified Sampling | Total size + per-stratum allocation (proportional/Neyman) | closed-form (Cochran 1977; Kauermann & Kuechenhoff 2011) | Live |
-| LQAS | Lot Quality Assurance Sampling (rapid area classification) | closed-form binomial operating-characteristic search (Robertson & Valadez 2006) | Live |
-| Resource Equation (Animal Studies) | Recommend/check sample size via error degrees of freedom (E=N-T) | closed-form arithmetic (Mead 1988; Charan & Kantharia 2013) | Live |
-| Subgroup / Interaction Testing | Inflate a main-effect sample size for a treatment-by-subgroup interaction test ("4x rule") | closed-form arithmetic (4/effect_ratio^2), Brookes et al. 2004 | Live |
-| Qualitative Sample Size Guidance | Reference guidance for qualitative interview studies (saturation, information power, purposive/theoretical sampling) -- no formula, no numeric output | Guest, Bunce & Johnson 2006; Malterud, Siersma & Guassora 2016; Glaser & Strauss 1967; Patton 2002/2015 | Live |
-| Monte Carlo Mixed Models | Two-arm cluster-randomized trial (continuous LMM or binary GLMM outcome), or a longitudinal growth-curve model (group difference in slope) -- all analyzed via the actual mixed-model likelihood-ratio test, no closed-form formula exists, so directly simulated via `lme4::lmer()`/`glmer()` | Bolker et al. 2009; Judd, Westfall & Kenny 2017; Green & MacLeod 2016 (`simr`) | Live |
-| Variance Tests | Single-variance test vs. a reference SD (chi-squared); two-variance test comparing two groups (F test) | closed-form (chi-squared/F distribution, `uniroot()` solve) | Live |
-| Crossover Trial (2x2) | Continuous outcome, test for a difference (not equivalence) | `TrialSize::TwoSampleCrossOver.Equality()` (Chow, Shao & Wang 2003) | Live |
-| Factorial ANOVA / ANCOVA | Main effects, interactions, ANCOVA group effects (general F-test) | `pwr::pwr.f2.test()` (Cohen 1988) | Live |
-| Logistic Regression | Simple logistic regression, binary or continuous predictor; ordinal (proportional odds) regression, two groups; multiple-regression covariate-adjusted (variance-inflation) binary/continuous designs | `powerMediation::SSizeLogisticBin()`/`SSizeLogisticCon()` (Hsieh et al. 1998); `Hmisc::posamsize()` (Whitehead 1993); closed-form 1/(1-R²) inflation (Hsieh, Bloch & Larsen 1998) | Live |
-| Self-Controlled Case Series | Cases-only design, risk-period vs. own-time comparison, optional age effects | closed-form (Musonda, Farrington & Whitaker 2006) | Live |
-| RM-ANOVA / Mixed ANOVA | Between-subjects, within-subjects, and group x time interaction effects | closed-form (Cohen 1988; `WebPower::wp.rmanova()` algorithm) | Live |
-| Nonparametric Tests | Wilcoxon rank-sum, Wilcoxon signed-rank, Kendall's tau, Kruskal-Wallis, Jonckheere-Terpstra, Friedman, Kolmogorov-Smirnov (two-sample), Wald-Wolfowitz runs test (two-sample) | `TrialSize::Nonpara.Two.Sample()`/`Nonpara.One.Sample()`/`Nonpara.Independ()` (Chow, Shao & Wang 2003); `pwr::pwr.anova.test()` inflated by 3/pi ARE (Hodges & Lehmann 1956); Jonckheere-Terpstra reuses the Kendall's tau engine (asymptotic equivalence); Friedman reuses `calc_rm_anova()` inflated by (3/pi)*k/(k+1) ARE (Zimmerman & Zumbo 1993); Kolmogorov-Smirnov and runs test via direct Monte Carlo simulation of `stats::ks.test()`/`tseries::runs.test()` (no closed form exists for either) | Live |
-| Ratio Estimation | Precision-based risk ratio, odds ratio, rate ratio | `presize::prec_riskratio()`/`prec_or()`/`prec_rateratio()` | Live |
-| Multiplicity Adjustment | Bonferroni/Sidak-adjusted sample size for one-/two-sample proportion or mean tests, given m planned simultaneous comparisons; FDR (Benjamini-Hochberg)-controlled sample size for two independent means | closed-form correction wrapping this app's own `calc_proportion_1s()`/`_2s()`/`calc_means_1s()`/`_2s()`; FDR design via an independently-derived, Monte-Carlo-verified closed form wrapping `pwr::pwr.t.test()` (Benjamini & Hochberg 1995) | Live |
-| MANOVA / Hotelling's T² | Two-group Hotelling's T-squared test (p jointly-tested continuous outcomes) | closed-form noncentral F (Rencher 2002; Vonesh & Schork 1986 framework) | Live |
-| Bayesian Design Analysis | Prior-averaged power (assurance) for a two-arm proportions trial, log odds ratio, given a Normal or Uniform prior on the true effect; Bayes Factor Design Analysis for two-sample means | `Hmisc::gbayes2()` (Spiegelhalter & Freedman 1986); direct Monte Carlo simulation of `BayesFactor::ttestBF()` (Rouder et al. 2009; Schönbrodt & Wagenmakers 2018) | Live |
-| Longitudinal / MMRM | Two-group difference in linear slope (rate of change) over repeated visits, via all 4 `lmmpower()` methods (Liu & Liang, Diggle, Ard & Edland, Hu/Mackey/Thomas); or a mixed model of repeated measures (MMRM) with dropout, AR(1) correlation | closed-form reimplementation of `longpower::liu.liang.linear.power()` (Liu & Liang 1997), `diggle.linear.power()` (Diggle et al 2002), `edland.linear.power()` (Ard & Edland 2011), `hu.mackey.thomas.linear.power()` (Hu, Mackey & Thomas 2021), `power.mmrm.ar1()` (Lu, Luo & Chen 2008) | Live |
-| Competing Risks | Joint test of a cause-specific hazard and the any-cause hazard (Gray's-test setting) | closed-form root-finding (`uniroot()` + `mvtnorm::pmvnorm()`), reimplemented from `powerCompRisk::powerCompRisk()`'s own public source (package not installable from CRAN in this sandbox; source read from its GitHub CRAN mirror) per Yang, Fung & Li (2017) | Live |
-| RMST Comparison | Two-arm restricted mean survival time comparison (superiority or non-inferiority) | Monte Carlo simulation reimplemented from `SSRMST::ssrmst()` + `survRM2::rmst2()`'s own public source (neither package installable from CRAN in this sandbox; both read from their GitHub CRAN mirrors), using only `survival::survfit()`, per Uno et al. (2014, 2015) | Live |
-| Precision-based (generic) | CI-width driven (risk diff/ratio) | `presize`, `precisely` | Not started |
-| MANOVA (global, k>2 groups) | Global & special effects for k > 2 groups | Vonesh & Schork (1986) closed-form; not yet wrapped | Not started |
+| Proportions | Precision (Cochran, +FPC); vs. known value; two independent; Bonferroni post-hoc pairwise | closed form (Cochran); `pwr::pwr.p.test`, `pwr.2p.test`; `TrialSize::OneWayANOVA.PairwiseComparison()` | Live |
+| Means | Precision; one-sample; two-sample (equal/unequal n); Welch; paired; one-way ANOVA; planned linear contrast; Bonferroni post-hoc pairwise | `epiR::epi.sssimpleestc()`; `pwr::pwr.t.test`, `pwr.t2n.test`, `pwr.anova.test`; closed form (Julious 2004) for Welch; `TrialSize::Dose.Response.Linear()`, `OneWayANOVA.pairwise()` | Live |
+| Incidence Rate | Precision; two rates; Poisson regression (continuous predictor); two negative-binomial rates | `presize::prec_rate()`; closed form (Demidenko 2007); `powerMediation::sizePoisson()`; reimplemented `MKpower::power.nb.test()` (Zhu & Lakkis 2014) | Live |
+| Ratio Estimation | Precision-based RR, OR, rate ratio | `presize::prec_riskratio()`, `prec_or()`, `prec_rateratio()` | Live |
+| Stratified Sampling | Total n + proportional/Neyman allocation | closed form (Cochran 1977) | Live |
+| Cluster / Design Effect | DEFF; DEFF with variable cluster size; WHO EPI cluster survey; two-stage PPS optimal allocation | closed form (Kish 1965); CV-adjusted DEFF verified vs. `clusterPower`; `epiR::epi.ssclus2estb()`; Hansen-Hurwitz-Madow verified vs. `PracTools::clusOpt2()` | Live |
+| LQAS | Classification decision rule | closed-form binomial search (Robertson & Valadez 2006) | Live |
+| Capture-Recapture | Chapman-Petersen, precision-based | closed form (Chapman 1951; Seber 1982), Monte Carlo verified | Live |
+| Case-Control | Unmatched; matched 1:m; case-crossover; nested; case-cohort | `epiR::epi.sscc()`; `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed form (Cai & Zeng 2004) | Live |
+| Cohort / RR | Cohort / cross-sectional RR | `epiR::epi.sscohortc()` | Live |
+| Self-Controlled Case Series | SCCS with optional age effects | reimplemented `SCCS::samplesize()` (Musonda et al. 2006) | Live |
+| Ecological Study Guidance | Guidance panel, no formula | Morgenstern 1995; Robinson 1950 | Live |
+| Diagnostic Accuracy | Se/Sp precision; vs. reference; two tests unpaired/paired; PPV/NPV; LR+/LR−; DOR | closed form (Buderer; Casagrande-Pike; Connor; Altman & Bland); `presize::prec_pos_lr()`/`prec_neg_lr()` | Live |
+| ROC / AUC | Single AUC vs. 0.5; two correlated AUCs | `pROC::power.roc.test()` | Live |
+| Agreement / Reliability | Kappa; ICC; Cronbach's alpha; Bland-Altman; Lin's CCC | `presize::prec_kappa()`, `prec_icc()`, `prec_cronb()`, `prec_lim_agree()`; closed form (Lin 1989/2000) | Live |
+| Pilot / Feasibility | 12/arm rule; precision of a pilot SD | Julious 2005; chi-square CI theory | Live |
+| Simon Two-Stage | Minimax and optimal designs | `clinfun::ph2simon()` | Live |
+| Equivalence (TOST) | Means; proportions; PK bioequivalence (2×2, 2×2×4, 2×3×3); expected-power bioequivalence | `PowerTOST::sampleN.TOST()`, `expsampleN.TOST()`; `epiR::epi.ssequb()` | Live |
+| Non-Inferiority | Means; proportions; OR; HR | `epiR::epi.ssninfc()`, `epi.ssninfb()`; `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
+| Crossover Trial (2×2) | Continuous, difference | `TrialSize::TwoSampleCrossOver.Equality()` | Live |
+| Group Sequential Design | Continuous/binary/survival boundaries; Lan-DeMets spending (2 looks) + conditional power and sample-size re-estimation | `clinfun::gsdesign.*()`; spending functions verified vs. `rpact`; inverse-normal combination (Lehmacher & Wassmer 1999) | Live |
+| Subgroup / Interaction Testing | "4× rule" inflation | closed form (Brookes et al. 2004) | Live |
+| Monte Carlo Mixed Models | CRT continuous (LMM); CRT binary (GLMM); growth-curve slope difference | direct simulation + LRT via `lme4::lmer()`/`glmer()`; growth-curve LRT verified vs. `simr::doTest()` | Live |
+| Trial Sequential Analysis | Required information size: RR, OR, RD, MD | reimplemented, verified vs. `RTSA::ris()` | Live |
+| Stepped-Wedge CRT | Continuous outcome | Hooper et al. (2016) design effect, verified vs. `clusterPower::cpa.sw.normal()` | Live |
+| Log-Rank / Survival | Log-rank; Cox PH (binary/continuous); stratified; accrual + noncompliance; weighted log-rank (non-PH) | `powerSurvEpi::ssizeCT()`, `ssizeEpi()`, `ssizeEpiCont()`, `ssize.stratify()`; `Hmisc::cpower()`; simulation of `survival::survdiff(rho=)` | Live |
+| Competing Risks | Joint cause-specific / any-cause hazard test | reimplemented `powerCompRisk` (Yang, Fung & Li 2017) with `mvtnorm::pmvnorm()` | Live |
+| RMST Comparison | Superiority / non-inferiority | simulation reimplementing `SSRMST` + `survRM2` with `survival::survfit()` (Uno et al.) | Live |
+| Prediction Model | Development (binary, continuous, survival); external validation (binary) | `pmsampsize::pmsampsize()`; reimplemented `pmvalsampsize` (Riley et al. 2021) | Live |
+| Rule of Three | Upper bound; n to detect ≥ 1 event; disease freedom, imperfect test | closed form (Hanley & Lippman-Hand 1983); `epiR::epi.ssdetect()` | Live |
+| Resource Equation | Recommend / check E = N − T | Mead 1988; Charan & Kantharia 2013 | Live |
+| Qualitative Sample Size Guidance | Guidance panel, no formula | Guest et al. 2006; Malterud et al. 2016; Patton; Glaser & Strauss | Live |
+| Psychometrics Sample Size Guidance | EFA/CFA subjects-per-item; CFA/SEM RMSEA test of close fit; IRT calibration by model | Costello & Osborne 2005 / Comrey & Lee 1992; MacCallum, Browne & Sugawara 1996 verified vs. `semTools`; Linacre 1994, Hulin et al. 1982, Reise & Yu 1990 | Live |
+| Value of Information | EVPI; EVSI + ENBS-optimal n | closed-form normal VOI, verified vs. `voi::evpi()`/`evsi()` | Live |
+| Correlation | Pearson; two independent r; two dependent r; point-biserial; regression slope; partial; Spearman | `pwr::pwr.r.test()`; closed form (Cohen 1988; Steiger 1980); ARE inflation for Spearman | Live |
+| Chi-Square Tests | GoF; R×C independence; McNemar; Mantel-Haenszel; Cochran-Armitage; Cochran's Q | `pwr::pwr.chisq.test()`; `TrialSize::McNemar.Test()`, `Propensity.Score.strata()`, `Cochran.Armitage.Trend()`; simulation of `rstatix::cochran_qtest()` | Live |
+| Multiple Regression | R² vs. zero; R² increase | `pwr::pwr.f2.test()` | Live |
+| Factorial ANOVA / ANCOVA | General F-test | `pwr::pwr.f2.test()` | Live |
+| Logistic Regression | Binary/continuous predictor, simple or covariate-adjusted; ordinal | `powerMediation::SSizeLogisticBin()`/`Con()`; 1/(1−R²) inflation; `Hmisc::posamsize()` | Live |
+| Exact Tests | Binomial; Fisher; Boschloo; exact Poisson; sign test | `stats::binom.test()`, `poisson.test()` searches; `Exact::power.exact.test()` | Live |
+| RM-ANOVA / Mixed ANOVA | Between; within; interaction | reimplemented `WebPower::wp.rmanova()` | Live |
+| Nonparametric Tests | Wilcoxon ×2; Kendall's tau; Kruskal-Wallis; Jonckheere-Terpstra; Friedman; KS; runs test; animal K-sample rank test | `TrialSize::Nonpara.*()`; ARE inflation; simulation of `ks.test()`/`tseries::runs.test()`; `clinfun::power.ladesign()` | Live |
+| Variance Tests | One variance; two variances; SD precision | closed form (chi-square / F) | Live |
+| Multiplicity Adjustment | Bonferroni/Šidák (proportions, means); FDR (BH) means; exact microarray FDR; Dunnett | wraps this app's own formulas; FDR closed form (simulation-verified); Liu & Hwang 2007 verified vs. `ssize.fdr`; `mvtnorm::qmvt()` | Live |
+| MANOVA / Hotelling's T² | Two-group Hotelling's T² | closed-form noncentral F (Rencher 2002) | Live |
+| Bayesian Design Analysis | Assurance; Bayes factor design analysis | `Hmisc::gbayes2()`; simulation of `BayesFactor::ttestBF()` | Live |
+| Longitudinal / MMRM | Slope difference: Liu & Liang, Diggle, Ard & Edland, Hu et al.; MMRM with dropout, AR(1) | reimplemented `longpower` functions | Live |
+| Multilevel / Hierarchical Model | Two- and three-level slope difference | reimplemented `powerlmm` (no-dropout case) | Live |
+| Meta-Analysis Power | Number of studies, fixed/random effects | Hedges & Pigott 2004 / Jackson & Turner 2017, verified vs. `metapower` | Live |
+| Precision-based (generic CI width) | Risk difference/ratio CI width | covered across Proportions, Means, Rate, Ratio, Variance precision designs | Covered |
+| MANOVA (global, k > 2 groups) | Global and special-effect tests | Vonesh & Schork (1986) — not yet implemented | Open (ROADMAP A.3) |
 
-Each row above is (or will be) exactly one `mod_*.R` + `calc_*.R` +
-`content_*.R` file set, following the module contract in §8.
+Open, blocked and partially covered items are listed in ROADMAP §4 — none have been
+removed.
 
-**Top navbar.** With 24 modules live, one flat top-level nav tab per
-calculator became unworkably crowded (26 items: Home, the wizard, and 24
-modules). `app.R` now groups modules into `bslib::nav_menu()` dropdowns via
-`global.R`'s `module_groups` list, ordered to match
-`checklist_by_design.md`'s own Part-1 section numbers (already simple ->
-difficult): Descriptive & Estimation, Survey & Cross-Sectional,
-Observational Studies, Diagnostic & Screening, Agreement & Reliability,
-Clinical Trials, Survival Analysis, Prediction Models, Surveillance, and
-General Statistical Tests (the handful of modules — Correlation,
-Chi-Square, Multiple Regression, Factorial ANOVA/ANCOVA, Logistic
-Regression, Exact Tests — with no single natural study-design home).
-Total: Home + 10 dropdowns = 11 top-level items. This is a navigation-layer
-change only; `nav_select()` still targets a module by its nav title exactly
-as before, whether that `nav_panel` sits directly on the navbar or nested
-in a dropdown (see §8's registry-wiring note and the `home_finder.R`/
-`design_wizard.R` mechanism in §7.1).
+**Top navbar.** Modules are grouped into 14 `bslib::nav_menu()` dropdowns via
+`R/registry.R`'s `module_groups`, ordered roughly simple → advanced: Descriptive &
+Estimation; Survey & Cross-Sectional; Observational Studies; Diagnostic & Screening;
+Agreement & Reliability; Clinical Trials; Survival Analysis; Prediction Models;
+Surveillance; Preclinical / Animal Studies; Qualitative / Mixed Methods;
+Psychometrics / Scale Development; Health Economics / Value of Information; General
+Statistical Tests. `nav_select()` targets a module by nav title whether it sits in a
+dropdown or not. The navbar is now full; the suite expansion needs a navigation
+redesign (ROADMAP §5).
 
 ### 7.1 "Which calculator?" — the study design identification wizard
 
-A third way into the app, alongside the Home finder in §7 above: a
-guided-questionnaire wizard (a tab inside the Home hub, "Which calculator?
-(guided wizard)" — folded in during the navbar/Home reorg once the module
-count made a separate top-level nav panel for it too crowded) that walks a
-researcher through Stage 1–5 of
-[`docs/design_identification_algorithm.md`](design_identification_algorithm.md)
-— primary aim, allocation/directionality, outcome type, groups/dependence
-structure — one question at a time, showing the reasoning trace as it goes,
-and ending on either a jump button into a live module (reusing the Home
-finders' `nav_select()` + `updateRadioButtons()` mechanism) or an honest
-"not yet built" note naming the module/backend/citation the checklists
-already call for. It never silently decides, and a "start over" control is
-always present.
+A guided questionnaire inside the Home hub that walks a researcher through Stages 1–5
+of [`design_identification_algorithm.md`](design_identification_algorithm.md) —
+primary aim, allocation/directionality, outcome type, groups/dependence — one
+question at a time, showing its reasoning, and ending on a jump button into a live
+module or an honest "not yet built" note. A "start over" control is always present.
 
-Implementation: `R/home/design_tree.R` (a flat node registry — question
-nodes with `options`, terminal nodes with either a `catalog_key` into
-`calculator_catalog` or a `would_use`/`citation` pair) and
-`R/home/design_wizard.R` (the UI/server, structured the same
-non-Shiny-module way as `home_finder.R`, for the same reason: it needs to
-jump the top-level navbar from the root session). `design_wizard.R` exposes
-a `design_wizard_body()` UI-fragment function (not a full page) plus its
-existing `design_wizard_server()`; `R/home/home_hub.R` composes it alongside
-`home_finder.R`'s dual-taxonomy browser and a formula/LaTeX helper into one
-"Home" nav panel — see §7 above and the top-navbar note there for why (26
-flat top-level tabs became unworkable once the module count reached 24).
+Implementation: `R/home_design_tree.R` (flat node registry: question nodes with
+`options`; terminals with a `catalog_key`, a function of the collected flags, or a
+`would_use`/`citation` pair) and `R/design_wizard.R` (UI/server at the top
+level so it can drive the navbar). `R/design_free_text.R` (`walk_free_text()`)
+implements Stage 0: a keyword-heuristic parser that pre-fills answers by walking the
+same registry and stops at the first question it can't infer. No LLM layer —
+deliberately, to keep the app self-contained and deterministic.
 
-This is the guided-tree half of the source document (its Stages 1-5;
-build-plan **Stage 1.5**, done). Its Stage 0 — free-text/PICO input parsing
-that pre-fills the wizard's answers instead of clicking through every
-question — is the other half, build-plan **Stage 5**, also now done (see
-§14): a keyword-heuristic parser (`R/home/design_free_text.R`) that walks
-the same node registry a manual click-through would, stopping honestly at
-the first question it can't confidently infer rather than guessing a final
-module. An LLM parsing layer, floated in the source document as the more
-capable alternative, was deliberately not built — no LLM API is wired into
-this otherwise self-contained, deterministically-tested app, and keyword
-heuristics are the document's own documented graceful-degrade path for
-exactly that situation.
+**Coverage.** Root offers ten aims: estimate, compare, prediction, diagnostic
+accuracy, agreement, qualitative, meta-analysis, relationships (correlation /
+regression), "something else" (survey sampling, scale development, rare events,
+animal studies, pilots, value of information, genetics), and "I already know which
+test". The last branch is generated from `home_catalog.R`'s `test_families` at source
+load time, so `home_design_tree.R` is named to load after `home_catalog.R` (package files
+load alphabetically).
+Terminals are built with `.term(id, design, key)` (key may be `.by_outcome(cont,
+bin)`) or `.term_open(id, design, would_use, citation)`; the open ones are exactly the
+not-built items in ROADMAP §4. Cluster-randomised paths show a design-effect note
+with jump buttons to Cluster / Design Effect and Monte Carlo Mixed Models.
+
+Enforced by tests: every node and every built catalog entry is reachable from root;
+every terminal resolves to a built entry, guidance, or an open item listed in the
+ROADMAP; `test-catalog_consistency.R` checks navbar ↔ catalog ↔ module `design`
+radio values in both directions. Option order matters where free-text rules exist
+(rules refer to options by position), so options are only appended there. The
+RCT-internals branch still has no free-text rules.
 
 ---
 
 ## 8. Module Contract
 
-Every calculator module follows the same three-part contract so the pattern is
-copy-paste-modify for new additions.
+Every calculator module follows the same three-part contract.
 
-**Metadata (content layer)** — plain R list, one per module:
+**Content** — a plain R list per design:
 ```r
 proportion_content <- list(
   title = "Single Proportion vs. Known Value",
   formula_latex = "$$n = \\frac{Z_{\\alpha/2}^2 \\, p(1-p)}{d^2}$$",
   explanation = "Where p is the expected proportion, d is the precision...",
   worked_example = "...",
-  citation = "Naing L, Winn T, Rusli BN. Practical issues in calculating
-               the sample size for prevalence studies. Arch Orofac Sci. 2006.",
+  citation = "Naing L, Winn T, Rusli BN. ... Arch Orofac Sci. 2006.",
   backend = "pwr::pwr.p.test"
 )
 ```
 
-**Calculation function (pure R, no Shiny)**:
+**Calculation function** — pure R, no Shiny; validates with the shared helpers in
+`calc_utils.R`, returns its result wrapped in `new_ss_result()` (`calc_result.R`,
+ROADMAP P1 item 8) — a named list (inputs echoed back) with class `ss_result`
+added on top, so every field (`n`, `n_total`, whatever that design calls its own
+headline number, `inputs`, ...) is exactly what the function would have returned
+anyway; the class only adds a generic `print()`/`format()`. Monte Carlo designs use
+`.mc_search_n1()` and a fixed `seed` argument for reproducibility.
 ```r
-calc_proportion_ss <- function(p, d, conf_level = 0.95) {
-  # validates inputs, calls pwr::pwr.p.test or closed-form formula,
-  # returns a list(n = ..., inputs_echo = ...)
+calc_proportion_1s <- function(p0, p1, alpha = 0.05, power = 0.8, alternative = "two.sided") {
+  # validate, compute
+  new_ss_result(list(n = ..., inputs = ...))
 }
 ```
 
-**Module UI/server (Shiny)**:
-```r
-mod_proportion_ui  <- function(id) { ... tabsetPanel(Calculate, Formula, Reference) ... }
-mod_proportion_server <- function(id) { moduleServer(id, function(input, output, session) {
-  # reads inputs, calls calc_proportion_ss(), renders result + validation messages
-}) }
-```
+**Module** — `mod_<name>_ui(id)` (Calculate / Formula / Help / Reference tabs;
+`design` radio + `conditionalPanel()` per design where there are several),
+`mod_<name>_server(id)` (calls the calc function in `reactive()` + `tryCatch()`), and
+`<name>_meta <- list(id, nav_title)`.
 
-`app.R` wires modules into the navbar by iterating a registry list — adding a
-calculator to the nav does not require editing `app.R`'s structure, only
-appending to `module_registry` and placing its id in the appropriate
-`module_groups` entry (both in `global.R`; see §7's "Top navbar" note).
+**Wiring** — a `module_registry()` entry and a `module_groups` placement in `R/registry.R`;
+one `calculator_catalog` entry per design plus family-index keys in
+`home_catalog.R`; a wizard route in `design_tree.R` (the tests require one); tests; and a
+tick in both checklists. `run_app.R` never changes.
 
 ---
 
 ## 9. Help / Reference Content Design
-- Formula rendered via `render_formula_block(module_content$formula_latex)`
-  (`R/modules/mod_shared_ui.R`) — wraps `withMathJax(HTML(...))` plus a
-  collapsible raw-LaTeX view with a copy-to-clipboard button, so every
-  formula's LaTeX source is visible/copyable without a separate feature per
-  module. `formula_latex` itself is one or more `$$...$$` display-math
-  blocks (concatenated with `paste0()` when there's more than one — see §8's
-  example and `README.md`'s module-contract section for the exact
-  convention, including the doubled-backslash escaping an R string needs).
-- Explanation and worked example as plain markdown-rendered text
-  (`shiny::markdown()` or `includeMarkdown()`)
-- Reference sub-tab always shows: full citation, and which package/function
-  implements the method, so users can verify independently
+- Formula rendered by `render_formula_block(content$formula_latex)`
+  (`mod_shared_ui.R`): MathJax plus a collapsible raw-LaTeX view with a copy button.
+  `formula_latex` is one or more `$$...$$` blocks joined with `paste0()`; LaTeX
+  backslashes are doubled in R strings.
+- Explanation and worked example rendered with `shiny::markdown()`.
+- Reference tab always shows the full citation and the implementing package/function
+  (or "closed-form reimplementation, verified against …"), so users can check
+  independently.
 
 ---
 
 ## 10. Post-hoc Power Module — Dropped
 
-A dedicated post-hoc/achieved-power module (given n and an *observed* effect,
-report the power that was achieved) was planned early on, then progressively
-deprioritized to "last, maybe cut" as the build order matured, and is now
-dropped as a planned deliverable entirely — not merely deferred. Decision
-(2026-09-13): the authoritative methodological literature this project
-already cited for it (Hoenig & Heisey 2001, *"The Abuse of Power"*) treats
-observed/retrospective power as a deterministic, monotonic function of the
-p-value — computing and displaying it is discouraged practice, not merely
-low-value, so building it at all would work against the app's own stated
-Transparency goal (§3) rather than serve it. No `mod_posthoc_power.R` was
-ever built; the only trace of the idea was an empty `study_design_families`
-catalog stub, now removed. Every already-shipped calculator's own "achieved
-power" *result* field (reporting the power its own solve-for-N formula
-achieves at a *pre-specified*, not observed, effect size) is unrelated and
-unaffected — that is standard, uncontroversial output, not this module.
+A dedicated post-hoc/achieved-power module (given n and an *observed* effect, report
+the power achieved) was planned early on, then progressively deprioritized, and is
+dropped as a planned deliverable — not merely deferred. Decision (2026-09-13): the
+literature this project already cited (Hoenig & Heisey 2001, *"The Abuse of Power"*)
+treats observed power as a deterministic, monotonic function of the p-value, so
+building it would work against the Transparency goal (§3). No module was ever built.
+Each calculator's own "achieved power" field (at a *pre-specified* effect size) is
+standard output and unaffected.
 
 ---
 
 ## 11. Non-Functional Requirements
 
-| Requirement | Detail |
-|---|---|
-| Extensibility | New calculator = new module + calc + content file; no changes to core app shell |
-| Input validation | Every numeric input bounded/sanity-checked (e.g., proportions in [0,1]); inline error messages, not crashes |
-| Performance | All calculations are closed-form/near-instant; no need for async or caching in v1 |
-| Accessibility | Use `bslib` semantic components; label all inputs; sufficient color contrast |
-| Browser support | Modern evergreen browsers (Chrome, Firefox, Edge); no IE support needed |
-| Portability | Deployable to shinyapps.io as-is; flag any code that would block a future Shinylive port (e.g., avoid packages with compiled system dependencies not available in WebAssembly, where feasible) |
+| Requirement | Detail | Status |
+|---|---|---|
+| Extensibility | New calculator = module + calc + content files + registry/catalog entries | Met |
+| Input validation | Every numeric input bounded/sanity-checked; inline messages, not crashes | Met |
+| Performance | Closed-form designs are near-instant. Monte Carlo designs take ~5–25 s and currently recompute on input change, blocking the R process | Needs a Calculate button + async (ROADMAP F9, P1) |
+| Accessibility | `bslib` semantic components; labelled inputs | Not audited (ROADMAP P3) |
+| Browser support | Modern evergreen browsers | Met |
+| Portability | Deployable to shinyapps.io as-is. Shinylive (WebAssembly) depends on every runtime package having a webR binary — compiled packages (`lme4`, `BayesFactor`, `Hmisc`, `mvtnorm`) are the risk | Spike planned (ROADMAP D3) |
+| Reproducibility | Same inputs → same output, including Monte Carlo designs (fixed seeds) | Met in code; package versions not locked (ROADMAP P0) |
 
 ---
 
 ## 12. Testing Strategy
-- **Unit tests** (`testthat`) on every `calc_*.R` function against known published
-  worked examples (textbook or original-article numbers) — this is the primary
-  correctness guardrail
-- **Cross-validation**: for each calculator, one manual comparison run against
-  OpenEpi and/or PS: Power and Sample Size with identical inputs, documented in
-  the module's test file as a comment
-- **Manual UI smoke test** per module before merging: invalid input handling,
-  edge cases (p=0, p=1, n very small)
+- **Unit tests** (`testthat`, 474 `test_that()` blocks, 54 files) on every
+  `calc_*.R` function and on the wizard/free-text/content logic.
+- **Three verification modes** (at least one per design): published worked example;
+  real package as oracle (often bit-for-bit, packages installed only for this);
+  Monte Carlo simulation of the actual test. Oracle comparisons are recorded in test
+  comments and checklist notes.
+- **Monte Carlo designs** additionally test type-I-error control, monotonicity (more
+  effect → smaller n), and reproducibility under a fixed seed.
+- **Browser checks**: each new design is exercised in the running app with Playwright
+  before commit (currently ad-hoc scripts, not in the repo).
+- **Runtime**: the default run takes ~1 min. The 27 slowest tests (Monte Carlo,
+  ≥ 5 s each) call `skip_if_not_slow()` and run only with `S2R_SLOW_TESTS=true`;
+  the full suite takes ~13 min, mostly `test-calc_glmm.R`.
+- **CI**: `.github/workflows/tests.yml` — fast suite on every push/PR, full suite
+  weekly or on demand, packages restored from `renv.lock`.
+- **Consistency tests**: `test-design_tree.R` (reachability of every node and built
+  entry) and `test-catalog_consistency.R` (navbar ↔ catalog ↔ module design radios).
+- **Planned** (ROADMAP P1): `shinytest2` smoke tests.
 
 ---
 
 ## 13. Deployment Architecture
-- **v1**: shinyapps.io free tier, single app instance
-- **Future option**: Shinylive export for static hosting (e.g., GitHub Pages) if
-  wider distribution to other faculty/students without server costs becomes a
-  priority — revisit once calculator catalog stabilizes, since some backend
-  packages may need WebAssembly-compatible alternatives
+- **Today**: run from source (`shiny::runApp()`); shinyapps.io-compatible as-is.
+- **Planned** (ROADMAP Track D): Docker image / hosted server; installable R package
+  with `run_app()`; Shinylive static site → PWA → Android APK via Trusted Web
+  Activity; desktop wrapper. The Shinylive spike is the go/no-go for all offline
+  options.
 
 ---
 
 ## 14. Development Roadmap
 
-Superseded by the 4-stage plan in `checklist_by_design.md` / `checklist_by_test.md`
-("Recommendations (staged build plan)"), which is the authoritative, actively
-maintained backlog. Summary:
+The forward plan is [`ROADMAP.md`](ROADMAP.md). The build stages used so far:
 
 | Stage | Scope | Status |
 |---|---|---|
-| 1 — v1 CORE (~25 modules) | Single proportion, single mean, two means, two proportions, unmatched case-control, cohort/RR, one-way ANOVA, correlation, chi-square, diagnostic Se/Sp, ICC, kappa, log-rank, Simon two-stage, pilot rules-of-thumb, TOST equivalence | All Stage-1 CORE items live: Proportions, Means (incl. ANOVA), Diagnostic Accuracy, Agreement/Reliability (kappa+ICC), Case-Control (unmatched+matched), Cohort/RR, Correlation, Chi-Square Tests (GoF+independence), Pilot/Feasibility, Simon Two-Stage, Equivalence (TOST), Log-Rank/Survival |
-| 1.5 — study design identification wizard, guided-tree half | "Which calculator?" guided Q&A routing a research question to the right Stage-1 module (or an honest not-built note for anything later); see §7.1 and `docs/design_identification_algorithm.md` Stages 1-5 | Live — built deliberately right after Stage 1 finished and before Stage 2 starts, so every CORE module is reachable both by name and by guided description before the backlog grows further |
-| 2 — analytical depth | F-family completeness (factorial/RM-ANOVA, ANCOVA, MANOVA), full correlation/regression suite, matched case-control, ROC comparison, Bland-Altman/CCC/Cronbach, prediction-model development (`pmsampsize`) | In progress -- Cronbach's alpha, Bland-Altman LoA, and likelihood ratios (LR+/LR-) live; F-family completeness, correlation/regression suite, matched case-control, ROC/AUC, CCC, and prediction models still open |
-| 3 — advanced trial designs | Cluster-randomized/stepped-wedge, group-sequential/adaptive, survival extensions, bioequivalence replicate designs, longitudinal/MMRM | Bioequivalence replicate designs (2x2x4, 2x3x3) live in Equivalence (TOST); group-sequential designs (continuous/binary/survival, Pocock-to-O'Brien-Fleming boundaries) live in the new Group Sequential Design module; rest not started |
-| 4 — niche/simulation & non-formula | Genetic (`genpwr`), SEM (`semPower`), trial sequential analysis, `simr`-based simulation, guidance-only qualitative/animal-study panels | `simr`-based simulation live (Monte Carlo GLMM module, built deliberately last per this stage's own framing); guidance-only panels live (Qualitative Sample Size Guidance, Resource Equation for animal studies); genetic, SEM, and trial sequential analysis still open (no installed/reachable package or safe reimplementation path found) |
-| 5 — study design identification wizard, free-text half (done) | Stage 0 of `docs/design_identification_algorithm.md`: free-text/PICO input parsing that pre-fills the guided wizard's answers instead of requiring every question to be clicked through manually | Live — keyword-heuristic parser (`R/home/design_free_text.R`, `walk_free_text()`) covers the Stage-1 root branch, the estimation sub-branch, and the comparison path (allocation -> selection basis -> case-control matching -> outcome type -> groups -> dependence); wired into the wizard as an optional free-text box that pre-fills the trace and stops honestly at the first question it can't confidently infer (never guesses a final module). An LLM parsing layer was deliberately not built — no LLM API is wired into this otherwise self-contained, deterministically-tested app — and the RCT-internals branch (individual vs. cluster allocation, superiority vs. non-inferiority intent) has no rules yet, both left as documented gaps rather than unverifiable guesses |
-| 6 — remaining backlog | Everything not yet closed across `checklist_by_design.md`/`checklist_by_test.md`: Stage 3's unfinished advanced-trial-design items (cluster-randomized/stepped-wedge closed-form, group-sequential completeness), Stage 4's still-open niche items (genetic/`genpwr`, SEM/`semPower`, trial sequential analysis), plus the longer tail never batched (multilevel/`powerlmm`, health-economics/EVPI, meta-analysis power, real-world-evidence designs, and more) | Renumbered from the prior "Stage 2-4 backlog" framing now that Stage 5 is done — Stage 5 doesn't consume any of this backlog, it only makes already-built modules easier to reach by free text; deployment polish (evaluate Shinylive) also falls in this phase. Batch 1 (done): Capture-Recapture, Ecological Study Guidance, Animal-study rank tests (Nonparametric Tests module), Dunnett multi-arm-vs-control (Multiplicity module), EFA/CFA Sample Size Guidance — five items closed; Stepped-wedge CRT investigated and explicitly declined (no installed package, unverifiable formula) |
+| 1 — v1 CORE | Proportions, means, case-control, cohort, ANOVA, correlation, chi-square, diagnostic Se/Sp, ICC, kappa, log-rank, Simon, pilot, TOST | **Done** |
+| 1.5 — wizard, guided tree | "Which calculator?" Q&A | **Done** — full coverage since 28 Sep 2026 (ROADMAP F1) |
+| 2 — analytical depth | F-family, correlation/regression suite, matched case-control, ROC, Bland-Altman/CCC/Cronbach, prediction models | **Done** (open halves in ROADMAP A.3: MANOVA k>2, non-common-index dependent r, multinomial) |
+| 3 — advanced trial designs | Cluster-randomized, stepped-wedge, group-sequential/adaptive, survival extensions, bioequivalence replicates, longitudinal/MMRM | **Done** (open halves: stepped-wedge binary, Lan-DeMets 3+ looks, multilevel with dropout) |
+| 4 — niche/simulation & guidance | `simr`-style simulation, SEM, TSA, qualitative/animal guidance, genetics | **Done except genetics** (GWAS / G×E open — ROADMAP A.1) |
+| 5 — wizard, free-text half | Keyword parser pre-filling the wizard | **Done** (RCT-internals rules open) |
+| 6 — remaining backlog | Everything else in the checklists | **Effectively complete** — 8 batches plus a closing audit; remaining items blocked with documented reasons (ROADMAP §4) |
+| 8 — dependency reduction | Shrink runtime package list where reimplementation is safe | **Planned** — now ROADMAP P2 |
 
-The original Phase 1-6 table (superseded) is preserved in git history for
-reference; Phase 1 (app shell + Proportions template) and most of Phase 2
-(Means, diagnostic accuracy) are complete under the new numbering above.
+Items still open, blocked, or paused by the owner are kept in ROADMAP §4 with their
+unblock conditions. The two owner-paused items are external validation for
+time-to-event models and model updating/recalibration.
 
 ---
 
@@ -429,33 +429,43 @@ reference; Phase 1 (app shell + Proportions template) and most of Phase 2
 
 | Risk | Mitigation |
 |---|---|
-| Formula errors silently produce wrong sample sizes | Mandatory unit test against a published worked example before a module is considered done |
-| Scope creep slows down v1 | Phase 1 strictly limited to one working module end-to-end |
-| Package API changes (pwr/epiR versions) break calculators | Pin package versions in a lockfile (`renv`) |
+| Formula errors silently produce wrong sample sizes | Mandatory numeric verification before shipping (§12) |
+| Package updates change results | Versions locked in `renv.lock`; CI runs against them |
+| Docs and navigation drift from the code | Consistency tests (ROADMAP P0); ROADMAP as the single forward-looking doc |
+| Development environment lost on container reset | SessionStart hook rebuilds it; `renv.lock` records the exact versions |
+| Development sandbox cannot reach CRAN or journal sites | `github.com/cran` mirror + apt for packages; web search for citations; items needing paper access stay open rather than guessed |
+| Monte Carlo designs block other users on a shared server | Calculate button + `ExtendedTask` before hosting widely (ROADMAP F9) |
+| Licence of reimplementations transcribed from GPL packages | Resolved: project relicensed to GPL-3 (ROADMAP F8 / D2); module headers keep naming each source package |
+| Scope creep as the project grows into a suite | Workbench-by-workbench milestones with exit criteria (ROADMAP §11) |
 
 ---
 
 ## 16. Open Questions
-- Public GitHub repo from the start, or private until Phase 2–3 complete?
-- Any interest in `renv` for dependency locking given multi-month timeline?
-- Should the Reference sub-tab link out to DOIs where available, or citation text only?
-- **Backend reconciliation:** three already-live calculators use a closed-form
-  formula where `checklist_by_design.md`/`checklist_by_test.md` name a
-  specific CRAN package instead (Proportions' precision-based design: Cochran
-  formula vs. `presize::prec_prop`/`epiR::epi.sssimpleestb`; Diagnostic
-  Accuracy's precision-based design: Buderer formula vs.
-  `presize::prec_sens`/`prec_spec`). Both are verified correct against
-  published worked examples, so this is a style question, not a correctness
-  one: reconcile to the named packages for consistency with the "wrap, don't
-  reimplement" principle, or leave as-is since they predate the checklist and
-  already work? See `checklist_by_design.md`'s "Backend deviations" section.
-- **Checklist maintenance:** `checklist_by_design.md` / `checklist_by_test.md`
-  are meant to be ticked off as modules go live (per their own legend) — needs
-  a habit/reminder (e.g. as a step in each new module's PR/commit) so they
-  don't drift out of sync with the codebase the way this table (§7) briefly did.
+- **Suite decisions** — scope, licence, name, distribution target, languages, and when
+  to reopen paused items: see ROADMAP §10 (D1–D6).
+- **Backend reconciliation:** Proportions' precision design uses the Cochran formula
+  and Diagnostic Accuracy's precision design uses Buderer's formula, where the
+  checklists name `presize::prec_prop`/`epiR::epi.sssimpleestb` and
+  `presize::prec_sens`/`prec_spec`. Both are verified; this is a style question.
+  Revisit during Phase 8 / package API work.
+- **Reference links:** link citations to DOIs where available? (Useful for the
+  planned citation export.)
+
+Resolved since v0.1: `renv` — yes, `renv.lock` added. Checklist maintenance — to be
+enforced by consistency tests rather than habit.
 
 ---
 
-## Appendix: Core Dependencies
-`shiny`, `bslib`, `pwr`, `presize`, `precisely`, `epiR`, `WebPower`, `pwrss`,
-`TrialSize`, `kappaSize`, `testthat`, `renv` (optional)
+## Appendix: Dependencies
+
+**Runtime** (`DESCRIPTION` `Imports`): `shiny`, `bslib`, `pwr`, `presize`, `epiR`,
+`clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`,
+`powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `rstatix`, `lme4`;
+plus `survival`, `graphics`, `stats` and `utils` from base R.
+
+**Testing**: `testthat` (and `lmerTest`, optional, for one cross-check).
+
+**Verification-only (development)**: installed from `github.com/cran/<pkg>` when a
+design is built, never loaded by the app — e.g. `longpower`, `powerlmm`, `RTSA`,
+`rpact`, `clusterPower`, `CRTSize`, `ssize.fdr`, `metapower`, `semTools`,
+`semPower`, `simr`, `voi`, `PracTools`, `WebPower`, `genpwr`, `iMRMC`, `dfcrm`.

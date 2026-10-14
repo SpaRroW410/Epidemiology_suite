@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_lqas.R"))
-
 test_that("calc_lqas reproduces the classic n=19 LQAS rule exactly", {
   # p_upper=0.80, p_lower=0.50, alpha=beta=0.10 is the widely-used LQAS
   # "n=19" rule (30-percentage-point threshold gap). Verified against a

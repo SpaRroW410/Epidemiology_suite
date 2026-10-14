@@ -1,3 +1,4 @@
 library(testthat)
+library(epidemiologicasuite)
 
-test_dir("testthat")
+test_check("epidemiologicasuite")

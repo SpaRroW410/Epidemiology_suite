@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_rm_anova.R"))
-source(file.path("..", "..", "R", "calc", "calc_nonparametric.R"))
-
 test_that("calc_wilcoxon_rank_sum matches Chow, Shao & Wang (2003) Example 14.3", {
   # k = 1, p1 = 0.7, p2 = 0.8, p3 = 0.8, alpha = 0.05, power = 0.80 -> n = 54.
   res <- calc_wilcoxon_rank_sum(k = 1, p1 = 0.7, p2 = 0.8, p3 = 0.8, alpha = 0.05, power = 0.80)
@@ -106,6 +102,7 @@ test_that("calc_friedman rejects invalid inputs", {
 })
 
 test_that("calc_ks_two_sample finds a sample size close to its own simulated target power (reproducible via fixed seed)", {
+  skip_if_not_slow()
   # Two independent runs with identical inputs (same fixed internal seed)
   # must return bit-for-bit identical results.
   res1 <- calc_ks_two_sample(effect_size = 0.5, alpha = 0.05, power = 0.8, nsim = 500)
@@ -119,6 +116,7 @@ test_that("calc_ks_two_sample finds a sample size close to its own simulated tar
 })
 
 test_that("calc_ks_two_sample needs a larger n for a smaller effect size", {
+  skip_if_not_slow()
   res_small <- calc_ks_two_sample(effect_size = 0.3, alpha = 0.05, power = 0.8, nsim = 500)
   res_large <- calc_ks_two_sample(effect_size = 0.8, alpha = 0.05, power = 0.8, nsim = 500)
   expect_gt(res_small$n1, res_large$n1)
@@ -132,6 +130,7 @@ test_that("calc_ks_two_sample rejects invalid inputs", {
 })
 
 test_that("calc_wald_wolfowitz_runs finds a sample size close to its own simulated target power (reproducible via fixed seed)", {
+  skip_if_not_slow()
   res1 <- calc_wald_wolfowitz_runs(effect_size = 0.8, alpha = 0.05, power = 0.8, nsim = 500)
   res2 <- calc_wald_wolfowitz_runs(effect_size = 0.8, alpha = 0.05, power = 0.8, nsim = 500)
   expect_identical(res1, res2)
@@ -141,6 +140,7 @@ test_that("calc_wald_wolfowitz_runs finds a sample size close to its own simulat
 })
 
 test_that("calc_wald_wolfowitz_runs needs a larger n for a smaller effect size, and more than the equivalent KS design", {
+  skip_if_not_slow()
   res_small <- calc_wald_wolfowitz_runs(effect_size = 0.6, alpha = 0.05, power = 0.8, nsim = 500)
   res_large <- calc_wald_wolfowitz_runs(effect_size = 1.2, alpha = 0.05, power = 0.8, nsim = 500)
   expect_gt(res_small$n1, res_large$n1)

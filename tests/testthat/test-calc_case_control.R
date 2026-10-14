@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_case_control.R"))
-
 test_that("calc_case_control_unmatched matches Woodward (2014) Example 8.17", {
   # p0 = 0.30, OR = 2.0, power = 0.90, two-sided alpha = 0.05, ratio = 1 ->
   # n = 376 total (188 cases, 188 controls).

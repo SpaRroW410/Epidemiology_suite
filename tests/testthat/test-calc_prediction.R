@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_prediction.R"))
-
 test_that("calc_prediction_binary (csrsquared) matches Riley et al (2019, Part II) exactly", {
   # 24 parameters, prevalence=0.174, csrsquared=0.288 -> n=662, events~115.
   res <- calc_prediction_binary(parameters = 24, prevalence = 0.174, csrsquared = 0.288)
@@ -9,6 +6,7 @@ test_that("calc_prediction_binary (csrsquared) matches Riley et al (2019, Part I
 })
 
 test_that("calc_prediction_binary (cstatistic) reproduces the csrsquared-based answer closely", {
+  skip_if_not_slow()
   # Same scenario, but starting from a reported C-statistic of 0.89
   # instead -- approximates csrsquared via simulation (seeded), so we
   # expect a very close but not necessarily identical n.

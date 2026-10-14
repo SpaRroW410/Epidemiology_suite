@@ -1,5 +1,3 @@
-source(file.path("..", "..", "R", "content", "content_qualitative.R"))
-
 # Unlike every other module in this app, the Qualitative & Mixed Methods
 # Sample Size Guidance module has no calc_*.R function to unit-test --
 # it is pure reference content, per the checklist's own explicit

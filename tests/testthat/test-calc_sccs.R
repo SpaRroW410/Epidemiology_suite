@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_sccs.R"))
-
 test_that("calc_sccs_samplesize matches SCCS::samplesize()'s own documented examples exactly", {
   # eexpo=2.5, risk=21, astart=366, aend=730, alpha=0.05, power=0.8:
   # p=1 (no age effects, all cases exposed) -> n=110.

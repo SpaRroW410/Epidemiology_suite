@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_tsa.R"))
-
 test_that("calc_tsa_information_size RR matches RTSA::ris() (mc=0.8, pC=0.12 -> n=7030)", {
   res <- calc_tsa_information_size(outcome = "RR", mc = 0.8, pC = 0.12, alpha = 0.05, beta = 0.1, side = 2)
   expect_equal(res$n_total, 7030)

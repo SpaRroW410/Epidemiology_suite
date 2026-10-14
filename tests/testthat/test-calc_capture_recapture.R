@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_capture_recapture.R"))
-
 test_that("calc_capture_recapture_n2 reproduces this session's own Monte Carlo verification", {
   # N=1000, n1=100, target CV=0.10 (precision = 0.10 * z_0.975) -> n2=474,
   # independently confirmed by simulating 200,000 replicates of the actual

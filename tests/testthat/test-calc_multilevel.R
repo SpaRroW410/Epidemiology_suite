@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_multilevel.R"))
-
 test_that("calc_multilevel_two_level matches real powerlmm::get_power() (n1=11, T=10, var_ratio=0.02, delta=-0.9 -> n2=5639)", {
   # Verified exactly (6 decimal places) against real powerlmm::get_power()
   # at this same n: study_parameters(n1=11, n2=5639, T_end=10,

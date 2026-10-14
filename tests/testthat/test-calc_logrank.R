@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_logrank.R"))
-
 test_that("calc_logrank matches Rosner (2006) Example 14.42 exactly", {
   # pE = 0.3707, pC = 0.4890, HR = 0.7, ratio = 1, alpha = 0.05, power = 0.80
   # -> nE = nC = 294 (the textbook's own published answer).
@@ -63,6 +60,7 @@ test_that("calc_survival_stratified rejects invalid inputs", {
 })
 
 test_that("calc_weighted_logrank is reproducible under a fixed seed", {
+  skip_if_not_slow()
   res1 <- calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4, effect_timing = "delayed",
                                  accrual = 12, tot_time = 30, rho = 0, power = 0.8)
   res2 <- calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4, effect_timing = "delayed",
@@ -72,6 +70,7 @@ test_that("calc_weighted_logrank is reproducible under a fixed seed", {
 })
 
 test_that("calc_weighted_logrank reproduces the well-documented, opposite-direction behavior of the Fleming-Harrington G-rho family under delayed vs. early/fading non-PH effects", {
+  skip_if_not_slow()
   # npsurvSS (the checklist's named package) isn't installable from CRAN
   # in this sandbox (no network access); its own source, read from its
   # public GitHub CRAN mirror, implements a much larger (11-file,

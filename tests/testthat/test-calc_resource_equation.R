@@ -1,5 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_resource_equation.R"))
-
 test_that("calc_resource_equation_check reproduces Charan & Kantharia (2013)'s own worked example", {
   # 5 groups, 10 rats each (N=50) -> E = 50-5 = 45, "more than needed"
   res <- calc_resource_equation_check(k_groups = 5, n_per_group = 10)
