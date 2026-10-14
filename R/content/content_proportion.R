@@ -42,7 +42,7 @@ proportion_content <- list(
     backend = "pwr::pwr.p.test (effect size via pwr::ES.h)"
   ),
   precision = list(
-    title = "Single Proportion — Precision-Based (No Reference Value)",
+    title = "Single Proportion -- Precision-Based (No Reference Value)",
     formula_latex = paste0(
       "$$n_0 = \\frac{Z_{1-\\alpha/2}^2 \\, p(1-p)}{d^2}$$",
       "$$n = \\frac{n_0}{1 + \\dfrac{n_0 - 1}{N}} \\quad \\text{(finite population correction, if } N \\text{ known)}$$"

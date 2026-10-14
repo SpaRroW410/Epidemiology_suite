@@ -373,6 +373,54 @@ mod_diagnostic_server <- function(id) {
           effect = list(param = "sens", values = curve_range_proportion(), label = "sens (expected sensitivity)"),
           power = list(param = "power", values = curve_range_power())
         )
+      } else if (input$design == "precision") {
+        req(input$sens, input$spec, input$prevalence, input$prec_sens, input$prec_spec, input$conf_level)
+        acc_by_scale <- function(sens, spec, prevalence, scale, prec_sens, prec_spec, conf_level) {
+          calc_diagnostic_accuracy(sens = sens, spec = spec, prevalence = prevalence,
+                                   prec_sens = prec_sens * scale, prec_spec = prec_spec * scale,
+                                   conf_level = conf_level)
+        }
+        list(
+          calc_fn = acc_by_scale,
+          args = list(sens = input$sens, spec = input$spec, prevalence = input$prevalence, scale = 1,
+                       prec_sens = input$prec_sens, prec_spec = input$prec_spec, conf_level = input$conf_level),
+          effect = list(param = "prevalence", values = curve_range_proportion(),
+                      label = "Expected prevalence",
+                      title = "Required n vs. expected prevalence"),
+          power = list(param = "scale", values = curve_range_multiplicative(1, 0.3, 3),
+                      label = "Multiplier on both precision targets (1 = as entered; larger = looser)",
+                      title = "Required n vs. precision (both targets scaled)")
+        )
+      } else if (input$design == "ppv_npv") {
+        req(input$sens_ppv, input$spec_ppv, input$prevalence_ppv, input$prec_ppv, input$prec_npv, input$conf_level_ppv)
+        ppv_by_scale <- function(sens, spec, prevalence, scale, prec_ppv, prec_npv, conf_level) {
+          calc_diagnostic_ppv_npv(sens = sens, spec = spec, prevalence = prevalence,
+                                  prec_ppv = prec_ppv * scale, prec_npv = prec_npv * scale, conf_level = conf_level)
+        }
+        list(
+          calc_fn = ppv_by_scale,
+          args = list(sens = input$sens_ppv, spec = input$spec_ppv, prevalence = input$prevalence_ppv, scale = 1,
+                       prec_ppv = input$prec_ppv, prec_npv = input$prec_npv, conf_level = input$conf_level_ppv),
+          effect = list(param = "prevalence", values = curve_range_proportion(),
+                      label = "Expected prevalence",
+                      title = "Required n vs. expected prevalence"),
+          power = list(param = "scale", values = curve_range_multiplicative(1, 0.3, 3),
+                      label = "Multiplier on both precision targets (1 = as entered; larger = looser)",
+                      title = "Required n vs. precision (both targets scaled)")
+        )
+      } else if (input$design == "likelihood_ratio") {
+        req(input$sens_lr, input$spec_lr, input$prevalence_lr, input$lr_type, input$conf_width_lr, input$conf_level_lr)
+        list(
+          calc_fn = calc_diagnostic_likelihood_ratio,
+          args = list(sens = input$sens_lr, spec = input$spec_lr, prevalence = input$prevalence_lr,
+                       type = input$lr_type, conf_width = input$conf_width_lr, conf_level = input$conf_level_lr),
+          effect = list(param = "prevalence", values = curve_range_proportion(),
+                      label = "Expected prevalence",
+                      title = "Required n vs. expected prevalence"),
+          power = list(param = "conf_width", values = curve_range_multiplicative(input$conf_width_lr, 0.3, 3),
+                      label = "Desired CI width for the LR",
+                      title = "Required n vs. precision (CI width)")
+        )
       } else {
         NULL
       }

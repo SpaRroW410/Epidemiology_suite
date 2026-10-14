@@ -37,7 +37,8 @@ mod_resource_equation_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -104,5 +105,26 @@ mod_resource_equation_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() resource_equation_content$size)
+
+    # Precision curves (ROADMAP P1 item 10): a precision-based design has no
+    # power, so its two curves are n against the key assumption and n against
+    # the precision target.
+    render_power_curves(output, function() {
+      if (input$mode == "size") {
+        req(input$k_groups_size, input$e_target)
+        list(
+          calc_fn = calc_resource_equation_size,
+          args = list(k_groups = input$k_groups_size, e_target = input$e_target),
+          effect = list(param = "k_groups", values = 2:10,
+                      label = "Number of groups",
+                      title = "Required n per group vs. number of groups"),
+          power = list(param = "e_target", values = curve_range_multiplicative(input$e_target, 0.5, 3),
+                      label = "Target error degrees of freedom (E)",
+                      title = "Required n per group vs. target E")
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }

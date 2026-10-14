@@ -99,7 +99,8 @@ mod_cluster_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -240,5 +241,59 @@ mod_cluster_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() cluster_content[[input$design]])
+
+    # Precision curves (ROADMAP P1 item 10): a precision-based design has no
+    # power, so its two curves are n against the key assumption and n against
+    # the precision target.
+    render_power_curves(output, function() {
+      req(input$design)
+      if (input$design == "deff") {
+        req(input$n_base, input$icc, input$cluster_size)
+        list(
+          calc_fn = calc_cluster_deff,
+          args = list(n_base = input$n_base, icc = input$icc, cluster_size = input$cluster_size),
+          effect = list(param = "icc", values = curve_range_within(0, 0.5),
+                      label = "Intracluster correlation (ICC)",
+                      title = "Required n vs. ICC"),
+          power = list(param = "cluster_size", values = curve_range_multiplicative(input$cluster_size),
+                      label = "Average cluster size",
+                      title = "Required n vs. cluster size")
+        )
+      } else if (input$design == "deff_variable") {
+        req(input$n_base_var, input$icc_var, input$cluster_size_var, input$cv_var)
+        list(
+          calc_fn = calc_cluster_deff_variable,
+          args = list(n_base = input$n_base_var, icc = input$icc_var,
+                       cluster_size = input$cluster_size_var, cv = input$cv_var),
+          effect = list(param = "icc", values = curve_range_within(0, 0.5),
+                      label = "Intracluster correlation (ICC)",
+                      title = "Required n vs. ICC"),
+          power = list(param = "cluster_size", values = curve_range_multiplicative(input$cluster_size_var),
+                      label = "Average cluster size",
+                      title = "Required n vs. cluster size")
+        )
+      } else if (input$design == "survey") {
+        req(input$b_survey, input$p_survey, input$epsilon_survey, input$error_survey,
+            input$rho_survey, input$conf_level_survey)
+        b_sd <- input$b_sd_survey
+        if (is.null(b_sd) || is.na(b_sd)) b_sd <- NULL
+        N_psu <- input$N_psu_survey
+        if (is.null(N_psu) || is.na(N_psu)) N_psu <- NULL
+        list(
+          calc_fn = calc_cluster_survey_binary,
+          args = list(b = input$b_survey, b_sd = b_sd, p = input$p_survey, epsilon = input$epsilon_survey,
+                       error = input$error_survey, rho = input$rho_survey, N_psu = N_psu,
+                       conf_level = input$conf_level_survey),
+          effect = list(param = "rho", values = curve_range_within(0, 0.5),
+                      label = "Intracluster correlation (rho)",
+                      title = "Required n vs. ICC"),
+          power = list(param = "epsilon", values = curve_range_multiplicative(input$epsilon_survey, 0.25, 3),
+                      label = "Desired precision (epsilon)",
+                      title = "Required n vs. precision (epsilon)")
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }

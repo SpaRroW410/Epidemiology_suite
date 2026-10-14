@@ -493,6 +493,86 @@ mod_means_server <- function(id) {
                         label = "mean_diff (mean of paired differences)"),
           power = list(param = "power", values = curve_range_power())
         )
+      } else if (input$design == "posthoc_pairwise") {
+        req(input$tau_posthoc, input$sigma_posthoc, input$margin_posthoc, input$alpha, input$power)
+        list(
+          calc_fn = calc_means_posthoc_pairwise,
+          args = list(tau = input$tau_posthoc, sigma = input$sigma_posthoc, margin = input$margin_posthoc,
+                       alpha = input$alpha, power = input$power),
+          effect = list(param = "margin", values = curve_range_multiplicative(abs(input$margin_posthoc)),
+                        label = "Assumed difference between this pair's means"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "anova") {
+        # The effect is a whole vector of group means, so the curve scales
+        # the differences between them (1 = as entered) via an adapter.
+        req(input$k, input$sd_anova, input$alpha, input$power)
+        k <- as.integer(input$k)
+        mean_vals <- lapply(seq_len(k), function(i) input[[paste0("group_mean_", i)]])
+        req(!any(vapply(mean_vals, is.null, logical(1))))
+        group_means <- as.numeric(unlist(mean_vals))
+        anova_by_scale <- function(group_means, scale, sd, alpha, power) {
+          calc_means_anova(group_means = curve_scale_about(group_means, mean(group_means), scale),
+                           sd = sd, alpha = alpha, power = power)
+        }
+        list(
+          calc_fn = anova_by_scale,
+          args = list(group_means = group_means, scale = 1, sd = input$sd_anova,
+                       alpha = input$alpha, power = input$power),
+          effect = list(param = "scale", values = curve_range_multiplicative(1),
+                        label = "Multiplier on the differences between group means (1 = as entered)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "planned_contrast") {
+        req(input$k_contrast, input$sigma_contrast, input$alpha, input$power)
+        k <- as.integer(input$k_contrast)
+        mu_vals <- lapply(seq_len(k), function(i) input[[paste0("contrast_mu_", i)]])
+        c_vals <- lapply(seq_len(k), function(i) input[[paste0("contrast_c_", i)]])
+        f_vals <- lapply(seq_len(k), function(i) input[[paste0("contrast_f_", i)]])
+        req(!any(vapply(mu_vals, is.null, logical(1))), !any(vapply(c_vals, is.null, logical(1))),
+            !any(vapply(f_vals, is.null, logical(1))))
+        mu <- as.numeric(unlist(mu_vals))
+        contrast_by_scale <- function(mu, scale, sigma, ci, fi, alpha, power) {
+          calc_means_planned_contrast(mu = curve_scale_about(mu, mean(mu), scale), sigma = sigma,
+                                      ci = ci, fi = fi, alpha = alpha, power = power)
+        }
+        list(
+          calc_fn = contrast_by_scale,
+          args = list(mu = mu, scale = 1, sigma = input$sigma_contrast, ci = as.numeric(unlist(c_vals)),
+                       fi = as.numeric(unlist(f_vals)), alpha = input$alpha, power = input$power),
+          effect = list(param = "scale", values = curve_range_multiplicative(1),
+                        label = "Multiplier on the differences between group means (1 = as entered)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "single_precision") {
+        req(input$mean_precision, input$sd_precision, input$epsilon_precision,
+            input$error_precision, input$conf_level_precision)
+        N <- input$N_precision
+        if (is.null(N) || is.na(N)) N <- NULL
+        list(
+          calc_fn = calc_means_single_precision,
+          args = list(mean = input$mean_precision, sd = input$sd_precision,
+                       epsilon = input$epsilon_precision, error = input$error_precision,
+                       conf_level = input$conf_level_precision, N = N),
+          effect = list(param = "sd", values = curve_range_multiplicative(input$sd_precision),
+                      label = "sd (expected standard deviation)",
+                      title = "Required n vs. expected standard deviation"),
+          power = list(param = "epsilon", values = curve_range_multiplicative(input$epsilon_precision, 0.25, 3),
+                      label = "epsilon (desired precision)",
+                      title = "Required n vs. precision (epsilon)")
+        )
+      } else if (input$design == "two_sample_unequal_n") {
+        req(input$mu1_unequal, input$mu2_unequal, input$sd_unequal, input$n1_unequal,
+            input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_means_2s_unequal_n,
+          args = list(mu1 = input$mu1_unequal, mu2 = input$mu2_unequal, sd = input$sd_unequal,
+                       n1 = input$n1_unequal, alpha = input$alpha, power = input$power,
+                       alternative = input$alternative),
+          effect = list(param = "mu2", values = curve_range_around(input$mu1_unequal, 3 * input$sd_unequal),
+                        label = "mu2 (group 2 mean)"),
+          power = list(param = "power", values = curve_range_power())
+        )
       } else {
         NULL
       }

@@ -26,7 +26,8 @@ mod_stratified_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -94,5 +95,30 @@ mod_stratified_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() stratified_content$stratified)
+
+    # Precision curves (ROADMAP P1 item 10): a precision-based design has no
+    # power, so its two curves are n against the key assumption and n against
+    # the precision target.
+    render_power_curves(output, function() {
+      req(input$k, input$e, input$conf_level, input$type)
+      k <- as.integer(input$k)
+      Nh_vals <- lapply(seq_len(k), function(i) input[[paste0("Nh_", i)]])
+      Sh_vals <- lapply(seq_len(k), function(i) input[[paste0("Sh_", i)]])
+      req(!any(vapply(Nh_vals, is.null, logical(1))), !any(vapply(Sh_vals, is.null, logical(1))))
+      strat_by_scale <- function(Nh, Sh, scale, e, conf_level, type) {
+        calc_stratified_sampling(Nh = Nh, Sh = Sh * scale, e = e, conf_level = conf_level, type = type)
+      }
+      list(
+        calc_fn = strat_by_scale,
+        args = list(Nh = as.numeric(unlist(Nh_vals)), Sh = as.numeric(unlist(Sh_vals)), scale = 1,
+                     e = input$e, conf_level = input$conf_level, type = input$type),
+        effect = list(param = "scale", values = curve_range_multiplicative(1),
+                      label = "Multiplier on every stratum's SD (1 = as entered)",
+                      title = "Required n vs. within-stratum variability"),
+        power = list(param = "e", values = curve_range_multiplicative(input$e, 0.25, 3),
+                      label = "Desired precision (e)",
+                      title = "Required n vs. precision (e)")
+      )
+    })
   })
 }

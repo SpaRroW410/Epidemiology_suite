@@ -177,6 +177,18 @@ mod_variance_server <- function(id) {
                         label = "sigma2 (group 2 SD)"),
           power = list(param = "power", values = curve_range_power())
         )
+      } else if (input$design == "sd_precision") {
+        req(input$target_width, input$conf_level)
+        list(
+          calc_fn = calc_variance_sd_precision,
+          args = list(target_width = input$target_width, conf_level = input$conf_level),
+          effect = list(param = "target_width", values = curve_range_multiplicative(input$target_width, 0.3, 3),
+                      label = "Target CI width (multiple of the observed SD)",
+                      title = "Required n vs. target CI width"),
+          power = list(param = "conf_level", values = curve_range_within(0.8, 0.99),
+                      label = "Confidence level",
+                      title = "Required n vs. confidence level")
+        )
       } else {
         NULL
       }

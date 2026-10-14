@@ -159,13 +159,13 @@ case_control_content <- list(
       sep = "\n"
     ),
     worked_example = paste(
-      "Binary exposure -- Lachin (2008), §3.3: to detect OR = 3.5 with",
+      "Binary exposure -- Lachin (2008), sec. 3.3: to detect OR = 3.5 with",
       "exposure prevalence pE = 0.15 in a 1:2 matched nested case-control",
       "study (nD = 1, nH = 2), with no adjustment covariates (R2 = 0),",
       "alpha = 0.05, and 80% power, this calculator returns 59 matched",
       "sets (177 subjects total).",
       "",
-      "Continuous exposure -- Lachin (2008), §3.1: to detect OR = 1.39",
+      "Continuous exposure -- Lachin (2008), sec. 3.1: to detect OR = 1.39",
       "per SD of a continuous exposure (sigma = 1) with the same 1:2",
       "matching, alpha = 0.05, and 85% power, this calculator returns",
       "125 matched sets (375 subjects total).",
@@ -173,8 +173,8 @@ case_control_content <- list(
     ),
     citation = paste(
       "Lachin JM. Biostatistical Methods: The Assessment of Relative",
-      "Risks. 2nd ed. Wiley; 2008. §3.1 (continuous exposure, formulas",
-      "24-25), §3.3 (binary exposure, formula 38)."
+      "Risks. 2nd ed. Wiley; 2008. sec. 3.1 (continuous exposure, formulas",
+      "24-25), sec. 3.3 (binary exposure, formula 38)."
     ),
     backend = "powerSurvEpi::powerConLogistic.bin() / powerConLogistic.con()"
   ),

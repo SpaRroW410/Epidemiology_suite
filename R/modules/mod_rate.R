@@ -252,6 +252,19 @@ mod_rate_server <- function(id) {
           effect = list(param = "RR", values = curve_range_ratio(), label = "Rate ratio (treatment / control)"),
           power = list(param = "power", values = curve_range_power())
         )
+      } else if (input$design == "precision") {
+        req(input$rate, input$conf_width, input$conf_level, input$method)
+        list(
+          calc_fn = calc_rate_precision,
+          args = list(rate = input$rate, conf_width = input$conf_width,
+                       conf_level = input$conf_level, method = input$method),
+          effect = list(param = "rate", values = curve_range_multiplicative(input$rate),
+                      label = "Expected rate",
+                      title = "Required events vs. expected rate"),
+          power = list(param = "conf_width", values = curve_range_multiplicative(input$conf_width, 0.3, 3),
+                      label = "Desired confidence interval width",
+                      title = "Required events vs. precision (CI width)")
+        )
       } else {
         NULL
       }

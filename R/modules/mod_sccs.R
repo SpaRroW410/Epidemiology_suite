@@ -112,9 +112,20 @@ mod_sccs_server <- function(id) {
     # age-effects) branch, whose p is a single scalar; the age-groups
     # branch's p/eage/agegrp are vectors and are left for a later batch.
     render_power_curves(output, function() {
-      if (input$age_effects != "no") return(NULL)
-      req(input$eexpo, input$risk, input$astart, input$aend, input$p_flat,
+      req(input$eexpo, input$risk, input$astart, input$aend, input$age_effects,
           input$alpha, input$power)
+      if (input$age_effects == "yes") {
+        req(input$p_vec, input$eage_vec, input$agegrp_vec)
+        return(list(
+          calc_fn = calc_sccs_samplesize,
+          args = list(eexpo = input$eexpo, risk = input$risk, astart = input$astart, aend = input$aend,
+                       p = .parse_numeric_vec(input$p_vec), alpha = input$alpha, power = input$power,
+                       eage = .parse_numeric_vec(input$eage_vec), agegrp = .parse_numeric_vec(input$agegrp_vec)),
+          effect = list(param = "eexpo", values = curve_range_ratio(), label = "Design relative incidence (eexpo)"),
+          power = list(param = "power", values = curve_range_power())
+        ))
+      }
+      req(input$p_flat)
       list(
         calc_fn = calc_sccs_samplesize,
         args = list(eexpo = input$eexpo, risk = input$risk, astart = input$astart,

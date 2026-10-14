@@ -23,7 +23,8 @@ mod_subgroup_interaction_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -70,5 +71,22 @@ mod_subgroup_interaction_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() subgroup_interaction_content$standard)
+
+    # Precision curves (ROADMAP P1 item 10): a precision-based design has no
+    # power, so its two curves are n against the key assumption and n against
+    # the precision target.
+    render_power_curves(output, function() {
+      req(input$n_main_total, input$effect_ratio)
+      list(
+        calc_fn = calc_subgroup_interaction,
+        args = list(n_main_total = input$n_main_total, effect_ratio = input$effect_ratio),
+        effect = list(param = "effect_ratio", values = curve_range_multiplicative(input$effect_ratio),
+                      label = "Interaction effect relative to the main effect",
+                      title = "Required n vs. interaction effect size"),
+        power = list(param = "n_main_total", values = curve_range_multiplicative(input$n_main_total),
+                      label = "Main-effect total sample size",
+                      title = "Interaction n vs. main-effect sample size")
+      )
+    })
   })
 }

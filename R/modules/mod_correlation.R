@@ -313,6 +313,20 @@ mod_correlation_server <- function(id) {
           effect = list(param = "r", values = curve_range_correlation(), label = "r (Spearman correlation)"),
           power = list(param = "power", values = curve_range_power())
         )
+      } else if (input$design == "two_dependent") {
+        req(input$r_yx1, input$r_yx2, input$r_x1x2, input$alpha, input$power, input$alternative)
+        # r_yx2 is only free inside the range that keeps the 3x3 correlation
+        # matrix positive definite, given the other two correlations.
+        half <- sqrt((1 - input$r_yx1^2) * (1 - input$r_x1x2^2))
+        mid <- input$r_yx1 * input$r_x1x2
+        list(
+          calc_fn = calc_correlation_two_dependent,
+          args = list(r_yx1 = input$r_yx1, r_yx2 = input$r_yx2, r_x1x2 = input$r_x1x2,
+                       alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "r_yx2", values = curve_range_within(mid - half, mid + half),
+                        label = "r_yx2 (within the range a valid correlation matrix allows)"),
+          power = list(param = "power", values = curve_range_power())
+        )
       } else {
         NULL
       }

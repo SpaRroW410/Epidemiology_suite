@@ -146,3 +146,28 @@ test_that("curve_range_ratio is a positive, log-spaced grid excluding 1", {
   ratios <- v[-1] / v[-length(v)]
   expect_equal(ratios, rep(ratios[1], length(ratios)), tolerance = 1e-8)
 })
+
+test_that("curve_scale_about reproduces the input at m = 1 and scales deviations from the reference", {
+  x <- c(9, 10, 11)
+  expect_equal(curve_scale_about(x, mean(x), 1), x)
+  expect_equal(curve_scale_about(x, mean(x), 2), c(8, 10, 12))
+  expect_equal(curve_scale_about(x, mean(x), 0), c(10, 10, 10))
+})
+
+test_that("ss_curve_points abandons a point that exceeds its time budget, counts it, and carries on", {
+  slow_at_2 <- function(x) {
+    if (x == 2) while (TRUE) sqrt(2) # a busy loop: setTimeLimit() cannot interrupt Sys.sleep()
+    new_ss_result(list(n = x * 10, inputs = list()))
+  }
+  t0 <- Sys.time()
+  pts <- ss_curve_points(slow_at_2, list(), "x", c(1, 2, 3), time_limit = 0.3)
+  expect_lt(as.numeric(Sys.time() - t0, units = "secs"), 1.5)
+  expect_equal(pts$x, c(1, 3))
+  expect_equal(attr(pts, "timeouts"), 1L)
+})
+
+test_that("ss_curve_points reports zero timeouts when nothing is slow", {
+  pts <- ss_curve_points(calc_proportion_2s, list(p1 = 0.1, alpha = 0.05, power = 0.8), "p2", c(0.3, 0.5),
+                         time_limit = 5)
+  expect_equal(attr(pts, "timeouts"), 0L)
+})

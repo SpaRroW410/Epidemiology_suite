@@ -102,7 +102,8 @@ mod_prediction_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -270,5 +271,59 @@ mod_prediction_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() prediction_content[[input$design]])
+
+    # Precision curves (ROADMAP P1 item 10): a precision-based design has no
+    # power, so its two curves are n against the key assumption and n against
+    # the precision target.
+    render_power_curves(output, function() {
+      req(input$design)
+      shrink_axis <- list(param = "shrinkage", values = curve_range_within(0.6, 0.99),
+                      label = "Expected shrinkage",
+                      title = "Required n vs. target shrinkage")
+      if (input$design == "binary") {
+        req(input$parameters_b, input$prevalence, input$r2_method, input$shrinkage_b)
+        r2_args <- if (input$r2_method == "csrsquared") {
+          req(input$csrsquared_b)
+          list(csrsquared = input$csrsquared_b)
+        } else {
+          req(input$cstatistic)
+          list(cstatistic = input$cstatistic)
+        }
+        list(
+          calc_fn = calc_prediction_binary,
+          args = c(list(parameters = input$parameters_b, prevalence = input$prevalence,
+                         shrinkage = input$shrinkage_b), r2_args),
+          effect = list(param = "parameters", values = 2:30,
+                      label = "Number of candidate predictor parameters",
+                      title = "Required n vs. number of predictor parameters"),
+          power = shrink_axis
+        )
+      } else if (input$design == "continuous") {
+        req(input$parameters_c, input$intercept, input$sd, input$rsquared_c, input$shrinkage_c, input$mmoe)
+        list(
+          calc_fn = calc_prediction_continuous,
+          args = list(parameters = input$parameters_c, intercept = input$intercept, sd = input$sd,
+                       rsquared = input$rsquared_c, shrinkage = input$shrinkage_c, mmoe = input$mmoe),
+          effect = list(param = "parameters", values = 2:30,
+                      label = "Number of candidate predictor parameters",
+                      title = "Required n vs. number of predictor parameters"),
+          power = shrink_axis
+        )
+      } else if (input$design == "survival") {
+        req(input$parameters_s, input$rate, input$timepoint, input$meanfup,
+            input$csrsquared_s, input$shrinkage_s)
+        list(
+          calc_fn = calc_prediction_survival,
+          args = list(parameters = input$parameters_s, rate = input$rate, timepoint = input$timepoint,
+                       meanfup = input$meanfup, csrsquared = input$csrsquared_s, shrinkage = input$shrinkage_s),
+          effect = list(param = "parameters", values = 2:30,
+                      label = "Number of candidate predictor parameters",
+                      title = "Required n vs. number of predictor parameters"),
+          power = shrink_axis
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }

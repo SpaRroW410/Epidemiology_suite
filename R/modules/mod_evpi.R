@@ -41,7 +41,8 @@ mod_evpi_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -122,6 +123,28 @@ mod_evpi_server <- function(id) {
     # and mod_tsa.R/mod_multilevel.R for the same shape).
     render_export_handlers(output, result, function() {
       modifyList(evpi_content[[input$design]], list(citation = evpi_content$shared$citation))
+    })
+
+    # Curves (ROADMAP P1 item 10): only the EVSI/ENBS design returns a sample
+    # size (the ENBS-optimal n). EVPI is a monetary value, not an n, so it has
+    # no curve of this kind. A warmed-up ENBS search takes ~10 ms, so it runs
+    # live.
+    render_power_curves(output, function() {
+      if (input$design != "evsi") return(NULL)
+      req(input$mean_inb, input$sd_inb, input$population, input$sampling_sd,
+          input$cost_per_patient, input$fixed_cost, input$n_max)
+      list(
+        calc_fn = calc_enbs_optimal_n,
+        args = list(mean_inb = input$mean_inb, sd_inb = input$sd_inb, sampling_sd = input$sampling_sd,
+                     cost_per_patient = input$cost_per_patient, population = input$population,
+                     fixed_cost = input$fixed_cost, n_max = input$n_max),
+        effect = list(param = "mean_inb", values = curve_range_multiplicative(abs(input$mean_inb)),
+                      label = "Mean incremental net benefit",
+                      title = "ENBS-optimal n vs. mean incremental net benefit"),
+        power = list(param = "cost_per_patient", values = curve_range_multiplicative(input$cost_per_patient),
+                     label = "Cost per patient sampled",
+                     title = "ENBS-optimal n vs. cost per patient")
+      )
     })
   })
 }

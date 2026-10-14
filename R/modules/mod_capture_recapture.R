@@ -28,7 +28,8 @@ mod_capture_recapture_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -80,5 +81,22 @@ mod_capture_recapture_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() capture_recapture_content$chapman_precision)
+
+    # Precision curves (ROADMAP P1 item 10): a precision-based design has no
+    # power, so its two curves are n against the key assumption and n against
+    # the precision target.
+    render_power_curves(output, function() {
+      req(input$N, input$n1, input$precision, input$conf_level)
+      list(
+        calc_fn = calc_capture_recapture_n2,
+        args = list(N = input$N, n1 = input$n1, precision = input$precision, conf_level = input$conf_level),
+        effect = list(param = "N", values = curve_range_multiplicative(input$N),
+                      label = "Assumed population size (N)",
+                      title = "Required second-sample size vs. population size"),
+        power = list(param = "precision", values = curve_range_multiplicative(input$precision, 0.3, 3),
+                      label = "Desired precision",
+                      title = "Required second-sample size vs. precision")
+      )
+    })
   })
 }

@@ -253,6 +253,27 @@ mod_case_control_server <- function(id) {
           effect = list(param = "hr", values = curve_range_ratio(), label = "Hazard ratio (HR)"),
           power = list(param = "power", values = curve_range_power())
         )
+      } else if (input$design == "nested") {
+        req(input$exposure_type, input$OR, input$nD, input$nH, input$R2, input$alpha, input$power)
+        if (input$exposure_type == "binary") {
+          req(input$pE)
+          list(
+            calc_fn = calc_case_control_nested_binary,
+            args = list(OR = input$OR, pE = input$pE, nD = input$nD, nH = input$nH,
+                         R2 = input$R2, alpha = input$alpha, power = input$power),
+            effect = list(param = "OR", values = curve_range_ratio(), label = "Odds ratio (OR)"),
+            power = list(param = "power", values = curve_range_power())
+          )
+        } else {
+          req(input$sigma)
+          list(
+            calc_fn = calc_case_control_nested_continuous,
+            args = list(OR = input$OR, sigma = input$sigma, nD = input$nD, nH = input$nH,
+                         R2 = input$R2, alpha = input$alpha, power = input$power),
+            effect = list(param = "OR", values = curve_range_ratio(), label = "Odds ratio (OR)"),
+            power = list(param = "power", values = curve_range_power())
+          )
+        }
       } else {
         NULL
       }

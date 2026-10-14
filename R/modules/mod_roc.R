@@ -157,6 +157,25 @@ mod_roc_server <- function(id) {
           effect = list(param = "auc", values = curve_range_within(0.5, 1), label = "Expected AUC"),
           power = list(param = "power", values = curve_range_power())
         )
+      } else if (input$design == "compare_two") {
+        req(input$A1, input$B1, input$A2, input$B2, input$rn, input$ra, input$delta_compare,
+            input$alpha_compare, input$power_compare, input$kappa_compare)
+        fpr_args <- list(fpr11 = NULL, fpr12 = NULL, fpr21 = NULL, fpr22 = NULL)
+        if (isTRUE(input$include_partial_auc)) {
+          req(input$fpr11, input$fpr12, input$fpr21, input$fpr22)
+          fpr_args <- list(fpr11 = input$fpr11, fpr12 = input$fpr12,
+                            fpr21 = input$fpr21, fpr22 = input$fpr22)
+        }
+        list(
+          calc_fn = calc_compare_two_aucs,
+          args = c(list(A1 = input$A1, B1 = input$B1, A2 = input$A2, B2 = input$B2,
+                         rn = input$rn, ra = input$ra, delta = input$delta_compare,
+                         alpha = input$alpha_compare, power = input$power_compare,
+                         kappa = input$kappa_compare), fpr_args),
+          effect = list(param = "delta", values = curve_range_multiplicative(abs(input$delta_compare)),
+                        label = "AUC difference to detect (delta)"),
+          power = list(param = "power", values = curve_range_power())
+        )
       } else {
         NULL
       }

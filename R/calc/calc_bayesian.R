@@ -94,7 +94,7 @@ calc_bayesian_assurance_or <- function(p1, p2,
 #' Bayes Factor Design Analysis for a two-sample t-test, via Monte Carlo
 #' simulation
 #'
-#' Schönbrodt & Wagenmakers (2018)'s "Bayes Factor Design Analysis" (BFDA)
+#' Schoenbrodt & Wagenmakers (2018)'s "Bayes Factor Design Analysis" (BFDA)
 #' asks a different question than ordinary frequentist power: not "what
 #' sample size gives X% probability of a significant p-value," but "what
 #' sample size gives X% probability that the actual Bayes factor (BF10,

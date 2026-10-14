@@ -13,7 +13,7 @@
 
 diagnostic_content <- list(
   precision = list(
-    title = "Sensitivity & Specificity — Precision-Based (No Reference Value)",
+    title = "Sensitivity & Specificity -- Precision-Based (No Reference Value)",
     formula_latex = paste0(
       "$$n_{Sn} = \\frac{Z_{1-\\alpha/2}^2 \\, Sn(1-Sn)}{W_{Sn}^2 \\times P}$$",
       "$$n_{Sp} = \\frac{Z_{1-\\alpha/2}^2 \\, Sp(1-Sp)}{W_{Sp}^2 \\times (1-P)}$$",

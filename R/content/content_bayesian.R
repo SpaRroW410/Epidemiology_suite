@@ -82,7 +82,7 @@ bayesian_content <- list(
       "rather than a fixed pass/fail cutoff.",
       "",
       "BFDA has NO closed form by design -- the method invented by",
-      "Schönbrodt & Wagenmakers (2018) IS direct simulation, exactly the",
+      "Schoenbrodt & Wagenmakers (2018) IS direct simulation, exactly the",
       "same situation this app's own checklist names \"simulation",
       "(`simr`/custom Monte Carlo)\" for elsewhere. This wraps",
       "`BayesFactor::ttestBF()` -- the JZS (Jeffreys-Zellner-Siow) default",
@@ -114,7 +114,7 @@ bayesian_content <- list(
       "group for the classical two-sample t-test at the same d/alpha/",
       "power -- BFDA needing roughly double the classical n to reach a",
       "stringent evidence threshold is the expected, well-documented",
-      "direction (Schönbrodt & Wagenmakers 2018's own simulations show",
+      "direction (Schoenbrodt & Wagenmakers 2018's own simulations show",
       "the same pattern). Independently confirmed by a separate,",
       "larger-nsim simulation: at n=129, a 400-replicate check gives",
       "P(BF10 > 10) = 0.835 (matching the 0.80 target, on the",
@@ -124,7 +124,7 @@ bayesian_content <- list(
       sep = "\n"
     ),
     citation = paste(
-      "Schönbrodt FD, Wagenmakers EJ. Bayes factor design analysis:",
+      "Schoenbrodt FD, Wagenmakers EJ. Bayes factor design analysis:",
       "planning for compelling evidence. Psychon Bull Rev.",
       "2018;25(1):128-142 (defines BFDA and its simulation-based",
       "methodology, the checklist's own named approach for this item).",

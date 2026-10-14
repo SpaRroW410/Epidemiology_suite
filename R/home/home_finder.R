@@ -68,12 +68,12 @@ home_finder_server <- function(input, output, session) {
   } else {
     div(class = "mb-3",
         answers_p,
-        div(class = "text-muted", paste(entry$label, "— coming soon")))
+        div(class = "text-muted", paste(entry$label, "-- coming soon")))
   }
 }
 
 .coming_soon_note <- function() {
   div(class = "text-muted",
-      "Not yet implemented in the app — see ", code("docs/SDD.md"),
+      "Not yet implemented in the app -- see ", code("docs/SDD.md"),
       " for the roadmap.")
 }

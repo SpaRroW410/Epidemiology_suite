@@ -382,6 +382,84 @@ mod_chisq_server <- function(id) {
           effect = list(param = "p10", values = curve_range_proportion(), label = "p10 (positive to negative)"),
           power = list(param = "power", values = curve_range_power())
         )
+      } else if (input$design == "gof") {
+        req(input$k_gof, input$alpha, input$power)
+        k <- as.integer(input$k_gof)
+        p0_vals <- lapply(seq_len(k), function(i) input[[paste0("p0_", i)]])
+        p1_vals <- lapply(seq_len(k), function(i) input[[paste0("p1_", i)]])
+        req(!any(vapply(p0_vals, is.null, logical(1))), !any(vapply(p1_vals, is.null, logical(1))))
+        # The effect is the gap between two vectors of proportions, so the
+        # curve scales that gap (1 = as entered) and rejects any multiplier
+        # that pushes a proportion to zero or below.
+        gof_by_scale <- function(P0, P1, scale, alpha, power) {
+          P1s <- curve_scale_about(P1, P0, scale)
+          if (any(P1s <= 0)) stop("scaled proportions must stay positive")
+          calc_chisq_gof(P0 = P0, P1 = P1s, alpha = alpha, power = power)
+        }
+        list(
+          calc_fn = gof_by_scale,
+          args = list(P0 = as.numeric(unlist(p0_vals)), P1 = as.numeric(unlist(p1_vals)), scale = 1,
+                       alpha = input$alpha, power = input$power),
+          effect = list(param = "scale", values = curve_range_multiplicative(1),
+                        label = "Multiplier on the gap between P1 and P0 (1 = as entered)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "independence") {
+        req(input$rows, input$cols, input$alpha, input$power)
+        r <- as.integer(input$rows)
+        cols <- as.integer(input$cols)
+        vals <- lapply(seq_len(r), function(i) {
+          lapply(seq_len(cols), function(j) input[[sprintf("p_%d_%d", i, j)]])
+        })
+        req(!any(vapply(unlist(vals, recursive = FALSE), is.null, logical(1))))
+        P <- matrix(as.numeric(unlist(vals)), nrow = r, ncol = cols, byrow = TRUE)
+        # The effect is how far the table departs from independence, so the
+        # curve scales that departure (1 = as entered).
+        indep_by_scale <- function(P, scale, alpha, power) {
+          P0 <- outer(rowSums(P), colSums(P))
+          Ps <- curve_scale_about(P, P0, scale)
+          if (any(Ps <= 0)) stop("scaled cell proportions must stay positive")
+          calc_chisq_independence(P = Ps, alpha = alpha, power = power)
+        }
+        list(
+          calc_fn = indep_by_scale,
+          args = list(P = P, scale = 1, alpha = input$alpha, power = input$power),
+          effect = list(param = "scale", values = curve_range_multiplicative(1),
+                        label = "Multiplier on the departure from independence (1 = as entered)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "mantelhaenszel") {
+        req(input$J_mh, input$phi_mh, input$alpha, input$power)
+        J <- as.integer(input$J_mh)
+        a_vals <- lapply(seq_len(J), function(j) input[[paste0("mh_a_", j)]])
+        b_vals <- lapply(seq_len(J), function(j) input[[paste0("mh_b_", j)]])
+        p1_vals <- lapply(seq_len(J), function(j) input[[paste0("mh_p1_", j)]])
+        req(!any(vapply(a_vals, is.null, logical(1))), !any(vapply(b_vals, is.null, logical(1))),
+            !any(vapply(p1_vals, is.null, logical(1))))
+        list(
+          calc_fn = calc_mantelhaenszel,
+          args = list(alpha = input$alpha, power = input$power, a = as.numeric(unlist(a_vals)),
+                       b = as.numeric(unlist(b_vals)), p1 = as.numeric(unlist(p1_vals)), phi = input$phi_mh),
+          effect = list(param = "phi", values = curve_range_ratio(), label = "Odds ratio (phi)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "cochran_armitage") {
+        req(input$k_ca, input$delta_ca, input$alpha, input$power)
+        k <- as.integer(input$k_ca)
+        pi_vals <- lapply(seq_len(k), function(i) input[[paste0("pi_ca_", i)]])
+        di_vals <- lapply(seq_len(k), function(i) input[[paste0("di_ca_", i)]])
+        ni_vals <- lapply(seq_len(k), function(i) input[[paste0("ni_ca_", i)]])
+        req(!any(vapply(pi_vals, is.null, logical(1))), !any(vapply(di_vals, is.null, logical(1))),
+            !any(vapply(ni_vals, is.null, logical(1))))
+        pis <- as.numeric(unlist(pi_vals))
+        list(
+          calc_fn = calc_cochran_armitage_trend,
+          args = list(pi = pis, di = as.numeric(unlist(di_vals)), ni = as.numeric(unlist(ni_vals)),
+                       delta = input$delta_ca, alpha = input$alpha, power = input$power),
+          effect = list(param = "delta", values = curve_range_around(0, 0.5 * diff(range(pis))),
+                        label = "delta (clinically meaningful minimal difference)"),
+          power = list(param = "power", values = curve_range_power())
+        )
       } else {
         NULL
       }

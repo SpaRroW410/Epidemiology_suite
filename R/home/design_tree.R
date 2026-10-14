@@ -1,7 +1,7 @@
 # Flat-registry decision tree for the "Which calculator?" wizard
 # (docs/design_identification_algorithm.md). Routes a guided Q&A session to
 # either a built catalog entry (see home_catalog.R) or an honest "not yet
-# built" terminal naming what is missing and why (docs/ROADMAP.md §4) --
+# built" terminal naming what is missing and why (docs/ROADMAP.md sec. 4) --
 # never a silent guess and never a broken link.
 #
 # Node shape:
@@ -81,7 +81,7 @@ design_nodes <- list(
     )
   ),
 
-  # ---------------------------------------------------------------- §1F ----
+  # ---------------------------------------------------------------- sec. 1F ----
   meta_type = list(
     id = "meta_type", stage = 1,
     question = "What do you need for the meta-analysis?",
@@ -109,7 +109,7 @@ design_nodes <- list(
     )
   ),
 
-  # ---------------------------------------------------------------- §1A ----
+  # ---------------------------------------------------------------- sec. 1A ----
   est_type = list(
     id = "est_type", stage = 1,
     question = "What are you estimating?",
@@ -138,7 +138,7 @@ design_nodes <- list(
     )
   ),
 
-  # ---------------------------------------------------------------- §1D ----
+  # ---------------------------------------------------------------- sec. 1D ----
   diag_type = list(
     id = "diag_type", stage = 1,
     question = "What do you need for the diagnostic test?",
@@ -165,7 +165,7 @@ design_nodes <- list(
     )
   ),
 
-  # ---------------------------------------------------------------- §1E ----
+  # ---------------------------------------------------------------- sec. 1E ----
   agree_scale = list(
     id = "agree_scale", stage = 1,
     question = "What's the scale of the outcome being rated or measured?",
@@ -179,7 +179,7 @@ design_nodes <- list(
     )
   ),
 
-  # ---------------------------------------------------------------- §1C ----
+  # ---------------------------------------------------------------- sec. 1C ----
   pred_type = list(
     id = "pred_type", stage = 1,
     question = "Developing a new model, or validating an existing one?",
@@ -194,7 +194,7 @@ design_nodes <- list(
     )
   ),
 
-  # --------------------------------------------- relationships (§ Part 2) ----
+  # --------------------------------------------- relationships (sec.  Part 2) ----
   rel_type = list(
     id = "rel_type", stage = 3,
     question = "What kind of relationship?",
@@ -810,7 +810,7 @@ design_nodes <- list(
 
   # ================================================================== #
   # Terminal nodes -- not yet built (honest placeholder, no catalog_key).
-  # Every one of these is listed in docs/ROADMAP.md §4 with what would
+  # Every one of these is listed in docs/ROADMAP.md sec. 4 with what would
   # unblock it.
   # ================================================================== #
 

@@ -56,7 +56,8 @@ mod_ratio_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -149,5 +150,52 @@ mod_ratio_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() ratio_content[[input$design]])
+
+    # Precision curves (ROADMAP P1 item 10): a precision-based design has no
+    # power, so its two curves are n against the key assumption and n against
+    # the precision target.
+    render_power_curves(output, function() {
+      req(input$design)
+      if (input$design == "risk_ratio") {
+        req(input$p1_rr, input$p2_rr, input$r_rr, input$conf_width_rr, input$conf_level_rr, input$method_rr)
+        list(
+          calc_fn = calc_precision_riskratio,
+          args = list(p1 = input$p1_rr, p2 = input$p2_rr, r = input$r_rr, conf_width = input$conf_width_rr,
+                       conf_level = input$conf_level_rr, method = input$method_rr),
+          effect = list(param = "p2", values = curve_range_proportion(),
+                      label = "p2 (group 2 proportion)",
+                      title = "Required n vs. p2"),
+          power = list(param = "conf_width", values = curve_range_multiplicative(input$conf_width_rr, 0.3, 3),
+                      label = "Desired CI width",
+                      title = "Required n vs. precision (CI width)")
+        )
+      } else if (input$design == "odds_ratio") {
+        req(input$p1_or, input$p2_or, input$r_or, input$conf_width_or, input$conf_level_or, input$method_or)
+        list(
+          calc_fn = calc_precision_or,
+          args = list(p1 = input$p1_or, p2 = input$p2_or, r = input$r_or, conf_width = input$conf_width_or,
+                       conf_level = input$conf_level_or, method = input$method_or),
+          effect = list(param = "p2", values = curve_range_proportion(),
+                      label = "p2 (group 2 proportion)",
+                      title = "Required n vs. p2"),
+          power = list(param = "conf_width", values = curve_range_multiplicative(input$conf_width_or, 0.3, 3),
+                      label = "Desired CI width",
+                      title = "Required n vs. precision (CI width)")
+        )
+      } else {
+        req(input$rate1_rrt, input$rate2_rrt, input$r_rrt, input$prec_level_rrt, input$conf_level_rrt)
+        list(
+          calc_fn = calc_precision_rateratio,
+          args = list(rate1 = input$rate1_rrt, rate2 = input$rate2_rrt, r = input$r_rrt,
+                       prec_level = input$prec_level_rrt, conf_level = input$conf_level_rrt),
+          effect = list(param = "rate2", values = curve_range_multiplicative(input$rate2_rrt),
+                      label = "rate2 (group 2 rate)",
+                      title = "Required n vs. rate2"),
+          power = list(param = "prec_level", values = curve_range_multiplicative(input$prec_level_rrt, 0.3, 3),
+                      label = "Precision level",
+                      title = "Required n vs. precision level")
+        )
+      }
+    })
   })
 }

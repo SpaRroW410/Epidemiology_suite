@@ -58,7 +58,8 @@ mod_rule_of_three_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -170,5 +171,51 @@ mod_rule_of_three_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() rule_of_three_content[[input$design]])
+
+    # Precision curves (ROADMAP P1 item 10): a precision-based design has no
+    # power, so its two curves are n against the key assumption and n against
+    # the precision target.
+    render_power_curves(output, function() {
+      req(input$design)
+      if (input$design == "n_required") {
+        req(input$p, input$conf_level_n)
+        list(
+          calc_fn = calc_rule_of_three_n,
+          args = list(p = input$p, conf_level = input$conf_level_n),
+          effect = list(param = "p", values = curve_range_multiplicative(input$p, 0.2, 3),
+                      label = "Assumed event probability (p)",
+                      title = "Required n vs. event probability"),
+          power = list(param = "conf_level", values = curve_range_within(0.8, 0.99),
+                      label = "Confidence level",
+                      title = "Required n vs. confidence level")
+        )
+      } else if (input$design == "detect_imperfect") {
+        req(input$N_detect, input$prev_detect, input$n_tests_detect,
+            input$se1_detect, input$sp1_detect, input$conf_level_detect)
+        if (input$n_tests_detect == "1") {
+          se <- input$se1_detect
+          sp <- input$sp1_detect
+          interpretation <- "series"
+        } else {
+          req(input$se2_detect, input$sp2_detect, input$interpretation_detect)
+          se <- c(input$se1_detect, input$se2_detect)
+          sp <- c(input$sp1_detect, input$sp2_detect)
+          interpretation <- input$interpretation_detect
+        }
+        list(
+          calc_fn = calc_detect_event_imperfect_test,
+          args = list(N = input$N_detect, prev = input$prev_detect, se = se, sp = sp,
+                       interpretation = interpretation, conf_level = input$conf_level_detect),
+          effect = list(param = "prev", values = curve_range_multiplicative(input$prev_detect, 0.2, 3),
+                      label = "Assumed prevalence, if present",
+                      title = "Required n vs. prevalence"),
+          power = list(param = "conf_level", values = curve_range_within(0.8, 0.99),
+                      label = "Confidence level",
+                      title = "Required n vs. confidence level")
+        )
+      } else {
+        NULL
+      }
+    })
   })
 }

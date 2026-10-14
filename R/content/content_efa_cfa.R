@@ -133,7 +133,7 @@ efa_cfa_content <- list(
   ),
 
   irt_calibration = list(
-    title = "IRT Item Calibration — Minimum Sample Size by Model Type",
+    title = "IRT Item Calibration -- Minimum Sample Size by Model Type",
     formula_latex = paste0(
       "$$N_{minimum} = \\text{lookup}(\\text{model type}), \\quad ",
       "\\text{from published Monte Carlo parameter-recovery studies}$$"

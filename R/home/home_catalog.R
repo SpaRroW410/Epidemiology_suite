@@ -25,7 +25,7 @@
 
 calculator_catalog <- list(
   list(key = "proportion_single_precision",
-       label = "Single proportion — precision-based (no reference value)",
+       label = "Single proportion -- precision-based (no reference value)",
        answers = paste(
          "Answers: \"How many subjects do I need to estimate my own",
          "prevalence to within +/-d%?\" -- no benchmark, no power, no",
@@ -86,7 +86,7 @@ calculator_catalog <- list(
        module_input_id = "chisq-design", design_value = "independence"),
 
   list(key = "means_single_precision",
-       label = "Single mean — precision-based (no reference value)",
+       label = "Single mean -- precision-based (no reference value)",
        answers = paste(
          "Answers: \"How many subjects do I need to estimate my own mean",
          "to within a desired precision?\" -- no benchmark, no power, no",
@@ -174,7 +174,7 @@ calculator_catalog <- list(
   # these are only reachable via the "by study design" finder, not "by
   # groups & data type" -- the groups finder just never matches them.
   list(key = "diagnostic_precision",
-       label = "Sensitivity & specificity — precision-based (no reference value)",
+       label = "Sensitivity & specificity -- precision-based (no reference value)",
        answers = paste(
          "Answers: \"How many subjects (diseased + non-diseased) do I need",
          "to estimate my test's sensitivity and specificity to a desired",

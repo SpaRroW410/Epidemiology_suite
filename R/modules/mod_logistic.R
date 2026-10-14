@@ -263,6 +263,18 @@ mod_logistic_server <- function(id) {
           effect = list(param = "or", values = curve_range_ratio(), label = "Odds ratio per 1-SD increase"),
           power = list(param = "power", values = curve_range_power())
         )
+      } else if (input$design == "ordinal") {
+        req(input$k_ord, input$or_ord, input$fraction_ord, input$alpha_ord, input$power_ord)
+        k <- as.integer(input$k_ord)
+        p_vals <- lapply(seq_len(k), function(i) input[[paste0("ordcat_p_", i)]])
+        req(!any(vapply(p_vals, is.null, logical(1))))
+        list(
+          calc_fn = calc_ordinal_proportional_odds,
+          args = list(p = as.numeric(unlist(p_vals)), odds_ratio = input$or_ord,
+                       fraction = input$fraction_ord, alpha = input$alpha_ord, power = input$power_ord),
+          effect = list(param = "odds_ratio", values = curve_range_ratio(), label = "Odds ratio between the two groups"),
+          power = list(param = "power", values = curve_range_power())
+        )
       } else {
         NULL
       }

@@ -328,7 +328,7 @@ mod_logrank_server <- function(id) {
     # cox_continuous. "logrank" uses a 20-point grid -- powerSurvEpi's
     # ssizeCT.default() measured ~95ms/call, so a 40-point grid would take
     # ~3.8s per curve. Not wired: "stratified" (vectors), "noncompliance"
-    # (Hmisc::cpower search, measured ~6.3s for ONE call) and
+    # (its cost was first measured as ~6.3 s per call, which was one-off start-up; warmed up it is ~20 ms, so it is wired) and
     # "weighted_logrank" (Monte Carlo).
     render_power_curves(output, function() {
       if (input$design == "logrank") {
@@ -356,6 +356,36 @@ mod_logrank_server <- function(id) {
           args = list(power = input$power_c, theta = input$theta_c, sigma2 = input$sigma2_c,
                        psi = input$psi_c, rho2 = input$rho2_c, alpha = input$alpha_c),
           effect = list(param = "theta", values = curve_range_ratio(), label = "Hazard ratio per unit (theta)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "stratified") {
+        req(input$m_strata, input$timeUnit, input$hr_strat, input$alpha_strat, input$power_strat)
+        m <- as.integer(input$m_strata)
+        g_vals <- lapply(seq_len(m), function(i) input[[paste0("g_", i)]])
+        p_vals <- lapply(seq_len(m), function(i) input[[paste0("p_", i)]])
+        lambda0_vals <- lapply(seq_len(m), function(i) input[[paste0("lambda0_", i)]])
+        req(!any(vapply(g_vals, is.null, logical(1))), !any(vapply(p_vals, is.null, logical(1))),
+            !any(vapply(lambda0_vals, is.null, logical(1))))
+        list(
+          calc_fn = calc_survival_stratified,
+          args = list(power = input$power_strat, timeUnit = input$timeUnit,
+                       gVec = as.numeric(unlist(g_vals)), pVec = as.numeric(unlist(p_vals)),
+                       hr = input$hr_strat, lambda0Vec = as.numeric(unlist(lambda0_vals)),
+                       alpha = input$alpha_strat),
+          effect = list(param = "hr", values = curve_range_ratio(n = 20), label = "Hazard ratio (HR)"),
+          power = list(param = "power", values = curve_range_power(n = 20))
+        )
+      } else if (input$design == "noncompliance") {
+        req(input$tref_nc, input$mc_nc, input$r_nc, input$accrual_nc, input$tmin_nc,
+            input$noncomp_c_nc, input$noncomp_i_nc, input$alpha_nc, input$power_nc)
+        list(
+          calc_fn = calc_survival_noncompliance,
+          args = list(tref = input$tref_nc, mc = input$mc_nc, pct_reduction = input$r_nc,
+                       accrual = input$accrual_nc, tmin = input$tmin_nc,
+                       noncomp_c = input$noncomp_c_nc, noncomp_i = input$noncomp_i_nc,
+                       alpha = input$alpha_nc, power = input$power_nc),
+          effect = list(param = "pct_reduction", values = curve_range_within(0, 100),
+                        label = "Percent reduction in the event rate"),
           power = list(param = "power", values = curve_range_power())
         )
       } else {

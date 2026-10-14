@@ -73,7 +73,8 @@ mod_agreement_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -235,5 +236,81 @@ mod_agreement_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() agreement_content[[input$design]])
+
+    # Precision curves (ROADMAP P1 item 10): a precision-based design has no
+    # power, so its two curves are n against the key assumption and n against
+    # the precision target.
+    render_power_curves(output, function() {
+      req(input$design)
+      if (input$design == "kappa") {
+        req(input$kappa, input$raters, input$n_category, input$conf_width_kappa, input$conf_level_kappa)
+        k <- as.integer(input$n_category)
+        prop_vals <- lapply(seq_len(k), function(i) input[[paste0("prop_", i)]])
+        req(!any(vapply(prop_vals, is.null, logical(1))))
+        list(
+          calc_fn = calc_kappa,
+          args = list(kappa = input$kappa, n_category = k, raters = as.integer(input$raters),
+                       props = as.numeric(unlist(prop_vals)), conf_width = input$conf_width_kappa,
+                       conf_level = input$conf_level_kappa),
+          effect = list(param = "kappa", values = curve_range_correlation(),
+                      label = "Expected kappa",
+                      title = "Required n vs. expected kappa"),
+          power = list(param = "conf_width", values = curve_range_multiplicative(input$conf_width_kappa, 0.3, 3),
+                      label = "Desired CI width",
+                      title = "Required n vs. precision (CI width)")
+        )
+      } else if (input$design == "icc") {
+        req(input$rho, input$k_icc, input$conf_width_icc, input$conf_level_icc)
+        list(
+          calc_fn = calc_icc,
+          args = list(rho = input$rho, k = input$k_icc, conf_width = input$conf_width_icc,
+                       conf_level = input$conf_level_icc),
+          effect = list(param = "rho", values = curve_range_within(0, 1),
+                      label = "Expected ICC (rho)",
+                      title = "Required n vs. expected ICC"),
+          power = list(param = "conf_width", values = curve_range_multiplicative(input$conf_width_icc, 0.3, 3),
+                      label = "Desired CI width",
+                      title = "Required n vs. precision (CI width)")
+        )
+      } else if (input$design == "cronbach") {
+        req(input$k_cronbach, input$calpha, input$conf_width_cronbach, input$conf_level_cronbach)
+        list(
+          calc_fn = calc_agreement_cronbach,
+          args = list(k = input$k_cronbach, calpha = input$calpha, conf_width = input$conf_width_cronbach,
+                       conf_level = input$conf_level_cronbach),
+          effect = list(param = "calpha", values = curve_range_within(0, 1),
+                      label = "Expected Cronbach's alpha",
+                      title = "Required n vs. expected alpha"),
+          power = list(param = "conf_width", values = curve_range_multiplicative(input$conf_width_cronbach, 0.3, 3),
+                      label = "Desired CI width",
+                      title = "Required n vs. precision (CI width)")
+        )
+      } else if (input$design == "bland_altman") {
+        req(input$conf_width_ba, input$conf_level_ba)
+        list(
+          calc_fn = calc_agreement_bland_altman,
+          args = list(conf_width = input$conf_width_ba, conf_level = input$conf_level_ba),
+          effect = list(param = "conf_width", values = curve_range_multiplicative(input$conf_width_ba, 0.3, 3),
+                      label = "Desired CI width (SD-units)",
+                      title = "Required n vs. precision (CI width)"),
+          power = list(param = "conf_level", values = curve_range_within(0.8, 0.99),
+                      label = "Confidence level",
+                      title = "Required n vs. confidence level")
+        )
+      } else {
+        req(input$rho_c, input$rho_ccc, input$u_ccc, input$conf_width_ccc, input$conf_level_ccc)
+        list(
+          calc_fn = calc_agreement_ccc,
+          args = list(rho_c = input$rho_c, rho = input$rho_ccc, u = input$u_ccc,
+                       conf_width = input$conf_width_ccc, conf_level = input$conf_level_ccc),
+          effect = list(param = "rho_c", values = curve_range_within(0, input$rho_ccc),
+                      label = "Expected CCC (rho_c)",
+                      title = "Required n vs. expected CCC"),
+          power = list(param = "conf_width", values = curve_range_multiplicative(input$conf_width_ccc, 0.3, 3),
+                      label = "Desired CI width",
+                      title = "Required n vs. precision (CI width)")
+        )
+      }
+    })
   })
 }

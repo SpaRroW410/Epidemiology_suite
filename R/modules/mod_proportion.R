@@ -243,6 +243,31 @@ mod_proportion_server <- function(id) {
           effect = list(param = "p2", values = curve_range_proportion(), label = "p2 (group 2 proportion)"),
           power = list(param = "power", values = curve_range_power())
         )
+      } else if (input$design == "posthoc_pairwise") {
+        req(input$tau_posthoc, input$p1_posthoc, input$p2_posthoc, input$alpha, input$power)
+        list(
+          calc_fn = calc_proportion_posthoc_pairwise,
+          args = list(tau = input$tau_posthoc, p1 = input$p1_posthoc, p2 = input$p2_posthoc,
+                       alpha = input$alpha, power = input$power),
+          effect = list(param = "p2", values = curve_range_proportion(), label = "p2 (this pair's second group proportion)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "precision") {
+        # Precision-based: there is no power, so the two curves are n against
+        # the key assumption (p) and against the precision target (d).
+        req(input$p_precision, input$d_precision, input$conf_level)
+        N <- input$N_precision
+        if (is.null(N) || is.na(N)) N <- NULL
+        list(
+          calc_fn = calc_proportion_precision,
+          args = list(p = input$p_precision, d = input$d_precision, conf_level = input$conf_level, N = N),
+          effect = list(param = "p", values = curve_range_proportion(),
+                      label = "p (expected proportion)",
+                      title = "Required n vs. expected proportion"),
+          power = list(param = "d", values = curve_range_multiplicative(input$d_precision, 0.25, 2),
+                      label = "d (desired margin of error)",
+                      title = "Required n vs. precision (margin of error d)")
+        )
       } else {
         NULL
       }

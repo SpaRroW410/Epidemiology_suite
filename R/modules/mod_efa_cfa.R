@@ -63,7 +63,8 @@ mod_efa_cfa_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -171,5 +172,23 @@ mod_efa_cfa_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() efa_cfa_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): only "rmsea" has a power argument.
+    # It scans candidate n one at a time (~0.31 s per call), so its curves
+    # are click-gated with a short grid.
+    render_power_curves(output, function() {
+      if (input$design != "rmsea") return(NULL)
+      req(input$df_rmsea, input$rmsea0, input$rmseaA, input$group_rmsea,
+          input$alpha_rmsea, input$power_rmsea)
+      list(
+        calc_fn = calc_sem_rmsea_samplesize,
+        args = list(rmsea0 = input$rmsea0, rmseaA = input$rmseaA, df = input$df_rmsea,
+                     power = input$power_rmsea, alpha = input$alpha_rmsea, group = input$group_rmsea),
+        effect = list(param = "rmseaA", values = curve_range_within(input$rmsea0, max(0.15, 1.5 * input$rmseaA), n = 10),
+                      label = "RMSEA_A (alternative)"),
+        power = list(param = "power", values = curve_range_power(n = 10)),
+        gated = list(note = "Each point scans candidate sample sizes (~0.3 s), so these 20 points take about 10-12 seconds.")
+      )
+    }, input = input)
   })
 }

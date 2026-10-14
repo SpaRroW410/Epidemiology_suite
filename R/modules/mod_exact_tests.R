@@ -88,7 +88,8 @@ mod_exact_tests_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -240,5 +241,72 @@ mod_exact_tests_server <- function(id) {
       remap <- c("sign" = "sign_test")
       exact_tests_content[[if (key %in% names(remap)) remap[[key]] else key]]
     })
+
+    # Power curves (ROADMAP P1 item 10): every exact design searches for the
+    # smallest n whose exact power reaches the target, which costs
+    # ~0.2-2.1 s per call, so all but the Poisson one are click-gated with a
+    # short grid; the Poisson design (~0.05 s) stays live.
+    render_power_curves(output, function() {
+      req(input$design)
+      axis_power <- function(n) list(param = "power", values = curve_range_power(n = n))
+      if (input$design == "binomial") {
+        req(input$p0, input$p1_bin, input$alpha_bin, input$power_bin, input$alternative_bin)
+        list(
+          calc_fn = calc_binomial_exact,
+          args = list(p0 = input$p0, p1 = input$p1_bin, alpha = input$alpha_bin,
+                       power = input$power_bin, alternative = input$alternative_bin),
+          effect = list(param = "p1", values = curve_range_proportion(n = 10), label = "p1 (expected proportion)"),
+          power = axis_power(10),
+          gated = list(note = "Each point is an exact-power search (~0.4 s), so these 20 points take about 5-10 seconds.")
+        )
+      } else if (input$design == "fisher") {
+        req(input$p1_fisher, input$p2_fisher, input$alpha_fisher, input$power_fisher,
+            input$ratio_fisher, input$alternative_fisher)
+        list(
+          calc_fn = calc_fisher_exact,
+          args = list(p1 = input$p1_fisher, p2 = input$p2_fisher, alpha = input$alpha_fisher,
+                       power = input$power_fisher, ratio = input$ratio_fisher,
+                       alternative = input$alternative_fisher),
+          effect = list(param = "p2", values = curve_range_proportion(n = 10), label = "p2 (group 2 proportion)"),
+          power = axis_power(10),
+          gated = list(note = "Each point is an exact-power search (~0.7 s), so these 20 points take about 10-15 seconds.")
+        )
+      } else if (input$design == "boschloo") {
+        req(input$p1_boschloo, input$p2_boschloo, input$alpha_boschloo, input$power_boschloo,
+            input$ratio_boschloo, input$alternative_boschloo)
+        list(
+          calc_fn = calc_boschloo_exact,
+          args = list(p1 = input$p1_boschloo, p2 = input$p2_boschloo, alpha = input$alpha_boschloo,
+                       power = input$power_boschloo, ratio = input$ratio_boschloo,
+                       alternative = input$alternative_boschloo),
+          effect = list(param = "p2", values = curve_range_proportion(n = 8), label = "p2 (group 2 proportion)"),
+          power = axis_power(8),
+          gated = list(note = "Each point is an unconditional exact-power search (~2 s), so these 16 points take about 40 seconds.")
+        )
+      } else if (input$design == "poisson") {
+        req(input$rate0_poisson, input$rate1_poisson, input$alpha_poisson,
+            input$power_poisson, input$alternative_poisson)
+        list(
+          calc_fn = calc_poisson_exact,
+          args = list(rate0 = input$rate0_poisson, rate1 = input$rate1_poisson,
+                       alpha = input$alpha_poisson, power = input$power_poisson,
+                       alternative = input$alternative_poisson),
+          effect = list(param = "rate1", values = curve_range_multiplicative(input$rate0_poisson, 0.3, 4, n = 20),
+                        label = "rate1 (expected true rate)"),
+          power = axis_power(20)
+        )
+      } else {
+        req(input$p_pos_sign, input$alpha_sign, input$power_sign, input$alternative_sign)
+        list(
+          calc_fn = calc_sign_test,
+          args = list(p_pos = input$p_pos_sign, alpha = input$alpha_sign,
+                       power = input$power_sign, alternative = input$alternative_sign),
+          effect = list(param = "p_pos", values = curve_range_proportion(n = 10),
+                        label = "Proportion of pairs with a positive difference"),
+          power = axis_power(10),
+          gated = list(note = "Each point is an exact-power search (~0.2 s), so these 20 points take about 15 seconds.")
+        )
+      }
+    }, input = input)
   })
 }

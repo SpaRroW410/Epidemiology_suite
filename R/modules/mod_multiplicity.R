@@ -335,9 +335,42 @@ mod_multiplicity_server <- function(id) {
                         label = "mu2 (group 2 mean)"),
           power = list(param = "power", values = curve_range_power())
         )
+      } else if (input$design == "fdr_means_2s") {
+        req(input$d_fdr, input$pi1_fdr, input$fdr_level, input$m, input$power)
+        list(
+          calc_fn = calc_multiplicity_fdr_means,
+          args = list(d = input$d_fdr, m = input$m, pi1 = input$pi1_fdr,
+                       fdr_level = input$fdr_level, power = input$power),
+          effect = list(param = "d", values = curve_range_multiplicative(input$d_fdr), label = "Cohen's d"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "fdr_microarray") {
+        req(input$delta_fdrma, input$sigma_fdrma, input$pi0_fdrma, input$fdr_level_fdrma,
+            input$max_n_fdrma, input$side_fdrma, input$power_fdrma)
+        list(
+          calc_fn = calc_fdr_microarray_two_sample,
+          args = list(delta = input$delta_fdrma, sigma = input$sigma_fdrma,
+                       fdr_level = input$fdr_level_fdrma, power = input$power_fdrma,
+                       pi0 = input$pi0_fdrma, max_n = as.integer(input$max_n_fdrma),
+                       side = input$side_fdrma),
+          effect = list(param = "delta", values = curve_range_multiplicative(abs(input$delta_fdrma)),
+                        label = "delta (difference in mean expression)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "dunnett") {
+        req(input$d_dunnett, input$k_dunnett, input$alpha, input$power)
+        list(
+          calc_fn = calc_multiplicity_dunnett,
+          args = list(d = input$d_dunnett, k = as.integer(input$k_dunnett),
+                       alpha = input$alpha, power = input$power),
+          effect = list(param = "d", values = curve_range_multiplicative(input$d_dunnett, n = 8),
+                        label = "Cohen's d"),
+          power = list(param = "power", values = curve_range_power(n = 8)),
+          gated = list(note = "Each point needs a multivariate-t quantile search (~1.4 s), so these 16 points take about 20-25 seconds.")
+        )
       } else {
         NULL
       }
-    })
+    }, input = input)
   })
 }

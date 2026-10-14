@@ -43,17 +43,30 @@
 #' @param args Named list of its *current* arguments (the values already on screen).
 #' @param vary_param Name of the argument to vary.
 #' @param vary_values Numeric vector of values to substitute for `vary_param`.
-#' @return `data.frame(x, y)`. A value where `calc_fn()` errors (e.g. an
-#'   effect size outside the formula's valid domain, or the "no effect to
-#'   detect" guard when a scan range happens to include it) is simply not a
-#'   row -- a sparser curve, never a fabricated point.
-ss_curve_points <- function(calc_fn, args, vary_param, vary_values) {
+#' @param time_limit Seconds one point may take before it is abandoned.
+#'   An exact-power search near the null can need thousands of subjects and
+#'   take minutes; without a cap one such point would freeze the app. The
+#'   limit is only checked where R can interrupt, so a single uninterruptible
+#'   compiled call can still overrun it once.
+#' @return `data.frame(x, y)` with an attribute `timeouts` (how many points
+#'   were abandoned for being too slow). A value where `calc_fn()` errors
+#'   (e.g. an effect size outside the formula's valid domain, or the "no
+#'   effect to detect" guard when a scan range happens to include it) is
+#'   simply not a row -- a sparser curve, never a fabricated point.
+ss_curve_points <- function(calc_fn, args, vary_param, vary_values, time_limit = Inf) {
   xs <- numeric(0)
   ys <- numeric(0)
+  timeouts <- 0L
+  on.exit(setTimeLimit(elapsed = Inf), add = TRUE)
   for (v in vary_values) {
     call_args <- args
     call_args[[vary_param]] <- v
-    res <- tryCatch(do.call(calc_fn, call_args), error = function(e) NULL)
+    setTimeLimit(elapsed = time_limit, transient = TRUE)
+    res <- tryCatch(do.call(calc_fn, call_args), error = function(e) {
+      if (grepl("elapsed time limit", conditionMessage(e), fixed = TRUE)) timeouts <<- timeouts + 1L
+      NULL
+    })
+    setTimeLimit(elapsed = Inf)
     if (is.null(res)) next
     fname <- .ss_curve_n_field(res)
     if (is.null(fname)) next
@@ -62,7 +75,9 @@ ss_curve_points <- function(calc_fn, args, vary_param, vary_values) {
     xs <- c(xs, v)
     ys <- c(ys, val)
   }
-  data.frame(x = xs, y = ys)
+  out <- data.frame(x = xs, y = ys)
+  attr(out, "timeouts") <- timeouts
+  out
 }
 
 # Generic scan ranges, reused across every module's curve wiring instead of
@@ -121,3 +136,11 @@ curve_range_multiplicative <- function(center, lower_mult = 0.3, upper_mult = 3,
   v <- exp(seq(log(center * lower_mult), log(center * upper_mult), length.out = n))
   v[abs(v - center) > 1e-9]
 }
+
+#' Scale a vector's deviations from a reference by a multiplier `m`
+#'
+#' For a design whose effect is a whole vector (group means, alternative
+#' proportions) rather than one scalar: `m = 1` reproduces the entered
+#' values and the curve's x axis becomes "how much larger or smaller the
+#' differences are", which is the one knob every such design actually has.
+curve_scale_about <- function(x, ref, m) ref + m * (x - ref)

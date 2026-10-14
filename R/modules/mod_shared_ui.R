@@ -162,6 +162,14 @@ power_curves_ui <- function(ns) {
       "formula has no solution (e.g. an effect size outside its valid",
       "range) is simply omitted, not fabricated."),
     uiOutput(ns("curve_unavailable")),
+    # Only shown for a design whose curve is too slow to recompute on every
+    # input change (see render_power_curves()'s `gated`). The button is
+    # static so its click count survives re-renders of the rest of the block.
+    conditionalPanel(
+      condition = sprintf("output['%s'] == 'yes'", ns("curve_gated")),
+      uiOutput(ns("curve_gate_note")),
+      actionButton(ns("curve_go"), "Compute / recompute curves", class = "btn-sm btn-outline-primary mb-2")
+    ),
     plotOutput(ns("curve_effect"), height = "260px"),
     plotOutput(ns("curve_power"), height = "260px")
   )
@@ -174,26 +182,85 @@ power_curves_ui <- function(ns) {
 #'   each output's own reactive context, like `content_fn` in
 #'   `render_export_handlers()`, so a bare `input$design` read inside it
 #'   already establishes the right dependency) returning either `NULL`
-#'   (this design has no curve wiring yet) or
-#'   `list(calc_fn, args, effect = list(param, values, label), power =
-#'   list(param, values))` -- `power` may be omitted/NULL for a design with
-#'   no power argument to vary (e.g. a precision-based design).
-render_power_curves <- function(output, curve_spec) {
+#'   (this design has no curve wiring) or
+#'   `list(calc_fn, args, effect = list(param, values, label, title),
+#'   power = list(param, values, label, title), gated)`.
+#'   - Each axis's optional `title` replaces the default plot title; a
+#'     precision-based design uses the second axis for its precision
+#'     target (e.g. a CI width) instead of power.
+#'   - `gated = list(note = "...")` marks a design whose calc_fn is too
+#'     slow to recompute on every input change: its curves are computed only
+#'     when the user clicks "Compute / recompute curves", and are never shown
+#'     for inputs other than the ones they were computed from. Requires
+#'     `input`.
+#' @param input The module's own `input`; needed only for gated designs.
+render_power_curves <- function(output, curve_spec, input = NULL) {
+  gated_store <- reactiveVal(NULL)
+
+  is_gated <- function(spec) !is.null(spec) && !is.null(spec$gated)
+  store_matches <- function(store, spec) {
+    !is.null(store) && is_gated(spec) &&
+      identical(store$args, spec$args) &&
+      identical(store$effect_param, spec$effect$param)
+  }
+
   output$curve_unavailable <- renderUI({
     spec <- curve_spec()
     if (is.null(spec)) {
       div(class = "text-muted small", "Power curves are not yet available for this design.")
     }
   })
+  output$curve_gated <- renderText({
+    if (is_gated(curve_spec())) "yes" else "no"
+  })
+  outputOptions(output, "curve_gated", suspendWhenHidden = FALSE)
+  output$curve_gate_note <- renderUI({
+    spec <- curve_spec()
+    if (!is_gated(spec)) return(NULL)
+    fresh <- store_matches(gated_store(), spec)
+    div(class = if (fresh) "text-muted small" else "alert alert-warning small",
+        strong("Slow calculation: "), spec$gated$note,
+        if (!fresh) " The curves below are not shown until you click the button; they are never shown for inputs other than the ones they were computed from.")
+  })
 
-  .plot_curve <- function(spec, which) {
+  if (!is.null(input)) {
+    observeEvent(input$curve_go, {
+      spec <- tryCatch(isolate(curve_spec()), error = function(e) NULL)
+      if (!is_gated(spec)) return()
+      shiny::withProgress(message = "Computing curves", value = 0, {
+        pts <- list()
+        for (which in c("effect", "power")) {
+          axis <- spec[[which]]
+          if (!is.null(axis)) {
+            pts[[which]] <- ss_curve_points(spec$calc_fn, spec$args, axis$param, axis$values,
+                                            time_limit = 4)
+          }
+          shiny::incProgress(0.5)
+        }
+      })
+      gated_store(list(args = spec$args, effect_param = spec$effect$param, pts = pts))
+    })
+  }
+
+  .draw_curve <- function(pts, spec, which) {
     axis <- spec[[which]]
-    req(axis)
-    pts <- ss_curve_points(spec$calc_fn, spec$args, axis$param, axis$values)
-    req(nrow(pts) > 0)
+    if (nrow(pts) == 0) {
+      # Every grid point was rejected by the design's own validation (e.g.
+      # a contrast of all zeros): say so rather than leave a blank box.
+      plot.new()
+      text(0.5, 0.5, "No valid points for the current inputs\n(the design's own validation rejected every value)",
+           cex = 0.9, col = "grey40")
+      return(invisible())
+    }
     label <- if (!is.null(axis$label)) axis$label else axis$param
-    main <- if (which == "power") "Required n vs. power" else "Required n vs. effect size"
+    main <- if (!is.null(axis$title)) axis$title else
+      if (which == "power") "Required n vs. power" else "Required n vs. effect size"
     plot(pts$x, pts$y, type = "l", lwd = 2, xlab = label, ylab = "Required n", main = main)
+    skipped <- attr(pts, "timeouts")
+    if (!is.null(skipped) && skipped > 0) {
+      mtext(sprintf("%d point(s) left out: too slow to compute (typically where the effect is close to zero)", skipped),
+            side = 1, line = 4, cex = 0.7, col = "firebrick")
+    }
 
     current <- tryCatch(do.call(spec$calc_fn, spec$args), error = function(e) NULL)
     if (!is.null(current)) {
@@ -202,6 +269,19 @@ render_power_curves <- function(output, curve_spec) {
         points(spec$args[[axis$param]], current[[fname]], pch = 19, col = "firebrick")
       }
     }
+  }
+
+  .plot_curve <- function(spec, which) {
+    axis <- spec[[which]]
+    req(axis)
+    pts <- if (is_gated(spec)) {
+      store <- gated_store()
+      req(store_matches(store, spec))
+      store$pts[[which]]
+    } else {
+      ss_curve_points(spec$calc_fn, spec$args, axis$param, axis$values, time_limit = 2)
+    }
+    .draw_curve(pts, spec, which)
   }
 
   output$curve_effect <- renderPlot({

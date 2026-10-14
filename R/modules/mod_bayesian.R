@@ -71,7 +71,8 @@ mod_bayesian_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
-      export_controls_ui(ns)
+      export_controls_ui(ns),
+      power_curves_ui(ns)
     ),
     tabPanel(
       "Formula / Help",
@@ -185,5 +186,29 @@ mod_bayesian_server <- function(id) {
     })
 
     render_export_handlers(output, result, function() bayesian_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): only the assurance design -- BFDA is
+    # Monte Carlo. (An early draft click-gated this on a ~1.1 s first-call
+    # timing; that was one-off start-up cost, and a warmed-up call takes
+    # ~5 ms, so it runs live.)
+    render_power_curves(output, function() {
+      if (input$design != "assurance_or") return(NULL)
+      req(input$p1, input$p2, input$prior_type, input$delta_w, input$n_ratio,
+          input$alpha_or, input$power_or)
+      prior_args <- if (input$prior_type == "normal") {
+        req(input$prior_mean, input$prior_sd)
+        list(prior_type = "normal", prior_mean = input$prior_mean, prior_sd = input$prior_sd)
+      } else {
+        req(input$prior_lower, input$prior_upper)
+        list(prior_type = "uniform", prior_lower = input$prior_lower, prior_upper = input$prior_upper)
+      }
+      list(
+        calc_fn = calc_bayesian_assurance_or,
+        args = c(list(p1 = input$p1, p2 = input$p2, delta_w = input$delta_w, n_ratio = input$n_ratio,
+                       alpha = input$alpha_or, power = input$power_or), prior_args),
+        effect = list(param = "p2", values = curve_range_proportion(), label = "p2 (group 2 response probability)"),
+        power = list(param = "power", values = curve_range_power())
+      )
+    })
   })
 }
