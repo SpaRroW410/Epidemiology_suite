@@ -586,7 +586,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
 
 13. **Analyze workbench v1** (Track B1) — OpenEpi-parity calculators from summary
     counts, almost entirely on `epiR` (already a dependency). **In progress (14 Oct 2026):
-    slice 1 of ~9 done -- the 2x2 table.**
+    slices 1-2 of ~9 done -- the 2x2 table and diagnostic-test evaluation.**
     - **Done: "2x2 Table Analysis"** (`calc_analyze_2x2.R`, `content_analyze_2x2.R`,
       `mod_analyze_2x2.R`; 50th navbar module, new last dropdown "Analyze Summary Data").
       Three layouts (cohort/trial, cross-sectional, case-control) give RR or PR, OR, RD,
@@ -605,6 +605,34 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     - **Suite result.** Full fast suite including the browser UI tests (the new module is
       opened by `test-ui_smoke.R` like the other 49): 639 tests, 2659 assertions, 0
       failures/errors/warnings, 77 skips (27 Monte Carlo + 50 every-design UI tests).
+    - **Slice 2 done: "Diagnostic Test Evaluation"** (`calc_analyze_diagnostic.R`,
+      `content_analyze_dx.R`, `mod_analyze_dx.R`; 51st module, same dropdown).
+      *One test* from its TP/FP/FN/TN: sensitivity, specificity, PPV, NPV, LR+, LR-,
+      accuracy and Youden's index, each (except Youden) with a 95% CI -- Clopper-Pearson
+      exact (default) or Wilson. PPV/NPV come from the counts (valid when the sample
+      prevalence is the one of interest) or, at a **stated prevalence**, by Bayes' rule
+      with a logit-scale delta-method CI (Mercaldo, Lau & Zhou 2007). *Combined testing*:
+      serial ("all positive") and parallel ("any positive") strategies for **2-6 tests**
+      from each test's Se/Sp (and optionally the numbers of diseased / non-diseased behind
+      them, which switches on 95% CIs), with PPV/NPV at the stated prevalence.
+    - **Slice 2 verification.** Single test equals `epiR::epi.tests()` (exact and Wilson)
+      to 1e-6 on four tables and reproduces the published Scott et al. (2008) example
+      (Se 0.90, 0.88-0.92; Sp 0.76, 0.73-0.79; LR+ 3.75, 3.32-4.24). The serial/parallel
+      formulas are checked against an **exhaustive enumeration of all 2^k result
+      patterns** for k = 2..6 (an independent oracle, since no package computes them).
+      The combined-test variances are checked by simulation: the probability-scale variance
+      of the combined Se/Sp matches 40,000 simulated studies to 3% even in small samples;
+      the logit-scale SEs of the predictive values match to 3-5% **in large samples** only.
+    - **Honest limits.** Combined-test figures assume the tests are *conditionally
+      independent given disease*; with dependent tests the real performance is usually worse
+      (Vacek 1985) -- the app says so beside the table. Delta-method intervals (stated-
+      prevalence PPV/NPV, combined estimates) are asymptotic: in a first test with only 10
+      false negatives the NPV interval was ~10% too narrow versus simulation, which is why
+      the counts-based exact interval is the default and the help text says so. The
+      combined CIs treat the per-test figures as independent estimates; if all tests were run
+      on the same patients they are approximate. Formula provenance: serial/parallel Se/Sp
+      are the product rule (derived and enumerated, not copied from a source with page
+      references -- the help text says "derivation checked", not "from textbook X").
     - **Wiring.** Three catalog entries (one per design radio value, as the consistency
       tests require), a study-design family and a test family, and a new wizard root
       option "Analyze counts I already have" -> "How were the subjects sampled?".
@@ -612,8 +640,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     - **Still to do for item 13** (OpenEpi parity, in rough priority): stratified
       Mantel-Haenszel with homogeneity test, CIs for proportions (Wilson, exact, ...)
       and means, person-time rates and rate ratios, direct/indirect standardization and
-      SMR, diagnostic-test evaluation from counts (Se, Sp, PPV, NPV, LRs), kappa from a
-      table, McNemar / matched pairs, chi-square for trend, vaccine efficacy; plus the
+      SMR, kappa from a table, McNemar / matched pairs, chi-square for trend, vaccine efficacy; plus the
       navigation redesign (M2) -- the 15th dropdown is already one too many for the
       navbar, and the new group is simply appended last for now.
 14. **Planning tools** (Track B2) — randomization lists, attrition/non-response

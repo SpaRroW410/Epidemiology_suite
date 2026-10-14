@@ -57,6 +57,32 @@ for (m in registry) {
   })
 }
 
+test_that("Diagnostic Test Evaluation: single test shows CIs; combining 3 tests lists serial and parallel, with CIs once n is given", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Diagnostic Test Evaluation")
+  single <- ui_output_text(app, "analyze_dx-result")
+  expect_match(single, "Sensitivity")
+  expect_match(single, "90.1% \\(87.7 to 92.1\\)")   # Scott et al. 2008 / epiR::epi.tests()
+  expect_match(single, "Positive predictive value")
+
+  app$set_inputs(`analyze_dx-design` = "combined")
+  app$wait_for_idle(800, timeout = 60000)
+  combined <- ui_output_text(app, "analyze_dx-result")
+  expect_match(combined, "Parallel: positive if ANY of the 3 tests")
+  expect_match(combined, "Serial: positive only if ALL 3 tests")
+  expect_match(combined, "99.7%")   # parallel sensitivity of 90/80/85
+  expect_match(combined, "61.2%")   # serial sensitivity
+  expect_match(combined, "Enter the numbers of diseased and non-diseased")
+  app$set_inputs(`analyze_dx-nd1` = 100, `analyze_dx-nd2` = 200, `analyze_dx-nd3` = 150,
+                 `analyze_dx-nn1` = 300, `analyze_dx-nn2` = 250, `analyze_dx-nn3` = 200)
+  app$wait_for_idle(800, timeout = 60000)
+  with_ci <- ui_output_text(app, "analyze_dx-result")
+  expect_match(with_ci, " to ")
+  expect_false(grepl("Enter the numbers of diseased", with_ci))
+  expect_equal(ui_output_errors(app), 0)
+})
+
 test_that("no JavaScript or Shiny errors accumulated while opening every module", {
   skip_if_no_ui()
   expect_equal(ui_console_errors(ui_driver()), character())

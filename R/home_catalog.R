@@ -24,6 +24,27 @@
 #   design_value - value to preset that input to (NA if none)
 
 calculator_catalog <- list(
+
+  list(key = "analyze_dx_single",
+       label = "Analyze a diagnostic test from a 2x2 table (sensitivity, specificity, PPV, NPV)",
+       answers = paste(
+         "Answers: \"I already have the counts from a diagnostic study -- what are the sensitivity,",
+         "specificity, predictive values and likelihood ratios, with confidence intervals?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Diagnostic Test Evaluation",
+       module_input_id = "analyze_dx-design", design_value = "single"),
+
+  list(key = "analyze_dx_combined",
+       label = "Combine diagnostic tests: serial and parallel testing (2-6 tests)",
+       answers = paste(
+         "Answers: \"If I use two or more tests together -- in parallel (any positive) or in series (all",
+         "positive) -- what sensitivity, specificity, PPV and NPV do I get?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Diagnostic Test Evaluation",
+       module_input_id = "analyze_dx-design", design_value = "combined"),
+
   list(key = "analyze_2x2_cohort",
        label = "Analyze a 2x2 table: cohort / trial (risk ratio, risk difference)",
        answers = paste(
@@ -1853,7 +1874,8 @@ calculator_catalog <- list(
 study_design_families <- list(
   list(id = "analyze_counts", label = "Analyze data you already have (summary counts)",
        hint = "Not a sample-size calculation: effect measures and confidence intervals from counts you already have, starting with the 2x2 table.",
-       catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control")),
+       catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control",
+                         "analyze_dx_single", "analyze_dx_combined")),
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",
@@ -2024,6 +2046,9 @@ study_design_families <- list(
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
 test_families <- list(
+  list(id = "analyze_dx_tests", label = "Diagnostic Test Evaluation (from counts)",
+       hint = "Sensitivity, specificity, predictive values and likelihood ratios with confidence intervals from a test-by-disease table, and serial/parallel combinations of 2-6 tests.",
+       catalog_keys = c("analyze_dx_single", "analyze_dx_combined")),
   list(id = "analyze_2x2_tests", label = "2x2 Table Analysis (from counts)",
        hint = "Risk ratio, odds ratio, risk difference, attributable fractions and number needed from the four cells of a 2x2 table.",
        catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control")),

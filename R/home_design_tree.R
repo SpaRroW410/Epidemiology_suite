@@ -65,8 +65,18 @@ design_nodes <- list(
       list(label = "Plan a meta-analysis (number of studies, or trial sequential analysis)", next_id = "meta_type"),
       list(label = "Study the relationship between variables (correlation / regression)", next_id = "rel_type"),
       list(label = "Something else: survey sampling, scale development, rare events, animal studies, pilots, health economics, genetics", next_id = "other_purpose"),
-      list(label = "Analyze counts I already have (a 2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_design"),
+      list(label = "Analyze counts I already have (a 2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_type"),
       list(label = "I already know which statistical test I'll use -- browse by test family", next_id = "bytest_family")
+    )
+  ),
+
+  analyze_type = list(
+    id = "analyze_type", stage = 1,
+    question = "What do you want to analyze from counts you already have?",
+    options = list(
+      list(label = "An exposure-outcome association (2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_design"),
+      list(label = "A diagnostic test (sensitivity, specificity, PPV, NPV from a test-by-disease table)", next_id = "term_analyze_dx_single"),
+      list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined")
     )
   ),
 
@@ -737,6 +747,8 @@ design_nodes <- list(
   term_bayes_assurance = .term("term_bayes_assurance", "Bayesian assurance, two proportions", "bayesian_assurance_or"),
   term_bfda = .term("term_bfda", "Bayes factor design analysis, two means", "bfda_ttest"),
 
+  term_analyze_dx_single = .term("term_analyze_dx_single", "Diagnostic test evaluation from a 2x2 table", "analyze_dx_single"),
+  term_analyze_dx_combined = .term("term_analyze_dx_combined", "Serial / parallel testing of 2-6 tests", "analyze_dx_combined"),
   term_analyze_2x2_cohort = .term("term_analyze_2x2_cohort", "2x2 table analysis, cohort / trial", "analyze_2x2_cohort"),
   term_analyze_2x2_cross_sectional = .term("term_analyze_2x2_cross_sectional", "2x2 table analysis, cross-sectional", "analyze_2x2_cross_sectional"),
   term_analyze_2x2_case_control = .term("term_analyze_2x2_case_control", "2x2 table analysis, case-control", "analyze_2x2_case_control"),

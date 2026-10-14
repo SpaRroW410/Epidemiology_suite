@@ -107,7 +107,9 @@ module_registry <- function() {
     list(id = meta_power_meta$id, title = meta_power_meta$nav_title,
          ui = mod_meta_power_ui, server = mod_meta_power_server),
     list(id = analyze_2x2_meta$id, title = analyze_2x2_meta$nav_title,
-         ui = mod_analyze_2x2_ui, server = mod_analyze_2x2_server)
+         ui = mod_analyze_2x2_ui, server = mod_analyze_2x2_server),
+    list(id = analyze_dx_meta$id, title = analyze_dx_meta$nav_title,
+         ui = mod_analyze_dx_ui, server = mod_analyze_dx_server)
   )
 }
 
@@ -153,5 +155,5 @@ module_groups <- list(
                        "variance", "multiplicity", "manova", "bayesian",
                        "longitudinal", "multilevel", "meta_power")),
   list(title = "Analyze Summary Data",
-       module_ids = c("analyze_2x2"))
+       module_ids = c("analyze_2x2", "analyze_dx"))
 )
