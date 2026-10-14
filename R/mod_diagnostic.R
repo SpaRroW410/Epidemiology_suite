@@ -1,8 +1,8 @@
 # Diagnostic Accuracy module: Calculate / Formula-Help / Reference sub-tabs.
 # Follows the same module contract as mod_proportion.R / mod_means.R (docs/
 # SDD.md #8): a `design` radioButtons()/conditionalPanel() switch across the
-# four designs in Akoglu (2022) -- see R/calc/calc_diagnostic.R and
-# R/content/content_diagnostic.R for the formulas and citations.
+# four designs in Akoglu (2022) -- see R/calc_diagnostic.R and
+# R/content_diagnostic.R for the formulas and citations.
 
 diagnostic_meta <- list(
   id = "diagnostic",

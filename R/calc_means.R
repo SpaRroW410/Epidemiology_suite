@@ -414,4 +414,4 @@ calc_means_welch <- function(mu1, mu2, sd1, sd2, alpha = 0.05, power = 0.8,
 }
 
 # Shared .validate_number() / .validate_positive() / .validate_unit_interval()
-# live in calc_utils.R (sourced alongside every file in R/calc/).
+# live in calc_utils.R (same package namespace).

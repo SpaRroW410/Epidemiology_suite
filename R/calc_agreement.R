@@ -1,6 +1,6 @@
 # Pure calculation functions for agreement/reliability studies -- i.e. when
 # there is no gold standard/reference test to compare against, so instead of
-# sensitivity/specificity (R/calc/calc_diagnostic.R) you assess how well two
+# sensitivity/specificity (R/calc_diagnostic.R) you assess how well two
 # raters or methods *agree* with each other.
 #
 # Both functions wrap validated presize:: functions rather than reimplementing

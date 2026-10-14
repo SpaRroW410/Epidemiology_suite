@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "home", "home_catalog.R"))
-source(file.path("..", "..", "R", "home", "design_tree.R"))
-source(file.path("..", "..", "R", "home", "design_free_text.R"))
-
 .terminal_key <- function(res) {
   node <- design_nodes[[res$node_id]]
   if (!isTRUE(node$terminal)) return(NULL)

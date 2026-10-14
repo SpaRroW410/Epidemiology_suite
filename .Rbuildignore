@@ -1,0 +1,12 @@
+^renv\.lock$
+^renv$
+^\.Rprofile$
+^\.github$
+^\.claude$
+^docs$
+^app\.R$
+^README\.md$
+^\.gitattributes$
+^.*\.Rproj$
+^\.Rproj\.user$
+^LICENSE$

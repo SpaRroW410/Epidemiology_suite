@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_survival_noncompliance.R"))
-
 test_that("calc_survival_noncompliance matches Hmisc::cpower()'s own documented example closely", {
   # Reproducing the package's own example code exactly:
   #   nc.i <- 25; nc.c <- 15; mort <- .18; r <- 15

@@ -154,4 +154,4 @@ calc_proportion_posthoc_pairwise <- function(tau, p1, p2, alpha = 0.05, power = 
 }
 
 # Shared .validate_unit_interval() / .validate_population() live in
-# calc_utils.R (sourced alongside every file in R/calc/).
+# calc_utils.R (same package namespace).

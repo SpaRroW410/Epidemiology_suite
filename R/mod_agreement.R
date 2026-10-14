@@ -1,7 +1,7 @@
 # Agreement/Reliability module: Calculate / Formula-Help / Reference
 # sub-tabs. Follows the same module contract as mod_proportion.R (docs/
 # SDD.md #8), for the case where there is no gold standard to compare
-# against -- see R/calc/calc_agreement.R and R/content/content_agreement.R.
+# against -- see R/calc_agreement.R and R/content_agreement.R.
 
 agreement_meta <- list(
   id = "agreement",

@@ -3,7 +3,7 @@
 # are directly unit-testable (see tests/testthat). Depends on
 # calc_proportion.R's calc_proportion_1s()/calc_proportion_2s() and
 # calc_means.R's calc_means_1s()/calc_means_2s_indep() -- all already
-# sourced into the same environment by global.R's R/calc loop.
+# in the same package namespace.
 #
 # When planning several simultaneous hypothesis tests (e.g. several outcome
 # variables, or several pairwise comparisons not already covered by the

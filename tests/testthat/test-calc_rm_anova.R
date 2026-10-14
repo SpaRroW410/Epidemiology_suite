@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_rm_anova.R"))
-
 test_that("calc_rm_anova (between) matches WebPower::wp.rmanova()'s own documented example", {
   # ng = 3, nm = 4, f = 0.36, nscor = 0.7, power = 0.8 -> n = 110 (WebPower's
   # own table shows n = 110 gives power = 0.8029337, the first rung >= 0.80).

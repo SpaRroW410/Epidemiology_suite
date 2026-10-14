@@ -124,47 +124,60 @@ The **Home** tab has three helpers:
 
 ## Requirements
 
-- R ≥ 4.1
-- `pacman` (installed automatically by `global.R`), which installs/loads the
-  runtime packages: `shiny`, `bslib`, `pwr`, `presize`, `epiR`, `clinfun`,
+- R ≥ 4.3
+- The runtime packages are declared in `DESCRIPTION` (`Imports`) and installed with
+  the package: `shiny`, `bslib`, `pwr`, `presize`, `epiR`, `clinfun`,
   `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`,
   `powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `rstatix`, `lme4`.
-  `survival` and `stats` come with R.
-- `testthat` to run the tests.
+  `survival`, `stats`, `graphics` and `utils` come with R.
+- `testthat` (and `withr`) to run the tests.
 
 Exact versions are recorded in [`renv.lock`](renv.lock) (R 4.3.3); CI restores
 from it. To reproduce that environment: `renv::restore()`. After adding or updating
 a package, re-snapshot the runtime and test packages with
-`renv::snapshot(packages = c(<the p_load() list>, "pacman", "testthat", "withr", "lmerTest"))`.
+`renv::snapshot(packages = c(<DESCRIPTION Imports>, "testthat", "withr", "lmerTest"))`.
 
 In Claude Code on the web, `.claude/hooks/session-start.sh` rebuilds this
 environment automatically on a fresh container (Ubuntu `r-cran-*` binaries where
 available, otherwise the `github.com/cran` mirror).
 
-## Running the app
+## Installing and running the app
+
+sample2result is an R package (GPL-3). Install it from GitHub and start the app:
 
 ```r
-shiny::runApp()
+install.packages("remotes")
+remotes::install_github("SpaRroW410/Sample_size_all")
+sample2result::run_app()
 ```
 
-or `Rscript -e 'shiny::runApp()'` from a shell.
+`run_app(...)` passes its arguments on to `shiny::runApp()` (e.g.
+`run_app(port = 8080, launch.browser = FALSE)`); `sample2result_app()` returns the
+Shiny app object without running it.
+
+From a clone (development), the root `app.R` loads the package with
+`pkgload::load_all()`, so `shiny::runApp()` or `Rscript -e 'shiny::runApp()'` from
+the repository root still works.
 
 ## Running tests
 
 ```r
-testthat::test_dir("tests/testthat")
+testthat::test_local()   # loads the package from the working directory first
 ```
+
+The tests call internal functions, so they must run inside the package namespace:
+use `test_local()` (or `devtools::test()`), not `test_dir()` on its own.
 
 This takes about a minute: the 27 slowest tests (Monte Carlo simulations, ≥ 5 s
 each) are skipped. To run everything (~13 minutes, mostly `test-calc_glmm.R`):
 
 ```sh
-S2R_SLOW_TESTS=true Rscript -e 'testthat::test_dir("tests/testthat")'
+S2R_SLOW_TESTS=true Rscript -e 'testthat::test_local()'
 ```
 
 A new Monte Carlo test should start with `skip_if_not_slow()`
 (`tests/testthat/helper-slow.R`). To run one file:
-`testthat::test_file("tests/testthat/test-calc_proportion.R")`.
+`testthat::test_local(filter = "calc_proportion")`.
 
 CI (`.github/workflows/tests.yml`) runs the fast suite on every push and pull
 request, and the full suite weekly or on demand from the Actions tab.
@@ -174,13 +187,16 @@ request, and the full suite weekly or on demand from the Actions tab.
 ## Repository structure
 
 ```
-app.R                  entry point: grouped navbar + Home hub, wired from the registry
-global.R               pacman::p_load(), source()s R/, module_registry + module_groups
-R/
-├── calc/              pure calculation functions, no Shiny (calc_*.R) + calc_utils.R
-├── content/           per-module formula / explanation / example / citation (content_*.R)
-├── modules/           Shiny UI + server per module (mod_*.R) + mod_shared_ui.R
-└── home/              Home hub: catalog, browse finder, wizard, free-text parser
+DESCRIPTION, NAMESPACE package metadata (hand-maintained; no roxygen2)
+app.R                  development entry point: pkgload::load_all() + sample2result_app()
+R/                     the package (flat, as R requires; grouped by file-name prefix):
+├── run_app.R          run_app() / sample2result_app(): grouped navbar + Home hub
+├── registry.R         module_registry() + module_groups
+├── calc_*.R           pure calculation functions, no Shiny (+ calc_utils.R)
+├── content_*.R        per-module formula / explanation / example / citation
+├── mod_*.R            Shiny UI + server per module (+ mod_shared_ui.R)
+└── home_*.R, design_*.R   Home hub: catalog, browse finder, wizard, free-text parser
+man/                   help pages for the two exported functions
 tests/testthat/        unit tests (calc_*.R functions, wizard, catalog consistency)
 docs/                  roadmap, SDD, checklists, algorithm doc, original brief
 .claude/               SessionStart hook that rebuilds the R environment
@@ -192,19 +208,19 @@ renv.lock              locked package versions
 
 Every calculator is three files plus registry entries.
 
-1. **`R/calc/calc_<name>.R`** — pure R, no Shiny. Validate inputs with the shared
+1. **`R/calc_<name>.R`** — pure R, no Shiny. Validate inputs with the shared
    helpers in `calc_utils.R` (`.validate_number()`, `.validate_positive()`,
    `.validate_unit_interval()`, `.validate_population()`), call a runtime package or
    a verified closed form, and return a plain list. Directly unit-testable.
    Monte Carlo designs share the search helper `.mc_search_n1()` and take a fixed
    `seed` so results are reproducible.
 
-2. **`R/content/content_<name>.R`** — a list (one per design) with `title`,
+2. **`R/content_<name>.R`** — a list (one per design) with `title`,
    `formula_latex`, `explanation`, `worked_example`, `citation`, `backend`.
    `formula_latex` is one or more `$$...$$` blocks joined with `paste0()`; every
    LaTeX backslash is doubled because it's an R string (`\\frac`, `\\alpha`).
 
-3. **`R/modules/mod_<name>.R`** — `mod_<name>_ui(id)` (a `tabsetPanel()` with
+3. **`R/mod_<name>.R`** — `mod_<name>_ui(id)` (a `tabsetPanel()` with
    **Calculate / Formula / Help / Reference**), `mod_<name>_server(id)` (calls the
    `calc_*` function inside `reactive()` + `tryCatch()` and renders the result or the
    validation message), and `<name>_meta <- list(id =, nav_title =)`. Render
@@ -215,12 +231,13 @@ Every calculator is three files plus registry entries.
 ### Adding a module
 
 1. Copy the three files of a similar module and adapt them.
-2. Add a `module_registry` entry and put its id in the right `module_groups` entry
-   (`global.R`). `app.R` does not change.
-3. Add one `calculator_catalog` entry per design in `R/home/home_catalog.R`
+2. Add a `module_registry()` entry and put its id in the right `module_groups` entry
+   (`R/registry.R`). `R/run_app.R` does not change. If the new file calls a package
+   with `pkg::`, add that package to `DESCRIPTION` `Imports`.
+3. Add one `calculator_catalog` entry per design in `R/home_catalog.R`
    (`built = TRUE`, `nav_target`, `module_input_id`, `design_value`) and list the
    keys in a `study_design_families` and a `test_families` entry.
-4. Route to it from the wizard (`R/home/design_tree.R`): add an option and a
+4. Route to it from the wizard (`R/home_design_tree.R`): add an option and a
    `.term()` terminal where a study-design branch fits. The "browse by test" branch
    picks up new `test_families` keys automatically. `test-design_tree.R` fails if
    any built catalog entry is unreachable, and `test-catalog_consistency.R` fails if
@@ -236,13 +253,18 @@ Every calculator is three files plus registry entries.
   Because modules namespace input ids (`proportion-design`, not `design`), the
   condition string is built with `ns("design")` so it stays correct under any
   module id.
-- **`do.call()` builds the navbar.** `app.R` creates one `nav_menu()` per
+- **`do.call()` builds the navbar.** `sample2result_app()` creates one `nav_menu()` per
   `module_groups` entry and passes the variable-length list to `page_navbar()` via
   `do.call()`, which calls a function with an argument list assembled at runtime.
 - **`moduleServer()` / `NS()`** give each module an isolated input/output namespace.
-- **`pacman::p_load()`** installs missing packages automatically, so a fresh clone
-  runs without a separate install step. (Packages must not do this — see the
-  roadmap's package track.)
+- **Dependencies are declared, not installed at runtime.** The app used to call
+  `pacman::p_load()` from `global.R`; as a package it declares them in
+  `DESCRIPTION` `Imports` and calls them with `pkg::`, which is what makes
+  `remotes::install_github()` install everything it needs.
+- **Load order.** Package files load alphabetically, so nothing may use another
+  file's objects at load time. `module_registry()` is therefore a function, and
+  `home_design_tree.R` is named to sort after `home_catalog.R`, whose
+  `test_families` it reads when it loads.
 - **Updating a module's input from outside it.** The Home hub runs at the top level
   and calls `updateRadioButtons(session, "proportion-design", ...)` with the
   already-namespaced id; `ns()` is only needed *inside* a module.

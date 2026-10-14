@@ -1,10 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_curve.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_proportion.R"))
-source(file.path("..", "..", "R", "calc", "calc_means.R"))
-source(file.path("..", "..", "R", "calc", "calc_case_control.R"))
-
 test_that("ss_curve_points traces n_per_group across a grid of p2, holding p1/alpha/power fixed", {
   pts <- ss_curve_points(
     calc_proportion_2s,

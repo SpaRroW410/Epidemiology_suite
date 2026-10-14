@@ -1,3 +1,4 @@
 library(testthat)
+library(sample2result)
 
-test_dir("testthat")
+test_check("sample2result")

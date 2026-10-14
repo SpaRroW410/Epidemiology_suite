@@ -1,5 +1,5 @@
 # "Which calculator?" guided wizard (docs/design_identification_algorithm.md).
-# Walks the flat node registry in design_tree.R one question at a time,
+# Walks the flat node registry in home_design_tree.R one question at a time,
 # showing the reasoning trace as it goes, and ends either on a jump button
 # into a built module (reusing the same nav_select()/updateRadioButtons()
 # mechanism as the Home finders) or an honest "not yet built" note.

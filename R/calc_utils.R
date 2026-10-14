@@ -1,6 +1,6 @@
 # Shared input-validation helpers used across calc_*.R files. Kept here
-# rather than duplicated per file, since global.R sources every file in
-# R/calc/ into one shared environment -- duplicate names would silently
+# rather than duplicated per file, since every file in R/ lives in
+# one shared package namespace -- duplicate names would silently
 # shadow each other.
 
 .validate_number <- function(x, label) {

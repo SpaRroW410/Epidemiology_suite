@@ -61,7 +61,7 @@ combination, plus long-term extensibility — not novel statistical methodology.
 | Goal | Success criterion | Status |
 |---|---|---|
 | Correctness | Every design matches a published worked example, a real package used as an oracle, or a Monte Carlo check of the actual test | Met for every shipped design (474 test blocks) |
-| Extensibility | A new calculator is three new files plus registry/catalog entries, with no changes to other modules or `app.R` | Met |
+| Extensibility | A new calculator is three new files plus registry/catalog entries, with no changes to other modules or `run_app.R` | Met |
 | Transparency | Every result traceable to a stated formula, a cited source, and a named backend | Met |
 | Usability | A student with no statistics background can get a correct result using in-app guidance alone | Yes for routing — the wizard reaches all 49 modules and all 156 designs (test-enforced) |
 | Maintainability | Understandable and modifiable by one part-time developer | Met; CI and consistency tests now guard against drift |
@@ -74,36 +74,37 @@ combination, plus long-term extensibility — not novel statistical methodology.
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
-│  UI shell  (app.R — bslib::page_navbar)                        │
+│  UI shell  (R/run_app.R — bslib::page_navbar)                  │
 │  Home hub + 14 nav_menu dropdowns built from module_groups     │
 └──────────────┬──────────────────────────────┬─────────────────┘
                │                              │
 ┌──────────────▼───────────────┐   ┌──────────▼──────────────────┐
-│  Home hub (R/home/)           │   │  Calculator modules          │
-│  home_catalog.R  — 152 design │   │  (R/modules/mod_*.R)         │
+│  Home hub (R/home_*.R)        │   │  Calculator modules          │
+│  home_catalog.R  — 152 design │   │  (R/mod_*.R)                 │
 │    entries, two family indexes│   │  UI fn + server fn + meta    │
 │  home_finder.R — Browse       │──▶│  Calculate | Formula/Help |  │
 │  design_tree/_wizard.R — wizard│  │  Reference                   │
 │  design_free_text.R — pre-fill│   └──────────┬──────────────────┘
 └───────────────────────────────┘              │
                                     ┌──────────▼──────────────────┐
-                                    │  Computation (R/calc/)       │
+                                    │  Computation (R/calc_*.R)    │
                                     │  pure functions, no Shiny    │
                                     │  wrap a runtime package, or  │
                                     │  a verified reimplementation,│
                                     │  or a seeded Monte Carlo     │
                                     └──────────┬──────────────────┘
                                     ┌──────────▼──────────────────┐
-                                    │  Content (R/content/)        │
+                                    │  Content (R/content_*.R)     │
                                     │  formula LaTeX, explanation, │
                                     │  worked example, citation,   │
                                     │  backend                     │
                                     └──────────────────────────────┘
 ```
 
-`global.R` loads packages, sources every file under `R/`, and defines
-`module_registry` (id, nav title, UI, server for each module) and `module_groups`
-(which modules sit in which navbar dropdown). The Home hub jumps to a module with
+The app is the R package `sample2result` (`DESCRIPTION`, `NAMESPACE`, flat `R/`).
+`R/registry.R` defines `module_registry()` (id, nav title, UI, server for each
+module) and `module_groups` (which modules sit in which navbar dropdown);
+`R/run_app.R` builds the navbar from them (`sample2result_app()`; `run_app()` runs it). The Home hub jumps to a module with
 `bslib::nav_select()` and presets its design with `updateRadioButtons()`.
 
 ### 4.2 Design principles
@@ -137,7 +138,7 @@ combination, plus long-term extensibility — not novel statistical methodology.
 | Testing | `testthat` unit tests (fast/slow split), GitHub Actions CI; manual browser checks with Playwright | `shinytest2` planned (ROADMAP P1) |
 | Dev environment | `.claude/hooks/session-start.sh` rebuilds R + packages on a fresh container; `renv.lock` records the versions (CI restores from it) | — |
 | Version control | Git / GitHub | |
-| Deployment | Source + `shiny::runApp()` today | hosted, package, Shinylive/PWA/APK options in ROADMAP Track D |
+| Deployment | Installable R package (`remotes::install_github()` + `run_app()`) | hosted, package, Shinylive/PWA/APK options in ROADMAP Track D |
 
 ---
 
@@ -145,14 +146,16 @@ combination, plus long-term extensibility — not novel statistical methodology.
 
 ```
 Sample_size_all/
-├── app.R                  # builds the grouped navbar + Home hub from the registry
-├── global.R               # p_load(), source() of R/, module_registry, module_groups
-├── R/
-│   ├── calc/              # calc_*.R — pure functions; calc_utils.R — validators, MC search
-│   ├── content/           # content_*.R — formula, explanation, example, citation, backend
-│   ├── modules/           # mod_*.R — Shiny UI + server; mod_shared_ui.R
-│   └── home/              # home_catalog.R, home_finder.R, home_hub.R,
-│                          # design_tree.R, design_wizard.R, design_free_text.R
+├── DESCRIPTION, NAMESPACE # package metadata (hand-maintained, no roxygen2)
+├── app.R                  # development entry point: pkgload::load_all() + sample2result_app()
+├── R/                     # flat (R requires it); grouped by file-name prefix
+│   ├── run_app.R          # run_app(), sample2result_app(): navbar + Home hub from the registry
+│   ├── registry.R         # module_registry(), module_groups
+│   ├── calc_*.R           # pure functions; calc_utils.R — validators, MC search
+│   ├── content_*.R        # formula, explanation, example, citation, backend
+│   ├── mod_*.R            # Shiny UI + server; mod_shared_ui.R
+│   └── home_*.R, design_*.R   # home_catalog.R, home_finder.R, home_hub.R,
+│                          # home_design_tree.R, design_wizard.R, design_free_text.R
 ├── tests/testthat/        # test-calc_*.R, test-design_tree.R, test-design_free_text.R,
 │                          # test-catalog_consistency.R, ...
 ├── docs/
@@ -243,7 +246,7 @@ Open, blocked and partially covered items are listed in ROADMAP §4 — none hav
 removed.
 
 **Top navbar.** Modules are grouped into 14 `bslib::nav_menu()` dropdowns via
-`global.R`'s `module_groups`, ordered roughly simple → advanced: Descriptive &
+`R/registry.R`'s `module_groups`, ordered roughly simple → advanced: Descriptive &
 Estimation; Survey & Cross-Sectional; Observational Studies; Diagnostic & Screening;
 Agreement & Reliability; Clinical Trials; Survival Analysis; Prediction Models;
 Surveillance; Preclinical / Animal Studies; Qualitative / Mixed Methods;
@@ -260,10 +263,10 @@ primary aim, allocation/directionality, outcome type, groups/dependence — one
 question at a time, showing its reasoning, and ending on a jump button into a live
 module or an honest "not yet built" note. A "start over" control is always present.
 
-Implementation: `R/home/design_tree.R` (flat node registry: question nodes with
+Implementation: `R/home_design_tree.R` (flat node registry: question nodes with
 `options`; terminals with a `catalog_key`, a function of the collected flags, or a
-`would_use`/`citation` pair) and `R/home/design_wizard.R` (UI/server at the top
-level so it can drive the navbar). `R/home/design_free_text.R` (`walk_free_text()`)
+`would_use`/`citation` pair) and `R/design_wizard.R` (UI/server at the top
+level so it can drive the navbar). `R/design_free_text.R` (`walk_free_text()`)
 implements Stage 0: a keyword-heuristic parser that pre-fills answers by walking the
 same registry and stops at the first question it can't infer. No LLM layer —
 deliberately, to keep the app self-contained and deterministic.
@@ -273,7 +276,8 @@ accuracy, agreement, qualitative, meta-analysis, relationships (correlation /
 regression), "something else" (survey sampling, scale development, rare events,
 animal studies, pilots, value of information, genetics), and "I already know which
 test". The last branch is generated from `home_catalog.R`'s `test_families` at source
-time, so `global.R` sources `home_catalog.R` before the rest of `R/home/`.
+load time, so `home_design_tree.R` is named to load after `home_catalog.R` (package files
+load alphabetically).
 Terminals are built with `.term(id, design, key)` (key may be `.by_outcome(cont,
 bin)`) or `.term_open(id, design, would_use, citation)`; the open ones are exactly the
 not-built items in ROADMAP §4. Cluster-randomised paths show a design-effect note
@@ -323,10 +327,10 @@ calc_proportion_1s <- function(p0, p1, alpha = 0.05, power = 0.8, alternative = 
 `mod_<name>_server(id)` (calls the calc function in `reactive()` + `tryCatch()`), and
 `<name>_meta <- list(id, nav_title)`.
 
-**Wiring** — a `module_registry` entry and a `module_groups` placement in `global.R`;
+**Wiring** — a `module_registry()` entry and a `module_groups` placement in `R/registry.R`;
 one `calculator_catalog` entry per design plus family-index keys in
 `home_catalog.R`; a wizard route in `design_tree.R` (the tests require one); tests; and a
-tick in both checklists. `app.R` never changes.
+tick in both checklists. `run_app.R` never changes.
 
 ---
 
@@ -454,10 +458,10 @@ enforced by consistency tests rather than habit.
 
 ## Appendix: Dependencies
 
-**Runtime** (loaded by `global.R`): `shiny`, `bslib`, `pwr`, `presize`, `epiR`,
+**Runtime** (`DESCRIPTION` `Imports`): `shiny`, `bslib`, `pwr`, `presize`, `epiR`,
 `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`,
 `powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `rstatix`, `lme4`;
-plus `survival` and `stats` from base R. `pacman` loads them.
+plus `survival`, `graphics`, `stats` and `utils` from base R.
 
 **Testing**: `testthat` (and `lmerTest`, optional, for one cross-check).
 

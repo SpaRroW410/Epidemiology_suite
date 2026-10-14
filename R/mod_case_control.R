@@ -1,8 +1,8 @@
 # Case-Control module: Calculate / Formula-Help / Reference sub-tabs.
 # Follows the same module contract as mod_proportion.R (docs/SDD.md #8):
 # a `design` radioButtons()/conditionalPanel() switch across unmatched and
-# matched designs -- see R/calc/calc_case_control.R and
-# R/content/content_case_control.R for the formulas and citations.
+# matched designs -- see R/calc_case_control.R and
+# R/content_case_control.R for the formulas and citations.
 
 case_control_meta <- list(
   id = "case_control",

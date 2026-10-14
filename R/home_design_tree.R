@@ -31,8 +31,10 @@
 # Coverage contract (tests/testthat/test-design_tree.R): every built entry in
 # calculator_catalog, and so every module in the navbar, is reachable from
 # root. The last root option ("I already know which test...") is generated
-# from home_catalog.R's test_families, so home_catalog.R must be sourced
-# before this file (global.R does this explicitly).
+# from home_catalog.R's test_families, so home_catalog.R must be loaded
+# before this file. Package files load in alphabetical (C-locale) order, which is
+# why this file is named home_design_tree.R (it sorts after home_catalog.R) --
+# do not rename it to something that sorts before "home_catalog.R".
 
 # Terminal constructors -- keep the node list below readable.
 .term <- function(id, design, key, note = NULL) {

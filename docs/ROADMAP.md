@@ -32,10 +32,10 @@
 | Individual designs | **156**, all in the Browse catalog (F2 fixed) |
 | Checklist coverage | By design: **81 / 94** done (13 open) · By test: **69 / 74** done (5 open) |
 | Unit tests | **487** `test_that()` blocks across 55 files, every design checked against a published worked example, a real package (oracle), or simulation |
-| Runtime packages | **19** in `global.R` + `survival`/`stats` from base R |
+| Runtime packages | **19** in `DESCRIPTION` `Imports` + `survival`/`stats`/`graphics`/`utils` from base R |
 | Verification-only packages | ~30 more (installed from the `github.com/cran` mirror, used only to check reimplementations — never shipped) |
 | Wizard coverage | "Which calculator?" reaches **49 / 49** modules and all 156 catalog entries, enforced by tests (F1 fixed) |
-| Distribution | Source-only (clone + `shiny::runApp()`); no package, no hosted build. CI on GitHub Actions; versions locked in `renv.lock` |
+| Distribution | Installable package (`remotes::install_github()` + `run_app()`), no hosted build. CI on GitHub Actions; versions locked in `renv.lock` |
 
 The sample-size catalog is now effectively complete within the project's own rules
 (every formula traceable to a published source and verified numerically; no new
@@ -55,7 +55,7 @@ cannot reach — see §4.
 | F4 | **Addressed (28 Sep 2026)** — CI + `renv.lock` added (P0 items 5–6). Was: ~~No CI and no dependency lock.~~ Environment is rebuilt by `.claude/hooks/session-start.sh` from latest GitHub-mirror sources — not reproducible, and a package update could silently change a result | no `.github/`, no `renv.lock` | Medium |
 | F5 | **Fixed (28 Sep 2026)** — default run ~1 min, 27 Monte Carlo tests behind `S2R_SLOW_TESTS=true`. Was: ~~Slow test suite.~~ Full run takes ~6–10 min, dominated by Monte Carlo tests (`test-calc_glmm.R` alone several minutes); there is no fast/slow split | observed across every batch | Medium |
 | F6 | **No automated UI tests in the repo.** Every browser check so far was an ad-hoc Playwright script in a scratch directory | nothing under `tests/` beyond `testthat` unit tests | Medium |
-| F7 | **Not yet package-shaped.** R packages need a flat `R/` directory (current code uses `R/calc/`, `R/modules/`, …), a `DESCRIPTION`/`NAMESPACE`, and no `source()`-based loading; tests `source()` files by relative path; `pacman::p_load()` auto-installs, which packages must not do | repo layout, `global.R`, test headers | Medium (blocks Track C) |
+| F7 | **Fixed (14 Oct 2026, item 11).** ~~Not yet package-shaped.~~ `R/` is flat, `DESCRIPTION`/`NAMESPACE` exist, `global.R` and `pacman::p_load()` are gone, tests no longer `source()` files. The installed package passes `R CMD check`'s test step | repo layout, `DESCRIPTION`, `NAMESPACE`, `R/run_app.R`, `R/registry.R` | Done |
 | F8 | **Resolved by relicensing to GPL-3 (D2, 28 Sep 2026).** Background: the project was MIT, but several modules were built by reading and transcribing source from GPL-licensed packages (e.g. `PracTools` GPL-3, `ssize.fdr` GPL-3, `voi` GPL-3, `clusterPower` GPL≥2, `semTools` GPL≥2, `simr` GPL≥2, `metapower` GPL-2, `WebPower` GPL≥3, `rpact` LGPL-3). Mathematical formulas aren't copyrightable, but closely transcribed code may count as a derivative work. *Not legal advice.* GPL-3 is compatible with all of these (GPL-2-only `metapower` is the one to watch: it was a verification reference, not a code source to ship) | package `DESCRIPTION` licenses; module header comments | Resolved; keep module header comments naming each source |
 | F9 | **Partly addressed (28 Sep 2026).** Shiny runs one R process per app instance; a 5–25 s simulation (Monte Carlo Mixed Models, RMST, weighted log-rank, BFDA, KS/runs/animal-rank) used to recompute on every input change — fixed, see P1 item 7. Still true: one user's simulation blocks every other user on the same app instance while it runs — needs `ExtendedTask` (P1 item 7, second half) | observed during browser verification | Was Medium (High once hosted); recompute-storm risk resolved, cross-user blocking remains |
 | F10 | **Resolved (28 Sep 2026).** Every module (except the two guidance-only ones) now offers CSV/JSON/BibTeX/RIS download and a justification paragraph — see P1 item 9 | download handlers exist for all 47 calculator modules | Was Medium; resolved |
@@ -498,7 +498,55 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     batch -- RM-ANOVA's three designs share one unconditional code path,
     which a naive per-batch tally undercounted): **78 designs wired
     across 31 modules** by batch 8; superseded by the completion block above (136 states across 44 modules).
-11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
+11. **Package skeleton (Track C1) -- done (14 Oct 2026)**, named `sample2result` (GPL-3).
+    The app is now an installable R package; install with
+    `remotes::install_github("SpaRroW410/Sample_size_all")`, run with
+    `sample2result::run_app()`.
+    - **Layout.** `R/` flattened with `git mv` (162 files; no name collisions).
+      `global.R` is gone: `R/registry.R` holds `module_registry()` (now a
+      *function*, so it is evaluated after the whole namespace has loaded) and
+      `module_groups`; `R/run_app.R` holds `sample2result_app()` (the navbar
+      shell, formerly `app.R`) and `run_app(...)` (= `shiny::runApp()`). Root
+      `app.R` is `pkgload::load_all()` + `sample2result_app()` for development.
+    - **Load order.** Package files load alphabetically, and only one file had a
+      load-time dependency: `design_tree.R` builds its "browse by test" branch from
+      `home_catalog.R`'s `test_families`. It is renamed `home_design_tree.R` so it
+      sorts after `home_catalog.R` (a comment in the file says why); the
+      `test-design_tree.R` coverage tests would fail loudly if that ever broke.
+    - **Dependencies.** `DESCRIPTION` `Imports` = the 19 former `p_load()` packages
+      plus `survival`, `graphics`, `stats`, `utils`; `Suggests` = `testthat`,
+      `withr`. These were found by parsing the code for `pkg::` calls
+      (`getParseData`, not grep, which also hit comments and citation strings) and
+      by `codetools::findGlobals()` for unqualified calls. Only `shiny` (imported
+      whole) and a handful of `bslib`/`stats`/`graphics`/`utils` functions are
+      called unqualified, so `NAMESPACE` is a short hand-written file (roxygen2 is
+      not available in this environment; it must be kept in sync with `Imports`).
+      The ~30 verification-only packages stay out of `Imports`.
+    - **Tests.** All `source()` lines removed; the suite runs inside the package
+      namespace via `testthat::test_local()` (CI updated), `tests/testthat.R` is
+      `test_check("sample2result")`. `test-catalog_consistency.R` calls
+      `module_registry()`; the ROADMAP-tracking test in `test-design_tree.R` skips
+      when `docs/` is absent (it is `.Rbuildignore`d from the installed package).
+    - **Verified.** Fast suite via `test_local()`: 523 tests, 2043 assertions, 0
+      failures/errors/warnings, 27 expected Monte Carlo skips. `R CMD build` +
+      `R CMD INSTALL` in a `C` locale (the pure-ASCII `R/` from item 10 matters
+      here); `R CMD check`: the tests step passes against the *installed*
+      package; the installed app, started with `run_app()`, was driven in
+      Chromium (Proportions result 385 with both curve plots, no page errors).
+    - **Known `R CMD check` residue** (not blocking `install_github`): a
+      `Sys.setlocale` warning that is this sandbox's missing `en_US.UTF-8`, not a
+      package problem; no `man/` pages beyond the two exported functions (hand
+      written); the `Authors@R` maintainer e-mail is the owner's GitHub
+      *no-reply* address (`52481132+SpaRroW410@users.noreply.github.com`), because
+      `R CMD build` rejects a package with no maintainer e-mail -- **swap in the
+      address you want published before any CRAN/r-universe release**.
+    - **Not done / still open (Track C1 leftovers).** The GitHub repository is
+      still called `Sample_size_all` and the navbar title still reads "Sample Size
+      Calculator" (renaming the repository changes the install path, so it is the
+      owner's call). Deployment: a hosted deployment must now install the package
+      and call `sample2result::run_app()`/`sample2result_app()` from its `app.R`;
+      the earlier note that "a two-line `app.R` keeps shinyapps.io working" was
+      not tested and is withdrawn until item 18 (hosted deployment, D1).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
 
 ### P2 — first suite expansion + portability
@@ -633,9 +681,9 @@ comments, content is data, and tests use `testthat`.
   roxygen2.
 - Flatten `R/` (required by R packages). File names are already prefixed
   (`calc_`, `content_`, `mod_`, `home_`/`design_`), so this is mechanical.
-- Replace `global.R`'s `source()` loop and `pacman::p_load()` with the package
-  namespace; expose `run_app()`. Keep a two-line root `app.R`
-  (`pkgload::load_all(); run_app()`) so shinyapps.io deploys keep working.
+- (done, item 11) Replace `global.R`'s `source()` loop and `pacman::p_load()` with the
+  package namespace; expose `run_app()` and `sample2result_app()`. Root `app.R` is a
+  development shim (`pkgload::load_all()`); hosted deployment is untested (item 18, D1).
 - Rewrite test headers to use the package (drop the `source()` lines).
 - Install path: `remotes::install_github("SpaRroW410/Sample_size_all")`.
 

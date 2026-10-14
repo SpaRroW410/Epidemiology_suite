@@ -6,7 +6,7 @@
 # on that module's Reference tab, so nothing new needs to be authored
 # per design. Pure functions, no Shiny dependency, directly unit-testable
 # (mirrors every calc_*.R file's own "no Shiny here" convention);
-# R/modules/mod_shared_ui.R wires these into each module's UI/server.
+# R/mod_shared_ui.R wires these into each module's UI/server.
 
 #' Flatten an `ss_result` into a single-row, CSV/JSON-friendly named list
 #'
@@ -52,6 +52,7 @@ ss_result_to_csv <- function(result) {
   flat <- ss_result_flatten(result)
   df <- as.data.frame(lapply(flat, function(v) if (is.na(v)) NA else as.character(v)),
                        stringsAsFactors = FALSE, check.names = FALSE)
+  csv_out <- NULL # textConnection(local = TRUE) fills this variable
   con <- textConnection("csv_out", "w", local = TRUE)
   on.exit(close(con))
   utils::write.csv(df, con, row.names = FALSE)

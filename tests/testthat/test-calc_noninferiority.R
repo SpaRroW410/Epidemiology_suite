@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_noninferiority.R"))
-
 test_that("calc_noninferiority_means matches Chow/Shao/Wang (2008, p.61-62) exactly", {
   res <- calc_noninferiority_means(mean_new = 0.20, mean_standard = 0.20, sd = 0.10,
                                     margin = 0.05, alpha = 0.05, power = 0.80, ratio = 1)

@@ -1,13 +1,13 @@
-# Cross-checks between the navbar (global.R's module_registry), the Home
+# Cross-checks between the navbar (registry.R's module_registry()), the Home
 # hub's calculator_catalog and the guided wizard (design_tree.R), so a new
 # module or design option can't silently go missing from discovery again
 # (docs/ROADMAP.md finding F1/F2).
 
-withr::with_dir(file.path("..", ".."), suppressMessages(source("global.R")))
+.registry <- module_registry()
 
 .built <- Filter(function(e) isTRUE(e$built), calculator_catalog)
-.titles <- vapply(module_registry, `[[`, character(1), "title")
-.ui_html <- lapply(setNames(module_registry, vapply(module_registry, `[[`, character(1), "id")),
+.titles <- vapply(.registry, `[[`, character(1), "title")
+.ui_html <- lapply(setNames(.registry, vapply(.registry, `[[`, character(1), "id")),
                    function(m) as.character(m$ui(m$id)))
 
 # Values of every radio button named `input_id` in a module's rendered UI.
@@ -30,7 +30,7 @@ test_that("every catalog design preset is a real radio choice in its module", {
   for (e in .built) {
     if (is.na(e$module_input_id)) next
     mid <- sub("-[^-]+$", "", e$module_input_id)
-    m <- Find(function(m) identical(m$id, mid), module_registry)
+    m <- Find(function(m) identical(m$id, mid), .registry)
     expect_false(is.null(m), info = paste(e$key, "-> no module with id", mid))
     if (is.null(m)) next
     expect_equal(m$title, e$nav_target, info = e$key)
@@ -54,7 +54,7 @@ test_that("every design radio choice in a module has a catalog entry", {
 })
 
 test_that("modules with several catalog entries preset a design input", {
-  for (m in module_registry) {
+  for (m in .registry) {
     entries <- Filter(function(e) identical(e$nav_target, m$title), .built)
     if (length(entries) < 2) next
     expect_true(all(!is.na(vapply(entries, function(e) as.character(e$module_input_id), character(1)))),

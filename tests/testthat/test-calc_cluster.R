@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_cluster.R"))
-
 test_that("calc_cluster_deff matches Killip, Mahfoud & Pearce (2004)'s worked example exactly", {
   # icc=0.05, cluster_size=10 -> deff = 1 + (10-1)*0.05 = 1.45 (their own
   # illustration of the design-effect formula).

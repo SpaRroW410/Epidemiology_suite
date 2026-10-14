@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_agreement.R"))
-
 # The two (rho_c, rho, u, conf_width) scenarios below were derived by
 # generating a real synthetic paired dataset, running the actual, installed
 # epiR::epi.ccc(x, y, ci = "asymptotic") on it, and reading off its own

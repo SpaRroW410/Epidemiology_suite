@@ -1,5 +1,5 @@
 # Data for the Home page's two calculator finders (by study design, and by
-# groups/data type). Content is data, same principle as R/content/*.R --
+# groups/data type). Content is data, same principle as R/*.R --
 # adding a calculator means adding/flipping a catalog entry here, not
 # rewriting the finder UI/server logic in home_finder.R.
 #

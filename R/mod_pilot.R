@@ -2,8 +2,8 @@
 # Follows the same module contract as mod_cohort.R (docs/SDD.md #8) -- a
 # single calculation, no design radio needed. Unlike every other module,
 # this one is guidance (a rule of thumb + a precision illustration), not a
-# sample-size formula -- see R/calc/calc_pilot.R and
-# R/content/content_pilot.R.
+# sample-size formula -- see R/calc_pilot.R and
+# R/content_pilot.R.
 
 pilot_meta <- list(
   id = "pilot",

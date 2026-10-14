@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_proportion.R"))
-
 test_that("calc_proportion_1s matches Cohen (1988) published one-sample tables", {
   # Cohen (1988) Table 6.4.1: one-sample proportion test, alpha = .05 two-tailed,
   # power = .80, small conventional arcsine effect size h = 0.2, gives n = 197.

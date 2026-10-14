@@ -1,7 +1,7 @@
 # EFA/CFA Subjects-Per-Item Guidance module: Calculate / Formula-Help /
 # Reference sub-tabs. Follows the same module contract as mod_pilot.R
 # (docs/SDD.md #8) -- a rule-of-thumb calculator, not a hypothesis-test
-# formula. See R/calc/calc_efa_cfa.R and R/content/content_efa_cfa.R.
+# formula. See R/calc_efa_cfa.R and R/content_efa_cfa.R.
 
 efa_cfa_meta <- list(
   id = "efa_cfa",

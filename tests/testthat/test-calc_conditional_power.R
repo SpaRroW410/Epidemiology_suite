@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_lan_demets.R"))
-
 test_that("calc_conditional_power_normal matches a hand-derived example (z1=1.5, n_max=128, OF design)", {
   # theta = 1.5/sqrt(64) = 0.1875; z2_cutoff = (1.968586-1.5*sqrt(.5))/sqrt(.5) = 1.283965 (approx)
   # CP = pnorm(sqrt(64)*0.1875 - 1.283965) = pnorm(0.216035) = 0.5855

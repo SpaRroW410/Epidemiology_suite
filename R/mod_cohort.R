@@ -1,7 +1,7 @@
 # Cohort / RR module: Calculate / Formula-Help / Reference sub-tabs.
 # Follows the same module contract as mod_diagnostic.R (docs/SDD.md #8), but
-# has only one design -- see R/calc/calc_cohort.R and
-# R/content/content_cohort.R for the formula and citation.
+# has only one design -- see R/calc_cohort.R and
+# R/content_cohort.R for the formula and citation.
 
 cohort_meta <- list(
   id = "cohort",

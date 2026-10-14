@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_logrank.R"))
-
 test_that("calc_logrank matches Rosner (2006) Example 14.42 exactly", {
   # pE = 0.3707, pC = 0.4890, HR = 0.7, ratio = 1, alpha = 0.05, power = 0.80
   # -> nE = nC = 294 (the textbook's own published answer).

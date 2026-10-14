@@ -1,7 +1,7 @@
 # Capture-Recapture module: Calculate / Formula-Help / Reference sub-tabs.
 # Follows the same module contract as mod_pilot.R (docs/SDD.md #8) -- a
 # single precision-based calculation, no design radio needed. See
-# R/calc/calc_capture_recapture.R and R/content/content_capture_recapture.R.
+# R/calc_capture_recapture.R and R/content_capture_recapture.R.
 
 capture_recapture_meta <- list(
   id = "capture_recapture",

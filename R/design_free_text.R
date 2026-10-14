@@ -1,11 +1,11 @@
 # Stage 0 of docs/design_identification_algorithm.md: free-text keyword
-# heuristics that pre-fill design_tree.R's guided wizard instead of requiring
+# heuristics that pre-fill home_design_tree.R's guided wizard instead of requiring
 # every question to be clicked through by hand. Deliberately keyword-based,
 # not LLM-based -- this app has no LLM API wired in anywhere and is otherwise
 # fully self-contained/deterministic/unit-tested, and the algorithm doc's own
 # section 0.3 explicitly frames keyword heuristics as the graceful-degrade
 # design for offline/no-API operation. Never lets the parser choose a final
-# module on its own: it only pre-selects design_tree.R option indices a human
+# module on its own: it only pre-selects home_design_tree.R option indices a human
 # would otherwise click, and it stops the instant no rule matches, handing
 # control back to the manual wizard exactly where it left off.
 #
@@ -110,7 +110,7 @@ free_text_rules <- list(
   )
 )
 
-#' Walk design_tree.R's node registry from root using free-text keyword
+#' Walk home_design_tree.R's node registry from root using free-text keyword
 #' rules, exactly mirroring design_wizard_server()'s own manual-click
 #' traversal (design_wizard.R's observeEvent(input$design_wizard_next, ...)):
 #' apply any opt$set flags, append a trace entry, resolve next_id (string or

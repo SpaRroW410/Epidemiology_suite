@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_meta_power.R"))
-
 test_that("calc_meta_analysis_power matches metapower::mpower()'s own documented example (Cohen's d) exactly", {
   # metapower::mpower(effect_size=.2, study_size=10, k=10, i2=.5, es_type="d")
   # -> fixed_power=0.1694615, random_power=0.1357176 (verified directly

@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_chisq.R"))
-
 test_that("calc_chisq_gof matches Cohen (1988) Exercise 7.1, p. 249", {
   # 4 equally-likely null categories (P0 = 0.25 each), anticipating
   # P1 = (0.375, 0.2083, 0.2083, 0.2083) -> w ~ 0.289, and solving for N at

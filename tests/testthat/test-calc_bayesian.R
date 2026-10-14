@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_bayesian.R"))
-
 test_that("calc_bayesian_assurance_or matches Hmisc::gbayes2()'s own documented uniform-prior example closely", {
   # Reproducing the package's own example code exactly:
   #   prior2 <- function(delta) dunif(delta, log(1.2), log(1.3))

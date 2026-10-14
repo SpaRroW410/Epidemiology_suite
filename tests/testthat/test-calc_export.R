@@ -1,8 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_export.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_proportion.R"))
-
 test_that("ss_result_flatten flattens inputs with a dot-separated name and collapses vectors", {
   r <- new_ss_result(list(
     n_total = 100, alpha_spent = c(0.01, 0.05),
