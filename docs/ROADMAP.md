@@ -225,8 +225,8 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    plus the EVPI fallback fix (justification text, and the BibTeX/RIS
    downloads specifically, since they share the same citation field) —
    all render correctly, no page errors, no server-log errors.
-10. **Power/sensitivity curves (F6-adjacent) -- infrastructure + rollout in
-    progress.** `R/calc/calc_curve.R` (pure, unit-tested, no Shiny):
+10. **Power/sensitivity curves -- done (14 Oct 2026); infrastructure and rollout
+    history below.** `R/calc/calc_curve.R` (pure, unit-tested, no Shiny):
     `ss_curve_points(calc_fn, args, vary_param, vary_values)` recomputes a
     design's own headline n/k field (`.ss_curve_n_field()`, a narrower match
     than `calc_result.R`'s own headline detector -- deliberately excludes a
@@ -415,43 +415,72 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
         a design-specific reduced grid size or a Calculate-button gate,
         not a blanket live curve.
 
-    Deliberately left unwired (backlog for the next rollout batch, same
-    incremental pattern as items 8/9): designs with no power argument
-    because they aren't a hypothesis test (`precision`,
-    `single_precision`, Diagnostic's `precision`/`ppv_npv`/
-    `likelihood_ratio`, Variance's `sd_precision`, every Agreement design,
-    Pilot) and designs whose effect isn't one scalar (`anova`,
-    `planned_contrast` -- k group means; Case-Control's `nested` -- R2/
-    nD/nH structure; Correlation's `two_dependent` -- three jointly-
-    constrained correlations; ROC's `compare_two` -- 8+ binormal/
-    correlation inputs with no single obvious effect; Chi-Square's
-    `gof`/`independence`/`mantelhaenszel`/`cochran_armitage` -- vectors or
-    matrices of proportions; `cochran_q` -- Monte Carlo; SCCS's age-groups
-    branch -- vectors; Logistic's `ordinal` -- a vector of category
-    probabilities; Log-Rank's `stratified` -- vectors; Meta-Analysis
-    Power's `or` -- a 2x2 table; Subgroup/Interaction Testing -- no power
-    argument; Log-Rank's `noncompliance` and `weighted_logrank` -- slow /
-    Monte Carlo). `posthoc_pairwise` (Proportions, Means) is left for a
-    later batch despite having a single scalar effect pair, and
-    Multiplicity's `dunnett` and all of Exact Tests are deferred for
-    being too slow for a plain 40-point live grid (measured, not
-    assumed). The 16 modules still without curves (47 eligible minus the 31
-    wired, grep-verified) were each checked and none is a plain wiring
-    job left over: **no power or type-II-error input at all** in the
-    module (precision- or design-based) -- Agreement, Pilot, Cluster/
-    Design Effect, Stratified Sampling, Ratio Estimation, Prediction
-    Model, Resource Equation, Subgroup/Interaction, Capture-Recapture,
-    Value of Information, Rule of Three; **Monte Carlo** --
-    GLMM, RMST (their Calculate-button pattern from item 7 would also
-    have to drive the curve); **too slow per call for a live grid** --
-    Exact Tests, Bayesian (`assurance_or`), EFA/CFA (`rmsea`). What is
-    left is therefore not more wiring but three different pieces of
-    work: a "required n vs. precision" curve for the precision-based
-    modules (a different feature from this effect/power pair), a
-    Calculate-button-gated curve for the slow and Monte Carlo designs
-    (Dunnett, Exact Tests, Log-Rank noncompliance, Bayesian assurance,
-    EFA/CFA RMSEA, GLMM, RMST), and the per-design leftovers listed
-    above (e.g. `posthoc_pairwise`, `compare_two`).
+    **Completion (14 Oct 2026) -- the three open pieces, done.** After
+    batch 8 the ROADMAP listed three remaining kinds of work; all three are
+    now built:
+    1. *Per-design leftovers* (designs with no single scalar effect, or one
+       skipped for cost): `posthoc_pairwise` (Proportions, Means), Means
+       `anova`/`planned_contrast`, ROC `compare_two`, Case-Control `nested`,
+       Correlation `two_dependent`, Chi-Square `gof`/`independence`/
+       `mantelhaenszel`/`cochran_armitage`, SCCS age groups, Logistic
+       `ordinal`, Log-Rank `stratified`/`noncompliance`, Multiplicity's two
+       FDR designs, Means' unequal-n design (found missing by the crawl
+       below). Where the effect is a whole vector, the curve's x axis is a
+       *multiplier on the differences* (`curve_scale_about()`; 1 = as
+       entered): group means for ANOVA/contrasts, the gap between P1 and P0
+       for goodness of fit, the departure from independence for an R x C
+       table. Correlation `two_dependent` varies `r_yx2` only inside the range
+       that keeps the correlation matrix valid.
+    2. *Precision-based designs* (n against the key assumption and against
+       the precision target, via a new optional axis `title`): Proportions,
+       Means, Diagnostic (three designs), Incidence Rate, Variance, Agreement
+       (all five), Subgroup/Interaction, Cluster (three), Stratified, Ratio
+       (three), Capture-Recapture, Rule of Three (two), Resource Equation,
+       Prediction Model (three).
+    3. *Slow designs*: `render_power_curves(..., input = input)` plus a
+       spec flag `gated` computes the curves only when the user clicks
+       "Compute / recompute curves", never shows curves for inputs other than
+       the ones they were computed from, and says how long it will take
+       (measured: binomial ~8 s, Fisher ~12 s, sign ~17 s, Boschloo ~42 s,
+       Dunnett ~26 s, RMSEA ~12 s). Every call also has a per-point time
+       budget (`ss_curve_points(time_limit=)`; 2 s live, 4 s gated): an
+       exact-power search near the null can need thousands of subjects, and
+       the first gated run of the binomial test took 140 s because of just
+       such points. Abandoned points are counted and disclosed on the plot.
+
+    Two measurement mistakes were corrected on the way. Bayesian assurance
+    (~1.1 s), EVSI and Log-Rank `noncompliance` (~6.3 s) had been declined or
+    gated on a *single cold first call*; warmed up they take 5-20 ms (the
+    first call loads packages), so they now run live. The same cold-call
+    effect did not apply to Dunnett or the exact tests, whose full-grid
+    timings were measured and are real. Lesson recorded: time a warmed-up
+    call, and time the whole grid, before declining a design.
+
+    **Verification by crawl.** A Playwright crawler
+    (kept outside the repo; it becomes the basis for item 12) visited every
+    design of every module, waited for Shiny to go idle (an earlier version
+    judged the page before the server had updated and mistook the previous
+    design's plot for the current one's -- the server-side check with
+    `shiny::testServer()` confirmed no stale output), and for gated designs
+    clicked the button and waited for the plots. Result: **44 of the 49
+    modules and 136 browser states (designs, counting the nested
+    toggles) show curves**, 0 page errors.
+
+    **What is deliberately not wired, and why** (17 states):
+    - *Monte Carlo* -- BFDA, KS, runs, animal-rank, weighted log-rank, GLMM
+      (3 designs), RMST (and Cochran's Q): each point is a multi-second
+      stochastic simulation, so a 40-point curve is minutes and noisy. This
+      needs the background-process work of item 7 (`ExtendedTask`) first.
+    - *Not an n-vs-assumption relationship* -- EVPI (a monetary value),
+      EFA/CFA rule of thumb and IRT guidance (fixed ratios / a table),
+      Resource Equation `check`, Rule of Three `bound` and Pilot (each computes
+      a bound or a precision *from* n), Prediction external validation
+      (simulation), Cluster `pps_optimal` (cost allocation).
+    - *Inputs that are jointly constrained* -- Nonparametric `rank_sum`,
+      `signed_rank`, `kendall`, `jonckheere` take tuples of related
+      probabilities; varying one alone plots a set the user could not have
+      meant.
+    - *A whole table* -- Meta-Analysis Power's `or` type.
 
     Verified: full fast test suite (0 failures/0 errors, 27 expected
     Monte Carlo skips) after `global.R` was confirmed to source cleanly
@@ -468,7 +497,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     memory (the carried-forward figure quietly drifted off by a few each
     batch -- RM-ANOVA's three designs share one unconditional code path,
     which a naive per-batch tally undercounted): **78 designs wired
-    across 31 modules**, eight batches.
+    across 31 modules** by batch 8; superseded by the completion block above (136 states across 44 modules).
 11. **Package skeleton (Track C1)**, named `sample2result` (licence already decided: GPL-3).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
 
