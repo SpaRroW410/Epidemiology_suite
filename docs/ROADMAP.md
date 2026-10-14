@@ -774,8 +774,10 @@ summary-data tools). The navbar title is now "epidemiologicasuite" (D3).
   the sidebar has no search box (the Home hub's Browse/wizard remain the way to find a
   calculator by purpose); the Home page heading still reads "Comprehensive Sample Size
   Calculator"; bookmarkable URLs, dark mode and the accessibility pass listed under
-  cross-cutting features are untouched. Checked in a desktop-width screenshot and a phone-width
-  one (the phone shows the collapsed navbar; the stacked sidebar itself was not screenshotted).
+  cross-cutting features are untouched. Checked in desktop-width screenshots (Plan, Analyze, a module deep in the list)
+  and at phone width (390 px): the navbar collapses, the sidebar stacks above the calculator and
+  scrolls inside its 40vh cap. Full suite incl. browser tests: 661 tests, 3055 assertions, 0
+  failures/errors/warnings, 78 skips (27 Monte Carlo + 51 every-design UI tests).
 
 ---
 
