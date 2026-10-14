@@ -575,7 +575,9 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     - **Dependency caveat.** `shinytest2` is not in `renv.lock`: its current release
       (0.5.x) imports `httr2`, which needs `rlang >= 1.3.0` while the lock pins 1.1.3.
       Version 0.4.1 (uses `httr`) works with the locked packages; CI installs it with
-      `remotes::install_version()`. This CI step is **untested until its first run**.
+      `remotes::install_version()`. CI run 26 confirmed it: the install step succeeded and the UI tests ran on the
+      runner (`FAIL 0 | SKIP 76 | PASS 2484`; the 76 skips are the 27 Monte Carlo tests and
+      the 49 every-design tests).
     - **Not covered (by design).** Numerical correctness (the unit tests do that),
       the click-gated curves and Monte Carlo Calculate buttons (checked in the item-10
       crawl, not asserted here), and visual appearance (no snapshot testing).
