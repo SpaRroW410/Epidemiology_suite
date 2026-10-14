@@ -1,8 +1,8 @@
-\name{sample2result_app}
-\alias{sample2result_app}
-\title{Build the sample2result Shiny app object}
+\name{epidemiologicasuite_app}
+\alias{epidemiologicasuite_app}
+\title{Build the epidemiologicasuite Shiny app object}
 \usage{
-sample2result_app()
+epidemiologicasuite_app()
 }
 \value{
 A \code{shiny::shinyApp()} object.

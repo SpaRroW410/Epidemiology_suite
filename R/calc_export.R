@@ -303,7 +303,7 @@ format_citation_bibtex <- function(design_title, citation) {
   citation <- .ascii_safe(citation)
   esc <- function(s) gsub("([{}])", "\\\\\\1", s)
   sprintf(
-    "@misc{%s,\n  title = {%s},\n  note = {%s},\n  howpublished = {sample2result sample size calculator}\n}\n",
+    "@misc{%s,\n  title = {%s},\n  note = {%s},\n  howpublished = {epidemiologicasuite sample size calculator}\n}\n",
     .citation_key(design_title), esc(design_title), esc(citation)
   )
 }

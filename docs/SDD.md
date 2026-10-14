@@ -1,5 +1,5 @@
 # Software Design Document
-## sample2result — Comprehensive Sample Size Calculator for Community Medicine / Epidemiology
+## epidemiologicasuite — Comprehensive Sample Size Calculator for Community Medicine / Epidemiology
 
 | | |
 |---|---|
@@ -101,10 +101,10 @@ combination, plus long-term extensibility — not novel statistical methodology.
                                     └──────────────────────────────┘
 ```
 
-The app is the R package `sample2result` (`DESCRIPTION`, `NAMESPACE`, flat `R/`).
+The app is the R package `epidemiologicasuite` (`DESCRIPTION`, `NAMESPACE`, flat `R/`).
 `R/registry.R` defines `module_registry()` (id, nav title, UI, server for each
 module) and `module_groups` (which modules sit in which navbar dropdown);
-`R/run_app.R` builds the navbar from them (`sample2result_app()`; `run_app()` runs it). The Home hub jumps to a module with
+`R/run_app.R` builds the navbar from them (`epidemiologicasuite_app()`; `run_app()` runs it). The Home hub jumps to a module with
 `bslib::nav_select()` and presets its design with `updateRadioButtons()`.
 
 ### 4.2 Design principles
@@ -147,9 +147,9 @@ module) and `module_groups` (which modules sit in which navbar dropdown);
 ```
 Sample_size_all/
 ├── DESCRIPTION, NAMESPACE # package metadata (hand-maintained, no roxygen2)
-├── app.R                  # development entry point: pkgload::load_all() + sample2result_app()
+├── app.R                  # development entry point: pkgload::load_all() + epidemiologicasuite_app()
 ├── R/                     # flat (R requires it); grouped by file-name prefix
-│   ├── run_app.R          # run_app(), sample2result_app(): navbar + Home hub from the registry
+│   ├── run_app.R          # run_app(), epidemiologicasuite_app(): navbar + Home hub from the registry
 │   ├── registry.R         # module_registry(), module_groups
 │   ├── calc_*.R           # pure functions; calc_utils.R — validators, MC search
 │   ├── content_*.R        # formula, explanation, example, citation, backend

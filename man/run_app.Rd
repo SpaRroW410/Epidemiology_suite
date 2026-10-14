@@ -1,6 +1,6 @@
 \name{run_app}
 \alias{run_app}
-\title{Run the sample2result application}
+\title{Run the epidemiologicasuite application}
 \usage{
 run_app(...)
 }

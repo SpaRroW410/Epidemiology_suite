@@ -1,4 +1,4 @@
 library(testthat)
-library(sample2result)
+library(epidemiologicasuite)
 
-test_check("sample2result")
+test_check("epidemiologicasuite")

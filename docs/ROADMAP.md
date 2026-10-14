@@ -1,11 +1,11 @@
-# Roadmap — sample2result: from Sample Size Calculator to Epidemiology Suite
+# Roadmap — epidemiologicasuite: from Sample Size Calculator to Epidemiology Suite
 
 | | |
 |---|---|
 | **Status** | Active — authoritative forward plan |
 | **Last reviewed** | 28 September 2026 (full codebase + docs review) |
 | **Owner** | Dr. Mukul Maheshwari |
-| **Name** | **sample2result** (app, package and suite — decision D3) |
+| **Name** | **epidemiologicasuite** (app, package and suite — decision D3) |
 | **Licence** | GPL-3 (decision D2) |
 
 **How the docs fit together**
@@ -153,7 +153,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    them). `mod_shared_ui.R`'s `export_controls_ui()`/`render_export_handlers()`
    wire a "Copy paragraph" button + CSV/JSON/BibTeX/RIS downloads into a
    module in two lines, filenamed from the design (e.g.
-   `sample2result_two_independent_proportions.csv`).
+   `epidemiologicasuite_two_independent_proportions.csv`).
    Found and fixed along the way (real bug, not sandbox-only — same root
    cause could bite a deployment with a similarly minimal locale): this
    sandbox has no working multibyte locale at all, under which R's own
@@ -498,16 +498,16 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     batch -- RM-ANOVA's three designs share one unconditional code path,
     which a naive per-batch tally undercounted): **78 designs wired
     across 31 modules** by batch 8; superseded by the completion block above (136 states across 44 modules).
-11. **Package skeleton (Track C1) -- done (14 Oct 2026)**, named `sample2result` (GPL-3).
+11. **Package skeleton (Track C1) -- done (14 Oct 2026)**, named `epidemiologicasuite` (GPL-3).
     The app is now an installable R package; install with
     `remotes::install_github("SpaRroW410/Sample_size_all")`, run with
-    `sample2result::run_app()`.
+    `epidemiologicasuite::run_app()`.
     - **Layout.** `R/` flattened with `git mv` (162 files; no name collisions).
       `global.R` is gone: `R/registry.R` holds `module_registry()` (now a
       *function*, so it is evaluated after the whole namespace has loaded) and
-      `module_groups`; `R/run_app.R` holds `sample2result_app()` (the navbar
+      `module_groups`; `R/run_app.R` holds `epidemiologicasuite_app()` (the navbar
       shell, formerly `app.R`) and `run_app(...)` (= `shiny::runApp()`). Root
-      `app.R` is `pkgload::load_all()` + `sample2result_app()` for development.
+      `app.R` is `pkgload::load_all()` + `epidemiologicasuite_app()` for development.
     - **Load order.** Package files load alphabetically, and only one file had a
       load-time dependency: `design_tree.R` builds its "browse by test" branch from
       `home_catalog.R`'s `test_families`. It is renamed `home_design_tree.R` so it
@@ -524,7 +524,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       The ~30 verification-only packages stay out of `Imports`.
     - **Tests.** All `source()` lines removed; the suite runs inside the package
       namespace via `testthat::test_local()` (CI updated), `tests/testthat.R` is
-      `test_check("sample2result")`. `test-catalog_consistency.R` calls
+      `test_check("epidemiologicasuite")`. `test-catalog_consistency.R` calls
       `module_registry()`; the ROADMAP-tracking test in `test-design_tree.R` skips
       when `docs/` is absent (it is `.Rbuildignore`d from the installed package).
     - **Verified.** Fast suite via `test_local()`: 523 tests, 2043 assertions, 0
@@ -536,15 +536,15 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     - **Known `R CMD check` residue** (not blocking `install_github`): a
       `Sys.setlocale` warning that is this sandbox's missing `en_US.UTF-8`, not a
       package problem; no `man/` pages beyond the two exported functions (hand
-      written); the `Authors@R` maintainer e-mail is the owner's GitHub
-      *no-reply* address (`52481132+SpaRroW410@users.noreply.github.com`), because
-      `R CMD build` rejects a package with no maintainer e-mail -- **swap in the
-      address you want published before any CRAN/r-universe release**.
+      written); the `Authors@R` maintainer e-mail is `ryan00700@gmail.com`
+      (required: `R CMD build` rejects a package with no maintainer e-mail;
+      supplied by the owner on 14 Oct 2026, after a first version of this item
+      used a GitHub no-reply address).
     - **Not done / still open (Track C1 leftovers).** The GitHub repository is
       still called `Sample_size_all` and the navbar title still reads "Sample Size
       Calculator" (renaming the repository changes the install path, so it is the
       owner's call). Deployment: a hosted deployment must now install the package
-      and call `sample2result::run_app()`/`sample2result_app()` from its `app.R`;
+      and call `epidemiologicasuite::run_app()`/`epidemiologicasuite_app()` from its `app.R`;
       the earlier note that "a two-line `app.R` keeps shinyapps.io working" was
       not tested and is withdrawn until item 18 (hosted deployment, D1).
 12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
@@ -667,7 +667,7 @@ dropdowns can't nest. With several workbenches, move to a top level of workbench
 (Plan / Collect / Analyze / Report / Learn) with a sidebar or grouped dropdown
 (header items + separators) inside each. The Home hub's Browse catalog and wizard
 extend to cover analysis tasks too. The app title also changes from "Sample Size
-Calculator" to **sample2result** (D3).
+Calculator" to **epidemiologicasuite** (D3).
 
 ---
 
@@ -682,7 +682,7 @@ comments, content is data, and tests use `testthat`.
 - Flatten `R/` (required by R packages). File names are already prefixed
   (`calc_`, `content_`, `mod_`, `home_`/`design_`), so this is mechanical.
 - (done, item 11) Replace `global.R`'s `source()` loop and `pacman::p_load()` with the
-  package namespace; expose `run_app()` and `sample2result_app()`. Root `app.R` is a
+  package namespace; expose `run_app()` and `epidemiologicasuite_app()`. Root `app.R` is a
   development shim (`pkgload::load_all()`); hosted deployment is untested (item 18, D1).
 - Rewrite test headers to use the package (drop the `source()` lines).
 - Install path: `remotes::install_github("SpaRroW410/Sample_size_all")`.
@@ -699,11 +699,19 @@ licence declared (D2), and ≤ 20 Imports (Phase 8 helps).
 **C4 — release channels (P3).** GitHub → **r-universe** (automatic binaries,
 including WebAssembly builds for webR, which Track D3 needs) → CRAN.
 
-**Name.** `sample2result` (D3). It is a valid R package name (starts with a letter,
-letters and digits only). A web search on 28 Sep 2026 found no existing package with
-that name; confirm with `available::available("sample2result")` (checks CRAN,
-Bioconductor and GitHub) before the first public release. Rename the GitHub
-repository and the app title as part of C1.
+**Name.** `epidemiologicasuite` (D3, revised 14 Oct 2026). The package was first
+called `sample2result`; the owner then asked for `epidemiologica_suite`, but an R
+package name may contain only letters, digits and dots (no underscore), so it is
+spelled `epidemiologicasuite` (the dotted `epidemiologica.suite` would also be
+legal but reads like an S3 method name). Availability, checked 14 Oct 2026: no
+`github.com/cran/epidemiologicasuite` repository exists (the CRAN mirror answers
+for real packages such as `pwr` and not for this name), and a web search found no
+package, repository or page with that name or the dotted/underscore variants. CRAN,
+Bioconductor and the CRAN index were not directly reachable from the sandbox, so
+confirm with `available::available("epidemiologicasuite")` before the first public
+release. The GitHub repository is still `Sample_size_all` (renaming it is an owner
+action and changes the install path); the navbar title changes with the suite
+expansion (D3).
 
 ---
 
@@ -771,7 +779,7 @@ Recorded 28 September 2026.
 |---|---|---|---|
 | D1 | Suite scope: summary-data calculators only, or also a raw-data analysis workbench? | **Summary-data calculators only, for now** | B1–B5 and B7 (from summaries) stay in scope; B6 and the line-list parts of B4 are deferred, not dropped |
 | D2 | Licence: keep MIT or relicense to GPL-3? | **GPL-3** | `LICENSE` replaced with the GPL-3 text; resolves F8. The package `DESCRIPTION` will say `License: GPL-3` |
-| D3 | Suite and package name | **`sample2result`** | Used for the package (C1), the app title and the suite; single package until CRAN, then consider a core + app split (C3) |
+| D3 | Suite and package name | **`epidemiologicasuite`** (was `sample2result`; `epidemiologica_suite` is not a legal package name) | Used for the package (C1), the app title and the suite; single package until CRAN, then consider a core + app split (C3) |
 | D4 | Primary distribution target: hosted web, or offline/APK first? | **Offline / APK later** | Hosted web + R package first (D1, D2); the Shinylive spike (D3) and APK (D5a) stay at P2/P3 |
 | D5 | Languages | **English only** | No translation layer; F11 narrows to accessibility and mobile layout |
 | D6 | When to reopen the two paused items (A.2) | *Open* | Suggested: once paper access is available |
@@ -781,7 +789,7 @@ Recorded 28 September 2026.
 | Milestone | Contents | Exit criterion |
 |---|---|---|
 | **M0 Hygiene** | P0 items 1–6 | Wizard and catalog tests pass (done); fast suite < 2 min (done, ~1 min); CI green |
-| **M1 Foundations** | Calculate button + async, result object, export + justification text, power curves, `sample2result` package skeleton | `run_app()` works from an installed package; results downloadable |
+| **M1 Foundations** | Calculate button + async, result object, export + justification text, power curves, `epidemiologicasuite` package skeleton | `run_app()` works from an installed package; results downloadable |
 | **M2 Analyze v1** | B1 calculators + navigation redesign | Reproduces OpenEpi/`epiR` worked examples; wizard covers analysis tasks |
 | **M3 Portability** | Shinylive spike, Phase 8 tier 1, pkgdown site | Go/no-go on offline/APK, with evidence |
 | **M4 Planning & field tools** | B2, B3 | Randomization lists reproducible by seed |

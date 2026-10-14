@@ -3,7 +3,7 @@
 # module_registry() and to the right module_groups entry; nothing in this
 # file needs to change beyond that.
 
-#' Run the sample2result application
+#' Run the epidemiologicasuite application
 #'
 #' Starts the sample size / power calculator in the default web browser (or the
 #' RStudio viewer). Blocks until the app is stopped.
@@ -13,10 +13,10 @@
 #' @return Does not return while the app is running.
 #' @export
 run_app <- function(...) {
-  shiny::runApp(sample2result_app(), ...)
+  shiny::runApp(epidemiologicasuite_app(), ...)
 }
 
-#' Build the sample2result Shiny app object
+#' Build the epidemiologicasuite Shiny app object
 #'
 #' The app object itself, without running it -- for `shiny::runApp()`, for the
 #' root `app.R` used during development, and for deployment or testing
@@ -24,7 +24,7 @@ run_app <- function(...) {
 #'
 #' @return A [shiny::shinyApp()] object.
 #' @export
-sample2result_app <- function() {
+epidemiologicasuite_app <- function() {
   registry <- module_registry()
   registry_by_id <- setNames(registry, vapply(registry, `[[`, character(1), "id"))
 

@@ -1,4 +1,4 @@
-# sample2result — Sample Size Calculator
+# epidemiologicasuite — Sample Size Calculator
 
 An R Shiny web app for sample size and power calculations in community medicine,
 epidemiology and clinical research. Every calculator comes with its formula
@@ -7,7 +7,7 @@ example, the original methodological citation, and the name of the package or
 formula that implements it.
 
 **Current state:** 49 calculator modules, 156 individual designs, 487 unit-test
-blocks. The project, app and future package are named **sample2result**. The sample-size catalog is essentially complete; the project is now
+blocks. The project, app and future package are named **epidemiologicasuite**. The sample-size catalog is essentially complete; the project is now
 planning its next step — growing into a wider **epidemiology suite**, an installable
 **R package**, and offline/mobile distribution. See
 [`docs/ROADMAP.md`](docs/ROADMAP.md).
@@ -143,16 +143,16 @@ available, otherwise the `github.com/cran` mirror).
 
 ## Installing and running the app
 
-sample2result is an R package (GPL-3). Install it from GitHub and start the app:
+epidemiologicasuite is an R package (GPL-3). Install it from GitHub and start the app:
 
 ```r
 install.packages("remotes")
 remotes::install_github("SpaRroW410/Sample_size_all")
-sample2result::run_app()
+epidemiologicasuite::run_app()
 ```
 
 `run_app(...)` passes its arguments on to `shiny::runApp()` (e.g.
-`run_app(port = 8080, launch.browser = FALSE)`); `sample2result_app()` returns the
+`run_app(port = 8080, launch.browser = FALSE)`); `epidemiologicasuite_app()` returns the
 Shiny app object without running it.
 
 From a clone (development), the root `app.R` loads the package with
@@ -188,9 +188,9 @@ request, and the full suite weekly or on demand from the Actions tab.
 
 ```
 DESCRIPTION, NAMESPACE package metadata (hand-maintained; no roxygen2)
-app.R                  development entry point: pkgload::load_all() + sample2result_app()
+app.R                  development entry point: pkgload::load_all() + epidemiologicasuite_app()
 R/                     the package (flat, as R requires; grouped by file-name prefix):
-├── run_app.R          run_app() / sample2result_app(): grouped navbar + Home hub
+├── run_app.R          run_app() / epidemiologicasuite_app(): grouped navbar + Home hub
 ├── registry.R         module_registry() + module_groups
 ├── calc_*.R           pure calculation functions, no Shiny (+ calc_utils.R)
 ├── content_*.R        per-module formula / explanation / example / citation
@@ -253,7 +253,7 @@ Every calculator is three files plus registry entries.
   Because modules namespace input ids (`proportion-design`, not `design`), the
   condition string is built with `ns("design")` so it stays correct under any
   module id.
-- **`do.call()` builds the navbar.** `sample2result_app()` creates one `nav_menu()` per
+- **`do.call()` builds the navbar.** `epidemiologicasuite_app()` creates one `nav_menu()` per
   `module_groups` entry and passes the variable-length list to `page_navbar()` via
   `do.call()`, which calls a function with an argument list assembled at runtime.
 - **`moduleServer()` / `NS()`** give each module an isolated input/output namespace.
@@ -282,7 +282,7 @@ Every calculator is three files plus registry entries.
 
 Copyright (C) 2026 Dr. Mukul Maheshwari.
 
-sample2result is free software: you can redistribute it and/or modify it under the
+epidemiologicasuite is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
 Foundation, version 3 — see [`LICENSE`](LICENSE). It is distributed in the hope that
 it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
