@@ -54,7 +54,7 @@ cannot reach — see §4.
 | F3 | **Stale documentation.** README described 24 modules, SDD's roadmap marked finished stages "not started", SDD appendix listed packages never used (`WebPower`, `pwrss`, `precisely`); one ticked checklist note (logistic covariate adjustment) still says "not covered" | fixed in this refresh (README, SDD, and the checklist note) | Low (fixed) |
 | F4 | **Addressed (28 Sep 2026)** — CI + `renv.lock` added (P0 items 5–6). Was: ~~No CI and no dependency lock.~~ Environment is rebuilt by `.claude/hooks/session-start.sh` from latest GitHub-mirror sources — not reproducible, and a package update could silently change a result | no `.github/`, no `renv.lock` | Medium |
 | F5 | **Fixed (28 Sep 2026)** — default run ~1 min, 27 Monte Carlo tests behind `S2R_SLOW_TESTS=true`. Was: ~~Slow test suite.~~ Full run takes ~6–10 min, dominated by Monte Carlo tests (`test-calc_glmm.R` alone several minutes); there is no fast/slow split | observed across every batch | Medium |
-| F6 | **No automated UI tests in the repo.** Every browser check so far was an ad-hoc Playwright script in a scratch directory | nothing under `tests/` beyond `testthat` unit tests | Medium |
+| F6 | **Fixed (14 Oct 2026, item 12).** ~~No automated UI tests in the repo.~~ `tests/testthat/test-ui_smoke.R` drives every module in headless Chrome via `shinytest2` | `tests/testthat/test-ui_smoke.R`, `helper-ui.R` | Done |
 | F7 | **Fixed (14 Oct 2026, item 11).** ~~Not yet package-shaped.~~ `R/` is flat, `DESCRIPTION`/`NAMESPACE` exist, `global.R` and `pacman::p_load()` are gone, tests no longer `source()` files. The installed package passes `R CMD check`'s test step | repo layout, `DESCRIPTION`, `NAMESPACE`, `R/run_app.R`, `R/registry.R` | Done |
 | F8 | **Resolved by relicensing to GPL-3 (D2, 28 Sep 2026).** Background: the project was MIT, but several modules were built by reading and transcribing source from GPL-licensed packages (e.g. `PracTools` GPL-3, `ssize.fdr` GPL-3, `voi` GPL-3, `clusterPower` GPL≥2, `semTools` GPL≥2, `simr` GPL≥2, `metapower` GPL-2, `WebPower` GPL≥3, `rpact` LGPL-3). Mathematical formulas aren't copyrightable, but closely transcribed code may count as a derivative work. *Not legal advice.* GPL-3 is compatible with all of these (GPL-2-only `metapower` is the one to watch: it was a verification reference, not a code source to ship) | package `DESCRIPTION` licenses; module header comments | Resolved; keep module header comments naming each source |
 | F9 | **Partly addressed (28 Sep 2026).** Shiny runs one R process per app instance; a 5–25 s simulation (Monte Carlo Mixed Models, RMST, weighted log-rank, BFDA, KS/runs/animal-rank) used to recompute on every input change — fixed, see P1 item 7. Still true: one user's simulation blocks every other user on the same app instance while it runs — needs `ExtendedTask` (P1 item 7, second half) | observed during browser verification | Was Medium (High once hosted); recompute-storm risk resolved, cross-user blocking remains |
@@ -547,7 +547,38 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       and call `epidemiologicasuite::run_app()`/`epidemiologicasuite_app()` from its `app.R`;
       the earlier note that "a two-line `app.R` keeps shinyapps.io working" was
       not tested and is withdrawn until item 18 (hosted deployment, D1).
-12. **Automated UI smoke tests (F6)** with `shinytest2` — one per module.
+12. **Automated UI smoke tests (F6) -- done (14 Oct 2026)** with `shinytest2`.
+    `tests/testthat/test-ui_smoke.R` (+ `helper-ui.R`) starts the app once in headless
+    Chrome and opens each of the 49 modules: the module's navbar pane is on screen, no
+    output is in a Shiny error state, its `result` output (where it has one) is
+    non-empty; plus the Home hub start-up and a Browse jump, and a final check that no
+    JavaScript/R error was logged. Fast lane: 52 tests, 252 assertions, ~2 min. With
+    `S2R_SLOW_TESTS=true` a second lane switches through every design of every module's
+    primary design radio (33 modules; the other 16 have no design selector and are
+    covered by the default-state test): 101 tests, 359 assertions, 0 failures, ~7.5 min.
+    Tests skip when `shinytest2`, Chrome or the repository's `app.R` is missing (so
+    `R CMD check` on the installed package is unaffected) or with `S2R_SKIP_UI=true`.
+    - **Real bugs the first runs found.** (1) The Home hub's Browse jump buttons had
+      duplicate HTML ids -- 7 ids, whenever a calculator is listed under several
+      families of one lens -- so a click could be shadowed; ids now carry lens and
+      family position (`home_browse_button_ids()`, unit-tested). The comment in
+      `home_finder.R` that claimed there were no duplicates was only true across the two
+      lenses. (2) Shiny was also auto-sourcing `R/` next to the package that `app.R`
+      loads (startup warning, code loaded twice): fixed with `_disable_autoload.R`.
+    - **Test-harness lessons** (all cost time here): JS built by
+      `sprintf` with an attribute selector breaks on a title containing an apostrophe
+      ("MANOVA / Hotelling's T-squared") and `run_js()` swallows the syntax error, so
+      the helper compares `data-value` in JS and waits for the `main_nav` input;
+      `wait_for_idle()` alone can return before a freshly opened tab starts computing;
+      `set_inputs()` to an unchanged value waits 30 s for an output update that never
+      comes (`wait_ = FALSE`); Chrome needs `--no-sandbox` as root.
+    - **Dependency caveat.** `shinytest2` is not in `renv.lock`: its current release
+      (0.5.x) imports `httr2`, which needs `rlang >= 1.3.0` while the lock pins 1.1.3.
+      Version 0.4.1 (uses `httr`) works with the locked packages; CI installs it with
+      `remotes::install_version()`. This CI step is **untested until its first run**.
+    - **Not covered (by design).** Numerical correctness (the unit tests do that),
+      the click-gated curves and Monte Carlo Calculate buttons (checked in the item-10
+      crawl, not asserted here), and visual appearance (no snapshot testing).
 
 ### P2 — first suite expansion + portability
 
