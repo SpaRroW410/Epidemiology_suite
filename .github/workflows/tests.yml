@@ -47,5 +47,14 @@ jobs:
 
       - uses: r-lib/actions/setup-renv@v2
 
+      # Browser-driven UI smoke tests (tests/testthat/test-ui_smoke.R). shinytest2 is
+      # not in renv.lock: its current release needs a newer rlang than the lock pins,
+      # so the last release that works with the locked packages is installed here.
+      # Chrome is preinstalled on GitHub's ubuntu runners; the tests skip when
+      # shinytest2 or Chrome is missing.
+      - name: Install UI test dependencies
+        run: |
+          Rscript -e 'install.packages("remotes"); remotes::install_version("shinytest2", version = "0.4.1", upgrade = "never")'
+
       - name: Run tests
         run: Rscript -e 'testthat::test_local(".", stop_on_failure = TRUE)'

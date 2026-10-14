@@ -175,6 +175,16 @@ each) are skipped. To run everything (~13 minutes, mostly `test-calc_glmm.R`):
 S2R_SLOW_TESTS=true Rscript -e 'testthat::test_local()'
 ```
 
+**UI smoke tests** (`tests/testthat/test-ui_smoke.R`, ~2 minutes) start the whole app
+in headless Chrome with [`shinytest2`](https://rstudio.github.io/shinytest2/) and open
+every module, checking that its pane shows, no output is in an error state, its
+`result` output is non-empty and no JavaScript error was logged. With
+`S2R_SLOW_TESTS=true` they also switch through every design of every module. They need
+`shinytest2` and a Chrome/Chromium (set `CHROMOTE_CHROME` if it is not found) and skip
+themselves when either is missing, or with `S2R_SKIP_UI=true`. `shinytest2` is not in
+`renv.lock` (its current release needs a newer `rlang` than the lock pins); CI installs
+version 0.4.1 explicitly. Locally: `remotes::install_version("shinytest2", "0.4.1")`.
+
 A new Monte Carlo test should start with `skip_if_not_slow()`
 (`tests/testthat/helper-slow.R`). To run one file:
 `testthat::test_local(filter = "calc_proportion")`.
