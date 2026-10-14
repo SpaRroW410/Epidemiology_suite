@@ -25,7 +25,8 @@ planning its next step — growing into a wider **epidemiology suite**, an insta
 
 ## What's inside
 
-Modules are grouped in the top navbar by study design, roughly simple → advanced.
+The top navbar has one item per **workbench** -- *Home*, *Plan: Sample Size* and *Analyze* -- and each
+workbench lists its modules in a sidebar, under group headers ordered roughly simple → advanced.
 
 | Group | Module | Designs |
 |---|---|---|
@@ -266,9 +267,10 @@ Every calculator is three files plus registry entries.
   Because modules namespace input ids (`proportion-design`, not `design`), the
   condition string is built with `ns("design")` so it stays correct under any
   module id.
-- **`do.call()` builds the navbar.** `epidemiologicasuite_app()` creates one `nav_menu()` per
-  `module_groups` entry and passes the variable-length list to `page_navbar()` via
-  `do.call()`, which calls a function with an argument list assembled at runtime.
+- **`do.call()` builds the navbar.** `epidemiologicasuite_app()` creates one navbar item per
+  `module_workbenches` entry (a `navset_pill_list()` sidebar of grouped modules inside it) and
+  passes the variable-length list to `page_navbar()` via `do.call()`, which calls a function with
+  an argument list assembled at runtime. `jump_to_module()` selects the workbench and then the module.
 - **`moduleServer()` / `NS()`** give each module an isolated input/output namespace.
 - **Dependencies are declared, not installed at runtime.** The app used to call
   `pacman::p_load()` from `global.R`; as a package it declares them in
@@ -282,7 +284,8 @@ Every calculator is three files plus registry entries.
   and calls `updateRadioButtons(session, "proportion-design", ...)` with the
   already-namespaced id; `ns()` is only needed *inside* a module.
 - **`bslib::nav_select("main_nav", <title>)`** switches tabs programmatically; it
-  works whether the panel sits on the navbar or inside a dropdown.
+  works whether the panel sits on the navbar or inside a nested list; use `jump_to_module()`
+  (registry.R), which selects the workbench first and then the module.
 - **`numericInput(..., value = NA)`** renders an empty optional field; the server
   treats `NULL`/`NA` as "not supplied".
 - **`session$ns()` for inputs created in `renderUI()`** — the server-side equivalent

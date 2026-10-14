@@ -67,3 +67,25 @@ test_that("the guided wizard can reach every navbar module", {
   reached_navs <- unique(vapply(reached_keys, function(k) catalog_entry(k)$nav_target, character(1)))
   expect_equal(setdiff(.titles, reached_navs), character(0))
 })
+
+test_that("every module sits in exactly one group of exactly one workbench", {
+  ids <- vapply(.registry, `[[`, character(1), "id")
+  placed <- unlist(lapply(module_workbenches, function(wb) unlist(lapply(wb$groups, `[[`, "module_ids"))))
+  expect_equal(sort(placed), sort(ids))               # none missing, none unknown
+  expect_false(anyDuplicated(placed) > 0)             # none in two places
+})
+
+test_that("workbench ids, titles and navigation ids are unique and do not collide with module titles", {
+  expect_false(anyDuplicated(vapply(module_workbenches, `[[`, character(1), "id")) > 0)
+  wb_titles <- vapply(module_workbenches, `[[`, character(1), "title")
+  expect_false(anyDuplicated(wb_titles) > 0)
+  expect_false(anyDuplicated(vapply(module_workbenches, `[[`, character(1), "nav_id")) > 0)
+  expect_equal(intersect(c("Home", wb_titles), .titles), character(0))
+})
+
+test_that("every built catalog entry's target module resolves to a workbench", {
+  for (e in .built) {
+    expect_false(is.null(module_workbench_of(e$nav_target)), info = e$key)
+  }
+  expect_null(module_workbench_of("No such module"))
+})

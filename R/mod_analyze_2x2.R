@@ -17,7 +17,7 @@ mod_analyze_2x2_ui <- function(id) {
       br(),
       p(class = "text-muted",
         "Analyze counts you already have. This tool does not plan a study; for sample size use the",
-        "calculators under the other menus."),
+        "calculators under Plan: Sample Size."),
       radioButtons(
         ns("design"), "How were the subjects sampled?",
         choices = c(

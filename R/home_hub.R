@@ -20,8 +20,9 @@ home_panel_ui <- function() {
       "worked-formula help tab and a reference to its original source."
     )),
     p(paste(
-      "Use the tabs above to go straight to a calculator, grouped by study",
-      "design, or use the Helper below to find, learn about, or understand",
+      "Use the tabs above: Plan: Sample Size lists every sample-size and power",
+      "calculator, grouped by study design, and Analyze works on counts you",
+      "already have. Or use the Helper below to find, learn about, or understand",
       "the formula behind the calculator you need."
     )),
     hr(),

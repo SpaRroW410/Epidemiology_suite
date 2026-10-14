@@ -52,13 +52,21 @@ ui_js_by_data_value <- function(selector, value) {
           ui_js_string(selector), ui_js_string(value))
 }
 
+# Open a module the way a user does: pick its workbench in the top navbar, then
+# the module in the workbench's list. Waits for each choice to reach the server
+# (idle alone can be observed in the gap before a new tab's outputs start).
 ui_open_module <- function(app, title) {
-  app$run_js(sprintf("%s.click()", ui_js_by_data_value("a[data-bs-toggle=tab][data-value]", title)))
-  # Wait for the navbar input to reach the server, then for the server to go idle:
-  # idle alone can be observed in the gap before the new tab's outputs start.
-  app$wait_for_js(sprintf("Shiny.shinyapp.$inputValues['main_nav'] === %s", ui_js_string(title)),
-                  timeout = 60000)
+  wb <- module_workbench_of(title)
+  stopifnot(!is.null(wb))
+  ui_select_tab(app, "main_nav", wb$title)
+  ui_select_tab(app, wb$nav_id, title)
   app$wait_for_idle(800, timeout = 120000)
+}
+
+ui_select_tab <- function(app, input_id, title) {
+  app$run_js(sprintf("%s.click()", ui_js_by_data_value("a[data-bs-toggle=tab][data-value]", title)))
+  app$wait_for_js(sprintf("Shiny.shinyapp.$inputValues[%s] === %s", ui_js_string(input_id), ui_js_string(title)),
+                  timeout = 60000)
 }
 
 # Is the module's own top-level navbar pane on screen?

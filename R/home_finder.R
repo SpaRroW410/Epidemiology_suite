@@ -77,7 +77,7 @@ home_finder_server <- function(input, output, session) {
       entry <- catalog_entry(ids[[btn_id]])
       if (!isTRUE(entry$built)) return(invisible(NULL))
       observeEvent(input[[btn_id]], {
-        nav_select("main_nav", entry$nav_target, session = session)
+        jump_to_module(session, entry$nav_target)
         if (!is.na(entry$module_input_id)) {
           updateRadioButtons(session, entry$module_input_id, selected = entry$design_value)
         }

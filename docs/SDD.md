@@ -75,7 +75,7 @@ combination, plus long-term extensibility — not novel statistical methodology.
 ```
 ┌───────────────────────────────────────────────────────────────┐
 │  UI shell  (R/run_app.R — bslib::page_navbar)                  │
-│  Home hub + 14 nav_menu dropdowns built from module_groups     │
+│  Home hub + workbenches (Plan, Analyze) from module_workbenches │
 └──────────────┬──────────────────────────────┬─────────────────┘
                │                              │
 ┌──────────────▼───────────────┐   ┌──────────▼──────────────────┐
@@ -103,7 +103,7 @@ combination, plus long-term extensibility — not novel statistical methodology.
 
 The app is the R package `epidemiologicasuite` (`DESCRIPTION`, `NAMESPACE`, flat `R/`).
 `R/registry.R` defines `module_registry()` (id, nav title, UI, server for each
-module) and `module_groups` (which modules sit in which navbar dropdown);
+module) and `module_workbenches` (which workbench and sidebar group each module sits in);
 `R/run_app.R` builds the navbar from them (`epidemiologicasuite_app()`; `run_app()` runs it). The Home hub jumps to a module with
 `bslib::nav_select()` and presets its design with `updateRadioButtons()`.
 
@@ -130,7 +130,7 @@ module) and `module_groups` (which modules sit in which navbar dropdown);
 | Layer | Choice | Notes |
 |---|---|---|
 | App framework | R Shiny | |
-| UI theme/layout | `bslib::page_navbar()` + `nav_menu()`, Bootswatch "litera", Source Serif 4 | 14 grouped dropdowns |
+| UI theme/layout | `bslib::page_navbar()` + `navset_pill_list()`, Bootswatch "litera", Source Serif 4 | workbenches with grouped sidebars |
 | Formula rendering | MathJax via `withMathJax()`, wrapped by `render_formula_block()` | adds a copyable LaTeX view |
 | Modularity | Shiny modules (`NS()`, `moduleServer()`) | |
 | Runtime stats packages | `pwr`, `presize`, `epiR`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `rstatix`, `lme4` (+ `survival`, `stats`) | 19 loaded by `pacman::p_load()` incl. `shiny`/`bslib` |
@@ -245,15 +245,20 @@ The table below is a snapshot of what is live (28 Sep 2026).
 Open, blocked and partially covered items are listed in ROADMAP §4 — none have been
 removed.
 
-**Top navbar.** Modules are grouped into 14 `bslib::nav_menu()` dropdowns via
-`R/registry.R`'s `module_groups`, ordered roughly simple → advanced: Descriptive &
-Estimation; Survey & Cross-Sectional; Observational Studies; Diagnostic & Screening;
-Agreement & Reliability; Clinical Trials; Survival Analysis; Prediction Models;
-Surveillance; Preclinical / Animal Studies; Qualitative / Mixed Methods;
-Psychometrics / Scale Development; Health Economics / Value of Information; General
-Statistical Tests. `nav_select()` targets a module by nav title whether it sits in a
-dropdown or not. The navbar is now full; the suite expansion needs a navigation
-redesign (ROADMAP §5).
+**Navigation (workbenches).** The top navbar has one item per workbench -- Home, *Plan:
+Sample Size* (the 49 sample-size and power calculators) and *Analyze* (calculators that
+work on counts the user already has) -- and each workbench shows its modules in a
+sticky, scrollable `bslib::navset_pill_list()` sidebar under small group headers.
+`R/registry.R`'s `module_workbenches` defines the workbenches, their groups and the order;
+the Plan groups are ordered roughly simple -> advanced: Descriptive & Estimation; Survey &
+Cross-Sectional; Observational Studies; Diagnostic & Screening; Agreement & Reliability;
+Clinical Trials; Survival Analysis; Prediction Models; Surveillance; Preclinical / Animal
+Studies; Qualitative / Mixed Methods; Psychometrics / Scale Development; Health Economics /
+Value of Information; General Statistical Tests. The earlier one-dropdown-per-group navbar
+(14 dropdowns, then 15) could not hold a third workbench because bslib dropdowns cannot nest.
+`jump_to_module()` opens a module from the Home hub or wizard by selecting its workbench
+(`input$main_nav`) and then the module in the workbench's list (`input$<nav_id>`). On phones
+the sidebar stacks above the calculator with its height capped.
 
 ### 7.1 "Which calculator?" — the study design identification wizard
 

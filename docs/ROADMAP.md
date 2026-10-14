@@ -752,12 +752,30 @@ published worked example.
 (P1), bookmarkable/shareable URLs (Shiny bookmarking), dark mode
 (`bslib::input_dark_mode()`), accessibility (WCAG AA). English only (D5) — no translation layer planned.
 
-**Navigation redesign needed.** 14 dropdowns already fill the navbar and `bslib`
-dropdowns can't nest. With several workbenches, move to a top level of workbenches
-(Plan / Collect / Analyze / Report / Learn) with a sidebar or grouped dropdown
-(header items + separators) inside each. The Home hub's Browse catalog and wizard
-extend to cover analysis tasks too. The app title also changes from "Sample Size
-Calculator" to **epidemiologicasuite** (D3).
+**Navigation redesign -- done (14 Oct 2026, first part of milestone M2).** The navbar is
+now a top level of *workbenches* with a grouped sidebar inside each, instead of one
+dropdown per group (bslib dropdowns cannot nest, and 15 no longer fit). Built: **Home,
+Plan: Sample Size** (the 49 calculators, 14 group headers) and **Analyze** (the two
+summary-data tools). The navbar title is now "epidemiologicasuite" (D3).
+- `R/registry.R`: `module_workbenches` (id, title, `nav_id`, groups) replaces
+  `module_groups`; `module_workbench_of()` and `jump_to_module()` open a module from
+  anywhere by selecting its workbench and then the module. `R/run_app.R` builds the UI with
+  `bslib::navset_pill_list()` (a bare string in `...` becomes a group header) plus a small
+  stylesheet: sticky, scrollable list, small-caps headers, and a height cap on phones.
+- The Home hub's Browse buttons and the wizard use `jump_to_module()`; the UI smoke tests
+  open modules the way a user does (workbench first, then module) and check both
+  `input$main_nav` and the workbench's own input. New consistency tests: every module is in
+  exactly one group of one workbench, ids/titles do not collide, every built catalog target
+  resolves to a workbench.
+- Found while building it: a capped-height Bootstrap 5 `.nav` **wraps into columns** unless
+  `flex-direction: column; flex-wrap: nowrap` is set -- the first screenshot showed items
+  spilling into a second column.
+- **Not done:** Collect / Report / Learn workbenches do not exist yet (nothing to put in them);
+  the sidebar has no search box (the Home hub's Browse/wizard remain the way to find a
+  calculator by purpose); the Home page heading still reads "Comprehensive Sample Size
+  Calculator"; bookmarkable URLs, dark mode and the accessibility pass listed under
+  cross-cutting features are untouched. Checked in a desktop-width screenshot and a phone-width
+  one (the phone shows the collapsed navbar; the stacked sidebar itself was not screenshotted).
 
 ---
 
