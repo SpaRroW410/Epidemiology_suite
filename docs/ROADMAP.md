@@ -585,7 +585,34 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
 ### P2 — first suite expansion + portability
 
 13. **Analyze workbench v1** (Track B1) — OpenEpi-parity calculators from summary
-    counts, almost entirely on `epiR` (already a dependency).
+    counts, almost entirely on `epiR` (already a dependency). **In progress (14 Oct 2026):
+    slice 1 of ~9 done -- the 2x2 table.**
+    - **Done: "2x2 Table Analysis"** (`calc_analyze_2x2.R`, `content_analyze_2x2.R`,
+      `mod_analyze_2x2.R`; 50th navbar module, new last dropdown "Analyze Summary Data").
+      Three layouts (cohort/trial, cross-sectional, case-control) give RR or PR, OR, RD,
+      attributable fraction among the exposed, population attributable fraction and
+      NNT/NNH, each with a CI, plus Pearson chi-square and Fisher's exact test. Exports
+      (justification paragraph, CSV/JSON/BibTeX/RIS) work through the shared controls.
+    - **Verification.** The estimators are written out (Katz RR, Woolf OR, Wald RD,
+      Jewell PAF, Altman NNT) instead of calling `epi.2by2()`, whose return shape has
+      changed between epiR releases; `epi.2by2()` is the oracle: RR/OR/RD/AF/PAF
+      agree to 1e-6 on four tables x two designs, and the case-control OR and PAF match
+      too. The published Willeberg (1977) cat-food example from epiR's help page
+      (RR 4.01, 1.43-11.23; 75% attributable, 30-91%) is reproduced. Two differences
+      from epiR are deliberate: the case-control exposed attributable fraction uses the
+      sample OR (epiR uses the conditional MLE), and a zero cell leaves the affected
+      interval undefined and flagged instead of silently adding 0.5.
+    - **Wiring.** Three catalog entries (one per design radio value, as the consistency
+      tests require), a study-design family and a test family, and a new wizard root
+      option "Analyze counts I already have" -> "How were the subjects sampled?".
+      The free-text wizard (`design_free_text.R`) does not yet know analysis keywords.
+    - **Still to do for item 13** (OpenEpi parity, in rough priority): stratified
+      Mantel-Haenszel with homogeneity test, CIs for proportions (Wilson, exact, ...)
+      and means, person-time rates and rate ratios, direct/indirect standardization and
+      SMR, diagnostic-test evaluation from counts (Se, Sp, PPV, NPV, LRs), kappa from a
+      table, McNemar / matched pairs, chi-square for trend, vaccine efficacy; plus the
+      navigation redesign (M2) -- the 15th dropdown is already one too many for the
+      navbar, and the new group is simply appended last for now.
 14. **Planning tools** (Track B2) — randomization lists, attrition/non-response
     inflation, protocol text.
 15. **Shinylive feasibility spike** (Track D3) — decides the offline/APK path.

@@ -65,7 +65,19 @@ design_nodes <- list(
       list(label = "Plan a meta-analysis (number of studies, or trial sequential analysis)", next_id = "meta_type"),
       list(label = "Study the relationship between variables (correlation / regression)", next_id = "rel_type"),
       list(label = "Something else: survey sampling, scale development, rare events, animal studies, pilots, health economics, genetics", next_id = "other_purpose"),
+      list(label = "Analyze counts I already have (a 2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_design"),
       list(label = "I already know which statistical test I'll use -- browse by test family", next_id = "bytest_family")
+    )
+  ),
+
+  analyze_design = list(
+    id = "analyze_design", stage = 1,
+    question = "How were the subjects in your 2x2 table sampled?",
+    help = "This decides which measures are valid: risks (and so risk ratio, risk difference, number needed) can only be estimated if subjects were followed from exposure to outcome or sampled without regard to either.",
+    options = list(
+      list(label = "Followed from exposure to outcome (cohort study or trial)", next_id = "term_analyze_2x2_cohort"),
+      list(label = "Exposure and outcome measured together (cross-sectional / survey)", next_id = "term_analyze_2x2_cross_sectional"),
+      list(label = "Sampled by outcome: cases and controls", next_id = "term_analyze_2x2_case_control")
     )
   ),
 
@@ -724,6 +736,10 @@ design_nodes <- list(
   term_subgroup = .term("term_subgroup", "Subgroup / interaction testing", "subgroup_interaction"),
   term_bayes_assurance = .term("term_bayes_assurance", "Bayesian assurance, two proportions", "bayesian_assurance_or"),
   term_bfda = .term("term_bfda", "Bayes factor design analysis, two means", "bfda_ttest"),
+
+  term_analyze_2x2_cohort = .term("term_analyze_2x2_cohort", "2x2 table analysis, cohort / trial", "analyze_2x2_cohort"),
+  term_analyze_2x2_cross_sectional = .term("term_analyze_2x2_cross_sectional", "2x2 table analysis, cross-sectional", "analyze_2x2_cross_sectional"),
+  term_analyze_2x2_case_control = .term("term_analyze_2x2_case_control", "2x2 table analysis, case-control", "analyze_2x2_case_control"),
 
   term_cohort_rr = .term("term_cohort_rr", "Cohort study (relative risk)", "cohort_rr",
     note = paste(

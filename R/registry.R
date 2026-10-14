@@ -105,7 +105,9 @@ module_registry <- function() {
     list(id = stepped_wedge_meta$id, title = stepped_wedge_meta$nav_title,
          ui = mod_stepped_wedge_ui, server = mod_stepped_wedge_server),
     list(id = meta_power_meta$id, title = meta_power_meta$nav_title,
-         ui = mod_meta_power_ui, server = mod_meta_power_server)
+         ui = mod_meta_power_ui, server = mod_meta_power_server),
+    list(id = analyze_2x2_meta$id, title = analyze_2x2_meta$nav_title,
+         ui = mod_analyze_2x2_ui, server = mod_analyze_2x2_server)
   )
 }
 
@@ -149,5 +151,7 @@ module_groups <- list(
        module_ids = c("correlation", "chisq", "regression", "anova_general",
                        "logistic", "exact_tests", "rm_anova", "nonparametric",
                        "variance", "multiplicity", "manova", "bayesian",
-                       "longitudinal", "multilevel", "meta_power"))
+                       "longitudinal", "multilevel", "meta_power")),
+  list(title = "Analyze Summary Data",
+       module_ids = c("analyze_2x2"))
 )

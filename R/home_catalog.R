@@ -24,6 +24,37 @@
 #   design_value - value to preset that input to (NA if none)
 
 calculator_catalog <- list(
+  list(key = "analyze_2x2_cohort",
+       label = "Analyze a 2x2 table: cohort / trial (risk ratio, risk difference)",
+       answers = paste(
+         "Answers: \"I already have the counts from a cohort study or trial -- what are the risk ratio,",
+         "risk difference, attributable fractions and number needed to treat, with confidence intervals?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "2x2 Table Analysis",
+       module_input_id = "analyze_2x2-design", design_value = "cohort"),
+
+  list(key = "analyze_2x2_cross_sectional",
+       label = "Analyze a 2x2 table: cross-sectional (prevalence ratio)",
+       answers = paste(
+         "Answers: \"I already have counts from a survey or cross-sectional study -- what are the prevalence",
+         "ratio, odds ratio and attributable fractions, with confidence intervals?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "2x2 Table Analysis",
+       module_input_id = "analyze_2x2-design", design_value = "cross_sectional"),
+
+  list(key = "analyze_2x2_case_control",
+       label = "Analyze a 2x2 table: case-control (odds ratio)",
+       answers = paste(
+         "Answers: \"I already have counts from a case-control study -- what are the odds ratio and",
+         "attributable fractions, with confidence intervals?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "2x2 Table Analysis",
+       module_input_id = "analyze_2x2-design", design_value = "case_control"),
+
+
   list(key = "proportion_single_precision",
        label = "Single proportion -- precision-based (no reference value)",
        answers = paste(
@@ -1820,6 +1851,9 @@ calculator_catalog <- list(
 # calculator catalog table. "Proportions" is the only family with built
 # calculators right now; selecting it reveals its catalog entries above.
 study_design_families <- list(
+  list(id = "analyze_counts", label = "Analyze data you already have (summary counts)",
+       hint = "Not a sample-size calculation: effect measures and confidence intervals from counts you already have, starting with the 2x2 table.",
+       catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control")),
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",
@@ -1990,6 +2024,9 @@ study_design_families <- list(
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
 test_families <- list(
+  list(id = "analyze_2x2_tests", label = "2x2 Table Analysis (from counts)",
+       hint = "Risk ratio, odds ratio, risk difference, attributable fractions and number needed from the four cells of a 2x2 table.",
+       catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control")),
   list(id = "t_tests", label = "t Tests",
        hint = "Comparing one or two means (incl. Welch's unequal-variance test), a Bonferroni-adjusted post-hoc pairwise comparison, or a point-biserial correlation (Student's t framework).",
        catalog_keys = c("means_single", "means_two_indep",
