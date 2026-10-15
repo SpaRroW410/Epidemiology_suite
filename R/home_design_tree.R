@@ -76,7 +76,17 @@ design_nodes <- list(
     options = list(
       list(label = "An exposure-outcome association (2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_design"),
       list(label = "A diagnostic test (sensitivity, specificity, PPV, NPV from a test-by-disease table)", next_id = "term_analyze_dx_single"),
-      list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined")
+      list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined"),
+      list(label = "A confidence interval for a proportion, or for a mean and standard deviation", next_id = "analyze_ci_type")
+    )
+  ),
+
+  analyze_ci_type = list(
+    id = "analyze_ci_type", stage = 1,
+    question = "Which summary figures do you have?",
+    options = list(
+      list(label = "A proportion: x events out of n", next_id = "term_analyze_ci_proportion"),
+      list(label = "A mean and standard deviation from a sample of size n", next_id = "term_analyze_ci_mean")
     )
   ),
 
@@ -747,6 +757,8 @@ design_nodes <- list(
   term_bayes_assurance = .term("term_bayes_assurance", "Bayesian assurance, two proportions", "bayesian_assurance_or"),
   term_bfda = .term("term_bfda", "Bayes factor design analysis, two means", "bfda_ttest"),
 
+  term_analyze_ci_proportion = .term("term_analyze_ci_proportion", "Confidence interval for a proportion", "analyze_ci_proportion"),
+  term_analyze_ci_mean = .term("term_analyze_ci_mean", "Confidence interval for a mean and standard deviation", "analyze_ci_mean"),
   term_analyze_dx_single = .term("term_analyze_dx_single", "Diagnostic test evaluation from a 2x2 table", "analyze_dx_single"),
   term_analyze_dx_combined = .term("term_analyze_dx_combined", "Serial / parallel testing of 2-6 tests", "analyze_dx_combined"),
   term_analyze_2x2_cohort = .term("term_analyze_2x2_cohort", "2x2 table analysis, cohort / trial", "analyze_2x2_cohort"),

@@ -25,6 +25,27 @@
 
 calculator_catalog <- list(
 
+  list(key = "analyze_ci_proportion",
+       label = "Confidence interval for a proportion (Wilson, exact, Agresti-Coull, Jeffreys, mid-P, Wald)",
+       answers = paste(
+         "Answers: \"I have x events out of n -- what is the confidence interval for the proportion, and how",
+         "much does the choice of method matter?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Confidence Intervals",
+       module_input_id = "analyze_ci-design", design_value = "proportion"),
+
+  list(key = "analyze_ci_mean",
+       label = "Confidence interval for a mean and a standard deviation (from n, mean, SD)",
+       answers = paste(
+         "Answers: \"I have a sample size, a mean and a standard deviation -- what are the confidence",
+         "intervals for the mean and for the standard deviation?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Confidence Intervals",
+       module_input_id = "analyze_ci-design", design_value = "mean"),
+
+
   list(key = "analyze_dx_single",
        label = "Analyze a diagnostic test from a 2x2 table (sensitivity, specificity, PPV, NPV)",
        answers = paste(
@@ -1875,7 +1896,8 @@ study_design_families <- list(
   list(id = "analyze_counts", label = "Analyze data you already have (summary counts)",
        hint = "Not a sample-size calculation: effect measures and confidence intervals from counts you already have, starting with the 2x2 table.",
        catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control",
-                         "analyze_dx_single", "analyze_dx_combined")),
+                         "analyze_dx_single", "analyze_dx_combined",
+                         "analyze_ci_proportion", "analyze_ci_mean")),
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",
@@ -2046,6 +2068,9 @@ study_design_families <- list(
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
 test_families <- list(
+  list(id = "analyze_ci_tests", label = "Confidence Intervals (from summary figures)",
+       hint = "Confidence intervals for a proportion (six methods side by side) and for a mean and standard deviation, from the summary figures alone.",
+       catalog_keys = c("analyze_ci_proportion", "analyze_ci_mean")),
   list(id = "analyze_dx_tests", label = "Diagnostic Test Evaluation (from counts)",
        hint = "Sensitivity, specificity, predictive values and likelihood ratios with confidence intervals from a test-by-disease table, and serial/parallel combinations of 2-6 tests.",
        catalog_keys = c("analyze_dx_single", "analyze_dx_combined")),

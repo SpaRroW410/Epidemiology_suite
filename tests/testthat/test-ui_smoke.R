@@ -87,6 +87,23 @@ test_that("Diagnostic Test Evaluation: single test shows CIs; combining 3 tests 
   expect_equal(ui_output_errors(app), 0)
 })
 
+test_that("Confidence Intervals: proportion lists the methods; the mean design gives t and SD intervals", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Confidence Intervals")
+  prop <- ui_output_text(app, "analyze_ci-result")
+  expect_match(prop, "Wilson score")
+  expect_match(prop, "0\\.1812")    # Wilson lower limit for 7/20 (= epiR::epi.conf())
+  expect_match(prop, "Mid-P exact")
+  app$set_inputs(`analyze_ci-design` = "mean")
+  app$wait_for_idle(800, timeout = 60000)
+  mean_txt <- ui_output_text(app, "analyze_ci-result")
+  expect_match(mean_txt, "Mean \\(t interval\\)")
+  expect_match(mean_txt, "9\\.253 to 10\\.75")
+  expect_match(mean_txt, "Standard deviation")
+  expect_equal(ui_output_errors(app), 0)
+})
+
 test_that("no JavaScript or Shiny errors accumulated while opening every module", {
   skip_if_no_ui()
   expect_equal(ui_console_errors(ui_driver()), character())

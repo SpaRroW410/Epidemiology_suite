@@ -586,7 +586,8 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
 
 13. **Analyze workbench v1** (Track B1) — OpenEpi-parity calculators from summary
     counts, almost entirely on `epiR` (already a dependency). **In progress (14 Oct 2026):
-    slices 1-2 of ~9 done -- the 2x2 table and diagnostic-test evaluation.**
+    slices 1-3 of ~9 done -- the 2x2 table, diagnostic-test evaluation and confidence intervals
+    for proportions and means.**
     - **Done: "2x2 Table Analysis"** (`calc_analyze_2x2.R`, `content_analyze_2x2.R`,
       `mod_analyze_2x2.R`; 50th navbar module, new last dropdown "Analyze Summary Data").
       Three layouts (cohort/trial, cross-sectional, case-control) give RR or PR, OR, RD,
@@ -633,13 +634,26 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       on the same patients they are approximate. Formula provenance: serial/parallel Se/Sp
       are the product rule (derived and enumerated, not copied from a source with page
       references -- the help text says "derivation checked", not "from textbook X").
+    - **Slice 3 done: "Confidence Intervals"** (`calc_analyze_ci.R`, `content_analyze_ci.R`,
+      `mod_analyze_ci.R`; 52nd module). *Proportion* (x of n): six intervals side by side --
+      Wilson score, Clopper-Pearson exact, Agresti-Coull, Jeffreys, mid-P exact and Wald (the
+      last labelled "not recommended"; Brown, Cai & DasGupta 2001). *Mean and SD* from (n,
+      mean, SD): Student t interval, normal-quantile interval and a chi-square interval for the
+      SD. Verification: Wilson / exact / Agresti-Coull / Jeffreys equal `epiR::epi.conf()` on
+      six (x, n) pairs and `binom.test()`; the mean interval equals `t.test()` on data built to
+      have exactly that mean and SD; the mid-P limits satisfy their defining equation to 1e-8
+      (epiR has no mid-P, so the definition is the oracle); coverage simulations: exact >=
+      nominal, Wilson ~95%, SD interval 95% for normal data. **Two deliberate differences from
+      epiR**, both at the boundary: Agresti-Coull is cut to [0, 1] (epiR returns -0.004 / 1.004
+      for 1/10 and 9/10), and Jeffreys uses the Brown-Cai-DasGupta end-point convention (lower =
+      0 at x = 0, upper = 1 at x = n; epiR returns 0.99998 for 25/25).
     - **Wiring.** Three catalog entries (one per design radio value, as the consistency
       tests require), a study-design family and a test family, and a new wizard root
       option "Analyze counts I already have" -> "How were the subjects sampled?".
       The free-text wizard (`design_free_text.R`) does not yet know analysis keywords.
     - **Still to do for item 13** (OpenEpi parity, in rough priority): stratified
-      Mantel-Haenszel with homogeneity test, CIs for proportions (Wilson, exact, ...)
-      and means, person-time rates and rate ratios, direct/indirect standardization and
+      Mantel-Haenszel with homogeneity test, CIs for differences/ratios of proportions and
+      means, person-time rates and rate ratios, direct/indirect standardization and
       SMR, kappa from a table, McNemar / matched pairs, chi-square for trend, vaccine efficacy; plus the
       navigation redesign (M2) -- the 15th dropdown is already one too many for the
       navbar, and the new group is simply appended last for now.
