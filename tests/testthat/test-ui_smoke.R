@@ -104,6 +104,26 @@ test_that("Confidence Intervals: proportion lists the methods; the mean design g
   expect_equal(ui_output_errors(app), 0)
 })
 
+test_that("Mantel-Haenszel: pooled estimates and tests render; fewer strata and the case-control design update them", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Stratified Analysis (Mantel-Haenszel)")
+  txt <- ui_output_text(app, "analyze_mh-result")
+  expect_match(txt, "3\\.80")                      # pooled OR for the default tables (= epiR / mantelhaen.test)
+  expect_match(txt, "Risk difference")
+  expect_match(txt, "Breslow-Day")
+  expect_match(txt, "Stratum 3")
+  app$set_inputs(`analyze_mh-n_strata` = 2)
+  app$wait_for_idle(800, timeout = 60000)
+  expect_false(grepl("Stratum 3", ui_output_text(app, "analyze_mh-result")))
+  app$set_inputs(`analyze_mh-design` = "case_control")
+  app$wait_for_idle(800, timeout = 60000)
+  cc <- ui_output_text(app, "analyze_mh-result")
+  expect_false(grepl("Risk difference", cc))
+  expect_match(cc, "Odds ratio")
+  expect_equal(ui_output_errors(app), 0)
+})
+
 test_that("no JavaScript or Shiny errors accumulated while opening every module", {
   skip_if_no_ui()
   expect_equal(ui_console_errors(ui_driver()), character())

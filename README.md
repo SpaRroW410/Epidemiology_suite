@@ -6,8 +6,8 @@ epidemiology and clinical research. Every calculator comes with its formula
 example, the original methodological citation, and the name of the package or
 formula that implements it.
 
-**Current state:** 49 sample-size calculator modules (156 designs) plus three
-*Analyze* tools (2x2 table analysis, diagnostic test evaluation, confidence intervals), 523+ unit-test blocks and browser-driven
+**Current state:** 49 sample-size calculator modules (156 designs) plus four
+*Analyze* tools (2x2 table analysis, stratified Mantel-Haenszel analysis, diagnostic test evaluation, confidence intervals), 523+ unit-test blocks and browser-driven
 UI smoke tests. The project, app and future package are named **epidemiologicasuite**. The sample-size catalog is essentially complete; the project is now
 planning its next step — growing into a wider **epidemiology suite**, an installable
 **R package**, and offline/mobile distribution. See
@@ -67,6 +67,7 @@ workbench lists its modules in a sidebar, under group headers ordered roughly si
 | **Analyze Summary Data** | 2x2 Table Analysis | analyze counts you already have: risk/prevalence ratio, odds ratio, risk/prevalence difference, attributable fractions, number needed (NNT/NNH) with confidence intervals; cohort, cross-sectional or case-control layout |
 | | Diagnostic Test Evaluation | sensitivity, specificity, PPV, NPV, likelihood ratios with 95% CIs from a 2x2 table (exact or Wilson; PPV/NPV from the counts or at a stated prevalence); serial and parallel combination of 2-6 tests |
 | | Confidence Intervals | proportion: Wilson, Clopper-Pearson, Agresti-Coull, Jeffreys, mid-P, Wald side by side; mean (t) and standard deviation (chi-square) from n, mean, SD |
+| | Stratified Analysis (Mantel-Haenszel) | 2-8 strata of 2x2 tables: crude vs Mantel-Haenszel adjusted OR / RR / RD with CIs, Cochran-Mantel-Haenszel test, Woolf / Breslow-Day / Tarone homogeneity tests; cohort or case-control |
 | **General Statistical Tests** | Correlation | Pearson; two independent r; two dependent r; point-biserial; regression slope; partial; Spearman |
 | | Chi-Square Tests | goodness of fit; R×C independence; McNemar; Mantel-Haenszel; Cochran-Armitage trend; Cochran's Q |
 | | Multiple Regression | R² vs. zero; R² increase |

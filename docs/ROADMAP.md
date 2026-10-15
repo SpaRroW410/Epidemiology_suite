@@ -586,8 +586,8 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
 
 13. **Analyze workbench v1** (Track B1) — OpenEpi-parity calculators from summary
     counts, almost entirely on `epiR` (already a dependency). **In progress (14 Oct 2026):
-    slices 1-3 of ~9 done -- the 2x2 table, diagnostic-test evaluation and confidence intervals
-    for proportions and means.**
+    slices 1-4 of ~9 done -- the 2x2 table, diagnostic-test evaluation, confidence intervals for
+    proportions and means, and stratified Mantel-Haenszel analysis.**
     - **Done: "2x2 Table Analysis"** (`calc_analyze_2x2.R`, `content_analyze_2x2.R`,
       `mod_analyze_2x2.R`; 50th navbar module, new last dropdown "Analyze Summary Data").
       Three layouts (cohort/trial, cross-sectional, case-control) give RR or PR, OR, RD,
@@ -647,13 +647,28 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       epiR**, both at the boundary: Agresti-Coull is cut to [0, 1] (epiR returns -0.004 / 1.004
       for 1/10 and 9/10), and Jeffreys uses the Brown-Cai-DasGupta end-point convention (lower =
       0 at x = 0, upper = 1 at x = n; epiR returns 0.99998 for 25/25).
+    - **Slice 4 done: "Stratified Analysis (Mantel-Haenszel)"** (`calc_analyze_mh.R`,
+      `content_analyze_mh.R`, `mod_analyze_mh.R`; 53rd module). 2-8 strata of 2x2 tables, cohort or
+      case-control layout. Crude (collapsed) and Mantel-Haenszel adjusted OR (Robins-Breslow-Greenland
+      CI), RR (Greenland-Robins) and RD (Sato) with the crude-vs-adjusted change (the 10% confounding
+      rule of thumb), stratum-specific estimates, the Cochran-Mantel-Haenszel test (with and without
+      continuity correction) and homogeneity tests: Woolf (OR and RR), Breslow-Day and Tarone.
+    - **Slice 4 verification.** Pooled OR/RR/RD and CIs equal `epiR::epi.2by2()` and the OR, CIs and
+      both CMH statistics equal `stats::mantelhaen.test()` on three stratified data sets (including one
+      with a zero cell); Breslow-Day and Tarone equal `DescTools::BreslowDayTest()` (installed from the
+      CRAN mirror as an oracle only; not a dependency); the expected counts A* solve their defining
+      equation to 1e-8; identical stratum ORs give homogeneity statistics of 0. **One deliberate
+      difference from epiR:** epiR's OR homogeneity test is Woolf's test on Haldane-Anscombe (+0.5)
+      corrected cells; this app computes the classic uncorrected Woolf test (1955) and the unit test
+      reproduces epiR's number from the corrected cells to show that is the only difference. Zero cells:
+      the pooled MH estimates use every stratum; the Woolf-type tests use only strata with all four cells
+      non-zero and say so; Breslow-Day uses strata whose margins allow A*.
     - **Wiring.** Three catalog entries (one per design radio value, as the consistency
       tests require), a study-design family and a test family, and a new wizard root
       option "Analyze counts I already have" -> "How were the subjects sampled?".
       The free-text wizard (`design_free_text.R`) does not yet know analysis keywords.
-    - **Still to do for item 13** (OpenEpi parity, in rough priority): stratified
-      Mantel-Haenszel with homogeneity test, CIs for differences/ratios of proportions and
-      means, person-time rates and rate ratios, direct/indirect standardization and
+    - **Still to do for item 13** (OpenEpi parity, in rough priority): CIs for differences/ratios
+      of proportions and means, person-time rates and rate ratios, direct/indirect standardization and
       SMR, kappa from a table, McNemar / matched pairs, chi-square for trend, vaccine efficacy; plus the
       navigation redesign (M2) -- the 15th dropdown is already one too many for the
       navbar, and the new group is simply appended last for now.

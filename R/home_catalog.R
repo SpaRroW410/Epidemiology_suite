@@ -25,6 +25,27 @@
 
 calculator_catalog <- list(
 
+  list(key = "analyze_mh_cohort",
+       label = "Stratified 2x2 tables: Mantel-Haenszel adjusted OR, RR, RD (cohort / trial)",
+       answers = paste(
+         "Answers: \"I have 2x2 tables for each level of a confounder -- what are the adjusted odds ratio, risk",
+         "ratio and risk difference, is there confounding, and do the stratum effects agree?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Stratified Analysis (Mantel-Haenszel)",
+       module_input_id = "analyze_mh-design", design_value = "cohort"),
+
+  list(key = "analyze_mh_case_control",
+       label = "Stratified 2x2 tables: Mantel-Haenszel adjusted odds ratio (case-control)",
+       answers = paste(
+         "Answers: \"I have case-control 2x2 tables for each level of a confounder -- what is the adjusted odds",
+         "ratio, is there confounding, and are the stratum odds ratios homogeneous?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Stratified Analysis (Mantel-Haenszel)",
+       module_input_id = "analyze_mh-design", design_value = "case_control"),
+
+
   list(key = "analyze_ci_proportion",
        label = "Confidence interval for a proportion (Wilson, exact, Agresti-Coull, Jeffreys, mid-P, Wald)",
        answers = paste(
@@ -1897,7 +1918,8 @@ study_design_families <- list(
        hint = "Not a sample-size calculation: effect measures and confidence intervals from counts you already have, starting with the 2x2 table.",
        catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control",
                          "analyze_dx_single", "analyze_dx_combined",
-                         "analyze_ci_proportion", "analyze_ci_mean")),
+                         "analyze_ci_proportion", "analyze_ci_mean",
+                         "analyze_mh_cohort", "analyze_mh_case_control")),
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",
@@ -2068,6 +2090,9 @@ study_design_families <- list(
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
 test_families <- list(
+  list(id = "analyze_mh_tests", label = "Stratified Analysis (Mantel-Haenszel)",
+       hint = "Mantel-Haenszel adjusted odds ratio, risk ratio and risk difference over 2-8 strata, the Cochran-Mantel-Haenszel test and Woolf / Breslow-Day / Tarone homogeneity tests.",
+       catalog_keys = c("analyze_mh_cohort", "analyze_mh_case_control")),
   list(id = "analyze_ci_tests", label = "Confidence Intervals (from summary figures)",
        hint = "Confidence intervals for a proportion (six methods side by side) and for a mean and standard deviation, from the summary figures alone.",
        catalog_keys = c("analyze_ci_proportion", "analyze_ci_mean")),

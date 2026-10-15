@@ -75,9 +75,20 @@ design_nodes <- list(
     question = "What do you want to analyze from counts you already have?",
     options = list(
       list(label = "An exposure-outcome association (2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_design"),
+      list(label = "An association adjusted for a confounder (stratified 2x2 tables, Mantel-Haenszel)", next_id = "analyze_mh_design"),
       list(label = "A diagnostic test (sensitivity, specificity, PPV, NPV from a test-by-disease table)", next_id = "term_analyze_dx_single"),
       list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined"),
       list(label = "A confidence interval for a proportion, or for a mean and standard deviation", next_id = "analyze_ci_type")
+    )
+  ),
+
+  analyze_mh_design = list(
+    id = "analyze_mh_design", stage = 1,
+    question = "How were the subjects in your stratified tables sampled?",
+    help = "Risk ratios and risk differences can only be estimated if subjects were followed from exposure to outcome (or sampled without regard to either); a case-control sample gives the odds ratio only.",
+    options = list(
+      list(label = "Followed from exposure to outcome, or a cross-sectional survey (cohort / trial / cross-sectional)", next_id = "term_analyze_mh_cohort"),
+      list(label = "Sampled by outcome: cases and controls", next_id = "term_analyze_mh_case_control")
     )
   ),
 
@@ -757,6 +768,8 @@ design_nodes <- list(
   term_bayes_assurance = .term("term_bayes_assurance", "Bayesian assurance, two proportions", "bayesian_assurance_or"),
   term_bfda = .term("term_bfda", "Bayes factor design analysis, two means", "bfda_ttest"),
 
+  term_analyze_mh_cohort = .term("term_analyze_mh_cohort", "Mantel-Haenszel, cohort / trial / cross-sectional", "analyze_mh_cohort"),
+  term_analyze_mh_case_control = .term("term_analyze_mh_case_control", "Mantel-Haenszel, case-control", "analyze_mh_case_control"),
   term_analyze_ci_proportion = .term("term_analyze_ci_proportion", "Confidence interval for a proportion", "analyze_ci_proportion"),
   term_analyze_ci_mean = .term("term_analyze_ci_mean", "Confidence interval for a mean and standard deviation", "analyze_ci_mean"),
   term_analyze_dx_single = .term("term_analyze_dx_single", "Diagnostic test evaluation from a 2x2 table", "analyze_dx_single"),
