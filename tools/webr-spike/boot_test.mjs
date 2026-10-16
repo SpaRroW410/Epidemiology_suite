@@ -76,16 +76,21 @@ try {
           }
           return null;
         }, info.prefix);
-        const visit = async (label) => {
+        const visit = async (label, waited) => {
           const p = await probe();
           const bad = p.errs.length || p.danger.length;
-          rec.designs.push({ design: label, status: bad ? "ERROR" : p.result || !p.has_result ? "ok" : "empty", detail: (p.errs[0] || p.danger[0] || p.result || "").slice(0, 110) });
+          rec.designs.push({ design: label, waited, status: bad ? "ERROR" : p.result || !p.has_result ? "ok" : "empty", detail: (p.errs[0] || p.danger[0] || p.result || "").slice(0, 110) });
         };
         if (radio) {
           for (const v of radio.vals) {
             await f.evaluate((a) => { const r = [...document.querySelectorAll("input[type=radio]")].find((e) => e.name === a.name && e.value === a.v); if (r) r.click(); }, { name: radio.name, v });
-            await page.waitForTimeout(2500);
-            await visit(v);
+            let waited = 0;
+            for (; waited < 25; waited++) {
+              await page.waitForTimeout(1000);
+              const p = await probe();
+              if (p.errs.length || p.danger.length || (p.has_result && p.result.length > 0) || (!p.has_result && waited >= 2)) break;
+            }
+            await visit(v, waited + 1);
           }
         } else {
           await visit("(single view)");
@@ -95,6 +100,9 @@ try {
         report.modules.push(rec);
         console.log("MOD " + JSON.stringify({ title: rec.title, status: rec.status, n: rec.designs.length, bad: rec.designs.filter((d) => d.status !== "ok") }));
       }
+    }
+    for (const m of report.modules) {
+      for (const d of m.designs.filter((x) => x.status !== "ok")) console.log("SUM " + m.title + " | " + d.design + " | " + d.status + " | waited " + d.waited + " | " + d.detail);
     }
     report.module_summary = {
       total: report.modules.length,
