@@ -11,3 +11,4 @@
 ^\.Rproj\.user$
 ^LICENSE$
 ^_disable_autoload\.R$
+^tools$
