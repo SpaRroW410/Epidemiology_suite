@@ -101,9 +101,6 @@ try {
         console.log("MOD " + JSON.stringify({ title: rec.title, status: rec.status, n: rec.designs.length, bad: rec.designs.filter((d) => d.status !== "ok") }));
       }
     }
-    for (const m of report.modules) {
-      for (const d of m.designs.filter((x) => x.status !== "ok")) console.log("SUM " + m.title + " | " + d.design + " | " + d.status + " | waited " + d.waited + " | " + d.detail);
-    }
     report.module_summary = {
       total: report.modules.length,
       modules_ok: report.modules.filter((m) => m.status === "ok").length,
@@ -121,5 +118,9 @@ try {
 report.total_s = (Date.now() - t0) / 1000;
 await page.screenshot({ path: shot, fullPage: false });
 fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-console.log(JSON.stringify(report, null, 2));
+const compact = { ...report, modules: undefined };
+console.log(JSON.stringify(compact, null, 2));
+for (const m of report.modules || []) {
+  for (const d of m.designs.filter((x) => x.status !== "ok")) console.log("SUM " + m.title + " | " + d.design + " | " + d.status + " | waited " + d.waited + " | " + d.detail);
+}
 await browser.close();
