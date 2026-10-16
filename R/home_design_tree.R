@@ -77,9 +77,20 @@ design_nodes <- list(
       list(label = "An exposure-outcome association (2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_design"),
       list(label = "An association adjusted for a confounder (stratified 2x2 tables, Mantel-Haenszel)", next_id = "analyze_mh_design"),
       list(label = "Incidence rates from events and person-time (one rate, or a rate ratio of two groups)", next_id = "analyze_rate_type"),
+      list(label = "Paired data, agreement between raters, or a trend across ordered groups (McNemar, kappa, chi-square for trend)", next_id = "analyze_paired_type"),
       list(label = "A diagnostic test (sensitivity, specificity, PPV, NPV from a test-by-disease table)", next_id = "term_analyze_dx_single"),
       list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined"),
       list(label = "A confidence interval for a proportion, or for a mean and standard deviation", next_id = "analyze_ci_type")
+    )
+  ),
+
+  analyze_paired_type = list(
+    id = "analyze_paired_type", stage = 1,
+    question = "Which of these describes your counts?",
+    options = list(
+      list(label = "The same subjects classified twice (two tests, before/after, matched pairs): McNemar", next_id = "term_analyze_mcnemar"),
+      list(label = "Two raters or tests classifying the same subjects: how well do they agree (kappa)?", next_id = "term_analyze_kappa"),
+      list(label = "Proportions across ordered groups (dose levels, age bands): is there a trend?", next_id = "term_analyze_trend")
     )
   ),
 
@@ -778,6 +789,9 @@ design_nodes <- list(
   term_bayes_assurance = .term("term_bayes_assurance", "Bayesian assurance, two proportions", "bayesian_assurance_or"),
   term_bfda = .term("term_bfda", "Bayes factor design analysis, two means", "bfda_ttest"),
 
+  term_analyze_mcnemar = .term("term_analyze_mcnemar", "McNemar's test and matched-pair odds ratio", "analyze_mcnemar"),
+  term_analyze_kappa = .term("term_analyze_kappa", "Cohen's kappa agreement", "analyze_kappa"),
+  term_analyze_trend = .term("term_analyze_trend", "Chi-square test for trend", "analyze_trend"),
   term_analyze_rate_single = .term("term_analyze_rate_single", "Confidence interval for an incidence rate", "analyze_rate_single"),
   term_analyze_rate_ratio = .term("term_analyze_rate_ratio", "Rate ratio and rate difference from person-time", "analyze_rate_ratio"),
   term_analyze_mh_cohort = .term("term_analyze_mh_cohort", "Mantel-Haenszel, cohort / trial / cross-sectional", "analyze_mh_cohort"),

@@ -25,6 +25,37 @@
 
 calculator_catalog <- list(
 
+  list(key = "analyze_mcnemar",
+       label = "Paired binary data: McNemar's test and matched-pair odds ratio (from counts)",
+       answers = paste(
+         "Answers: \"The same subjects were classified twice (two tests, before/after, matched pairs) -- do the two",
+         "differ, and what are the matched odds ratio and the paired difference?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Paired, Agreement and Trend Tests",
+       module_input_id = "analyze_tests-design", design_value = "mcnemar"),
+
+  list(key = "analyze_kappa",
+       label = "Agreement between two raters or tests: Cohen's kappa (from a table)",
+       answers = paste(
+         "Answers: \"How well do two raters or tests agree beyond chance -- kappa (unweighted or weighted) with a",
+         "confidence interval, and does it depend on prevalence?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Paired, Agreement and Trend Tests",
+       module_input_id = "analyze_tests-design", design_value = "kappa"),
+
+  list(key = "analyze_trend",
+       label = "Trend in proportions across ordered groups: chi-square for trend",
+       answers = paste(
+         "Answers: \"Does the proportion with the outcome rise or fall steadily across ordered groups such as dose",
+         "levels or age bands?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Paired, Agreement and Trend Tests",
+       module_input_id = "analyze_tests-design", design_value = "trend"),
+
+
   list(key = "analyze_rate_single",
        label = "Confidence interval for an incidence rate (events per person-time)",
        answers = paste(
@@ -1941,7 +1972,8 @@ study_design_families <- list(
                          "analyze_dx_single", "analyze_dx_combined",
                          "analyze_ci_proportion", "analyze_ci_mean",
                          "analyze_mh_cohort", "analyze_mh_case_control",
-                         "analyze_rate_single", "analyze_rate_ratio")),
+                         "analyze_rate_single", "analyze_rate_ratio",
+                         "analyze_mcnemar", "analyze_kappa", "analyze_trend")),
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",
@@ -2112,6 +2144,9 @@ study_design_families <- list(
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
 test_families <- list(
+  list(id = "analyze_paired_tests", label = "Paired, Agreement and Trend Tests (from counts)",
+       hint = "McNemar's test and matched-pair odds ratio for paired binary data, Cohen's kappa (unweighted or weighted) for agreement, and the chi-square test for trend across ordered groups, from counts.",
+       catalog_keys = c("analyze_mcnemar", "analyze_kappa", "analyze_trend")),
   list(id = "analyze_rates_tests", label = "Rates and Rate Ratios (person-time)",
        hint = "Confidence interval for an incidence rate, and the rate ratio, rate difference, attributable fractions and tests for two groups, from events and person-time.",
        catalog_keys = c("analyze_rate_single", "analyze_rate_ratio")),

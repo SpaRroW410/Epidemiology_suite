@@ -586,7 +586,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
 
 13. **Analyze workbench v1** (Track B1) — OpenEpi-parity calculators from summary
     counts, almost entirely on `epiR` (already a dependency). **In progress (14 Oct 2026):
-    slices 1-5 of ~9 done -- the 2x2 table, diagnostic-test evaluation, confidence intervals for
+    slices 1-6 of ~9 done -- the 2x2 table, diagnostic-test evaluation, confidence intervals for
     proportions and means, stratified Mantel-Haenszel analysis, and person-time rates and rate
     ratios.**
     - **Done: "2x2 Table Analysis"** (`calc_analyze_2x2.R`, `content_analyze_2x2.R`,
@@ -690,13 +690,30 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       two-sided p-value is twice the smaller one-sided mid-P tail.
     - **Not done in this slice:** stratified rate ratios (the Mantel-Haenszel IRR of epiR's cohort.time
       example, 4.39), standardized rates / SMR (next), and a rate-per-person-time sample-size link.
+    - **Slice 6 done: "Paired, Agreement and Trend Tests"** (`calc_analyze_tests.R`,
+      `content_analyze_tests.R`, `mod_analyze_tests.R`; 55th module; three designs).
+      *McNemar* (paired 2x2): chi-square with and without continuity correction, exact and mid-P
+      tests, matched-pair odds ratio with exact and Wald-log CIs, difference of the two positive
+      proportions. *Cohen's kappa* (2-6 categories; unweighted, linear or quadratic weights): kappa with
+      the Fleiss-Cohen-Everitt (1969) CI, test of kappa = 0, observed/chance agreement, PABAK, Landis-Koch
+      labels (marked as a convention). *Chi-square for trend* (Cochran-Armitage; 2-8 ordered groups with
+      optional scores) with Wilson CIs per group.
+    - **Slice 6 verification.** McNemar equals `stats::mcnemar.test()` (both corrections) and `binom.test()`
+      on four tables; kappa and CI equal `DescTools::CohenKappa()` for all three weightings on 2x2, 3x3 and
+      4x4 tables, the unweighted SE equals the explicit 1969 Fleiss-Cohen-Everitt expression, and the 2x2
+      kappa, PABAK and null-hypothesis SE equal `epiR::epi.kappa()` (whose CI uses the null-hypothesis SE,
+      which is why this app does not copy epiR's interval); the trend statistic equals
+      `stats::prop.trend.test()` with default and custom scores, and is unchanged by reversing the groups
+      or rescaling the scores; the SE of the paired difference matches 20,000 simulated studies (3%).
+      Known limits stated in the app: the paired-difference Wald interval is approximate, kappa depends on
+      prevalence, the trend test detects only a linear trend.
     - **Wiring.** Three catalog entries (one per design radio value, as the consistency
       tests require), a study-design family and a test family, and a new wizard root
       option "Analyze counts I already have" -> "How were the subjects sampled?".
       The free-text wizard (`design_free_text.R`) does not yet know analysis keywords.
     - **Still to do for item 13** (OpenEpi parity, in rough priority): CIs for differences/ratios
       of proportions and means, stratified rate ratios, direct/indirect standardization and
-      SMR, kappa from a table, McNemar / matched pairs, chi-square for trend, vaccine efficacy; plus the
+      SMR, vaccine efficacy; plus the
       navigation redesign (M2) -- the 15th dropdown is already one too many for the
       navbar, and the new group is simply appended last for now.
 14. **Planning tools** (Track B2) — randomization lists, attrition/non-response
