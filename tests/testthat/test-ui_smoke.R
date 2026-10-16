@@ -179,7 +179,7 @@ test_that("Standardization and SMR: the published direct example, a two-group co
   app$set_inputs(`analyze_std-design` = "indirect")
   app$wait_for_idle(800, timeout = 60000)
   ind <- ui_output_text(app, "analyze_std-result")
-  expect_match(ind, "Expected events\\s+52")             # 550 x 0.025 + 450 x 0.085, as in epi.indirectadj()
+  expect_match(ind, "expected 52")                        # 550 x 0.025 + 450 x 0.085, as in epi.indirectadj()
   expect_match(ind, "1\\.115")
   app$set_inputs(`analyze_std-design` = "smr")
   app$wait_for_idle(800, timeout = 60000)
