@@ -8,7 +8,12 @@ const [url, shot, reportPath] = process.argv.slice(2);
 const report = { url, started: new Date().toISOString(), console_errors: [], page_errors: [], requests: 0, bytes: 0 };
 const browser = await chromium.launch({ executablePath: "/usr/bin/google-chrome", args: ["--no-sandbox"] });
 const page = await browser.newPage();
-page.on("console", (m) => { if (m.type() === "error") report.console_errors.push(m.text().slice(0, 300)); });
+report.load_lines = [];
+page.on("console", (m) => {
+  const t = m.text();
+  if (/LOAD |SOURCE FAILED/.test(t)) report.load_lines.push(t.slice(0, 300));
+  else if (m.type() === "error" && !/Downloading webR package/.test(t)) report.console_errors.push(t.slice(0, 300));
+});
 page.on("pageerror", (e) => report.page_errors.push(String(e).slice(0, 300)));
 page.on("response", async (r) => { report.requests++; try { const b = await r.body(); report.bytes += b.length; } catch (e) {} });
 
@@ -18,7 +23,7 @@ report.page_load_s = (Date.now() - t0) / 1000;
 try {
   // Shinylive renders the app in an iframe; the navbar title is the signal that the UI is up.
   const frame = page.frameLocator("iframe").first();
-  await frame.locator("text=epidemiologicasuite").first().waitFor({ timeout: 900000 });
+  await frame.locator("text=epidemiologicasuite").first().waitFor({ timeout: 480000 });
   report.ui_visible_s = (Date.now() - t0) / 1000;
   // Open a calculator and check that a result renders.
   await frame.locator("a[data-value='Plan: Sample Size']").first().click({ timeout: 60000 });

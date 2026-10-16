@@ -64,6 +64,13 @@ tab <- tab[order(tab$in_newest, !tab$direct, tab$package), ]
 write.csv(tab, file.path(out_dir, "webr_package_check.csv"), row.names = FALSE)
 
 missing <- tab[!tab$in_newest, ]
+needed_by <- function(p) paste(names(Filter(function(d) p %in% d, deps)), collapse = ", ")
+missing$needed_by <- vapply(missing$package, needed_by, "")
+other_versions <- setdiff(avail_dirs, rev(avail_dirs)[1])
+missing$elsewhere <- vapply(missing$package, function(p) {
+  hit <- other_versions[vapply(other_versions, function(v) !is.na(tab[tab$package == p, paste0("wasm_", v)]), NA)]
+  if (length(hit)) paste("R", hit, collapse = ", ") else "no"
+}, "")
 lines <- c(
   "# webR package availability",
   "",
@@ -72,8 +79,8 @@ lines <- c(
   sprintf("Total download of the packages found (sum of the .tgz sizes, before webR's own runtime): **%.1f MB**.", sum(tab$size_mb, na.rm = TRUE)),
   "",
   "## Missing from the webR repository",
-  if (nrow(missing)) c("", "| package | direct import | compiled |", "|---|---|---|",
-                       sprintf("| %s | %s | %s |", missing$package, ifelse(missing$direct, "yes", "no"), missing$compiled)) else "None.",
+  if (nrow(missing)) c("", "| package | direct import | compiled | needed by | in another R version's repo |", "|---|---|---|---|---|",
+                       sprintf("| %s | %s | %s | %s | %s |", missing$package, ifelse(missing$direct, "yes", "no"), missing$compiled, missing$needed_by, missing$elsewhere)) else "None.",
   "",
   "## Largest packages found",
   "",
