@@ -51,7 +51,10 @@ try {
       await page.waitForTimeout(1500);
       const titles = await f.evaluate(() => [...document.querySelectorAll("ul.nav-stacked a[data-value]")]
         .filter((e) => e.offsetParent !== null).map((e) => e.getAttribute("data-value")));
+      const only = process.env.ONLY ? JSON.parse(process.env.ONLY) : null;
+      const maxWait = Number(process.env.WAIT || 25);
       for (const title of titles) {
+        if (only && !only[title]) continue;
         const rec = { workbench: wb, title };
         const t2 = Date.now();
         await clickByValue(title);
@@ -83,9 +86,10 @@ try {
         };
         if (radio) {
           for (const v of radio.vals) {
+            if (only && !only[title].includes(v)) continue;
             await f.evaluate((a) => { const r = [...document.querySelectorAll("input[type=radio]")].find((e) => e.name === a.name && e.value === a.v); if (r) r.click(); }, { name: radio.name, v });
             let waited = 0;
-            for (; waited < 25; waited++) {
+            for (; waited < maxWait; waited++) {
               await page.waitForTimeout(1000);
               const p = await probe();
               if (p.errs.length || p.danger.length || (p.has_result && p.result.length > 0) || (!p.has_result && waited >= 2)) break;
@@ -93,7 +97,13 @@ try {
             await visit(v, waited + 1);
           }
         } else {
-          await visit("(single view)");
+          let waited = 0;
+          for (; waited < maxWait; waited++) {
+            const p = await probe();
+            if (p.errs.length || p.danger.length || (p.has_result && p.result.length > 0) || (!p.has_result && waited >= 2)) break;
+            await page.waitForTimeout(1000);
+          }
+          await visit("(single view)", waited + 1);
         }
         rec.status = rec.designs.some((d) => d.status === "ERROR") ? "ERROR" : rec.designs.every((d) => d.status === "ok") ? "ok" : "partial";
         rec.seconds = (Date.now() - t2) / 1000;
