@@ -27,6 +27,7 @@ jobs:
           path: spike-output
 
   export-and-boot:
+    if: false   # stage 2 findings are recorded in docs/ROADMAP.md; switch on to re-run the browser crawl
     # Stage 2: build the app as a Shinylive (WebAssembly) site and boot it in headless Chrome.
     runs-on: ubuntu-24.04
     timeout-minutes: 60

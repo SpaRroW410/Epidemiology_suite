@@ -71,6 +71,20 @@ missing$elsewhere <- vapply(missing$package, function(p) {
   hit <- other_versions[vapply(other_versions, function(v) !is.na(tab[tab$package == p, paste0("wasm_", v)]), NA)]
   if (length(hit)) paste("R", hit, collapse = ", ") else "no"
 }, "")
+# Weight of each direct import: the download of its own dependency closure, and the part that no other
+# direct import also needs (what dropping it would save).
+size_of <- setNames(tab$size_mb, tab$package)
+closure_of <- lapply(direct, function(d) unique(c(d, deps[[d]])))
+names(closure_of) <- direct
+weights <- do.call(rbind, lapply(direct, function(d) {
+  mine <- closure_of[[d]]
+  others <- unique(unlist(closure_of[setdiff(direct, d)]))
+  data.frame(import = d, closure_packages = length(mine), closure_mb = round(sum(size_of[mine], na.rm = TRUE), 1),
+             unique_mb = round(sum(size_of[setdiff(mine, others)], na.rm = TRUE), 1), stringsAsFactors = FALSE)
+}))
+weights <- weights[order(-weights$unique_mb), ]
+write.csv(weights, file.path(out_dir, "webr_import_weights.csv"), row.names = FALSE)
+
 lines <- c(
   "# webR package availability",
   "",
@@ -86,6 +100,12 @@ lines <- c(
   "",
   "| package | MB | compiled |", "|---|---|---|",
   { top <- head(tab[order(-tab$size_mb), ], 15); sprintf("| %s | %s | %s |", top$package, top$size_mb, top$compiled) },
+  "",
+  "",
+  "## Weight of each direct import (MB of .tgz downloads)",
+  "",
+  "| import | packages in its closure | closure MB | MB only this import needs |", "|---|---|---|---|",
+  sprintf("| %s | %d | %.1f | %.1f |", weights$import, weights$closure_packages, weights$closure_mb, weights$unique_mb),
   "",
   sprintf("Index availability: %s",
           paste(sprintf("R %s: %s", repo_dirs, ifelse(repo_dirs %in% avail_dirs, "found", "not found")), collapse = "; "))
