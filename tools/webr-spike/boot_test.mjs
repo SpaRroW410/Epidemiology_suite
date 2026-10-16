@@ -51,7 +51,7 @@ try {
       await page.waitForTimeout(1500);
       const titles = await f.evaluate(() => [...document.querySelectorAll("ul.nav-stacked a[data-value]")]
         .filter((e) => e.offsetParent !== null).map((e) => e.getAttribute("data-value")));
-      const only = process.env.ONLY ? JSON.parse(process.env.ONLY) : null;
+      const only = process.env.ONLY_FILE ? JSON.parse(fs.readFileSync(process.env.ONLY_FILE, "utf8")) : null;
       const maxWait = Number(process.env.WAIT || 25);
       for (const title of titles) {
         if (only && !only[title]) continue;
