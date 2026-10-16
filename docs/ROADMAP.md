@@ -60,6 +60,9 @@ cannot reach — see §4.
 | F9 | **Partly addressed (28 Sep 2026).** Shiny runs one R process per app instance; a 5–25 s simulation (Monte Carlo Mixed Models, RMST, weighted log-rank, BFDA, KS/runs/animal-rank) used to recompute on every input change — fixed, see P1 item 7. Still true: one user's simulation blocks every other user on the same app instance while it runs — needs `ExtendedTask` (P1 item 7, second half) | observed during browser verification | Was Medium (High once hosted); recompute-storm risk resolved, cross-user blocking remains |
 | F10 | **Resolved (28 Sep 2026).** Every module (except the two guidance-only ones) now offers CSV/JSON/BibTeX/RIS download and a justification paragraph — see P1 item 9 | download handlers exist for all 47 calculator modules | Was Medium; resolved |
 | F11 | **Accessibility and mobile layout never audited.** Translations are not planned (English only, D5) | — | Low–Medium |
+| F12 | **Open (found by the item 15 spike).** The theme uses `bslib::font_google("Source Serif 4")`, which downloads the font file when the page is first rendered. Without internet at that moment (a Shinylive build, an air-gapped server, `R CMD check` on a locked-down machine) the page fails to render at all | `R/run_app.R` (theme) | Medium; fix by shipping the font or using a system font stack; needed for any offline route |
+| F13 | **Open (found by the item 15 spike).** The app only works with the epiR version pinned in `renv.lock` (2.0.67). Current CRAN `epiR` (3.0.0, also what the webR repository serves) changed `epi.ssdetect()` (`prev`/`finite.correction`/`conf.level` became `pstar`/`se.psu`/`ss.se`), so Rule of Three "imperfect test" fails on a fresh install; the other `epi.ss*` calls were not re-checked against 3.0.0 | `R/calc_rule_of_three.R`; epiR 3.0.0 source | High for CRAN / fresh installs; best fixed by removing `epiR` from the runtime (item 16) rather than chasing its API |
+| F14 | **Open (found by the item 15 spike).** `rstatix` is declared an import for one call (`cochran_qtest`, Cochran's Q); it costs 21.8 MB of unique dependencies in a browser build and a long install otherwise | `R/calc_chisq.R:320` | Low effort, high weight reduction |
 
 ---
 
@@ -851,7 +854,39 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       bracketed prompt for it. A seed makes a list reproducible, not secret -- the app says to keep it confidential.
       (5) The free-text wizard only routes text that names the planning task outright; a sample-size request that
       merely mentions dropouts still goes to Compare (tested).
-15. **Shinylive feasibility spike** (Track D3) — decides the offline/APK path.
+15. **Shinylive feasibility spike** (Track D3) — **done (16 Oct 2026): conditional go for a static browser build; the offline/APK path is not yet decided.**
+    - **How it was run.** The sandbox cannot reach `repo.r-wasm.org`, so the spike runs on GitHub's runners
+      (`.github/workflows/shinylive-spike.yml`, `tools/webr-spike/`; the browser stage is parked with `if: false`, flip
+      it to re-run). Stage 1 (`check_packages.R`) checks every runtime dependency against the webR package repository.
+      Stage 2 builds the app with `shinylive::export()` and drives it in headless Chrome served from localhost, opening
+      every module and every design radio value and recording output errors and validation messages. Network times
+      are therefore *not* representative of a real phone connection.
+    - **Packages.** The 20 non-base imports pull in 168 packages; 165 exist as WebAssembly builds. Missing: `rootSolve`
+      (needed by `Exact`), `deSolve` and `quadprog`. The packages total about 180 MB of downloads before the webR
+      runtime (about 77 MB more in the export); a first page load transferred about 170-190 MB.
+    - **Booting.** A build with a patched font stack boots: the interface appears after about 75-120 s (runner, local
+      server) and the first calculation takes about 7-12 s. Loading `PowerTOST` at start-up breaks the whole app (a
+      shared library, `commonmark.so`, fails to load; bisected to `PowerTOST` alone, whose `cubature` dependency also
+      fails to load at call time). The build that works leaves `PowerTOST` unattached, so only its own designs fail.
+    - **Calculators.** Of 185 design options in 60 modules, **177 work**. 15 that looked empty after 25 s finish
+      within about 46 s (Monte Carlo and simulation designs are slower in the browser). 4 are the app's own validation
+      messages at default inputs (e.g. identical proportions, so "no effect to detect"; an RMST default with identical
+      arms), which appear in the native app too. **8 fail for real:** Equivalence (TOST) "means" (`cubature` cannot
+      load), Exact Tests Fisher / Boschloo / Poisson / sign (`rootSolve` missing), Longitudinal Diggle and Edland
+      ("LAPACK routines cannot be loaded"), and Rule of Three "detect_imperfect" (see F13 -- not specific to the browser).
+    - **What is heaviest.** `epiR` drags in 86 packages (97.8 MB; 44.4 MB needed by nothing else, including `sf`, `s2`,
+      `units`, `ggplot2`) for nine closed-form sample-size calls (`epi.sscc`, `epi.ssclus`, `epi.sscohortc`,
+      `epi.sssimpleestc`, `epi.ssninfb`, `epi.ssninfc`, `epi.ssdetect`, `epi.ssequb`). `rstatix` (86.7 MB closure, 21.8 MB
+      unique) is called exactly once, for Cochran's Q. Then `BayesFactor` (8.4 MB unique), `Hmisc` (5.9), `tseries` (4.7),
+      `PowerTOST` (3.5). Dropping `epiR` and `rstatix` alone would remove about two thirds of the unique weight and make
+      the browser (and CRAN) story far lighter; this is the concrete target for item 16.
+    - **Decision.** A static browser build (`shinylive`, GitHub Pages) is feasible and covers 96% of the designs today.
+      It is worth offering as a *secondary* distribution once (a) item 16 has removed `epiR` and `rstatix` from the
+      runtime path (cuts the first download by roughly a third to a half, to be measured), (b) the browser build gates the
+      8 failing designs with a clear "not available in the browser version" message, and (c) the font change below is
+      made. It should not yet be promised as the offline / APK route: first load is 170+ MB, only the `light`
+      one-module case was timed on a real run, mobile memory limits were not tested, and the TWA / Capacitor wrappers
+      (D5a, D5b) were not tried. Re-run the spike after item 16 and against the newest webR before deciding D5.
 16. **Phase 8 dependency reduction, tier 1** (§9) — also de-risks D3 and CRAN.
 17. **pkgdown documentation site** (free, GitHub Pages).
 
@@ -1037,7 +1072,7 @@ expansion (D3).
 |---|---|---|---|---|---|
 | **D1 Hosted web** | shinyapps.io, Posit Connect Cloud, own VPS with Shiny Server, or **Docker** (`rocker/shiny`) for institutional servers / ShinyProxy | No | Yes | **Feasible now** | Needs F9 (async) before many concurrent users; free tiers have hour limits |
 | **D2 R package** | `install_github()` / r-universe / CRAN, then `run_app()` | Yes (local R) | No | After C1 | Users need R installed — fine for faculty/researchers |
-| **D3 Shinylive (WebAssembly) static site** | `shinylive::export()` → GitHub Pages; runs entirely in the browser | Yes, after first load | **No** | **Conditional — needs a spike** | Every runtime package needs a webR binary (check each of the 19 on `repo.r-wasm.org`); compiled packages (`lme4`, `BayesFactor`, `Hmisc`, `mvtnorm`, …) are the risk; first load downloads tens of MB. Mitigate with Phase 8 and lazy per-module loading. Could not be checked from this sandbox (egress blocked) |
+| **D3 Shinylive (WebAssembly) static site** | `shinylive::export()` → GitHub Pages; runs entirely in the browser | Yes, after first load | **No** | **Conditional — needs a spike** | Every runtime package needs a webR binary (check each of the 19 on `repo.r-wasm.org`); compiled packages (`lme4`, `BayesFactor`, `Hmisc`, `mvtnorm`, …) are the risk; first load downloads tens of MB. Mitigate with Phase 8 and lazy per-module loading. **Spike run 16 Oct 2026 (item 15): 165 of 168 packages exist for webR; 177 of 185 designs work; first load 170+ MB; see item 15 for the decision.** |
 | **D4 PWA** (installable web app) | Manifest + service worker on top of D3 (offline) or D1 (online shell) | With D3 | With D1 | After D3/D1 | Low effort; installs on Android, iOS, desktop from the browser |
 | **D5a Android APK — Trusted Web Activity** | Bubblewrap/PWABuilder wraps the D4 site into a Play-Store APK/AAB | With D3 | No (static hosting) | After D4 | Needs an HTTPS domain + Digital Asset Links; small APK; **recommended APK route** |
 | **D5b Android APK — Capacitor bundle** | Ships the Shinylive export *inside* the APK | Fully | No | Spike after D3 | Larger APK (webR runtime + packages); webR worker inside an Android WebView must be tested |
