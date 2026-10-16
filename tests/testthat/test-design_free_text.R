@@ -118,3 +118,14 @@ test_that("analysis phrasing reaches the Analyze branch, and planning phrasing i
   expect_equal(walk_free_text("sample size for a vaccine efficacy trial, randomized")$trace[[1]]$answer, design_nodes$root$options[[2]]$label)
   expect_equal(walk_free_text("estimate sensitivity and specificity against a gold standard")$trace[[1]]$answer, design_nodes$root$options[[4]]$label)
 })
+
+test_that("planning-tool phrasing reaches the planning branch; sample-size requests that mention dropouts do not", {
+  r <- walk_free_text("generate a randomization list with permuted blocks")
+  expect_equal(r$node_id, "term_plan_randomization_block")
+  r <- walk_free_text("I need a randomisation schedule stratified by site")
+  expect_equal(r$node_id, "term_plan_randomization_stratified")
+  r <- walk_free_text("inflate the sample size for attrition")
+  expect_equal(r$node_id, "term_plan_attrition_stages")
+  expect_equal(walk_free_text("compare two groups in a randomized trial allowing for 10% dropout")$trace[[1]]$answer,
+               design_nodes$root$options[[2]]$label)
+})

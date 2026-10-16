@@ -25,6 +25,62 @@
 
 calculator_catalog <- list(
 
+  list(key = "plan_attrition_stages",
+       label = "Inflate a sample size for attrition and non-response (one or several stages)",
+       answers = paste(
+         "Answers: \"I know how many participants I need to analyze -- how many must I enrol to allow for non-response,",
+         "loss to follow-up and unusable data?\""
+       ),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Attrition and Non-response",
+       module_input_id = "attrition-design", design_value = "stages"),
+
+  list(key = "plan_attrition_arms",
+       label = "Inflate each arm for different expected losses",
+       answers = paste(
+         "Answers: \"The arms will lose different numbers of participants -- how many must I enrol in each arm?\""
+       ),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Attrition and Non-response",
+       module_input_id = "attrition-design", design_value = "arms"),
+
+  list(key = "plan_attrition_noncompliance",
+       label = "Inflate a sample size for drop-out and drop-in (non-compliance)",
+       answers = paste(
+         "Answers: \"Some participants will stop the treatment or cross over -- how much larger must the trial be?\""
+       ),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Attrition and Non-response",
+       module_input_id = "attrition-design", design_value = "noncompliance"),
+
+  list(key = "plan_randomization_block",
+       label = "Randomization list: permuted blocks (reproducible from a seed)",
+       answers = paste(
+         "Answers: \"I need a balanced allocation list for my trial that I can regenerate from a seed and hand to whoever",
+         "holds the allocation.\""
+       ),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Randomization List",
+       module_input_id = "randomization-design", design_value = "block"),
+
+  list(key = "plan_randomization_stratified",
+       label = "Randomization list: permuted blocks within strata (sites, prognostic groups)",
+       answers = paste(
+         "Answers: \"I need a separate balanced list for each site or prognostic stratum.\""
+       ),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Randomization List",
+       module_input_id = "randomization-design", design_value = "stratified"),
+
+  list(key = "plan_randomization_simple",
+       label = "Randomization list: simple (unrestricted) randomization",
+       answers = paste(
+         "Answers: \"I need an unrestricted random allocation list (and want to see how unbalanced chance can make it).\""
+       ),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Randomization List",
+       module_input_id = "randomization-design", design_value = "simple"),
+
   list(key = "analyze_compare_proportions",
        label = "Compare two proportions: difference, risk ratio, odds ratio (several interval methods)",
        answers = paste(
@@ -2057,6 +2113,10 @@ calculator_catalog <- list(
 # calculator catalog table. "Proportions" is the only family with built
 # calculators right now; selecting it reveals its catalog entries above.
 study_design_families <- list(
+  list(id = "planning_tools", label = "Study planning tools (randomization, attrition)",
+       hint = "Not a sample-size calculation: reproducible randomization lists, and inflating a required sample size for attrition, non-response and non-compliance.",
+       catalog_keys = c("plan_randomization_block", "plan_randomization_stratified", "plan_randomization_simple",
+                         "plan_attrition_stages", "plan_attrition_arms", "plan_attrition_noncompliance")),
   list(id = "analyze_counts", label = "Analyze data you already have (summary counts)",
        hint = "Not a sample-size calculation: effect measures and confidence intervals from counts you already have, starting with the 2x2 table.",
        catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control",
@@ -2238,6 +2298,12 @@ study_design_families <- list(
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
 test_families <- list(
+  list(id = "planning_randomization", label = "Randomization List",
+       hint = "Reproducible allocation lists: permuted blocks (fixed or random block sizes), blocks within strata, or simple randomization, with a methods paragraph.",
+       catalog_keys = c("plan_randomization_block", "plan_randomization_stratified", "plan_randomization_simple")),
+  list(id = "planning_attrition", label = "Attrition and Non-response",
+       hint = "Inflate a required sample size for losses at one or several stages, for different losses per arm, or for drop-out and drop-in.",
+       catalog_keys = c("plan_attrition_stages", "plan_attrition_arms", "plan_attrition_noncompliance")),
   list(id = "analyze_compare_tests", label = "Compare Two Groups (from summary figures)",
        hint = "Difference, risk ratio and odds ratio of two proportions with several confidence-interval methods side by side, and the difference, variance ratio and standardized difference of two means.",
        catalog_keys = c("analyze_compare_proportions", "analyze_compare_means")),

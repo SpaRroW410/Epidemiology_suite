@@ -66,6 +66,7 @@ design_nodes <- list(
       list(label = "Study the relationship between variables (correlation / regression)", next_id = "rel_type"),
       list(label = "Something else: survey sampling, scale development, rare events, animal studies, pilots, health economics, genetics", next_id = "other_purpose"),
       list(label = "Analyze counts I already have (a 2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_type"),
+      list(label = "Plan study logistics: a randomization list, or enrolling extra for attrition / non-response", next_id = "planning_type"),
       list(label = "I already know which statistical test I'll use -- browse by test family", next_id = "bytest_family")
     )
   ),
@@ -113,6 +114,35 @@ design_nodes <- list(
       list(label = "The same subjects classified twice (two tests, before/after, matched pairs): McNemar", next_id = "term_analyze_mcnemar"),
       list(label = "Two raters or tests classifying the same subjects: how well do they agree (kappa)?", next_id = "term_analyze_kappa"),
       list(label = "Proportions across ordered groups (dose levels, age bands): is there a trend?", next_id = "term_analyze_trend")
+    )
+  ),
+
+  planning_type = list(
+    id = "planning_type", stage = 1,
+    question = "What do you need to plan?",
+    options = list(
+      list(label = "A randomization list (permuted blocks, strata or simple), reproducible from a seed", next_id = "planning_rand_type"),
+      list(label = "How many to enrol to allow for attrition, non-response or non-compliance", next_id = "planning_attr_type")
+    )
+  ),
+
+  planning_rand_type = list(
+    id = "planning_rand_type", stage = 1,
+    question = "Which kind of randomization list?",
+    options = list(
+      list(label = "Permuted blocks (balanced after every block; fixed or random block sizes)", next_id = "term_plan_randomization_block"),
+      list(label = "Permuted blocks within strata (sites or prognostic groups)", next_id = "term_plan_randomization_stratified"),
+      list(label = "Simple (unrestricted) randomization", next_id = "term_plan_randomization_simple")
+    )
+  ),
+
+  planning_attr_type = list(
+    id = "planning_attr_type", stage = 1,
+    question = "What do you expect to lose?",
+    options = list(
+      list(label = "Participants lost at one or several stages (non-response, loss to follow-up, unusable data)", next_id = "term_plan_attrition_stages"),
+      list(label = "Different numbers lost in each arm", next_id = "term_plan_attrition_arms"),
+      list(label = "Participants who stop the treatment or cross over (drop-out / drop-in)", next_id = "term_plan_attrition_noncompliance")
     )
   ),
 
@@ -831,6 +861,12 @@ design_nodes <- list(
   term_analyze_kappa = .term("term_analyze_kappa", "Cohen's kappa agreement", "analyze_kappa"),
   term_analyze_trend = .term("term_analyze_trend", "Chi-square test for trend", "analyze_trend"),
   term_analyze_rate_single = .term("term_analyze_rate_single", "Confidence interval for an incidence rate", "analyze_rate_single"),
+  term_plan_randomization_block = .term("term_plan_randomization_block", "Randomization list: permuted blocks", "plan_randomization_block"),
+  term_plan_randomization_stratified = .term("term_plan_randomization_stratified", "Randomization list: blocks within strata", "plan_randomization_stratified"),
+  term_plan_randomization_simple = .term("term_plan_randomization_simple", "Randomization list: simple", "plan_randomization_simple"),
+  term_plan_attrition_stages = .term("term_plan_attrition_stages", "Enrol extra for attrition and non-response", "plan_attrition_stages"),
+  term_plan_attrition_arms = .term("term_plan_attrition_arms", "Enrol extra, per arm", "plan_attrition_arms"),
+  term_plan_attrition_noncompliance = .term("term_plan_attrition_noncompliance", "Inflate for drop-out and drop-in", "plan_attrition_noncompliance"),
   term_analyze_rate_stratified = .term("term_analyze_rate_stratified", "Mantel-Haenszel rate ratio over strata", "analyze_rate_stratified"),
   term_analyze_vaccine_risk = .term("term_analyze_vaccine_risk", "Vaccine efficacy from attack rates", "analyze_vaccine_risk"),
   term_analyze_vaccine_rate = .term("term_analyze_vaccine_rate", "Vaccine efficacy from person-time rates", "analyze_vaccine_rate"),

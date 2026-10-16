@@ -59,6 +59,8 @@ workbench lists its modules in a sidebar, under group headers ordered roughly si
 | | Competing Risks | joint cause-specific / any-cause hazard test |
 | | RMST Comparison | restricted mean survival time, superiority or non-inferiority |
 | **Prediction Models** | Prediction Model | development (binary, continuous, survival); external validation (binary) |
+| **Study Planning Tools** | Randomization List | reproducible allocation lists from a seed: permuted blocks (fixed or random block sizes, any allocation ratio), blocks within strata, simple randomization; CSV download and a methods paragraph |
+| | Attrition and Non-response | enrol n / prod(1 - loss) over several stages (not n x (1 + loss)), per-arm losses, drop-out / drop-in dilution n / (1 - R_E - R_C)^2 |
 | **Surveillance** | Rule of Three | upper bound for zero events; n to see ≥ 1 event; disease freedom with an imperfect test |
 | **Preclinical / Animal Studies** | Resource Equation | Mead's E = N − T rule |
 | **Qualitative / Mixed Methods** | Qualitative Sample Size Guidance | saturation, information power, purposive sampling (no formula) |

@@ -123,7 +123,11 @@ module_registry <- function() {
     list(id = analyze_compare_meta$id, title = analyze_compare_meta$nav_title,
          ui = mod_analyze_compare_ui, server = mod_analyze_compare_server),
     list(id = analyze_vaccine_meta$id, title = analyze_vaccine_meta$nav_title,
-         ui = mod_analyze_vaccine_ui, server = mod_analyze_vaccine_server)
+         ui = mod_analyze_vaccine_ui, server = mod_analyze_vaccine_server),
+    list(id = attrition_meta$id, title = attrition_meta$nav_title,
+         ui = mod_attrition_ui, server = mod_attrition_server),
+    list(id = randomization_meta$id, title = randomization_meta$nav_title,
+         ui = mod_randomization_ui, server = mod_randomization_server)
   )
 }
 
@@ -174,6 +178,8 @@ module_workbenches <- list(
            module_ids = c("efa_cfa")),
       list(title = "Health Economics / Value of Information",
            module_ids = c("evpi")),
+      list(title = "Study Planning Tools",
+           module_ids = c("attrition", "randomization")),
       list(title = "General Statistical Tests",
            module_ids = c("correlation", "chisq", "regression", "anova_general", "logistic", "exact_tests", "rm_anova", "nonparametric", "variance", "multiplicity", "manova", "bayesian", "longitudinal", "multilevel", "meta_power"))
        )),

@@ -819,8 +819,37 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       planning text uses them too (tested: "sample size for a vaccine efficacy trial" still routes to Compare).
     - **Item 13 is complete** (nine slices). Not done, by choice: Ury-Wiggins SMR limits (constants unverifiable),
       adjusted VE from models, stratified rate-ratio exact (conditional) intervals.
-14. **Planning tools** (Track B2) — randomization lists, attrition/non-response
-    inflation, protocol text.
+14. **Planning tools** (Track B2) — **done (16 Oct 2026)**: randomization lists and attrition /
+    non-response inflation; the protocol text already existed (the justification paragraph of
+    item 9) and both new modules reuse or extend it.
+    - **Randomization List** (`calc_randomization.R`, module `randomization`, group "Study Planning Tools" of the
+      Plan workbench): simple, permuted-block (any allocation ratio, 2-8 arms, one fixed block size or several chosen
+      at random per block) and stratified permuted-block lists; reproducible from a seed; CSV download of the full list;
+      a methods paragraph with a bracketed placeholder for who generated and holds the list; guidance on allocation
+      concealment. The generator is pinned inside the call (Mersenne-Twister, rejection sampling) and the caller's own
+      random stream is restored, so the same seed gives the same list on any R >= 3.6 and other code is never disturbed.
+    - **Attrition and Non-response** (`calc_attrition.R`, module `attrition`): enrol n / prod(1 - d_i) over 1-6 stages
+      (shown against the common error n (1 + d)), per-arm inflation for different losses (with the contrast against
+      using the average loss), and the drop-out / drop-in dilution factor 1 / (1 - R_E - R_C)^2.
+    - **Verification.** No package computes "the right list", so the unit tests check the defining properties: exact
+      balance in every complete block (ratios 1:1, 2:1:1, 2:1), every ordering of a block equally likely (chi-square
+      over 6000 lists), block sizes drawn equally often, per-stratum balance and independence, long-run arm
+      frequencies, reproducibility, the caller's RNG stream untouched, and regression values for fixed seeds (recorded
+      from this code under R 4.3.3, so they guard against change but are not independent references). Attrition: the
+      identities are recomputed from the expected number of analyzable participants, and the rounding guard avoids
+      the classic 100 / 0.8 = 125.00000000000001 -> 126 error. A power simulation (slow lane) shows that with the
+      inflated n the intention-to-treat z test reaches about the planned power, and with the uninflated n it does not.
+    - **Honesty notes (item 14).** (1) The dilution formula was *derived here* (n is proportional to 1 / difference^2
+      with the variance unchanged); Lachin JM, Control Clin Trials 1981;2:93-113 is the reference it is usually
+      attributed to, whose existence was confirmed by web search but whose equations were not read; the app says so.
+      It is approximate for proportions. (2) The retention formulas are identities and are labelled as such, with no
+      citation. (3) Randomization references (Altman & Bland BMJ 1999;319:703-704; Schulz & Grimes Lancet
+      2002;359:515-519 and 359:614-618; Matts & Lachin Control Clin Trials 1988;9:327-344) were confirmed by web
+      search to exist with those volumes and pages (the search did not return the author list of the last one; the
+      authorship is from memory); none could be read. (4) The methods paragraph does not claim concealment: it leaves a
+      bracketed prompt for it. A seed makes a list reproducible, not secret -- the app says to keep it confidential.
+      (5) The free-text wizard only routes text that names the planning task outright; a sample-size request that
+      merely mentions dropouts still goes to Compare (tested).
 15. **Shinylive feasibility spike** (Track D3) — decides the offline/APK path.
 16. **Phase 8 dependency reduction, tier 1** (§9) — also de-risks D3 and CRAN.
 17. **pkgdown documentation site** (free, GitHub Pages).

@@ -26,6 +26,9 @@ free_text_rules <- list(
   # "analyze the counts I have"): words such as "vaccine efficacy" or "sensitivity"
   # alone also occur in planning text and must not be hijacked.
   root = list(
+    # Planning logistics, named outright (a sample-size request that merely mentions dropouts is not matched).
+    list(pattern = "randomi[sz]ation (list|schedule|sequence)|(generate|create|make) (a )?(random(i[sz]ation)? )?(allocation )?(list|sequence|schedule)|allocation (list|sequence|schedule)|block randomi[sz]ation|permuted.?block|(inflate|adjust|increase)\\w* (the )?sample size (for|to allow for) (attrition|dropouts?|drop.?out|non.?response|loss(es)? to follow.?up)",
+         option_index = 11, confidence = "Medium"),
     list(pattern = "analy[sz]e (the |my |our )?(counts|summary|data (i|we) (already )?(have|collected))|already (have|collected) (the )?(counts|data|numbers)|from (the )?(summary )?counts|\\b2\\s?x\\s?2 table|mantel.?haenszel|standardi[sz]ed mortality ratio|\\bsmr\\b|confidence interval (for|of) (a |the |an )?(proportion|mean|rate|incidence)",
          option_index = 10, confidence = "Medium"),
     list(pattern = "qualitative|in-depth interview|\\bfgd\\b|focus group|thematic",
@@ -45,6 +48,23 @@ free_text_rules <- list(
          option_index = 2, confidence = "Medium"),
     list(pattern = "prevalence of|estimate the|proportion of|magnitude of|assess the burden|mean level of|to determine the level|incidence rate of",
          option_index = 1, confidence = "High")
+  ),
+
+  planning_type = list(
+    list(pattern = "attrition|drop.?out|drop.?in|non.?response|loss(es)? to follow|non.?complian", option_index = 2, confidence = "High"),
+    list(pattern = "random",                                                                   option_index = 1, confidence = "High")
+  ),
+
+  planning_rand_type = list(
+    list(pattern = "strat|\\bsites?\\b|centre|center",   option_index = 2, confidence = "Medium"),
+    list(pattern = "simple|unrestricted|coin",              option_index = 3, confidence = "Medium"),
+    list(pattern = "block",                                 option_index = 1, confidence = "High")
+  ),
+
+  planning_attr_type = list(
+    list(pattern = "drop.?in|drop.?out|non.?complian|cross.?over|crossover", option_index = 3, confidence = "Medium"),
+    list(pattern = "each arm|per arm|differ\\w* (loss|attrition)|by arm",     option_index = 2, confidence = "Medium"),
+    list(pattern = "attrition|non.?response|loss(es)? to follow|stages?",      option_index = 1, confidence = "High")
   ),
 
   analyze_type = list(
