@@ -172,3 +172,152 @@ analyze_rate_single_table <- function(result) {
   do.call(rbind, list(m("Exact (Garwood)", "exact"), m("Mid-P exact", "mid_p"), m("Byar approximation (a + 1/2 form)", "byar"),
                       m("Wald (not recommended)", "wald")))
 }
+
+# ---------------------------------------------------------------------------
+# Stratified rates: Mantel-Haenszel rate ratio and rate difference (ROADMAP item 13,
+# slice 9). k strata, each with events and person-time in the exposed (d1, t1) and
+# unexposed (d0, t0) group; D = d1 + d0, T = t1 + t0.
+#   IRR_MH = sum(d1 t0 / T) / sum(d0 t1 / T)                       (Rothman & Boice 1979)
+#   Var{ln IRR_MH} = sum(D t1 t0 / T^2) / (sum(d1 t0 / T) sum(d0 t1 / T))
+#                  -- Greenland & Robins, Biometrics 1985;41:55-68 (the same closed form
+#                  epiR::epi.2by2(method = "cohort.time") uses);
+#   RD_MH  = sum((d1 t0 - d0 t1) / T) / sum(t1 t0 / T),
+#   Var(RD_MH) = sum((t1 t0 / T)^2 (d1/t1^2 + d0/t0^2)) / sum(t1 t0 / T)^2.
+#   CMH-type score test of IRR = 1 (form as in Rothman, Greenland & Lash, Modern Epidemiology 3rd ed.; book not consulted -- verified numerically):
+#     (sum(d1 - E))^2 / sum(V), E = D t1 / T, V = D t1 t0 / T^2  (1 df; equals the
+#     single-stratum score test of calc_analyze_rate_ratio when k = 1).
+#   Homogeneity of the stratum rate ratios: (1) Woolf-type inverse-variance test of the
+#     log IRRs (Wald variance 1/d1 + 1/d0, strata with a zero count are left out);
+#     (2) a Breslow-Day-type test DERIVED here, not taken from a source: given each
+#     stratum's D, d1 ~ Binomial(D, p) with p = IRR t1 / (IRR t1 + t0); with IRR = IRR_MH the
+#     Pearson statistic sum (d1 - D p)^2 / (D p (1 - p)) is referred to chi-square on
+#     (strata with events - 1) df. Its size is checked by simulation in the unit tests.
+# Verification oracle: epiR::epi.2by2(method = "cohort.time") for IRR_MH, RD_MH and their
+# Wald limits (tests/testthat/test-calc_analyze_rates.R).
+
+.rate_parse_strata <- function(strata) {
+  m <- tryCatch(as.matrix(as.data.frame(strata)), error = function(e) NULL)
+  if (is.null(m) || ncol(m) < 4) stop("Give the strata as rows of four numbers: events and person-time (exposed), events and person-time (unexposed).")
+  m <- m[, 1:4, drop = FALSE]
+  storage.mode(m) <- "double"
+  colnames(m) <- c("d1", "t1", "d0", "t0")
+  k <- nrow(m)
+  if (k < 2) stop("Give at least 2 strata.")
+  if (k > 20) stop("At most 20 strata are supported.")
+  for (i in seq_len(k)) {
+    v <- m[i, ]
+    if (any(is.na(v)) || any(!is.finite(v))) stop(sprintf("Stratum %d: every entry must be a number.", i))
+    if (any(v[c(1, 3)] < 0) || any(v[c(1, 3)] != round(v[c(1, 3)]))) {
+      stop(sprintf("Stratum %d: the event counts must be non-negative whole numbers.", i))
+    }
+    if (any(v[c(2, 4)] <= 0)) stop(sprintf("Stratum %d: person-time must be positive in both groups.", i))
+  }
+  m
+}
+
+#' Mantel-Haenszel analysis of stratified person-time data
+#'
+#' @param strata Matrix or data frame, one row per stratum, columns d1, t1, d0, t0 (events and
+#'   person-time in the exposed group, then in the unexposed group).
+#' @param multiplier Rate differences are reported per this many person-time units.
+#' @param conf_level Confidence level.
+calc_analyze_rate_stratified <- function(strata, multiplier = 1000, conf_level = 0.95) {
+  m <- .rate_parse_strata(strata)
+  .rate_validate_time(multiplier, "The multiplier")
+  .validate_unit_interval(conf_level, "Confidence level")
+  k <- nrow(m)
+  d1 <- m[, "d1"]; t1 <- m[, "t1"]; d0 <- m[, "d0"]; t0 <- m[, "t0"]
+  dd <- d1 + d0; tt <- t1 + t0
+  if (sum(dd) == 0) stop("At least one event is needed.")
+  z <- stats::qnorm(1 - (1 - conf_level) / 2)
+
+  # Crude (collapsed) estimates
+  D1 <- sum(d1); D0 <- sum(d0); T1 <- sum(t1); T0 <- sum(t0)
+  # The crude interval is the exact conditional one of the two-group tool (what
+  # epiR::epi.2by2() reports as the crude rate-ratio interval); the Mantel-Haenszel
+  # interval below is a Wald interval on the log scale, so the two differ in method too.
+  crude_two <- calc_analyze_rate_ratio(D1, T1, D0, T0, multiplier, conf_level)
+  crude_irr <- crude_two$rate_ratio
+  crude_ci <- c(crude_two$rate_ratio_exact_lower, crude_two$rate_ratio_exact_upper)
+  crude_rd <- (D1 / T1 - D0 / T0) * multiplier
+  crude_rd_se <- sqrt(D1 / T1^2 + D0 / T0^2) * multiplier
+
+  # Mantel-Haenszel rate ratio
+  num <- sum(d1 * t0 / tt); den <- sum(d0 * t1 / tt)
+  mh_irr <- if (den > 0 && num > 0) num / den else NA_real_
+  mh_ci <- c(NA_real_, NA_real_)
+  if (!is.na(mh_irr)) {
+    v_ln <- sum(dd * t1 * t0 / tt^2) / (num * den)
+    mh_ci <- exp(log(mh_irr) + c(-1, 1) * z * sqrt(v_ln))
+  }
+  # Mantel-Haenszel rate difference
+  w <- t1 * t0 / tt
+  mh_rd <- sum((d1 * t0 - d0 * t1) / tt) / sum(w) * multiplier
+  mh_rd_se <- sqrt(sum(w^2 * (d1 / t1^2 + d0 / t0^2))) / sum(w) * multiplier
+
+  # CMH-type score test of IRR = 1
+  e <- dd * t1 / tt; v <- dd * t1 * t0 / tt^2
+  cmh <- if (sum(v) > 0) sum(d1 - e)^2 / sum(v) else NA_real_
+  cmh_p <- if (is.na(cmh)) NA_real_ else stats::pchisq(cmh, 1, lower.tail = FALSE)
+
+  # Homogeneity: Woolf type on the log rate ratios
+  ok <- d1 > 0 & d0 > 0
+  woolf <- woolf_p <- NA_real_; woolf_df <- NA_integer_
+  if (sum(ok) >= 2) {
+    ln <- log((d1[ok] / t1[ok]) / (d0[ok] / t0[ok])); wt <- 1 / (1 / d1[ok] + 1 / d0[ok])
+    woolf <- sum(wt * (ln - sum(wt * ln) / sum(wt))^2)
+    woolf_df <- sum(ok) - 1L
+    woolf_p <- stats::pchisq(woolf, woolf_df, lower.tail = FALSE)
+  }
+  # Homogeneity: Breslow-Day-type Pearson statistic (derived here; see header)
+  bd <- bd_p <- NA_real_; bd_df <- NA_integer_
+  hasd <- dd > 0
+  if (!is.na(mh_irr) && sum(hasd) >= 2) {
+    p <- mh_irr * t1[hasd] / (mh_irr * t1[hasd] + t0[hasd])
+    bd <- sum((d1[hasd] - dd[hasd] * p)^2 / (dd[hasd] * p * (1 - p)))
+    bd_df <- sum(hasd) - 1L
+    bd_p <- stats::pchisq(bd, bd_df, lower.tail = FALSE)
+  }
+
+  inputs <- list(multiplier = multiplier, conf_level = conf_level)
+  for (i in seq_len(k)) {
+    inputs[[paste0("d1_", i)]] <- d1[i]; inputs[[paste0("t1_", i)]] <- t1[i]
+    inputs[[paste0("d0_", i)]] <- d0[i]; inputs[[paste0("t0_", i)]] <- t0[i]
+  }
+  new_ss_result(list(
+    n_strata = k, events_total = sum(dd), person_time_total = sum(tt),
+    crude_rate_ratio = crude_irr, crude_rate_ratio_lower = crude_ci[1], crude_rate_ratio_upper = crude_ci[2],
+    mh_rate_ratio = mh_irr, mh_rate_ratio_lower = mh_ci[1], mh_rate_ratio_upper = mh_ci[2],
+    rate_ratio_change_percent = if (is.na(mh_irr) || is.na(crude_irr)) NA_real_ else 100 * (crude_irr - mh_irr) / mh_irr,
+    crude_rate_difference = crude_rd, crude_rate_difference_lower = crude_rd - z * crude_rd_se,
+    crude_rate_difference_upper = crude_rd + z * crude_rd_se,
+    mh_rate_difference = mh_rd, mh_rate_difference_lower = mh_rd - z * mh_rd_se,
+    mh_rate_difference_upper = mh_rd + z * mh_rd_se,
+    cmh_chisq = cmh, cmh_p = cmh_p,
+    woolf_chisq = woolf, woolf_df = woolf_df, woolf_p = woolf_p,
+    breslow_day_type_chisq = bd, breslow_day_type_df = bd_df, breslow_day_type_p = bd_p,
+    zero_count_strata = sum(!ok), multiplier = multiplier, inputs = inputs
+  ))
+}
+
+# Stratum-specific rates and rate ratios (exact conditional CI, as in the two-group tool and
+# epiR::epi.2by2()), rebuilt from the stored inputs for display.
+analyze_rate_strata_table <- function(result, labels = NULL) {
+  k <- result$n_strata
+  rows <- lapply(seq_len(k), function(i) {
+    g <- function(x) result$inputs[[paste0(x, "_", i)]]
+    d1 <- g("d1"); t1 <- g("t1"); d0 <- g("d0"); t0 <- g("t0")
+    if (d1 + d0 > 0) {
+      r <- calc_analyze_rate_ratio(d1, t1, d0, t0, result$multiplier, result$inputs$conf_level)
+      est <- r$rate_ratio; lo <- r$rate_ratio_exact_lower; hi <- r$rate_ratio_exact_upper
+    } else {
+      est <- lo <- hi <- NA_real_
+    }
+    data.frame(
+      stratum = if (!is.null(labels) && length(labels) >= i && nzchar(labels[i])) labels[i] else paste("Stratum", i),
+      d1 = d1, t1 = t1, d0 = d0, t0 = t0,
+      rate_exposed = d1 / t1 * result$multiplier, rate_unexposed = d0 / t0 * result$multiplier,
+      rate_ratio = est, rate_ratio_lower = lo, rate_ratio_upper = hi, stringsAsFactors = FALSE)
+  })
+  do.call(rbind, rows)
+}

@@ -209,6 +209,37 @@ test_that("Compare Two Groups: proportions list the interval methods side by sid
   expect_equal(ui_output_errors(app), 0)
 })
 
+test_that("Rates: stratified design gives the Mantel-Haenszel rate ratio next to the crude one", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Rates and Rate Ratios")
+  app$set_inputs(`analyze_rates-design` = "stratified")
+  app$wait_for_idle(800, timeout = 60000)
+  st <- ui_output_text(app, "analyze_rates-result")
+  expect_match(st, "Mantel-Haenszel adjusted")
+  expect_match(st, "2\\.16")                           # MH rate ratio 2.16 (= epiR::epi.2by2 cohort.time)
+  expect_match(st, "1\\.30 to 3\\.60")
+  expect_match(st, "Breslow-Day type")
+  expect_equal(ui_output_errors(app), 0)
+})
+
+test_that("Vaccine Efficacy: the three data types show their intervals side by side", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Vaccine Efficacy")
+  rk <- ui_output_text(app, "analyze_vaccine-result")
+  expect_match(rk, "Vaccine efficacy = 95\\.0%")
+  expect_match(rk, "Koopman score")
+  expect_match(rk, "90\\.0% to 97\\.5%")
+  app$set_inputs(`analyze_vaccine-design` = "rate")
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "analyze_vaccine-result"), "89\\.4% to 97\\.8%")
+  app$set_inputs(`analyze_vaccine-design` = "odds")
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "analyze_vaccine-result"), "Vaccine efficacy = 75\\.0%")
+  expect_equal(ui_output_errors(app), 0)
+})
+
 test_that("no JavaScript or Shiny errors accumulated while opening every module", {
   skip_if_no_ui()
   expect_equal(ui_console_errors(ui_driver()), character())

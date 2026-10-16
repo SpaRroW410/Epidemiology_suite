@@ -781,8 +781,44 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       Koopman, Hedges, Cumming & Finch and Fagerland et al. were confirmed by web search, the others (Newcombe, Miettinen-Nurminen, Mee, Welch) are cited as given in the
       DescTools/R documentation and were not independently web-checked. The original papers could not be read, so formulas are verified
       numerically against the packages above, not against the papers.
-    - **Still to do for item 13** (OpenEpi parity, in rough priority): stratified rate ratios, vaccine efficacy,
-      and analysis keywords in the free-text wizard.
+    - **Slice 9 done: stratified rate ratios and vaccine efficacy.**
+      *Stratified rates* (new design `stratified` of the Rates module, 2-8 strata of events and person-time):
+      Mantel-Haenszel rate ratio (Wald limits on the log scale, Greenland-Robins variance) and rate difference, the
+      crude (collapsed) estimates beside them with the percent change, stratum-specific rate ratios (exact
+      conditional CI), a Mantel-Haenszel-type score test and two homogeneity tests. *Vaccine efficacy* (new module
+      `analyze_vaccine`): VE = 1 - RR, limits = 1 minus the limits of the ratio with the ends swapped, for three data
+      types -- cases/participants (Koopman, Katz, adjusted log), cases/person-time (exact, mid-P, Wald), and
+      case-control / test-negative counts (Woolf, conditional exact) -- the methods shown side by side.
+    - **Slice 9 verification.** MH rate ratio, its limits, the MH rate difference with limits, the crude exact
+      interval and the stratum-specific exact intervals all equal `epiR::epi.2by2(method = "cohort.time")` to 1e-8.
+      The one-stratum limit equals the two-group tool, the score statistic of two identical strata is twice that of
+      one, the result is invariant to rescaling person-time, and the Woolf statistic equals a weighted
+      least-squares residual sum of squares (`lm`). A 3000-replicate simulation (slow lane) gives 95.0% coverage for
+      the MH interval and 4-5% rejection for the null score test and both homogeneity tests when the rate ratio is
+      common (about 60-150 events per stratum; with only ~12 events per stratum the Woolf test is conservative, 3.2%,
+      as is typical for it). VE limits equal 1 minus the limits of `calc_analyze_compare_proportions()` /
+      `calc_analyze_rate_ratio()`, a hand-built Clopper-Pearson interval mapped to VE, `fisher.test()` and the
+      Woolf formula; the risk ratio the VE is built from equals `epiR::epi.2by2(method = "cohort.count")`.
+    - **Honesty notes (slice 9).** (1) The *Breslow-Day-type homogeneity test for rate ratios is derived here* by
+      analogy with the odds-ratio test (Pearson statistic of the exposed events against their expectation under the
+      Mantel-Haenszel rate ratio, referred to chi-square on strata-with-events minus 1 df); it is labelled as derived
+      in the app and its size is checked only by simulation. (2) The Mantel-Haenszel rate-ratio and rate-difference
+      forms follow Rothman & Boice 1979 / Greenland & Robins 1985 (Biometrics 41:55-68) as implemented in epiR; the
+      original papers and *Modern Epidemiology* could not be read here, so no chapter is cited and the formulas
+      rest on the numerical agreement above. (3) For VE only Orenstein et al. 1985 (Bull World Health Organ
+      63:1055-1068) was confirmed by web search. The BNT162b2 trial (Polack et al. 2020) is **not** cited: its
+      primary interval was a Bayesian credible interval, not these confidence intervals. (4) VE here is crude -- no
+      adjustment for confounding, waning or misclassification, and the app says so; VE = 1 - OR from a case-control
+      study estimates 1 - RR only when controls represent the source population. The worked examples use
+      illustrative numbers and are labelled as such.
+    - **Free-text wizard: analysis keywords (done).** `design_free_text.R` now routes text that states analysis of
+      existing data outright ("2x2 table", Mantel-Haenszel, SMR, "analyze the counts I have", "from the summary
+      counts", "confidence interval for a proportion") to the Analyze branch, and a new `analyze_type` rule table picks
+      the sub-branch (stratified, standardization, vaccine, rates, paired/agreement, diagnostic, intervals, two-group
+      comparison, 2x2). Words like "vaccine efficacy" or "sensitivity" alone are deliberately *not* root cues, because
+      planning text uses them too (tested: "sample size for a vaccine efficacy trial" still routes to Compare).
+    - **Item 13 is complete** (nine slices). Not done, by choice: Ury-Wiggins SMR limits (constants unverifiable),
+      adjusted VE from models, stratified rate-ratio exact (conditional) intervals.
 14. **Planning tools** (Track B2) — randomization lists, attrition/non-response
     inflation, protocol text.
 15. **Shinylive feasibility spike** (Track D3) — decides the offline/APK path.

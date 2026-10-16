@@ -127,6 +127,46 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Rates and Rate Ratios",
        module_input_id = "analyze_rates-design", design_value = "ratio"),
 
+  list(key = "analyze_rate_stratified",
+       label = "Rates in several strata: Mantel-Haenszel rate ratio and rate difference (person-time)",
+       answers = paste(
+         "Answers: \"I have events and person-time for exposed and unexposed groups within strata of a confounder -- what is",
+         "the adjusted rate ratio and rate difference, and do the strata agree?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Rates and Rate Ratios",
+       module_input_id = "analyze_rates-design", design_value = "stratified"),
+
+  list(key = "analyze_vaccine_risk",
+       label = "Vaccine efficacy from cases and participants (attack rates): 1 - risk ratio",
+       answers = paste(
+         "Answers: \"I have cases and participants in a vaccinated and an unvaccinated group -- what is the vaccine efficacy",
+         "and its confidence interval (Koopman, Katz, adjusted log)?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Vaccine Efficacy",
+       module_input_id = "analyze_vaccine-design", design_value = "risk"),
+
+  list(key = "analyze_vaccine_rate",
+       label = "Vaccine efficacy from cases and person-time (incidence rates): 1 - rate ratio",
+       answers = paste(
+         "Answers: \"I have cases and person-time in a vaccinated and an unvaccinated group -- what is the vaccine efficacy",
+         "and its confidence interval (exact, mid-P, Wald)?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Vaccine Efficacy",
+       module_input_id = "analyze_vaccine-design", design_value = "rate"),
+
+  list(key = "analyze_vaccine_odds",
+       label = "Vaccine effectiveness from a case-control or test-negative study: 1 - odds ratio",
+       answers = paste(
+         "Answers: \"I have vaccinated and unvaccinated cases and controls -- what is the vaccine effectiveness and its",
+         "confidence interval (Woolf, exact)?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Vaccine Efficacy",
+       module_input_id = "analyze_vaccine-design", design_value = "odds"),
+
 
   list(key = "analyze_mh_cohort",
        label = "Stratified 2x2 tables: Mantel-Haenszel adjusted OR, RR, RD (cohort / trial)",
@@ -2023,7 +2063,8 @@ study_design_families <- list(
                          "analyze_dx_single", "analyze_dx_combined",
                          "analyze_ci_proportion", "analyze_ci_mean",
                          "analyze_mh_cohort", "analyze_mh_case_control",
-                         "analyze_rate_single", "analyze_rate_ratio",
+                         "analyze_rate_single", "analyze_rate_ratio", "analyze_rate_stratified",
+                         "analyze_vaccine_risk", "analyze_vaccine_rate", "analyze_vaccine_odds",
                          "analyze_mcnemar", "analyze_kappa", "analyze_trend",
                          "analyze_std_direct", "analyze_std_indirect", "analyze_std_smr",
                          "analyze_compare_proportions", "analyze_compare_means")),
@@ -2207,8 +2248,11 @@ test_families <- list(
        hint = "McNemar's test and matched-pair odds ratio for paired binary data, Cohen's kappa (unweighted or weighted) for agreement, and the chi-square test for trend across ordered groups, from counts.",
        catalog_keys = c("analyze_mcnemar", "analyze_kappa", "analyze_trend")),
   list(id = "analyze_rates_tests", label = "Rates and Rate Ratios (person-time)",
-       hint = "Confidence interval for an incidence rate, and the rate ratio, rate difference, attributable fractions and tests for two groups, from events and person-time.",
-       catalog_keys = c("analyze_rate_single", "analyze_rate_ratio")),
+       hint = "Confidence interval for an incidence rate, the rate ratio, rate difference, attributable fractions and tests for two groups, and Mantel-Haenszel adjusted rate ratio and difference over strata, from events and person-time.",
+       catalog_keys = c("analyze_rate_single", "analyze_rate_ratio", "analyze_rate_stratified")),
+  list(id = "analyze_vaccine_tests", label = "Vaccine Efficacy (from counts)",
+       hint = "Vaccine efficacy or effectiveness (1 - relative risk) with confidence intervals by several methods, from attack rates, from incidence rates, or from a case-control / test-negative study.",
+       catalog_keys = c("analyze_vaccine_risk", "analyze_vaccine_rate", "analyze_vaccine_odds")),
   list(id = "analyze_mh_tests", label = "Stratified Analysis (Mantel-Haenszel)",
        hint = "Mantel-Haenszel adjusted odds ratio, risk ratio and risk difference over 2-8 strata, the Cochran-Mantel-Haenszel test and Woolf / Breslow-Day / Tarone homogeneity tests.",
        catalog_keys = c("analyze_mh_cohort", "analyze_mh_case_control")),

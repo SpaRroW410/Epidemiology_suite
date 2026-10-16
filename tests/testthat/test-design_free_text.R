@@ -101,3 +101,20 @@ test_that("every option_index referenced by a free-text rule exists at that node
     }
   }
 })
+
+test_that("analysis phrasing reaches the Analyze branch, and planning phrasing is not hijacked", {
+  r <- walk_free_text("I want to analyze the counts I have: a 2x2 table with an odds ratio")
+  expect_equal(r$trace[[1]]$answer, design_nodes$root$options[[10]]$label)
+  expect_equal(r$node_id, "analyze_design")           # 2x2 -> asks how subjects were sampled; no rule there
+  r <- walk_free_text("Mantel-Haenszel analysis of stratified tables")
+  expect_equal(r$node_id, "analyze_mh_design")
+  r <- walk_free_text("analyze the counts: standardized mortality ratio (SMR) for a cohort")
+  expect_equal(r$node_id, "analyze_std_type")
+  r <- walk_free_text("analyze the counts I already have for vaccine efficacy")
+  expect_equal(r$node_id, "analyze_vaccine_type")
+  r <- walk_free_text("from the summary counts, rate ratio per person-years")
+  expect_equal(r$node_id, "analyze_rate_type")
+  # planning texts that merely mention analysis-sounding words keep their old route
+  expect_equal(walk_free_text("sample size for a vaccine efficacy trial, randomized")$trace[[1]]$answer, design_nodes$root$options[[2]]$label)
+  expect_equal(walk_free_text("estimate sensitivity and specificity against a gold standard")$trace[[1]]$answer, design_nodes$root$options[[4]]$label)
+})

@@ -134,3 +134,92 @@ test_that("display table lists four single-rate methods; results are ss_result o
   r <- calc_analyze_rate_single(7, 1000)
   expect_equal(nrow(analyze_rate_single_table(r)), 4); expect_s3_class(r, "ss_result"); expect_s3_class(feychting(), "ss_result")
 })
+
+# ---- stratified rates (Mantel-Haenszel) -------------------------------------------------------
+strat3 <- rbind(c(20, 3000, 10, 4000), c(12, 2000, 8, 2500), c(5, 1000, 9, 3000))   # d1, t1, d0, t0
+
+test_that("stratified: Mantel-Haenszel rate ratio and rate difference with Wald limits equal epiR::epi.2by2(cohort.time)", {
+  skip_if_not_installed("epiR")
+  arr <- array(NA_real_, dim = c(2, 2, 3), dimnames = list(c("E+", "E-"), c("D", "T"), paste0("s", 1:3)))
+  for (i in 1:3) arr[, , i] <- matrix(c(strat3[i, 1], strat3[i, 3], strat3[i, 2], strat3[i, 4]), 2)
+  e <- suppressWarnings(suppressMessages(epiR::epi.2by2(as.table(arr), method = "cohort.time")))
+  r <- calc_analyze_rate_stratified(strat3, multiplier = 100)       # epiR reports the difference per 100
+  expect_equal(c(r$mh_rate_ratio, r$mh_rate_ratio_lower, r$mh_rate_ratio_upper), as.numeric(e$massoc.detail$IRR.mh.wald[1, ]), tolerance = 1e-8)
+  expect_equal(c(r$mh_rate_difference, r$mh_rate_difference_lower, r$mh_rate_difference_upper),
+               as.numeric(e$massoc.detail$ARate.mh.wald[1, ]), tolerance = 1e-8)
+  expect_equal(c(r$crude_rate_ratio, r$crude_rate_ratio_lower, r$crude_rate_ratio_upper), as.numeric(e$massoc.detail$IRR.crude.wald[1, ]), tolerance = 1e-8)
+  tb <- analyze_rate_strata_table(r)
+  expect_equal(as.matrix(tb[, c("rate_ratio", "rate_ratio_lower", "rate_ratio_upper")]), unname(as.matrix(e$massoc.detail$IRR.strata.wald)), ignore_attr = TRUE, tolerance = 1e-8)
+})
+
+test_that("stratified: closed forms, the one-stratum limit and invariance to rescaling person-time", {
+  r <- calc_analyze_rate_stratified(strat3)
+  tt <- rowSums(strat3[, c(2, 4)])
+  expect_equal(r$mh_rate_ratio, sum(strat3[, 1] * strat3[, 4] / tt) / sum(strat3[, 3] * strat3[, 2] / tt))
+  # two identical strata give the same rate ratio as one of them
+  one <- calc_analyze_rate_ratio(20, 3000, 10, 4000)
+  two <- calc_analyze_rate_stratified(rbind(strat3[1, ], strat3[1, ]))
+  expect_equal(two$mh_rate_ratio, one$rate_ratio, tolerance = 1e-12)
+  # the CMH-type score test of one stratum is the score test of the two-group tool; of two identical strata it is ~ twice that
+  expect_equal(calc_analyze_rate_stratified(rbind(strat3[1, ], strat3[1, ]))$cmh_chisq, 2 * one$score_chisq, tolerance = 1e-10)
+  # person-time in other units changes nothing
+  s2 <- strat3; s2[, c(2, 4)] <- s2[, c(2, 4)] / 365.25
+  r2 <- calc_analyze_rate_stratified(s2)
+  expect_equal(c(r2$mh_rate_ratio, r2$mh_rate_ratio_lower, r2$cmh_chisq, r2$woolf_chisq), c(r$mh_rate_ratio, r$mh_rate_ratio_lower, r$cmh_chisq, r$woolf_chisq), tolerance = 1e-10)
+  # rate difference scales with the multiplier
+  expect_equal(calc_analyze_rate_stratified(strat3, multiplier = 1000)$mh_rate_difference,
+               10 * calc_analyze_rate_stratified(strat3, multiplier = 100)$mh_rate_difference)
+})
+
+test_that("stratified: Woolf homogeneity statistic equals a weighted least-squares residual sum of squares", {
+  r <- calc_analyze_rate_stratified(strat3)
+  y <- log((strat3[, 1] / strat3[, 2]) / (strat3[, 3] / strat3[, 4])); w <- 1 / (1 / strat3[, 1] + 1 / strat3[, 3])
+  fit <- lm(y ~ 1, weights = w)
+  expect_equal(r$woolf_chisq, sum(w * residuals(fit)^2), tolerance = 1e-10)
+  expect_equal(r$woolf_df, 2L)
+  expect_equal(r$woolf_p, pchisq(r$woolf_chisq, 2, lower.tail = FALSE))
+})
+
+test_that("stratified: strongly heterogeneous strata are flagged by both homogeneity tests", {
+  r <- calc_analyze_rate_stratified(rbind(c(60, 1000, 10, 1000), c(10, 1000, 60, 1000), c(30, 1000, 30, 1000)))
+  expect_lt(r$woolf_p, 1e-6); expect_lt(r$breslow_day_type_p, 1e-6)
+})
+
+test_that("stratified: zero counts are handled, never invented", {
+  r <- calc_analyze_rate_stratified(rbind(c(0, 500, 0, 600), c(4, 800, 2, 900), c(3, 300, 0, 400)))
+  expect_true(is.finite(r$mh_rate_ratio))                 # an empty stratum contributes nothing
+  expect_equal(r$zero_count_strata, 2)
+  expect_true(is.na(r$woolf_chisq))                       # only one stratum has both counts > 0
+  expect_true(is.na(calc_analyze_rate_stratified(rbind(c(3, 100, 0, 100), c(2, 100, 0, 100)))$mh_rate_ratio))
+  expect_error(calc_analyze_rate_stratified(rbind(c(0, 100, 0, 100), c(0, 100, 0, 100))), "At least one event")
+  tb <- analyze_rate_strata_table(calc_analyze_rate_stratified(rbind(c(0, 500, 0, 600), c(4, 800, 2, 900))))
+  expect_true(is.na(tb$rate_ratio[1]))
+})
+
+test_that("stratified: input is validated", {
+  expect_error(calc_analyze_rate_stratified(rbind(c(1, 10, 1, 10))), "at least 2 strata")
+  expect_error(calc_analyze_rate_stratified(rbind(c(1, 10, 1, 10), c(1.5, 10, 1, 10))), "whole numbers")
+  expect_error(calc_analyze_rate_stratified(rbind(c(1, 0, 1, 10), c(1, 10, 1, 10))), "person-time must be positive")
+  expect_error(calc_analyze_rate_stratified(rbind(c(1, 10, 1, 10), c(NA, 10, 1, 10))), "must be a number")
+  expect_error(calc_analyze_rate_stratified(strat3, conf_level = 1.2))
+})
+
+test_that("stratified (simulation): MH interval covers, the CMH test and both homogeneity tests have about nominal size", {
+  skip_if_not_slow()
+  set.seed(2026)
+  t1 <- c(3000, 2000, 1000) * 5; t0 <- c(4000, 2500, 3000) * 5; base <- c(0.002, 0.003, 0.004); theta <- 1.8   # ~ 60-150 events per stratum
+  reps <- 3000
+  res <- replicate(reps, {
+    r <- calc_analyze_rate_stratified(cbind(rpois(3, base * theta * t1), t1, rpois(3, base * t0), t0))
+    c(r$mh_rate_ratio_lower <= theta && theta <= r$mh_rate_ratio_upper, r$woolf_p < 0.05, r$breslow_day_type_p < 0.05)
+  })
+  # absolute tolerances: the Monte Carlo SE of a rate near 0.05 with 3000 replicates is about 0.004
+  expect_lt(abs(mean(res[1, ]) - 0.95), 0.015)
+  expect_lt(abs(mean(res[2, ], na.rm = TRUE) - 0.05), 0.015)
+  expect_lt(abs(mean(res[3, ], na.rm = TRUE) - 0.05), 0.015)
+  null <- replicate(reps, {
+    r <- calc_analyze_rate_stratified(cbind(rpois(3, base * t1), t1, rpois(3, base * t0), t0))
+    r$cmh_p < 0.05
+  })
+  expect_lt(abs(mean(null) - 0.05), 0.015)
+})

@@ -80,6 +80,7 @@ design_nodes <- list(
       list(label = "Paired data, agreement between raters, or a trend across ordered groups (McNemar, kappa, chi-square for trend)", next_id = "analyze_paired_type"),
       list(label = "Rates for populations with different age structures: standardized rates or an SMR", next_id = "analyze_std_type"),
       list(label = "Compare two groups from summary figures: two proportions (difference, ratio, odds ratio) or two means", next_id = "analyze_compare_type"),
+      list(label = "Vaccine efficacy or effectiveness (1 - relative risk) from a trial, cohort or case-control study", next_id = "analyze_vaccine_type"),
       list(label = "A diagnostic test (sensitivity, specificity, PPV, NPV from a test-by-disease table)", next_id = "term_analyze_dx_single"),
       list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined"),
       list(label = "A confidence interval for a proportion, or for a mean and standard deviation", next_id = "analyze_ci_type")
@@ -115,12 +116,23 @@ design_nodes <- list(
     )
   ),
 
+  analyze_vaccine_type = list(
+    id = "analyze_vaccine_type", stage = 1,
+    question = "What data do you have for the vaccine comparison?",
+    options = list(
+      list(label = "Cases and number of participants in a vaccinated and an unvaccinated group (attack rates)", next_id = "term_analyze_vaccine_risk"),
+      list(label = "Cases and person-time in each group (incidence rates)", next_id = "term_analyze_vaccine_rate"),
+      list(label = "Vaccinated and unvaccinated cases and controls (case-control or test-negative design)", next_id = "term_analyze_vaccine_odds")
+    )
+  ),
+
   analyze_rate_type = list(
     id = "analyze_rate_type", stage = 1,
     question = "What do you want to do with your events and person-time?",
     options = list(
       list(label = "A confidence interval for one incidence rate", next_id = "term_analyze_rate_single"),
-      list(label = "Compare two groups: rate ratio, rate difference, attributable fractions", next_id = "term_analyze_rate_ratio")
+      list(label = "Compare two groups: rate ratio, rate difference, attributable fractions", next_id = "term_analyze_rate_ratio"),
+      list(label = "Compare two groups within strata of a confounder: adjusted (Mantel-Haenszel) rate ratio and rate difference", next_id = "term_analyze_rate_stratified")
     )
   ),
 
@@ -819,6 +831,10 @@ design_nodes <- list(
   term_analyze_kappa = .term("term_analyze_kappa", "Cohen's kappa agreement", "analyze_kappa"),
   term_analyze_trend = .term("term_analyze_trend", "Chi-square test for trend", "analyze_trend"),
   term_analyze_rate_single = .term("term_analyze_rate_single", "Confidence interval for an incidence rate", "analyze_rate_single"),
+  term_analyze_rate_stratified = .term("term_analyze_rate_stratified", "Mantel-Haenszel rate ratio over strata", "analyze_rate_stratified"),
+  term_analyze_vaccine_risk = .term("term_analyze_vaccine_risk", "Vaccine efficacy from attack rates", "analyze_vaccine_risk"),
+  term_analyze_vaccine_rate = .term("term_analyze_vaccine_rate", "Vaccine efficacy from person-time rates", "analyze_vaccine_rate"),
+  term_analyze_vaccine_odds = .term("term_analyze_vaccine_odds", "Vaccine effectiveness from a case-control study", "analyze_vaccine_odds"),
   term_analyze_rate_ratio = .term("term_analyze_rate_ratio", "Rate ratio and rate difference from person-time", "analyze_rate_ratio"),
   term_analyze_mh_cohort = .term("term_analyze_mh_cohort", "Mantel-Haenszel, cohort / trial / cross-sectional", "analyze_mh_cohort"),
   term_analyze_mh_case_control = .term("term_analyze_mh_case_control", "Mantel-Haenszel, case-control", "analyze_mh_case_control"),

@@ -9,7 +9,8 @@
 # would otherwise click, and it stops the instant no rule matches, handing
 # control back to the manual wizard exactly where it left off.
 #
-# Coverage is deliberately partial: rules exist for the Stage-1 root branch,
+# Coverage is deliberately partial: rules exist for the Stage-1 root branch (including an
+# explicit-analysis cue for the Analyze branch and its sub-branch table),
 # the estimation sub-branch, and the comparison path (allocation ->
 # selection basis -> case-control matching -> outcome type -> groups ->
 # dependence) -- the phrasing patterns the algorithm doc itself discusses.
@@ -20,7 +21,13 @@
 
 free_text_rules <- list(
 
+  # Analysis of counts the user already has. Checked first, but only on phrases that
+  # state analysis of existing data outright ("2x2 table", Mantel-Haenszel, SMR,
+  # "analyze the counts I have"): words such as "vaccine efficacy" or "sensitivity"
+  # alone also occur in planning text and must not be hijacked.
   root = list(
+    list(pattern = "analy[sz]e (the |my |our )?(counts|summary|data (i|we) (already )?(have|collected))|already (have|collected) (the )?(counts|data|numbers)|from (the )?(summary )?counts|\\b2\\s?x\\s?2 table|mantel.?haenszel|standardi[sz]ed mortality ratio|\\bsmr\\b|confidence interval (for|of) (a |the |an )?(proportion|mean|rate|incidence)",
+         option_index = 10, confidence = "Medium"),
     list(pattern = "qualitative|in-depth interview|\\bfgd\\b|focus group|thematic",
          option_index = 6, confidence = "High"),
     list(pattern = "validity of|accuracy of|sensitivity|specificity|gold standard|index test",
@@ -38,6 +45,19 @@ free_text_rules <- list(
          option_index = 2, confidence = "Medium"),
     list(pattern = "prevalence of|estimate the|proportion of|magnitude of|assess the burden|mean level of|to determine the level|incidence rate of",
          option_index = 1, confidence = "High")
+  ),
+
+  analyze_type = list(
+    list(pattern = "mantel.?haenszel|stratif|confound",                              option_index = 2, confidence = "High"),
+    list(pattern = "\\bsmr\\b|standardi[sz]ed|age.?adjusted|direct standardi|indirect standardi", option_index = 5, confidence = "High"),
+    list(pattern = "vaccine (efficacy|effectiveness)|\\bve\\b",                       option_index = 7, confidence = "High"),
+    list(pattern = "person.?(years|time)|incidence rate|rate ratio",                 option_index = 3, confidence = "High"),
+    list(pattern = "mcnemar|\\bkappa\\b|agreement|chi.?square for trend|cochran.?armitage|paired", option_index = 4, confidence = "High"),
+    list(pattern = "serial|parallel",                                                option_index = 9, confidence = "Medium"),
+    list(pattern = "sensitivity|specificity|\\bppv\\b|\\bnpv\\b|predictive value",   option_index = 8, confidence = "High"),
+    list(pattern = "confidence interval (for|of)",                                   option_index = 10, confidence = "Medium"),
+    list(pattern = "two (proportions|means|groups)|difference (in|of|between) (two )?(proportions|means)", option_index = 6, confidence = "Medium"),
+    list(pattern = "\\b2\\s?x\\s?2\\b|risk ratio|relative risk|odds ratio|risk difference", option_index = 1, confidence = "High")
   ),
 
   est_type = list(

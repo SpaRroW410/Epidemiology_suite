@@ -90,5 +90,50 @@ analyze_rates_content <- list(
       "stats::poisson.test()."
     ),
     backend = "closed forms (conditional binomial, Wald, delta method); verified against epiR::epi.2by2(), poisson.test() and prop.test()"
+  ),
+  stratified = list(
+    title = "Stratified rates: Mantel-Haenszel rate ratio and rate difference",
+    formula_latex = paste0(
+      "$$\\widehat{IRR}_{MH}=\\frac{\\sum_i d_{1i}T_{0i}/T_i}{\\sum_i d_{0i}T_{1i}/T_i},\\qquad ",
+      "\\operatorname{Var}\\{\\ln\\widehat{IRR}_{MH}\\}=\\frac{\\sum_i D_iT_{1i}T_{0i}/T_i^2}",
+      "{\\left(\\sum_i d_{1i}T_{0i}/T_i\\right)\\left(\\sum_i d_{0i}T_{1i}/T_i\\right)}$$",
+      "$$\\widehat{RD}_{MH}=\\frac{\\sum_i (d_{1i}T_{0i}-d_{0i}T_{1i})/T_i}{\\sum_i T_{1i}T_{0i}/T_i},\\qquad ",
+      "\\chi^2_{MH}=\\frac{\\{\\sum_i (d_{1i}-D_iT_{1i}/T_i)\\}^2}{\\sum_i D_iT_{1i}T_{0i}/T_i^2}\\ \\ (1\\text{ df})$$"
+    ),
+    explanation = paste(
+      "Enter events and person-time for the **exposed** and the **unexposed** group in each **stratum** (2-8 levels of a",
+      "confounder such as age band or sex). The app combines the strata into one **Mantel-Haenszel rate ratio** and one",
+      "Mantel-Haenszel **rate difference**, each with a Wald confidence interval, and shows them next to the **crude**",
+      "(collapsed) rate ratio so you can see how much the stratifying variable changes the answer.",
+      "",
+      "- The **Cochran-Mantel-Haenszel-type score test** tests that the common rate ratio is 1.",
+      "- Two tests check whether the stratum rate ratios agree (**effect modification**). The **Woolf-type** test compares",
+      "  the stratum log rate ratios by inverse variance (strata with a zero count cannot enter it). The **Breslow-Day-type**",
+      "  test is **derived here** by analogy with the odds-ratio test and is *not* taken from a published source: it compares",
+      "  each stratum's exposed events with the number expected under the Mantel-Haenszel rate ratio. Both are checked by",
+      "  simulation in the unit tests (about 5% rejections when the rate ratio really is common).",
+      "- If a homogeneity test is significant, report the stratum-specific rate ratios instead of (or beside) the pooled one.",
+      "- The crude interval is the exact conditional one; the adjusted interval is a Wald interval on the log scale, so the",
+      "  two differ in method as well as in adjustment. A stratum with no events at all contributes nothing.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Three strata of exposed vs unexposed (events / person-time): 20/3000 vs 10/4000, 12/2000 vs 8/2500 and 5/1000 vs",
+      "9/3000. Crude rate ratio 2.17 (exact 95% CI 1.29 to 3.71); **Mantel-Haenszel rate ratio 2.16 (1.30 to 3.60)**; the",
+      "rate difference is 3.29 per 1000 person-years (1.03 to 5.55). These equal `epiR::epi.2by2(method = \"cohort.time\")`.",
+      "The data are illustrative (they are the example used to check the code), not from a published study.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Rothman KJ, Boice JD. Epidemiologic Analysis with a Programmable Calculator. NIH Publication 79-1649; 1979",
+      "(Mantel-Haenszel estimator for rates); Greenland S, Robins JM. Estimation of a common",
+      "effect parameter from sparse follow-up data. Biometrics 1985;41:55-68 (variance of the log rate ratio);",
+      "Rothman KJ, Greenland S, Lash TL. Modern Epidemiology. 3rd ed. Lippincott Williams & Wilkins; 2008 (stratified analysis of rates; the book could not be consulted, so no chapter is cited);",
+      "Woolf B. Ann Hum Genet 1955;19:251-253",
+      "(inverse-variance homogeneity test). The variance and test forms were verified numerically against",
+      "epiR::epi.2by2(method = 'cohort.time') and by simulation; the originals could not be read, and the",
+      "Breslow-Day-type rate test is derived, not cited."
+    ),
+    backend = "closed forms; Mantel-Haenszel rate ratio / rate difference and limits verified against epiR::epi.2by2(method = 'cohort.time'); homogeneity tests by simulation"
   )
 )
