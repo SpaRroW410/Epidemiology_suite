@@ -183,7 +183,11 @@ test_that("Standardization and SMR: the published direct example, a two-group co
   expect_match(ind, "1\\.115")
   app$set_inputs(`analyze_std-design` = "smr")
   app$wait_for_idle(800, timeout = 60000)
-  expect_match(ui_output_text(app, "analyze_std-result"), "0\\.8470")   # exact lower limit, = poisson.test(58, 52)
+  smr <- ui_output_text(app, "analyze_std-result")
+  expect_match(smr, "0\\.8470")                                          # exact lower limit, = poisson.test(58, 52)
+  expect_match(smr, "Rothman-Greenland")                                   # the side-by-side comparison of interval methods
+  expect_match(smr, "Vandenbroucke")
+  expect_match(smr, "Byar approximation")
   expect_equal(ui_output_errors(app), 0)
 })
 

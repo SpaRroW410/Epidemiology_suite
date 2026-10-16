@@ -136,3 +136,80 @@ test_that("strata display table and results are well formed", {
   expect_equal(tb$standard_weight, c(0.5, 0.5)); expect_equal(sum(tb$contribution), ed()$standardized_rate)
   expect_s3_class(ed(), "ss_result"); expect_s3_class(calc_analyze_smr(5, 4), "ss_result")
 })
+
+# ---- SMR: several interval methods side by side ----------------------------------------------
+# Reference values computed with epiR 3.0.0's epi.smr() (CRAN, 13 Oct 2026; the version in this project's
+# renv.lock predates epi.smr) for each (O, E): Byar CI and test, Rothman-Greenland, Vandenbroucke (95%),
+# chi-square test, and -- for O <= 5, where epi.smr allows it -- the mid-P CI and p-value.
+epi_smr_ref <- list(
+  list(o = 4,   e = 3.3, byar = c(0.32610618, 3.1032584), byar_z = 0.20600097, byar_p = 0.83679016, rg = c(0.45493074, 3.2295858),
+       van = c(0.31528386, 2.6909978), chi = c(0.14848485, 0.69998752), mid = c(0.38513966, 2.9237665), mid_p = 0.65707143),
+  list(o = 5,   e = 2.1, byar = c(0.76730844, 5.5562686), byar_z = 1.5354444, byar_p = 0.1246747, rg = c(0.9910186, 5.7203106),
+       van = c(0.75131048, 4.9252273), chi = c(4.0047619, 0.045371905), mid = c(0.87237791, 5.2773436), mid_p = 0.082575195),
+  list(o = 2,   e = 7.5, byar = c(0.029950028, 0.96278253), byar_z = -2.0485615, byar_p = 0.040505012, rg = c(0.066692708, 1.0662502),
+       van = c(0.025140941, 0.76428965), chi = c(4.0333333, 0.044609718), mid = c(0.044709798, 0.88106124), mid_p = 0.024957932),
+  list(o = 12,  e = 8.2, byar = c(0.75530608, 2.5564461), byar_z = 1.1425329, byar_p = 0.2532326, rg = c(0.83108735, 2.5768439),
+       van = c(0.75254272, 2.4085218), chi = c(1.7609756, 0.18450287)),
+  list(o = 58,  e = 52,  byar = c(0.84690802, 1.4419191), byar_z = 0.77291451, byar_p = 0.43957298, rg = c(0.86229608, 1.442756),
+       van = c(0.84680238, 1.420904), chi = c(0.69230769, 0.40538056)),
+  list(o = 25,  e = 10,  byar = c(1.6174266, 3.6906451), byar_z = 3.8812388, byar_p = 0.00010392572, rg = c(1.6892725, 3.6998176),
+       van = c(1.6160545, 3.5760185), chi = c(22.5, 2.101436e-06)))
+
+test_that("SMR interval methods and tests equal epiR 3.0.0's epi.smr() reference values", {
+  for (cs in epi_smr_ref) {
+    r <- calc_analyze_smr(cs$o, cs$e); info <- paste(cs$o, cs$e)
+    expect_equal(c(r$smr_byar_lower, r$smr_byar_upper), cs$byar, tolerance = 1e-6, info = info)
+    expect_equal(c(r$byar_z, r$byar_test_p), c(cs$byar_z, cs$byar_p), tolerance = 1e-6, info = info)
+    expect_equal(c(r$smr_rothman_greenland_lower, r$smr_rothman_greenland_upper), cs$rg, tolerance = 1e-6, info = info)
+    expect_equal(c(r$smr_vandenbroucke_lower, r$smr_vandenbroucke_upper), cs$van, tolerance = 1e-6, info = info)
+    expect_equal(c(r$chisq, r$chisq_p), cs$chi, tolerance = 1e-6, info = info)
+    if (!is.null(cs$mid)) {
+      # epiR solves for the limits with uniroot()'s default tolerance (~1e-4); ours is solved to 1e-12 and
+      # checked against the defining equation in an earlier test, so agree to 1e-4 only
+      expect_equal(c(r$smr_mid_p_lower, r$smr_mid_p_upper), cs$mid, tolerance = 1e-4, info = info)
+      expect_equal(r$mid_p_test_p, cs$mid_p, tolerance = 1e-6, info = info)
+    }
+  }
+})
+
+test_that("epiR's own documented SMR example (4 observed, 3.3 expected, mid-P) is reproduced: 1.2 (95% CI 0.38 to 2.9), p = 0.657", {
+  r <- calc_analyze_smr(4, 3.3)
+  expect_equal(round(c(r$smr, r$smr_mid_p_lower, r$smr_mid_p_upper), 2), c(1.21, 0.39, 2.92))   # epiR's text rounds 0.385 -> 0.38
+  expect_equal(round(r$mid_p_test_p, 3), 0.657)
+})
+
+test_that("SMR intervals agree with DescTools::PoissonCI(): exact, and the a + 1/2 Byar form is a different (also published) variant", {
+  skip_if_not_installed("DescTools")
+  for (oe in list(c(4, 3.3), c(12, 8.2), c(58, 52), c(25, 10))) {
+    r <- calc_analyze_smr(oe[1], oe[2])
+    ex <- DescTools::PoissonCI(oe[1], n = 1, method = "exact")
+    expect_equal(c(r$smr_exact_lower, r$smr_exact_upper), unname(ex[1, c("lwr.ci", "upr.ci")]) / oe[2], tolerance = 1e-8)
+  }
+})
+
+test_that("Byar tracks the exact limits closely for O >= 12; Rothman-Greenland is undefined at O = 0; limits are never negative", {
+  for (oe in list(c(12, 8.2), c(58, 52), c(130, 140), c(25, 10))) {
+    r <- calc_analyze_smr(oe[1], oe[2])
+    expect_equal(r$smr_byar_lower, r$smr_exact_lower, tolerance = 0.01); expect_equal(r$smr_byar_upper, r$smr_exact_upper, tolerance = 0.01)
+  }
+  z <- calc_analyze_smr(0, 2.4)
+  expect_true(is.na(z$smr_rothman_greenland_lower) && is.na(z$smr_rothman_greenland_upper))
+  expect_equal(c(z$smr_exact_lower, z$smr_mid_p_lower, z$smr_byar_lower, z$smr_vandenbroucke_lower, z$smr_wald_lower), rep(0, 5))
+  expect_equal(z$smr_wald_upper, 0)   # the Wald interval's zero-width failure at O = 0
+  for (oe in list(c(1, 0.9), c(2, 7.5), c(0, 5)))
+    expect_true(all(unlist(calc_analyze_smr(oe[1], oe[2])[c("smr_exact_lower", "smr_byar_lower", "smr_vandenbroucke_lower", "smr_wald_lower")]) >= 0))
+})
+
+test_that("method intervals are ordered as expected: exact is the widest of the exact family, all contain the SMR (O >= 12)", {
+  r <- calc_analyze_smr(25, 10)
+  expect_lt(r$smr_exact_lower, r$smr_mid_p_lower); expect_gt(r$smr_exact_upper, r$smr_mid_p_upper)
+  for (m in c("exact", "mid_p", "byar", "rothman_greenland", "vandenbroucke", "wald")) {
+    expect_true(r[[paste0("smr_", m, "_lower")]] < 2.5 && 2.5 < r[[paste0("smr_", m, "_upper")]], info = m)
+  }
+})
+
+test_that("SMR display table lists the six methods with notes", {
+  tb <- analyze_smr_table(calc_analyze_smr(58, 52))
+  expect_equal(nrow(tb), 6); expect_true(all(nzchar(tb$note)))
+  expect_match(tb$method[1], "Exact"); expect_match(tb$method[6], "Wald")
+})

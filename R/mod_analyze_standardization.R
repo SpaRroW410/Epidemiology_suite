@@ -191,21 +191,29 @@ mod_analyze_std_server <- function(id) {
       v <- res$value
       lvl <- sprintf("%.0f%%", 100 * v$inputs$conf_level)
 
-      smr_block <- function(v, with_expected_note) tagList(
-        tags$table(
-          class = "table table-sm",
-          tags$thead(tags$tr(tags$th("Measure"), tags$th("Value"))),
-          tags$tbody(
-            tags$tr(tags$td("Observed events"), tags$td(.fmt_s(v$observed))),
-            tags$tr(tags$td("Expected events"), tags$td(.fmt_s(v$expected))),
-            tags$tr(tags$td("SMR (observed / expected)"), tags$td(.fmt_s(v$smr))),
-            tags$tr(tags$td(paste0(lvl, " CI, exact (Garwood)")), tags$td(paste(.fmt_s(v$smr_exact_lower), "to", .fmt_s(v$smr_exact_upper)))),
-            tags$tr(tags$td(paste0(lvl, " CI, mid-P exact")), tags$td(paste(.fmt_s(v$smr_mid_p_lower), "to", .fmt_s(v$smr_mid_p_upper))))
-          )
-        ),
-        tags$ul(tags$li(sprintf("Test of SMR = 1: exact p = %s;  mid-P p = %s", .fmt_sp(v$exact_test_p), .fmt_sp(v$mid_p_test_p)))),
-        div(class = "text-muted", "The interval treats the expected count as fixed. SMRs of different groups are not strictly comparable with each other; compare each with 1, or use direct standardization.")
-      )
+      smr_block <- function(v) {
+        tb <- analyze_smr_table(v)
+        tagList(
+          p(sprintf("Observed %s, expected %s: SMR = %s.", .fmt_s(v$observed), .fmt_s(v$expected), .fmt_s(v$smr))),
+          tags$table(
+            class = "table table-sm",
+            tags$thead(tags$tr(tags$th("Interval method"), tags$th(paste0(lvl, " CI, lower")), tags$th("upper"), tags$th("Note"))),
+            tags$tbody(lapply(seq_len(nrow(tb)), function(i) {
+              tags$tr(tags$td(tb$method[i]), tags$td(.fmt_s(tb$lower[i])), tags$td(.fmt_s(tb$upper[i])),
+                      tags$td(class = "text-muted small", tb$note[i]))
+            }))
+          ),
+          div(class = "text-muted",
+              "The methods are shown side by side so you can compare them; none is the only correct one. With 5 or fewer observed events the exact and mid-P intervals are the usual choice; with more events the approximations agree closely with the exact one (see the Formula / Help tab for what each assumes)."),
+          h6("Tests of SMR = 1"),
+          tags$ul(
+            tags$li(sprintf("Exact Poisson test: p = %s;  mid-P exact: p = %s", .fmt_sp(v$exact_test_p), .fmt_sp(v$mid_p_test_p))),
+            tags$li(sprintf("Chi-square (O - E)^2 / E = %s (1 df): p = %s", .fmt_s(v$chisq), .fmt_sp(v$chisq_p))),
+            tags$li(sprintf("Byar's normal approximation: z = %s, p = %s", .fmt_s(v$byar_z), .fmt_sp(v$byar_test_p)))
+          ),
+          div(class = "text-muted", "The intervals treat the expected count as fixed. SMRs of different groups are not strictly comparable with each other; compare each with 1, or use direct standardization.")
+        )
+      }
 
       if (res$design == "direct") {
         per <- format(v$multiplier, big.mark = ",", scientific = FALSE)

@@ -123,7 +123,22 @@ analyze_dsr_strata_table <- function(events, person_time, standard, multiplier =
              rate = rate * multiplier, standard_weight = w, contribution = w * ifelse(is.na(rate), 0, rate) * multiplier)
 }
 
-#' Standardized mortality (morbidity) ratio from observed and expected events
+#' Standardized mortality (morbidity) ratio from observed and expected events, several interval methods
+#'
+#' Confidence intervals by six methods are returned side by side, so the user can compare them (no one of
+#' them is "the" interval; the choice depends on the count -- see the notes in the module). With O observed
+#' and E expected events (E treated as fixed, O as Poisson):
+#'   exact         [chi2_{a/2, 2O}/(2E), chi2_{1-a/2, 2(O+1)}/(2E)]  (Garwood; Liddell 1984; Ulm 1990)
+#'   mid-P exact   limits solving P(X > O) + P(X = O)/2 = a/2 and P(X < O) + P(X = O)/2 = a/2
+#'                 (Miettinen 1974; Rothman & Boice 1979)
+#'   Byar          O (1 - 1/(9O) - z/(3 sqrt O))^3 / E to (O + 1)(1 - 1/(9(O + 1)) + z/(3 sqrt(O + 1)))^3 / E
+#'                 (Byar, unpublished, as given by Rothman & Boice 1979 and Breslow & Day 1987; the form
+#'                 in epiR::epi.smr())
+#'   Rothman-Greenland  SMR exp(+/- z / sqrt O) (log-normal; Modern Epidemiology)
+#'   Vandenbroucke      (sqrt O -/+ z/2)^2 / E (square-root transformation; Am J Epidemiol 1982;115:303-304)
+#'   Wald          (O -/+ z sqrt O) / E, cut at 0 (the naive normal interval, shown for comparison)
+#' Tests of SMR = 1: exact Poisson, mid-P, chi-square (O - E)^2 / E (1 df) and Byar's normal-approximation
+#' statistic z = sqrt(9a')(1 - 1/(9a') - (E/a')^(1/3)), a' = O + 1 if O < E else O.
 #'
 #' @param observed Observed number of events (a whole number).
 #' @param expected Expected number of events (positive), e.g. from reference rates.
@@ -132,20 +147,51 @@ calc_analyze_smr <- function(observed, expected, conf_level = 0.95) {
   .rate_validate_count(observed, "Observed events")
   .rate_validate_time(expected, "Expected events")
   .validate_unit_interval(conf_level, "Confidence level")
-  alpha <- 1 - conf_level
-  exact <- c(if (observed == 0) 0 else stats::qchisq(alpha / 2, 2 * observed) / 2,
-             stats::qchisq(1 - alpha / 2, 2 * (observed + 1)) / 2) / expected
-  midp <- .rate_midp_poisson(observed, alpha) / expected
-  exact_p <- stats::poisson.test(observed, expected)$p.value
-  # mid-P two-sided: twice the smaller one-sided mid-P tail
-  up <- stats::ppois(observed, expected, lower.tail = FALSE) + 0.5 * stats::dpois(observed, expected)
-  lo <- (if (observed == 0) 0 else stats::ppois(observed - 1, expected)) + 0.5 * stats::dpois(observed, expected)
+  alpha <- 1 - conf_level; z <- stats::qnorm(1 - alpha / 2)
+  o <- observed; e <- expected
+
+  exact <- c(if (o == 0) 0 else stats::qchisq(alpha / 2, 2 * o) / 2, stats::qchisq(1 - alpha / 2, 2 * (o + 1)) / 2) / e
+  midp <- .rate_midp_poisson(o, alpha) / e
+  byar <- c(if (o == 0) 0 else o * (1 - 1 / (9 * o) - z / (3 * sqrt(o)))^3,
+            (o + 1) * (1 - 1 / (9 * (o + 1)) + z / (3 * sqrt(o + 1)))^3) / e
+  rg <- if (o > 0) (o / e) * exp(c(-1, 1) * z / sqrt(o)) else c(NA_real_, NA_real_)
+  van <- c(max(0, sqrt(o) - z / 2)^2, (sqrt(o) + z / 2)^2) / e
+  wald <- c(max(0, o - z * sqrt(o)), o + z * sqrt(o)) / e
+
+  exact_p <- stats::poisson.test(o, e)$p.value
+  up <- stats::ppois(o, e, lower.tail = FALSE) + 0.5 * stats::dpois(o, e)
+  lo <- (if (o == 0) 0 else stats::ppois(o - 1, e)) + 0.5 * stats::dpois(o, e)
+  chi <- (o - e)^2 / e
+  ap <- if (o < e) o + 1 else o
+  byar_z <- sqrt(9 * ap) * (1 - 1 / (9 * ap) - (e / ap)^(1 / 3))
+
   new_ss_result(list(
-    observed = observed, expected = expected, smr = observed / expected,
+    observed = o, expected = e, smr = o / e,
     smr_exact_lower = exact[1], smr_exact_upper = exact[2],
     smr_mid_p_lower = midp[1], smr_mid_p_upper = midp[2],
+    smr_byar_lower = byar[1], smr_byar_upper = byar[2],
+    smr_rothman_greenland_lower = rg[1], smr_rothman_greenland_upper = rg[2],
+    smr_vandenbroucke_lower = van[1], smr_vandenbroucke_upper = van[2],
+    smr_wald_lower = wald[1], smr_wald_upper = wald[2],
     exact_test_p = exact_p, mid_p_test_p = min(1, 2 * min(up, lo)),
-    inputs = list(observed = observed, expected = expected, conf_level = conf_level)
+    chisq = chi, chisq_p = stats::pchisq(chi, 1, lower.tail = FALSE),
+    byar_z = byar_z, byar_test_p = 2 * stats::pnorm(-abs(byar_z)),
+    inputs = list(observed = o, expected = e, conf_level = conf_level)
+  ))
+}
+
+# Display table for the SMR interval methods, in the order shown to the user.
+analyze_smr_table <- function(result) {
+  m <- function(label, key, note) data.frame(
+    method = label, lower = result[[paste0("smr_", key, "_lower")]], upper = result[[paste0("smr_", key, "_upper")]],
+    note = note, stringsAsFactors = FALSE)
+  do.call(rbind, list(
+    m("Exact (Garwood / Ulm)", "exact", "conservative; recommended when O is small (5 or fewer)"),
+    m("Mid-P exact", "mid_p", "exact, less conservative"),
+    m("Byar approximation", "byar", "close to the exact limits for moderate O"),
+    m("Rothman-Greenland (log)", "rothman_greenland", "approximate; undefined at O = 0"),
+    m("Vandenbroucke (square root)", "vandenbroucke", "approximate; shortcut"),
+    m("Wald (naive)", "wald", "for comparison only")
   ))
 }
 

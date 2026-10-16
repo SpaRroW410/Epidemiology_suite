@@ -713,7 +713,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       population; crude rate (exact CI) and directly standardized rate with the Fay-Feuer gamma CI;
       optionally a second group, with the ratio and difference of the two standardized rates.
       *Indirect*: person-time by stratum x reference rates -> expected events -> SMR. *SMR* from observed
-      and expected counts. SMR intervals: exact (Garwood) and mid-P; exact and mid-P tests of SMR = 1.
+      and expected counts. SMR intervals: six methods side by side (see below); four tests of SMR = 1.
     - **Slice 7 verification.** The published Thrusfield (2007) example from epiR's help page is
       reproduced to 7 digits (Glasgow standardized rate 0.2599, 95% CI 0.1964-0.3406, i.e. "26 (20 to 34)
       per 100 dog-years"); the direct rate, CI and crude rate equal `epiR::epi.directadj()` on four data
@@ -724,10 +724,34 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       studies (4%) -- **that comparison is derived here by the delta method, not from a cited source**.
     - **Deliberately not copied from epiR:** `epi.indirectadj()`'s SMR interval is the Poisson
       *quantile* of the observed count divided by the expected count (a discrete, non-standard interval,
-      e.g. 0.846-1.404 for 58/52 against the exact 0.847-1.442); this app uses the exact (Ulm/Garwood) and
-      mid-P intervals instead. `epi.conf(ctype = "smr")` does not compute O/E and was not used.
+      e.g. 0.846-1.404 for 58/52 against the exact 0.847-1.442); this app shows the exact (Ulm/Garwood), mid-P and
+      other published intervals instead. `epi.conf(ctype = "smr")` does not compute O/E and was not used.
       Also not offered: indirectly adjusted rates (SMR x standard crude rate), which need the standard
       population's own crude rate; SMRs of different groups are not comparable and the app says so.
+    - **SMR intervals: six methods side by side (added 16 Oct 2026 at the owner's request: "calculate it
+      by all methods, compare them side by side, and leave it to the user").** Exact (Garwood/Ulm/Liddell),
+      mid-P exact, Byar, Rothman-Greenland (log), Vandenbroucke (square root) and Wald (naive), with a note per
+      method, plus four tests of SMR = 1 (exact Poisson, mid-P, chi-square (O-E)^2/E, Byar's z).
+      *Citation search:* the existence, journal, volume and pages of Liddell 1984 (J Epidemiol Community Health
+      38:85-88), Ulm 1990 (Am J Epidemiol 131:373-375), Vandenbroucke 1982 (Am J Epidemiol 115:303-304, DOI
+      10.1093/oxfordjournals.aje.a113306), Ury & Wiggins 1985 (Am J Epidemiol 122:197-198), Miettinen 1974 (J Am
+      Stat Assoc 69:380-382) and Rothman & Boice 1979 (NIH Publication 79-1649, 129 pp.) were confirmed by web
+      search; Byar's limits are attributed to "Byar, unpublished" by Rothman & Boice (per the SEER documentation)
+      and appear in Breslow & Day 1987 vol. II. **The original papers could not be read** (no full text was
+      reachable from the sandbox), so the formulas were verified numerically instead: against **epiR 3.0.0's
+      `epi.smr()`** (a CRAN release newer than the one in renv.lock, so its values are hard-coded in the unit
+      test with their provenance), `stats::poisson.test()` and `DescTools::PoissonCI()`.
+    - **Found while doing this (reported, not worked around):** epiR 3.0.0's `epi.smr(method = "fisher")`
+      lower confidence limit differs from the exact (Garwood) lower limit -- 0.492 vs 0.330 for 4 observed / 3.3
+      expected -- an apparent off-by-one in the root-finding (it solves P(X <= O) = 1 - alpha/2 instead of
+      P(X <= O - 1)); the upper limit agrees. That method is not used. Its mid-P limits use `uniroot()`'s default
+      tolerance (~1e-4, so they differ from this app's at the 5th digit). `epi.conf(ctype = "smr")` does not
+      compute O/E at all. **Not offered:** the Ury-Wiggins (1985) shortcut, because epiR's own comment says its
+      reference code was wrong and the constants could not be verified from the paper; and the Regidor et al.
+      (1993) reference that epiR's code comments attribute the Byar interval to, which could not be found.
+      Two Byar forms exist: this module uses the (O, O + 1) form of `epi.smr()`/Breslow & Day, which tracks the exact
+      limits (0.326-3.103 vs exact 0.330-3.104 for 4/3.3); the person-time-rate module uses the O + 1/2 form that
+      `epi.conf()` and `DescTools` implement (see slice 5).
     - **Wiring.** Three catalog entries (one per design radio value, as the consistency
       tests require), a study-design family and a test family, and a new wizard root
       option "Analyze counts I already have" -> "How were the subjects sampled?".

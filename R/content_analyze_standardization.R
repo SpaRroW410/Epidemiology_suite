@@ -12,6 +12,52 @@
   "Cross-checked against epiR::epi.directadj()."
 )
 
+.analyze_smr_formulas <- paste0(
+  "$$SMR=\\frac{O}{E}\\qquad \\text{Exact: }\\ \\left[\\frac{\\chi^2_{\\alpha/2,\\,2O}}{2E},\\ \\frac{\\chi^2_{1-\\alpha/2,\\,2(O+1)}}{2E}\\right]$$",
+  "$$\\text{Byar: }\\ \\frac{O\\left(1-\\frac1{9O}-\\frac{z}{3\\sqrt O}\\right)^3}{E}\\ \\text{to}\\ \\frac{(O+1)\\left(1-\\frac1{9(O+1)}+\\frac{z}{3\\sqrt{O+1}}\\right)^3}{E}$$",
+  "$$\\text{Rothman-Greenland: }\\ SMR\\cdot e^{\\pm z/\\sqrt O},\\qquad \\text{Vandenbroucke: }\\ \\frac{(\\sqrt O\\mp z/2)^2}{E},\\qquad \\text{Wald: }\\ \\frac{O\\pm z\\sqrt O}{E}$$",
+  "The mid-P exact limits solve $P(X>O)+\\tfrac12P(X=O)=\\alpha/2$ (lower) and $P(X<O)+\\tfrac12P(X=O)=\\alpha/2$ (upper) ",
+  "for a Poisson mean $\\lambda$, divided by $E$."
+)
+
+.analyze_smr_methods_text <- paste(
+  "- **Exact (Garwood / Ulm / Liddell)** treats $O$ as Poisson and inverts the Poisson distribution through the",
+  "  chi-square distribution. It never undercovers, but is conservative (wide). The usual choice when $O$ is small.",
+  "- **Mid-P exact** gives the observed count only half weight in each tail: still based on the exact distribution,",
+  "  but narrower and closer to nominal coverage on average.",
+  "- **Byar** is a cube-root (Wilson-Hilferty type) approximation to the exact limits and tracks them closely once",
+  "  $O$ is moderate.",
+  "- **Rothman-Greenland** assumes $\\ln SMR$ is normal with variance $1/O$; it is undefined at $O=0$ and poor for small $O$.",
+  "- **Vandenbroucke** is a square-root (variance-stabilizing) shortcut: $\\sqrt O$ is roughly normal with variance 1/4.",
+  "- **Wald** is $O\\pm z\\sqrt O$ over $E$; shown only for comparison (zero width at $O=0$).",
+  "",
+  "Guidance from the `epiR` documentation: exact intervals and tests when the observed count is 5 or fewer, the",
+  "approximations for larger counts. The tests of SMR = 1 are the exact Poisson test, its mid-P version, the",
+  "chi-square statistic $(O-E)^2/E$ and Byar's normal approximation. The expected count $E$ is treated as fixed",
+  "(known); SMRs of different groups, each standardized with its own stratum weights, are **not strictly comparable**",
+  "with each other.",
+  "",
+  "Which interval to trust is your decision: if they agree, the choice does not matter; if they disagree (small $O$),",
+  "report the exact or mid-P interval and say which you used.",
+  sep = "\n"
+)
+
+.analyze_smr_citation <- paste(
+  "Exact: Liddell FDK. Simple exact analysis of the standardised mortality ratio. J Epidemiol Community Health",
+  "1984;38:85-88; Ulm K. A simple method to calculate the confidence interval of a standardized mortality ratio",
+  "(SMR). Am J Epidemiol 1990;131:373-375; Breslow NE, Day NE. Statistical Methods in Cancer Research, Vol II. IARC;",
+  "1987. Mid-P: Miettinen OS. Comment. J Am Stat Assoc 1974;69:380-382; Rothman K, Boice J. Epidemiologic Analysis",
+  "with a Programmable Calculator. NIH Publication 79-1649; 1979. Byar's approximation: attributed to Byar",
+  "(unpublished) by Rothman & Boice 1979 and given in Breslow & Day 1987. Rothman-Greenland: Lash TL, VanderWeele TJ,",
+  "Haneuse S, Rothman KJ. Modern Epidemiology, 4th ed. 2021. Vandenbroucke JP. A shortcut method for calculating the",
+  "95 per cent confidence interval of the standardized mortality ratio (letter). Am J Epidemiol 1982;115:303-304.",
+  "Verification: the existence, journal, volume and pages of these references were checked by web search; the",
+  "original papers could not be read, so each formula was checked numerically against epiR 3.0.0 epi.smr(),",
+  "stats::poisson.test() and DescTools::PoissonCI() instead. Not offered: the Ury-Wiggins (1985) shortcut, whose",
+  "constants could not be verified, and epiR's 'fisher' confidence limits, whose lower limit differs from the exact",
+  "(Garwood) lower limit by an apparent off-by-one."
+)
+
 analyze_std_content <- list(
   direct = list(
     title = "Direct standardization: age-standardized rates and their comparison",
@@ -51,59 +97,47 @@ analyze_std_content <- list(
   ),
   indirect = list(
     title = "Indirect standardization: expected events and the standardized ratio (SMR)",
-    formula_latex = paste0(
-      "$$E=\\sum_i r_i\\,T_i,\\qquad SMR=\\frac{O}{E}$$",
-      "$$\\text{exact 95\\% CI: }\\ \\left[\\frac{\\chi^2_{\\alpha/2,\\,2O}}{2E},\\ \\frac{\\chi^2_{1-\\alpha/2,\\,2(O+1)}}{2E}\\right]$$"
-    ),
+    formula_latex = .analyze_smr_formulas,
     explanation = paste(
       "Use **indirect standardization** when the study group is small or its stratum-specific rates are unreliable",
       "or unknown, but you have its person-time $T_i$ in each stratum and **reference rates** $r_i$ from a larger",
-      "population. Multiplying gives the **expected** number of events $E$ if the group had the reference rates;",
-      "the **standardized mortality (or morbidity) ratio** is $SMR=O/E$ with $O$ the observed number of events.",
+      "population. Multiplying gives the **expected** number of events $E=\\sum_i r_iT_i$ if the group had the",
+      "reference rates; the **standardized mortality (or morbidity) ratio** is $SMR=O/E$ with $O$ the observed number",
+      "of events.",
       "",
-      "The confidence interval treats $E$ as fixed and $O$ as Poisson: the **exact** (Garwood) interval and the less",
-      "conservative **mid-P** interval are shown, with exact and mid-P tests of SMR = 1. SMRs of different groups",
-      "standardized to the same reference are **not strictly comparable** with each other, because each uses its own",
-      "stratum weights; compare each with 1 or use direct standardization for comparisons.",
+      .analyze_smr_methods_text,
       sep = "\n"
     ),
     worked_example = paste(
       "Adapted from the `epiR::epi.indirectadj()` help example (after Dohoo, Martin and Stryhn 2009): area A has",
       "550 beef herds and 450 dairy herds at risk; the reference incidences are 25 and 85 cases per 1000 herds. The",
-      "expected number of cases is 550 x 0.025 + 450 x 0.085 = 52, and 58 were observed: SMR = 58/52 = 1.12",
-      "(exact 95% CI 0.85 to 1.44; exact test p = 0.40). The expected count and SMR equal epiR's; the exact interval",
-      "equals `poisson.test(58, 52)` (epiR's own SMR interval is a quantile-based variant and is not copied).",
+      "expected number of cases is 550 x 0.025 + 450 x 0.085 = 52, and 58 were observed: SMR = 58/52 = 1.12. The",
+      "intervals by method are shown in the app (exact 0.85 to 1.44, mid-P 0.85 to 1.43, Byar 0.85 to 1.44,",
+      "Rothman-Greenland 0.86 to 1.44, Vandenbroucke 0.85 to 1.42, Wald 0.83 to 1.40); with 58 events they all agree",
+      "closely. The expected count equals epiR's.",
       sep = "\n"
     ),
-    citation = paste(
-      "Breslow NE, Day NE. Statistical Methods in Cancer Research, Vol II: The Design and Analysis of Cohort Studies.",
-      "IARC; 1987 (indirect standardization, SMR); Ulm K. A simple method to calculate the confidence interval of a",
-      "standardized mortality ratio (SMR). Am J Epidemiol 1990;131:373-375 (exact interval); Lancaster HO. J Am Stat",
-      "Assoc 1961;56:223-234 and Berry G, Armitage P. The Statistician 1995;44:417-423 (mid-P). The expected counts",
-      "are checked against epiR::epi.indirectadj() and the exact interval against stats::poisson.test()."
-    ),
-    backend = "closed forms (Poisson quantiles); verified against stats::poisson.test() and epiR::epi.indirectadj() (expected counts)"
+    citation = .analyze_smr_citation,
+    backend = "closed forms (Poisson/chi-square quantiles, approximations); checked against epiR 3.0.0 epi.smr(), stats::poisson.test(), DescTools::PoissonCI() and epiR::epi.indirectadj() (expected counts)"
   ),
   smr = list(
     title = "SMR from observed and expected events",
-    formula_latex = paste0(
-      "$$SMR=\\frac{O}{E},\\qquad \\text{exact 95\\% CI: }\\ \\left[\\frac{\\chi^2_{\\alpha/2,\\,2O}}{2E},\\ \\frac{\\chi^2_{1-\\alpha/2,\\,2(O+1)}}{2E}\\right]$$"
-    ),
+    formula_latex = .analyze_smr_formulas,
     explanation = paste(
       "If you already have the **observed** number of events $O$ and the **expected** number $E$ (from published",
-      "reference rates, or from a registry's own calculation), enter them directly. The SMR is $O/E$; the confidence",
-      "interval and tests treat $E$ as fixed and $O$ as a Poisson count (exact and mid-P).",
+      "reference rates, or from a registry's own calculation), enter them directly. The SMR is $O/E$. Several confidence",
+      "intervals are shown side by side:",
+      "",
+      .analyze_smr_methods_text,
       sep = "\n"
     ),
     worked_example = paste(
-      "58 events observed, 52 expected: SMR = 1.12, exact 95% CI 0.85 to 1.44, mid-P CI 0.85 to 1.43, exact test",
-      "p = 0.40; equal to `poisson.test(58, 52)`.",
+      "The epiR help example: 4 events observed, 3.3 expected. SMR = 1.21; mid-P exact 95% CI 0.39 to 2.92 (p = 0.657);",
+      "exact 0.33 to 3.10; Byar 0.33 to 3.10; Rothman-Greenland 0.45 to 3.23; Vandenbroucke 0.32 to 2.69. With so few",
+      "events the methods visibly disagree -- the reason they are all shown.",
       sep = "\n"
     ),
-    citation = paste(
-      "Breslow NE, Day NE. Statistical Methods in Cancer Research, Vol II. IARC; 1987; Ulm K. Am J Epidemiol",
-      "1990;131:373-375 (exact interval); Berry G, Armitage P. The Statistician 1995;44:417-423 (mid-P)."
-    ),
-    backend = "closed forms (Poisson quantiles); verified against stats::poisson.test()"
+    citation = .analyze_smr_citation,
+    backend = "closed forms (Poisson/chi-square quantiles, approximations); checked against epiR 3.0.0 epi.smr(), stats::poisson.test() and DescTools::PoissonCI()"
   )
 )
