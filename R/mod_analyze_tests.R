@@ -28,11 +28,12 @@ mod_analyze_tests_ui <- function(id) {
       condition = sprintf("input['%s'] >= %d", ns("k"), i),
       fluidRow(
         column(2, strong(paste("Rater 1:", i))),
+        # the conditionalPanel goes INSIDE the column: a panel between a row and its columns breaks the grid
         lapply(seq_len(.tt_max_k), function(j) {
-          conditionalPanel(
+          column(2, conditionalPanel(
             condition = sprintf("input['%s'] >= %d", ns("k"), j),
-            column(2, numericInput(ns(sprintf("k_%d_%d", i, j)), NULL, value = .tt_default_kappa[i, j], min = 0, step = 1))
-          )
+            numericInput(ns(sprintf("k_%d_%d", i, j)), NULL, value = .tt_default_kappa[i, j], min = 0, step = 1)
+          ))
         })
       )
     )
@@ -83,6 +84,12 @@ mod_analyze_tests_ui <- function(id) {
                                 "Linear (ordered categories)" = "linear",
                                 "Quadratic / Fleiss-Cohen (ordered categories)" = "quadratic")),
         p(class = "text-muted", "Rows are rater 1, columns are rater 2."),
+        fluidRow(
+          column(2, strong("")),
+          lapply(seq_len(.tt_max_k), function(j) {
+            column(2, conditionalPanel(condition = sprintf("input['%s'] >= %d", ns("k"), j), strong(paste("Rater 2:", j))))
+          })
+        ),
         kappa_rows
       ),
       conditionalPanel(
