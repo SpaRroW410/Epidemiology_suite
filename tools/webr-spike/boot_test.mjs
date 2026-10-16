@@ -11,7 +11,7 @@ const page = await browser.newPage();
 report.load_lines = [];
 page.on("console", (m) => {
   const t = m.text();
-  if (/LOAD |SOURCE FAILED/.test(t)) report.load_lines.push(t.slice(0, 300));
+  if (/LOAD |SOURCE FAILED|unable to load shared object|could not load dynamic lib/.test(t)) report.load_lines.push(t.slice(0, 300));
   else if (m.type() === "error" && !/Downloading webR package/.test(t)) report.console_errors.push(t.slice(0, 300));
 });
 page.on("pageerror", (e) => report.page_errors.push(String(e).slice(0, 300)));
@@ -29,7 +29,7 @@ try {
   await frame.locator("a[data-value='Plan: Sample Size']").first().click({ timeout: 60000 });
   await frame.locator("a[data-value='Rule of Three']").first().click({ timeout: 60000 });
   const t1 = Date.now();
-  await frame.locator(".shiny-html-output, .shiny-text-output").filter({ hasText: /upper|bound|rule|events/i }).first().waitFor({ timeout: 300000 });
+  await frame.locator("#rule_of_three-result").waitFor({ state: "visible", timeout: 300000 });
   report.first_calc_s = (Date.now() - t1) / 1000;
   report.calc_text = (await frame.locator("#rule_of_three-result").innerText({ timeout: 30000 }).catch(() => "")).slice(0, 300);
   report.output_errors = await frame.locator(".shiny-output-error").count();
