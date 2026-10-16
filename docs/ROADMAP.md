@@ -836,8 +836,9 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       over 6000 lists), block sizes drawn equally often, per-stratum balance and independence, long-run arm
       frequencies, reproducibility, the caller's RNG stream untouched, and regression values for fixed seeds (recorded
       from this code under R 4.3.3, so they guard against change but are not independent references). Attrition: the
-      identities are recomputed from the expected number of analyzable participants, and the rounding guard avoids
-      the classic 100 / 0.8 = 125.00000000000001 -> 126 error. A power simulation (slow lane) shows that with the
+      identities are recomputed from the expected number of analyzable participants, and a rounding guard avoids
+      floating-point over-rounding (9 / (1 - 55/100) is 20.000000000000004 in floating point, which a bare ceiling()
+      turns into 21 instead of 20; such cases occur for many n and whole-percent losses). A power simulation (slow lane) shows that with the
       inflated n the intention-to-treat z test reaches about the planned power, and with the uninflated n it does not.
     - **Honesty notes (item 14).** (1) The dilution formula was *derived here* (n is proportional to 1 / difference^2
       with the variance unchanged); Lachin JM, Control Clin Trials 1981;2:93-113 is the reference it is usually

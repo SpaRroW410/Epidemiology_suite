@@ -5,7 +5,10 @@ test_that("one stage: n / (1 - d), rounded up; adding the loss instead under-rec
   expect_equal(r$extra_to_recruit, 25)
   expect_equal(calc_attrition_stages(100, 0.15)$n_enrolled, 118)       # 117.65 -> 118
   expect_equal(calc_attrition_stages(80, 0)$n_enrolled, 80)
-  expect_equal(calc_attrition_stages(100, 0.2)$n_enrolled, 125)        # 100 / 0.8 is not 125.0000000001 -> 126
+  expect_gt(9 / (1 - 55 / 100), 20)                                      # floating-point fuzz: 20.000000000000004, so a bare ceiling() would give 21
+  expect_equal(calc_attrition_stages(9, 55 / 100)$n_enrolled, 20)
+  expect_equal(calc_attrition_stages(17, 32 / 100)$n_enrolled, 25)
+  expect_equal(calc_attrition_stages(21, 30 / 100)$n_enrolled, 30)
 })
 
 test_that("stages multiply, and the expected completers recompute the requirement", {
