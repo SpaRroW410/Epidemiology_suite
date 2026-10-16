@@ -55,32 +55,55 @@ try {
         const rec = { workbench: wb, title };
         const t2 = Date.now();
         await clickByValue(title);
-        // wait until some output of this module has text, or an error shows, up to 40 s
-        let info = null;
-        for (let i = 0; i < 40; i++) {
-          await page.waitForTimeout(1000);
-          info = await f.evaluate(() => {
-            const outs = [...document.querySelectorAll(".shiny-html-output, .shiny-text-output, .shiny-plot-output, .shiny-bound-output")].filter((e) => e.offsetParent !== null);
-            const errs = outs.filter((e) => e.classList.contains("shiny-output-error")).map((e) => e.innerText.slice(0, 160));
-            const withText = outs.filter((e) => !e.classList.contains("shiny-output-error") && e.innerText.trim().length > 15 && !/^home/.test(e.id));
-            const prefix = (outs.map((e) => e.id).filter((x) => x.includes("-"))[0] || "").split("-")[0];
-            return { errors: errs, n_outputs: outs.length, text: withText.length ? withText[0].innerText.replace(/\s+/g, " ").slice(0, 110) : "", prefix };
-          });
-          if (info.errors.length || info.text) break;
+        await page.waitForTimeout(2500);
+        const probe = () => f.evaluate(() => {
+          const vis = (e) => e.offsetParent !== null;
+          const outs = [...document.querySelectorAll(".shiny-html-output, .shiny-text-output, .shiny-plot-output, .shiny-bound-output")].filter(vis);
+          const errs = outs.filter((e) => e.classList.contains("shiny-output-error")).map((e) => e.innerText.replace(/\s+/g, " ").slice(0, 160));
+          const danger = [...document.querySelectorAll(".text-danger")].filter(vis).map((e) => e.innerText.replace(/\s+/g, " ").slice(0, 160));
+          const prefix = (outs.map((e) => e.id).filter((x) => x.includes("-") && !/^home/.test(x))[0] || "").split("-")[0];
+          const res = prefix ? document.getElementById(prefix + "-result") : null;
+          return { prefix, has_result: !!res, result: res ? res.innerText.replace(/\s+/g, " ").slice(0, 100) : "", errs, danger };
+        });
+        let info = await probe();
+        rec.prefix = info.prefix; rec.has_result = info.has_result;
+        rec.designs = [];
+        // every value of the module's primary radio selector (what the native every-design UI test does)
+        const radio = await f.evaluate((prefix) => {
+          for (const g of ["design", "outcome", "mode", "es_type"]) {
+            const vals = [...document.querySelectorAll("input[type=radio]")].filter((e) => e.name === prefix + "-" + g).map((e) => e.value);
+            if (vals.length) return { name: prefix + "-" + g, vals };
+          }
+          return null;
+        }, info.prefix);
+        const visit = async (label) => {
+          const p = await probe();
+          const bad = p.errs.length || p.danger.length;
+          rec.designs.push({ design: label, status: bad ? "ERROR" : p.result || !p.has_result ? "ok" : "empty", detail: (p.errs[0] || p.danger[0] || p.result || "").slice(0, 110) });
+        };
+        if (radio) {
+          for (const v of radio.vals) {
+            await f.evaluate((a) => { const r = [...document.querySelectorAll("input[type=radio]")].find((e) => e.name === a.name && e.value === a.v); if (r) r.click(); }, { name: radio.name, v });
+            await page.waitForTimeout(2500);
+            await visit(v);
+          }
+        } else {
+          await visit("(single view)");
         }
-        rec.prefix = info.prefix; rec.n_outputs = info.n_outputs;
-        rec.status = info.errors.length ? "ERROR" : info.text ? "ok" : "no output (button-driven or empty)";
-        rec.detail = info.errors.length ? info.errors[0] : info.text;
+        rec.status = rec.designs.some((d) => d.status === "ERROR") ? "ERROR" : rec.designs.every((d) => d.status === "ok") ? "ok" : "partial";
         rec.seconds = (Date.now() - t2) / 1000;
         report.modules.push(rec);
-        console.log(JSON.stringify(rec));
+        console.log("MOD " + JSON.stringify({ title: rec.title, status: rec.status, n: rec.designs.length, bad: rec.designs.filter((d) => d.status !== "ok") }));
       }
     }
     report.module_summary = {
       total: report.modules.length,
-      ok: report.modules.filter((m) => m.status === "ok").length,
-      error: report.modules.filter((m) => m.status === "ERROR").length,
-      no_output: report.modules.filter((m) => m.status.startsWith("no output")).length,
+      modules_ok: report.modules.filter((m) => m.status === "ok").length,
+      modules_error: report.modules.filter((m) => m.status === "ERROR").length,
+      modules_partial: report.modules.filter((m) => m.status === "partial").length,
+      designs_total: report.modules.reduce((n, m) => n + m.designs.length, 0),
+      designs_error: report.modules.reduce((n, m) => n + m.designs.filter((d) => d.status === "ERROR").length, 0),
+      designs_empty: report.modules.reduce((n, m) => n + m.designs.filter((d) => d.status === "empty").length, 0),
     };
   }
 } catch (e) {
