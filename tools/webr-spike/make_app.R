@@ -5,6 +5,7 @@
 #           every pkg:: reference in R/, so the same packages are still bundled and downloaded;
 #           the variant only changes what is attached at start-up.)
 #   full-A+B - full minus the named packages (for bisecting a loading failure)
+#   only-A+B - shiny, bslib and the named packages only
 args <- commandArgs(trailingOnly = TRUE)
 out <- args[1]; variant <- if (length(args) >= 2) args[2] else "full"
 unlink(out, recursive = TRUE); dir.create(file.path(out, "R"), recursive = TRUE)
@@ -15,6 +16,8 @@ imports <- trimws(sub("\\s*\\(.*$", "", strsplit(desc, ",")[[1]]))
 imports <- setdiff(imports[nzchar(imports)], c("graphics", "stats", "utils"))
 pkgs <- if (variant == "light") {
   c("shiny", "bslib", "pwr", "survival")
+} else if (grepl("^only-", variant)) {
+  c("shiny", "bslib", strsplit(sub("^only-", "", variant), "+", fixed = TRUE)[[1]])
 } else if (grepl("^full-", variant)) {
   setdiff(imports, strsplit(sub("^full-", "", variant), "+", fixed = TRUE)[[1]])
 } else imports
