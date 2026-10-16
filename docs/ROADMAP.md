@@ -586,8 +586,9 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
 
 13. **Analyze workbench v1** (Track B1) — OpenEpi-parity calculators from summary
     counts, almost entirely on `epiR` (already a dependency). **In progress (14 Oct 2026):
-    slices 1-4 of ~9 done -- the 2x2 table, diagnostic-test evaluation, confidence intervals for
-    proportions and means, and stratified Mantel-Haenszel analysis.**
+    slices 1-5 of ~9 done -- the 2x2 table, diagnostic-test evaluation, confidence intervals for
+    proportions and means, stratified Mantel-Haenszel analysis, and person-time rates and rate
+    ratios.**
     - **Done: "2x2 Table Analysis"** (`calc_analyze_2x2.R`, `content_analyze_2x2.R`,
       `mod_analyze_2x2.R`; 50th navbar module, new last dropdown "Analyze Summary Data").
       Three layouts (cohort/trial, cross-sectional, case-control) give RR or PR, OR, RD,
@@ -663,12 +664,38 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       reproduces epiR's number from the corrected cells to show that is the only difference. Zero cells:
       the pooled MH estimates use every stratum; the Woolf-type tests use only strata with all four cells
       non-zero and say so; Breslow-Day uses strata whose margins allow A*.
+    - **Slice 5 done: "Rates and Rate Ratios"** (`calc_analyze_rates.R`, `content_analyze_rates.R`,
+      `mod_analyze_rates.R`; 54th module). *One rate* (events, person-time, reported per a chosen
+      multiplier): exact (Garwood), mid-P exact, Byar and Wald intervals side by side. *Two groups*:
+      each rate with an exact CI; the **rate ratio** with exact (conditional binomial), mid-P exact
+      and Wald-log intervals; the **rate difference** (Wald); the attributable fraction among the
+      exposed and the **population attributable fraction**; and three tests of no difference (exact
+      conditional, mid-P, score chi-square).
+    - **Slice 5 verification.** Exact single-rate limits equal `epiR::epi.conf()` and the chi-square
+      (Garwood) form; the rate-ratio exact CI and p-value equal `stats::poisson.test()` and
+      `epiR::epi.2by2(method = "cohort.time")` on four data sets, as do the rate difference and the
+      attributable fraction among the exposed; the score chi-square equals `prop.test(correct = FALSE)`;
+      mid-P limits satisfy their defining equations to 1e-8; the published Feychting et al. (1998)
+      example (IRR 0.46, 95% CI 0.38-0.55; RD -7.22 per 1000 person-years) is reproduced.
+    - **Three things that differ from, or go beyond, epiR (all documented in the app).**
+      (1) **Byar:** the unit-tested form is Rothman's a' = d + 1/2 variant that epiR implements
+      (3.12-13.75 for 7 events in 1000 person-years); Byar's original formula in Breslow & Day (1987),
+      which uses d and d + 1 and tracks the exact limits (2.80-14.42), is not offered because only epiR's
+      form had an oracle -- the app labels it "(a + 1/2 form)". (2) **Population attributable fraction
+      CI:** epiR combines separate limits of the overall and unexposed rates, ignoring that both contain the
+      unexposed events; this app uses the delta method with the covariance, Var(ln(Ipop/I0)) = 1/d0 - 1/D.
+      The two intervals differ a lot for small counts (epiR 21.5%-74.4% vs -17.7%-77.5% for 10/2000 vs 4/2500
+      person-years); the unit tests check the SE against 20,000 simulated studies (3%) and the interval's
+      coverage (95% +/- 2%). That interval is derived here, not taken from a cited source. (3) The mid-P
+      two-sided p-value is twice the smaller one-sided mid-P tail.
+    - **Not done in this slice:** stratified rate ratios (the Mantel-Haenszel IRR of epiR's cohort.time
+      example, 4.39), standardized rates / SMR (next), and a rate-per-person-time sample-size link.
     - **Wiring.** Three catalog entries (one per design radio value, as the consistency
       tests require), a study-design family and a test family, and a new wizard root
       option "Analyze counts I already have" -> "How were the subjects sampled?".
       The free-text wizard (`design_free_text.R`) does not yet know analysis keywords.
     - **Still to do for item 13** (OpenEpi parity, in rough priority): CIs for differences/ratios
-      of proportions and means, person-time rates and rate ratios, direct/indirect standardization and
+      of proportions and means, stratified rate ratios, direct/indirect standardization and
       SMR, kappa from a table, McNemar / matched pairs, chi-square for trend, vaccine efficacy; plus the
       navigation redesign (M2) -- the 15th dropdown is already one too many for the
       navbar, and the new group is simply appended last for now.

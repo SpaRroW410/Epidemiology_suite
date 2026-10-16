@@ -25,6 +25,27 @@
 
 calculator_catalog <- list(
 
+  list(key = "analyze_rate_single",
+       label = "Confidence interval for an incidence rate (events per person-time)",
+       answers = paste(
+         "Answers: \"I have a number of events and the person-time they arose in -- what is the rate and its",
+         "confidence interval (exact, mid-P, Byar, Wald)?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Rates and Rate Ratios",
+       module_input_id = "analyze_rates-design", design_value = "single"),
+
+  list(key = "analyze_rate_ratio",
+       label = "Compare two rates: rate ratio, rate difference, attributable fractions (person-time)",
+       answers = paste(
+         "Answers: \"I have events and person-time in an exposed and an unexposed group -- what are the rate",
+         "ratio, rate difference and attributable fractions, with confidence intervals and tests?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Rates and Rate Ratios",
+       module_input_id = "analyze_rates-design", design_value = "ratio"),
+
+
   list(key = "analyze_mh_cohort",
        label = "Stratified 2x2 tables: Mantel-Haenszel adjusted OR, RR, RD (cohort / trial)",
        answers = paste(
@@ -1919,7 +1940,8 @@ study_design_families <- list(
        catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control",
                          "analyze_dx_single", "analyze_dx_combined",
                          "analyze_ci_proportion", "analyze_ci_mean",
-                         "analyze_mh_cohort", "analyze_mh_case_control")),
+                         "analyze_mh_cohort", "analyze_mh_case_control",
+                         "analyze_rate_single", "analyze_rate_ratio")),
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",
@@ -2090,6 +2112,9 @@ study_design_families <- list(
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
 test_families <- list(
+  list(id = "analyze_rates_tests", label = "Rates and Rate Ratios (person-time)",
+       hint = "Confidence interval for an incidence rate, and the rate ratio, rate difference, attributable fractions and tests for two groups, from events and person-time.",
+       catalog_keys = c("analyze_rate_single", "analyze_rate_ratio")),
   list(id = "analyze_mh_tests", label = "Stratified Analysis (Mantel-Haenszel)",
        hint = "Mantel-Haenszel adjusted odds ratio, risk ratio and risk difference over 2-8 strata, the Cochran-Mantel-Haenszel test and Woolf / Breslow-Day / Tarone homogeneity tests.",
        catalog_keys = c("analyze_mh_cohort", "analyze_mh_case_control")),

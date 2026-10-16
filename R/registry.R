@@ -113,7 +113,9 @@ module_registry <- function() {
     list(id = analyze_ci_meta$id, title = analyze_ci_meta$nav_title,
          ui = mod_analyze_ci_ui, server = mod_analyze_ci_server),
     list(id = analyze_mh_meta$id, title = analyze_mh_meta$nav_title,
-         ui = mod_analyze_mh_ui, server = mod_analyze_mh_server)
+         ui = mod_analyze_mh_ui, server = mod_analyze_mh_server),
+    list(id = analyze_rates_meta$id, title = analyze_rates_meta$nav_title,
+         ui = mod_analyze_rates_ui, server = mod_analyze_rates_server)
   )
 }
 
@@ -170,7 +172,7 @@ module_workbenches <- list(
   list(id = "analyze", title = "Analyze", nav_id = "analyze_nav",
        groups = list(
          list(title = "From summary counts",
-              module_ids = c("analyze_2x2", "analyze_mh", "analyze_dx", "analyze_ci"))
+              module_ids = c("analyze_2x2", "analyze_mh", "analyze_rates", "analyze_dx", "analyze_ci"))
        ))
 )
 

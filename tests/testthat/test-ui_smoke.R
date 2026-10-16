@@ -124,6 +124,22 @@ test_that("Mantel-Haenszel: pooled estimates and tests render; fewer strata and 
   expect_equal(ui_output_errors(app), 0)
 })
 
+test_that("Rates and Rate Ratios: single rate lists the methods; comparing two groups gives the published rate ratio", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Rates and Rate Ratios")
+  single <- ui_output_text(app, "analyze_rates-result")
+  expect_match(single, "Exact \\(Garwood\\)")
+  expect_match(single, "Mid-P exact")
+  app$set_inputs(`analyze_rates-design` = "ratio")
+  app$wait_for_idle(800, timeout = 60000)
+  ratio <- ui_output_text(app, "analyze_rates-result")
+  expect_match(ratio, "0\\.461")                  # Feychting et al. 1998: IRR 0.46
+  expect_match(ratio, "Rate ratio -- exact")
+  expect_match(ratio, "Population attributable fraction")
+  expect_equal(ui_output_errors(app), 0)
+})
+
 test_that("no JavaScript or Shiny errors accumulated while opening every module", {
   skip_if_no_ui()
   expect_equal(ui_console_errors(ui_driver()), character())

@@ -76,9 +76,19 @@ design_nodes <- list(
     options = list(
       list(label = "An exposure-outcome association (2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_design"),
       list(label = "An association adjusted for a confounder (stratified 2x2 tables, Mantel-Haenszel)", next_id = "analyze_mh_design"),
+      list(label = "Incidence rates from events and person-time (one rate, or a rate ratio of two groups)", next_id = "analyze_rate_type"),
       list(label = "A diagnostic test (sensitivity, specificity, PPV, NPV from a test-by-disease table)", next_id = "term_analyze_dx_single"),
       list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined"),
       list(label = "A confidence interval for a proportion, or for a mean and standard deviation", next_id = "analyze_ci_type")
+    )
+  ),
+
+  analyze_rate_type = list(
+    id = "analyze_rate_type", stage = 1,
+    question = "What do you want to do with your events and person-time?",
+    options = list(
+      list(label = "A confidence interval for one incidence rate", next_id = "term_analyze_rate_single"),
+      list(label = "Compare two groups: rate ratio, rate difference, attributable fractions", next_id = "term_analyze_rate_ratio")
     )
   ),
 
@@ -768,6 +778,8 @@ design_nodes <- list(
   term_bayes_assurance = .term("term_bayes_assurance", "Bayesian assurance, two proportions", "bayesian_assurance_or"),
   term_bfda = .term("term_bfda", "Bayes factor design analysis, two means", "bfda_ttest"),
 
+  term_analyze_rate_single = .term("term_analyze_rate_single", "Confidence interval for an incidence rate", "analyze_rate_single"),
+  term_analyze_rate_ratio = .term("term_analyze_rate_ratio", "Rate ratio and rate difference from person-time", "analyze_rate_ratio"),
   term_analyze_mh_cohort = .term("term_analyze_mh_cohort", "Mantel-Haenszel, cohort / trial / cross-sectional", "analyze_mh_cohort"),
   term_analyze_mh_case_control = .term("term_analyze_mh_case_control", "Mantel-Haenszel, case-control", "analyze_mh_case_control"),
   term_analyze_ci_proportion = .term("term_analyze_ci_proportion", "Confidence interval for a proportion", "analyze_ci_proportion"),
