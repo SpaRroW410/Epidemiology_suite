@@ -78,9 +78,20 @@ design_nodes <- list(
       list(label = "An association adjusted for a confounder (stratified 2x2 tables, Mantel-Haenszel)", next_id = "analyze_mh_design"),
       list(label = "Incidence rates from events and person-time (one rate, or a rate ratio of two groups)", next_id = "analyze_rate_type"),
       list(label = "Paired data, agreement between raters, or a trend across ordered groups (McNemar, kappa, chi-square for trend)", next_id = "analyze_paired_type"),
+      list(label = "Rates for populations with different age structures: standardized rates or an SMR", next_id = "analyze_std_type"),
       list(label = "A diagnostic test (sensitivity, specificity, PPV, NPV from a test-by-disease table)", next_id = "term_analyze_dx_single"),
       list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined"),
       list(label = "A confidence interval for a proportion, or for a mean and standard deviation", next_id = "analyze_ci_type")
+    )
+  ),
+
+  analyze_std_type = list(
+    id = "analyze_std_type", stage = 1,
+    question = "What do you have?",
+    options = list(
+      list(label = "Stratum-specific events and person-time for my group(s) and a standard population: direct standardization", next_id = "term_analyze_std_direct"),
+      list(label = "My group's person-time by stratum and reference rates from a larger population: indirect standardization (SMR)", next_id = "term_analyze_std_indirect"),
+      list(label = "Observed and expected numbers of events already: SMR with a confidence interval", next_id = "term_analyze_std_smr")
     )
   ),
 
@@ -789,6 +800,9 @@ design_nodes <- list(
   term_bayes_assurance = .term("term_bayes_assurance", "Bayesian assurance, two proportions", "bayesian_assurance_or"),
   term_bfda = .term("term_bfda", "Bayes factor design analysis, two means", "bfda_ttest"),
 
+  term_analyze_std_direct = .term("term_analyze_std_direct", "Direct standardization", "analyze_std_direct"),
+  term_analyze_std_indirect = .term("term_analyze_std_indirect", "Indirect standardization and SMR", "analyze_std_indirect"),
+  term_analyze_std_smr = .term("term_analyze_std_smr", "SMR from observed and expected events", "analyze_std_smr"),
   term_analyze_mcnemar = .term("term_analyze_mcnemar", "McNemar's test and matched-pair odds ratio", "analyze_mcnemar"),
   term_analyze_kappa = .term("term_analyze_kappa", "Cohen's kappa agreement", "analyze_kappa"),
   term_analyze_trend = .term("term_analyze_trend", "Chi-square test for trend", "analyze_trend"),

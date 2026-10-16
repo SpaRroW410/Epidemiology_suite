@@ -586,7 +586,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
 
 13. **Analyze workbench v1** (Track B1) — OpenEpi-parity calculators from summary
     counts, almost entirely on `epiR` (already a dependency). **In progress (14 Oct 2026):
-    slices 1-6 of ~9 done -- the 2x2 table, diagnostic-test evaluation, confidence intervals for
+    slices 1-7 of ~9 done -- the 2x2 table, diagnostic-test evaluation, confidence intervals for
     proportions and means, stratified Mantel-Haenszel analysis, and person-time rates and rate
     ratios.**
     - **Done: "2x2 Table Analysis"** (`calc_analyze_2x2.R`, `content_analyze_2x2.R`,
@@ -707,13 +707,33 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       or rescaling the scores; the SE of the paired difference matches 20,000 simulated studies (3%).
       Known limits stated in the app: the paired-difference Wald interval is approximate, kappa depends on
       prevalence, the trend test detects only a linear trend.
+    - **Slice 7 done: "Standardization and SMR"** (`calc_analyze_standardization.R`,
+      `content_analyze_standardization.R`, `mod_analyze_standardization.R`; 56th module; three designs).
+      *Direct standardization*: per-stratum events and person-time (2-12 strata) against a standard
+      population; crude rate (exact CI) and directly standardized rate with the Fay-Feuer gamma CI;
+      optionally a second group, with the ratio and difference of the two standardized rates.
+      *Indirect*: person-time by stratum x reference rates -> expected events -> SMR. *SMR* from observed
+      and expected counts. SMR intervals: exact (Garwood) and mid-P; exact and mid-P tests of SMR = 1.
+    - **Slice 7 verification.** The published Thrusfield (2007) example from epiR's help page is
+      reproduced to 7 digits (Glasgow standardized rate 0.2599, 95% CI 0.1964-0.3406, i.e. "26 (20 to 34)
+      per 100 dog-years"); the direct rate, CI and crude rate equal `epiR::epi.directadj()` on four data
+      sets including one with a zero-event stratum; standardizing to the group's own person-time gives the
+      crude rate and variance (an identity check); expected counts equal `epiR::epi.indirectadj()`'s
+      (52 and 140); the SMR exact interval and p-value equal `stats::poisson.test()`; mid-P limits satisfy
+      their equations. The SE of the ratio and difference of two standardized rates matches 8,000 simulated
+      studies (4%) -- **that comparison is derived here by the delta method, not from a cited source**.
+    - **Deliberately not copied from epiR:** `epi.indirectadj()`'s SMR interval is the Poisson
+      *quantile* of the observed count divided by the expected count (a discrete, non-standard interval,
+      e.g. 0.846-1.404 for 58/52 against the exact 0.847-1.442); this app uses the exact (Ulm/Garwood) and
+      mid-P intervals instead. `epi.conf(ctype = "smr")` does not compute O/E and was not used.
+      Also not offered: indirectly adjusted rates (SMR x standard crude rate), which need the standard
+      population's own crude rate; SMRs of different groups are not comparable and the app says so.
     - **Wiring.** Three catalog entries (one per design radio value, as the consistency
       tests require), a study-design family and a test family, and a new wizard root
       option "Analyze counts I already have" -> "How were the subjects sampled?".
       The free-text wizard (`design_free_text.R`) does not yet know analysis keywords.
     - **Still to do for item 13** (OpenEpi parity, in rough priority): CIs for differences/ratios
-      of proportions and means, stratified rate ratios, direct/indirect standardization and
-      SMR, vaccine efficacy; plus the
+      of proportions and means, stratified rate ratios, vaccine efficacy; plus the
       navigation redesign (M2) -- the 15th dropdown is already one too many for the
       navbar, and the new group is simply appended last for now.
 14. **Planning tools** (Track B2) — randomization lists, attrition/non-response

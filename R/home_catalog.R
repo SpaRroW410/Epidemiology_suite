@@ -25,6 +25,36 @@
 
 calculator_catalog <- list(
 
+  list(key = "analyze_std_direct",
+       label = "Direct standardization: age-standardized rates, with a comparison of two groups",
+       answers = paste(
+         "Answers: \"My groups have different age structures -- what are their directly standardized rates against a",
+         "standard population, with confidence intervals, and how do they compare?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Standardization and SMR",
+       module_input_id = "analyze_std-design", design_value = "direct"),
+
+  list(key = "analyze_std_indirect",
+       label = "Indirect standardization: expected events from reference rates, and the SMR",
+       answers = paste(
+         "Answers: \"I have the person-time of a (small) group by stratum and reference rates -- how many events would",
+         "I expect, and what is the standardized mortality (morbidity) ratio?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Standardization and SMR",
+       module_input_id = "analyze_std-design", design_value = "indirect"),
+
+  list(key = "analyze_std_smr",
+       label = "Standardized mortality (morbidity) ratio from observed and expected events",
+       answers = paste(
+         "Answers: \"I already have observed and expected counts -- what is the SMR and its confidence interval?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Standardization and SMR",
+       module_input_id = "analyze_std-design", design_value = "smr"),
+
+
   list(key = "analyze_mcnemar",
        label = "Paired binary data: McNemar's test and matched-pair odds ratio (from counts)",
        answers = paste(
@@ -1973,7 +2003,8 @@ study_design_families <- list(
                          "analyze_ci_proportion", "analyze_ci_mean",
                          "analyze_mh_cohort", "analyze_mh_case_control",
                          "analyze_rate_single", "analyze_rate_ratio",
-                         "analyze_mcnemar", "analyze_kappa", "analyze_trend")),
+                         "analyze_mcnemar", "analyze_kappa", "analyze_trend",
+                         "analyze_std_direct", "analyze_std_indirect", "analyze_std_smr")),
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",
@@ -2144,6 +2175,9 @@ study_design_families <- list(
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
 test_families <- list(
+  list(id = "analyze_standardization_tests", label = "Standardization and SMR (from counts)",
+       hint = "Directly standardized rates (with a comparison of two groups), indirect standardization with expected events, and the SMR with exact and mid-P intervals.",
+       catalog_keys = c("analyze_std_direct", "analyze_std_indirect", "analyze_std_smr")),
   list(id = "analyze_paired_tests", label = "Paired, Agreement and Trend Tests (from counts)",
        hint = "McNemar's test and matched-pair odds ratio for paired binary data, Cohen's kappa (unweighted or weighted) for agreement, and the chi-square test for trend across ordered groups, from counts.",
        catalog_keys = c("analyze_mcnemar", "analyze_kappa", "analyze_trend")),

@@ -163,6 +163,30 @@ test_that("Paired, Agreement and Trend Tests: McNemar, kappa (3x3, weighted) and
   expect_equal(ui_output_errors(app), 0)
 })
 
+test_that("Standardization and SMR: the published direct example, a two-group comparison, indirect and direct SMR", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Standardization and SMR")
+  dr <- ui_output_text(app, "analyze_std-result")
+  expect_match(dr, "Directly standardized rate")
+  expect_match(dr, "264\\.7")                           # Thrusfield (2007) / epiR: 0.2647 per dog-year, per 1000
+  app$set_inputs(`analyze_std-compare` = TRUE)
+  app$wait_for_idle(800, timeout = 60000)
+  two <- ui_output_text(app, "analyze_std-result")
+  expect_match(two, "Group B")
+  expect_match(two, "259\\.9")                          # Glasgow 0.2599 per dog-year
+  expect_match(two, "Ratio")
+  app$set_inputs(`analyze_std-design` = "indirect")
+  app$wait_for_idle(800, timeout = 60000)
+  ind <- ui_output_text(app, "analyze_std-result")
+  expect_match(ind, "Expected events\\s+52")             # 550 x 0.025 + 450 x 0.085, as in epi.indirectadj()
+  expect_match(ind, "1\\.115")
+  app$set_inputs(`analyze_std-design` = "smr")
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "analyze_std-result"), "0\\.8470")   # exact lower limit, = poisson.test(58, 52)
+  expect_equal(ui_output_errors(app), 0)
+})
+
 test_that("no JavaScript or Shiny errors accumulated while opening every module", {
   skip_if_no_ui()
   expect_equal(ui_console_errors(ui_driver()), character())
