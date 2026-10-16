@@ -863,15 +863,16 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       are therefore *not* representative of a real phone connection.
     - **Packages.** The 20 non-base imports pull in 168 packages; 165 exist as WebAssembly builds. Missing: `rootSolve`
       (needed by `Exact`), `deSolve` and `quadprog`. The packages total about 180 MB of downloads before the webR
-      runtime (about 77 MB more in the export); a first page load transferred about 170-190 MB.
+      runtime (the exported `shinylive/` folder alone is 77 MB); a first page load transferred about 170-190 MB.
     - **Booting.** A build with a patched font stack boots: the interface appears after about 75-120 s (runner, local
       server) and the first calculation takes about 7-12 s. Loading `PowerTOST` at start-up breaks the whole app (a
       shared library, `commonmark.so`, fails to load; bisected to `PowerTOST` alone, whose `cubature` dependency also
       fails to load at call time). The build that works leaves `PowerTOST` unattached, so only its own designs fail.
     - **Calculators.** Of 185 design options in 60 modules, **177 work**. 15 that looked empty after 25 s finish
-      within about 46 s (Monte Carlo and simulation designs are slower in the browser). 4 are the app's own validation
-      messages at default inputs (e.g. identical proportions, so "no effect to detect"; an RMST default with identical
-      arms), which appear in the native app too. **8 fail for real:** Equivalence (TOST) "means" (`cubature` cannot
+      within about 46 s (Monte Carlo and simulation designs are slower in the browser). 5 are the app's own validation
+      messages at default inputs (planned contrast of zero, identical proportions in two Chi-Square designs, a Meta-Analysis
+      Power cell-count mismatch, and RMST with identical arms), which are not browser problems; judged from their wording
+      and the default inputs, not re-run in the native app. **8 fail for real:** Equivalence (TOST) "means" (`cubature` cannot
       load), Exact Tests Fisher / Boschloo / Poisson / sign (`rootSolve` missing), Longitudinal Diggle and Edland
       ("LAPACK routines cannot be loaded"), and Rule of Three "detect_imperfect" (see F13 -- not specific to the browser).
     - **What is heaviest.** `epiR` drags in 86 packages (97.8 MB; 44.4 MB needed by nothing else, including `sf`, `s2`,
