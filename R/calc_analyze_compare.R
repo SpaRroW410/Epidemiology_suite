@@ -232,8 +232,10 @@ calc_analyze_compare_means <- function(n1, mean1, sd1, n2, mean2, sd2, conf_leve
   scale <- sqrt(n1 * n2 / (n1 + n2))
   tstat <- d_cohen * scale
   ncp_lim <- function(p) {
-    f <- function(ncp) stats::pt(tstat, df_p, ncp = ncp) - p
-    lo <- tstat - 40; hi <- tstat + 40
+    # pt() warns about "full precision" for noncentralities far from the root; those evaluations are only
+    # used to bracket it, so the warning is irrelevant there
+    f <- function(ncp) suppressWarnings(stats::pt(tstat, df_p, ncp = ncp)) - p
+    lo <- tstat - 15; hi <- tstat + 15
     stats::uniroot(f, c(lo, hi), tol = 1e-10, extendInt = "yes")$root
   }
   d_lim <- c(ncp_lim(1 - alpha / 2), ncp_lim(alpha / 2)) / scale

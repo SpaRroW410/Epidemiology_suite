@@ -756,10 +756,33 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       tests require), a study-design family and a test family, and a new wizard root
       option "Analyze counts I already have" -> "How were the subjects sampled?".
       The free-text wizard (`design_free_text.R`) does not yet know analysis keywords.
-    - **Still to do for item 13** (OpenEpi parity, in rough priority): CIs for differences/ratios
-      of proportions and means, stratified rate ratios, vaccine efficacy; plus the
-      navigation redesign (M2) -- the 15th dropdown is already one too many for the
-      navbar, and the new group is simply appended last for now.
+    - **Slice 8 done: "Compare Two Groups"** (`calc_analyze_compare.R`, module `analyze_compare`), again with
+      several published methods side by side, the choice left to the user. *Two proportions* (x1/n1 vs x2/n2):
+      difference by Wald, Wald with continuity correction, Agresti-Caffo, Newcombe hybrid score (with and without
+      continuity correction), Miettinen-Nurminen score and Mee score; ratio by Koopman score, Katz log and
+      adjusted log (+1/2, defined when a count is zero); odds ratio by conditional exact (Fisher) and Woolf; plus
+      Pearson chi-square and Fisher tests. *Two means* (n, mean, SD per group): Welch and pooled-variance t
+      intervals/tests, variance-ratio F interval/test, Cohen's d and Hedges' g with noncentral-t intervals.
+    - **Slice 8 verification.** Every proportion interval was compared with `DescTools::BinomDiffCI()` /
+      `BinomRatioCI()` on the 56/70 vs 48/80 example (Newcombe 1998). Wald, Agresti-Caffo, Newcombe and Katz agree
+      to 1e-5; Miettinen-Nurminen, Mee and Koopman differ from DescTools by up to ~1e-4 because DescTools solves the
+      score equation with `uniroot()`'s default tolerance (this app solves it to 1e-12; the unit tests check the
+      score equation itself at the returned limits and use an absolute 5e-4 tolerance against DescTools). Odds ratios
+      equal `fisher.test()`; t and variance-ratio results equal `t.test()` / `var.test()` on data constructed to
+      have exactly the entered summary statistics; the noncentral-t limits satisfy their defining equation; and a
+      1000-replicate coverage simulation checks that the score intervals sit near nominal coverage. Worked-example
+      numbers shown in the app were re-read from the code (an earlier draft of the means example had wrong
+      numbers and was corrected). The Miettinen-Nurminen N/(N-1) factor is included (Mee omits it), as in
+      Newcombe/Fagerland et al.
+    - **Citations (honest status).** Newcombe 1998 (Stat Med 17:873-890, 857-872), Miettinen & Nurminen 1985 (Stat
+      Med 4:213-226), Mee 1984 (Biometrics 40:1175-1176), Koopman 1984 (Biometrics 40:513-517), Welch 1947,
+      Hedges 1981 (J Educ Stat 6:107-128), Cumming & Finch 2001 (Educ Psychol Meas 61:532-574) and Fagerland,
+      Lydersen & Laake 2015 (Stat Methods Med Res 24:224-254) are cited; the existence, volume and pages of
+      Koopman, Hedges, Cumming & Finch and Fagerland et al. were confirmed by web search, the others (Newcombe, Miettinen-Nurminen, Mee, Welch) are cited as given in the
+      DescTools/R documentation and were not independently web-checked. The original papers could not be read, so formulas are verified
+      numerically against the packages above, not against the papers.
+    - **Still to do for item 13** (OpenEpi parity, in rough priority): stratified rate ratios, vaccine efficacy,
+      and analysis keywords in the free-text wizard.
 14. **Planning tools** (Track B2) — randomization lists, attrition/non-response
     inflation, protocol text.
 15. **Shinylive feasibility spike** (Track D3) — decides the offline/APK path.

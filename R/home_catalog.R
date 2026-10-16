@@ -25,6 +25,27 @@
 
 calculator_catalog <- list(
 
+  list(key = "analyze_compare_proportions",
+       label = "Compare two proportions: difference, risk ratio, odds ratio (several interval methods)",
+       answers = paste(
+         "Answers: \"I have events and sample sizes in two groups -- what are the difference, risk ratio and odds ratio, with",
+         "confidence intervals by several methods side by side?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Compare Two Groups",
+       module_input_id = "analyze_compare-design", design_value = "proportions"),
+
+  list(key = "analyze_compare_means",
+       label = "Compare two means from summary statistics: difference, variance ratio, Cohen's d",
+       answers = paste(
+         "Answers: \"I have the sample size, mean and SD of two groups -- what is the difference in means (Welch and",
+         "pooled), the variance ratio and the standardized difference?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Compare Two Groups",
+       module_input_id = "analyze_compare-design", design_value = "means"),
+
+
   list(key = "analyze_std_direct",
        label = "Direct standardization: age-standardized rates, with a comparison of two groups",
        answers = paste(
@@ -2004,7 +2025,8 @@ study_design_families <- list(
                          "analyze_mh_cohort", "analyze_mh_case_control",
                          "analyze_rate_single", "analyze_rate_ratio",
                          "analyze_mcnemar", "analyze_kappa", "analyze_trend",
-                         "analyze_std_direct", "analyze_std_indirect", "analyze_std_smr")),
+                         "analyze_std_direct", "analyze_std_indirect", "analyze_std_smr",
+                         "analyze_compare_proportions", "analyze_compare_means")),
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",
@@ -2175,6 +2197,9 @@ study_design_families <- list(
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
 test_families <- list(
+  list(id = "analyze_compare_tests", label = "Compare Two Groups (from summary figures)",
+       hint = "Difference, risk ratio and odds ratio of two proportions with several confidence-interval methods side by side, and the difference, variance ratio and standardized difference of two means.",
+       catalog_keys = c("analyze_compare_proportions", "analyze_compare_means")),
   list(id = "analyze_standardization_tests", label = "Standardization and SMR (from counts)",
        hint = "Directly standardized rates (with a comparison of two groups), indirect standardization with expected events, and the SMR with exact and mid-P intervals.",
        catalog_keys = c("analyze_std_direct", "analyze_std_indirect", "analyze_std_smr")),

@@ -7,7 +7,7 @@ example, the original methodological citation, and the name of the package or
 formula that implements it.
 
 **Current state:** 49 sample-size calculator modules (156 designs) plus seven
-*Analyze* tools (2x2 table analysis, stratified Mantel-Haenszel analysis, person-time rates, standardization and SMR, paired/agreement/trend tests, diagnostic test evaluation, confidence intervals), 523+ unit-test blocks and browser-driven
+*Analyze* tools (2x2 table analysis, stratified Mantel-Haenszel analysis, person-time rates, standardization and SMR, paired/agreement/trend tests, diagnostic test evaluation, confidence intervals, comparison of two proportions or means), 523+ unit-test blocks and browser-driven
 UI smoke tests. The project, app and future package are named **epidemiologicasuite**. The sample-size catalog is essentially complete; the project is now
 planning its next step — growing into a wider **epidemiology suite**, an installable
 **R package**, and offline/mobile distribution. See
@@ -70,6 +70,7 @@ workbench lists its modules in a sidebar, under group headers ordered roughly si
 | | Stratified Analysis (Mantel-Haenszel) | 2-8 strata of 2x2 tables: crude vs Mantel-Haenszel adjusted OR / RR / RD with CIs, Cochran-Mantel-Haenszel test, Woolf / Breslow-Day / Tarone homogeneity tests; cohort or case-control |
 | | Rates and Rate Ratios | incidence rate with exact / mid-P / Byar / Wald intervals; two groups: rate ratio (exact, mid-P, Wald), rate difference, attributable fractions, exact / mid-P / score tests, from events and person-time |
 | | Paired, Agreement and Trend Tests | McNemar's test and matched-pair OR (exact/Wald), Cohen's kappa (unweighted/linear/quadratic, 2-6 categories) with CI and PABAK, Cochran-Armitage chi-square for trend |
+| | Compare Two Groups | difference / ratio / odds ratio of two proportions (Wald, Agresti-Caffo, Newcombe, Miettinen-Nurminen, Mee, Koopman, Katz, exact side by side) and two means (Welch, pooled, variance ratio, Cohen's d / Hedges' g) |
 | | Standardization and SMR | direct standardization (Fay-Feuer gamma CI, optional two-group comparison), indirect standardization with expected events, SMR with exact and mid-P intervals |
 | **General Statistical Tests** | Correlation | Pearson; two independent r; two dependent r; point-biserial; regression slope; partial; Spearman |
 | | Chi-Square Tests | goodness of fit; R×C independence; McNemar; Mantel-Haenszel; Cochran-Armitage trend; Cochran's Q |

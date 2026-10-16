@@ -79,9 +79,19 @@ design_nodes <- list(
       list(label = "Incidence rates from events and person-time (one rate, or a rate ratio of two groups)", next_id = "analyze_rate_type"),
       list(label = "Paired data, agreement between raters, or a trend across ordered groups (McNemar, kappa, chi-square for trend)", next_id = "analyze_paired_type"),
       list(label = "Rates for populations with different age structures: standardized rates or an SMR", next_id = "analyze_std_type"),
+      list(label = "Compare two groups from summary figures: two proportions (difference, ratio, odds ratio) or two means", next_id = "analyze_compare_type"),
       list(label = "A diagnostic test (sensitivity, specificity, PPV, NPV from a test-by-disease table)", next_id = "term_analyze_dx_single"),
       list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined"),
       list(label = "A confidence interval for a proportion, or for a mean and standard deviation", next_id = "analyze_ci_type")
+    )
+  ),
+
+  analyze_compare_type = list(
+    id = "analyze_compare_type", stage = 1,
+    question = "What are the two groups' summary figures?",
+    options = list(
+      list(label = "Events and sample sizes (two proportions)", next_id = "term_analyze_compare_proportions"),
+      list(label = "Sample size, mean and standard deviation (two means)", next_id = "term_analyze_compare_means")
     )
   ),
 
@@ -800,6 +810,8 @@ design_nodes <- list(
   term_bayes_assurance = .term("term_bayes_assurance", "Bayesian assurance, two proportions", "bayesian_assurance_or"),
   term_bfda = .term("term_bfda", "Bayes factor design analysis, two means", "bfda_ttest"),
 
+  term_analyze_compare_proportions = .term("term_analyze_compare_proportions", "Compare two proportions", "analyze_compare_proportions"),
+  term_analyze_compare_means = .term("term_analyze_compare_means", "Compare two means from summary statistics", "analyze_compare_means"),
   term_analyze_std_direct = .term("term_analyze_std_direct", "Direct standardization", "analyze_std_direct"),
   term_analyze_std_indirect = .term("term_analyze_std_indirect", "Indirect standardization and SMR", "analyze_std_indirect"),
   term_analyze_std_smr = .term("term_analyze_std_smr", "SMR from observed and expected events", "analyze_std_smr"),

@@ -191,6 +191,24 @@ test_that("Standardization and SMR: the published direct example, a two-group co
   expect_equal(ui_output_errors(app), 0)
 })
 
+test_that("Compare Two Groups: proportions list the interval methods side by side; means give Welch and pooled", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Compare Two Groups")
+  pr <- ui_output_text(app, "analyze_compare-result")
+  expect_match(pr, "Miettinen-Nurminen score")
+  expect_match(pr, "Newcombe hybrid score")
+  expect_match(pr, "Koopman score")
+  expect_match(pr, "0\\.0528 to 0\\.338")           # Miettinen-Nurminen for 56/70 vs 48/80 (= DescTools::BinomDiffCI)
+  app$set_inputs(`analyze_compare-design` = "means")
+  app$wait_for_idle(800, timeout = 60000)
+  me <- ui_output_text(app, "analyze_compare-result")
+  expect_match(me, "Welch")
+  expect_match(me, "Student, pooled variance")
+  expect_match(me, "Hedges")
+  expect_equal(ui_output_errors(app), 0)
+})
+
 test_that("no JavaScript or Shiny errors accumulated while opening every module", {
   skip_if_no_ui()
   expect_equal(ui_console_errors(ui_driver()), character())
