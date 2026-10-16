@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [only-epiR+presize+pwr+clinfun+powerSurvEpi, only-PowerTOST+Exact+pmsampsize+pROC+TrialSize, only-powerMediation+Hmisc+tseries+BayesFactor+mvtnorm, only-rstatix+lme4+survival]
+        variant: [only-PowerTOST, only-Exact, only-pmsampsize, only-pROC, only-TrialSize]
     steps:
       - uses: actions/checkout@v4
       - uses: r-lib/actions/setup-r@v2
