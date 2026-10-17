@@ -15,6 +15,7 @@ planning its next step — growing into a wider **epidemiology suite**, an insta
 
 | Document | What it's for |
 |---|---|
+| **Documentation site** (pkgdown, `tools/docs/`) | One page per calculator -- formula, explanation, worked example, citation, how it is computed -- plus the roadmap and design documents. Built from the package's own text on every push; published to GitHub Pages from `main` (see below) |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Priorities, review findings, suite/package/deployment plans, and every open or blocked item |
 | [`docs/checklist_by_design.md`](docs/checklist_by_design.md) · [`docs/checklist_by_test.md`](docs/checklist_by_test.md) | Per-design build status and the verification evidence behind each one |
 | [`docs/SDD.md`](docs/SDD.md) | Architecture, module contract, conventions |
@@ -173,6 +174,14 @@ From a clone (development), the root `app.R` loads the package with
 `pkgload::load_all()`, so `shiny::runApp()` or `Rscript -e 'shiny::runApp()'` from
 the repository root still works.
 
+## Documentation site
+
+`tools/docs/build_site_sources.R` writes one article per calculator (from its `*_content` object), the calculator
+overview and the project pages into `vignettes/` plus `_pkgdown.yml` (none of it is committed); `pkgdown::build_site()` then
+builds the site into `site_out/`. The `docs` workflow does this on every push and keeps the site as a build artifact; on
+`main` it also deploys to GitHub Pages. One-time setup for the repository owner: *Settings > Pages > Source: GitHub Actions*.
+Locally: `Rscript tools/docs/build_site_sources.R && Rscript -e 'pkgdown::build_site()'`.
+
 ## Running tests
 
 ```r
@@ -224,7 +233,8 @@ man/                   help pages for the two exported functions
 tests/testthat/        unit tests (calc_*.R functions, wizard, catalog consistency)
 docs/                  roadmap, SDD, checklists, algorithm doc, original brief
 .claude/               SessionStart hook that rebuilds the R environment
-.github/workflows/     CI (tests.yml)
+.github/workflows/     CI (tests.yml), documentation site (docs.yml), browser-build spike (shinylive-spike.yml)
+tools/                 docs/ (site generator), webr-spike/ (Shinylive feasibility checks)
 renv.lock              locked package versions
 ```
 

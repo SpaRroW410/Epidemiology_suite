@@ -918,7 +918,22 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       `PowerTOST` (also what breaks the browser build: `cubature`), `Exact` (Boschloo; `rootSolve` has no WebAssembly
       build), `clinfun`. Largest remaining runtime weight: `lme4` (11 MB unique; used by the Monte Carlo mixed-model
       designs, so kept), then `survival`, `bslib`, `shiny`.
-17. **pkgdown documentation site** (free, GitHub Pages).
+17. **pkgdown documentation site** (free, GitHub Pages) -- **built and passing in CI (17 Oct 2026); publishing waits for
+    the owner to enable Pages and merge to `main`.**
+    - **What it is.** `tools/docs/build_site_sources.R` generates, from the package itself, one page per calculator (60) from
+      its `<module>_content` object -- title, formula (MathJax), explanation, worked example, citation and "implemented
+      via", the same text as the app's Formula / Help and Reference tabs -- plus a calculator overview grouped by workbench
+      and category, and pages for the roadmap, the software design and the study-design algorithm. Nothing generated is
+      committed, so the site cannot drift from the app. `.github/workflows/docs.yml` builds it with pkgdown on every push
+      (178 files, "Checking for problems" clean) and keeps it as an artifact; on `main` it deploys with
+      `actions/deploy-pages`. Output goes to `site_out/`, not `docs/`, which holds the project's markdown documents.
+    - **Checks done.** All 64 generated pages render with pandoc locally (482 formulas converted, no stray `$` in the
+      calculator pages); the CI build passes. pkgdown itself could not be run in this sandbox, so the first look at the
+      built site (navigation, search, MathJax in the browser) is for the owner or the next session: download the `site`
+      artifact from the docs workflow.
+    - **To publish:** Settings > Pages > Source: *GitHub Actions*, then merge this branch to `main` (the deploy job only
+      runs from `main`). **Open:** a custom domain, a "Try it online" link once a hosted or browser build exists, and
+      cross-links from each page to the matching section in the app.
 
 ### P3 — distribution and larger workbenches
 
