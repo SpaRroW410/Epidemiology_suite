@@ -85,6 +85,7 @@ try {
           rec.designs.push({ design: label, waited, status: bad ? "ERROR" : p.result || !p.has_result ? "ok" : "empty", detail: (p.errs[0] || p.danger[0] || p.result || "").slice(0, 110) });
         };
         if (radio) {
+          let prevResult = "", prevErr = "";
           for (const v of radio.vals) {
             if (only && !only[title].includes(v)) continue;
             await f.evaluate((a) => { const r = [...document.querySelectorAll("input[type=radio]")].find((e) => e.name === a.name && e.value === a.v); if (r) r.click(); }, { name: radio.name, v });
@@ -92,9 +93,13 @@ try {
             for (; waited < maxWait; waited++) {
               await page.waitForTimeout(1000);
               const p = await probe();
-              if (p.errs.length || p.danger.length || (p.has_result && p.result.length > 0) || (!p.has_result && waited >= 2)) break;
+              const changed = p.result !== prevResult || (p.errs[0] || p.danger[0] || "") !== prevErr;
+              if (waited >= 1 && changed && (p.errs.length || p.danger.length || (p.has_result && p.result.length > 0))) break;
+              if (!p.has_result && waited >= 2) break;
+              if (waited >= 7 && !changed && (p.errs.length || p.danger.length || p.result.length > 0)) break;   // identical output on purpose
             }
             await visit(v, waited + 1);
+            const lp = await probe(); prevResult = lp.result; prevErr = lp.errs[0] || lp.danger[0] || "";
           }
         } else {
           let waited = 0;

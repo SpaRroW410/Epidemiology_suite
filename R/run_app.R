@@ -64,8 +64,11 @@ epidemiologicasuite_app <- function() {
       theme = bs_theme(
         version = 5,
         bootswatch = "litera",
-        base_font = font_google("Source Serif 4"),
-        heading_font = font_google("Source Serif 4"),
+        # A local font stack, not bslib::font_google(): that downloads the font when the first page is
+        # rendered, so the app could not start without internet (a Shinylive/offline build, a locked-down
+        # server). "Source Serif 4" is used if it is installed on the viewer's machine.
+        base_font = font_collection("Source Serif 4", "Georgia", "Cambria", "Times New Roman", "serif"),
+        heading_font = font_collection("Source Serif 4", "Georgia", "Cambria", "Times New Roman", "serif"),
         "font-size-base" = "0.95rem"
       ),
       header = tags$style(HTML(.workbench_css))

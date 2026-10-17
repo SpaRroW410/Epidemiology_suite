@@ -27,7 +27,6 @@ jobs:
           path: spike-output
 
   export-and-boot:
-    if: false   # stage 2 findings are recorded in docs/ROADMAP.md; switch on to re-run the browser crawl
     # Stage 2: build the app as a Shinylive (WebAssembly) site and boot it in headless Chrome.
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -35,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [full-PowerTOST]
+        variant: [app]
     steps:
       - uses: actions/checkout@v4
       - uses: r-lib/actions/setup-r@v2
@@ -56,7 +55,7 @@ jobs:
           sleep 3
           cd tools/webr-spike 2>/dev/null || cd "$GITHUB_WORKSPACE/tools/webr-spike"
           npm init -y >/dev/null && npm install playwright-core >/dev/null
-          CRAWL=1 WAIT=170 ONLY_FILE="$GITHUB_WORKSPACE/tools/webr-spike/only.json" node boot_test.mjs http://localhost:8008/ "$GITHUB_WORKSPACE/boot-${{ matrix.variant }}.png" "$GITHUB_WORKSPACE/boot-${{ matrix.variant }}.json"
+          CRAWL=1 WAIT=90 node boot_test.mjs http://localhost:8008/ "$GITHUB_WORKSPACE/boot-${{ matrix.variant }}.png" "$GITHUB_WORKSPACE/boot-${{ matrix.variant }}.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
