@@ -37,10 +37,13 @@ writeLines(c("# bundle hints for shinylive's package scan; never executed",
 
 # lme4 needs MASS; the copy that shinylive bundles under /shinylive/webr/packages fails to load its compiled part
 # ("could not load dynamic lib .../MASS.so"), while the build installed from the webR repository works. So install
-# it from the repository before anything loads lme4. webr:: exists only inside webR.
+# it from the repository before anything loads lme4. webr:: exists only inside webR. It is also loaded at once:
+# when other compiled packages had been loaded first, MASS.so later failed to load (a full crawl failed where a
+# targeted one passed), so MASS goes in first.
 prelude <- c(
   "if (identical(Sys.info()[['sysname']], 'Emscripten') && requireNamespace('webr', quietly = TRUE)) {",
   "  try(webr::install('MASS', quiet = TRUE), silent = TRUE)",
+  "  message('PRELUDE load MASS: ', tryCatch({ loadNamespace('MASS'); 'ok' }, error = function(e) conditionMessage(e)))",
   "  message('PRELUDE libPaths: ', paste(.libPaths(), collapse = ' | '))",
   "  message('PRELUDE MASS at: ', tryCatch(find.package('MASS'), error = function(e) 'not found'))",
   "}")
