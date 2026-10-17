@@ -60,7 +60,7 @@ cannot reach — see §4.
 | F9 | **Partly addressed (28 Sep 2026).** Shiny runs one R process per app instance; a 5–25 s simulation (Monte Carlo Mixed Models, RMST, weighted log-rank, BFDA, KS/runs/animal-rank) used to recompute on every input change — fixed, see P1 item 7. Still true: one user's simulation blocks every other user on the same app instance while it runs — needs `ExtendedTask` (P1 item 7, second half) | observed during browser verification | Was Medium (High once hosted); recompute-storm risk resolved, cross-user blocking remains |
 | F10 | **Resolved (28 Sep 2026).** Every module (except the two guidance-only ones) now offers CSV/JSON/BibTeX/RIS download and a justification paragraph — see P1 item 9 | download handlers exist for all 47 calculator modules | Was Medium; resolved |
 | F11 | **Accessibility and mobile layout never audited.** Translations are not planned (English only, D5) | — | Low–Medium |
-| F12 | **Open (found by the item 15 spike).** The theme uses `bslib::font_google("Source Serif 4")`, which downloads the font file when the page is first rendered. Without internet at that moment (a Shinylive build, an air-gapped server, `R CMD check` on a locked-down machine) the page fails to render at all | `R/run_app.R` (theme) | Medium; fix by shipping the font or using a system font stack; needed for any offline route |
+| F12 | **Fixed (17 Oct 2026).** ~~Open (found by the item 15 spike).~~ The theme uses `bslib::font_google("Source Serif 4")`, which downloads the font file when the page is first rendered. Without internet at that moment (a Shinylive build, an air-gapped server, `R CMD check` on a locked-down machine) the page fails to render at all | `R/run_app.R` (theme) | Medium; fix by shipping the font or using a system font stack; needed for any offline route |
 | F13 | **Fixed (17 Oct 2026, item 16).** ~~Open (found by the item 15 spike).~~ The app only works with the epiR version pinned in `renv.lock` (2.0.67). Current CRAN `epiR` (3.0.0, also what the webR repository serves) changed `epi.ssdetect()` (`prev`/`finite.correction`/`conf.level` became `pstar`/`se.psu`/`ss.se`), so Rule of Three "imperfect test" fails on a fresh install; the other `epi.ss*` calls were not re-checked against 3.0.0 | `R/calc_rule_of_three.R`; epiR 3.0.0 source | High for CRAN / fresh installs; best fixed by removing `epiR` from the runtime (item 16) rather than chasing its API |
 | F14 | **Fixed (17 Oct 2026, item 16).** ~~Open (found by the item 15 spike).~~ `rstatix` is declared an import for one call (`cochran_qtest`, Cochran's Q); it costs 21.8 MB of unique dependencies in a browser build and a long install otherwise | `R/calc_chisq.R:320` | Low effort, high weight reduction |
 
@@ -881,6 +881,20 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       unique) is called exactly once, for Cochran's Q. Then `BayesFactor` (8.4 MB unique), `Hmisc` (5.9), `tseries` (4.7),
       `PowerTOST` (3.5). Dropping `epiR` and `rstatix` alone would remove about two thirds of the unique weight and make
       the browser (and CRAN) story far lighter; this is the concrete target for item 16.
+    - **Browser-build fixes and re-crawl (17 Oct 2026).** Done in the app: the theme's Google Font download is replaced by a
+      local font stack (F12 fixed); `solve()` / `chol()` fall back to a small base-R routine only when LAPACK is
+      missing (`.solve_safe()`, `.chol_safe()`, tested against the real functions), which fixed the two Longitudinal designs;
+      the Fisher / Boschloo (`Exact`) and the three bioequivalence (`PowerTOST`) designs now stop with "needs the R package
+      ..., which cannot be loaded in this environment" instead of a package-loading error (`.require_pkg()`). Rule of Three
+      "imperfect test" was fixed by item 16. Spike tooling only (not in the app): the browser app attaches just `shiny` and
+      `bslib`, and a prelude loads `MASS` and `lme4` at start-up -- loading them late made `MASS.so`, then `rbibutils.so`,
+      fail to load ("could not load dynamic lib"), so any real Shinylive build of the package needs the same prelude.
+      **Result of the last full crawl (185 design options, 60 modules):** the interface appears after about 40-70 s, the first
+      calculation after 6-11 s, the page transfers 64 MB (was 170-190 MB before item 16). 176 options render a result;
+      5 show the app's own validation message at default inputs (not browser problems); 3 show the plain "needs the R
+      package" message (TOST means, Fisher, Boschloo -- by design, no WebAssembly build of `rootSolve` / `cubature`); 1
+      (Trial Sequential Analysis, RR) did not finish within 150 s in the last crawl although it did in earlier ones, so
+      its browser speed is still open. Network times come from a CI runner and are not representative of a phone.
     - **Decision.** A static browser build (`shinylive`, GitHub Pages) is feasible and covers 96% of the designs today.
       It is worth offering as a *secondary* distribution once (a) item 16 has removed `epiR` and `rstatix` from the
       runtime path (cuts the first download by roughly a third to a half, to be measured), (b) the browser build gates the
