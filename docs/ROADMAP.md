@@ -61,8 +61,8 @@ cannot reach — see §4.
 | F10 | **Resolved (28 Sep 2026).** Every module (except the two guidance-only ones) now offers CSV/JSON/BibTeX/RIS download and a justification paragraph — see P1 item 9 | download handlers exist for all 47 calculator modules | Was Medium; resolved |
 | F11 | **Accessibility and mobile layout never audited.** Translations are not planned (English only, D5) | — | Low–Medium |
 | F12 | **Open (found by the item 15 spike).** The theme uses `bslib::font_google("Source Serif 4")`, which downloads the font file when the page is first rendered. Without internet at that moment (a Shinylive build, an air-gapped server, `R CMD check` on a locked-down machine) the page fails to render at all | `R/run_app.R` (theme) | Medium; fix by shipping the font or using a system font stack; needed for any offline route |
-| F13 | **Open (found by the item 15 spike).** The app only works with the epiR version pinned in `renv.lock` (2.0.67). Current CRAN `epiR` (3.0.0, also what the webR repository serves) changed `epi.ssdetect()` (`prev`/`finite.correction`/`conf.level` became `pstar`/`se.psu`/`ss.se`), so Rule of Three "imperfect test" fails on a fresh install; the other `epi.ss*` calls were not re-checked against 3.0.0 | `R/calc_rule_of_three.R`; epiR 3.0.0 source | High for CRAN / fresh installs; best fixed by removing `epiR` from the runtime (item 16) rather than chasing its API |
-| F14 | **Open (found by the item 15 spike).** `rstatix` is declared an import for one call (`cochran_qtest`, Cochran's Q); it costs 21.8 MB of unique dependencies in a browser build and a long install otherwise | `R/calc_chisq.R:320` | Low effort, high weight reduction |
+| F13 | **Fixed (17 Oct 2026, item 16).** ~~Open (found by the item 15 spike).~~ The app only works with the epiR version pinned in `renv.lock` (2.0.67). Current CRAN `epiR` (3.0.0, also what the webR repository serves) changed `epi.ssdetect()` (`prev`/`finite.correction`/`conf.level` became `pstar`/`se.psu`/`ss.se`), so Rule of Three "imperfect test" fails on a fresh install; the other `epi.ss*` calls were not re-checked against 3.0.0 | `R/calc_rule_of_three.R`; epiR 3.0.0 source | High for CRAN / fresh installs; best fixed by removing `epiR` from the runtime (item 16) rather than chasing its API |
+| F14 | **Fixed (17 Oct 2026, item 16).** ~~Open (found by the item 15 spike).~~ `rstatix` is declared an import for one call (`cochran_qtest`, Cochran's Q); it costs 21.8 MB of unique dependencies in a browser build and a long install otherwise | `R/calc_chisq.R:320` | Low effort, high weight reduction |
 
 ---
 
@@ -888,7 +888,36 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       made. It should not yet be promised as the offline / APK route: first load is 170+ MB, only the `light`
       one-module case was timed on a real run, mobile memory limits were not tested, and the TWA / Capacitor wrappers
       (D5a, D5b) were not tried. Re-run the spike after item 16 and against the newest webR before deciding D5.
-16. **Phase 8 dependency reduction, tier 1** (§9) — also de-risks D3 and CRAN.
+16. **Phase 8 dependency reduction, tier 1** (§9) — **done in part (17 Oct 2026): the six packages the item 15 spike
+    identified as heaviest are out of the runtime.**
+    - **Removed from `Imports`:** `epiR` (9 calls), `rstatix` (1), `Hmisc` (3), `tseries` (1), `BayesFactor` (1).
+      Each call is replaced by a closed form in `R/calc_closed_forms.R`, transcribed from the function it replaced and
+      **tested against the real function** over input grids (the packages moved to `Suggests` as oracles, so the tests skip
+      cleanly where they are absent). Agreement is to floating-point noise, except the JZS Bayes factor (relative
+      difference 1.8e-9 against `ttestBF`, whose own integration tolerance it is within).
+    - **Results unchanged.** The seeded Monte Carlo designs (Cochran's Q, runs test, BFDA, noncompliance power) were run
+      in the slow lane before and after and reproduce, and a direct before/after comparison of BFDA power at n = 20/40/60
+      gives identical rejection rates. `BayesFactor`'s replacement is also about 80x faster per call (0.09 ms against
+      7 ms), so the BFDA design is much quicker (its default `nsim` was left as it was).
+    - **Measured effect** (the item 15 package check, same method): the dependency closure of the runtime imports went
+      from **168 to 58 packages**, the download from **180 MB to 51 MB (-71%)**, and the packages with no WebAssembly build
+      from **3 to 1** (`rootSolve`, needed by `Exact`). Imports in `DESCRIPTION`: 20 -> 15 non-base (14 listed plus `survival`).
+    - **Bonus fix (F13).** Rule of Three "imperfect test" no longer depends on `epiR`'s changing `epi.ssdetect()`
+      interface, so it works on a fresh install; the code follows the pinned 2.0.67 semantics, which are what the app's
+      worked examples and tests were built on.
+    - **Honesty notes.** (1) The replacements reproduce `epiR` 2.0.67 / `rstatix` / `Hmisc` 5.1.1 / `tseries` /
+      `BayesFactor` *as they were*, including their rounding conventions; where those packages have quirks (e.g. `epi.ssninfb`
+      leaves the treatment group unrounded when `r` is not 1), the quirk is kept so results do not move, and flagged in
+      the code. (2) `epi.ssdetect()` in the current `epiR` 3.0.0 has a different interface and was not compared. (3)
+      `Hmisc::cpower` cites Lachin & Foulkes (1986) in its own documentation; the formula was transcribed from the
+      package, and Lachin & Foulkes was not read. (4) Rouder et al. 2009 (Psychon Bull Rev 16:225-237) was already cited in
+      the app; the formula was transcribed from the usual statement of eq. 1 and verified numerically against
+      `BayesFactor`, not read in the original.
+    - **Still to do (tier 1 remainder, now low value for size):** `pwr`, `powerMediation`, `pmsampsize`, `pROC` (each
+      under 1 MB). **Moderate:** `presize` (0.5 MB unique), `powerSurvEpi`, `TrialSize`. **Defer (higher risk):**
+      `PowerTOST` (also what breaks the browser build: `cubature`), `Exact` (Boschloo; `rootSolve` has no WebAssembly
+      build), `clinfun`. Largest remaining runtime weight: `lme4` (11 MB unique; used by the Monte Carlo mixed-model
+      designs, so kept), then `survival`, `bslib`, `shiny`.
 17. **pkgdown documentation site** (free, GitHub Pages).
 
 ### P3 — distribution and larger workbenches
