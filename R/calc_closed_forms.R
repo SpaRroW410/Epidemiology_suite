@@ -51,7 +51,7 @@
     stop("Target power is not reachable. Check the exact specification of the hypotheses.")
   }
   n.control <- ceiling((treat * (1 - treat) / r + control * (1 - control)) * ((z.alpha + z.beta) / (treat - control - ndelta))^2)
-  n.treat <- n.control * r
+  n.treat <- n.control * r      # epiR quirk kept so results do not move: the treatment group is not rounded (a fraction when r is not a whole number)
   list(n.total = n.treat + n.control, n.treat = n.treat, n.control = n.control)
 }
 
