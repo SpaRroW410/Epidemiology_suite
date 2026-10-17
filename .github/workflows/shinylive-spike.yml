@@ -55,7 +55,7 @@ jobs:
           sleep 3
           cd tools/webr-spike 2>/dev/null || cd "$GITHUB_WORKSPACE/tools/webr-spike"
           npm init -y >/dev/null && npm install playwright-core >/dev/null
-          CRAWL=1 WAIT=90 node boot_test.mjs http://localhost:8008/ "$GITHUB_WORKSPACE/boot-${{ matrix.variant }}.png" "$GITHUB_WORKSPACE/boot-${{ matrix.variant }}.json"
+          CRAWL=1 WAIT=120 ONLY_FILE="$GITHUB_WORKSPACE/tools/webr-spike/only.json" node boot_test.mjs http://localhost:8008/ "$GITHUB_WORKSPACE/boot-${{ matrix.variant }}.png" "$GITHUB_WORKSPACE/boot-${{ matrix.variant }}.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

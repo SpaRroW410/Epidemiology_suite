@@ -11,7 +11,7 @@ const page = await browser.newPage();
 report.load_lines = [];
 page.on("console", (m) => {
   const t = m.text();
-  if (/LOAD |SOURCE FAILED|unable to load shared object|could not load dynamic lib/.test(t)) report.load_lines.push(t.slice(0, 300));
+  if (/LOAD |SOURCE FAILED|PRELUDE|unable to load shared object|could not load dynamic lib/.test(t)) report.load_lines.push(t.slice(0, 300));
   else if (m.type() === "error" && !/Downloading webR package/.test(t)) report.console_errors.push(t.slice(0, 300));
 });
 page.on("pageerror", (e) => report.page_errors.push(String(e).slice(0, 300)));
