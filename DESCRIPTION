@@ -27,8 +27,6 @@ Imports:
     pROC,
     TrialSize,
     powerMediation,
-    Hmisc,
-    tseries,
     BayesFactor,
     mvtnorm,
     lme4,
@@ -40,7 +38,9 @@ Suggests:
     testthat (>= 3.0.0),
     withr,
     epiR,
-    rstatix
+    rstatix,
+    Hmisc,
+    tseries
 Config/testthat/edition: 3
 URL: https://github.com/SpaRroW410/Sample_size_all
 BugReports: https://github.com/SpaRroW410/Sample_size_all/issues

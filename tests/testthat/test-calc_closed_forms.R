@@ -92,3 +92,42 @@ test_that("Cochran's Q equals rstatix::cochran_qtest() on random related binary 
   # degenerate data (all subjects identical) has no defined statistic
   expect_true(is.na(.cf_cochran_q(rep(1, 12), rep(1:4, 3), factor(rep(1:3, each = 4)))$p))
 })
+
+test_that("Bayesian assurance integral equals Hmisc::gbayes2() for normal and uniform priors", {
+  skip_if_not_installed("Hmisc")
+  for (sd in c(0.1, 0.3, 1)) for (dw in c(0, 0.1)) for (alpha in c(0.05, 0.01)) {
+    pn <- function(d) dnorm(d, 0.3, 0.2); pu <- function(d) dunif(d, 0, 0.6)
+    near(.cf_gbayes2(sd, pn, dw, alpha), Hmisc::gbayes2(sd, pn, delta.w = dw, alpha = alpha), paste("normal", sd, dw, alpha))
+    near(.cf_gbayes2(sd, pu, dw, alpha), Hmisc::gbayes2(sd, pu, delta.w = dw, alpha = alpha), paste("uniform", sd, dw, alpha))
+  }
+})
+
+test_that("ordinal-response sample size equals Hmisc::posamsize()", {
+  skip_if_not_installed("Hmisc")
+  for (p in list(c(0.2, 0.3, 0.5), rep(0.25, 4), c(0.1, 0.1, 0.2, 0.6))) for (or in c(1.5, 2.5, 0.6)) for (fr in c(0.5, 0.3)) {
+    a <- .cf_posamsize(p, or, fr, 0.05, 0.9); b <- Hmisc::posamsize(p = p, odds.ratio = or, fraction = fr, alpha = 0.05, power = 0.9)
+    near(a, unclass(b)[c("n", "eff")])
+  }
+  expect_error(.cf_posamsize(c(0.2, 0.2), 2), "do not add up")
+})
+
+test_that("survival power with non-compliance equals Hmisc::cpower()", {
+  skip_if_not_installed("Hmisc")
+  for (cfg in list(c(5, 0.9, 25, 3, 5), c(3, 0.6, 30, 2, 1), c(2, 0.4, 20, 0, 4))) for (n in c(200, 1500, 20000)) for (nc in list(c(0, 0), c(10, 20))) {
+    a <- .cf_cpower(cfg[1], n, cfg[2], cfg[3], cfg[4], cfg[5], nc[1], nc[2], 0.05)
+    b <- Hmisc::cpower(tref = cfg[1], n = n, mc = cfg[2], r = cfg[3], accrual = cfg[4], tmin = cfg[5], noncomp.c = nc[1], noncomp.i = nc[2], alpha = 0.05, pr = FALSE)
+    near(a, b, paste(cfg, n, nc))
+  }
+  expect_error(.cf_cpower(5, 100, 1.5, 25, 3, 5), "fraction")
+})
+
+test_that("runs-test p-value equals tseries::runs.test() on random two-level sequences", {
+  skip_if_not_installed("tseries")
+  set.seed(8)
+  for (i in 1:60) {
+    n <- sample(8:80, 1)
+    x <- factor(sample(c("A", "B"), n, replace = TRUE, prob = c(runif(1, 0.2, 0.8), 1)), levels = c("A", "B"))
+    if (nlevels(droplevels(x)) < 2) next
+    near(.cf_runs_test_p(x), suppressWarnings(tseries::runs.test(x)$p.value))
+  }
+})

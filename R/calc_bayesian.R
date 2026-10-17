@@ -65,7 +65,7 @@ calc_bayesian_assurance_or <- function(p1, p2,
 
   v <- function(n1) 1 / (n1 * p1 * (1 - p1)) + 1 / (n1 * n_ratio * p2 * (1 - p2))
   assurance_given_n1 <- function(n1) {
-    Hmisc::gbayes2(sqrt(v(n1)), prior, delta.w = delta_w, alpha = alpha)
+    .cf_gbayes2(sqrt(v(n1)), prior, delta.w = delta_w, alpha = alpha)
   }
 
   n1_lower <- 2

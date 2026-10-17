@@ -31,6 +31,7 @@ test_that("calc_ordinal_proportional_odds matches Hmisc's own documented example
   expect_equal(res$n, 3149)
   expect_equal(round(res$eff, 2), 0.90)
 
+  skip_if_not_installed("Hmisc")
   fit <- Hmisc::popower(p = c(.1, .2, .4, .3), odds.ratio = 1.2, n = 3148)
   expect_equal(round(fit$power, 2), 0.80)
 })

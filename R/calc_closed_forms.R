@@ -208,3 +208,70 @@
   q <- (k - 1) * (k * sum(C^2) - T^2) / denom
   list(statistic = q, df = k - 1L, p = stats::pchisq(q, k - 1L, lower.tail = FALSE))
 }
+
+# --- Hmisc replacements ---------------------------------------------------------------------------
+# Bayesian assurance for a difference with sd `sd` of the estimate and prior density `prior`
+# (Spiegelhalter, Abrams & Myles 2004; Hmisc::gbayes2): P(significant and delta > delta.w) =
+# integral over delta > delta.w of [1 - Phi((delta.w - delta)/sd + z)] prior(delta) d delta.
+.cf_gbayes2 <- function(sd, prior, delta.w = 0, alpha = 0.05, upper = Inf) {
+  z <- stats::qnorm(1 - alpha / 2)
+  prod <- function(delta) (1 - stats::pnorm((delta.w - delta) / sd + z)) * prior(delta)
+  ip <- stats::integrate(prior, -Inf, upper)[["value"]]
+  if (abs(ip - 1) > 0.01) {
+    warning(paste("integrate failed to obtain 1.0 for integral of prior.\nDivided posterior probability by the integral it did obtain (",
+                  format(ip), ").\nTry specifying upper=.", sep = ""))
+  }
+  stats::integrate(prod, delta.w, upper)[["value"]]
+}
+
+# Sample size for an ordinal response analysed by the proportional-odds model (Whitehead 1993):
+# n = 3 (A + 1)^2 (z_alpha/2 + z_beta)^2 / (A log(OR)^2 (1 - sum p^3)), A = (1 - fraction)/fraction;
+# `eff` is the efficiency of the ordinal categories relative to a continuous response (Hmisc::posamsize).
+.cf_posamsize <- function(p, odds.ratio, fraction = 0.5, alpha = 0.05, power = 0.8) {
+  p <- p[!is.na(p)]
+  if (abs(sum(p) - 1) > 1e-05) stop("probabilities in p do not add up to 1")
+  A <- (1 - fraction) / fraction
+  log.or <- logb(odds.ratio)
+  z.alpha <- stats::qnorm(1 - alpha / 2)
+  z.beta <- stats::qnorm(power)
+  ps <- 1 - sum(p^3)
+  n <- 3 * ((A + 1)^2) * (z.alpha + z.beta)^2 / A / (log.or^2) / ps
+  eff <- ps / (1 - 1 / n / n)
+  list(n = n, eff = eff)
+}
+
+# Power of a two-arm survival comparison with uniform accrual, exponential survival and non-compliance
+# (Hmisc::cpower, after Lachin & Foulkes 1986; Hmisc's own documentation cites them): the log hazard
+# ratio is diluted linearly by the drop-in and non-adherence percentages. Returns the power.
+.cf_cpower <- function(tref, n, mc, r, accrual, tmin, noncomp.c = 0, noncomp.i = 0, alpha = 0.05) {
+  if (mc > 1) stop("mc should be a fraction")
+  mi <- (1 - r / 100) * mc
+  nc <- n / 2
+  ni <- n / 2
+  lamc <- -logb(1 - mc) / tref
+  lami <- -logb(1 - mi) / tref
+  tmax <- tmin + accrual
+  pc <- if (accrual == 0) 1 - exp(-lamc * tmin) else 1 - 1 / accrual / lamc * (exp(-tmin * lamc) - exp(-tmax * lamc))
+  pi <- if (accrual == 0) 1 - exp(-lami * tmin) else 1 - 1 / accrual / lami * (exp(-tmin * lami) - exp(-tmax * lami))
+  mc <- pc * nc
+  mi <- pi * ni
+  delta <- logb(lami / lamc)
+  if (noncomp.c + noncomp.i > 0) delta <- delta * (1 - (noncomp.c + noncomp.i) / 100)
+  v <- 1 / mc + 1 / mi
+  sd <- sqrt(v)
+  z <- -stats::qnorm(alpha / 2)
+  c(Power = 1 - (stats::pnorm(z - abs(delta) / sd) - stats::pnorm(-z - abs(delta) / sd)))
+}
+
+# --- tseries replacement: Wald-Wolfowitz runs test for a two-level factor ----------------------------
+# Standard-normal approximation (Wald & Wolfowitz 1940): R runs, m = 1 + 2 n1 n2 / (n1 + n2),
+# s^2 = 2 n1 n2 (2 n1 n2 - n1 - n2) / ((n1 + n2)^2 (n1 + n2 - 1)); two-sided p = 2 Phi(-|R - m| / s).
+.cf_runs_test_p <- function(x) {
+  n <- length(x)
+  R <- 1 + sum(as.numeric(x[-1] != x[-n]))
+  n1 <- sum(levels(x)[1] == x)
+  n2 <- sum(levels(x)[2] == x)
+  m <- 1 + 2 * n1 * n2 / (n1 + n2)
+  s <- sqrt(2 * n1 * n2 * (2 * n1 * n2 - n1 - n2) / ((n1 + n2)^2 * (n1 + n2 - 1)))
+  2 * stats::pnorm(-abs((R - m) / s))
+}

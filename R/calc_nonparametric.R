@@ -389,7 +389,7 @@ calc_wald_wolfowitz_runs <- function(effect_size, alpha = 0.05, power = 0.8,
       y <- rnorm(n2, effect_size, 1)
       vals <- c(x, y)
       labs <- factor(c(rep("A", n1), rep("B", n2)))
-      suppressWarnings(tseries::runs.test(labs[order(vals)])$p.value) < alpha
+      .cf_runs_test_p(labs[order(vals)]) < alpha
     })
     mean(rejections)
   }

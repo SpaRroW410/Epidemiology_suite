@@ -52,8 +52,8 @@ calc_ordinal_proportional_odds <- function(p, odds_ratio, fraction = 0.5,
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  fit <- Hmisc::posamsize(p = p, odds.ratio = odds_ratio, fraction = fraction,
-                           alpha = alpha, power = power)
+  fit <- .cf_posamsize(p = p, odds.ratio = odds_ratio, fraction = fraction,
+                       alpha = alpha, power = power)
 
   new_ss_result(list(
     n = ceiling(fit$n),

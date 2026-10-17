@@ -59,7 +59,7 @@ bayesian_content <- list(
       "the size of a clinical trial, based on subjective clinical",
       "opinion. Stat Med. 1986;5(1):1-13."
     ),
-    backend = "Hmisc::gbayes2()"
+    backend = "closed-form integral (Spiegelhalter, Abrams & Myles 2004); identical to Hmisc::gbayes2(), which it is tested against"
   ),
   bfda = list(
     title = "Bayes Factor Design Analysis, Two-Sample Means",

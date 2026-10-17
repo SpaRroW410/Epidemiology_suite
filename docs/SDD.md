@@ -133,7 +133,7 @@ module) and `module_workbenches` (which workbench and sidebar group each module 
 | UI theme/layout | `bslib::page_navbar()` + `navset_pill_list()`, Bootswatch "litera", Source Serif 4 | workbenches with grouped sidebars |
 | Formula rendering | MathJax via `withMathJax()`, wrapped by `render_formula_block()` | adds a copyable LaTeX view |
 | Modularity | Shiny modules (`NS()`, `moduleServer()`) | |
-| Runtime stats packages | `pwr`, `presize`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `lme4` (+ `survival`, `stats`); `epiR` and `rstatix` were removed from the runtime in item 16 | 17 imports in `DESCRIPTION` incl. `shiny`/`bslib` |
+| Runtime stats packages | `pwr`, `presize`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `BayesFactor`, `mvtnorm`, `lme4` (+ `survival`, `stats`); `epiR`, `rstatix`, `Hmisc` and `tseries` were removed from the runtime in item 16 | 15 imports in `DESCRIPTION` incl. `shiny`/`bslib` |
 | Verification-only packages | e.g. `longpower`, `powerlmm`, `RTSA`, `rpact`, `clusterPower`, `ssize.fdr`, `metapower`, `semTools`, `simr`, `voi`, `PracTools`, `WebPower` | installed from `github.com/cran/<pkg>` during development; never loaded by the app |
 | Testing | `testthat` unit tests (fast/slow split), GitHub Actions CI; manual browser checks with Playwright | `shinytest2` planned (ROADMAP P1) |
 | Dev environment | `.claude/hooks/session-start.sh` rebuilds R + packages on a fresh container; `renv.lock` records the versions (CI restores from it) | — |
@@ -215,7 +215,7 @@ The table below is a snapshot of what is live (28 Sep 2026).
 | Monte Carlo Mixed Models | CRT continuous (LMM); CRT binary (GLMM); growth-curve slope difference | direct simulation + LRT via `lme4::lmer()`/`glmer()`; growth-curve LRT verified vs. `simr::doTest()` | Live |
 | Trial Sequential Analysis | Required information size: RR, OR, RD, MD | reimplemented, verified vs. `RTSA::ris()` | Live |
 | Stepped-Wedge CRT | Continuous outcome | Hooper et al. (2016) design effect, verified vs. `clusterPower::cpa.sw.normal()` | Live |
-| Log-Rank / Survival | Log-rank; Cox PH (binary/continuous); stratified; accrual + noncompliance; weighted log-rank (non-PH) | `powerSurvEpi::ssizeCT()`, `ssizeEpi()`, `ssizeEpiCont()`, `ssize.stratify()`; `Hmisc::cpower()`; simulation of `survival::survdiff(rho=)` | Live |
+| Log-Rank / Survival | Log-rank; Cox PH (binary/continuous); stratified; accrual + noncompliance (`.cf_cpower()`, verified vs. `Hmisc::cpower()`); weighted log-rank (non-PH) | `powerSurvEpi::ssizeCT()`, `ssizeEpi()`, `ssizeEpiCont()`, `ssize.stratify()`; `Hmisc::cpower()`; simulation of `survival::survdiff(rho=)` | Live |
 | Competing Risks | Joint cause-specific / any-cause hazard test | reimplemented `powerCompRisk` (Yang, Fung & Li 2017) with `mvtnorm::pmvnorm()` | Live |
 | RMST Comparison | Superiority / non-inferiority | simulation reimplementing `SSRMST` + `survRM2` with `survival::survfit()` (Uno et al.) | Live |
 | Prediction Model | Development (binary, continuous, survival); external validation (binary) | `pmsampsize::pmsampsize()`; reimplemented `pmvalsampsize` (Riley et al. 2021) | Live |
@@ -228,14 +228,14 @@ The table below is a snapshot of what is live (28 Sep 2026).
 | Chi-Square Tests | GoF; R×C independence; McNemar; Mantel-Haenszel; Cochran-Armitage; Cochran's Q | `pwr::pwr.chisq.test()`; `TrialSize::McNemar.Test()`, `Propensity.Score.strata()`, `Cochran.Armitage.Trend()`; simulation using the closed-form `.cf_cochran_q()` (verified vs. `rstatix::cochran_qtest()`) | Live |
 | Multiple Regression | R² vs. zero; R² increase | `pwr::pwr.f2.test()` | Live |
 | Factorial ANOVA / ANCOVA | General F-test | `pwr::pwr.f2.test()` | Live |
-| Logistic Regression | Binary/continuous predictor, simple or covariate-adjusted; ordinal | `powerMediation::SSizeLogisticBin()`/`Con()`; 1/(1−R²) inflation; `Hmisc::posamsize()` | Live |
+| Logistic Regression | Binary/continuous predictor, simple or covariate-adjusted; ordinal | `powerMediation::SSizeLogisticBin()`/`Con()`; 1/(1−R²) inflation; closed form `.cf_posamsize()` (verified vs. `Hmisc::posamsize()`) | Live |
 | Exact Tests | Binomial; Fisher; Boschloo; exact Poisson; sign test | `stats::binom.test()`, `poisson.test()` searches; `Exact::power.exact.test()` | Live |
 | RM-ANOVA / Mixed ANOVA | Between; within; interaction | reimplemented `WebPower::wp.rmanova()` | Live |
-| Nonparametric Tests | Wilcoxon ×2; Kendall's tau; Kruskal-Wallis; Jonckheere-Terpstra; Friedman; KS; runs test; animal K-sample rank test | `TrialSize::Nonpara.*()`; ARE inflation; simulation of `ks.test()`/`tseries::runs.test()`; `clinfun::power.ladesign()` | Live |
+| Nonparametric Tests | Wilcoxon ×2; Kendall's tau; Kruskal-Wallis; Jonckheere-Terpstra; Friedman; KS; runs test (`.cf_runs_test_p()`, verified vs. `tseries::runs.test()`); animal K-sample rank test | `TrialSize::Nonpara.*()`; ARE inflation; simulation of `ks.test()`/`tseries::runs.test()`; `clinfun::power.ladesign()` | Live |
 | Variance Tests | One variance; two variances; SD precision | closed form (chi-square / F) | Live |
 | Multiplicity Adjustment | Bonferroni/Šidák (proportions, means); FDR (BH) means; exact microarray FDR; Dunnett | wraps this app's own formulas; FDR closed form (simulation-verified); Liu & Hwang 2007 verified vs. `ssize.fdr`; `mvtnorm::qmvt()` | Live |
 | MANOVA / Hotelling's T² | Two-group Hotelling's T² | closed-form noncentral F (Rencher 2002) | Live |
-| Bayesian Design Analysis | Assurance; Bayes factor design analysis | `Hmisc::gbayes2()`; simulation of `BayesFactor::ttestBF()` | Live |
+| Bayesian Design Analysis | Assurance; Bayes factor design analysis | closed form `.cf_gbayes2()` (verified vs. `Hmisc::gbayes2()`); simulation of `BayesFactor::ttestBF()` | Live |
 | Longitudinal / MMRM | Slope difference: Liu & Liang, Diggle, Ard & Edland, Hu et al.; MMRM with dropout, AR(1) | reimplemented `longpower` functions | Live |
 | Multilevel / Hierarchical Model | Two- and three-level slope difference | reimplemented `powerlmm` (no-dropout case) | Live |
 | Meta-Analysis Power | Number of studies, fixed/random effects | Hedges & Pigott 2004 / Jackson & Turner 2017, verified vs. `metapower` | Live |
@@ -465,10 +465,10 @@ enforced by consistency tests rather than habit.
 
 **Runtime** (`DESCRIPTION` `Imports`): `shiny`, `bslib`, `pwr`, `presize`,
 `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`,
-`powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `lme4`;
+`powerMediation`, `BayesFactor`, `mvtnorm`, `lme4`;
 plus `survival`, `graphics`, `stats` and `utils` from base R.
 
-**Testing**: `testthat` (and `lmerTest`, optional, for one cross-check). `epiR` and `rstatix` (`Suggests`) are oracles for the closed-form routines in `R/calc_closed_forms.R` and for the Analyze workbench.
+**Testing**: `testthat` (and `lmerTest`, optional, for one cross-check). `epiR`, `rstatix`, `Hmisc` and `tseries` (`Suggests`) are oracles for the closed-form routines in `R/calc_closed_forms.R` and for the Analyze workbench.
 
 **Verification-only (development)**: installed from `github.com/cran/<pkg>` when a
 design is built, never loaded by the app — e.g. `longpower`, `powerlmm`, `RTSA`,
