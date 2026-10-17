@@ -133,7 +133,7 @@ module) and `module_workbenches` (which workbench and sidebar group each module 
 | UI theme/layout | `bslib::page_navbar()` + `navset_pill_list()`, Bootswatch "litera", Source Serif 4 | workbenches with grouped sidebars |
 | Formula rendering | MathJax via `withMathJax()`, wrapped by `render_formula_block()` | adds a copyable LaTeX view |
 | Modularity | Shiny modules (`NS()`, `moduleServer()`) | |
-| Runtime stats packages | `pwr`, `presize`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `BayesFactor`, `mvtnorm`, `lme4` (+ `survival`, `stats`); `epiR`, `rstatix`, `Hmisc` and `tseries` were removed from the runtime in item 16 | 15 imports in `DESCRIPTION` incl. `shiny`/`bslib` |
+| Runtime stats packages | `pwr`, `presize`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `mvtnorm`, `lme4` (+ `survival`, `stats`); `epiR`, `rstatix`, `Hmisc`, `tseries` and `BayesFactor` were removed from the runtime in item 16 | 14 imports in `DESCRIPTION` incl. `shiny`/`bslib` |
 | Verification-only packages | e.g. `longpower`, `powerlmm`, `RTSA`, `rpact`, `clusterPower`, `ssize.fdr`, `metapower`, `semTools`, `simr`, `voi`, `PracTools`, `WebPower` | installed from `github.com/cran/<pkg>` during development; never loaded by the app |
 | Testing | `testthat` unit tests (fast/slow split), GitHub Actions CI; manual browser checks with Playwright | `shinytest2` planned (ROADMAP P1) |
 | Dev environment | `.claude/hooks/session-start.sh` rebuilds R + packages on a fresh container; `renv.lock` records the versions (CI restores from it) | — |
@@ -235,7 +235,7 @@ The table below is a snapshot of what is live (28 Sep 2026).
 | Variance Tests | One variance; two variances; SD precision | closed form (chi-square / F) | Live |
 | Multiplicity Adjustment | Bonferroni/Šidák (proportions, means); FDR (BH) means; exact microarray FDR; Dunnett | wraps this app's own formulas; FDR closed form (simulation-verified); Liu & Hwang 2007 verified vs. `ssize.fdr`; `mvtnorm::qmvt()` | Live |
 | MANOVA / Hotelling's T² | Two-group Hotelling's T² | closed-form noncentral F (Rencher 2002) | Live |
-| Bayesian Design Analysis | Assurance; Bayes factor design analysis | closed form `.cf_gbayes2()` (verified vs. `Hmisc::gbayes2()`); simulation of `BayesFactor::ttestBF()` | Live |
+| Bayesian Design Analysis | Assurance; Bayes factor design analysis | closed form `.cf_gbayes2()` (verified vs. `Hmisc::gbayes2()`); simulation of the closed-form JZS Bayes factor `.cf_ttest_bf10()` (verified vs. `BayesFactor::ttestBF()`) | Live |
 | Longitudinal / MMRM | Slope difference: Liu & Liang, Diggle, Ard & Edland, Hu et al.; MMRM with dropout, AR(1) | reimplemented `longpower` functions | Live |
 | Multilevel / Hierarchical Model | Two- and three-level slope difference | reimplemented `powerlmm` (no-dropout case) | Live |
 | Meta-Analysis Power | Number of studies, fixed/random effects | Hedges & Pigott 2004 / Jackson & Turner 2017, verified vs. `metapower` | Live |
@@ -465,10 +465,10 @@ enforced by consistency tests rather than habit.
 
 **Runtime** (`DESCRIPTION` `Imports`): `shiny`, `bslib`, `pwr`, `presize`,
 `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`,
-`powerMediation`, `BayesFactor`, `mvtnorm`, `lme4`;
+`powerMediation`, `mvtnorm`, `lme4`;
 plus `survival`, `graphics`, `stats` and `utils` from base R.
 
-**Testing**: `testthat` (and `lmerTest`, optional, for one cross-check). `epiR`, `rstatix`, `Hmisc` and `tseries` (`Suggests`) are oracles for the closed-form routines in `R/calc_closed_forms.R` and for the Analyze workbench.
+**Testing**: `testthat` (and `lmerTest`, optional, for one cross-check). `epiR`, `rstatix`, `Hmisc`, `tseries` and `BayesFactor` (`Suggests`) are oracles for the closed-form routines in `R/calc_closed_forms.R` and for the Analyze workbench.
 
 **Verification-only (development)**: installed from `github.com/cran/<pkg>` when a
 design is built, never loaded by the app — e.g. `longpower`, `powerlmm`, `RTSA`,

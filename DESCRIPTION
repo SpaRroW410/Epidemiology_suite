@@ -27,7 +27,6 @@ Imports:
     pROC,
     TrialSize,
     powerMediation,
-    BayesFactor,
     mvtnorm,
     lme4,
     survival,
@@ -40,7 +39,8 @@ Suggests:
     epiR,
     rstatix,
     Hmisc,
-    tseries
+    tseries,
+    BayesFactor
 Config/testthat/edition: 3
 URL: https://github.com/SpaRroW410/Sample_size_all
 BugReports: https://github.com/SpaRroW410/Sample_size_all/issues

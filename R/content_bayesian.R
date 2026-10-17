@@ -84,9 +84,10 @@ bayesian_content <- list(
       "BFDA has NO closed form by design -- the method invented by",
       "Schoenbrodt & Wagenmakers (2018) IS direct simulation, exactly the",
       "same situation this app's own checklist names \"simulation",
-      "(`simr`/custom Monte Carlo)\" for elsewhere. This wraps",
-      "`BayesFactor::ttestBF()` -- the JZS (Jeffreys-Zellner-Siow) default",
-      "Bayesian t-test of Rouder et al. (2009), using a Cauchy prior on",
+      "(`simr`/custom Monte Carlo)\" for elsewhere. This computes",
+      "the JZS (Jeffreys-Zellner-Siow) default Bayes factor of the",
+      "Bayesian t-test of Rouder et al. (2009) -- a closed-form integral, equal to",
+      "`BayesFactor::ttestBF()` and checked against it -- using a Cauchy prior on",
       "the standardized effect size -- and repeatedly simulates two-group",
       "data at the assumed Cohen's d, counting the fraction of replicates",
       "whose Bayes factor exceeds the chosen threshold.",
@@ -101,10 +102,10 @@ bayesian_content <- list(
       "- **power** - the target probability that BF10 exceeds the",
       "  threshold.",
       "- **nsim** - simulated datasets per candidate n while searching;",
-      "  `ttestBF()` is much slower per call than the ordinary tests this",
-      "  app simulates elsewhere, so this design's default nsim is lower",
-      "  and the search is warm-started from the classical n to keep the",
-      "  overall search time reasonable.",
+      "  this design's default nsim is lower than for the other simulated",
+      "  designs (it was chosen when the Bayes factor came from a slower",
+      "  package) and the search is warm-started from the classical n to",
+      "  keep the overall search time reasonable.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -131,8 +132,8 @@ bayesian_content <- list(
       "Rouder JN, Speckman PL, Sun D, Morey RD, Iverson G. Bayesian t",
       "tests for accepting and rejecting the null hypothesis. Psychon",
       "Bull Rev. 2009;16(2):225-237 (the JZS default Bayesian t-test",
-      "implemented by BayesFactor::ttestBF())."
+      "as implemented by BayesFactor::ttestBF(); here recomputed in closed form)."
     ),
-    backend = "direct Monte Carlo simulation of BayesFactor::ttestBF()"
+    backend = "direct Monte Carlo simulation of the JZS two-sample Bayes factor (closed-form integral, Rouder et al. 2009; identical to BayesFactor::ttestBF(), which it is tested against)"
   )
 )

@@ -102,7 +102,8 @@ calc_bayesian_assurance_or <- function(p1, p2,
 #' will exceed a chosen evidence threshold" (e.g. BF10 > 10, conventionally
 #' "strong evidence," Jeffreys 1961/Lee & Wagenmakers 2013). BFDA has no
 #' closed form by design -- the original paper's own method IS direct
-#' simulation -- so this wraps `BayesFactor::ttestBF()` (already
+#' simulation -- so this simulates the JZS Bayes factor `.cf_ttest_bf10()` (the closed-form integral of Rouder et al. 2009, equal to `BayesFactor::ttestBF()` to about 1e-9 and ~80x faster; it replaced that package, which is
+#' now a test-only oracle; formerly already
 #' installed; a new project dependency) exactly the same way this app's
 #' `calc_ks_two_sample()`/`calc_wald_wolfowitz_runs()` wrap `stats::
 #' ks.test()`/`tseries::runs.test()`, reusing the identical
@@ -145,7 +146,7 @@ calc_bfda_ttest <- function(effect_size, bf_threshold = 10, alpha = 0.05, power 
     bfs <- replicate(reps, {
       x <- rnorm(n1, 0, 1)
       y <- rnorm(n1, effect_size, 1)
-      exp(as.vector(BayesFactor::ttestBF(x = x, y = y)@bayesFactor$bf))
+      .cf_ttest_bf10(x, y)
     })
     mean(bfs > bf_threshold)
   }

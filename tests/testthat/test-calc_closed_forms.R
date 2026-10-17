@@ -131,3 +131,17 @@ test_that("runs-test p-value equals tseries::runs.test() on random two-level seq
     near(.cf_runs_test_p(x), suppressWarnings(tseries::runs.test(x)$p.value))
   }
 })
+
+test_that("JZS Bayes factor for the two-sample t test equals BayesFactor::ttestBF()", {
+  skip_if_not_installed("BayesFactor")
+  set.seed(11)
+  for (i in 1:40) {
+    n1 <- sample(5:120, 1); n2 <- sample(5:120, 1)
+    x <- rnorm(n1, 0, 1); y <- rnorm(n2, runif(1, -0.2, 1.2), runif(1, 0.7, 1.5))
+    ref <- exp(as.vector(BayesFactor::ttestBF(x = x, y = y)@bayesFactor$bf))
+    expect_equal(.cf_ttest_bf10(x, y), ref, tolerance = 1e-5, info = paste(n1, n2))
+  }
+  # a different prior scale as well
+  x <- rnorm(30); y <- rnorm(30, 0.5)
+  expect_equal(.cf_ttest_bf10(x, y, rscale = 1), exp(as.vector(BayesFactor::ttestBF(x = x, y = y, rscale = 1)@bayesFactor$bf)), tolerance = 1e-5)
+})

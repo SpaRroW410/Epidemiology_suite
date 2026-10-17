@@ -275,3 +275,24 @@
   s <- sqrt(2 * n1 * n2 * (2 * n1 * n2 - n1 - n2) / ((n1 + n2)^2 * (n1 + n2 - 1)))
   2 * stats::pnorm(-abs((R - m) / s))
 }
+
+# --- BayesFactor replacement: JZS Bayes factor for the two-sample t test ---------------------------
+# Rouder, Speckman, Sun, Morey & Iverson (2009), Psychonomic Bulletin & Review 16:225-237, eq. 1
+# (two-sample form with effective sample size N = n1 n2 / (n1 + n2)), Cauchy prior of scale r on the
+# standardized effect:  BF10 = integral_0^Inf (1 + N g r^2)^(-1/2) [(1 + t^2 / (nu (1 + N g r^2))) /
+# (1 + t^2 / nu)]^(-(nu + 1)/2) (2 pi)^(-1/2) g^(-3/2) exp(-1 / (2 g)) dg,  nu = n1 + n2 - 2.
+# The default r = sqrt(2) / 2 is BayesFactor's "medium" scale. Equals
+# BayesFactor::ttestBF(x, y)@bayesFactor$bf (a natural log) after exp(); checked in the unit tests.
+.cf_ttest_bf10 <- function(x, y, rscale = sqrt(2) / 2) {
+  n1 <- length(x); n2 <- length(y)
+  nu <- n1 + n2 - 2
+  sp2 <- ((n1 - 1) * stats::var(x) + (n2 - 1) * stats::var(y)) / nu
+  t <- (mean(x) - mean(y)) / sqrt(sp2 * (1 / n1 + 1 / n2))
+  N <- n1 * n2 / (n1 + n2)
+  logf <- function(g) {
+    a <- 1 + N * g * rscale^2
+    -0.5 * log(a) - ((nu + 1) / 2) * (log1p(t^2 / (nu * a)) - log1p(t^2 / nu)) -
+      0.5 * log(2 * pi) - 1.5 * log(g) - 1 / (2 * g)
+  }
+  exp(log(stats::integrate(function(g) exp(logf(g)), 0, Inf, rel.tol = 1e-10)$value))
+}
