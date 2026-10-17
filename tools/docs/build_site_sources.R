@@ -1,8 +1,8 @@
 # Generates the sources of the documentation site (ROADMAP item 17) from the package itself:
-#   vignettes/articles/<module>.Rmd   one page per calculator, built from its <module>_content object
+#   vignettes/<module>.Rmd   one page per calculator, built from its <module>_content object
 #                                     (title, formula, explanation, worked example, citation, "implemented via")
-#   vignettes/articles/calculators.Rmd   the overview by workbench and group
-#   vignettes/articles/{roadmap,design,algorithm}.Rmd   the docs/*.md files with a header
+#   vignettes/calculators.Rmd   the overview by workbench and group
+#   vignettes/{roadmap,design,algorithm}.Rmd   the docs/*.md files with a header
 #   _pkgdown.yml                      tools/docs/pkgdown_template.yml plus the generated article menu
 # Nothing generated is committed (see .gitignore): the pages are rebuilt from the source of truth on every
 # build, so the site cannot drift from the app. Run from the repository root:
@@ -13,7 +13,7 @@ suppressMessages(pkgload::load_all(".", quiet = TRUE))
 ns <- asNamespace("epidemiologicasuite")
 registry <- module_registry()
 by_id <- setNames(registry, vapply(registry, `[[`, "", "id"))
-out_dir <- file.path("vignettes", "articles")
+out_dir <- "vignettes"
 unlink(out_dir, recursive = TRUE)
 dir.create(out_dir, recursive = TRUE)
 
