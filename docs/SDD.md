@@ -133,7 +133,7 @@ module) and `module_workbenches` (which workbench and sidebar group each module 
 | UI theme/layout | `bslib::page_navbar()` + `navset_pill_list()`, Bootswatch "litera", Source Serif 4 | workbenches with grouped sidebars |
 | Formula rendering | MathJax via `withMathJax()`, wrapped by `render_formula_block()` | adds a copyable LaTeX view |
 | Modularity | Shiny modules (`NS()`, `moduleServer()`) | |
-| Runtime stats packages | `pwr`, `presize`, `epiR`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `rstatix`, `lme4` (+ `survival`, `stats`) | 19 loaded by `pacman::p_load()` incl. `shiny`/`bslib` |
+| Runtime stats packages | `pwr`, `presize`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `lme4` (+ `survival`, `stats`); `epiR` and `rstatix` were removed from the runtime in item 16 | 17 imports in `DESCRIPTION` incl. `shiny`/`bslib` |
 | Verification-only packages | e.g. `longpower`, `powerlmm`, `RTSA`, `rpact`, `clusterPower`, `ssize.fdr`, `metapower`, `semTools`, `simr`, `voi`, `PracTools`, `WebPower` | installed from `github.com/cran/<pkg>` during development; never loaded by the app |
 | Testing | `testthat` unit tests (fast/slow split), GitHub Actions CI; manual browser checks with Playwright | `shinytest2` planned (ROADMAP P1) |
 | Dev environment | `.claude/hooks/session-start.sh` rebuilds R + packages on a fresh container; `renv.lock` records the versions (CI restores from it) | — |
@@ -195,11 +195,11 @@ The table below is a snapshot of what is live (28 Sep 2026).
 | Incidence Rate | Precision; two rates; Poisson regression (continuous predictor); two negative-binomial rates | `presize::prec_rate()`; closed form (Demidenko 2007); `powerMediation::sizePoisson()`; reimplemented `MKpower::power.nb.test()` (Zhu & Lakkis 2014) | Live |
 | Ratio Estimation | Precision-based RR, OR, rate ratio | `presize::prec_riskratio()`, `prec_or()`, `prec_rateratio()` | Live |
 | Stratified Sampling | Total n + proportional/Neyman allocation | closed form (Cochran 1977) | Live |
-| Cluster / Design Effect | DEFF; DEFF with variable cluster size; WHO EPI cluster survey; two-stage PPS optimal allocation | closed form (Kish 1965); CV-adjusted DEFF verified vs. `clusterPower`; `epiR::epi.ssclus2estb()`; Hansen-Hurwitz-Madow verified vs. `PracTools::clusOpt2()` | Live |
+| Cluster / Design Effect | DEFF; DEFF with variable cluster size; WHO EPI cluster survey; two-stage PPS optimal allocation | closed form (Kish 1965); CV-adjusted DEFF verified vs. `clusterPower`; closed form `.cf_ssclus2estb()` (verified vs. `epiR::epi.ssclus2estb()`); Hansen-Hurwitz-Madow verified vs. `PracTools::clusOpt2()` | Live |
 | LQAS | Classification decision rule | closed-form binomial search (Robertson & Valadez 2006) | Live |
 | Capture-Recapture | Chapman-Petersen, precision-based | closed form (Chapman 1951; Seber 1982), Monte Carlo verified | Live |
-| Case-Control | Unmatched; matched 1:m; case-crossover; nested; case-cohort | `epiR::epi.sscc()`; `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed form (Cai & Zeng 2004) | Live |
-| Cohort / RR | Cohort / cross-sectional RR | `epiR::epi.sscohortc()` | Live |
+| Case-Control | Unmatched; matched 1:m; case-crossover; nested; case-cohort | closed forms `.cf_sscc_unmatched()` / `.cf_sscc_matched()` (verified vs. `epiR::epi.sscc()`); `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed form (Cai & Zeng 2004) | Live |
+| Cohort / RR | Cohort / cross-sectional RR | closed form `.cf_sscohortc()` (verified vs. `epiR::epi.sscohortc()`) | Live |
 | Self-Controlled Case Series | SCCS with optional age effects | reimplemented `SCCS::samplesize()` (Musonda et al. 2006) | Live |
 | Ecological Study Guidance | Guidance panel, no formula | Morgenstern 1995; Robinson 1950 | Live |
 | Diagnostic Accuracy | Se/Sp precision; vs. reference; two tests unpaired/paired; PPV/NPV; LR+/LR−; DOR | closed form (Buderer; Casagrande-Pike; Connor; Altman & Bland); `presize::prec_pos_lr()`/`prec_neg_lr()` | Live |
@@ -208,7 +208,7 @@ The table below is a snapshot of what is live (28 Sep 2026).
 | Pilot / Feasibility | 12/arm rule; precision of a pilot SD | Julious 2005; chi-square CI theory | Live |
 | Simon Two-Stage | Minimax and optimal designs | `clinfun::ph2simon()` | Live |
 | Equivalence (TOST) | Means; proportions; PK bioequivalence (2×2, 2×2×4, 2×3×3); expected-power bioequivalence | `PowerTOST::sampleN.TOST()`, `expsampleN.TOST()`; `epiR::epi.ssequb()` | Live |
-| Non-Inferiority | Means; proportions; OR; HR | `epiR::epi.ssninfc()`, `epi.ssninfb()`; `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
+| Non-Inferiority | Means; proportions; OR; HR | closed forms `.cf_ssninfc()`, `.cf_ssninfb()` (verified vs. `epiR::epi.ssninfc()`, `epi.ssninfb()`); `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
 | Crossover Trial (2×2) | Continuous, difference | `TrialSize::TwoSampleCrossOver.Equality()` | Live |
 | Group Sequential Design | Continuous/binary/survival boundaries; Lan-DeMets spending (2 looks) + conditional power and sample-size re-estimation | `clinfun::gsdesign.*()`; spending functions verified vs. `rpact`; inverse-normal combination (Lehmacher & Wassmer 1999) | Live |
 | Subgroup / Interaction Testing | "4× rule" inflation | closed form (Brookes et al. 2004) | Live |
@@ -219,13 +219,13 @@ The table below is a snapshot of what is live (28 Sep 2026).
 | Competing Risks | Joint cause-specific / any-cause hazard test | reimplemented `powerCompRisk` (Yang, Fung & Li 2017) with `mvtnorm::pmvnorm()` | Live |
 | RMST Comparison | Superiority / non-inferiority | simulation reimplementing `SSRMST` + `survRM2` with `survival::survfit()` (Uno et al.) | Live |
 | Prediction Model | Development (binary, continuous, survival); external validation (binary) | `pmsampsize::pmsampsize()`; reimplemented `pmvalsampsize` (Riley et al. 2021) | Live |
-| Rule of Three | Upper bound; n to detect ≥ 1 event; disease freedom, imperfect test | closed form (Hanley & Lippman-Hand 1983); `epiR::epi.ssdetect()` | Live |
+| Rule of Three | Upper bound; n to detect ≥ 1 event; disease freedom, imperfect test | closed form (Hanley & Lippman-Hand 1983); closed form `.cf_ssdetect()` (verified vs. `epiR::epi.ssdetect()` 2.0.67) | Live |
 | Resource Equation | Recommend / check E = N − T | Mead 1988; Charan & Kantharia 2013 | Live |
 | Qualitative Sample Size Guidance | Guidance panel, no formula | Guest et al. 2006; Malterud et al. 2016; Patton; Glaser & Strauss | Live |
 | Psychometrics Sample Size Guidance | EFA/CFA subjects-per-item; CFA/SEM RMSEA test of close fit; IRT calibration by model | Costello & Osborne 2005 / Comrey & Lee 1992; MacCallum, Browne & Sugawara 1996 verified vs. `semTools`; Linacre 1994, Hulin et al. 1982, Reise & Yu 1990 | Live |
 | Value of Information | EVPI; EVSI + ENBS-optimal n | closed-form normal VOI, verified vs. `voi::evpi()`/`evsi()` | Live |
 | Correlation | Pearson; two independent r; two dependent r; point-biserial; regression slope; partial; Spearman | `pwr::pwr.r.test()`; closed form (Cohen 1988; Steiger 1980); ARE inflation for Spearman | Live |
-| Chi-Square Tests | GoF; R×C independence; McNemar; Mantel-Haenszel; Cochran-Armitage; Cochran's Q | `pwr::pwr.chisq.test()`; `TrialSize::McNemar.Test()`, `Propensity.Score.strata()`, `Cochran.Armitage.Trend()`; simulation of `rstatix::cochran_qtest()` | Live |
+| Chi-Square Tests | GoF; R×C independence; McNemar; Mantel-Haenszel; Cochran-Armitage; Cochran's Q | `pwr::pwr.chisq.test()`; `TrialSize::McNemar.Test()`, `Propensity.Score.strata()`, `Cochran.Armitage.Trend()`; simulation using the closed-form `.cf_cochran_q()` (verified vs. `rstatix::cochran_qtest()`) | Live |
 | Multiple Regression | R² vs. zero; R² increase | `pwr::pwr.f2.test()` | Live |
 | Factorial ANOVA / ANCOVA | General F-test | `pwr::pwr.f2.test()` | Live |
 | Logistic Regression | Binary/continuous predictor, simple or covariate-adjusted; ordinal | `powerMediation::SSizeLogisticBin()`/`Con()`; 1/(1−R²) inflation; `Hmisc::posamsize()` | Live |
@@ -463,12 +463,12 @@ enforced by consistency tests rather than habit.
 
 ## Appendix: Dependencies
 
-**Runtime** (`DESCRIPTION` `Imports`): `shiny`, `bslib`, `pwr`, `presize`, `epiR`,
+**Runtime** (`DESCRIPTION` `Imports`): `shiny`, `bslib`, `pwr`, `presize`,
 `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`,
-`powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `rstatix`, `lme4`;
+`powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `lme4`;
 plus `survival`, `graphics`, `stats` and `utils` from base R.
 
-**Testing**: `testthat` (and `lmerTest`, optional, for one cross-check).
+**Testing**: `testthat` (and `lmerTest`, optional, for one cross-check). `epiR` and `rstatix` (`Suggests`) are oracles for the closed-form routines in `R/calc_closed_forms.R` and for the Analyze workbench.
 
 **Verification-only (development)**: installed from `github.com/cran/<pkg>` when a
 design is built, never loaded by the app — e.g. `longpower`, `powerlmm`, `RTSA`,

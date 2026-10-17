@@ -31,9 +31,8 @@ calc_noninferiority_means <- function(mean_new, mean_standard, sd, margin,
   .validate_unit_interval(power, "power")
   .validate_positive(ratio, "ratio")
 
-  fit <- epiR::epi.ssninfc(treat = mean_new, control = mean_standard, sigma = sd,
-                            delta = margin, n = NA, power = power, r = ratio,
-                            nfractional = FALSE, alpha = alpha)
+  fit <- .cf_ssninfc(treat = mean_new, control = mean_standard, sigma = sd,
+                     delta = margin, power = power, r = ratio, alpha = alpha)
 
   new_ss_result(list(
     n_total = fit$n.total,
@@ -67,9 +66,8 @@ calc_noninferiority_proportions <- function(p_new, p_standard, margin,
   .validate_unit_interval(power, "power")
   .validate_positive(ratio, "ratio")
 
-  fit <- epiR::epi.ssninfb(treat = p_new, control = p_standard, delta = margin,
-                            n = NA, power = power, r = ratio,
-                            nfractional = FALSE, alpha = alpha)
+  fit <- .cf_ssninfb(treat = p_new, control = p_standard, delta = margin,
+                     power = power, r = ratio, alpha = alpha)
 
   new_ss_result(list(
     n_total = fit$n.total,

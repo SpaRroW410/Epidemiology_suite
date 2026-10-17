@@ -130,7 +130,7 @@ cluster_content <- list(
       "with a simplified sampling method. Bull World Health Organ.",
       "1982;60(2):253-260."
     ),
-    backend = "epiR::epi.ssclus2estb()"
+    backend = "closed form; identical to epiR::epi.ssclus2estb(), which it is tested against"
   ),
 
   deff_variable = list(

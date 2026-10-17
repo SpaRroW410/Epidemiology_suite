@@ -196,9 +196,8 @@ calc_tost_proportions <- function(p_new, p_standard, margin,
   .validate_unit_interval(power, "power")
   .validate_positive(ratio, "ratio")
 
-  fit <- epiR::epi.ssequb(treat = p_new, control = p_standard, delta = margin,
-                           n = NA, power = power, r = ratio, type = "equivalence",
-                           nfractional = FALSE, alpha = alpha)
+  fit <- .cf_ssequb_equivalence(treat = p_new, control = p_standard, delta = margin,
+                                power = power, r = ratio, alpha = alpha)
 
   new_ss_result(list(
     n_total = fit$n.total,

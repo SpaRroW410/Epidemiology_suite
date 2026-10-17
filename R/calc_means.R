@@ -177,10 +177,10 @@ calc_means_single_precision <- function(mean, sd, epsilon,
   .validate_unit_interval(conf_level, "conf_level")
   if (!is.null(N)) .validate_population(N)
 
-  n <- epiR::epi.sssimpleestc(
+  n <- .cf_sssimpleestc(
     N = if (is.null(N)) NA else N,
     xbar = mean, sigma = sd, epsilon = epsilon, error = error,
-    nfractional = FALSE, conf.level = conf_level
+    conf.level = conf_level
   )
 
   new_ss_result(list(

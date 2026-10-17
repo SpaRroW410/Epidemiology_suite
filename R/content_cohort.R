@@ -51,6 +51,6 @@ cohort_content <- list(
       "Woodward M. Epidemiology: Study Design and Data Analysis. 3rd ed.",
       "Chapman & Hall/CRC; 2014. pp. 295-329 (worked examples)."
     ),
-    backend = "epiR::epi.sscohortc()"
+    backend = "closed form; identical to epiR::epi.sscohortc(), which it is tested against"
   )
 )

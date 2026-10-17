@@ -139,11 +139,12 @@ The **Home** tab has three helpers:
 
 - R ≥ 4.3
 - The runtime packages are declared in `DESCRIPTION` (`Imports`) and installed with
-  the package: `shiny`, `bslib`, `pwr`, `presize`, `epiR`, `clinfun`,
+  the package: `shiny`, `bslib`, `pwr`, `presize`, `clinfun`,
   `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`,
-  `powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `rstatix`, `lme4`.
+  `powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `lme4`.
   `survival`, `stats`, `graphics` and `utils` come with R.
-- `testthat` (and `withr`) to run the tests.
+- `testthat` (and `withr`) to run the tests; `epiR` and `rstatix` are optional (tests only: they are the
+  verification oracles for the closed-form routines that used to call them).
 
 Exact versions are recorded in [`renv.lock`](renv.lock) (R 4.3.3); CI restores
 from it. To reproduce that environment: `renv::restore()`. After adding or updating

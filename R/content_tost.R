@@ -102,7 +102,7 @@ tost_content <- list(
       "Clinical Studies. 3rd ed. Wiley-Blackwell; 2009, p. 113.",
       "(as implemented by epiR::epi.ssequb)."
     ),
-    backend = "epiR::epi.ssequb(type = \"equivalence\")"
+    backend = "closed form (Chow, Shao & Wang 2008); identical to epiR::epi.ssequb(type = \"equivalence\"), which it is tested against"
   ),
 
   bioequivalence = list(

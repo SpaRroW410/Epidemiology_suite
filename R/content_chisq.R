@@ -302,6 +302,6 @@ chisq_content <- list(
       "Cochran WG. The comparison of percentages in matched samples.",
       "Biometrika. 1950;37(3/4):256-266."
     ),
-    backend = "direct Monte Carlo simulation of rstatix::cochran_qtest()"
+    backend = "direct Monte Carlo simulation of Cochran's Q test (closed form, identical to rstatix::cochran_qtest(), which it is tested against)"
   )
 )

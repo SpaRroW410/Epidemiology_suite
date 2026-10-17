@@ -103,9 +103,8 @@ calc_detect_event_imperfect_test <- function(N, prev, se, sp,
   }
   .validate_unit_interval(conf_level, "conf_level")
 
-  fit <- epiR::epi.ssdetect(
+  fit <- .cf_ssdetect(
     N = N, prev = prev, se = se, sp = sp, interpretation = interpretation,
-    covar = c(0, 0), finite.correction = TRUE, nfractional = FALSE,
     conf.level = conf_level
   )
 
