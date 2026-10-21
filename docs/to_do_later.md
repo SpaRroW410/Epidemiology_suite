@@ -46,8 +46,9 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 - [ ] Re-check `epi.ssdetect()` against epiR 3.0.0 (different interface; the app follows 2.0.67 semantics).
 
 ### Browser build / offline (item 15, spike done)
-- [ ] A real Shinylive build of the *package* (the spike sources the R files into a generated app): the start-up step that loads
-  `MASS` and `lme4` first, the `MASS` bundling hint, and a webR build of the package itself.
+- [x] A real Shinylive build of the package -- done 21 Oct 2026 (`tools/pages/make_app.R`, `app` job of the `docs` workflow: export, boot in headless Chrome from `/app/`, pass/fail check; first passing run: UI visible after 77 s, first calculation 12 s, 64 MB transferred). It is assembled from the package's own `R/` directory (sourced, not a webR-compiled package: the package has no compiled code). Published to Pages under `/app/` beside the pkgdown site **only from `main`**.
+- [ ] **[owner]** Pages needs: Settings > Pages > Source: GitHub Actions, the repository public (free plan), and the branch merged to `main`; then check `https://sparrow410.github.io/Sample_size_all/app/` on a phone.
+- [ ] The browser build downloads about 64 MB on first visit; consider trimming (drop unused heavy packages once item 16 is finished) and measure on a real phone connection.
 - [ ] Trial Sequential Analysis (risk ratio) did not finish within 150 s in the last browser crawl (it did in earlier ones): measure and
   speed up or gate it.
 - [ ] Browser-build message for the designs that cannot load (TOST means, Fisher, Boschloo): done in the app as a plain message;

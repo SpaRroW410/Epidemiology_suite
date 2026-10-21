@@ -1281,3 +1281,14 @@ Recorded 28 September 2026.
 | **M5 Distribution** | Docker + hosted, PWA, APK (TWA), r-universe | Installable on Android; installable from r-universe |
 | **M6 Surveillance, modelling, CRAN** | B4, B5, C3 | CRAN check clean |
 | **Ongoing** | Track A items whenever their unblock condition is met | — |
+
+### Hosting on GitHub Pages (decision of 21 Oct 2026)
+Posit Connect / shinyapps.io are not the plan (the owner reports their token system is being discontinued; not verified here). The app is
+published on GitHub Pages as a Shinylive (WebAssembly) build under `/app/`, next to the pkgdown documentation; the installed R package
+contains everything, including the 8-9 designs that need compiled packages with no WebAssembly build (TOST means, Fisher, Boschloo),
+which show a message with the install command in the browser. One codebase: `tools/pages/make_app.R` assembles the browser app from
+`R/`, and the `app` job of the `docs` workflow requires that it boots in headless Chrome (UI up, a calculator renders, no source file
+fails) before it is published. First passing CI run: UI visible after 77 s, first calculation after 12 s, 64 MB transferred. Bug found by
+that check on its first run: Shinylive's package scan read `library(p, character.only = TRUE)` as a package called "p", so `bslib` was
+never attached; fixed by attaching by name. Not yet done: publishing (needs the owner steps in `docs/to_do_later.md`), a phone test, and
+trimming the download.
