@@ -12,9 +12,12 @@ template:
 
 navbar:
   structure:
-    left: [calculators, project, reference]
+    left: [app, calculators, project, reference]
     right: [search, github]
   components:
+    app:
+      text: Open the app
+      href: app/
     calculators:
       text: Calculators
       href: articles/calculators.html

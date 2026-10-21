@@ -1,7 +1,9 @@
-# Documentation site (docs/ROADMAP.md item 17): pkgdown, with one page per calculator generated from the
-# package's own content objects (tools/docs/build_site_sources.R), so the site cannot drift from the app.
-# Every push builds the site and keeps it as an artifact; the site is published to GitHub Pages only from
-# `main`. One-time setup by the repository owner: Settings > Pages > Source: "GitHub Actions".
+# The GitHub Pages site (docs/ROADMAP.md items 15 and 17): the pkgdown documentation, with one page per
+# calculator generated from the package's own content objects (tools/docs/build_site_sources.R), and the app
+# itself as a Shinylive (WebAssembly) build under /app/, assembled from the package's R/ directory
+# (tools/pages/make_app.R), so neither can drift from the package. Every push builds both and keeps the site
+# as an artifact; the site is published to GitHub Pages only from `main`. One-time setup by the repository
+# owner: Settings > Pages > Source: "GitHub Actions".
 name: docs
 
 on:
@@ -17,7 +19,54 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  app:
+    # The app in the browser: export with shinylive, then open it in headless Chrome from the /app/ subpath it will
+    # be served from and require that the UI comes up, a calculator renders and no source file fails to load.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - name: Install shinylive (R package)
+        run: Rscript -e 'install.packages("shinylive")'
+      - name: Assemble the app directory from the package sources
+        run: Rscript tools/pages/make_app.R pages_app
+      - name: Export (downloads the webR runtime and the WebAssembly packages)
+        run: |
+          Rscript -e 'cat("shinylive", as.character(packageVersion("shinylive")), "\n"); shinylive::export("pages_app", "app_out/app")' 2>&1 | tee export.log
+          du -sh app_out/app
+      - name: Boot the exported site in Chrome
+        run: |
+          (cd app_out && python3 -m http.server 8008 >/dev/null 2>&1 &)
+          sleep 3
+          cd tools/webr-spike
+          npm init -y >/dev/null && npm install playwright-core >/dev/null
+          node boot_test.mjs http://localhost:8008/app/ "$GITHUB_WORKSPACE/boot.png" "$GITHUB_WORKSPACE/boot.json"
+      - name: Check the boot report
+        run: tools/pages/check_boot.sh boot.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: app-boot
+          path: |
+            export.log
+            boot.png
+            boot.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-site
+          path: app_out/app
+          retention-days: 14
+
   build:
+    # The documentation is built and published even when the app job fails (the app artifact is only uploaded
+    # after its browser check passes, so a broken app is never published; the red job shows the problem).
+    needs: app
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     permissions:
@@ -44,6 +93,13 @@ jobs:
 
       - name: Build the site
         run: Rscript -e 'pkgdown::build_site(preview = FALSE, install = FALSE, new_process = FALSE)'
+
+      - name: Add the browser build of the app under /app/
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: app-site
+          path: site_out/app
 
       - name: Keep the site as an artifact
         uses: actions/upload-artifact@v4

@@ -114,7 +114,7 @@
 .require_pkg <- function(pkg, what) {
   ok <- tryCatch(suppressWarnings(requireNamespace(pkg, quietly = TRUE)), error = function(e) FALSE)
   if (!isTRUE(ok)) {
-    stop(sprintf("%s needs the R package '%s', which cannot be loaded in this environment (this happens in the browser version of the app). Use the installed R package or the hosted app for this design.", what, pkg), call. = FALSE)
+    stop(sprintf("%s needs the R package '%s', which cannot be loaded in this environment (this happens in the browser version of the app). The installed R package has every design; install it with: %s", what, pkg, .install_instructions), call. = FALSE)
   }
   invisible(TRUE)
 }

@@ -162,6 +162,16 @@ In Claude Code on the web, `.claude/hooks/session-start.sh` rebuilds this
 environment automatically on a fresh container (Ubuntu `r-cran-*` binaries where
 available, otherwise the `github.com/cran` mirror).
 
+## Two ways to use it
+
+- **In the browser, nothing to install:** the app is published on GitHub Pages at `https://sparrow410.github.io/Sample_size_all/app/`
+  (documentation at `https://sparrow410.github.io/Sample_size_all/`). It is the same code compiled to WebAssembly and runs
+  entirely on your device; nothing you type is sent to a server. The first visit downloads about 60 MB and takes up to a minute
+  to start. A few designs need compiled packages that have no WebAssembly build (TOST means, Fisher and Boschloo exact tests) and
+  say so; the simulation designs are faster in the installed package.
+- **As an R package, everything:** the package contains every design and works offline (below). The browser version is built from
+  the package's own `R/` directory by the `docs` workflow (`tools/pages/make_app.R`), so the two cannot drift apart.
+
 ## Installing and running the app
 
 epidemiologicasuite is an R package (GPL-3). Install it from GitHub and start the app:
@@ -254,7 +264,7 @@ docs/                  roadmap, SDD, checklists, algorithm doc, original brief
 .claude/               SessionStart hook that rebuilds the R environment
 .github/workflows/     CI (tests.yml), documentation site (docs.yml), container image (docker.yml), browser-build spike (shinylive-spike.yml)
 Dockerfile, docker-compose.yml, .dockerignore   container image (tools/docker/ holds its browser smoke test)
-tools/                 docs/ (site generator), webr-spike/ (Shinylive feasibility checks)
+tools/                 docs/ (site generator), pages/ (browser build for GitHub Pages), webr-spike/ (Shinylive feasibility checks)
 renv.lock              locked package versions
 ```
 

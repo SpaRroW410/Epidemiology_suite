@@ -71,7 +71,7 @@ epidemiologicasuite_app <- function() {
         heading_font = font_collection("Source Serif 4", "Georgia", "Cambria", "Times New Roman", "serif"),
         "font-size-base" = "0.95rem"
       ),
-      header = tags$style(HTML(.workbench_css))
+      header = tagList(browser_notice_ui(), tags$style(HTML(.workbench_css)))
     ),
     list(home_panel),
     workbench_panels
