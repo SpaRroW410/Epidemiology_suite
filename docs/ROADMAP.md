@@ -952,7 +952,19 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
 ### P3 — distribution and larger workbenches
 
 18. Hosted deployment + Docker image (D1), PWA (D4), Android APK via TWA (D5a),
-    desktop wrapper (D7).
+    desktop wrapper (D7). **Docker image done (21 Oct 2026); the rest is open.**
+    - **Docker (D1, first half).** `Dockerfile` (pinned `rocker/r-ver:4.4.3`, dependencies installed from `DESCRIPTION` in a
+      cached layer, package installed, unprivileged user, `$PORT`, health check), `.dockerignore`, `docker-compose.yml`.
+      `.github/workflows/docker.yml` builds it, starts the container and drives it in headless Chrome
+      (`tools/docker/smoke.mjs`: navbar appears, Rule of Three returns the exact bound 0.0950): the first CI run
+      passed, with the navbar visible after 5.8 s. Pushes to `main` and `v*` tags also publish to
+      `ghcr.io/<owner>/epidemiologicasuite` with the default `GITHUB_TOKEN` (not exercised yet: no push to `main` since).
+    - **Not done / decisions for the owner.** *Where to host it* (shinyapps.io, Posit Connect, Fly.io / Render / a VPS
+      running the image) needs an account and a budget; the image runs anywhere that runs a container. *Multi-user
+      load*: Shiny is one R process per container, so concurrent simulations queue (F9, still open: `ExtendedTask`); put
+      the image behind a proxy that starts one container per session (e.g. ShinyProxy) or scale replicas. *Image size and
+      arm64* were not measured or built (amd64 only; Apple-silicon users get emulation). *HTTPS/domain*, **PWA** (D4) and
+      the **Android TWA** (D5a) need a public HTTPS host first; the **desktop wrapper** (D7) is not started.
 19. r-universe release, then CRAN (Track C4).
 20. Survey/field-epi tools (B3), outbreak & surveillance (B4), ID modelling for
     teaching (B5).

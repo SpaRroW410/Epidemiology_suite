@@ -174,6 +174,19 @@ From a clone (development), the root `app.R` loads the package with
 `pkgload::load_all()`, so `shiny::runApp()` or `Rscript -e 'shiny::runApp()'` from
 the repository root still works.
 
+## Running in Docker
+
+```sh
+docker build -t epidemiologicasuite .
+docker run --rm -p 3838:3838 epidemiologicasuite      # then open http://localhost:3838
+# or:  docker compose up --build
+```
+
+The image is built from a pinned R base image, installs the dependencies listed in `DESCRIPTION` and the package itself, runs as an
+unprivileged user and listens on `$PORT` (default 3838). It needs no internet access at run time. The `docker` workflow builds
+it on every relevant push and drives it in headless Chrome; pushes to `main` and `v*` tags also publish it to
+`ghcr.io/<owner>/epidemiologicasuite`.
+
 ## Documentation site
 
 `tools/docs/build_site_sources.R` writes one article per calculator (from its `*_content` object), the calculator
@@ -233,7 +246,8 @@ man/                   help pages for the two exported functions
 tests/testthat/        unit tests (calc_*.R functions, wizard, catalog consistency)
 docs/                  roadmap, SDD, checklists, algorithm doc, original brief
 .claude/               SessionStart hook that rebuilds the R environment
-.github/workflows/     CI (tests.yml), documentation site (docs.yml), browser-build spike (shinylive-spike.yml)
+.github/workflows/     CI (tests.yml), documentation site (docs.yml), container image (docker.yml), browser-build spike (shinylive-spike.yml)
+Dockerfile, docker-compose.yml, .dockerignore   container image (tools/docker/ holds its browser smoke test)
 tools/                 docs/ (site generator), webr-spike/ (Shinylive feasibility checks)
 renv.lock              locked package versions
 ```
