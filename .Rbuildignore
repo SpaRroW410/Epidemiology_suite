@@ -16,3 +16,6 @@
 ^_pkgdown\.yml$
 ^site_out$
 ^\.nojekyll$
+^Dockerfile$
+^\.dockerignore$
+^docker-compose\.yml$

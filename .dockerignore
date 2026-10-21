@@ -1,0 +1,15 @@
+.git
+.github
+.claude
+.Rproj.user
+.Rhistory
+.RData
+renv
+docs
+tests
+tools
+vignettes
+site_out
+_pkgdown.yml
+node_modules
+*.Rproj
