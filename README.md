@@ -6,8 +6,8 @@ epidemiology and clinical research. Every calculator comes with its formula
 example, the original methodological citation, and the name of the package or
 formula that implements it.
 
-**Current state:** 49 sample-size calculator modules (156 designs) plus seven
-*Analyze* tools (2x2 table analysis, stratified Mantel-Haenszel analysis, person-time rates, standardization and SMR, paired/agreement/trend tests, diagnostic test evaluation, confidence intervals, comparison of two proportions or means, vaccine efficacy), 523+ unit-test blocks and browser-driven
+**Current state:** 49 sample-size calculator modules (156 designs) plus eleven
+*Analyze* tools (2x2 table analysis, stratified Mantel-Haenszel analysis, person-time rates, standardization and SMR, paired/agreement/trend tests, diagnostic test evaluation, confidence intervals, comparison of two proportions or means, vaccine efficacy, outbreak measures, aberration detection), planning, survey and infectious-disease-model tools, 600+ unit-test blocks and browser-driven
 UI smoke tests. The project, app and future package are named **epidemiologicasuite**. The sample-size catalog is essentially complete; the project is now
 planning its next step — growing into a wider **epidemiology suite**, an installable
 **R package**, and offline/mobile distribution. See
@@ -65,6 +65,7 @@ workbench lists its modules in a sidebar, under group headers ordered roughly si
 | | Attrition and Non-response | enrol n / prod(1 - loss) over several stages (not n x (1 + loss)), per-arm losses, drop-out / drop-in dilution n / (1 - R_E - R_C)^2 |
 | **Survey & Field Tools** | Survey Sample Selection | reproducible selection from a list: simple random, systematic (fractional interval), PPS systematic with certainty units, and the WHO EPI 30 x 7 clusters; CSV and a methods paragraph |
 | | Survey Weights and Non-response | design weights, nonresponse adjustment by weighting class, response rates, Kish effective sample size and design effect of weighting |
+| **Infectious Disease Models** | Epidemic Models and Herd Immunity | herd-immunity threshold and coverage needed with an imperfect vaccine; deterministic SIR / SEIR epidemic with vaccination (final size, peak, infections averted, plotted); R0 from a growth rate or a final attack fraction |
 | **Surveillance** | Rule of Three | upper bound for zero events; n to see ≥ 1 event; disease freedom with an imperfect test |
 | **Preclinical / Animal Studies** | Resource Equation | Mead's E = N − T rule |
 | **Qualitative / Mixed Methods** | Qualitative Sample Size Guidance | saturation, information power, purposive sampling (no formula) |
@@ -77,6 +78,8 @@ workbench lists its modules in a sidebar, under group headers ordered roughly si
 | | Rates and Rate Ratios | incidence rate with exact / mid-P / Byar / Wald intervals; two groups: rate ratio (exact, mid-P, Wald), rate difference, attributable fractions, exact / mid-P / score tests, from events and person-time; 2-8 strata: Mantel-Haenszel rate ratio and rate difference with homogeneity tests |
 | | Paired, Agreement and Trend Tests | McNemar's test and matched-pair OR (exact/Wald), Cohen's kappa (unweighted/linear/quadratic, 2-6 categories) with CI and PABAK, Cochran-Armitage chi-square for trend |
 | | Vaccine Efficacy | VE = 1 - relative risk with CIs from attack rates (Koopman / Katz / adjusted log), person-time rates (exact / mid-P / Wald) or case-control / test-negative counts (Woolf / exact) |
+| | Outbreak Measures | attack rate; exposure-specific attack rates with risk ratios, risk differences and Fisher's test (the food-specific table); secondary attack rate; case fatality crude and among resolved cases, all with exact / Wilson / mid-P / other intervals |
+| | Aberration Detection | CDC EARS C1, C2, C3 and a normal or Poisson CUSUM on a pasted series of counts, with a plot |
 | | Compare Two Groups | difference / ratio / odds ratio of two proportions (Wald, Agresti-Caffo, Newcombe, Miettinen-Nurminen, Mee, Koopman, Katz, exact side by side) and two means (Welch, pooled, variance ratio, Cohen's d / Hedges' g) |
 | | Standardization and SMR | direct standardization (Fay-Feuer gamma CI, optional two-group comparison), indirect standardization with expected events, SMR with exact and mid-P intervals |
 | **General Statistical Tests** | Correlation | Pearson; two independent r; two dependent r; point-biserial; regression slope; partial; Spearman |

@@ -4,7 +4,7 @@
 # EARS (CDC Early Aberration Reporting System; Hutwagner L, Thompson W, Seeman GM, Treadwell T. The bioterrorism
 # preparedness and response Early Aberration Reporting System (EARS). J Urban Health 2003;80(Suppl 1):i89-i96; the
 # formulas as laid out by Fricker RD, Hegler BL, Dunfee DA. Comparing syndromic surveillance detection methods: EARS'
-# versus a CUSUM-based methodology. Stat Med 2008;27:3417-3429):
+# versus a CUSUM-based methodology. Stat Med 2008;27:3407-3429):
 #   C1  S_t = (x_t - mean) / sd of the `baseline` observations just before t (default 7); signal if S_t > 3.
 #   C2  the same with a guard band of 2 observations between the baseline and t (baseline t-9 ... t-3), so a rising
 #       outbreak does not contaminate its own baseline; signal if S_t > 3.

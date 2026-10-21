@@ -91,10 +91,10 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 ### 20. Survey / field epidemiology (B3), outbreak and surveillance (B4), infectious-disease teaching models (B5)
 - [x] **B3** sample selection (SRS, systematic, PPS, EPI 30 x 7) and survey weights -- done 21 Oct 2026.
 - [ ] B3 extras, none promised: post-stratification / raking to external totals, weight trimming, variance estimation for the selected design, two-stage selection of subjects inside clusters, an AAPOR-style response-rate table.
-- [ ] **B4** rates from counts: attack rate, secondary attack rate, case-fatality with confidence intervals (in scope under D1).
-- [ ] **B4** aberration detection from counts (EARS C1-C3, CUSUM) on a pasted series of counts.
+- [x] **B4** rates from counts: attack rate, exposure-specific table, secondary attack rate, case fatality -- done 21 Oct 2026.
+- [x] **B4** aberration detection from counts (EARS C1-C3, CUSUM normal and Poisson) on a pasted series -- done 21 Oct 2026. Not done, none promised: seasonal / day-of-week baselines (e.g. Farrington-type or regression-based detection), two-sided CUSUM, an adjustable false-alarm-rate calculator (ARL table), and a shape check of the series (zero-inflation).
 - [ ] **B4** line-list upload, epidemic curves, R0 / Rt (`EpiEstim` for Rt; check webR availability) -- **deferred by D1** with B6.
-- [ ] **B5** SIR / SEIR teaching models with vaccination, herd-immunity threshold, coverage needed (base-R ODE stepping, no `deSolve`).
+- [x] **B5** SIR / SEIR teaching models with vaccination, herd-immunity threshold, coverage needed, R0 from growth rate or final size (base-R RK4, no `deSolve` at run time) -- done 21 Oct 2026. Not done, none promised: waning immunity / births and deaths (endemic SIRS), vaccination during the epidemic (time-varying coverage), age-structured mixing and a contact matrix, leaky vs all-or-nothing vaccine distinction, stochastic runs, a calibration of the model to pasted case counts.
 
 ### 21. Evidence synthesis and the raw-data workbench
 - [ ] **B7** pooling from study summaries (fixed / random effects, forest plot); `metafor` is heavy, so a base-R implementation

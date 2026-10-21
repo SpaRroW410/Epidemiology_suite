@@ -28,7 +28,7 @@
 
 | Measure | Value |
 |---|---|
-| Calculator modules | **62** (49 sample-size calculators, 9 Analyze tools, 2 planning tools, 2 survey tools), in 16 groups in the Plan workbench and 1 in Analyze |
+| Calculator modules | **65** (49 sample-size calculators, 11 Analyze tools, 2 planning tools, 2 survey tools, 1 infectious-disease model tool), in 17 groups in the Plan workbench and 2 in Analyze |
 | Individual designs | **156**, all in the Browse catalog (F2 fixed) |
 | Checklist coverage | By design: **81 / 94** done (13 open) · By test: **69 / 74** done (5 open) |
 | Unit tests | **487** `test_that()` blocks across 55 files, every design checked against a published worked example, a real package (oracle), or simulation |
@@ -967,7 +967,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       the **Android TWA** (D5a) need a public HTTPS host first; the **desktop wrapper** (D7) is not started.
 19. r-universe release, then CRAN (Track C4).
 20. Survey/field-epi tools (B3), outbreak & surveillance (B4), ID modelling for
-    teaching (B5). **B3 done (21 Oct 2026); B4 and B5 are open.**
+    teaching (B5). **B3, B4 (counts-based parts) and B5 done (21 Oct 2026); line lists, epidemic curves and Rt stay deferred (D1).**
     - **Survey Sample Selection** (`calc_survey.R`, module `survey_selection`, group "Survey & Field Tools" of the Plan
       workbench): simple random sample, systematic sample (random start, fractional interval allowed), PPS systematic
       (Madow 1949) with iterative certainty units and an optional random-order variant, and the **WHO EPI 30 x 7** design
@@ -995,8 +995,42 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       could not be installed here (its dependencies are heavy), so it was not used as an oracle. Weighting classes assume
       equal-probability sampling within a class; post-stratification to external totals, raking, trimming and variance
       estimation are not offered.
-    - **B4 and B5 remain** (see `docs/to_do_later.md`): attack rates, secondary attack rate and case-fatality from counts,
-      aberration detection on pasted counts, and SIR / SEIR teaching models; line lists, epidemic curves and Rt stay deferred (D1).
+    - **Outbreak Measures** (`calc_analyze_outbreak.R`, module `analyze_outbreak`, Analyze workbench, group "Outbreaks and
+      surveillance"): attack rate; the exposure-specific attack-rate table (one row per suspected food or event: attack rates of
+      the exposed and unexposed, risk ratio with the Katz interval, risk difference, Fisher's exact p, share of cases exposed);
+      secondary attack rate; case fatality, crude and among resolved cases, each with the six proportion intervals of the CI
+      tool. Nothing new is estimated: the module re-arranges `calc_analyze_ci_proportion()` and `calc_analyze_2x2()` the way
+      an outbreak investigation uses them, and carries the cautions in the interface (screening-table p-values are descriptive;
+      the secondary-attack interval ignores household clustering; crude CFR is biased low and the resolved-case ratio high while
+      cases are unresolved).
+    - **Aberration Detection** (`calc_analyze_surveillance.R`, module `analyze_surveillance`): CDC EARS C1, C2 (2-day guard
+      band) and C3 (sum of the last three C2 excesses over 1 SD), and a one-sided CUSUM in its normal form and its Poisson form
+      (Lucas's reference value), on a pasted series of counts, with a two-panel base-R plot. **Verification:** C1 and C2
+      equal `surveillance::earsC()` (installed from the `github.com/cran` mirror as an oracle only; thresholds matched by
+      alpha = 1 - pnorm(3)); `earsC`'s C3 alarm rule drops the current-day term of the three-day sum, so it is **not** the
+      definition used here and C3 is checked by direct recomputation (the difference is noted in the code and the Reference
+      tab); the false-signal rate of C1 and C2 on stable normal counts equals the t-distribution value 0.0155 (simulation, slow
+      lane); CUSUM run lengths in control (ARL 336 for k = 0.5, h = 4, one-sided) and after 0.5 and 1 sd shifts agree with
+      `spc::xcusum.arl()` by simulation (slow lane). A mistake caught on the way: the "ARL 168 / 465" quoted for k = 0.5,
+      h = 4 / 5 are the **two-sided** values; the one-sided ones are 336 and 931 (spc), and the header and help now say so.
+    - **Epidemic Models and Herd Immunity** (`calc_epidemic_model.R`, module `epidemic_model`, new Plan group "Infectious
+      Disease Models"): herd-immunity threshold 1 - 1/R0 and coverage needed with an imperfect vaccine (threshold / efficacy,
+      flagged unattainable above 100%), Re = R0 (1 - cE), a deterministic SIR / SEIR epidemic with vaccination before the start
+      stepped by fixed-step RK4 in base R (no solver package at run time), final size, peak, growth rate, doubling time and
+      infections averted, plotted; and R0 from a doubling time (generation-interval relation for exponential stages) or from a final
+      attack fraction. **Verification:** the stepped solution equals `deSolve::ode()` (lsoda, rtol 1e-11) for an SIR and an SEIR
+      run; the final size equals the closed-form root of s = s0 exp(-R0 (1 - s - v)) and the textbook 79.7% for R0 = 2; the SIR
+      peak equals i0 + s0 - (1 + ln(R0 s0)) / R0; SEIR has the same final size as SIR with a later and lower peak; the SEIR growth
+      rate is the root of (r + sigma)(r + gamma) = sigma gamma R0 s0 and equals the measured early slope of the stepped run;
+      R0 recovered from the stepped run's growth rate and final size (also with prior immunity) equals the input.
+    - **Honesty notes.** Existence, journal, volume and pages confirmed by web search: Hutwagner et al. 2003 (J Urban Health
+      80(Suppl 1):i89-i96), Fricker, Hegler & Dunfee 2008 (Stat Med **27:3407-3429**; I first had 3417 from memory and the search
+      corrected it), Page 1954, Lucas 1985, Hethcote 2000 (SIAM Rev 42:599-653), Fine, Eames & Heymann 2011 (Clin Infect Dis
+      52:911-916), Wallinga & Lipsitch 2007 (Proc R Soc B 274:599-604). **Not** web-confirmed: Kermack & McKendrick 1927,
+      Anderson & May 1991, Hawkins & Olwell 1998, the CDC *Principles of Epidemiology* manual (all flagged as such in the
+      Reference tabs). None of the originals was read; formulas are checked numerically. The models are teaching tools:
+      homogeneous mixing, closed population, exponential stage durations, vaccination before the start only; the app says so.
+      R0 from a growth rate uses exponential stages, and a more peaked generation interval would give a lower R0.
 21. Raw-data analysis workbench (B6) — **deferred by D1** (summary-data only for now);
     evidence synthesis (B7) from study summaries stays in scope, and
     evidence synthesis (B7).

@@ -84,7 +84,29 @@ design_nodes <- list(
       list(label = "Vaccine efficacy or effectiveness (1 - relative risk) from a trial, cohort or case-control study", next_id = "analyze_vaccine_type"),
       list(label = "A diagnostic test (sensitivity, specificity, PPV, NPV from a test-by-disease table)", next_id = "term_analyze_dx_single"),
       list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined"),
-      list(label = "A confidence interval for a proportion, or for a mean and standard deviation", next_id = "analyze_ci_type")
+      list(label = "A confidence interval for a proportion, or for a mean and standard deviation", next_id = "analyze_ci_type"),
+      list(label = "An outbreak investigation: attack rates, which food or exposure, secondary attack rate, case fatality", next_id = "analyze_outbreak_type"),
+      list(label = "A series of case counts over time: has there been an unusual rise (aberration detection)?", next_id = "analyze_surv_type")
+    )
+  ),
+
+  analyze_outbreak_type = list(
+    id = "analyze_outbreak_type", stage = 1,
+    question = "Which outbreak measure do you need?",
+    options = list(
+      list(label = "The attack rate (cases / population at risk)", next_id = "term_analyze_outbreak_attack"),
+      list(label = "Attack rates by exposure and risk ratios: which food or event was the vehicle?", next_id = "term_analyze_outbreak_exposure"),
+      list(label = "The secondary attack rate among contacts", next_id = "term_analyze_outbreak_secondary"),
+      list(label = "Case fatality (deaths / cases), with the bias while an outbreak runs", next_id = "term_analyze_outbreak_cfr")
+    )
+  ),
+
+  analyze_surv_type = list(
+    id = "analyze_surv_type", stage = 1,
+    question = "Which aberration-detection method?",
+    options = list(
+      list(label = "EARS C1, C2, C3 (compare each day with the last few days)", next_id = "term_analyze_surveillance_ears"),
+      list(label = "CUSUM (accumulates small excesses over a baseline period; normal or Poisson)", next_id = "term_analyze_surveillance_cusum")
     )
   ),
 
@@ -124,7 +146,18 @@ design_nodes <- list(
       list(label = "A randomization list (permuted blocks, strata or simple), reproducible from a seed", next_id = "planning_rand_type"),
       list(label = "How many to enrol to allow for attrition, non-response or non-compliance", next_id = "planning_attr_type"),
       list(label = "Select the units of a survey sample from a list (random, systematic, PPS, WHO EPI 30 x 7 clusters)", next_id = "planning_sel_type"),
-      list(label = "Survey weights: design weights, nonresponse adjustment, effective sample size", next_id = "planning_weight_type")
+      list(label = "Survey weights: design weights, nonresponse adjustment, effective sample size", next_id = "planning_weight_type"),
+      list(label = "Infectious-disease models: herd immunity and vaccination coverage, an SIR / SEIR epidemic, R0", next_id = "planning_epi_type")
+    )
+  ),
+
+  planning_epi_type = list(
+    id = "planning_epi_type", stage = 1,
+    question = "What do you want from the infectious-disease model?",
+    options = list(
+      list(label = "The herd-immunity threshold and the vaccination coverage needed", next_id = "term_epi_model_herd"),
+      list(label = "Simulate an epidemic (SIR / SEIR) with vaccination: final size, peak, infections averted", next_id = "term_epi_model_sim"),
+      list(label = "Estimate R0 from a growth rate or a final attack fraction", next_id = "term_epi_model_r0")
     )
   ),
 
@@ -883,6 +916,15 @@ design_nodes <- list(
   term_analyze_kappa = .term("term_analyze_kappa", "Cohen's kappa agreement", "analyze_kappa"),
   term_analyze_trend = .term("term_analyze_trend", "Chi-square test for trend", "analyze_trend"),
   term_analyze_rate_single = .term("term_analyze_rate_single", "Confidence interval for an incidence rate", "analyze_rate_single"),
+  term_analyze_outbreak_attack = .term("term_analyze_outbreak_attack", "Outbreak attack rate", "analyze_outbreak_attack"),
+  term_analyze_outbreak_exposure = .term("term_analyze_outbreak_exposure", "Exposure-specific attack rates (food-specific table)", "analyze_outbreak_exposure"),
+  term_analyze_outbreak_secondary = .term("term_analyze_outbreak_secondary", "Secondary attack rate", "analyze_outbreak_secondary"),
+  term_analyze_outbreak_cfr = .term("term_analyze_outbreak_cfr", "Case fatality", "analyze_outbreak_cfr"),
+  term_analyze_surveillance_ears = .term("term_analyze_surveillance_ears", "Aberration detection: EARS C1, C2, C3", "analyze_surveillance_ears"),
+  term_analyze_surveillance_cusum = .term("term_analyze_surveillance_cusum", "Aberration detection: CUSUM", "analyze_surveillance_cusum"),
+  term_epi_model_herd = .term("term_epi_model_herd", "Herd-immunity threshold and coverage needed", "epi_model_herd"),
+  term_epi_model_sim = .term("term_epi_model_sim", "SIR / SEIR epidemic with vaccination", "epi_model_sim"),
+  term_epi_model_r0 = .term("term_epi_model_r0", "R0 from growth rate or final size", "epi_model_r0"),
   term_survey_select_srs = .term("term_survey_select_srs", "Survey sample: simple random", "survey_select_srs"),
   term_survey_select_systematic = .term("term_survey_select_systematic", "Survey sample: systematic", "survey_select_systematic"),
   term_survey_select_pps = .term("term_survey_select_pps", "Survey sample: PPS systematic", "survey_select_pps"),

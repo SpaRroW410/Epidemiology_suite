@@ -105,3 +105,17 @@ test_that("CUSUM run lengths agree with spc::xcusum.arl (simulated, slow lane)",
   expect_equal(mk(0.5, 4, 800, 400, 2), spc::xcusum.arl(0.5, 4, 0.5, sided = "one"), tolerance = 0.08)
   expect_equal(mk(0, 4, 700, 3500, 3), spc::xcusum.arl(0.5, 4, 0, sided = "one"), tolerance = 0.10)
 })
+
+test_that("false-signal rate of C1 and C2 on stable normal counts equals the t-distribution value (slow lane)", {
+  skip_if_not_slow()
+  set.seed(1); a <- 0; m <- 0; a2 <- 0
+  for (i in 1:30) {
+    x <- rnorm(5000, 100, 10)
+    r <- calc_surveillance_ears(x, "C1"); a <- a + r$n_alarms; m <- m + r$n_monitored
+    a2 <- a2 + calc_surveillance_ears(x, "C2")$n_alarms
+  }
+  # (x - mean) / s with x independent of the 7 baseline values is sqrt(1 + 1/7) times a t variable on 6 df
+  p <- pt(3 / sqrt(1 + 1 / 7), 6, lower.tail = FALSE)
+  expect_equal(a / m, p, tolerance = 0.05)
+  expect_equal(a2 / m, p, tolerance = 0.05)
+})

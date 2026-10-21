@@ -139,3 +139,15 @@ test_that("survey-tool phrasing reaches the survey selection and weights termina
   # sample-size planning text that mentions clusters or surveys is not hijacked
   expect_equal(walk_free_text("estimate the prevalence of anaemia in a cluster survey")$trace[[1]]$answer, design_nodes$root$options[[1]]$label)
 })
+
+test_that("outbreak, surveillance and epidemic-model phrasing reaches its terminal; vaccine-trial sample-size text does not", {
+  expect_equal(walk_free_text("which food was the vehicle: food-specific attack rates in an outbreak")$node_id, "term_analyze_outbreak_exposure")
+  expect_equal(walk_free_text("secondary attack rate among household contacts")$node_id, "term_analyze_outbreak_secondary")
+  expect_equal(walk_free_text("case fatality ratio during an outbreak investigation")$node_id, "term_analyze_outbreak_cfr")
+  expect_equal(walk_free_text("EARS C2 aberration detection on daily counts")$node_id, "term_analyze_surveillance_ears")
+  expect_equal(walk_free_text("use a CUSUM on weekly case counts")$node_id, "term_analyze_surveillance_cusum")
+  expect_equal(walk_free_text("what vaccination coverage do I need for herd immunity")$node_id, "term_epi_model_herd")
+  expect_equal(walk_free_text("simulate an SEIR epidemic with vaccination")$node_id, "term_epi_model_sim")
+  expect_equal(walk_free_text("estimate R0 from the doubling time")$node_id, "term_epi_model_r0")
+  expect_equal(walk_free_text("sample size for a vaccine trial with an attack rate of 5% in the control group")$trace[[1]]$answer, design_nodes$root$options[[2]]$label)
+})

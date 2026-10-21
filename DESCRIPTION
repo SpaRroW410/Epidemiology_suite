@@ -40,7 +40,9 @@ Suggests:
     rstatix,
     Hmisc,
     tseries,
-    BayesFactor
+    BayesFactor,
+    deSolve,
+    spc
 Config/testthat/edition: 3
 URL: https://github.com/SpaRroW410/Sample_size_all
 BugReports: https://github.com/SpaRroW410/Sample_size_all/issues

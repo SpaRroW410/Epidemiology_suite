@@ -124,6 +124,10 @@ module_registry <- function() {
          ui = mod_analyze_compare_ui, server = mod_analyze_compare_server),
     list(id = analyze_vaccine_meta$id, title = analyze_vaccine_meta$nav_title,
          ui = mod_analyze_vaccine_ui, server = mod_analyze_vaccine_server),
+    list(id = analyze_outbreak_meta$id, title = analyze_outbreak_meta$nav_title,
+         ui = mod_analyze_outbreak_ui, server = mod_analyze_outbreak_server),
+    list(id = analyze_surveillance_meta$id, title = analyze_surveillance_meta$nav_title,
+         ui = mod_analyze_surveillance_ui, server = mod_analyze_surveillance_server),
     list(id = attrition_meta$id, title = attrition_meta$nav_title,
          ui = mod_attrition_ui, server = mod_attrition_server),
     list(id = randomization_meta$id, title = randomization_meta$nav_title,
@@ -131,7 +135,9 @@ module_registry <- function() {
     list(id = survey_selection_meta$id, title = survey_selection_meta$nav_title,
          ui = mod_survey_selection_ui, server = mod_survey_selection_server),
     list(id = survey_weights_meta$id, title = survey_weights_meta$nav_title,
-         ui = mod_survey_weights_ui, server = mod_survey_weights_server)
+         ui = mod_survey_weights_ui, server = mod_survey_weights_server),
+    list(id = epidemic_model_meta$id, title = epidemic_model_meta$nav_title,
+         ui = mod_epidemic_model_ui, server = mod_epidemic_model_server)
   )
 }
 
@@ -186,13 +192,17 @@ module_workbenches <- list(
            module_ids = c("attrition", "randomization")),
       list(title = "Survey & Field Tools",
            module_ids = c("survey_selection", "survey_weights")),
+      list(title = "Infectious Disease Models",
+           module_ids = c("epidemic_model")),
       list(title = "General Statistical Tests",
            module_ids = c("correlation", "chisq", "regression", "anova_general", "logistic", "exact_tests", "rm_anova", "nonparametric", "variance", "multiplicity", "manova", "bayesian", "longitudinal", "multilevel", "meta_power"))
        )),
   list(id = "analyze", title = "Analyze", nav_id = "analyze_nav",
        groups = list(
          list(title = "From summary counts",
-              module_ids = c("analyze_2x2", "analyze_mh", "analyze_rates", "analyze_std", "analyze_dx", "analyze_tests", "analyze_ci", "analyze_compare", "analyze_vaccine"))
+              module_ids = c("analyze_2x2", "analyze_mh", "analyze_rates", "analyze_std", "analyze_dx", "analyze_tests", "analyze_ci", "analyze_compare", "analyze_vaccine")),
+         list(title = "Outbreaks and surveillance",
+              module_ids = c("analyze_outbreak", "analyze_surveillance"))
        ))
 )
 
