@@ -63,6 +63,8 @@ workbench lists its modules in a sidebar, under group headers ordered roughly si
 | **Prediction Models** | Prediction Model | development (binary, continuous, survival); external validation (binary) |
 | **Study Planning Tools** | Randomization List | reproducible allocation lists from a seed: permuted blocks (fixed or random block sizes, any allocation ratio), blocks within strata, simple randomization; CSV download and a methods paragraph |
 | | Attrition and Non-response | enrol n / prod(1 - loss) over several stages (not n x (1 + loss)), per-arm losses, drop-out / drop-in dilution n / (1 - R_E - R_C)^2 |
+| **Survey & Field Tools** | Survey Sample Selection | reproducible selection from a list: simple random, systematic (fractional interval), PPS systematic with certainty units, and the WHO EPI 30 x 7 clusters; CSV and a methods paragraph |
+| | Survey Weights and Non-response | design weights, nonresponse adjustment by weighting class, response rates, Kish effective sample size and design effect of weighting |
 | **Surveillance** | Rule of Three | upper bound for zero events; n to see ≥ 1 event; disease freedom with an imperfect test |
 | **Preclinical / Animal Studies** | Resource Equation | Mead's E = N − T rule |
 | **Qualitative / Mixed Methods** | Qualitative Sample Size Guidance | saturation, information power, purposive sampling (no formula) |

@@ -129,3 +129,13 @@ test_that("planning-tool phrasing reaches the planning branch; sample-size reque
   expect_equal(walk_free_text("compare two groups in a randomized trial allowing for 10% dropout")$trace[[1]]$answer,
                design_nodes$root$options[[2]]$label)
 })
+
+test_that("survey-tool phrasing reaches the survey selection and weights terminals", {
+  expect_equal(walk_free_text("choose 30 clusters for an EPI 30 x 7 survey from the village list")$node_id, "term_survey_select_epi")
+  expect_equal(walk_free_text("select a sample of villages with probability proportional to size")$node_id, "term_survey_select_pps")
+  expect_equal(walk_free_text("draw a systematic sample from the sampling frame")$node_id, "term_survey_select_systematic")
+  expect_equal(walk_free_text("compute survey weights with nonresponse adjustment")$node_id, "term_survey_weights_classes")
+  expect_equal(walk_free_text("effective sample size of survey weights using Kish")$node_id, "term_survey_weights_kish")
+  # sample-size planning text that mentions clusters or surveys is not hijacked
+  expect_equal(walk_free_text("estimate the prevalence of anaemia in a cluster survey")$trace[[1]]$answer, design_nodes$root$options[[1]]$label)
+})

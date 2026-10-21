@@ -81,6 +81,48 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Randomization List",
        module_input_id = "randomization-design", design_value = "simple"),
 
+  list(key = "survey_select_srs",
+       label = "Survey sample selection: simple random sample from a list (reproducible)",
+       answers = paste("Answers: \"I have a list of units (households, facilities) -- which ones do I select at random, and what are their weights?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Survey Sample Selection",
+       module_input_id = "survey_selection-design", design_value = "srs"),
+
+  list(key = "survey_select_systematic",
+       label = "Survey sample selection: systematic sample, every k-th unit from a random start",
+       answers = paste("Answers: \"I want a sample spread evenly over a list ordered by place or time -- which units do I take?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Survey Sample Selection",
+       module_input_id = "survey_selection-design", design_value = "systematic"),
+
+  list(key = "survey_select_pps",
+       label = "Survey sample selection: PPS systematic (probability proportional to size), e.g. choosing clusters",
+       answers = paste("Answers: \"I have clusters with population sizes -- which do I select, in proportion to size, and what are their weights?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Survey Sample Selection",
+       module_input_id = "survey_selection-design", design_value = "pps"),
+
+  list(key = "survey_select_epi",
+       label = "WHO EPI cluster survey (30 x 7): choose the clusters from a village list",
+       answers = paste("Answers: \"I am doing a 30 x 7 cluster survey -- which 30 clusters do I visit?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Survey Sample Selection",
+       module_input_id = "survey_selection-design", design_value = "epi"),
+
+  list(key = "survey_weights_classes",
+       label = "Survey design weights and nonresponse adjustment by weighting class",
+       answers = paste("Answers: \"I know the population, sample and respondents in each class -- what weight does each respondent get, and how much precision do the weights cost?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Survey Weights and Non-response",
+       module_input_id = "survey_weights-design", design_value = "classes"),
+
+  list(key = "survey_weights_kish",
+       label = "Effective sample size and design effect of a set of survey weights (Kish)",
+       answers = paste("Answers: \"I have survey weights -- what is the effective sample size after weighting?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Survey Weights and Non-response",
+       module_input_id = "survey_weights-design", design_value = "kish"),
+
   list(key = "analyze_compare_proportions",
        label = "Compare two proportions: difference, risk ratio, odds ratio (several interval methods)",
        answers = paste(
@@ -2116,7 +2158,9 @@ study_design_families <- list(
   list(id = "planning_tools", label = "Study planning tools (randomization, attrition)",
        hint = "Not a sample-size calculation: reproducible randomization lists, and inflating a required sample size for attrition, non-response and non-compliance.",
        catalog_keys = c("plan_randomization_block", "plan_randomization_stratified", "plan_randomization_simple",
-                         "plan_attrition_stages", "plan_attrition_arms", "plan_attrition_noncompliance")),
+                         "plan_attrition_stages", "plan_attrition_arms", "plan_attrition_noncompliance",
+                         "survey_select_srs", "survey_select_systematic", "survey_select_pps", "survey_select_epi",
+                         "survey_weights_classes", "survey_weights_kish")),
   list(id = "analyze_counts", label = "Analyze data you already have (summary counts)",
        hint = "Not a sample-size calculation: effect measures and confidence intervals from counts you already have, starting with the 2x2 table.",
        catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control",
@@ -2298,6 +2342,12 @@ study_design_families <- list(
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
 test_families <- list(
+  list(id = "survey_selection", label = "Survey Sample Selection",
+       hint = "Draw a simple random, systematic or probability-proportional-to-size sample from a list, or the clusters of a WHO EPI 30 x 7 survey, reproducible from a seed.",
+       catalog_keys = c("survey_select_srs", "survey_select_systematic", "survey_select_pps", "survey_select_epi")),
+  list(id = "survey_weights", label = "Survey Weights and Non-response",
+       hint = "Design weights, nonresponse adjustment by weighting class, and Kish's effective sample size and design effect.",
+       catalog_keys = c("survey_weights_classes", "survey_weights_kish")),
   list(id = "planning_randomization", label = "Randomization List",
        hint = "Reproducible allocation lists: permuted blocks (fixed or random block sizes), blocks within strata, or simple randomization, with a methods paragraph.",
        catalog_keys = c("plan_randomization_block", "plan_randomization_stratified", "plan_randomization_simple")),

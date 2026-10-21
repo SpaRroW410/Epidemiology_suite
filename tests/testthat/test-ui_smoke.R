@@ -279,6 +279,36 @@ test_that("Randomization List: the same seed gives the same list; blocks balance
   expect_equal(ui_output_errors(app), 0)
 })
 
+test_that("Survey Sample Selection: PPS shows a certainty unit and the exact check; EPI gives 30 clusters and 210 subjects", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Survey Sample Selection")
+  r <- ui_output_text(app, "survey_selection-result")
+  expect_match(r, "4 of 12 units selected")
+  expect_match(r, "taken with certainty")
+  expect_match(r, "Check: the design-weighted sum of the selected sizes is")
+  app$set_inputs(`survey_selection-design` = "epi")
+  app$wait_for_idle(800, timeout = 60000)
+  expect_equal(ui_output_errors(app), 0)
+  app$set_inputs(`survey_selection-design` = "srs")
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "survey_selection-result"), "40 of 500 units selected")
+  expect_equal(ui_output_errors(app), 0)
+})
+
+test_that("Survey Weights and Non-response: the worked example gives weighted response rate 75.5% and effective n 96.2", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Survey Weights and Non-response")
+  r <- ui_output_text(app, "survey_weights-result")
+  expect_match(r, "weighted response rate 75\\.5%")
+  expect_match(r, "96\\.2")
+  app$set_inputs(`survey_weights-design` = "kish")
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "survey_weights-result"), "Effective sample size 3\\.600 of 4")
+  expect_equal(ui_output_errors(app), 0)
+})
+
 test_that("no JavaScript or Shiny errors accumulated while opening every module", {
   skip_if_no_ui()
   expect_equal(ui_console_errors(ui_driver()), character())

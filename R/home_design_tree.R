@@ -66,7 +66,7 @@ design_nodes <- list(
       list(label = "Study the relationship between variables (correlation / regression)", next_id = "rel_type"),
       list(label = "Something else: survey sampling, scale development, rare events, animal studies, pilots, health economics, genetics", next_id = "other_purpose"),
       list(label = "Analyze counts I already have (a 2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_type"),
-      list(label = "Plan study logistics: a randomization list, or enrolling extra for attrition / non-response", next_id = "planning_type"),
+      list(label = "Plan study logistics: a randomization list, enrolling extra for attrition, selecting a survey sample, or survey weights", next_id = "planning_type"),
       list(label = "I already know which statistical test I'll use -- browse by test family", next_id = "bytest_family")
     )
   ),
@@ -122,7 +122,29 @@ design_nodes <- list(
     question = "What do you need to plan?",
     options = list(
       list(label = "A randomization list (permuted blocks, strata or simple), reproducible from a seed", next_id = "planning_rand_type"),
-      list(label = "How many to enrol to allow for attrition, non-response or non-compliance", next_id = "planning_attr_type")
+      list(label = "How many to enrol to allow for attrition, non-response or non-compliance", next_id = "planning_attr_type"),
+      list(label = "Select the units of a survey sample from a list (random, systematic, PPS, WHO EPI 30 x 7 clusters)", next_id = "planning_sel_type"),
+      list(label = "Survey weights: design weights, nonresponse adjustment, effective sample size", next_id = "planning_weight_type")
+    )
+  ),
+
+  planning_sel_type = list(
+    id = "planning_sel_type", stage = 1,
+    question = "How should the survey units be selected?",
+    options = list(
+      list(label = "A simple random sample from a list", next_id = "term_survey_select_srs"),
+      list(label = "A systematic sample (every k-th unit from a random start)", next_id = "term_survey_select_systematic"),
+      list(label = "Units chosen in proportion to size (PPS), for example clusters", next_id = "term_survey_select_pps"),
+      list(label = "The clusters of a WHO EPI 30 x 7 survey", next_id = "term_survey_select_epi")
+    )
+  ),
+
+  planning_weight_type = list(
+    id = "planning_weight_type", stage = 1,
+    question = "What do you need for the weights?",
+    options = list(
+      list(label = "Design weights and nonresponse adjustment by weighting class", next_id = "term_survey_weights_classes"),
+      list(label = "Effective sample size and design effect of a list of weights (Kish)", next_id = "term_survey_weights_kish")
     )
   ),
 
@@ -861,6 +883,12 @@ design_nodes <- list(
   term_analyze_kappa = .term("term_analyze_kappa", "Cohen's kappa agreement", "analyze_kappa"),
   term_analyze_trend = .term("term_analyze_trend", "Chi-square test for trend", "analyze_trend"),
   term_analyze_rate_single = .term("term_analyze_rate_single", "Confidence interval for an incidence rate", "analyze_rate_single"),
+  term_survey_select_srs = .term("term_survey_select_srs", "Survey sample: simple random", "survey_select_srs"),
+  term_survey_select_systematic = .term("term_survey_select_systematic", "Survey sample: systematic", "survey_select_systematic"),
+  term_survey_select_pps = .term("term_survey_select_pps", "Survey sample: PPS systematic", "survey_select_pps"),
+  term_survey_select_epi = .term("term_survey_select_epi", "WHO EPI 30 x 7 clusters", "survey_select_epi"),
+  term_survey_weights_classes = .term("term_survey_weights_classes", "Design weights and nonresponse adjustment", "survey_weights_classes"),
+  term_survey_weights_kish = .term("term_survey_weights_kish", "Effective sample size of weights (Kish)", "survey_weights_kish"),
   term_plan_randomization_block = .term("term_plan_randomization_block", "Randomization list: permuted blocks", "plan_randomization_block"),
   term_plan_randomization_stratified = .term("term_plan_randomization_stratified", "Randomization list: blocks within strata", "plan_randomization_stratified"),
   term_plan_randomization_simple = .term("term_plan_randomization_simple", "Randomization list: simple", "plan_randomization_simple"),

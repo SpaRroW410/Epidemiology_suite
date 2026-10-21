@@ -127,7 +127,11 @@ module_registry <- function() {
     list(id = attrition_meta$id, title = attrition_meta$nav_title,
          ui = mod_attrition_ui, server = mod_attrition_server),
     list(id = randomization_meta$id, title = randomization_meta$nav_title,
-         ui = mod_randomization_ui, server = mod_randomization_server)
+         ui = mod_randomization_ui, server = mod_randomization_server),
+    list(id = survey_selection_meta$id, title = survey_selection_meta$nav_title,
+         ui = mod_survey_selection_ui, server = mod_survey_selection_server),
+    list(id = survey_weights_meta$id, title = survey_weights_meta$nav_title,
+         ui = mod_survey_weights_ui, server = mod_survey_weights_server)
   )
 }
 
@@ -180,6 +184,8 @@ module_workbenches <- list(
            module_ids = c("evpi")),
       list(title = "Study Planning Tools",
            module_ids = c("attrition", "randomization")),
+      list(title = "Survey & Field Tools",
+           module_ids = c("survey_selection", "survey_weights")),
       list(title = "General Statistical Tests",
            module_ids = c("correlation", "chisq", "regression", "anova_general", "logistic", "exact_tests", "rm_anova", "nonparametric", "variance", "multiplicity", "manova", "bayesian", "longitudinal", "multilevel", "meta_power"))
        )),

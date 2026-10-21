@@ -28,11 +28,11 @@
 
 | Measure | Value |
 |---|---|
-| Calculator modules | **49**, in 14 navbar groups |
+| Calculator modules | **62** (49 sample-size calculators, 9 Analyze tools, 2 planning tools, 2 survey tools), in 16 groups in the Plan workbench and 1 in Analyze |
 | Individual designs | **156**, all in the Browse catalog (F2 fixed) |
 | Checklist coverage | By design: **81 / 94** done (13 open) · By test: **69 / 74** done (5 open) |
 | Unit tests | **487** `test_that()` blocks across 55 files, every design checked against a published worked example, a real package (oracle), or simulation |
-| Runtime packages | **19** in `DESCRIPTION` `Imports` + `survival`/`stats`/`graphics`/`utils` from base R |
+| Runtime packages | **14** in `DESCRIPTION` `Imports` + `survival`/`stats`/`graphics`/`utils` from base R (was 19; `epiR`, `rstatix`, `Hmisc`, `tseries`, `BayesFactor` removed in item 16) |
 | Verification-only packages | ~30 more (installed from the `github.com/cran` mirror, used only to check reimplementations — never shipped) |
 | Wizard coverage | "Which calculator?" reaches **49 / 49** modules and all 156 catalog entries, enforced by tests (F1 fixed) |
 | Distribution | Installable package (`remotes::install_github()` + `run_app()`), no hosted build. CI on GitHub Actions; versions locked in `renv.lock` |
@@ -967,7 +967,36 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       the **Android TWA** (D5a) need a public HTTPS host first; the **desktop wrapper** (D7) is not started.
 19. r-universe release, then CRAN (Track C4).
 20. Survey/field-epi tools (B3), outbreak & surveillance (B4), ID modelling for
-    teaching (B5).
+    teaching (B5). **B3 done (21 Oct 2026); B4 and B5 are open.**
+    - **Survey Sample Selection** (`calc_survey.R`, module `survey_selection`, group "Survey & Field Tools" of the Plan
+      workbench): simple random sample, systematic sample (random start, fractional interval allowed), PPS systematic
+      (Madow 1949) with iterative certainty units and an optional random-order variant, and the **WHO EPI 30 x 7** design
+      (clusters by PPS, a fixed number of subjects per cluster; the field selection of households is *not* computed and the
+      app says so). Reproducible from a seed (the same pinned generator as the randomization lists); the table of selected
+      units with inclusion probabilities and design weights downloads as CSV; a methods paragraph with a bracketed prompt.
+    - **Survey Weights and Non-response** (module `survey_weights`): design weights N/n, nonresponse adjustment in weighting
+      classes (adjusted weight N/r), weighted and unweighted response rates, Kish's effective sample size and design effect
+      of weighting (1 + CV^2), from class counts or from a pasted list of weights; generic CSV/JSON/BibTeX/RIS export.
+    - **Verification.** No package computes "the right sample", so the tests check the defining properties: exact sample size,
+      no unit twice, inclusion probabilities by simulation over seeds (SRS, systematic, PPS), reproducibility and an untouched
+      caller RNG, iterative certainty units on a hand-built frame, and for PPS the exact Horvitz-Thompson identity
+      (sum of size / pi over the sample = frame total, checked over 120 random frames) -- which caught a real bug during
+      development (a vectorised `ifelse()` returning a scalar). PPS systematic is also compared with
+      `sampling::UPsystematic()` (installed from the `github.com/cran` mirror as an oracle only) for the same random start on
+      60 random frames. Weights: identities (adjusted weights add up to the population; weighted response rate), the class
+      function agrees with the list-of-weights function on the expanded weights, hand values (weights 1, 1, 2, 2 give n_eff 3.6),
+      and a Monte Carlo check that the adjusted-weight estimator of a total is within 1% of the truth when response differs
+      by class while ignoring nonresponse is off by more than 20%.
+    - **Honesty notes.** Madow 1949 (Ann Math Stat 20:333-354), Henderson & Sundaresan 1982 (Bull World Health Organ
+      60:253-260) and Bennett et al. 1991 (World Health Stat Q 44:98-106) were confirmed by web search to exist with those
+      volumes and pages; Valliant, Dever & Kreuter 2013 (Springer) is a real book whose pages were not read; Kish 1965 was not
+      looked up. None of the originals was read: the formulas are checked numerically, not against the papers. The treatment of
+      certainty units is the usual one, written from the description rather than a transcription of a package. `PracTools`
+      could not be installed here (its dependencies are heavy), so it was not used as an oracle. Weighting classes assume
+      equal-probability sampling within a class; post-stratification to external totals, raking, trimming and variance
+      estimation are not offered.
+    - **B4 and B5 remain** (see `docs/to_do_later.md`): attack rates, secondary attack rate and case-fatality from counts,
+      aberration detection on pasted counts, and SIR / SEIR teaching models; line lists, epidemic curves and Rt stay deferred (D1).
 21. Raw-data analysis workbench (B6) — **deferred by D1** (summary-data only for now);
     evidence synthesis (B7) from study summaries stays in scope, and
     evidence synthesis (B7).

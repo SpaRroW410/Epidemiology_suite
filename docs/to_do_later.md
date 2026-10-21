@@ -89,7 +89,8 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
   release number and a `NEWS.md`.
 
 ### 20. Survey / field epidemiology (B3), outbreak and surveillance (B4), infectious-disease teaching models (B5)
-- [ ] **B3** -- *started 21 Oct 2026; see the roadmap for what is done.*
+- [x] **B3** sample selection (SRS, systematic, PPS, EPI 30 x 7) and survey weights -- done 21 Oct 2026.
+- [ ] B3 extras, none promised: post-stratification / raking to external totals, weight trimming, variance estimation for the selected design, two-stage selection of subjects inside clusters, an AAPOR-style response-rate table.
 - [ ] **B4** rates from counts: attack rate, secondary attack rate, case-fatality with confidence intervals (in scope under D1).
 - [ ] **B4** aberration detection from counts (EARS C1-C3, CUSUM) on a pasted series of counts.
 - [ ] **B4** line-list upload, epidemic curves, R0 / Rt (`EpiEstim` for Rt; check webR availability) -- **deferred by D1** with B6.
@@ -179,8 +180,8 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 
 ## 5. Housekeeping
 
-- [ ] Refresh section 1 of the roadmap ("Where the project stands"): it still quotes 49 modules, 19 runtime imports and
-  487 test blocks; the app now has 60 modules, 15 non-base imports and about 700 test blocks across 72 files.
+- [ ] Section 1 of the roadmap ("Where the project stands") now has the module and import counts; its test counts, checklist
+  coverage and wizard figures (487 test blocks, 81/94, 49/49) are still the 28 September values.
 - [ ] Re-snapshot `renv.lock` if a dependency is added or removed (it still lists the removed runtime packages, which is
   intended: the tests use them as oracles).
 - [ ] Keep `docs/checklist_by_design.md` / `checklist_by_test.md` in step with the Analyze and planning modules (they predate them).
