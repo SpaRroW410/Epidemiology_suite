@@ -18,6 +18,7 @@ planning its next step — growing into a wider **epidemiology suite**, an insta
 | **Documentation site** (pkgdown, `tools/docs/`) | One page per calculator -- formula, explanation, worked example, citation, how it is computed -- plus the roadmap and design documents. Built from the package's own text on every push; published to GitHub Pages from `main` (see below) |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Priorities, review findings, suite/package/deployment plans, and every open or blocked item |
 | [`docs/checklist_by_design.md`](docs/checklist_by_design.md) · [`docs/checklist_by_test.md`](docs/checklist_by_test.md) | Per-design build status and the verification evidence behind each one |
+| [`docs/to_do_later.md`](docs/to_do_later.md) | Everything not finished yet, in roadmap order, as a checklist (owner decisions marked) |
 | [`docs/SDD.md`](docs/SDD.md) | Architecture, module contract, conventions |
 | [`docs/design_identification_algorithm.md`](docs/design_identification_algorithm.md) | The logic behind the "Which calculator?" wizard |
 | [`docs/project-brief.md`](docs/project-brief.md) | The original project brief (historical) |
