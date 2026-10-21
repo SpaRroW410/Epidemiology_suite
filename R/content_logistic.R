@@ -122,7 +122,7 @@ logistic_content <- list(
       "the formula's accuracy for the binary-response special case). (as",
       "implemented by Hmisc::posamsize()/popower(), Frank Harrell)."
     ),
-    backend = "Hmisc::posamsize()"
+    backend = "closed form (Whitehead 1993); identical to Hmisc::posamsize(), which it is tested against"
   ),
   binary_adjusted = list(
     title = "Multiple Logistic Regression, Covariate-Adjusted -- Binary Predictor",

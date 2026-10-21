@@ -37,6 +37,7 @@ calc_fisher_exact <- function(p1, p2, alpha = 0.05, power = 0.8, ratio = 1,
   .validate_unit_interval(power, "power")
   .validate_positive(ratio, "ratio")
 
+  .require_pkg("Exact", "The Fisher exact power calculation")
   power_at <- function(n1) {
     n2 <- ceiling(n1 * ratio)
     Exact::power.exact.test(p1 = p1, p2 = p2, n1 = n1, n2 = n2,
@@ -100,6 +101,7 @@ calc_boschloo_exact <- function(p1, p2, alpha = 0.05, power = 0.8, ratio = 1,
   .validate_unit_interval(power, "power")
   .validate_positive(ratio, "ratio")
 
+  .require_pkg("Exact", "The Boschloo exact power calculation")
   power_at <- function(n1) {
     n2 <- ceiling(n1 * ratio)
     Exact::power.exact.test(p1 = p1, p2 = p2, n1 = n1, n2 = n2,

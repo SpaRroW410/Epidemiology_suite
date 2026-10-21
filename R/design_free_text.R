@@ -9,7 +9,8 @@
 # would otherwise click, and it stops the instant no rule matches, handing
 # control back to the manual wizard exactly where it left off.
 #
-# Coverage is deliberately partial: rules exist for the Stage-1 root branch,
+# Coverage is deliberately partial: rules exist for the Stage-1 root branch (including an
+# explicit-analysis cue for the Analyze branch and its sub-branch table),
 # the estimation sub-branch, and the comparison path (allocation ->
 # selection basis -> case-control matching -> outcome type -> groups ->
 # dependence) -- the phrasing patterns the algorithm doc itself discusses.
@@ -20,7 +21,22 @@
 
 free_text_rules <- list(
 
+  # Analysis of counts the user already has. Checked first, but only on phrases that
+  # state analysis of existing data outright ("2x2 table", Mantel-Haenszel, SMR,
+  # "analyze the counts I have"): words such as "vaccine efficacy" or "sensitivity"
+  # alone also occur in planning text and must not be hijacked.
   root = list(
+    # Planning logistics, named outright (a sample-size request that merely mentions dropouts is not matched).
+    list(pattern = "randomi[sz]ation (list|schedule|sequence)|(generate|create|make) (a )?(random(i[sz]ation)? )?(allocation )?(list|sequence|schedule)|allocation (list|sequence|schedule)|block randomi[sz]ation|permuted.?block|(inflate|adjust|increase)\\w* (the )?sample size (for|to allow for) (attrition|dropouts?|drop.?out|non.?response|loss(es)? to follow.?up)",
+         option_index = 11, confidence = "Medium"),
+    list(pattern = "probability proportional to size|\\bpps\\b|sampling frame|systematic sampl|\\bepi\\b.{0,20}(cluster|survey)|30\\s?(x|by|\\*)\\s?7|survey weights?|design weights?|sampling weights?|post.?stratif|inverse probability of selection|select(ion of)? (a |the )?(survey )?sample (from|of)",
+         option_index = 11, confidence = "Medium"),
+    list(pattern = "herd.?immunity|\\bseir\\b|\\bsir (model|epidemic)|\\br0\\b|basic reproduction number|epidemic model(l)?ing|coverage (is )?(needed|required) (to|for) (reach|achieve|stop|control)",
+         option_index = 11, confidence = "Medium"),
+    list(pattern = "secondary attack rate|food.?specific attack|attack rates? (table|by exposure|for each (food|exposure))|aberration (detection|alarm)|\\bears\\b.{0,20}(c[123]|aberration|surveillance)|\\bcusum\\b|outbreak (investigation|detection)|syndromic surveillance",
+         option_index = 10, confidence = "Medium"),
+    list(pattern = "analy[sz]e (the |my |our )?(counts|summary|data (i|we) (already )?(have|collected))|already (have|collected) (the )?(counts|data|numbers)|from (the )?(summary )?counts|\\b2\\s?x\\s?2 table|mantel.?haenszel|standardi[sz]ed mortality ratio|\\bsmr\\b|confidence interval (for|of) (a |the |an )?(proportion|mean|rate|incidence)",
+         option_index = 10, confidence = "Medium"),
     list(pattern = "qualitative|in-depth interview|\\bfgd\\b|focus group|thematic",
          option_index = 6, confidence = "High"),
     list(pattern = "validity of|accuracy of|sensitivity|specificity|gold standard|index test",
@@ -38,6 +54,71 @@ free_text_rules <- list(
          option_index = 2, confidence = "Medium"),
     list(pattern = "prevalence of|estimate the|proportion of|magnitude of|assess the burden|mean level of|to determine the level|incidence rate of",
          option_index = 1, confidence = "High")
+  ),
+
+  planning_type = list(
+    list(pattern = "herd.?immunity|\\bseir\\b|\\bsir\\b|\\br0\\b|reproduction number|epidemic|vaccination coverage|coverage (needed|required)", option_index = 5, confidence = "High"),
+    list(pattern = "weight|post.?stratif|raking|calibrat|effective sample size|design effect of the weights", option_index = 4, confidence = "High"),
+    list(pattern = "sampling frame|\\bpps\\b|proportional to size|systematic|\\bepi\\b|30\\s?(x|by|\\*)\\s?7|random sample|select(ion of)? (a |the )?(survey )?sample|cluster", option_index = 3, confidence = "High"),
+    list(pattern = "attrition|drop.?out|drop.?in|non.?response|loss(es)? to follow|non.?complian", option_index = 2, confidence = "High"),
+    list(pattern = "random",                                                                   option_index = 1, confidence = "High")
+  ),
+
+  planning_epi_type = list(
+    list(pattern = "growth rate|doubling|final (size|attack)|estimate r0|r0 from",     option_index = 3, confidence = "High"),
+    list(pattern = "simulat|\\bseir\\b|\\bsir\\b|epidemic curve|peak|final size|infections averted", option_index = 2, confidence = "High"),
+    list(pattern = "threshold|coverage|herd",                                          option_index = 1, confidence = "High")
+  ),
+
+  analyze_outbreak_type = list(
+    list(pattern = "secondary|household contacts|contacts of",                         option_index = 3, confidence = "High"),
+    list(pattern = "fatality|death",                                                   option_index = 4, confidence = "High"),
+    list(pattern = "food|exposure|vehicle|risk ratio|which",                           option_index = 2, confidence = "High"),
+    list(pattern = "attack rate",                                                      option_index = 1, confidence = "Medium")
+  ),
+
+  analyze_surv_type = list(
+    list(pattern = "cusum|cumulative sum|poisson",                                     option_index = 2, confidence = "High"),
+    list(pattern = "\\bears\\b|c[123]\\b|aberration|compare each day",                 option_index = 1, confidence = "Medium")
+  ),
+
+  planning_sel_type = list(
+    list(pattern = "\\bepi\\b|30\\s?(x|by|\\*)\\s?7",                option_index = 4, confidence = "High"),
+    list(pattern = "proportional to size|\\bpps\\b|cluster",        option_index = 3, confidence = "High"),
+    list(pattern = "systematic|every (k|kth|k-th|nth|n-th)",        option_index = 2, confidence = "High"),
+    list(pattern = "simple random|random sample",                    option_index = 1, confidence = "Medium")
+  ),
+
+  planning_weight_type = list(
+    list(pattern = "effective sample size|kish|design effect",       option_index = 2, confidence = "Medium"),
+    list(pattern = "weight|nonresponse|non.?response|post.?stratif", option_index = 1, confidence = "Medium")
+  ),
+
+  planning_rand_type = list(
+    list(pattern = "strat|\\bsites?\\b|centre|center",   option_index = 2, confidence = "Medium"),
+    list(pattern = "simple|unrestricted|coin",              option_index = 3, confidence = "Medium"),
+    list(pattern = "block",                                 option_index = 1, confidence = "High")
+  ),
+
+  planning_attr_type = list(
+    list(pattern = "drop.?in|drop.?out|non.?complian|cross.?over|crossover", option_index = 3, confidence = "Medium"),
+    list(pattern = "each arm|per arm|differ\\w* (loss|attrition)|by arm",     option_index = 2, confidence = "Medium"),
+    list(pattern = "attrition|non.?response|loss(es)? to follow|stages?",      option_index = 1, confidence = "High")
+  ),
+
+  analyze_type = list(
+    list(pattern = "aberration|\\bears\\b|\\bcusum\\b|syndromic|series of (case )?counts|unusual rise|early warning", option_index = 12, confidence = "High"),
+    list(pattern = "outbreak|attack rate|case.?fatality|food.?specific|secondary attack", option_index = 11, confidence = "High"),
+    list(pattern = "mantel.?haenszel|stratif|confound",                              option_index = 2, confidence = "High"),
+    list(pattern = "\\bsmr\\b|standardi[sz]ed|age.?adjusted|direct standardi|indirect standardi", option_index = 5, confidence = "High"),
+    list(pattern = "vaccine (efficacy|effectiveness)|\\bve\\b",                       option_index = 7, confidence = "High"),
+    list(pattern = "person.?(years|time)|incidence rate|rate ratio",                 option_index = 3, confidence = "High"),
+    list(pattern = "mcnemar|\\bkappa\\b|agreement|chi.?square for trend|cochran.?armitage|paired", option_index = 4, confidence = "High"),
+    list(pattern = "serial|parallel",                                                option_index = 9, confidence = "Medium"),
+    list(pattern = "sensitivity|specificity|\\bppv\\b|\\bnpv\\b|predictive value",   option_index = 8, confidence = "High"),
+    list(pattern = "confidence interval (for|of)",                                   option_index = 10, confidence = "Medium"),
+    list(pattern = "two (proportions|means|groups)|difference (in|of|between) (two )?(proportions|means)", option_index = 6, confidence = "Medium"),
+    list(pattern = "\\b2\\s?x\\s?2\\b|risk ratio|relative risk|odds ratio|risk difference", option_index = 1, confidence = "High")
   ),
 
   est_type = list(

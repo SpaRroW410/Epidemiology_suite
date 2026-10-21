@@ -75,7 +75,7 @@ combination, plus long-term extensibility — not novel statistical methodology.
 ```
 ┌───────────────────────────────────────────────────────────────┐
 │  UI shell  (R/run_app.R — bslib::page_navbar)                  │
-│  Home hub + 14 nav_menu dropdowns built from module_groups     │
+│  Home hub + workbenches (Plan, Analyze) from module_workbenches │
 └──────────────┬──────────────────────────────┬─────────────────┘
                │                              │
 ┌──────────────▼───────────────┐   ┌──────────▼──────────────────┐
@@ -103,7 +103,7 @@ combination, plus long-term extensibility — not novel statistical methodology.
 
 The app is the R package `epidemiologicasuite` (`DESCRIPTION`, `NAMESPACE`, flat `R/`).
 `R/registry.R` defines `module_registry()` (id, nav title, UI, server for each
-module) and `module_groups` (which modules sit in which navbar dropdown);
+module) and `module_workbenches` (which workbench and sidebar group each module sits in);
 `R/run_app.R` builds the navbar from them (`epidemiologicasuite_app()`; `run_app()` runs it). The Home hub jumps to a module with
 `bslib::nav_select()` and presets its design with `updateRadioButtons()`.
 
@@ -130,10 +130,10 @@ module) and `module_groups` (which modules sit in which navbar dropdown);
 | Layer | Choice | Notes |
 |---|---|---|
 | App framework | R Shiny | |
-| UI theme/layout | `bslib::page_navbar()` + `nav_menu()`, Bootswatch "litera", Source Serif 4 | 14 grouped dropdowns |
+| UI theme/layout | `bslib::page_navbar()` + `navset_pill_list()`, Bootswatch "litera", Source Serif 4 | workbenches with grouped sidebars |
 | Formula rendering | MathJax via `withMathJax()`, wrapped by `render_formula_block()` | adds a copyable LaTeX view |
 | Modularity | Shiny modules (`NS()`, `moduleServer()`) | |
-| Runtime stats packages | `pwr`, `presize`, `epiR`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `rstatix`, `lme4` (+ `survival`, `stats`) | 19 loaded by `pacman::p_load()` incl. `shiny`/`bslib` |
+| Runtime stats packages | `pwr`, `presize`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `mvtnorm`, `lme4` (+ `survival`, `stats`); `epiR`, `rstatix`, `Hmisc`, `tseries` and `BayesFactor` were removed from the runtime in item 16 | 14 imports in `DESCRIPTION` incl. `shiny`/`bslib` |
 | Verification-only packages | e.g. `longpower`, `powerlmm`, `RTSA`, `rpact`, `clusterPower`, `ssize.fdr`, `metapower`, `semTools`, `simr`, `voi`, `PracTools`, `WebPower` | installed from `github.com/cran/<pkg>` during development; never loaded by the app |
 | Testing | `testthat` unit tests (fast/slow split), GitHub Actions CI; manual browser checks with Playwright | `shinytest2` planned (ROADMAP P1) |
 | Dev environment | `.claude/hooks/session-start.sh` rebuilds R + packages on a fresh container; `renv.lock` records the versions (CI restores from it) | — |
@@ -195,11 +195,11 @@ The table below is a snapshot of what is live (28 Sep 2026).
 | Incidence Rate | Precision; two rates; Poisson regression (continuous predictor); two negative-binomial rates | `presize::prec_rate()`; closed form (Demidenko 2007); `powerMediation::sizePoisson()`; reimplemented `MKpower::power.nb.test()` (Zhu & Lakkis 2014) | Live |
 | Ratio Estimation | Precision-based RR, OR, rate ratio | `presize::prec_riskratio()`, `prec_or()`, `prec_rateratio()` | Live |
 | Stratified Sampling | Total n + proportional/Neyman allocation | closed form (Cochran 1977) | Live |
-| Cluster / Design Effect | DEFF; DEFF with variable cluster size; WHO EPI cluster survey; two-stage PPS optimal allocation | closed form (Kish 1965); CV-adjusted DEFF verified vs. `clusterPower`; `epiR::epi.ssclus2estb()`; Hansen-Hurwitz-Madow verified vs. `PracTools::clusOpt2()` | Live |
+| Cluster / Design Effect | DEFF; DEFF with variable cluster size; WHO EPI cluster survey; two-stage PPS optimal allocation | closed form (Kish 1965); CV-adjusted DEFF verified vs. `clusterPower`; closed form `.cf_ssclus2estb()` (verified vs. `epiR::epi.ssclus2estb()`); Hansen-Hurwitz-Madow verified vs. `PracTools::clusOpt2()` | Live |
 | LQAS | Classification decision rule | closed-form binomial search (Robertson & Valadez 2006) | Live |
 | Capture-Recapture | Chapman-Petersen, precision-based | closed form (Chapman 1951; Seber 1982), Monte Carlo verified | Live |
-| Case-Control | Unmatched; matched 1:m; case-crossover; nested; case-cohort | `epiR::epi.sscc()`; `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed form (Cai & Zeng 2004) | Live |
-| Cohort / RR | Cohort / cross-sectional RR | `epiR::epi.sscohortc()` | Live |
+| Case-Control | Unmatched; matched 1:m; case-crossover; nested; case-cohort | closed forms `.cf_sscc_unmatched()` / `.cf_sscc_matched()` (verified vs. `epiR::epi.sscc()`); `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed form (Cai & Zeng 2004) | Live |
+| Cohort / RR | Cohort / cross-sectional RR | closed form `.cf_sscohortc()` (verified vs. `epiR::epi.sscohortc()`) | Live |
 | Self-Controlled Case Series | SCCS with optional age effects | reimplemented `SCCS::samplesize()` (Musonda et al. 2006) | Live |
 | Ecological Study Guidance | Guidance panel, no formula | Morgenstern 1995; Robinson 1950 | Live |
 | Diagnostic Accuracy | Se/Sp precision; vs. reference; two tests unpaired/paired; PPV/NPV; LR+/LR−; DOR | closed form (Buderer; Casagrande-Pike; Connor; Altman & Bland); `presize::prec_pos_lr()`/`prec_neg_lr()` | Live |
@@ -208,34 +208,34 @@ The table below is a snapshot of what is live (28 Sep 2026).
 | Pilot / Feasibility | 12/arm rule; precision of a pilot SD | Julious 2005; chi-square CI theory | Live |
 | Simon Two-Stage | Minimax and optimal designs | `clinfun::ph2simon()` | Live |
 | Equivalence (TOST) | Means; proportions; PK bioequivalence (2×2, 2×2×4, 2×3×3); expected-power bioequivalence | `PowerTOST::sampleN.TOST()`, `expsampleN.TOST()`; `epiR::epi.ssequb()` | Live |
-| Non-Inferiority | Means; proportions; OR; HR | `epiR::epi.ssninfc()`, `epi.ssninfb()`; `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
+| Non-Inferiority | Means; proportions; OR; HR | closed forms `.cf_ssninfc()`, `.cf_ssninfb()` (verified vs. `epiR::epi.ssninfc()`, `epi.ssninfb()`); `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
 | Crossover Trial (2×2) | Continuous, difference | `TrialSize::TwoSampleCrossOver.Equality()` | Live |
 | Group Sequential Design | Continuous/binary/survival boundaries; Lan-DeMets spending (2 looks) + conditional power and sample-size re-estimation | `clinfun::gsdesign.*()`; spending functions verified vs. `rpact`; inverse-normal combination (Lehmacher & Wassmer 1999) | Live |
 | Subgroup / Interaction Testing | "4× rule" inflation | closed form (Brookes et al. 2004) | Live |
 | Monte Carlo Mixed Models | CRT continuous (LMM); CRT binary (GLMM); growth-curve slope difference | direct simulation + LRT via `lme4::lmer()`/`glmer()`; growth-curve LRT verified vs. `simr::doTest()` | Live |
 | Trial Sequential Analysis | Required information size: RR, OR, RD, MD | reimplemented, verified vs. `RTSA::ris()` | Live |
 | Stepped-Wedge CRT | Continuous outcome | Hooper et al. (2016) design effect, verified vs. `clusterPower::cpa.sw.normal()` | Live |
-| Log-Rank / Survival | Log-rank; Cox PH (binary/continuous); stratified; accrual + noncompliance; weighted log-rank (non-PH) | `powerSurvEpi::ssizeCT()`, `ssizeEpi()`, `ssizeEpiCont()`, `ssize.stratify()`; `Hmisc::cpower()`; simulation of `survival::survdiff(rho=)` | Live |
+| Log-Rank / Survival | Log-rank; Cox PH (binary/continuous); stratified; accrual + noncompliance (`.cf_cpower()`, verified vs. `Hmisc::cpower()`); weighted log-rank (non-PH) | `powerSurvEpi::ssizeCT()`, `ssizeEpi()`, `ssizeEpiCont()`, `ssize.stratify()`; `Hmisc::cpower()`; simulation of `survival::survdiff(rho=)` | Live |
 | Competing Risks | Joint cause-specific / any-cause hazard test | reimplemented `powerCompRisk` (Yang, Fung & Li 2017) with `mvtnorm::pmvnorm()` | Live |
 | RMST Comparison | Superiority / non-inferiority | simulation reimplementing `SSRMST` + `survRM2` with `survival::survfit()` (Uno et al.) | Live |
 | Prediction Model | Development (binary, continuous, survival); external validation (binary) | `pmsampsize::pmsampsize()`; reimplemented `pmvalsampsize` (Riley et al. 2021) | Live |
-| Rule of Three | Upper bound; n to detect ≥ 1 event; disease freedom, imperfect test | closed form (Hanley & Lippman-Hand 1983); `epiR::epi.ssdetect()` | Live |
+| Rule of Three | Upper bound; n to detect ≥ 1 event; disease freedom, imperfect test | closed form (Hanley & Lippman-Hand 1983); closed form `.cf_ssdetect()` (verified vs. `epiR::epi.ssdetect()` 2.0.67) | Live |
 | Resource Equation | Recommend / check E = N − T | Mead 1988; Charan & Kantharia 2013 | Live |
 | Qualitative Sample Size Guidance | Guidance panel, no formula | Guest et al. 2006; Malterud et al. 2016; Patton; Glaser & Strauss | Live |
 | Psychometrics Sample Size Guidance | EFA/CFA subjects-per-item; CFA/SEM RMSEA test of close fit; IRT calibration by model | Costello & Osborne 2005 / Comrey & Lee 1992; MacCallum, Browne & Sugawara 1996 verified vs. `semTools`; Linacre 1994, Hulin et al. 1982, Reise & Yu 1990 | Live |
 | Value of Information | EVPI; EVSI + ENBS-optimal n | closed-form normal VOI, verified vs. `voi::evpi()`/`evsi()` | Live |
 | Correlation | Pearson; two independent r; two dependent r; point-biserial; regression slope; partial; Spearman | `pwr::pwr.r.test()`; closed form (Cohen 1988; Steiger 1980); ARE inflation for Spearman | Live |
-| Chi-Square Tests | GoF; R×C independence; McNemar; Mantel-Haenszel; Cochran-Armitage; Cochran's Q | `pwr::pwr.chisq.test()`; `TrialSize::McNemar.Test()`, `Propensity.Score.strata()`, `Cochran.Armitage.Trend()`; simulation of `rstatix::cochran_qtest()` | Live |
+| Chi-Square Tests | GoF; R×C independence; McNemar; Mantel-Haenszel; Cochran-Armitage; Cochran's Q | `pwr::pwr.chisq.test()`; `TrialSize::McNemar.Test()`, `Propensity.Score.strata()`, `Cochran.Armitage.Trend()`; simulation using the closed-form `.cf_cochran_q()` (verified vs. `rstatix::cochran_qtest()`) | Live |
 | Multiple Regression | R² vs. zero; R² increase | `pwr::pwr.f2.test()` | Live |
 | Factorial ANOVA / ANCOVA | General F-test | `pwr::pwr.f2.test()` | Live |
-| Logistic Regression | Binary/continuous predictor, simple or covariate-adjusted; ordinal | `powerMediation::SSizeLogisticBin()`/`Con()`; 1/(1−R²) inflation; `Hmisc::posamsize()` | Live |
+| Logistic Regression | Binary/continuous predictor, simple or covariate-adjusted; ordinal | `powerMediation::SSizeLogisticBin()`/`Con()`; 1/(1−R²) inflation; closed form `.cf_posamsize()` (verified vs. `Hmisc::posamsize()`) | Live |
 | Exact Tests | Binomial; Fisher; Boschloo; exact Poisson; sign test | `stats::binom.test()`, `poisson.test()` searches; `Exact::power.exact.test()` | Live |
 | RM-ANOVA / Mixed ANOVA | Between; within; interaction | reimplemented `WebPower::wp.rmanova()` | Live |
-| Nonparametric Tests | Wilcoxon ×2; Kendall's tau; Kruskal-Wallis; Jonckheere-Terpstra; Friedman; KS; runs test; animal K-sample rank test | `TrialSize::Nonpara.*()`; ARE inflation; simulation of `ks.test()`/`tseries::runs.test()`; `clinfun::power.ladesign()` | Live |
+| Nonparametric Tests | Wilcoxon ×2; Kendall's tau; Kruskal-Wallis; Jonckheere-Terpstra; Friedman; KS; runs test (`.cf_runs_test_p()`, verified vs. `tseries::runs.test()`); animal K-sample rank test | `TrialSize::Nonpara.*()`; ARE inflation; simulation of `ks.test()`/`tseries::runs.test()`; `clinfun::power.ladesign()` | Live |
 | Variance Tests | One variance; two variances; SD precision | closed form (chi-square / F) | Live |
 | Multiplicity Adjustment | Bonferroni/Šidák (proportions, means); FDR (BH) means; exact microarray FDR; Dunnett | wraps this app's own formulas; FDR closed form (simulation-verified); Liu & Hwang 2007 verified vs. `ssize.fdr`; `mvtnorm::qmvt()` | Live |
 | MANOVA / Hotelling's T² | Two-group Hotelling's T² | closed-form noncentral F (Rencher 2002) | Live |
-| Bayesian Design Analysis | Assurance; Bayes factor design analysis | `Hmisc::gbayes2()`; simulation of `BayesFactor::ttestBF()` | Live |
+| Bayesian Design Analysis | Assurance; Bayes factor design analysis | closed form `.cf_gbayes2()` (verified vs. `Hmisc::gbayes2()`); simulation of the closed-form JZS Bayes factor `.cf_ttest_bf10()` (verified vs. `BayesFactor::ttestBF()`) | Live |
 | Longitudinal / MMRM | Slope difference: Liu & Liang, Diggle, Ard & Edland, Hu et al.; MMRM with dropout, AR(1) | reimplemented `longpower` functions | Live |
 | Multilevel / Hierarchical Model | Two- and three-level slope difference | reimplemented `powerlmm` (no-dropout case) | Live |
 | Meta-Analysis Power | Number of studies, fixed/random effects | Hedges & Pigott 2004 / Jackson & Turner 2017, verified vs. `metapower` | Live |
@@ -245,15 +245,20 @@ The table below is a snapshot of what is live (28 Sep 2026).
 Open, blocked and partially covered items are listed in ROADMAP §4 — none have been
 removed.
 
-**Top navbar.** Modules are grouped into 14 `bslib::nav_menu()` dropdowns via
-`R/registry.R`'s `module_groups`, ordered roughly simple → advanced: Descriptive &
-Estimation; Survey & Cross-Sectional; Observational Studies; Diagnostic & Screening;
-Agreement & Reliability; Clinical Trials; Survival Analysis; Prediction Models;
-Surveillance; Preclinical / Animal Studies; Qualitative / Mixed Methods;
-Psychometrics / Scale Development; Health Economics / Value of Information; General
-Statistical Tests. `nav_select()` targets a module by nav title whether it sits in a
-dropdown or not. The navbar is now full; the suite expansion needs a navigation
-redesign (ROADMAP §5).
+**Navigation (workbenches).** The top navbar has one item per workbench -- Home, *Plan:
+Sample Size* (the 49 sample-size and power calculators) and *Analyze* (calculators that
+work on counts the user already has) -- and each workbench shows its modules in a
+sticky, scrollable `bslib::navset_pill_list()` sidebar under small group headers.
+`R/registry.R`'s `module_workbenches` defines the workbenches, their groups and the order;
+the Plan groups are ordered roughly simple -> advanced: Descriptive & Estimation; Survey &
+Cross-Sectional; Observational Studies; Diagnostic & Screening; Agreement & Reliability;
+Clinical Trials; Survival Analysis; Prediction Models; Surveillance; Preclinical / Animal
+Studies; Qualitative / Mixed Methods; Psychometrics / Scale Development; Health Economics /
+Value of Information; General Statistical Tests. The earlier one-dropdown-per-group navbar
+(14 dropdowns, then 15) could not hold a third workbench because bslib dropdowns cannot nest.
+`jump_to_module()` opens a module from the Home hub or wizard by selecting its workbench
+(`input$main_nav`) and then the module in the workbench's list (`input$<nav_id>`). On phones
+the sidebar stacks above the calculator with its height capped.
 
 ### 7.1 "Which calculator?" — the study design identification wizard
 
@@ -458,12 +463,12 @@ enforced by consistency tests rather than habit.
 
 ## Appendix: Dependencies
 
-**Runtime** (`DESCRIPTION` `Imports`): `shiny`, `bslib`, `pwr`, `presize`, `epiR`,
+**Runtime** (`DESCRIPTION` `Imports`): `shiny`, `bslib`, `pwr`, `presize`,
 `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`,
-`powerMediation`, `Hmisc`, `tseries`, `BayesFactor`, `mvtnorm`, `rstatix`, `lme4`;
+`powerMediation`, `mvtnorm`, `lme4`;
 plus `survival`, `graphics`, `stats` and `utils` from base R.
 
-**Testing**: `testthat` (and `lmerTest`, optional, for one cross-check).
+**Testing**: `testthat` (and `lmerTest`, optional, for one cross-check). `epiR`, `rstatix`, `Hmisc`, `tseries` and `BayesFactor` (`Suggests`) are oracles for the closed-form routines in `R/calc_closed_forms.R` and for the Analyze workbench.
 
 **Verification-only (development)**: installed from `github.com/cran/<pkg>` when a
 design is built, never loaded by the app — e.g. `longpower`, `powerlmm`, `RTSA`,

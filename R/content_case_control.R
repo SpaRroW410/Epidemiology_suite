@@ -51,7 +51,7 @@ case_control_content <- list(
       "examples); Kelsey JL, Thompson WD, Evans AS. Methods in",
       "Observational Epidemiology. Oxford University Press; 1986."
     ),
-    backend = "epiR::epi.sscc(method = \"unmatched\")"
+    backend = "closed form (Kelsey et al. 1996); identical to epiR::epi.sscc(method = \"unmatched\"), which it is tested against"
   ),
 
   matched = list(
@@ -121,7 +121,7 @@ case_control_content <- list(
       "2019;38(6):956-968 (confirms the matched-case-control equivalence",
       "and formula choice, and documents its underestimation risk)."
     ),
-    backend = "epiR::epi.sscc(method = \"matched\")"
+    backend = "closed form (Dupont 1988, as in epiR); identical to epiR::epi.sscc(method = \"matched\"), which it is tested against"
   ),
 
   nested = list(

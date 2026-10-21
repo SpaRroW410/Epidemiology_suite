@@ -10,3 +10,12 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE$
+^_disable_autoload\.R$
+^tools$
+^vignettes$
+^_pkgdown\.yml$
+^site_out$
+^\.nojekyll$
+^Dockerfile$
+^\.dockerignore$
+^docker-compose\.yml$

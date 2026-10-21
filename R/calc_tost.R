@@ -28,6 +28,7 @@ calc_tost_means <- function(mean_diff, margin, sd, alpha = 0.05, power = 0.8) {
     stop("mean_diff must fall strictly within (-margin, margin) -- otherwise equivalence can't be shown even with infinite sample size.")
   }
 
+  .require_pkg("PowerTOST", "The equivalence sample size for means")
   fit <- PowerTOST::sampleN.TOST(
     alpha = alpha, targetpower = power, logscale = FALSE,
     theta0 = mean_diff, theta1 = -margin, theta2 = margin,
@@ -82,6 +83,7 @@ calc_tost_bioequivalence <- function(cv, theta0 = 0.95, theta1 = 0.8, theta2 = 1
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
+  .require_pkg("PowerTOST", "The pharmacokinetic bioequivalence sample size")
   fit <- PowerTOST::sampleN.TOST(
     alpha = alpha, targetpower = power, logscale = TRUE,
     theta0 = theta0, theta1 = theta1, theta2 = theta2,
@@ -154,6 +156,7 @@ calc_tost_assurance <- function(cv, prior_n, theta0 = 0.95, theta1 = 0.8, theta2
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
+  .require_pkg("PowerTOST", "The expected-power bioequivalence sample size")
   fit <- PowerTOST::expsampleN.TOST(
     alpha = alpha, targetpower = power, logscale = TRUE,
     theta0 = theta0, theta1 = theta1, theta2 = theta2,
@@ -196,9 +199,8 @@ calc_tost_proportions <- function(p_new, p_standard, margin,
   .validate_unit_interval(power, "power")
   .validate_positive(ratio, "ratio")
 
-  fit <- epiR::epi.ssequb(treat = p_new, control = p_standard, delta = margin,
-                           n = NA, power = power, r = ratio, type = "equivalence",
-                           nfractional = FALSE, alpha = alpha)
+  fit <- .cf_ssequb_equivalence(treat = p_new, control = p_standard, delta = margin,
+                                power = power, r = ratio, alpha = alpha)
 
   new_ss_result(list(
     n_total = fit$n.total,

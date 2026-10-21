@@ -149,7 +149,7 @@ calc_cluster_survey_binary <- function(b, b_sd = NULL, p, epsilon,
 
   b_arg <- if (is.null(b_sd)) b else c(b, b_sd)
 
-  fit <- epiR::epi.ssclus2estb(
+  fit <- .cf_ssclus2estb(
     N.psu = if (is.null(N_psu)) NA else N_psu,
     b = b_arg, Py = p, epsilon = epsilon, error = error, rho = rho,
     conf.level = conf_level

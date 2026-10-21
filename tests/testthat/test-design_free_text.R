@@ -101,3 +101,53 @@ test_that("every option_index referenced by a free-text rule exists at that node
     }
   }
 })
+
+test_that("analysis phrasing reaches the Analyze branch, and planning phrasing is not hijacked", {
+  r <- walk_free_text("I want to analyze the counts I have: a 2x2 table with an odds ratio")
+  expect_equal(r$trace[[1]]$answer, design_nodes$root$options[[10]]$label)
+  expect_equal(r$node_id, "analyze_design")           # 2x2 -> asks how subjects were sampled; no rule there
+  r <- walk_free_text("Mantel-Haenszel analysis of stratified tables")
+  expect_equal(r$node_id, "analyze_mh_design")
+  r <- walk_free_text("analyze the counts: standardized mortality ratio (SMR) for a cohort")
+  expect_equal(r$node_id, "analyze_std_type")
+  r <- walk_free_text("analyze the counts I already have for vaccine efficacy")
+  expect_equal(r$node_id, "analyze_vaccine_type")
+  r <- walk_free_text("from the summary counts, rate ratio per person-years")
+  expect_equal(r$node_id, "analyze_rate_type")
+  # planning texts that merely mention analysis-sounding words keep their old route
+  expect_equal(walk_free_text("sample size for a vaccine efficacy trial, randomized")$trace[[1]]$answer, design_nodes$root$options[[2]]$label)
+  expect_equal(walk_free_text("estimate sensitivity and specificity against a gold standard")$trace[[1]]$answer, design_nodes$root$options[[4]]$label)
+})
+
+test_that("planning-tool phrasing reaches the planning branch; sample-size requests that mention dropouts do not", {
+  r <- walk_free_text("generate a randomization list with permuted blocks")
+  expect_equal(r$node_id, "term_plan_randomization_block")
+  r <- walk_free_text("I need a randomisation schedule stratified by site")
+  expect_equal(r$node_id, "term_plan_randomization_stratified")
+  r <- walk_free_text("inflate the sample size for attrition")
+  expect_equal(r$node_id, "term_plan_attrition_stages")
+  expect_equal(walk_free_text("compare two groups in a randomized trial allowing for 10% dropout")$trace[[1]]$answer,
+               design_nodes$root$options[[2]]$label)
+})
+
+test_that("survey-tool phrasing reaches the survey selection and weights terminals", {
+  expect_equal(walk_free_text("choose 30 clusters for an EPI 30 x 7 survey from the village list")$node_id, "term_survey_select_epi")
+  expect_equal(walk_free_text("select a sample of villages with probability proportional to size")$node_id, "term_survey_select_pps")
+  expect_equal(walk_free_text("draw a systematic sample from the sampling frame")$node_id, "term_survey_select_systematic")
+  expect_equal(walk_free_text("compute survey weights with nonresponse adjustment")$node_id, "term_survey_weights_classes")
+  expect_equal(walk_free_text("effective sample size of survey weights using Kish")$node_id, "term_survey_weights_kish")
+  # sample-size planning text that mentions clusters or surveys is not hijacked
+  expect_equal(walk_free_text("estimate the prevalence of anaemia in a cluster survey")$trace[[1]]$answer, design_nodes$root$options[[1]]$label)
+})
+
+test_that("outbreak, surveillance and epidemic-model phrasing reaches its terminal; vaccine-trial sample-size text does not", {
+  expect_equal(walk_free_text("which food was the vehicle: food-specific attack rates in an outbreak")$node_id, "term_analyze_outbreak_exposure")
+  expect_equal(walk_free_text("secondary attack rate among household contacts")$node_id, "term_analyze_outbreak_secondary")
+  expect_equal(walk_free_text("case fatality ratio during an outbreak investigation")$node_id, "term_analyze_outbreak_cfr")
+  expect_equal(walk_free_text("EARS C2 aberration detection on daily counts")$node_id, "term_analyze_surveillance_ears")
+  expect_equal(walk_free_text("use a CUSUM on weekly case counts")$node_id, "term_analyze_surveillance_cusum")
+  expect_equal(walk_free_text("what vaccination coverage do I need for herd immunity")$node_id, "term_epi_model_herd")
+  expect_equal(walk_free_text("simulate an SEIR epidemic with vaccination")$node_id, "term_epi_model_sim")
+  expect_equal(walk_free_text("estimate R0 from the doubling time")$node_id, "term_epi_model_r0")
+  expect_equal(walk_free_text("sample size for a vaccine trial with an attack rate of 5% in the control group")$trace[[1]]$answer, design_nodes$root$options[[2]]$label)
+})

@@ -231,7 +231,7 @@ calc_glmm_logistic_power <- function(cluster_size, sigma_u, baseline_prob, or,
   # runtime dependency for what MASS::mvrnorm() would otherwise wrap.
   cov_re <- cor_intercept_slope * sqrt(sigma2_intercept * sigma2_slope)
   cov_mat <- matrix(c(sigma2_intercept, cov_re, cov_re, sigma2_slope), nrow = 2)
-  L <- chol(cov_mat)
+  L <- .chol_safe(cov_mat)
   z <- matrix(rnorm(n * 2), ncol = 2)
   re <- z %*% L
   b0i <- re[, 1][as.integer(subject)]

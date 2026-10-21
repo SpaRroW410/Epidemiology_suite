@@ -55,11 +55,11 @@ calc_survival_noncompliance <- function(tref, mc, pct_reduction, accrual, tmin,
   .validate_unit_interval(power, "power")
 
   power_given_n <- function(n) {
-    Hmisc::cpower(
+    .cf_cpower(
       tref = tref, n = n, mc = mc, r = pct_reduction,
       accrual = accrual, tmin = tmin,
       noncomp.c = noncomp_c, noncomp.i = noncomp_i,
-      alpha = alpha, pr = FALSE
+      alpha = alpha
     )
   }
 

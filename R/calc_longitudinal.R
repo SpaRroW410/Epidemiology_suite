@@ -46,10 +46,10 @@
 # also solves for delta/power/sigma2/sig.level given N, and supports a
 # list of R matrices differing by group -- not needed here).
 .liu_liang_n <- function(delta, u, v, R, Pi, alpha, power, alternative) {
-  Rinv <- solve(R)
+  Rinv <- .solve_safe(R)
   Ipl <- Pi[1] * t(u[[1]]) %*% Rinv %*% v[[1]] + Pi[2] * t(u[[2]]) %*% Rinv %*% v[[2]]
   Ill <- Pi[1] * t(v[[1]]) %*% Rinv %*% v[[1]] + Pi[2] * t(v[[2]]) %*% Rinv %*% v[[2]]
-  Illinv <- solve(Ill)
+  Illinv <- .solve_safe(Ill)
   Sigma1 <- Pi[1] * (t(u[[1]]) - Ipl %*% Illinv %*% t(v[[1]])) %*% Rinv %*% (u[[1]] - v[[1]] %*% Illinv %*% t(Ipl)) +
     Pi[2] * (t(u[[2]]) - Ipl %*% Illinv %*% t(v[[2]])) %*% Rinv %*% (u[[2]] - v[[2]] %*% Illinv %*% t(Ipl))
 
@@ -292,7 +292,7 @@ calc_longitudinal_diggle <- function(visit_times, delta, sigma2, rho,
   m <- length(visit_times)
   R <- matrix(rho, m, m) + diag(1 - rho, m)
   V <- sigma2 * R
-  xi <- solve(rbind(1, visit_times) %*% solve(V) %*% cbind(1, visit_times))[2, 2]
+  xi <- .solve_safe(rbind(1, visit_times) %*% .solve_safe(V) %*% cbind(1, visit_times))[2, 2]
   z_alpha <- if (alternative == "two.sided") qnorm(1 - alpha / 2) else qnorm(1 - alpha)
   n <- 2 * (z_alpha + qnorm(power))^2 * xi / delta^2
 
@@ -346,7 +346,7 @@ calc_longitudinal_edland <- function(visit_times, delta, sigma2_slope, sigma2_re
     for (j in 1:m) V[i, j] <- visit_times[i] * visit_times[j] * sigma2_slope
   }
   diag(V) <- diag(V) + sigma2_residual
-  term <- solve(t(X) %*% solve(V) %*% X)[2, 2]
+  term <- .solve_safe(t(X) %*% .solve_safe(V) %*% X)[2, 2]
 
   z_alpha <- if (alternative == "two.sided") qnorm(1 - alpha / 2) else qnorm(1 - alpha)
   n <- (z_alpha + qnorm(power))^2 * (2 * term) / delta^2

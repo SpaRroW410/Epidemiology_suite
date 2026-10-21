@@ -105,49 +105,126 @@ module_registry <- function() {
     list(id = stepped_wedge_meta$id, title = stepped_wedge_meta$nav_title,
          ui = mod_stepped_wedge_ui, server = mod_stepped_wedge_server),
     list(id = meta_power_meta$id, title = meta_power_meta$nav_title,
-         ui = mod_meta_power_ui, server = mod_meta_power_server)
+         ui = mod_meta_power_ui, server = mod_meta_power_server),
+    list(id = analyze_2x2_meta$id, title = analyze_2x2_meta$nav_title,
+         ui = mod_analyze_2x2_ui, server = mod_analyze_2x2_server),
+    list(id = analyze_dx_meta$id, title = analyze_dx_meta$nav_title,
+         ui = mod_analyze_dx_ui, server = mod_analyze_dx_server),
+    list(id = analyze_ci_meta$id, title = analyze_ci_meta$nav_title,
+         ui = mod_analyze_ci_ui, server = mod_analyze_ci_server),
+    list(id = analyze_mh_meta$id, title = analyze_mh_meta$nav_title,
+         ui = mod_analyze_mh_ui, server = mod_analyze_mh_server),
+    list(id = analyze_rates_meta$id, title = analyze_rates_meta$nav_title,
+         ui = mod_analyze_rates_ui, server = mod_analyze_rates_server),
+    list(id = analyze_tests_meta$id, title = analyze_tests_meta$nav_title,
+         ui = mod_analyze_tests_ui, server = mod_analyze_tests_server),
+    list(id = analyze_std_meta$id, title = analyze_std_meta$nav_title,
+         ui = mod_analyze_std_ui, server = mod_analyze_std_server),
+    list(id = analyze_compare_meta$id, title = analyze_compare_meta$nav_title,
+         ui = mod_analyze_compare_ui, server = mod_analyze_compare_server),
+    list(id = analyze_vaccine_meta$id, title = analyze_vaccine_meta$nav_title,
+         ui = mod_analyze_vaccine_ui, server = mod_analyze_vaccine_server),
+    list(id = analyze_outbreak_meta$id, title = analyze_outbreak_meta$nav_title,
+         ui = mod_analyze_outbreak_ui, server = mod_analyze_outbreak_server),
+    list(id = analyze_surveillance_meta$id, title = analyze_surveillance_meta$nav_title,
+         ui = mod_analyze_surveillance_ui, server = mod_analyze_surveillance_server),
+    list(id = attrition_meta$id, title = attrition_meta$nav_title,
+         ui = mod_attrition_ui, server = mod_attrition_server),
+    list(id = randomization_meta$id, title = randomization_meta$nav_title,
+         ui = mod_randomization_ui, server = mod_randomization_server),
+    list(id = survey_selection_meta$id, title = survey_selection_meta$nav_title,
+         ui = mod_survey_selection_ui, server = mod_survey_selection_server),
+    list(id = survey_weights_meta$id, title = survey_weights_meta$nav_title,
+         ui = mod_survey_weights_ui, server = mod_survey_weights_server),
+    list(id = epidemic_model_meta$id, title = epidemic_model_meta$nav_title,
+         ui = mod_epidemic_model_ui, server = mod_epidemic_model_server)
   )
 }
 
-# Top-navbar grouping: which module ids collapse under which dropdown menu, in
-# which order. Mirrors docs/checklist_by_design.md's own Part-1 study-design
-# section numbers (already simple -> difficult) so the navbar doesn't invent a
-# second taxonomy on top of the checklist's. Modules with no single natural
-# study-design home (general G*Power-style test families) are grouped together
-# in the last entry; they remain individually discoverable by test family via
-# the Home hub's "Browse calculators" toggle (R/home/home_catalog.R's
-# test_families), which points at these same module ids.
-module_groups <- list(
-  list(title = "Descriptive & Estimation",
-       module_ids = c("proportion", "means", "rate", "ratio")),
-  list(title = "Survey & Cross-Sectional",
-       module_ids = c("stratified", "cluster", "lqas", "capture_recapture")),
-  list(title = "Observational Studies",
-       module_ids = c("case_control", "cohort", "sccs", "ecological")),
-  list(title = "Diagnostic & Screening",
-       module_ids = c("diagnostic", "roc")),
-  list(title = "Agreement & Reliability",
-       module_ids = c("agreement")),
-  list(title = "Clinical Trials",
-       module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential",
-                       "subgroup_interaction", "glmm", "tsa", "stepped_wedge")),
-  list(title = "Survival Analysis",
-       module_ids = c("logrank", "competing_risks", "rmst")),
-  list(title = "Prediction Models",
-       module_ids = c("prediction")),
-  list(title = "Surveillance",
-       module_ids = c("rule_of_three")),
-  list(title = "Preclinical / Animal Studies",
-       module_ids = c("resource_equation")),
-  list(title = "Qualitative / Mixed Methods",
-       module_ids = c("qualitative")),
-  list(title = "Psychometrics / Scale Development",
-       module_ids = c("efa_cfa")),
-  list(title = "Health Economics / Value of Information",
-       module_ids = c("evpi")),
-  list(title = "General Statistical Tests",
-       module_ids = c("correlation", "chisq", "regression", "anova_general",
-                       "logistic", "exact_tests", "rm_anova", "nonparametric",
-                       "variance", "multiplicity", "manova", "bayesian",
-                       "longitudinal", "multilevel", "meta_power"))
+# Navigation: the app is organised into WORKBENCHES (the top navbar: Home, Plan,
+# Analyze, ...), each holding a vertical, grouped list of modules. bslib dropdowns
+# cannot nest and 15 dropdowns no longer fit one navbar, so the old
+# "one dropdown per group" layout became "one workbench per stage of a study, one
+# header per group inside it". A workbench has:
+#   id / title   the top-navbar value (input$main_nav) and label
+#   nav_id       the id of its module list (input$<nav_id> = the open module's title)
+#   groups       header + module ids, in display order
+# Adding a calculator = add its entry to module_registry() above and its id to a
+# group below; adding a workbench = add an entry here (run_app.R builds the rest).
+#
+# The sample-size groups mirror docs/checklist_by_design.md's own Part-1
+# study-design section numbers (already simple -> difficult) so the navigation does
+# not invent a second taxonomy on top of the checklist's. Modules with no single
+# natural study-design home (general G*Power-style test families) are grouped
+# together in the last group; they remain individually discoverable by test family
+# via the Home hub's "Browse calculators" toggle (R/home_catalog.R's test_families),
+# which points at these same module ids.
+module_workbenches <- list(
+  list(id = "plan", title = "Plan: Sample Size", nav_id = "plan_nav",
+       groups = list(
+      list(title = "Descriptive & Estimation",
+           module_ids = c("proportion", "means", "rate", "ratio")),
+      list(title = "Survey & Cross-Sectional",
+           module_ids = c("stratified", "cluster", "lqas", "capture_recapture")),
+      list(title = "Observational Studies",
+           module_ids = c("case_control", "cohort", "sccs", "ecological")),
+      list(title = "Diagnostic & Screening",
+           module_ids = c("diagnostic", "roc")),
+      list(title = "Agreement & Reliability",
+           module_ids = c("agreement")),
+      list(title = "Clinical Trials",
+           module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential", "subgroup_interaction", "glmm", "tsa", "stepped_wedge")),
+      list(title = "Survival Analysis",
+           module_ids = c("logrank", "competing_risks", "rmst")),
+      list(title = "Prediction Models",
+           module_ids = c("prediction")),
+      list(title = "Surveillance",
+           module_ids = c("rule_of_three")),
+      list(title = "Preclinical / Animal Studies",
+           module_ids = c("resource_equation")),
+      list(title = "Qualitative / Mixed Methods",
+           module_ids = c("qualitative")),
+      list(title = "Psychometrics / Scale Development",
+           module_ids = c("efa_cfa")),
+      list(title = "Health Economics / Value of Information",
+           module_ids = c("evpi")),
+      list(title = "Study Planning Tools",
+           module_ids = c("attrition", "randomization")),
+      list(title = "Survey & Field Tools",
+           module_ids = c("survey_selection", "survey_weights")),
+      list(title = "Infectious Disease Models",
+           module_ids = c("epidemic_model")),
+      list(title = "General Statistical Tests",
+           module_ids = c("correlation", "chisq", "regression", "anova_general", "logistic", "exact_tests", "rm_anova", "nonparametric", "variance", "multiplicity", "manova", "bayesian", "longitudinal", "multilevel", "meta_power"))
+       )),
+  list(id = "analyze", title = "Analyze", nav_id = "analyze_nav",
+       groups = list(
+         list(title = "From summary counts",
+              module_ids = c("analyze_2x2", "analyze_mh", "analyze_rates", "analyze_std", "analyze_dx", "analyze_tests", "analyze_ci", "analyze_compare", "analyze_vaccine")),
+         list(title = "Outbreaks and surveillance",
+              module_ids = c("analyze_outbreak", "analyze_surveillance"))
+       ))
 )
+
+# Where a module lives: its workbench (list) or NULL if the title is unknown.
+module_workbench_of <- function(module_title) {
+  registry <- module_registry()
+  ids <- vapply(registry, `[[`, character(1), "id")
+  titles <- vapply(registry, `[[`, character(1), "title")
+  id <- ids[match(module_title, titles)]
+  if (is.na(id)) return(NULL)
+  for (wb in module_workbenches) {
+    for (g in wb$groups) if (id %in% g$module_ids) return(wb)
+  }
+  NULL
+}
+
+# Open a module from anywhere (Home hub buttons, the wizard): select its
+# workbench in the top navbar, then the module inside it.
+jump_to_module <- function(session, module_title) {
+  wb <- module_workbench_of(module_title)
+  if (is.null(wb)) stop("No workbench contains a module titled '", module_title, "'.")
+  nav_select("main_nav", wb$title, session = session)
+  nav_select(wb$nav_id, module_title, session = session)
+  invisible(wb)
+}

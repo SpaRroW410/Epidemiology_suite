@@ -317,9 +317,8 @@ calc_cochran_q <- function(p, sigma2_subject, alpha = 0.05, power = 0.8,
     set.seed(seed)
     rejections <- replicate(reps, {
       df <- .simulate_cochran_q(n, p, sigma2_subject)
-      res <- tryCatch(rstatix::cochran_qtest(df, y ~ cond | id), error = function(e) NULL)
-      if (is.null(res)) return(FALSE)
-      res$p < alpha
+      res <- .cf_cochran_q(df$y, df$id, df$cond)
+      isTRUE(res$p < alpha)
     })
     mean(rejections)
   }

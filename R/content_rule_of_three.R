@@ -147,6 +147,6 @@ rule_of_three_content <- list(
       "herds. N Z Vet J. 1988;36(1):39-42. Dohoo I, Martin W, Stryhn H.",
       "Veterinary Epidemiologic Research. 2nd ed. AVC Inc; 2009, p. 54."
     ),
-    backend = "epiR::epi.ssdetect()"
+    backend = "closed form (MacDiarmid 1988; Cannon 2001); identical to epiR 2.0.67 epi.ssdetect(), which it is tested against"
   )
 )

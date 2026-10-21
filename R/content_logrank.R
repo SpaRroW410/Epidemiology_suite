@@ -257,7 +257,7 @@ logrank_content <- list(
       "Sample-size formula for the proportional-hazards regression",
       "model. Biometrics. 1983;39(2):499-503."
     ),
-    backend = "Hmisc::cpower()"
+    backend = "closed form (Lachin & Foulkes 1986, as in Hmisc::cpower()); identical to Hmisc::cpower(), which it is tested against"
   ),
 
   weighted_logrank = list(

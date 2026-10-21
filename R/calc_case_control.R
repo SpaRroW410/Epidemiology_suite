@@ -33,10 +33,8 @@ calc_case_control_unmatched <- function(p0, OR, power = 0.8, ratio = 1,
 
   sided <- if (identical(alternative, "two.sided")) 2 else 1
 
-  res <- epiR::epi.sscc(N = if (is.null(N)) NA else N, OR = OR, p1 = NA, p0 = p0,
-                         n = NA, power = power, r = ratio, phi.coef = 0,
-                         design = 1, sided.test = sided, nfractional = FALSE,
-                         conf.level = 1 - alpha, method = "unmatched", fleiss = FALSE)
+  res <- .cf_sscc_unmatched(N = if (is.null(N)) NA else N, OR = OR, p0 = p0, power = power,
+                            r = ratio, design = 1, sided.test = sided, conf.level = 1 - alpha)
 
   new_ss_result(list(
     n_total = ceiling(res$n.total),
@@ -81,10 +79,9 @@ calc_case_control_matched <- function(p0, OR, phi_coef = 0.2, power = 0.8, ratio
 
   sided <- if (identical(alternative, "two.sided")) 2 else 1
 
-  res <- epiR::epi.sscc(N = if (is.null(N)) NA else N, OR = OR, p1 = NA, p0 = p0,
-                         n = NA, power = power, r = ratio, phi.coef = phi_coef,
-                         design = 1, sided.test = sided, nfractional = FALSE,
-                         conf.level = 1 - alpha, method = "matched", fleiss = FALSE)
+  res <- .cf_sscc_matched(N = if (is.null(N)) NA else N, OR = OR, p0 = p0, power = power,
+                          r = ratio, phi.coef = phi_coef, design = 1, sided.test = sided,
+                          conf.level = 1 - alpha)
 
   new_ss_result(list(
     n_total = ceiling(res$n.total),

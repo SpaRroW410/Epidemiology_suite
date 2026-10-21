@@ -44,7 +44,7 @@ noninferiority_content <- list(
       "Research. Chapman & Hall/CRC Biostatistics Series; 2008, p. 61-62.",
       "(as implemented by epiR::epi.ssninfc)."
     ),
-    backend = "epiR::epi.ssninfc()"
+    backend = "closed form (Chow, Shao & Wang 2008); identical to epiR::epi.ssninfc(), which it is tested against"
   ),
 
   proportions = list(
@@ -83,7 +83,7 @@ noninferiority_content <- list(
       "Research. Chapman & Hall/CRC Biostatistics Series; 2008, p. 90.",
       "(as implemented by epiR::epi.ssninfb)."
     ),
-    backend = "epiR::epi.ssninfb()"
+    backend = "closed form (Chow, Shao & Wang 2008); identical to epiR::epi.ssninfb(), which it is tested against"
   ),
 
   odds_ratio = list(

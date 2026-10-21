@@ -24,6 +24,404 @@
 #   design_value - value to preset that input to (NA if none)
 
 calculator_catalog <- list(
+
+  list(key = "plan_attrition_stages",
+       label = "Inflate a sample size for attrition and non-response (one or several stages)",
+       answers = paste(
+         "Answers: \"I know how many participants I need to analyze -- how many must I enrol to allow for non-response,",
+         "loss to follow-up and unusable data?\""
+       ),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Attrition and Non-response",
+       module_input_id = "attrition-design", design_value = "stages"),
+
+  list(key = "plan_attrition_arms",
+       label = "Inflate each arm for different expected losses",
+       answers = paste(
+         "Answers: \"The arms will lose different numbers of participants -- how many must I enrol in each arm?\""
+       ),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Attrition and Non-response",
+       module_input_id = "attrition-design", design_value = "arms"),
+
+  list(key = "plan_attrition_noncompliance",
+       label = "Inflate a sample size for drop-out and drop-in (non-compliance)",
+       answers = paste(
+         "Answers: \"Some participants will stop the treatment or cross over -- how much larger must the trial be?\""
+       ),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Attrition and Non-response",
+       module_input_id = "attrition-design", design_value = "noncompliance"),
+
+  list(key = "plan_randomization_block",
+       label = "Randomization list: permuted blocks (reproducible from a seed)",
+       answers = paste(
+         "Answers: \"I need a balanced allocation list for my trial that I can regenerate from a seed and hand to whoever",
+         "holds the allocation.\""
+       ),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Randomization List",
+       module_input_id = "randomization-design", design_value = "block"),
+
+  list(key = "plan_randomization_stratified",
+       label = "Randomization list: permuted blocks within strata (sites, prognostic groups)",
+       answers = paste(
+         "Answers: \"I need a separate balanced list for each site or prognostic stratum.\""
+       ),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Randomization List",
+       module_input_id = "randomization-design", design_value = "stratified"),
+
+  list(key = "plan_randomization_simple",
+       label = "Randomization list: simple (unrestricted) randomization",
+       answers = paste(
+         "Answers: \"I need an unrestricted random allocation list (and want to see how unbalanced chance can make it).\""
+       ),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Randomization List",
+       module_input_id = "randomization-design", design_value = "simple"),
+
+  list(key = "survey_select_srs",
+       label = "Survey sample selection: simple random sample from a list (reproducible)",
+       answers = paste("Answers: \"I have a list of units (households, facilities) -- which ones do I select at random, and what are their weights?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Survey Sample Selection",
+       module_input_id = "survey_selection-design", design_value = "srs"),
+
+  list(key = "survey_select_systematic",
+       label = "Survey sample selection: systematic sample, every k-th unit from a random start",
+       answers = paste("Answers: \"I want a sample spread evenly over a list ordered by place or time -- which units do I take?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Survey Sample Selection",
+       module_input_id = "survey_selection-design", design_value = "systematic"),
+
+  list(key = "survey_select_pps",
+       label = "Survey sample selection: PPS systematic (probability proportional to size), e.g. choosing clusters",
+       answers = paste("Answers: \"I have clusters with population sizes -- which do I select, in proportion to size, and what are their weights?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Survey Sample Selection",
+       module_input_id = "survey_selection-design", design_value = "pps"),
+
+  list(key = "survey_select_epi",
+       label = "WHO EPI cluster survey (30 x 7): choose the clusters from a village list",
+       answers = paste("Answers: \"I am doing a 30 x 7 cluster survey -- which 30 clusters do I visit?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Survey Sample Selection",
+       module_input_id = "survey_selection-design", design_value = "epi"),
+
+  list(key = "survey_weights_classes",
+       label = "Survey design weights and nonresponse adjustment by weighting class",
+       answers = paste("Answers: \"I know the population, sample and respondents in each class -- what weight does each respondent get, and how much precision do the weights cost?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Survey Weights and Non-response",
+       module_input_id = "survey_weights-design", design_value = "classes"),
+
+  list(key = "survey_weights_kish",
+       label = "Effective sample size and design effect of a set of survey weights (Kish)",
+       answers = paste("Answers: \"I have survey weights -- what is the effective sample size after weighting?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Survey Weights and Non-response",
+       module_input_id = "survey_weights-design", design_value = "kish"),
+
+  list(key = "analyze_outbreak_attack",
+       label = "Outbreak attack rate (cases / population at risk) with confidence intervals",
+       answers = paste("Answers: \"I have the number of cases and the people at risk in an outbreak -- what is the attack rate and its confidence interval?\""),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Outbreak Measures",
+       module_input_id = "analyze_outbreak-design", design_value = "attack"),
+
+  list(key = "analyze_outbreak_exposure",
+       label = "Outbreak investigation: exposure-specific attack rates and risk ratios (food-specific table)",
+       answers = paste("Answers: \"I have ill and total counts for people who did and did not eat each food -- which exposure is the likely vehicle?\""),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Outbreak Measures",
+       module_input_id = "analyze_outbreak-design", design_value = "exposure"),
+
+  list(key = "analyze_outbreak_secondary",
+       label = "Secondary attack rate among contacts of cases",
+       answers = paste("Answers: \"I know how many susceptible contacts of the primary cases became ill -- what is the secondary attack rate?\""),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Outbreak Measures",
+       module_input_id = "analyze_outbreak-design", design_value = "secondary"),
+
+  list(key = "analyze_outbreak_cfr",
+       label = "Case fatality: crude and among resolved cases, with confidence intervals",
+       answers = paste("Answers: \"I have deaths and cases (and recoveries) -- what is the case fatality, and how biased is it while the outbreak runs?\""),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Outbreak Measures",
+       module_input_id = "analyze_outbreak-design", design_value = "cfr"),
+
+  list(key = "analyze_surveillance_ears",
+       label = "Aberration detection in a series of counts: EARS C1, C2, C3",
+       answers = paste("Answers: \"I have daily or weekly case counts -- did the last days rise unusually (CDC EARS)?\""),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Aberration Detection",
+       module_input_id = "analyze_surveillance-design", design_value = "ears"),
+
+  list(key = "analyze_surveillance_cusum",
+       label = "Aberration detection in a series of counts: CUSUM (normal or Poisson)",
+       answers = paste("Answers: \"I have case counts and a baseline period -- has the level shifted upward (CUSUM)?\""),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Aberration Detection",
+       module_input_id = "analyze_surveillance-design", design_value = "cusum"),
+
+  list(key = "epi_model_herd",
+       label = "Herd-immunity threshold and vaccination coverage needed (with imperfect vaccine efficacy)",
+       answers = paste("Answers: \"Given R0 and vaccine efficacy, what share must be immune and what coverage do I need?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Epidemic Models and Herd Immunity",
+       module_input_id = "epidemic_model-design", design_value = "herd"),
+
+  list(key = "epi_model_sim",
+       label = "SIR / SEIR epidemic simulation with vaccination (final size, peak, infections averted)",
+       answers = paste("Answers: \"What does an epidemic look like with this R0, these periods and this vaccination coverage?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Epidemic Models and Herd Immunity",
+       module_input_id = "epidemic_model-design", design_value = "sim"),
+
+  list(key = "epi_model_r0",
+       label = "R0 from an epidemic growth rate (doubling time) or from a final attack fraction",
+       answers = paste("Answers: \"From the early growth rate or the final attack fraction, what is R0?\""),
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Epidemic Models and Herd Immunity",
+       module_input_id = "epidemic_model-design", design_value = "r0"),
+
+  list(key = "analyze_compare_proportions",
+       label = "Compare two proportions: difference, risk ratio, odds ratio (several interval methods)",
+       answers = paste(
+         "Answers: \"I have events and sample sizes in two groups -- what are the difference, risk ratio and odds ratio, with",
+         "confidence intervals by several methods side by side?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Compare Two Groups",
+       module_input_id = "analyze_compare-design", design_value = "proportions"),
+
+  list(key = "analyze_compare_means",
+       label = "Compare two means from summary statistics: difference, variance ratio, Cohen's d",
+       answers = paste(
+         "Answers: \"I have the sample size, mean and SD of two groups -- what is the difference in means (Welch and",
+         "pooled), the variance ratio and the standardized difference?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Compare Two Groups",
+       module_input_id = "analyze_compare-design", design_value = "means"),
+
+
+  list(key = "analyze_std_direct",
+       label = "Direct standardization: age-standardized rates, with a comparison of two groups",
+       answers = paste(
+         "Answers: \"My groups have different age structures -- what are their directly standardized rates against a",
+         "standard population, with confidence intervals, and how do they compare?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Standardization and SMR",
+       module_input_id = "analyze_std-design", design_value = "direct"),
+
+  list(key = "analyze_std_indirect",
+       label = "Indirect standardization: expected events from reference rates, and the SMR",
+       answers = paste(
+         "Answers: \"I have the person-time of a (small) group by stratum and reference rates -- how many events would",
+         "I expect, and what is the standardized mortality (morbidity) ratio?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Standardization and SMR",
+       module_input_id = "analyze_std-design", design_value = "indirect"),
+
+  list(key = "analyze_std_smr",
+       label = "Standardized mortality (morbidity) ratio from observed and expected events",
+       answers = paste(
+         "Answers: \"I already have observed and expected counts -- what is the SMR and its confidence interval?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Standardization and SMR",
+       module_input_id = "analyze_std-design", design_value = "smr"),
+
+
+  list(key = "analyze_mcnemar",
+       label = "Paired binary data: McNemar's test and matched-pair odds ratio (from counts)",
+       answers = paste(
+         "Answers: \"The same subjects were classified twice (two tests, before/after, matched pairs) -- do the two",
+         "differ, and what are the matched odds ratio and the paired difference?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Paired, Agreement and Trend Tests",
+       module_input_id = "analyze_tests-design", design_value = "mcnemar"),
+
+  list(key = "analyze_kappa",
+       label = "Agreement between two raters or tests: Cohen's kappa (from a table)",
+       answers = paste(
+         "Answers: \"How well do two raters or tests agree beyond chance -- kappa (unweighted or weighted) with a",
+         "confidence interval, and does it depend on prevalence?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Paired, Agreement and Trend Tests",
+       module_input_id = "analyze_tests-design", design_value = "kappa"),
+
+  list(key = "analyze_trend",
+       label = "Trend in proportions across ordered groups: chi-square for trend",
+       answers = paste(
+         "Answers: \"Does the proportion with the outcome rise or fall steadily across ordered groups such as dose",
+         "levels or age bands?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Paired, Agreement and Trend Tests",
+       module_input_id = "analyze_tests-design", design_value = "trend"),
+
+
+  list(key = "analyze_rate_single",
+       label = "Confidence interval for an incidence rate (events per person-time)",
+       answers = paste(
+         "Answers: \"I have a number of events and the person-time they arose in -- what is the rate and its",
+         "confidence interval (exact, mid-P, Byar, Wald)?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Rates and Rate Ratios",
+       module_input_id = "analyze_rates-design", design_value = "single"),
+
+  list(key = "analyze_rate_ratio",
+       label = "Compare two rates: rate ratio, rate difference, attributable fractions (person-time)",
+       answers = paste(
+         "Answers: \"I have events and person-time in an exposed and an unexposed group -- what are the rate",
+         "ratio, rate difference and attributable fractions, with confidence intervals and tests?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Rates and Rate Ratios",
+       module_input_id = "analyze_rates-design", design_value = "ratio"),
+
+  list(key = "analyze_rate_stratified",
+       label = "Rates in several strata: Mantel-Haenszel rate ratio and rate difference (person-time)",
+       answers = paste(
+         "Answers: \"I have events and person-time for exposed and unexposed groups within strata of a confounder -- what is",
+         "the adjusted rate ratio and rate difference, and do the strata agree?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Rates and Rate Ratios",
+       module_input_id = "analyze_rates-design", design_value = "stratified"),
+
+  list(key = "analyze_vaccine_risk",
+       label = "Vaccine efficacy from cases and participants (attack rates): 1 - risk ratio",
+       answers = paste(
+         "Answers: \"I have cases and participants in a vaccinated and an unvaccinated group -- what is the vaccine efficacy",
+         "and its confidence interval (Koopman, Katz, adjusted log)?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Vaccine Efficacy",
+       module_input_id = "analyze_vaccine-design", design_value = "risk"),
+
+  list(key = "analyze_vaccine_rate",
+       label = "Vaccine efficacy from cases and person-time (incidence rates): 1 - rate ratio",
+       answers = paste(
+         "Answers: \"I have cases and person-time in a vaccinated and an unvaccinated group -- what is the vaccine efficacy",
+         "and its confidence interval (exact, mid-P, Wald)?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Vaccine Efficacy",
+       module_input_id = "analyze_vaccine-design", design_value = "rate"),
+
+  list(key = "analyze_vaccine_odds",
+       label = "Vaccine effectiveness from a case-control or test-negative study: 1 - odds ratio",
+       answers = paste(
+         "Answers: \"I have vaccinated and unvaccinated cases and controls -- what is the vaccine effectiveness and its",
+         "confidence interval (Woolf, exact)?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Vaccine Efficacy",
+       module_input_id = "analyze_vaccine-design", design_value = "odds"),
+
+
+  list(key = "analyze_mh_cohort",
+       label = "Stratified 2x2 tables: Mantel-Haenszel adjusted OR, RR, RD (cohort / trial)",
+       answers = paste(
+         "Answers: \"I have 2x2 tables for each level of a confounder -- what are the adjusted odds ratio, risk",
+         "ratio and risk difference, is there confounding, and do the stratum effects agree?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Stratified Analysis (Mantel-Haenszel)",
+       module_input_id = "analyze_mh-design", design_value = "cohort"),
+
+  list(key = "analyze_mh_case_control",
+       label = "Stratified 2x2 tables: Mantel-Haenszel adjusted odds ratio (case-control)",
+       answers = paste(
+         "Answers: \"I have case-control 2x2 tables for each level of a confounder -- what is the adjusted odds",
+         "ratio, is there confounding, and are the stratum odds ratios homogeneous?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Stratified Analysis (Mantel-Haenszel)",
+       module_input_id = "analyze_mh-design", design_value = "case_control"),
+
+
+  list(key = "analyze_ci_proportion",
+       label = "Confidence interval for a proportion (Wilson, exact, Agresti-Coull, Jeffreys, mid-P, Wald)",
+       answers = paste(
+         "Answers: \"I have x events out of n -- what is the confidence interval for the proportion, and how",
+         "much does the choice of method matter?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Confidence Intervals",
+       module_input_id = "analyze_ci-design", design_value = "proportion"),
+
+  list(key = "analyze_ci_mean",
+       label = "Confidence interval for a mean and a standard deviation (from n, mean, SD)",
+       answers = paste(
+         "Answers: \"I have a sample size, a mean and a standard deviation -- what are the confidence",
+         "intervals for the mean and for the standard deviation?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Confidence Intervals",
+       module_input_id = "analyze_ci-design", design_value = "mean"),
+
+
+  list(key = "analyze_dx_single",
+       label = "Analyze a diagnostic test from a 2x2 table (sensitivity, specificity, PPV, NPV)",
+       answers = paste(
+         "Answers: \"I already have the counts from a diagnostic study -- what are the sensitivity,",
+         "specificity, predictive values and likelihood ratios, with confidence intervals?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Diagnostic Test Evaluation",
+       module_input_id = "analyze_dx-design", design_value = "single"),
+
+  list(key = "analyze_dx_combined",
+       label = "Combine diagnostic tests: serial and parallel testing (2-6 tests)",
+       answers = paste(
+         "Answers: \"If I use two or more tests together -- in parallel (any positive) or in series (all",
+         "positive) -- what sensitivity, specificity, PPV and NPV do I get?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Diagnostic Test Evaluation",
+       module_input_id = "analyze_dx-design", design_value = "combined"),
+
+  list(key = "analyze_2x2_cohort",
+       label = "Analyze a 2x2 table: cohort / trial (risk ratio, risk difference)",
+       answers = paste(
+         "Answers: \"I already have the counts from a cohort study or trial -- what are the risk ratio,",
+         "risk difference, attributable fractions and number needed to treat, with confidence intervals?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "2x2 Table Analysis",
+       module_input_id = "analyze_2x2-design", design_value = "cohort"),
+
+  list(key = "analyze_2x2_cross_sectional",
+       label = "Analyze a 2x2 table: cross-sectional (prevalence ratio)",
+       answers = paste(
+         "Answers: \"I already have counts from a survey or cross-sectional study -- what are the prevalence",
+         "ratio, odds ratio and attributable fractions, with confidence intervals?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "2x2 Table Analysis",
+       module_input_id = "analyze_2x2-design", design_value = "cross_sectional"),
+
+  list(key = "analyze_2x2_case_control",
+       label = "Analyze a 2x2 table: case-control (odds ratio)",
+       answers = paste(
+         "Answers: \"I already have counts from a case-control study -- what are the odds ratio and",
+         "attributable fractions, with confidence intervals?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "2x2 Table Analysis",
+       module_input_id = "analyze_2x2-design", design_value = "case_control"),
+
+
   list(key = "proportion_single_precision",
        label = "Single proportion -- precision-based (no reference value)",
        answers = paste(
@@ -1820,6 +2218,26 @@ calculator_catalog <- list(
 # calculator catalog table. "Proportions" is the only family with built
 # calculators right now; selecting it reveals its catalog entries above.
 study_design_families <- list(
+  list(id = "planning_tools", label = "Study planning tools (randomization, attrition)",
+       hint = "Not a sample-size calculation: reproducible randomization lists, and inflating a required sample size for attrition, non-response and non-compliance.",
+       catalog_keys = c("plan_randomization_block", "plan_randomization_stratified", "plan_randomization_simple",
+                         "plan_attrition_stages", "plan_attrition_arms", "plan_attrition_noncompliance",
+                         "survey_select_srs", "survey_select_systematic", "survey_select_pps", "survey_select_epi",
+                         "survey_weights_classes", "survey_weights_kish",
+                         "epi_model_herd", "epi_model_sim", "epi_model_r0")),
+  list(id = "analyze_counts", label = "Analyze data you already have (summary counts)",
+       hint = "Not a sample-size calculation: effect measures and confidence intervals from counts you already have, starting with the 2x2 table.",
+       catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control",
+                         "analyze_dx_single", "analyze_dx_combined",
+                         "analyze_ci_proportion", "analyze_ci_mean",
+                         "analyze_mh_cohort", "analyze_mh_case_control",
+                         "analyze_rate_single", "analyze_rate_ratio", "analyze_rate_stratified",
+                         "analyze_vaccine_risk", "analyze_vaccine_rate", "analyze_vaccine_odds",
+                         "analyze_mcnemar", "analyze_kappa", "analyze_trend",
+                         "analyze_std_direct", "analyze_std_indirect", "analyze_std_smr",
+                         "analyze_compare_proportions", "analyze_compare_means",
+                         "analyze_outbreak_attack", "analyze_outbreak_exposure", "analyze_outbreak_secondary", "analyze_outbreak_cfr",
+                         "analyze_surveillance_ears", "analyze_surveillance_cusum")),
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",
@@ -1990,6 +2408,54 @@ study_design_families <- list(
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
 test_families <- list(
+  list(id = "analyze_outbreak_tests", label = "Outbreak Measures",
+       hint = "Attack rate, exposure-specific attack rates and risk ratios (which food?), secondary attack rate and case fatality, with confidence intervals, from counts.",
+       catalog_keys = c("analyze_outbreak_attack", "analyze_outbreak_exposure", "analyze_outbreak_secondary", "analyze_outbreak_cfr")),
+  list(id = "analyze_surveillance_tests", label = "Aberration Detection (counts)",
+       hint = "Detect an unusual rise in a pasted series of case counts: CDC EARS C1, C2, C3 and a normal or Poisson CUSUM.",
+       catalog_keys = c("analyze_surveillance_ears", "analyze_surveillance_cusum")),
+  list(id = "epidemic_model", label = "Epidemic Models and Herd Immunity",
+       hint = "Herd-immunity threshold and coverage needed, a deterministic SIR / SEIR epidemic with vaccination, and R0 from a growth rate or a final attack fraction.",
+       catalog_keys = c("epi_model_herd", "epi_model_sim", "epi_model_r0")),
+  list(id = "survey_selection", label = "Survey Sample Selection",
+       hint = "Draw a simple random, systematic or probability-proportional-to-size sample from a list, or the clusters of a WHO EPI 30 x 7 survey, reproducible from a seed.",
+       catalog_keys = c("survey_select_srs", "survey_select_systematic", "survey_select_pps", "survey_select_epi")),
+  list(id = "survey_weights", label = "Survey Weights and Non-response",
+       hint = "Design weights, nonresponse adjustment by weighting class, and Kish's effective sample size and design effect.",
+       catalog_keys = c("survey_weights_classes", "survey_weights_kish")),
+  list(id = "planning_randomization", label = "Randomization List",
+       hint = "Reproducible allocation lists: permuted blocks (fixed or random block sizes), blocks within strata, or simple randomization, with a methods paragraph.",
+       catalog_keys = c("plan_randomization_block", "plan_randomization_stratified", "plan_randomization_simple")),
+  list(id = "planning_attrition", label = "Attrition and Non-response",
+       hint = "Inflate a required sample size for losses at one or several stages, for different losses per arm, or for drop-out and drop-in.",
+       catalog_keys = c("plan_attrition_stages", "plan_attrition_arms", "plan_attrition_noncompliance")),
+  list(id = "analyze_compare_tests", label = "Compare Two Groups (from summary figures)",
+       hint = "Difference, risk ratio and odds ratio of two proportions with several confidence-interval methods side by side, and the difference, variance ratio and standardized difference of two means.",
+       catalog_keys = c("analyze_compare_proportions", "analyze_compare_means")),
+  list(id = "analyze_standardization_tests", label = "Standardization and SMR (from counts)",
+       hint = "Directly standardized rates (with a comparison of two groups), indirect standardization with expected events, and the SMR with exact and mid-P intervals.",
+       catalog_keys = c("analyze_std_direct", "analyze_std_indirect", "analyze_std_smr")),
+  list(id = "analyze_paired_tests", label = "Paired, Agreement and Trend Tests (from counts)",
+       hint = "McNemar's test and matched-pair odds ratio for paired binary data, Cohen's kappa (unweighted or weighted) for agreement, and the chi-square test for trend across ordered groups, from counts.",
+       catalog_keys = c("analyze_mcnemar", "analyze_kappa", "analyze_trend")),
+  list(id = "analyze_rates_tests", label = "Rates and Rate Ratios (person-time)",
+       hint = "Confidence interval for an incidence rate, the rate ratio, rate difference, attributable fractions and tests for two groups, and Mantel-Haenszel adjusted rate ratio and difference over strata, from events and person-time.",
+       catalog_keys = c("analyze_rate_single", "analyze_rate_ratio", "analyze_rate_stratified")),
+  list(id = "analyze_vaccine_tests", label = "Vaccine Efficacy (from counts)",
+       hint = "Vaccine efficacy or effectiveness (1 - relative risk) with confidence intervals by several methods, from attack rates, from incidence rates, or from a case-control / test-negative study.",
+       catalog_keys = c("analyze_vaccine_risk", "analyze_vaccine_rate", "analyze_vaccine_odds")),
+  list(id = "analyze_mh_tests", label = "Stratified Analysis (Mantel-Haenszel)",
+       hint = "Mantel-Haenszel adjusted odds ratio, risk ratio and risk difference over 2-8 strata, the Cochran-Mantel-Haenszel test and Woolf / Breslow-Day / Tarone homogeneity tests.",
+       catalog_keys = c("analyze_mh_cohort", "analyze_mh_case_control")),
+  list(id = "analyze_ci_tests", label = "Confidence Intervals (from summary figures)",
+       hint = "Confidence intervals for a proportion (six methods side by side) and for a mean and standard deviation, from the summary figures alone.",
+       catalog_keys = c("analyze_ci_proportion", "analyze_ci_mean")),
+  list(id = "analyze_dx_tests", label = "Diagnostic Test Evaluation (from counts)",
+       hint = "Sensitivity, specificity, predictive values and likelihood ratios with confidence intervals from a test-by-disease table, and serial/parallel combinations of 2-6 tests.",
+       catalog_keys = c("analyze_dx_single", "analyze_dx_combined")),
+  list(id = "analyze_2x2_tests", label = "2x2 Table Analysis (from counts)",
+       hint = "Risk ratio, odds ratio, risk difference, attributable fractions and number needed from the four cells of a 2x2 table.",
+       catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control")),
   list(id = "t_tests", label = "t Tests",
        hint = "Comparing one or two means (incl. Welch's unequal-variance test), a Bonferroni-adjusted post-hoc pairwise comparison, or a point-biserial correlation (Student's t framework).",
        catalog_keys = c("means_single", "means_two_indep",

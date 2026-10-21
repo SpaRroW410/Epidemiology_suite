@@ -19,7 +19,6 @@ Imports:
     bslib,
     pwr,
     presize,
-    epiR,
     clinfun,
     powerSurvEpi,
     PowerTOST,
@@ -28,11 +27,7 @@ Imports:
     pROC,
     TrialSize,
     powerMediation,
-    Hmisc,
-    tseries,
-    BayesFactor,
     mvtnorm,
-    rstatix,
     lme4,
     survival,
     graphics,
@@ -40,7 +35,14 @@ Imports:
     utils
 Suggests:
     testthat (>= 3.0.0),
-    withr
+    withr,
+    epiR,
+    rstatix,
+    Hmisc,
+    tseries,
+    BayesFactor,
+    deSolve,
+    spc
 Config/testthat/edition: 3
 URL: https://github.com/SpaRroW410/Sample_size_all
 BugReports: https://github.com/SpaRroW410/Sample_size_all/issues

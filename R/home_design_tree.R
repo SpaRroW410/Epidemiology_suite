@@ -65,7 +65,189 @@ design_nodes <- list(
       list(label = "Plan a meta-analysis (number of studies, or trial sequential analysis)", next_id = "meta_type"),
       list(label = "Study the relationship between variables (correlation / regression)", next_id = "rel_type"),
       list(label = "Something else: survey sampling, scale development, rare events, animal studies, pilots, health economics, genetics", next_id = "other_purpose"),
+      list(label = "Analyze counts I already have (a 2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_type"),
+      list(label = "Plan study logistics: a randomization list, enrolling extra for attrition, selecting a survey sample, or survey weights", next_id = "planning_type"),
       list(label = "I already know which statistical test I'll use -- browse by test family", next_id = "bytest_family")
+    )
+  ),
+
+  analyze_type = list(
+    id = "analyze_type", stage = 1,
+    question = "What do you want to analyze from counts you already have?",
+    options = list(
+      list(label = "An exposure-outcome association (2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_design"),
+      list(label = "An association adjusted for a confounder (stratified 2x2 tables, Mantel-Haenszel)", next_id = "analyze_mh_design"),
+      list(label = "Incidence rates from events and person-time (one rate, or a rate ratio of two groups)", next_id = "analyze_rate_type"),
+      list(label = "Paired data, agreement between raters, or a trend across ordered groups (McNemar, kappa, chi-square for trend)", next_id = "analyze_paired_type"),
+      list(label = "Rates for populations with different age structures: standardized rates or an SMR", next_id = "analyze_std_type"),
+      list(label = "Compare two groups from summary figures: two proportions (difference, ratio, odds ratio) or two means", next_id = "analyze_compare_type"),
+      list(label = "Vaccine efficacy or effectiveness (1 - relative risk) from a trial, cohort or case-control study", next_id = "analyze_vaccine_type"),
+      list(label = "A diagnostic test (sensitivity, specificity, PPV, NPV from a test-by-disease table)", next_id = "term_analyze_dx_single"),
+      list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined"),
+      list(label = "A confidence interval for a proportion, or for a mean and standard deviation", next_id = "analyze_ci_type"),
+      list(label = "An outbreak investigation: attack rates, which food or exposure, secondary attack rate, case fatality", next_id = "analyze_outbreak_type"),
+      list(label = "A series of case counts over time: has there been an unusual rise (aberration detection)?", next_id = "analyze_surv_type")
+    )
+  ),
+
+  analyze_outbreak_type = list(
+    id = "analyze_outbreak_type", stage = 1,
+    question = "Which outbreak measure do you need?",
+    options = list(
+      list(label = "The attack rate (cases / population at risk)", next_id = "term_analyze_outbreak_attack"),
+      list(label = "Attack rates by exposure and risk ratios: which food or event was the vehicle?", next_id = "term_analyze_outbreak_exposure"),
+      list(label = "The secondary attack rate among contacts", next_id = "term_analyze_outbreak_secondary"),
+      list(label = "Case fatality (deaths / cases), with the bias while an outbreak runs", next_id = "term_analyze_outbreak_cfr")
+    )
+  ),
+
+  analyze_surv_type = list(
+    id = "analyze_surv_type", stage = 1,
+    question = "Which aberration-detection method?",
+    options = list(
+      list(label = "EARS C1, C2, C3 (compare each day with the last few days)", next_id = "term_analyze_surveillance_ears"),
+      list(label = "CUSUM (accumulates small excesses over a baseline period; normal or Poisson)", next_id = "term_analyze_surveillance_cusum")
+    )
+  ),
+
+  analyze_compare_type = list(
+    id = "analyze_compare_type", stage = 1,
+    question = "What are the two groups' summary figures?",
+    options = list(
+      list(label = "Events and sample sizes (two proportions)", next_id = "term_analyze_compare_proportions"),
+      list(label = "Sample size, mean and standard deviation (two means)", next_id = "term_analyze_compare_means")
+    )
+  ),
+
+  analyze_std_type = list(
+    id = "analyze_std_type", stage = 1,
+    question = "What do you have?",
+    options = list(
+      list(label = "Stratum-specific events and person-time for my group(s) and a standard population: direct standardization", next_id = "term_analyze_std_direct"),
+      list(label = "My group's person-time by stratum and reference rates from a larger population: indirect standardization (SMR)", next_id = "term_analyze_std_indirect"),
+      list(label = "Observed and expected numbers of events already: SMR with a confidence interval", next_id = "term_analyze_std_smr")
+    )
+  ),
+
+  analyze_paired_type = list(
+    id = "analyze_paired_type", stage = 1,
+    question = "Which of these describes your counts?",
+    options = list(
+      list(label = "The same subjects classified twice (two tests, before/after, matched pairs): McNemar", next_id = "term_analyze_mcnemar"),
+      list(label = "Two raters or tests classifying the same subjects: how well do they agree (kappa)?", next_id = "term_analyze_kappa"),
+      list(label = "Proportions across ordered groups (dose levels, age bands): is there a trend?", next_id = "term_analyze_trend")
+    )
+  ),
+
+  planning_type = list(
+    id = "planning_type", stage = 1,
+    question = "What do you need to plan?",
+    options = list(
+      list(label = "A randomization list (permuted blocks, strata or simple), reproducible from a seed", next_id = "planning_rand_type"),
+      list(label = "How many to enrol to allow for attrition, non-response or non-compliance", next_id = "planning_attr_type"),
+      list(label = "Select the units of a survey sample from a list (random, systematic, PPS, WHO EPI 30 x 7 clusters)", next_id = "planning_sel_type"),
+      list(label = "Survey weights: design weights, nonresponse adjustment, effective sample size", next_id = "planning_weight_type"),
+      list(label = "Infectious-disease models: herd immunity and vaccination coverage, an SIR / SEIR epidemic, R0", next_id = "planning_epi_type")
+    )
+  ),
+
+  planning_epi_type = list(
+    id = "planning_epi_type", stage = 1,
+    question = "What do you want from the infectious-disease model?",
+    options = list(
+      list(label = "The herd-immunity threshold and the vaccination coverage needed", next_id = "term_epi_model_herd"),
+      list(label = "Simulate an epidemic (SIR / SEIR) with vaccination: final size, peak, infections averted", next_id = "term_epi_model_sim"),
+      list(label = "Estimate R0 from a growth rate or a final attack fraction", next_id = "term_epi_model_r0")
+    )
+  ),
+
+  planning_sel_type = list(
+    id = "planning_sel_type", stage = 1,
+    question = "How should the survey units be selected?",
+    options = list(
+      list(label = "A simple random sample from a list", next_id = "term_survey_select_srs"),
+      list(label = "A systematic sample (every k-th unit from a random start)", next_id = "term_survey_select_systematic"),
+      list(label = "Units chosen in proportion to size (PPS), for example clusters", next_id = "term_survey_select_pps"),
+      list(label = "The clusters of a WHO EPI 30 x 7 survey", next_id = "term_survey_select_epi")
+    )
+  ),
+
+  planning_weight_type = list(
+    id = "planning_weight_type", stage = 1,
+    question = "What do you need for the weights?",
+    options = list(
+      list(label = "Design weights and nonresponse adjustment by weighting class", next_id = "term_survey_weights_classes"),
+      list(label = "Effective sample size and design effect of a list of weights (Kish)", next_id = "term_survey_weights_kish")
+    )
+  ),
+
+  planning_rand_type = list(
+    id = "planning_rand_type", stage = 1,
+    question = "Which kind of randomization list?",
+    options = list(
+      list(label = "Permuted blocks (balanced after every block; fixed or random block sizes)", next_id = "term_plan_randomization_block"),
+      list(label = "Permuted blocks within strata (sites or prognostic groups)", next_id = "term_plan_randomization_stratified"),
+      list(label = "Simple (unrestricted) randomization", next_id = "term_plan_randomization_simple")
+    )
+  ),
+
+  planning_attr_type = list(
+    id = "planning_attr_type", stage = 1,
+    question = "What do you expect to lose?",
+    options = list(
+      list(label = "Participants lost at one or several stages (non-response, loss to follow-up, unusable data)", next_id = "term_plan_attrition_stages"),
+      list(label = "Different numbers lost in each arm", next_id = "term_plan_attrition_arms"),
+      list(label = "Participants who stop the treatment or cross over (drop-out / drop-in)", next_id = "term_plan_attrition_noncompliance")
+    )
+  ),
+
+  analyze_vaccine_type = list(
+    id = "analyze_vaccine_type", stage = 1,
+    question = "What data do you have for the vaccine comparison?",
+    options = list(
+      list(label = "Cases and number of participants in a vaccinated and an unvaccinated group (attack rates)", next_id = "term_analyze_vaccine_risk"),
+      list(label = "Cases and person-time in each group (incidence rates)", next_id = "term_analyze_vaccine_rate"),
+      list(label = "Vaccinated and unvaccinated cases and controls (case-control or test-negative design)", next_id = "term_analyze_vaccine_odds")
+    )
+  ),
+
+  analyze_rate_type = list(
+    id = "analyze_rate_type", stage = 1,
+    question = "What do you want to do with your events and person-time?",
+    options = list(
+      list(label = "A confidence interval for one incidence rate", next_id = "term_analyze_rate_single"),
+      list(label = "Compare two groups: rate ratio, rate difference, attributable fractions", next_id = "term_analyze_rate_ratio"),
+      list(label = "Compare two groups within strata of a confounder: adjusted (Mantel-Haenszel) rate ratio and rate difference", next_id = "term_analyze_rate_stratified")
+    )
+  ),
+
+  analyze_mh_design = list(
+    id = "analyze_mh_design", stage = 1,
+    question = "How were the subjects in your stratified tables sampled?",
+    help = "Risk ratios and risk differences can only be estimated if subjects were followed from exposure to outcome (or sampled without regard to either); a case-control sample gives the odds ratio only.",
+    options = list(
+      list(label = "Followed from exposure to outcome, or a cross-sectional survey (cohort / trial / cross-sectional)", next_id = "term_analyze_mh_cohort"),
+      list(label = "Sampled by outcome: cases and controls", next_id = "term_analyze_mh_case_control")
+    )
+  ),
+
+  analyze_ci_type = list(
+    id = "analyze_ci_type", stage = 1,
+    question = "Which summary figures do you have?",
+    options = list(
+      list(label = "A proportion: x events out of n", next_id = "term_analyze_ci_proportion"),
+      list(label = "A mean and standard deviation from a sample of size n", next_id = "term_analyze_ci_mean")
+    )
+  ),
+
+  analyze_design = list(
+    id = "analyze_design", stage = 1,
+    question = "How were the subjects in your 2x2 table sampled?",
+    help = "This decides which measures are valid: risks (and so risk ratio, risk difference, number needed) can only be estimated if subjects were followed from exposure to outcome or sampled without regard to either.",
+    options = list(
+      list(label = "Followed from exposure to outcome (cohort study or trial)", next_id = "term_analyze_2x2_cohort"),
+      list(label = "Exposure and outcome measured together (cross-sectional / survey)", next_id = "term_analyze_2x2_cross_sectional"),
+      list(label = "Sampled by outcome: cases and controls", next_id = "term_analyze_2x2_case_control")
     )
   ),
 
@@ -724,6 +906,51 @@ design_nodes <- list(
   term_subgroup = .term("term_subgroup", "Subgroup / interaction testing", "subgroup_interaction"),
   term_bayes_assurance = .term("term_bayes_assurance", "Bayesian assurance, two proportions", "bayesian_assurance_or"),
   term_bfda = .term("term_bfda", "Bayes factor design analysis, two means", "bfda_ttest"),
+
+  term_analyze_compare_proportions = .term("term_analyze_compare_proportions", "Compare two proportions", "analyze_compare_proportions"),
+  term_analyze_compare_means = .term("term_analyze_compare_means", "Compare two means from summary statistics", "analyze_compare_means"),
+  term_analyze_std_direct = .term("term_analyze_std_direct", "Direct standardization", "analyze_std_direct"),
+  term_analyze_std_indirect = .term("term_analyze_std_indirect", "Indirect standardization and SMR", "analyze_std_indirect"),
+  term_analyze_std_smr = .term("term_analyze_std_smr", "SMR from observed and expected events", "analyze_std_smr"),
+  term_analyze_mcnemar = .term("term_analyze_mcnemar", "McNemar's test and matched-pair odds ratio", "analyze_mcnemar"),
+  term_analyze_kappa = .term("term_analyze_kappa", "Cohen's kappa agreement", "analyze_kappa"),
+  term_analyze_trend = .term("term_analyze_trend", "Chi-square test for trend", "analyze_trend"),
+  term_analyze_rate_single = .term("term_analyze_rate_single", "Confidence interval for an incidence rate", "analyze_rate_single"),
+  term_analyze_outbreak_attack = .term("term_analyze_outbreak_attack", "Outbreak attack rate", "analyze_outbreak_attack"),
+  term_analyze_outbreak_exposure = .term("term_analyze_outbreak_exposure", "Exposure-specific attack rates (food-specific table)", "analyze_outbreak_exposure"),
+  term_analyze_outbreak_secondary = .term("term_analyze_outbreak_secondary", "Secondary attack rate", "analyze_outbreak_secondary"),
+  term_analyze_outbreak_cfr = .term("term_analyze_outbreak_cfr", "Case fatality", "analyze_outbreak_cfr"),
+  term_analyze_surveillance_ears = .term("term_analyze_surveillance_ears", "Aberration detection: EARS C1, C2, C3", "analyze_surveillance_ears"),
+  term_analyze_surveillance_cusum = .term("term_analyze_surveillance_cusum", "Aberration detection: CUSUM", "analyze_surveillance_cusum"),
+  term_epi_model_herd = .term("term_epi_model_herd", "Herd-immunity threshold and coverage needed", "epi_model_herd"),
+  term_epi_model_sim = .term("term_epi_model_sim", "SIR / SEIR epidemic with vaccination", "epi_model_sim"),
+  term_epi_model_r0 = .term("term_epi_model_r0", "R0 from growth rate or final size", "epi_model_r0"),
+  term_survey_select_srs = .term("term_survey_select_srs", "Survey sample: simple random", "survey_select_srs"),
+  term_survey_select_systematic = .term("term_survey_select_systematic", "Survey sample: systematic", "survey_select_systematic"),
+  term_survey_select_pps = .term("term_survey_select_pps", "Survey sample: PPS systematic", "survey_select_pps"),
+  term_survey_select_epi = .term("term_survey_select_epi", "WHO EPI 30 x 7 clusters", "survey_select_epi"),
+  term_survey_weights_classes = .term("term_survey_weights_classes", "Design weights and nonresponse adjustment", "survey_weights_classes"),
+  term_survey_weights_kish = .term("term_survey_weights_kish", "Effective sample size of weights (Kish)", "survey_weights_kish"),
+  term_plan_randomization_block = .term("term_plan_randomization_block", "Randomization list: permuted blocks", "plan_randomization_block"),
+  term_plan_randomization_stratified = .term("term_plan_randomization_stratified", "Randomization list: blocks within strata", "plan_randomization_stratified"),
+  term_plan_randomization_simple = .term("term_plan_randomization_simple", "Randomization list: simple", "plan_randomization_simple"),
+  term_plan_attrition_stages = .term("term_plan_attrition_stages", "Enrol extra for attrition and non-response", "plan_attrition_stages"),
+  term_plan_attrition_arms = .term("term_plan_attrition_arms", "Enrol extra, per arm", "plan_attrition_arms"),
+  term_plan_attrition_noncompliance = .term("term_plan_attrition_noncompliance", "Inflate for drop-out and drop-in", "plan_attrition_noncompliance"),
+  term_analyze_rate_stratified = .term("term_analyze_rate_stratified", "Mantel-Haenszel rate ratio over strata", "analyze_rate_stratified"),
+  term_analyze_vaccine_risk = .term("term_analyze_vaccine_risk", "Vaccine efficacy from attack rates", "analyze_vaccine_risk"),
+  term_analyze_vaccine_rate = .term("term_analyze_vaccine_rate", "Vaccine efficacy from person-time rates", "analyze_vaccine_rate"),
+  term_analyze_vaccine_odds = .term("term_analyze_vaccine_odds", "Vaccine effectiveness from a case-control study", "analyze_vaccine_odds"),
+  term_analyze_rate_ratio = .term("term_analyze_rate_ratio", "Rate ratio and rate difference from person-time", "analyze_rate_ratio"),
+  term_analyze_mh_cohort = .term("term_analyze_mh_cohort", "Mantel-Haenszel, cohort / trial / cross-sectional", "analyze_mh_cohort"),
+  term_analyze_mh_case_control = .term("term_analyze_mh_case_control", "Mantel-Haenszel, case-control", "analyze_mh_case_control"),
+  term_analyze_ci_proportion = .term("term_analyze_ci_proportion", "Confidence interval for a proportion", "analyze_ci_proportion"),
+  term_analyze_ci_mean = .term("term_analyze_ci_mean", "Confidence interval for a mean and standard deviation", "analyze_ci_mean"),
+  term_analyze_dx_single = .term("term_analyze_dx_single", "Diagnostic test evaluation from a 2x2 table", "analyze_dx_single"),
+  term_analyze_dx_combined = .term("term_analyze_dx_combined", "Serial / parallel testing of 2-6 tests", "analyze_dx_combined"),
+  term_analyze_2x2_cohort = .term("term_analyze_2x2_cohort", "2x2 table analysis, cohort / trial", "analyze_2x2_cohort"),
+  term_analyze_2x2_cross_sectional = .term("term_analyze_2x2_cross_sectional", "2x2 table analysis, cross-sectional", "analyze_2x2_cross_sectional"),
+  term_analyze_2x2_case_control = .term("term_analyze_2x2_case_control", "2x2 table analysis, case-control", "analyze_2x2_case_control"),
 
   term_cohort_rr = .term("term_cohort_rr", "Cohort study (relative risk)", "cohort_rr",
     note = paste(

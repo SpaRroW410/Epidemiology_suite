@@ -265,7 +265,7 @@ means_content <- list(
       "Applications. Wiley Series in Probability and Statistics; 1999,",
       "pp. 70-75. (as implemented by epiR::epi.sssimpleestc)."
     ),
-    backend = "epiR::epi.sssimpleestc()"
+    backend = "closed form; identical to epiR::epi.sssimpleestc(), which it is tested against"
   ),
 
   two_sample_unequal_n = list(

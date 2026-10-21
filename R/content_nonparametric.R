@@ -408,7 +408,7 @@ nonparametric_content <- list(
       "which is why direct simulation -- as this app's own checklist",
       "recommends for this test -- is used here instead)."
     ),
-    backend = "direct Monte Carlo simulation of tseries::runs.test()"
+    backend = "direct Monte Carlo simulation of the Wald-Wolfowitz runs test (closed form, identical to tseries::runs.test(), which it is tested against)"
   ),
 
   animal_rank_test = list(

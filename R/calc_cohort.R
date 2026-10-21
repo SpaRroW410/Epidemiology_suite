@@ -33,11 +33,9 @@ calc_cohort <- function(p0, p1, power = 0.8, ratio = 1, alpha = 0.05,
 
   sided <- if (identical(alternative, "two.sided")) 2 else 1
 
-  res <- epiR::epi.sscohortc(N = if (is.null(N)) NA else N, irexp1 = p1, irexp0 = p0,
-                              pexp = NA, n = NA, power = power, r = ratio,
-                              design = 1, sided.test = sided,
-                              finite.correction = !is.null(N), nfractional = FALSE,
-                              conf.level = 1 - alpha)
+  res <- .cf_sscohortc(N = if (is.null(N)) NA else N, irexp1 = p1, irexp0 = p0,
+                       power = power, r = ratio, design = 1, sided.test = sided,
+                       conf.level = 1 - alpha)
 
   new_ss_result(list(
     n_total = ceiling(res$n.total),

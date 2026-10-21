@@ -1,0 +1,82 @@
+# Container image (docs/ROADMAP.md item 18). Every relevant push builds the image, starts it and drives it in
+# headless Chrome (open a calculator, read a result). Pushes to `main` and version tags also publish it to GHCR
+# (ghcr.io/<owner>/epidemiologicasuite); that needs no setup beyond the default GITHUB_TOKEN.
+name: docker
+
+on:
+  push:
+    branches: [main, "claude/**"]
+    tags: ["v*"]
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "docker-compose.yml"
+      - "DESCRIPTION"
+      - "NAMESPACE"
+      - "R/**"
+      - "tools/docker/**"
+      - ".github/workflows/docker.yml"
+  workflow_dispatch:
+
+jobs:
+  image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: write
+    env:
+      PUBLISH: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: epidemiologicasuite:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start the container
+        run: |
+          docker run -d --name app -p 3838:3838 epidemiologicasuite:test
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:3838/ > page.html; then echo "up after ${i}x2 s"; break; fi
+            sleep 2
+          done
+          grep -q "epidemiologicasuite" page.html
+          docker ps
+
+      - name: Drive it in a browser
+        run: |
+          cd tools/docker
+          npm init -y > /dev/null && npm install playwright-core > /dev/null
+          node smoke.mjs http://localhost:3838/
+
+      - name: Container log and health
+        if: always()
+        run: |
+          docker logs app 2>&1 | tail -30
+          docker inspect --format '{{.State.Health.Status}}' app || true
+
+      - name: Log in to GHCR
+        if: env.PUBLISH == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish the image
+        if: env.PUBLISH == 'true'
+        run: |
+          owner=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          image=ghcr.io/${owner}/epidemiologicasuite
+          tag=latest; if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then tag=${GITHUB_REF#refs/tags/}; fi
+          docker tag epidemiologicasuite:test ${image}:${tag}
+          docker push ${image}:${tag}
+          echo "published ${image}:${tag}"
