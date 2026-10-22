@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_longitudinal.R"))
-
 test_that("calc_longitudinal_slope_diff matches longpower's own documented Alzheimer's-disease example", {
   # longpower isn't installable from CRAN in this sandbox (no network
   # access); liu.liang.linear.power()'s source -- a single, self-

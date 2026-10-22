@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_agreement.R"))
-
 test_that("calc_icc matches Bonett (2002)'s own published worked example", {
   # Bonett (2002): 4 raters, ICC = 0.85, desired CI width 0.2 -> n = 19.2,
   # rounded up to 20 (also the presize::prec_icc() package's own doc example).

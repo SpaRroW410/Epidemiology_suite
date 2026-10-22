@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_bayesian.R"))
-
 test_that("calc_bayesian_assurance_or matches Hmisc::gbayes2()'s own documented uniform-prior example closely", {
   # Reproducing the package's own example code exactly:
   #   prior2 <- function(delta) dunif(delta, log(1.2), log(1.3))
@@ -28,8 +24,10 @@ test_that("calc_bayesian_assurance_or reproduces gbayes2()'s own printed normal-
   # mixture shape) is correct, by calling gbayes2() ourselves as a reference.
   vguess <- 0.02183459
   mixture_prior <- function(delta) 0.5 * dnorm(delta, 0, 100) + 0.5 * dnorm(delta, 1, 1)
-  ref <- Hmisc::gbayes2(sqrt(vguess), mixture_prior, log(1.1))
-  expect_equal(round(ref, 4), 0.6133)
+  ref <- .cf_gbayes2(sqrt(vguess), mixture_prior, log(1.1))
+  expect_equal(round(ref, 4), 0.6133)          # the value printed in Hmisc::gbayes2()'s help page
+  skip_if_not_installed("Hmisc")
+  expect_equal(ref, Hmisc::gbayes2(sqrt(vguess), mixture_prior, log(1.1)), tolerance = 1e-12)
 })
 
 test_that("calc_bayesian_assurance_or requires a larger n as the target assurance increases", {

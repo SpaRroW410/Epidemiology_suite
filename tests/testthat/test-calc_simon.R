@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_simon.R"))
-
 test_that("calc_simon matches the classic textbook example exactly", {
   # pu = 0.20, pa = 0.40, alpha = beta = 0.10 -> Minimax: r1=3,n1=19,r=10,n=36;
   # Optimal: r1=3,n1=17,r=10,n=37 (as printed by clinfun::ph2simon itself).

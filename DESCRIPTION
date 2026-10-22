@@ -1,0 +1,48 @@
+Package: epidemiologicasuite
+Title: Sample Size and Power Calculator for Study Design
+Version: 0.1.0
+Authors@R: person("Mukul", "Maheshwari", role = c("aut", "cre", "cph"),
+    email = "ryan00700@gmail.com")
+Description: A 'shiny' application that helps choose a study design and
+    calculates the sample size or power for about 150 designs (proportions,
+    means, diagnostic accuracy, agreement, observational studies, clinical
+    trials, survival, prediction models, general statistical tests and more).
+    Every calculator shows its formula, a worked example and a citable source,
+    and results can be exported as a methods-section paragraph, CSV, JSON,
+    BibTeX or RIS. Calculations are closed-form or simulation-based and are
+    cross-checked against established R packages.
+License: GPL (>= 3)
+Encoding: UTF-8
+Depends: R (>= 4.3.0)
+Imports:
+    shiny,
+    bslib,
+    pwr,
+    presize,
+    clinfun,
+    powerSurvEpi,
+    PowerTOST,
+    Exact,
+    pmsampsize,
+    pROC,
+    TrialSize,
+    powerMediation,
+    mvtnorm,
+    lme4,
+    survival,
+    graphics,
+    stats,
+    utils
+Suggests:
+    testthat (>= 3.0.0),
+    withr,
+    epiR,
+    rstatix,
+    Hmisc,
+    tseries,
+    BayesFactor,
+    deSolve,
+    spc
+Config/testthat/edition: 3
+URL: https://github.com/SpaRroW410/Sample_size_all
+BugReports: https://github.com/SpaRroW410/Sample_size_all/issues

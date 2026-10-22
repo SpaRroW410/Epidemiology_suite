@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_competing_risks.R"))
-
 test_that("calc_competing_risks_joint matches powerCompRisk::powerCompRisk()'s own documented example exactly", {
   # Reproducing the package's own example (its source read directly from
   # its public CRAN mirror, since the package itself isn't installable

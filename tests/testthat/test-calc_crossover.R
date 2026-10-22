@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_crossover.R"))
-
 test_that("calc_crossover_2x2 matches TrialSize::TwoSampleCrossOver.Equality() exactly", {
   # alpha=0.05, power=0.8, sigma=0.4, delta=0.2 -> n per sequence = 15.698,
   # ceiling 16, total 32 (TrialSize's own formula, Chow/Shao/Wang 2003).

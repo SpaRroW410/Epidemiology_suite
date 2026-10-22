@@ -1,13 +1,13 @@
-# Cross-checks between the navbar (global.R's module_registry), the Home
+# Cross-checks between the navbar (registry.R's module_registry()), the Home
 # hub's calculator_catalog and the guided wizard (design_tree.R), so a new
 # module or design option can't silently go missing from discovery again
 # (docs/ROADMAP.md finding F1/F2).
 
-withr::with_dir(file.path("..", ".."), suppressMessages(source("global.R")))
+.registry <- module_registry()
 
 .built <- Filter(function(e) isTRUE(e$built), calculator_catalog)
-.titles <- vapply(module_registry, `[[`, character(1), "title")
-.ui_html <- lapply(setNames(module_registry, vapply(module_registry, `[[`, character(1), "id")),
+.titles <- vapply(.registry, `[[`, character(1), "title")
+.ui_html <- lapply(setNames(.registry, vapply(.registry, `[[`, character(1), "id")),
                    function(m) as.character(m$ui(m$id)))
 
 # Values of every radio button named `input_id` in a module's rendered UI.
@@ -30,7 +30,7 @@ test_that("every catalog design preset is a real radio choice in its module", {
   for (e in .built) {
     if (is.na(e$module_input_id)) next
     mid <- sub("-[^-]+$", "", e$module_input_id)
-    m <- Find(function(m) identical(m$id, mid), module_registry)
+    m <- Find(function(m) identical(m$id, mid), .registry)
     expect_false(is.null(m), info = paste(e$key, "-> no module with id", mid))
     if (is.null(m)) next
     expect_equal(m$title, e$nav_target, info = e$key)
@@ -54,7 +54,7 @@ test_that("every design radio choice in a module has a catalog entry", {
 })
 
 test_that("modules with several catalog entries preset a design input", {
-  for (m in module_registry) {
+  for (m in .registry) {
     entries <- Filter(function(e) identical(e$nav_target, m$title), .built)
     if (length(entries) < 2) next
     expect_true(all(!is.na(vapply(entries, function(e) as.character(e$module_input_id), character(1)))),
@@ -66,4 +66,26 @@ test_that("the guided wizard can reach every navbar module", {
   reached_keys <- design_reachable_keys()
   reached_navs <- unique(vapply(reached_keys, function(k) catalog_entry(k)$nav_target, character(1)))
   expect_equal(setdiff(.titles, reached_navs), character(0))
+})
+
+test_that("every module sits in exactly one group of exactly one workbench", {
+  ids <- vapply(.registry, `[[`, character(1), "id")
+  placed <- unlist(lapply(module_workbenches, function(wb) unlist(lapply(wb$groups, `[[`, "module_ids"))))
+  expect_equal(sort(placed), sort(ids))               # none missing, none unknown
+  expect_false(anyDuplicated(placed) > 0)             # none in two places
+})
+
+test_that("workbench ids, titles and navigation ids are unique and do not collide with module titles", {
+  expect_false(anyDuplicated(vapply(module_workbenches, `[[`, character(1), "id")) > 0)
+  wb_titles <- vapply(module_workbenches, `[[`, character(1), "title")
+  expect_false(anyDuplicated(wb_titles) > 0)
+  expect_false(anyDuplicated(vapply(module_workbenches, `[[`, character(1), "nav_id")) > 0)
+  expect_equal(intersect(c("Home", wb_titles), .titles), character(0))
+})
+
+test_that("every built catalog entry's target module resolves to a workbench", {
+  for (e in .built) {
+    expect_false(is.null(module_workbench_of(e$nav_target)), info = e$key)
+  }
+  expect_null(module_workbench_of("No such module"))
 })

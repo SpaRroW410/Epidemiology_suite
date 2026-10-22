@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_diagnostic.R"))
-
 # All worked examples below are independently recomputed from Akoglu H.
 # User's guide to sample size estimation in diagnostic accuracy studies.
 # Turk J Emerg Med. 2022;22(4):177-185 -- Table 2 (equations) and the

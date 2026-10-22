@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_noninferiority.R"))
-
 test_that("calc_noninferiority_means matches Chow/Shao/Wang (2008, p.61-62) exactly", {
   res <- calc_noninferiority_means(mean_new = 0.20, mean_standard = 0.20, sd = 0.10,
                                     margin = 0.05, alpha = 0.05, power = 0.80, ratio = 1)
@@ -25,9 +21,11 @@ test_that("calc_noninferiority_proportions matches Chow/Shao/Wang (2008, p.90) e
 
 test_that("calc_noninferiority_proportions: power computed from a fixed n reproduces 0.73", {
   # Chow/Shao/Wang's own follow-on example (n=40, 20/20) -> power = 0.73.
-  fit <- epiR::epi.ssninfb(treat = 0.85, control = 0.65, delta = 0.10, n = 40,
-                            power = NA, r = 1, nfractional = FALSE, alpha = 0.05)
-  expect_equal(round(fit$power, 2), 0.73)
+  # Power for 20 per group from the same normal-approximation formula the sample-size function inverts
+  # (written out here, so the check does not depend on epiR): z = (pA - pB + delta) / se; power = pnorm(z - z_alpha).
+  pA <- 0.85; pB <- 0.65; delta <- 0.10
+  z <- (pA - pB + delta) / sqrt(pA * (1 - pA) / 20 + pB * (1 - pB) / 20)
+  expect_equal(round(pnorm(z - qnorm(0.95)), 2), 0.73)
 })
 
 test_that("calc_noninferiority_proportions rejects invalid inputs", {

@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_subgroup_interaction.R"))
-
 test_that("calc_subgroup_interaction reproduces Brookes et al (2004)'s own headline 4x finding", {
   # A trial sized for 80% power on its main effect had only ~29% power
   # to detect an interaction of the SAME magnitude at that same n --

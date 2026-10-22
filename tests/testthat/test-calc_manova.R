@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_manova.R"))
-
 test_that("calc_manova_hotelling at p=1 reduces exactly to the two-sample t-test", {
   # D^2 = Cohen's d^2 at p=1; d=0.5, alpha=0.05, power=0.8 ->
   # pwr::pwr.t.test(d=0.5, sig.level=0.05, power=0.8, type="two.sample")

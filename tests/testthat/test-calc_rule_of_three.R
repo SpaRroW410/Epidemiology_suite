@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_rule_of_three.R"))
-
 test_that("calc_rule_of_three_bound matches the classic Hanley & Lippman-Hand (1983) illustration", {
   # n=30 subjects, zero events -> approx 3/30 = 0.0999..., exact 0.0950.
   res <- calc_rule_of_three_bound(n = 30, conf_level = 0.95)

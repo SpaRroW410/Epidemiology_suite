@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_tost.R"))
-
 test_that("calc_tost_means matches PowerTOST::sampleN.TOST()'s own documented example", {
   # PowerTOST's own doc example (logscale=FALSE, relative-to-reference
   # framing): theta0=-0.05, theta1=-0.2, theta2=0.2, CV=0.2, parallel ->

@@ -1,9 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_proportion.R"))
-source(file.path("..", "..", "R", "calc", "calc_means.R"))
-source(file.path("..", "..", "R", "calc", "calc_multiplicity.R"))
-
 test_that("calc_multiplicity_adjusted_alpha: Bonferroni and Sidak", {
   expect_equal(calc_multiplicity_adjusted_alpha(0.05, 4, "bonferroni"), 0.0125)
   expect_equal(round(calc_multiplicity_adjusted_alpha(0.05, 4, "sidak"), 7), 0.0127415)

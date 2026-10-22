@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_variance.R"))
-
 test_that("calc_variance_single matches hand computation (sigma0=10, sigma1=14, one-sided greater -> n=28)", {
   # Verified by Monte Carlo simulation: 20,000 replicates at n = 28 gave an
   # empirical power of 0.814, closely matching the 0.80 target.

@@ -1,7 +1,3 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
-source(file.path("..", "..", "R", "calc", "calc_lan_demets.R"))
-
 test_that("calc_lan_demets_normal OF boundaries match real rpact::getDesignGroupSequential() (alpha=0.025 one-sided, timing=0.5)", {
   # Verified exactly against rpact::getDesignGroupSequential(kMax=2,
   # alpha=0.025, sided=1, typeOfDesign="asOF", informationRates=c(0.5,1)):

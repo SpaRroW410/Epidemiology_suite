@@ -1,6 +1,3 @@
-source(file.path("..", "..", "R", "home", "home_catalog.R"))
-source(file.path("..", "..", "R", "home", "design_tree.R"))
-
 # Resolve a possibly-dynamic field (string, or function(flags) -> string/NULL)
 # against every flag combination the tree can actually produce, so tests
 # exercise both the "continuous" and "binary" outcome paths.
@@ -303,7 +300,9 @@ test_that("every node is reachable from root (no orphaned questions or terminals
 })
 
 test_that("every not-built terminal is tracked in docs/ROADMAP.md", {
-  roadmap <- paste(readLines(file.path("..", "..", "docs", "ROADMAP.md"), warn = FALSE, encoding = "UTF-8"), collapse = "\n")
+  roadmap_path <- file.path("..", "..", "docs", "ROADMAP.md")
+  skip_if_not(file.exists(roadmap_path), "docs/ are not part of the installed package")
+  roadmap <- paste(readLines(roadmap_path, warn = FALSE, encoding = "UTF-8"), collapse = "\n")
   # One distinctive ROADMAP phrase per open terminal; update both together.
   tracked <- c(term_n_of_1 = "N-of-1", term_auc_unpaired = "Unpaired AUCs", term_mrmc = "MRMC",
                term_deming = "Deming / Passing-Bablok", term_pred_extval_tte = "time-to-event (Riley et al. 2022)",

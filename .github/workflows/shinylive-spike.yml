@@ -1,0 +1,66 @@
+# Shinylive / webR feasibility spike (docs/ROADMAP.md item 15, Track D3).
+# Runs on GitHub's runners because the development sandbox cannot reach
+# repo.r-wasm.org. Triggered by changes to the spike itself, or by hand.
+name: shinylive-spike
+
+on:
+  push:
+    paths:
+      - "tools/webr-spike/**"
+      - ".github/workflows/shinylive-spike.yml"
+  workflow_dispatch:
+
+jobs:
+  packages:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - name: Which packages exist as WebAssembly builds?
+        run: Rscript tools/webr-spike/check_packages.R spike-output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: webr-package-check
+          path: spike-output
+
+  export-and-boot:
+    # Stage 2: build the app as a Shinylive (WebAssembly) site and boot it in headless Chrome.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [app]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - name: Install shinylive (R package)
+        run: Rscript -e 'install.packages("shinylive")'
+      - name: Assemble the app directory
+        run: Rscript tools/webr-spike/make_app.R spike_app ${{ matrix.variant }}
+      - name: Export (downloads the webR runtime and the WebAssembly packages)
+        run: |
+          Rscript -e 'shinylive::export("spike_app", "site")' 2>&1 | tee export.log
+          du -sh site; du -sh site/* | sort -h | tail -15
+          find site -type f -size +2M -printf '%s %p\n' | sort -n | tail -25
+      - name: Serve and boot in Chrome
+        run: |
+          cd site && python3 -m http.server 8008 >/dev/null 2>&1 &
+          sleep 3
+          cd tools/webr-spike 2>/dev/null || cd "$GITHUB_WORKSPACE/tools/webr-spike"
+          npm init -y >/dev/null && npm install playwright-core >/dev/null
+          CRAWL=1 WAIT=150 node boot_test.mjs http://localhost:8008/ "$GITHUB_WORKSPACE/boot-${{ matrix.variant }}.png" "$GITHUB_WORKSPACE/boot-${{ matrix.variant }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shinylive-${{ strategy.job-index }}
+          path: |
+            export.log
+            boot-*.png
+            boot-*.json

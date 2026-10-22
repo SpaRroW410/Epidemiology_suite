@@ -1,7 +1,4 @@
-source(file.path("..", "..", "R", "calc", "calc_result.R"))
-source(file.path("..", "..", "R", "calc", "calc_utils.R"))
 suppressMessages(library(lme4))
-source(file.path("..", "..", "R", "calc", "calc_glmm.R"))
 
 # Monte Carlo power for (generalized) linear mixed models, where no
 # closed-form formula generally exists. This directly simulates and
