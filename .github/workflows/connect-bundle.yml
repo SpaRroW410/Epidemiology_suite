@@ -31,8 +31,10 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::rsconnect, any::jsonlite, any::shinytest2, any::chromote, any::RcppEigen
+          extra-packages: any::rsconnect, any::jsonlite, any::shinytest2, any::chromote
           needs: connect
+      - name: Install RcppEigen with install.packages so the manifest records a normal source
+        run: Rscript -e 'install.packages("RcppEigen")'
       - name: Build the bundle and manifest.json
         run: Rscript tools/connect/make_manifest.R connect_bundle
       - name: Start the bundle as a plain Shiny app and open it in Chrome
