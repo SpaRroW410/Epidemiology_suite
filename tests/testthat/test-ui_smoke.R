@@ -395,7 +395,10 @@ for (m in registry) {
 # --- lazy loading of the calculators (start-up time) -------------------------
 
 test_that("start-up builds only the core calculators; lazy = FALSE builds all (static check)", {
-  count_placeholders <- function(app) lengths(regmatches(htmltools::renderTags(app$ui)$html, gregexpr("lazy-note", htmltools::renderTags(app$ui)$html)))
+  count_placeholders <- function(app) {
+    html <- htmltools::renderTags(attr(app, "ui_tags"))$html
+    lengths(regmatches(html, gregexpr("lazy-note", html)))
+  }
   n_lazy <- count_placeholders(epidemiologicasuite_app(lazy = TRUE))
   expect_equal(n_lazy, length(module_registry()) - length(lazy_core_modules))
   expect_equal(count_placeholders(epidemiologicasuite_app(lazy = FALSE)), 0)
@@ -418,17 +421,21 @@ test_that("a Home jump to a calculator that is not loaded yet loads it and then 
   expect_equal(ui_output_errors(app), 0)
 })
 
-test_that("background loading fills in every calculator behind a progress bar, without errors", {
+test_that("background loading fills in every calculator with the indicator beside the lists, without errors", {
   skip_if_no_ui()
   old <- Sys.getenv("EPIDEMIOLOGICASUITE_BACKGROUND_LOAD"); on.exit(Sys.setenv(EPIDEMIOLOGICASUITE_BACKGROUND_LOAD = old), add = TRUE)
   Sys.setenv(EPIDEMIOLOGICASUITE_BACKGROUND_LOAD = "true")
   chromote::set_chrome_args(c("--disable-gpu", "--disable-dev-shm-usage", "--no-sandbox"))
   app <- shinytest2::AppDriver$new(ui_app_dir(), name = "lazy_bg", load_timeout = 90000, timeout = 30000, view = FALSE)
   withr::defer(app$stop())
+  # the indicator beside the calculator lists: faint entries for what is still to come, and a bar with the count
+  expect_true(app$get_js("document.querySelectorAll('ul.nav-stacked a.lazy-pending').length") > 0)
+  expect_true(app$get_js("document.querySelectorAll('.lazy-box').length") == 2)       # one per workbench
   expect_true(app$get_js("document.querySelectorAll('.lazy-note').length") > 0)
   app$wait_for_js("document.querySelectorAll('.lazy-note').length === 0", timeout = 240000)
   app$wait_for_idle(1500, timeout = 120000)
-  expect_equal(app$get_js("document.querySelectorAll('.shiny-notification').length"), 0)   # the progress bar has closed
+  expect_equal(app$get_js("document.querySelectorAll('ul.nav-stacked a.lazy-pending').length"), 0)   # nothing left to come
+  expect_equal(app$get_js("document.querySelectorAll('.lazy-box:not(.lazy-complete)').length"), 0)   # and the bar has finished
   expect_equal(ui_output_errors(app), 0)
   ui_open_module(app, "Epidemic Models and Herd Immunity")
   expect_match(ui_output_text(app, "epidemic_model-result"), "Herd-immunity threshold 91\\.7%")

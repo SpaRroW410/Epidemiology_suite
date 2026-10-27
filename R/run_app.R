@@ -40,6 +40,7 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
   # cannot nest and 15 of them no longer fit one navbar, hence the sidebar.
   # jump_to_module() (registry.R) selects the workbench and then the module, so
   # the Home hub and wizard buttons work whichever workbench a module is in.
+  pending_titles <- vapply(registry[!names(registry_by_id) %in% core_ids], `[[`, character(1), "title")
   workbench_panels <- lapply(module_workbenches, function(wb) {
     items <- unlist(lapply(wb$groups, function(g) {
       c(list(g$title), lapply(g$module_ids, function(mid) {
@@ -77,7 +78,8 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
         heading_font = font_collection("Source Serif 4", "Georgia", "Cambria", "Times New Roman", "serif"),
         "font-size-base" = "0.95rem"
       ),
-      header = tagList(browser_notice_ui(), tags$style(HTML(.workbench_css)))
+      header = tagList(browser_notice_ui(), tags$style(HTML(.workbench_css)),
+                       if (length(pending_titles)) lazy_sidebar_assets(pending_titles))
     ),
     list(home_panel),
     workbench_panels
@@ -101,7 +103,9 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
     }
   }
 
-  shinyApp(ui, server)
+  app <- shinyApp(ui, server)
+  attr(app, "ui_tags") <- ui   # for tests that inspect the page without a browser
+  app
 }
 
 # Styling for the workbench sidebars: a scrollable, sticky module list whose group
