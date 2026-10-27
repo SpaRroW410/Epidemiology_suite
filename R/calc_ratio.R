@@ -31,12 +31,12 @@ calc_precision_riskratio <- function(p1, p2, r = 1, conf_width = 1, conf_level =
   .validate_positive(conf_width, "conf_width")
   .validate_unit_interval(conf_level, "conf_level")
 
-  res <- presize::prec_riskratio(p1 = p1, p2 = p2, n1 = NULL, r = r,
+  res <- .cf_prec_riskratio(p1 = p1, p2 = p2, n1 = NULL, r = r,
                                   conf.width = conf_width, conf.level = conf_level,
                                   method = method)
   n1 <- ceiling(res$n1)
   n2 <- ceiling(n1 * r)
-  achieved <- presize::prec_riskratio(p1 = p1, p2 = p2, n1 = n1, r = r,
+  achieved <- .cf_prec_riskratio(p1 = p1, p2 = p2, n1 = n1, r = r,
                                        conf.level = conf_level, method = method)
 
   new_ss_result(list(
@@ -69,12 +69,12 @@ calc_precision_or <- function(p1, p2, r = 1, conf_width = 1, conf_level = 0.95,
   .validate_positive(conf_width, "conf_width")
   .validate_unit_interval(conf_level, "conf_level")
 
-  res <- presize::prec_or(p1 = p1, p2 = p2, n1 = NULL, r = r,
+  res <- .cf_prec_or(p1 = p1, p2 = p2, n1 = NULL, r = r,
                            conf.width = conf_width, conf.level = conf_level,
                            method = method)
   n1 <- ceiling(res$n1)
   n2 <- ceiling(n1 * r)
-  achieved <- presize::prec_or(p1 = p1, p2 = p2, n1 = n1, r = r,
+  achieved <- .cf_prec_or(p1 = p1, p2 = p2, n1 = n1, r = r,
                                 conf.level = conf_level, method = method)
 
   new_ss_result(list(
@@ -110,11 +110,11 @@ calc_precision_rateratio <- function(rate1, rate2, r = 1, prec_level = 2, conf_l
   }
   .validate_unit_interval(conf_level, "conf_level")
 
-  res <- presize::prec_rateratio(n1 = NULL, rate1 = rate1, rate2 = rate2,
+  res <- .cf_prec_rateratio(n1 = NULL, rate1 = rate1, rate2 = rate2,
                                   prec.level = prec_level, r = r, conf.level = conf_level)
   n1 <- ceiling(res$n1)
   n2 <- ceiling(n1 * r)
-  achieved <- presize::prec_rateratio(n1 = n1, rate1 = rate1, rate2 = rate2,
+  achieved <- .cf_prec_rateratio(n1 = n1, rate1 = rate1, rate2 = rate2,
                                        r = r, conf.level = conf_level)
 
   new_ss_result(list(

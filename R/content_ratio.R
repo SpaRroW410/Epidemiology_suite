@@ -41,7 +41,7 @@ ratio_content <- list(
       "independent binomial proportions. Stat Methods Med Res.",
       "2015;24(2):224-254."
     ),
-    backend = "presize::prec_riskratio()"
+    backend = "closed form written out in the app, equal to presize::prec_riskratio() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   odds_ratio = list(
@@ -81,7 +81,7 @@ ratio_content <- list(
       "Recommended confidence intervals for two independent binomial",
       "proportions. Stat Methods Med Res. 2015;24(2):224-254."
     ),
-    backend = "presize::prec_or()"
+    backend = "closed form written out in the app, equal to presize::prec_or() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   rate_ratio = list(
@@ -118,6 +118,6 @@ ratio_content <- list(
       "Rothman KJ, Greenland S. Planning study size based on precision",
       "rather than power. Epidemiology. 2018;29(5):599-603."
     ),
-    backend = "presize::prec_rateratio()"
+    backend = "closed form written out in the app, equal to presize::prec_rateratio() (compared with the package in the tests; the package is not a dependency)"
   )
 )

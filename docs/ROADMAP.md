@@ -1325,3 +1325,33 @@ trimming the download.
 - **UI audit** (`tools/ui-audit/audit.R`, run by hand): every calculator and Home at 1366 px and 390 px: no horizontal scroll, no
   content wider than the window, no small scroll windows, no clipped inputs, no output or R errors, no console errors; the detector was
   checked against an injected fault. It covers layout and errors, not whether each result is numerically right (the unit tests do that).
+
+
+### Dependency reduction, stage 2: the easy and moderate packages (28 Oct 2026)
+Seven more runtime packages were replaced by closed forms written out in the app and tested against the real package: **pwr**,
+**powerMediation**, **pmsampsize**, **pROC** (easy) and **presize**, **powerSurvEpi**, **TrialSize** (moderate). The packages moved from
+Imports to Suggests as verification oracles (`skip_if_not_installed()`); only `kappaSize` was added to Imports (see below). Files:
+`R/calc_closed_forms_pwr.R` (Cohen's t / ANOVA / f2 / correlation / chi-square / proportion power, ES.h / ES.w, logistic and Poisson
+regression sizes, ROC sizes), `R/calc_closed_forms_pm.R` (Riley et al. criteria), `R/calc_closed_forms_ts.R` (TrialSize formulas and
+the powerSurvEpi survival and matched case-control formulas), `R/calc_closed_forms_presize.R` (precision-based sizes), with
+`test-calc_closed_forms_{pwr,pm,ts,presize}.R` comparing each function with the package over grids of inputs (about 2,700 expectations;
+sample sizes identical, power functions and intervals to 1e-10 or better).
+- **What it buys, honestly.** The install closure goes from 77 to 68 packages and from 110 MB to 105 MB: **9 packages** (the seven plus
+  `plyr` and `pracma`) and about **5 MB** of 110. Most of the weight is `shiny`, `bslib`, `lme4` and their dependencies, which stay.
+  The gain is fewer packages to download in the browser build, fewer things that can fail to install or change their interface (the
+  epiR 3.0 problem, F13), and every formula now traceable in the app's own source.
+- **Two bugs in the packages, found while transcribing, and corrected (not copied):**
+  1. `pmsampsize` 1.1.3 (latest on CRAN), continuous outcome, criterion 4 (precision of the intercept): the loop uses `+qt(0.025, df)`
+     (negative), so when this criterion binds the interval limits swap, the ratio drops below 1 and the loop stops after one step.
+     Example: parameters 2, intercept 1.9, sd 0.6, R2 0.2, mmoe 1.02 gives n = 237 with a "lower" limit 1.97 above the "upper" 1.83;
+     the smallest n that really meets the criterion is about 765. The app had been reproducing this. Now the criterion is computed as
+     defined and tested against its definition; when it does not bind, results equal the package.
+  2. `presize::prec_pos_lr()` / `prec_neg_lr()` accept `conf.level` but do not pass it to `prec_lr()`, so the likelihood-ratio design
+     always used 95%. Now the level is used (tested against `prec_lr()`); results change for any level other than 95%.
+- **Not replaced: `kappaSize`.** Cohen's kappa sample size needs kappaSize's cell-probability tables for 2-6 raters and 2-5 categories
+  (eight functions of 240-390 lines each); the thin `presize::prec_kappa()` wrapper around it is written out and `kappaSize` is now a
+  direct import. Re-deriving the tables is possible but large and was not done.
+- **Verified how:** each function against its package (identical sample sizes), plus the independent definition for the corrected
+  criterion. The papers behind the formulas were not read (citations are those in the package documentation and the module content
+  files); the Reference tab of each calculator now says "closed form written out in the app, equal to <package function> (compared
+  with the package in the tests; the package is not a dependency)". `renv.lock` still lists the removed packages (re-snapshot pending).

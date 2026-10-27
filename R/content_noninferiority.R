@@ -128,7 +128,7 @@ noninferiority_content <- list(
       "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
       "Research. New York: Marcel Dekker; 2003. Section 4.6."
     ),
-    backend = "TrialSize::RelativeRisk.NIS()"
+    backend = "closed form written out in the app, equal to TrialSize::RelativeRisk.NIS() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   hazard_ratio = list(
@@ -168,6 +168,6 @@ noninferiority_content <- list(
       "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
       "Research. New York: Marcel Dekker; 2003. Section 7.3."
     ),
-    backend = "TrialSize::Cox.NIS()"
+    backend = "closed form written out in the app, equal to TrialSize::Cox.NIS() (compared with the package in the tests; the package is not a dependency)"
   )
 )

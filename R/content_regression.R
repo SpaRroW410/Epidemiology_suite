@@ -45,7 +45,7 @@ regression_content <- list(
       "2nd ed. Hillsdale, NJ: Lawrence Erlbaum Associates; 1988, Exercise",
       "9.1 p. 424. (as implemented by pwr::pwr.f2.test)."
     ),
-    backend = "pwr::pwr.f2.test()"
+    backend = "closed form written out in the app, equal to pwr::pwr.f2.test() (compared with the package in the tests; the package is not a dependency)"
   ),
   r2_increase = list(
     title = "Hierarchical Multiple Regression, R-Squared Increase",
@@ -96,6 +96,6 @@ regression_content <- list(
       "2nd ed. Hillsdale, NJ: Lawrence Erlbaum Associates; 1988, Section",
       "9.7. (as implemented by pwr::pwr.f2.test)."
     ),
-    backend = "pwr::pwr.f2.test()"
+    backend = "closed form written out in the app, equal to pwr::pwr.f2.test() (compared with the package in the tests; the package is not a dependency)"
   )
 )

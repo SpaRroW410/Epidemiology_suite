@@ -37,7 +37,7 @@ logistic_content <- list(
       "calculation for linear and logistic regression. Stat Med.",
       "1998;17(14):1623-1634."
     ),
-    backend = "powerMediation::SSizeLogisticBin()"
+    backend = "closed form written out in the app, equal to powerMediation::SSizeLogisticBin() (compared with the package in the tests; the package is not a dependency)"
   ),
   continuous = list(
     title = "Simple Logistic Regression -- Continuous Predictor",
@@ -69,7 +69,7 @@ logistic_content <- list(
       "calculation for linear and logistic regression. Stat Med.",
       "1998;17(14):1623-1634."
     ),
-    backend = "powerMediation::SSizeLogisticCon()"
+    backend = "closed form written out in the app, equal to powerMediation::SSizeLogisticCon() (compared with the package in the tests; the package is not a dependency)"
   ),
   ordinal = list(
     title = "Ordinal (Proportional Odds) Logistic Regression -- Two Groups",
@@ -165,7 +165,7 @@ logistic_content <- list(
       "1998;17(14):1623-1634 (variance inflation factor for multiple",
       "covariates)."
     ),
-    backend = "closed-form wrapper around powerMediation::SSizeLogisticBin()"
+    backend = "closed form written out in the app, equal to closed-form wrapper around powerMediation::SSizeLogisticBin() (compared with the package in the tests; the package is not a dependency)"
   ),
   continuous_adjusted = list(
     title = "Multiple Logistic Regression, Covariate-Adjusted -- Continuous Predictor",
@@ -196,6 +196,6 @@ logistic_content <- list(
       "1998;17(14):1623-1634 (variance inflation factor for multiple",
       "covariates)."
     ),
-    backend = "closed-form wrapper around powerMediation::SSizeLogisticCon()"
+    backend = "closed form written out in the app, equal to closed-form wrapper around powerMediation::SSizeLogisticCon() (compared with the package in the tests; the package is not a dependency)"
   )
 )

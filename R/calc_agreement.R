@@ -50,7 +50,7 @@ calc_kappa <- function(kappa, n_category = 2, raters = 2, props,
   }
   .validate_unit_interval(conf_level, "conf_level")
 
-  res <- presize::prec_kappa(kappa = kappa, conf.width = conf_width,
+  res <- .cf_prec_kappa(kappa = kappa, conf.width = conf_width,
                               raters = raters, n_category = n_category,
                               props = props, conf.level = conf_level)
 
@@ -86,7 +86,7 @@ calc_icc <- function(rho, k, conf_width = 0.2, conf_level = 0.95) {
   }
   .validate_unit_interval(conf_level, "conf_level")
 
-  res <- presize::prec_icc(rho = rho, k = k, conf.width = conf_width,
+  res <- .cf_prec_icc(rho = rho, k = k, conf.width = conf_width,
                             conf.level = conf_level)
 
   new_ss_result(list(
@@ -112,7 +112,7 @@ calc_agreement_cronbach <- function(k, calpha, conf_width = 0.1, conf_level = 0.
   .validate_positive(conf_width, "conf_width")
   .validate_unit_interval(conf_level, "conf_level")
 
-  res <- presize::prec_cronb(k = k, calpha = calpha, n = NULL,
+  res <- .cf_prec_cronb(k = k, calpha = calpha, n = NULL,
                               conf.level = conf_level, conf.width = conf_width)
 
   new_ss_result(list(
@@ -197,7 +197,7 @@ calc_agreement_bland_altman <- function(conf_width = 1, conf_level = 0.95) {
   .validate_positive(conf_width, "conf_width")
   .validate_unit_interval(conf_level, "conf_level")
 
-  res <- presize::prec_lim_agree(n = NULL, conf.width = conf_width, conf.level = conf_level)
+  res <- .cf_prec_lim_agree(n = NULL, conf.width = conf_width, conf.level = conf_level)
 
   new_ss_result(list(
     n = ceiling(res$n),

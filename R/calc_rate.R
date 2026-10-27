@@ -32,10 +32,10 @@ calc_rate_precision <- function(rate, conf_width, conf_level = 0.95,
     stop("conf_width should not exceed 5 times rate (presize::prec_rate's own guidance).")
   }
 
-  fit <- presize::prec_rate(r = rate, conf.width = conf_width,
+  fit <- .cf_prec_rate(r = rate, conf.width = conf_width,
                              conf.level = conf_level, method = method)
   n_events <- ceiling(fit$x)
-  achieved <- presize::prec_rate(r = rate, x = n_events,
+  achieved <- .cf_prec_rate(r = rate, x = n_events,
                                   conf.level = conf_level, method = method)
 
   new_ss_result(list(

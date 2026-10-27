@@ -59,6 +59,6 @@ anova_general_content <- list(
       "(Analysis of Variance and Covariance) and 9 (F Tests of Variance",
       "Proportions)."
     ),
-    backend = "pwr::pwr.f2.test()"
+    backend = "closed form written out in the app, equal to pwr::pwr.f2.test() (compared with the package in the tests; the package is not a dependency)"
   )
 )

@@ -37,9 +37,9 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
   lists, a downloadable PDF/Word protocol section (today: a copyable paragraph and CSV/JSON/BibTeX/RIS downloads).
 
 ### Dependency reduction (item 16, done in part)
-- [ ] Remaining low-weight imports: `pwr`, `powerMediation`, `pmsampsize`, `pROC` (each under 1 MB; reimplement and test against
+- [x] (done 28 Oct 2026, see ROADMAP) Remaining low-weight imports: `pwr`, `powerMediation`, `pmsampsize`, `pROC` (each under 1 MB; reimplement and test against
   the package as was done for `epiR`, `Hmisc`, `tseries`, `BayesFactor`, `rstatix`).
-- [ ] Moderate: `presize`, `powerSurvEpi`, `TrialSize`.
+- [x] (done 28 Oct 2026) Moderate: `presize`, `powerSurvEpi`, `TrialSize`. Left: `kappaSize` (kappa cell-probability tables, 8 large functions) is now the direct import instead of `presize`; re-deriving it would remove one more package.
 - [ ] Higher risk, defer: `PowerTOST` (also what breaks the browser build), `Exact` / Boschloo (needs `rootSolve`, no WebAssembly
   build), `clinfun` (`ph2simon`, group-sequential). `lme4` stays (the Monte Carlo mixed-model designs need it); `mvtnorm`, `shiny`,
   `bslib` stay.
@@ -194,3 +194,9 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
   yes/no routes; a case-control with several controls per case and a measured exposure uses the paired test (1:m is approximate).
 - [ ] The keyword parser is deliberately conservative; a language-model option would need an API decision (the app has none).
 - [ ] UI audit: not run on a real phone or with a screen reader; item 22 (accessibility, dark mode) is still open.
+
+### Dependency reduction stage 2 (28 Oct 2026)
+- [ ] Re-snapshot `renv.lock` (it still lists the seven removed runtime packages and kappaSize's place has changed).
+- [ ] Optional: re-derive `kappaSize`'s kappa tables (2-6 raters, 2-5 categories) and drop the last of the easy/moderate set.
+- [ ] Report the two package bugs upstream (pmsampsize continuous criterion 4 sign error; presize prec_pos_lr / prec_neg_lr ignoring conf.level).
+- [ ] Remaining heavier ones: `PowerTOST`, `Exact`, `clinfun`, `lme4` (see the dependency section above).

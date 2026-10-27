@@ -86,7 +86,7 @@
 # documentation: Freedman 1982 (via Rosner 2006) for the two-group log-rank size, Latouche et al. 2004 and Hsieh & Lavori 2000 for
 # the Cox-model covariate sizes, Palta & Amini 1985 for stratification, and the matched case-control power formulas of Dupont 1988.
 # None of the originals was read here; the formulas are checked against the package, not against the papers.
-# powerConLogistic.bin / .con; tests compare them with the package over grids of inputs.
+# Tests compare each with the package (ssizeCT, ssizeEpi, ssizeEpiCont, ssize.stratify, powerConLogistic.bin / .con) over grids of inputs.
 
 # Two groups, log-rank, equal follow-up: k = nE / nC; pE, pC = event probabilities; RR = hazard ratio.
 .cf_pse_ssize_ct <- function(power, k, pE, pC, RR, alpha = 0.05) {

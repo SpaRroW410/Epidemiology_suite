@@ -60,7 +60,7 @@ agreement_content <- list(
       "2012;65(7):778-784. (extension to 3-6 raters and up to 5",
       "categories, as implemented in the kappaSize package)."
     ),
-    backend = "presize::prec_kappa() (wraps kappaSize::CIBinary/CI3Cats/CI4Cats/CI5Cats)"
+    backend = "Cohen's kappa: the presize::prec_kappa() logic written out; the cell-probability tables are kappaSize::CIBinary / CI3Cats / CI4Cats / CI5Cats (equal to presize::prec_kappa(), tested)"
   ),
 
   icc = list(
@@ -107,7 +107,7 @@ agreement_content <- list(
       "correlations with desired precision. Stat Med. 2002;21(9):1331-",
       "1335."
     ),
-    backend = "presize::prec_icc()"
+    backend = "closed form written out in the app, equal to presize::prec_icc() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   cronbach = list(
@@ -146,7 +146,7 @@ agreement_content <- list(
       "estimation, hypothesis testing, and sample size planning. J",
       "Organiz Behav. 2015;36(1):3-15."
     ),
-    backend = "presize::prec_cronb()"
+    backend = "closed form written out in the app, equal to presize::prec_cronb() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   bland_altman = list(
@@ -187,7 +187,7 @@ agreement_content <- list(
       "between two methods of clinical measurement. Lancet.",
       "1986;327(8476):307-310."
     ),
-    backend = "presize::prec_lim_agree()"
+    backend = "closed form written out in the app, equal to presize::prec_lim_agree() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   ccc = list(

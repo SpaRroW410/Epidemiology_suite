@@ -74,7 +74,7 @@ multiplicity_content <- list(
       "1979;6(2):65-70. (as re-run through pwr::pwr.p.test /",
       "pwr::pwr.2p.test / pwr::pwr.t.test)."
     ),
-    backend = "pwr::pwr.p.test() / pwr.2p.test() / pwr.t.test()"
+    backend = "closed form written out in the app, equal to pwr::pwr.p.test() / pwr.2p.test() / pwr.t.test() (compared with the package in the tests; the package is not a dependency)"
   ),
   fdr = list(
     title = "FDR (Benjamini-Hochberg)-Controlled Sample Size, Two Independent Means",
@@ -157,7 +157,7 @@ multiplicity_content <- list(
       "against, since the exact notation of that paper's own formula",
       "could not be re-fetched from this sandboxed environment)."
     ),
-    backend = "closed-form (independently derived + Monte Carlo verified) wrapping pwr::pwr.t.test()"
+    backend = "closed form written out in the app, equal to closed-form (independently derived + Monte Carlo verified) wrapping pwr::pwr.t.test() (compared with the package in the tests; the package is not a dependency)"
   ),
   fdr_microarray = list(
     title = "FDR-Controlled Sample Size, Two-Sample Microarray/Genomics Experiment (Exact)",
