@@ -200,3 +200,11 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] Optional: re-derive `kappaSize`'s kappa tables (2-6 raters, 2-5 categories) and drop the last of the easy/moderate set.
 - [ ] Report the two package bugs upstream (pmsampsize continuous criterion 4 sign error; presize prec_pos_lr / prec_neg_lr ignoring conf.level).
 - [ ] Remaining heavier ones: `PowerTOST`, `Exact`, `clinfun`, `lme4` (see the dependency section above).
+
+### Three versions (28 Oct 2026, see docs/hosting.md)
+- [ ] **[owner]** Create the Posit Connect Cloud account, publish from the branch `connect`, then put its address in `tools/pages/mobile_url.txt` (PR).
+- [ ] Open the Connect version on a phone; if it works, the "lite" mobile webR build is not needed (dropped from the plan).
+- [ ] Check the Connect Cloud free-plan limits (apps, active hours, memory) and idle sleep; decide if a paid plan or the Docker image elsewhere is needed.
+- [ ] Mention in the app that the server version sends inputs to the server (the browser version does not); add to the Connect build's home text.
+- [ ] Phone layout pass (single column, large touch targets) now that phones will use the server version (item 22).
+- [ ] Async / several users on one R process (F9) matters more once phones use the server version.

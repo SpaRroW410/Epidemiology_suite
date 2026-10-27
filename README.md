@@ -162,15 +162,19 @@ In Claude Code on the web, `.claude/hooks/session-start.sh` rebuilds this
 environment automatically on a fresh container (Ubuntu `r-cran-*` binaries where
 available, otherwise the `github.com/cran` mirror).
 
-## Two ways to use it
+## Three ways to use it
 
-- **In the browser, nothing to install:** the app is published on GitHub Pages at `https://sparrow410.github.io/Sample_size_all/app/`
-  (documentation at `https://sparrow410.github.io/Sample_size_all/`). It is the same code compiled to WebAssembly and runs
-  entirely on your device; nothing you type is sent to a server. The first visit downloads about 60 MB and takes up to a minute
-  to start. A few designs need compiled packages that have no WebAssembly build (TOST means, Fisher and Boschloo exact tests) and
-  say so; the simulation designs are faster in the installed package.
-- **As an R package, everything:** the package contains every design and works offline (below). The browser version is built from
-  the package's own `R/` directory by the `docs` workflow (`tools/pages/make_app.R`), so the two cannot drift apart.
+One codebase, built into three forms by CI (details and the owner's setup steps: [`docs/hosting.md`](docs/hosting.md)):
+
+1. **In the browser, nothing to install** -- GitHub Pages, `https://sparrow410.github.io/Sample_size_all/app/`. The same code compiled to
+   WebAssembly runs on your own device and nothing you type is sent to a server. The first visit downloads about 60 MB and needs
+   about 1 GB of memory, so it suits desktop browsers; a few designs that need compiled packages are not available there.
+2. **Phone / server version** -- the same app running on Posit Connect Cloud, so a phone only receives a web page (set up by the
+   repository owner; phones are redirected to it automatically once its address is configured). What you type is sent to that server.
+3. **As an R package, everything** -- works offline, with every design and the fastest simulations (below).
+
+The browser build and the server bundle are made from the package's own `R/` directory by the `docs` and `connect-bundle` workflows,
+so the three cannot drift apart.
 
 ## Installing and running the app
 

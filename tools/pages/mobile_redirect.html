@@ -1,0 +1,18 @@
+<!-- Sends phones and tablets to the server-hosted version (tools/pages/mobile_url.txt), because the in-browser build needs about
+     1 GB of memory and a 60 MB download, which many phones cannot give. Injected at the top of <head> by inject_status.py.
+     ?full=1 keeps the browser build and remembers the choice on this device; ?mobile=1 undoes it. -->
+<script>
+(function () {
+  var target = "__MOBILE_URL__";
+  try {
+    var q = new URLSearchParams(location.search);
+    if (q.get("mobile") === "1") localStorage.removeItem("s2r-full");
+    if (q.get("full") === "1") localStorage.setItem("s2r-full", "1");
+    if (localStorage.getItem("s2r-full") === "1") return;
+  } catch (e) {}
+  var ua = navigator.userAgent || "";
+  var phone = (navigator.userAgentData && navigator.userAgentData.mobile) || /Android|iPhone|iPad|iPod|Mobile/i.test(ua) ||
+              (navigator.maxTouchPoints > 1 && /Macintosh/.test(ua));   // an iPad that asks for the desktop site says "Macintosh"
+  if (phone) location.replace(target);
+})();
+</script>

@@ -1355,3 +1355,20 @@ sample sizes identical, power functions and intervals to 1e-10 or better).
   criterion. The papers behind the formulas were not read (citations are those in the package documentation and the module content
   files); the Reference tab of each calculator now says "closed form written out in the app, equal to <package function> (compared
   with the package in the tests; the package is not a dependency)". `renv.lock` still lists the removed packages (re-snapshot pending).
+
+
+### Three versions: browser build, phone/server version, R package (28 Oct 2026)
+The owner's phones (Safari and Brave on iOS) show a spinner that never ends on the browser build. It starts in iPhone-sized Chromium, in
+Linux WebKit and under a 4x CPU / 10 Mbit/s throttle (UI after 128 s), so the cause on the real devices could not be reproduced here; the
+runtime alone needs about 775 MB (an empty Shiny page) and the app about 1.1 GB, above what many phones allow a tab. Decision: instead
+of a cut-down "lite" webR build, keep the browser build for desktops and run the same package as an ordinary Shiny server on **Posit
+Connect Cloud** for phones, redirecting phones automatically. `docs/hosting.md` describes the three versions and the owner's steps.
+- `tools/connect/` + `.github/workflows/connect-bundle.yml`: builds the deployment bundle (`app.R`, `R/`, `manifest.json` with 68
+  packages, all CRAN) on every change to the code, starts it as a plain Shiny app in headless Chrome and checks a calculation, and on
+  `main` publishes it to the branch `connect` for Connect Cloud to deploy from. No Posit account or token is needed by CI.
+- `tools/pages/mobile_redirect.html` + `inject_status.py` + `mobile_url.txt`: phones and tablets are sent to the Connect address once it is
+  set (empty now: no redirect); `?full=1` keeps the browser build, `?mobile=1` undoes it. Tested in Chromium device emulation
+  (iPhone, Pixel, iPad with the desktop-site user agent, desktop, `?full=1`, remembered choice, `?mobile=1`).
+- **Not verified:** the Connect Cloud deployment itself (needs the owner's account), the free-plan limits, and any real phone. Posit
+  announced that shinyapps.io takes no new apps after the end of 2026 and migrates accounts to Connect Cloud from January 2027
+  (Posit's migration page; sources disagree on some dates), which is why Connect Cloud, not shinyapps.io, is the target.
