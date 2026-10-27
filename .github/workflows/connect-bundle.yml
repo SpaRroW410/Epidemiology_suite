@@ -31,7 +31,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::rsconnect, any::jsonlite, any::shinytest2, any::chromote
+          extra-packages: any::rsconnect, any::jsonlite, any::shinytest2, any::chromote, any::RcppEigen
           needs: connect
       - name: Build the bundle and manifest.json
         run: Rscript tools/connect/make_manifest.R connect_bundle
