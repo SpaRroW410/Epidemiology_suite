@@ -391,3 +391,45 @@ for (m in registry) {
     })
   })
 }
+
+# --- lazy loading of the calculators (start-up time) -------------------------
+
+test_that("start-up builds only the core calculators; lazy = FALSE builds all (static check)", {
+  count_placeholders <- function(app) lengths(regmatches(htmltools::renderTags(app$ui)$html, gregexpr("lazy-note", htmltools::renderTags(app$ui)$html)))
+  n_lazy <- count_placeholders(epidemiologicasuite_app(lazy = TRUE))
+  expect_equal(n_lazy, length(module_registry()) - length(lazy_core_modules))
+  expect_equal(count_placeholders(epidemiologicasuite_app(lazy = FALSE)), 0)
+  expect_true(all(lazy_core_modules %in% vapply(module_registry(), `[[`, character(1), "id")))
+  # the first module of every workbench is a core module, so no workbench opens on a placeholder
+  firsts <- vapply(module_workbenches, function(wb) wb$groups[[1]]$module_ids[1], "")
+  expect_true(all(firsts %in% lazy_core_modules))
+})
+
+test_that("a Home jump to a calculator that is not loaded yet loads it and then sets its design", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  expect_true(app$get_js("!!document.querySelector('#lazy_survey_selection > .lazy-note')"))   # not loaded at start
+  ids <- home_browse_button_ids()
+  btn <- names(ids)[ids == "survey_select_epi"][1]
+  app$run_js(sprintf("Shiny.setInputValue(%s, 1, {priority: 'event'})", ui_js_string(btn)))   # what the Home button sends
+  app$wait_for_js("Shiny.shinyapp.$inputValues['survey_selection-design'] === 'epi'", timeout = 60000)
+  expect_false(app$get_js("!!document.querySelector('#lazy_survey_selection > .lazy-note')"))
+  app$wait_for_idle(800, timeout = 60000)
+  expect_equal(ui_output_errors(app), 0)
+})
+
+test_that("background loading fills in every calculator behind a progress bar, without errors", {
+  skip_if_no_ui()
+  old <- Sys.getenv("EPIDEMIOLOGICASUITE_BACKGROUND_LOAD"); on.exit(Sys.setenv(EPIDEMIOLOGICASUITE_BACKGROUND_LOAD = old), add = TRUE)
+  Sys.setenv(EPIDEMIOLOGICASUITE_BACKGROUND_LOAD = "true")
+  chromote::set_chrome_args(c("--disable-gpu", "--disable-dev-shm-usage", "--no-sandbox"))
+  app <- shinytest2::AppDriver$new(ui_app_dir(), name = "lazy_bg", load_timeout = 90000, timeout = 30000, view = FALSE)
+  withr::defer(app$stop())
+  expect_true(app$get_js("document.querySelectorAll('.lazy-note').length") > 0)
+  app$wait_for_js("document.querySelectorAll('.lazy-note').length === 0", timeout = 240000)
+  app$wait_for_idle(1500, timeout = 120000)
+  expect_equal(app$get_js("document.querySelectorAll('.shiny-notification').length"), 0)   # the progress bar has closed
+  expect_equal(ui_output_errors(app), 0)
+  ui_open_module(app, "Epidemic Models and Herd Immunity")
+  expect_match(ui_output_text(app, "epidemic_model-result"), "Herd-immunity threshold 91\\.7%")
+})

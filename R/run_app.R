@@ -22,11 +22,17 @@ run_app <- function(...) {
 #' root `app.R` used during development, and for deployment or testing
 #' (e.g. `shiny::testServer()`, shinytest2).
 #'
+#' @param lazy If `TRUE` (the default) only a few basic calculators are built when the app
+#'   starts and the others are loaded when opened, and in the background with a progress bar,
+#'   which makes the first screen much faster; `FALSE` builds every calculator up front.
+#'   The default can be changed with `options(epidemiologicasuite.lazy = FALSE)`.
 #' @return A [shiny::shinyApp()] object.
 #' @export
-epidemiologicasuite_app <- function() {
+epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy", TRUE)) {
   registry <- module_registry()
   registry_by_id <- setNames(registry, vapply(registry, `[[`, character(1), "id"))
+  # Modules that exist at start-up; the others are placeholders filled by lazy_module_loader() (lazy_modules.R).
+  core_ids <- if (isTRUE(lazy)) intersect(lazy_core_modules, names(registry_by_id)) else names(registry_by_id)
 
   # One top-navbar item per workbench (module_workbenches in registry.R); inside
   # it a vertical list of modules under one small header per group
@@ -38,7 +44,7 @@ epidemiologicasuite_app <- function() {
     items <- unlist(lapply(wb$groups, function(g) {
       c(list(g$title), lapply(g$module_ids, function(mid) {
         m <- registry_by_id[[mid]]
-        nav_panel(title = m$title, m$ui(m$id))
+        nav_panel(title = m$title, if (m$id %in% core_ids) m$ui(m$id) else lazy_placeholder(m$id))
       }))
     }), recursive = FALSE)
     nav_panel(
@@ -79,8 +85,19 @@ epidemiologicasuite_app <- function() {
 
   server <- function(input, output, session) {
     home_server(input, output, session)
-    for (m in registry) {
+    for (m in registry[names(registry_by_id) %in% core_ids]) {
       m$server(m$id)
+    }
+    if (length(core_ids) < length(registry)) {
+      loader <- lazy_module_loader(session, registry, core_ids)
+      # jump_to_module() (registry.R) loads a module before selecting it
+      session$userData$ensure_module_title <- loader$ensure_title
+      # opening a not-yet-loaded calculator from its sidebar loads it at once
+      for (wb in module_workbenches) local({
+        nav_id <- wb$nav_id
+        observeEvent(input[[nav_id]], loader$ensure_title(input[[nav_id]]), ignoreNULL = TRUE)
+      })
+      loader$start_background()
     }
   }
 
