@@ -25,6 +25,9 @@ try {
   const frame = page.frameLocator("iframe").first();
   await frame.locator("text=epidemiologicasuite").first().waitFor({ timeout: 480000 });
   report.ui_visible_s = (Date.now() - t0) / 1000;
+  // the start-up status overlay (tools/pages/status_overlay.html) must remove itself once the app is on screen
+  await page.waitForTimeout(4000);
+  report.overlay_gone = (await page.locator("#s2r-status").count()) === 0;
   // Open a calculator and check that a result renders.
   await frame.locator("a[data-value='Plan: Sample Size']").first().click({ timeout: 60000 });
   await frame.locator("a[data-value='Rule of Three']").first().click({ timeout: 60000 });

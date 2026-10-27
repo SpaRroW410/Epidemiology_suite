@@ -4,6 +4,6 @@
 set -euo pipefail
 report="$1"
 jq . "$report" | head -40
-jq -e '.ok == true and .output_errors == 0 and ([.load_lines[]? | select(test("SOURCE FAILED"))] | length) == 0' "$report" >/dev/null \
+jq -e '.ok == true and .output_errors == 0 and (.overlay_gone != false) and ([.load_lines[]? | select(test("SOURCE FAILED"))] | length) == 0' "$report" >/dev/null \
   || { echo "browser build check FAILED"; exit 1; }
 echo "browser build check passed: UI visible after $(jq .ui_visible_s "$report") s, first calculation $(jq .first_calc_s "$report") s"

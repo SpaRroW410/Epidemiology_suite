@@ -39,6 +39,8 @@ jobs:
         run: |
           Rscript -e 'cat("shinylive", as.character(packageVersion("shinylive")), "\n"); shinylive::export("pages_app", "app_out/app")' 2>&1 | tee export.log
           du -sh app_out/app
+      - name: Add the start-up status overlay (explains the wait on a phone) and a proper page title
+        run: python3 tools/pages/inject_status.py app_out/app/index.html
       - name: Boot the exported site in Chrome
         run: |
           (cd app_out && python3 -m http.server 8008 >/dev/null 2>&1 &)
