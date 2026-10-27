@@ -153,7 +153,7 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] **Compare two dependent correlations** -- open: Non-common-index case
 - [ ] **Ordinal / multinomial regression** -- open: Nominal (multinomial) half
 - [ ] **Agreement** -- open: Weighted kappa
-- [ ] **Free-text study-design parser** -- open: RCT internals (individual vs. cluster, superiority vs. non-inferiority)
+- [x] **Free-text study-design parser** -- RCT internals done 27 Oct 2026 (unit, intent, outcome, groups rules; an unqualified "trial" is assumed individually randomised and the trail shows it as Medium confidence)
 - [ ] **Non-inferiority margins (RR / OR / HR / difference)** -- open: True **relative-risk-scale** margin. `TrialSize::RelativeRisk.NIS()` is really odds-ratio-based, so it ships as the OR design; no verified RR-scale source yet. *Added 28 Sep 2026 from the review-PDF cross-check*
 - [ ] **Holm / FDR** -- open: **Holm's step-down** as its own design. Bonferroni (shipped) is Holm's most conservative step; Holm's later thresholds depend on the observed p-values, so there is no single planning alpha — needs a simulation-based design. *Added 28 Sep 2026*
 - [ ] **Value of information (EVPI / EVSI)** -- open: Multi-parameter EVPPI and non-Normal outcomes (only the single-parameter, known-SD case ships). *Added 28 Sep 2026*
@@ -161,8 +161,7 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] **Multi-arm vs. common control** -- open: Dunnett for **binary** outcomes (means only; the wizard falls back to Bonferroni/Sidak two-proportion n). *Added 28 Sep 2026*
 
 ### A.4 Wizard
-- [ ] Free-text parser: the RCT-internals branch (individual vs cluster allocation, superiority vs non-inferiority) has no
-  keyword rules, deliberately; revisit with real user phrasing.
+- [x] Free-text parser: RCT internals now have rules (27 Oct 2026); revisit with real user phrasing.
 
 ---
 
