@@ -28,7 +28,7 @@ calc_means_1s <- function(mu0, mu1, sd, alpha = 0.05, power = 0.8,
   }
 
   d <- (mu1 - mu0) / sd
-  fit <- pwr::pwr.t.test(d = d, sig.level = alpha, power = power,
+  fit <- .cf_pwr_t_test(d = d, sig.level = alpha, power = power,
                           type = "one.sample", alternative = alternative)
 
   new_ss_result(list(
@@ -62,7 +62,7 @@ calc_means_2s_indep <- function(mu1, mu2, sd, alpha = 0.05, power = 0.8,
   }
 
   d <- (mu1 - mu2) / sd
-  fit <- pwr::pwr.t.test(d = d, sig.level = alpha, power = power,
+  fit <- .cf_pwr_t_test(d = d, sig.level = alpha, power = power,
                           type = "two.sample", alternative = alternative)
   n_per_group <- ceiling(fit$n)
 
@@ -96,7 +96,7 @@ calc_means_paired <- function(mean_diff, sd_diff, alpha = 0.05, power = 0.8,
   }
 
   d <- mean_diff / sd_diff
-  fit <- pwr::pwr.t.test(d = d, sig.level = alpha, power = power,
+  fit <- .cf_pwr_t_test(d = d, sig.level = alpha, power = power,
                           type = "paired", alternative = alternative)
 
   new_ss_result(list(
@@ -134,7 +134,7 @@ calc_means_anova <- function(group_means, sd, alpha = 0.05, power = 0.8) {
   sigma_m <- sqrt(sum((group_means - mean(group_means))^2) / k)
   f <- sigma_m / sd
 
-  fit <- pwr::pwr.anova.test(k = k, f = f, sig.level = alpha, power = power)
+  fit <- .cf_pwr_anova_test(k = k, f = f, sig.level = alpha, power = power)
   n_per_group <- ceiling(fit$n)
 
   new_ss_result(list(
@@ -222,7 +222,7 @@ calc_means_2s_unequal_n <- function(mu1, mu2, sd, n1, alpha = 0.05, power = 0.8,
   }
 
   d <- (mu1 - mu2) / sd
-  fit <- pwr::pwr.t2n.test(n1 = n1, n2 = NULL, d = d, sig.level = alpha,
+  fit <- .cf_pwr_t2n_test(n1 = n1, n2 = NULL, d = d, sig.level = alpha,
                             power = power, alternative = alternative)
   n2 <- ceiling(fit$n2)
 

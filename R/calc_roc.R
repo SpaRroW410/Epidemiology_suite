@@ -1,11 +1,11 @@
 # Pure calculation function for a single ROC curve's AUC sample size. No
 # Shiny dependency here so this is directly unit-testable (see
-# tests/testthat). Wraps pROC::power.roc.test() rather than reimplementing
-# the underlying math (project convention).
+# tests/testthat). The Obuchowski formulas are written out in calc_closed_forms_pwr.R and
+# equal pROC::power.roc.test() (the tests compare them).
 
 #' Sample size to detect that a single test's AUC differs from chance (0.5)
 #'
-#' Wraps pROC::power.roc.test() for the one-ROC-curve case (Obuchowski et
+#' Obuchowski's sample size (equal to pROC::power.roc.test()) for the one-ROC-curve case (Obuchowski et
 #' al. 2004, formulas 2 and 3). Solves the number of cases (subjects with
 #' the target condition) needed given the expected AUC, then the number of
 #' controls via the case:control ratio (kappa).
@@ -23,7 +23,7 @@ calc_roc_auc <- function(auc, alpha = 0.05, power = 0.8, kappa = 1) {
   .validate_unit_interval(power, "power")
   .validate_positive(kappa, "kappa")
 
-  res <- pROC::power.roc.test(auc = auc, sig.level = alpha, power = power, kappa = kappa)
+  res <- .cf_pwr_roc_auc(auc = auc, sig.level = alpha, power = power, kappa = kappa)
 
   n_cases <- ceiling(res$ncases)
   n_controls <- ceiling(res$ncontrols)
@@ -38,7 +38,7 @@ calc_roc_auc <- function(auc, alpha = 0.05, power = 0.8, kappa = 1) {
 
 #' Sample size to compare two correlated (paired) ROC curves' AUCs
 #'
-#' Wraps pROC::power.roc.test() for the two-ROC-curve case with a list
+#' Obuchowski & McClish's sample size (equal to pROC::power.roc.test()) for the two-ROC-curve case with a list
 #' of binormal parameters (no empirical ROC curve needed) -- Obuchowski &
 #' McClish (1997)'s method for comparing two AUCs measured on the same
 #' subjects (e.g. two diagnostic tests applied to the same patients).
@@ -85,7 +85,6 @@ calc_compare_two_aucs <- function(A1, B1, A2, B2, rn, ra, delta,
     stop("fpr11, fpr12, fpr21, and fpr22 must be either all provided (partial AUC) or all omitted (full AUC).")
   }
 
-  parslist <- list(A1 = A1, B1 = B1, A2 = A2, B2 = B2, rn = rn, ra = ra, delta = delta)
   if (all(fpr_given)) {
     for (nm in names(fpr_args)) {
       if (!is.numeric(fpr_args[[nm]]) || length(fpr_args[[nm]]) != 1 || is.na(fpr_args[[nm]]) ||
@@ -93,10 +92,10 @@ calc_compare_two_aucs <- function(A1, B1, A2, B2, rn, ra, delta,
         stop(sprintf("%s must be a single number in [0, 1].", nm))
       }
     }
-    parslist <- c(parslist, setNames(fpr_args, toupper(names(fpr_args))))
   }
 
-  res <- pROC::power.roc.test(parslist, sig.level = alpha, power = power, kappa = kappa)
+  res <- .cf_pwr_roc_two(A1 = A1, B1 = B1, A2 = A2, B2 = B2, rn = rn, ra = ra, delta = delta, sig.level = alpha, power = power,
+                         kappa = kappa, fpr11 = fpr11, fpr12 = fpr12, fpr21 = fpr21, fpr22 = fpr22)
 
   n_cases <- ceiling(res$ncases)
   n_controls <- ceiling(res$ncontrols)

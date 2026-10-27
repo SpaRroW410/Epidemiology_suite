@@ -22,11 +22,11 @@ calc_chisq_gof <- function(P0, P1, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  w <- pwr::ES.w1(P0, P1)
+  w <- .cf_es_w1(P0, P1)
   if (isTRUE(all.equal(w, 0))) stop("P0 and P1 must differ (no effect to detect).")
   df <- length(P0) - 1
 
-  fit <- pwr::pwr.chisq.test(w = w, df = df, sig.level = alpha, power = power)
+  fit <- .cf_pwr_chisq_test(w = w, df = df, sig.level = alpha, power = power)
 
   new_ss_result(list(
     N = ceiling(fit$N),
@@ -58,11 +58,11 @@ calc_chisq_independence <- function(P, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  w <- pwr::ES.w2(P)
+  w <- .cf_es_w2(P)
   if (isTRUE(all.equal(w, 0))) stop("P must not imply independence (no effect to detect).")
   df <- (nrow(P) - 1) * (ncol(P) - 1)
 
-  fit <- pwr::pwr.chisq.test(w = w, df = df, sig.level = alpha, power = power)
+  fit <- .cf_pwr_chisq_test(w = w, df = df, sig.level = alpha, power = power)
 
   new_ss_result(list(
     N = ceiling(fit$N),

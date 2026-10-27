@@ -1,13 +1,13 @@
 # Pure calculation functions for prediction/prognostic model development
 # sample size. No Shiny dependency here so these are directly unit-testable
-# (see tests/testthat). Wraps pmsampsize::pmsampsize() rather than
-# reimplementing the underlying math (project convention) -- Riley et al.'s
-# criteria are involved (overfitting, R-squared precision, outcome-risk
-# precision) and are exactly what this package already implements.
+# (see tests/testthat). Riley et al.'s criteria (overfitting, R-squared
+# precision, outcome-risk precision) are written out in calc_closed_forms_pm.R;
+# they equal pmsampsize 1.1.3 (the tests compare them) except for one sign error
+# in that package's continuous-outcome intercept criterion, which is corrected there.
 
 #' Sample size for developing a prediction model with a binary outcome
 #'
-#' Wraps pmsampsize::pmsampsize(type = "b"). Provide exactly one of
+#' Riley et al.'s criteria for a binary outcome (equal to pmsampsize::pmsampsize(type = "b")). Provide exactly one of
 #' csrsquared (a Cox-Snell R-squared taken/adjusted from an existing model)
 #' or cstatistic (a C-statistic from an existing model, converted to an
 #' approximate Cox-Snell R-squared via Riley et al. 2020's simulation-based
@@ -38,11 +38,8 @@ calc_prediction_binary <- function(parameters, prevalence, csrsquared = NULL,
     }
   }
 
-  res <- pmsampsize::pmsampsize(
-    type = "b", parameters = parameters, prevalence = prevalence, shrinkage = shrinkage,
-    csrsquared = if (is.null(csrsquared)) NA else csrsquared,
-    cstatistic = if (is.null(cstatistic)) NA else cstatistic
-  )
+  res <- .cf_pmsampsize_bin(parameters = parameters, prevalence = prevalence, shrinkage = shrinkage,
+                            rsquared = csrsquared, cstatistic = cstatistic)
 
   new_ss_result(list(
     n = res$sample_size,
@@ -58,7 +55,8 @@ calc_prediction_binary <- function(parameters, prevalence, csrsquared = NULL,
 
 #' Sample size for developing a prediction model with a continuous outcome
 #'
-#' Wraps pmsampsize::pmsampsize(type = "c").
+#' Riley et al.'s criteria for a continuous outcome (equal to pmsampsize::pmsampsize(type = "c") unless the intercept
+#' criterion binds, where the package has a sign error; see calc_closed_forms_pm.R).
 #'
 #' @param parameters Number of candidate predictor parameters (whole number >= 1)
 #' @param intercept Expected mean outcome value in the population
@@ -81,8 +79,8 @@ calc_prediction_continuous <- function(parameters, intercept, sd, rsquared,
   .validate_unit_interval(shrinkage, "shrinkage")
   .validate_positive(mmoe, "mmoe")
 
-  res <- pmsampsize::pmsampsize(type = "c", parameters = parameters, intercept = intercept,
-                                 sd = sd, rsquared = rsquared, shrinkage = shrinkage, mmoe = mmoe)
+  res <- .cf_pmsampsize_cont(parameters = parameters, intercept = intercept, sd = sd, rsquared = rsquared,
+                             shrinkage = shrinkage, mmoe = mmoe)
 
   new_ss_result(list(
     n = res$sample_size,
@@ -97,7 +95,7 @@ calc_prediction_continuous <- function(parameters, intercept, sd, rsquared,
 
 #' Sample size for developing a prediction model with a survival (time-to-event) outcome
 #'
-#' Wraps pmsampsize::pmsampsize(type = "s").
+#' Riley et al.'s criteria for a time-to-event outcome (equal to pmsampsize::pmsampsize(type = "s")).
 #'
 #' @param parameters Number of candidate predictor parameters (whole number >= 1)
 #' @param rate Expected overall event rate in the population (same time
@@ -119,9 +117,8 @@ calc_prediction_survival <- function(parameters, rate, timepoint, meanfup,
   .validate_unit_interval(csrsquared, "csrsquared")
   .validate_unit_interval(shrinkage, "shrinkage")
 
-  res <- pmsampsize::pmsampsize(type = "s", parameters = parameters, rate = rate,
-                                 timepoint = timepoint, meanfup = meanfup,
-                                 csrsquared = csrsquared, shrinkage = shrinkage)
+  res <- .cf_pmsampsize_surv(parameters = parameters, rate = rate, timepoint = timepoint, meanfup = meanfup,
+                             rsquared = csrsquared, shrinkage = shrinkage)
 
   new_ss_result(list(
     n = res$sample_size,

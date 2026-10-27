@@ -188,7 +188,7 @@ calc_multiplicity_fdr_means <- function(d, m, pi1, fdr_level = 0.05, power = 0.8
     stop("No feasible design: the implied per-test alpha exceeds 1 for this fdr_level/pi1/power combination -- try a smaller fdr_level or power, or a smaller pi1.")
   }
 
-  fit <- pwr::pwr.t.test(d = d, sig.level = alpha_star, power = power, type = "two.sample")
+  fit <- .cf_pwr_t_test(d = d, sig.level = alpha_star, power = power, type = "two.sample")
 
   new_ss_result(list(
     n_per_group = ceiling(fit$n),

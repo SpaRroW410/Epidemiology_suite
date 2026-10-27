@@ -148,7 +148,7 @@ calc_kruskal_wallis <- function(k, f, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  fit <- pwr::pwr.anova.test(k = k, f = f, sig.level = alpha, power = power)
+  fit <- .cf_pwr_anova_test(k = k, f = f, sig.level = alpha, power = power)
   n_anova <- ceiling(fit$n)
   n_per_group <- ceiling(n_anova / .ARE_WILCOXON_NORMAL)
 

@@ -162,7 +162,7 @@ calc_poisson_regression_continuous <- function(beta0, beta1, mu_x1, sigma2_x1,
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n <- powerMediation::sizePoisson(beta0 = beta0, beta1 = beta1, mu.x1 = mu_x1,
+  n <- .cf_size_poisson(beta0 = beta0, beta1 = beta1, mu.x1 = mu_x1,
                                     sigma2.x1 = sigma2_x1, mu.T = mu_T, phi = phi,
                                     alpha = alpha, power = power)
 

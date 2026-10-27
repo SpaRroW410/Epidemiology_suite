@@ -23,8 +23,8 @@ calc_proportion_1s <- function(p0, p1, alpha = 0.05, power = 0.8,
     stop("p0 and p1 must differ (no effect to detect).")
   }
 
-  h <- pwr::ES.h(p1, p0)
-  fit <- pwr::pwr.p.test(h = h, sig.level = alpha, power = power,
+  h <- .cf_es_h(p1, p0)
+  fit <- .cf_pwr_p_test(h = h, sig.level = alpha, power = power,
                           alternative = alternative)
 
   new_ss_result(list(
@@ -57,8 +57,8 @@ calc_proportion_2s <- function(p1, p2, alpha = 0.05, power = 0.8,
     stop("p1 and p2 must differ (no effect to detect).")
   }
 
-  h <- pwr::ES.h(p1, p2)
-  fit <- pwr::pwr.2p.test(h = h, sig.level = alpha, power = power,
+  h <- .cf_es_h(p1, p2)
+  fit <- .cf_pwr_2p_test(h = h, sig.level = alpha, power = power,
                            alternative = alternative)
   n_per_group <- ceiling(fit$n)
 
