@@ -1301,8 +1301,8 @@ trimming the download.
   button or the wizard jumps to them) and one by one in the background after the first screen. An indicator beside the
   calculator lists shows what is ready and what is left (animated bar "20 of 61 ready", faint entries with a pulsing dot, a
   spinner on the next one, a tick when one becomes ready). **Measured locally** (R process + headless Chrome to a usable screen): 30 s
-  before, 9 s after; DOM 5.4 MB -> 0.7 MB, 1,483 -> 101 inputs. **Not yet measured in the browser (WebAssembly) build**; the `app` job
-  of the `docs` workflow prints the number on every push. The package downloads (about 64 MB) are unchanged by this.
+  before, 9 s after; DOM 5.4 MB -> 0.7 MB, 1,483 -> 101 inputs. **In the browser (WebAssembly) build on the CI runner:** UI visible after 27 s instead of 77 s, first calculation after 5.4 s instead of 12 s
+  (the `app` job of the `docs` workflow prints these on every push; not measured on a phone). The package downloads (about 63 MB) are unchanged by this.
 - **A bug the UI tests found in my first version:** a lazily loaded calculator's server started before the browser had bound its
   inputs, so renders that test `input$design` failed with "argument is of length zero" and flashed an error. Fixed by starting a
   module's server only after the browser reports the inserted UI as bound (`lazy_bound`); a UI test now fails on any such R error.

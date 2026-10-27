@@ -188,7 +188,7 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] Keep `docs/checklist_by_design.md` / `checklist_by_test.md` in step with the Analyze and planning modules (they predate them).
 
 ### Start-up, wizard and UI (27 Oct 2026)
-- [ ] Measure the lazy loading in the browser build (the `app` job prints `ui_visible_s`; the earlier number was 77 s) and on a phone.
+- [x] Lazy loading in the browser build on CI: UI visible 77 s -> 27 s, first calculation 12 s -> 5.4 s. [ ] Still to measure on a real phone.
 - [ ] The 64 MB package download of the browser build is the remaining start-up cost; trimming needs the item-16 dependency work.
 - [ ] Background loading order and the four start-up calculators are a guess at what people use first: revisit with real usage.
 - [ ] Wizard: a cohort with a *continuous exposure* (dose-response) and a case-control with a *categorical* exposure still go to the
