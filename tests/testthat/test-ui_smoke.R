@@ -437,6 +437,8 @@ test_that("background loading fills in every calculator with the indicator besid
   expect_equal(app$get_js("document.querySelectorAll('.lazy-box:not(.lazy-complete)').length"), 0)   # and the bar has finished
   expect_equal(ui_output_errors(app), 0)
   ui_open_module(app, "Epidemic Models and Herd Immunity")
+  # a calculator loaded in the background renders once its tab is shown; on a slow machine that is after "idle" first reads true
+  app$wait_for_js("(function(){var e=document.getElementById('epidemic_model-result'); return !!e && e.innerText.trim().length > 0;})()", timeout = 60000)
   expect_match(ui_output_text(app, "epidemic_model-result"), "Herd-immunity threshold 91\\.7%")
 })
 
