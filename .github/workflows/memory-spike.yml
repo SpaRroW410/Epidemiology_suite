@@ -1,0 +1,40 @@
+# How much memory does the browser build need, and what takes it? (a phone tab is killed above roughly 1.5 GB on iOS.)
+# Exports three variants (a one-line Shiny page = the browser runtime's own floor, the app as published, and the app without the
+# MASS / lme4 start-up prelude), opens each at an iPhone size in headless Chrome and records the renderer's resident memory.
+# Manual (workflow_dispatch) or when this file changes.
+name: memory-spike
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/memory-spike.yml"
+      - "tools/pages/memory_probe.mjs"
+
+jobs:
+  memory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [instrumented]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - run: Rscript -e 'install.packages("shinylive")'
+      - run: Rscript tools/pages/make_app.R app_dir ${{ matrix.variant }}
+      - run: Rscript -e 'shinylive::export("app_dir", "out/app")'
+      - name: Measure
+        run: |
+          (cd out && python3 -m http.server 8008 >/dev/null 2>&1 &)
+          sleep 3
+          npm init -y >/dev/null && npm install playwright-core >/dev/null   # at the repository root, where the ES module finds it
+          marker=epidemiologicasuite; [ "${{ matrix.variant }}" = hello ] && marker="Hello memory probe"
+          node tools/pages/memory_probe.mjs http://localhost:8008/app/ "$marker" mem-${{ matrix.variant }}.json 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: memory-${{ matrix.variant }}
+          path: mem-*.json
