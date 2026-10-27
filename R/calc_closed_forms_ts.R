@@ -80,3 +80,47 @@
 .cf_ts_nonpara_indep <- function(alpha, beta, p1, p2) {
   4 * (stats::qnorm(1 - alpha / 2) / 3 + stats::qnorm(1 - beta) * sqrt(2 * p2 - 1 - (2 * p1 - 1)^2))^2 / (2 * p1 - 1)^2
 }
+
+# --- Survival and conditional-logistic sample sizes that used to come from `powerSurvEpi` --------------------------------------
+# The sources are the ones named in the module content files (content_logrank.R, content_case_control.R) and the package's own
+# documentation: Freedman 1982 (via Rosner 2006) for the two-group log-rank size, Latouche et al. 2004 and Hsieh & Lavori 2000 for
+# the Cox-model covariate sizes, Palta & Amini 1985 for stratification, and the matched case-control power formulas of Dupont 1988.
+# None of the originals was read here; the formulas are checked against the package, not against the papers.
+# powerConLogistic.bin / .con; tests compare them with the package over grids of inputs.
+
+# Two groups, log-rank, equal follow-up: k = nE / nC; pE, pC = event probabilities; RR = hazard ratio.
+.cf_pse_ssize_ct <- function(power, k, pE, pC, RR, alpha = 0.05) {
+  za <- stats::qnorm(1 - alpha / 2); zb <- stats::qnorm(power)
+  m <- ((k * RR + 1) / (RR - 1))^2 * (za + zb)^2 / k
+  denom <- k * pE + pC
+  c(nE = ceiling(m * k / denom), nC = ceiling(m / denom))
+}
+# Cox model, binary covariate: theta = hazard ratio, p = proportion exposed, psi = event proportion, rho2 = squared multiple correlation.
+.cf_pse_ssize_epi <- function(power, theta, p, psi, rho2, alpha = 0.05) {
+  ceiling((stats::qnorm(1 - alpha / 2) + stats::qnorm(power))^2 / (log(theta)^2 * p * (1 - p) * psi * (1 - rho2)))
+}
+# Cox model, continuous covariate with variance sigma2.
+.cf_pse_ssize_epi_cont <- function(power, theta, sigma2, psi, rho2, alpha = 0.05) {
+  ceiling((stats::qnorm(1 - alpha / 2) + stats::qnorm(power))^2 / (log(theta)^2 * sigma2 * psi * (1 - rho2)))
+}
+# Stratified log-rank (one-sided alpha, as in the package): strata weights gVec, exposed proportions PVec, baseline hazards lambda0Vec.
+.cf_pse_ssize_stratify <- function(power, timeUnit, gVec, PVec, HR, lambda0Vec, alpha = 0.05) {
+  lambda1Vec <- lambda0Vec * HR
+  part1 <- PVec * (1 - (exp(-lambda1Vec * (timeUnit - 1)) - exp(-lambda1Vec * timeUnit)) / lambda1Vec)
+  part2 <- (1 - PVec) * (1 - (exp(-lambda0Vec * (timeUnit - 1)) - exp(-lambda0Vec * timeUnit)) / lambda0Vec)
+  Vs <- part1 + part2
+  mu <- log(HR) * sqrt(sum(gVec * PVec * (1 - PVec) * Vs, na.rm = TRUE))
+  ceiling((stats::qnorm(1 - alpha) + stats::qnorm(power))^2 / mu^2)
+}
+# Matched case-control (nD cases and nH controls per set): number of sets N for a binary exposure with prevalence pE.
+.cf_pse_conlogistic_bin <- function(power = 0.8, OR, pE, nD, nH, R2 = 0, alpha = 0.05, nTests = 1) {
+  za <- stats::qnorm(1 - (alpha / 2) / nTests)
+  core <- log(OR)^2 * pE * (1 - pE) * (1 - R2) * nD * nH / (nD + nH)
+  (stats::qnorm(power) + za)^2 / core
+}
+# ... and for a continuous exposure with standard deviation sigma.
+.cf_pse_conlogistic_con <- function(power = 0.8, OR, sigma, nD, nH, R2 = 0, alpha = 0.05, nTests = 1) {
+  za <- stats::qnorm(1 - (alpha / 2) / nTests)
+  core <- log(OR)^2 * sigma^2 * nD * (1 - 1 / choose(nD + nH, nD)) * (1 - R2)
+  (stats::qnorm(power) + za)^2 / core
+}

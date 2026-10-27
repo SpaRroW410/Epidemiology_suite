@@ -154,6 +154,8 @@
 }
 
 # --- Logistic and Poisson regression sample sizes (replace powerMediation) ---------------------------------------------------
+# (Sources as cited in the package documentation and the module content files; none of the originals was read here, the formulas
+# are checked against the packages.)
 # Hsieh FY, Bloch DA, Larsen MD. A simple method of sample size calculation for linear and logistic regression. Stat Med 1998;17:1623-1634
 # (formula 1: continuous predictor; formula 2: binary predictor) and Signorini DF. Sample size for Poisson regression. Biometrika
 # 1991;78:446-450. Written out here; tests compare them with powerMediation::SSizeLogisticCon / SSizeLogisticBin / sizePoisson.

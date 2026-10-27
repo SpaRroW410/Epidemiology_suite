@@ -1,11 +1,11 @@
 # Pure calculation function for log-rank test sample size. No Shiny
 # dependency here so this is directly unit-testable (see tests/testthat).
-# Wraps powerSurvEpi::ssizeCT.default() (Freedman 1982, via Rosner 2006)
+# Wraps .cf_pse_ssize_ct() (Freedman 1982, via Rosner 2006)
 # rather than reimplementing the underlying math (project convention).
 
 #' Sample size for comparing two survival curves (log-rank test)
 #'
-#' Wraps powerSurvEpi::ssizeCT.default(). Sizes a study to detect a given
+#' Wraps .cf_pse_ssize_ct(). Sizes a study to detect a given
 #' hazard ratio between an experimental and control group over a fixed
 #' maximum follow-up period, expressed via each group's expected cumulative
 #' probability of the event (not person-time/rate-based).
@@ -29,7 +29,7 @@ calc_logrank <- function(pE, pC, hr, ratio = 1, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  fit <- powerSurvEpi::ssizeCT.default(power = power, k = ratio, pE = pE, pC = pC,
+  fit <- .cf_pse_ssize_ct(power = power, k = ratio, pE = pE, pC = pC,
                                        RR = hr, alpha = alpha)
 
   n_exp <- ceiling(fit[["nE"]])
@@ -46,7 +46,7 @@ calc_logrank <- function(pE, pC, hr, ratio = 1, alpha = 0.05, power = 0.8) {
 #' Sample size for Cox proportional-hazards regression, binary covariate
 #' of interest
 #'
-#' Wraps powerSurvEpi::ssizeEpi.default() (Latouche et al. 2004, reducing to
+#' Wraps .cf_pse_ssize_epi() (Latouche et al. 2004, reducing to
 #' Schoenfeld 1983 when rho2 = 0). Accounts for competing risks (via psi,
 #' the overall event probability) and, optionally, confounding/adjustment
 #' for another covariate correlated with the covariate of interest (rho2).
@@ -70,7 +70,7 @@ calc_cox_binary <- function(power, theta, p, psi, rho2 = 0, alpha = 0.05) {
   }
   .validate_unit_interval(alpha, "alpha")
 
-  n <- powerSurvEpi::ssizeEpi.default(power = power, theta = theta, p = p,
+  n <- .cf_pse_ssize_epi(power = power, theta = theta, p = p,
                                       psi = psi, rho2 = rho2, alpha = alpha)
 
   new_ss_result(list(
@@ -82,7 +82,7 @@ calc_cox_binary <- function(power, theta, p, psi, rho2 = 0, alpha = 0.05) {
 #' Sample size for Cox proportional-hazards regression, continuous (or
 #' other non-binary) covariate of interest
 #'
-#' Wraps powerSurvEpi::ssizeEpiCont.default() (Hsieh & Lavori 2000).
+#' Wraps .cf_pse_ssize_epi_cont() (Hsieh & Lavori 2000).
 #'
 #' @param power Desired power (0,1)
 #' @param theta Postulated hazard ratio per one-unit increase in the
@@ -104,7 +104,7 @@ calc_cox_continuous <- function(power, theta, sigma2, psi, rho2 = 0, alpha = 0.0
   }
   .validate_unit_interval(alpha, "alpha")
 
-  n <- powerSurvEpi::ssizeEpiCont.default(power = power, theta = theta, sigma2 = sigma2,
+  n <- .cf_pse_ssize_epi_cont(power = power, theta = theta, sigma2 = sigma2,
                                           psi = psi, rho2 = rho2, alpha = alpha)
 
   new_ss_result(list(
@@ -117,7 +117,7 @@ calc_cox_continuous <- function(power, theta, sigma2, psi, rho2 = 0, alpha = 0.0
 #' Sample size for a stratified log-rank test, exponential survival,
 #' binary predictor
 #'
-#' Wraps powerSurvEpi::ssize.stratify() (Palta & Amini 1985). Sizes a study
+#' Wraps .cf_pse_ssize_stratify() (Palta & Amini 1985). Sizes a study
 #' with m strata (e.g. sites, age bands) where the hazard is exponential
 #' within each stratum, the treatment effect (hazard ratio) is constant
 #' across strata (proportional hazards), and the analysis will be a
@@ -150,9 +150,9 @@ calc_survival_stratified <- function(power, timeUnit, gVec, pVec, hr, lambda0Vec
   if (any(pVec <= 0) || any(pVec >= 1)) stop("Each entry of pVec must be strictly between 0 and 1.")
   if (any(lambda0Vec <= 0)) stop("Each entry of lambda0Vec must be positive.")
 
-  n <- powerSurvEpi::ssize.stratify(power = power, timeUnit = timeUnit, gVec = gVec,
+  n <- .cf_pse_ssize_stratify(power = power, timeUnit = timeUnit, gVec = gVec,
                                     PVec = pVec, HR = hr, lambda0Vec = lambda0Vec,
-                                    alpha = alpha, verbose = FALSE)
+                                    alpha = alpha)
 
   new_ss_result(list(
     n_total = ceiling(n),
