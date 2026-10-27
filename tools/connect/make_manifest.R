@@ -14,9 +14,10 @@ m <- jsonlite::fromJSON(file.path(out, "manifest.json"), simplifyVector = FALSE)
 need <- c("shiny", "bslib", "lme4", "PowerTOST", "Exact", "clinfun", "kappaSize", "mvtnorm", "survival")
 missing <- setdiff(need, names(m$packages))
 if (length(missing)) stop("manifest.json lacks packages the app uses: ", paste(missing, collapse = ", "))
-# CRAN, or the Posit Package Manager mirror of it (what the CI runner installs from), can be installed by Connect; a GitHub or
-# local source cannot
-bad <- names(Filter(function(p) !(p$Source %in% c("CRAN", "RSPM", "PPM", "Bioconductor")), m$packages))
-if (length(bad)) stop("packages not from CRAN (Connect could not install them): ", paste(bad, collapse = ", "))
+# Connect can install from CRAN or a mirror of it (what the CI runner installs from: the source reads "CRAN", "RSPM", "standard" ...);
+# it cannot install from GitHub or a local copy, so refuse those
+src <- vapply(m$packages, function(p) if (is.null(p$Source)) "none" else as.character(p$Source), "")
+bad <- names(src)[tolower(src) %in% c("github", "gitlab", "bitbucket", "git", "local", "url", "source", "none", "unknown")]
+if (length(bad)) stop("packages Connect could not install (source in brackets): ", paste0(bad, " [", src[bad], "]", collapse = ", "))
 cat("package sources:", paste(names(table(vapply(m$packages, function(p) p$Source, ""))), table(vapply(m$packages, function(p) p$Source, "")), collapse = ", "), "\n")
 cat(sprintf("Wrote %s/manifest.json: %d packages, %d files\n", out, length(m$packages), length(m$files)))
