@@ -473,7 +473,8 @@ test_that("wizard: a cohort with a measured outcome reaches the means calculator
   expect_match(ui_output_text(app, "design_wizard_body"), "Anything unusual about the two groups")
   # click through to the calculator
   app$set_inputs(design_wizard_choice = "1"); app$click("design_wizard_next"); app$wait_for_idle(800, timeout = 30000)
-  expect_match(ui_output_text(app, "design_wizard_body"), "Two independent means")
+  expect_match(ui_output_text(app, "design_wizard_body"), "Two independent groups")
+  expect_match(ui_output_text(app, "design_wizard_body"), "Go to: Means")
   # Back returns to the previous question
   app$click("design_wizard_back"); app$wait_for_idle(800, timeout = 30000)
   expect_match(ui_output_text(app, "design_wizard_body"), "Anything unusual about the two groups")
@@ -486,7 +487,7 @@ test_that("wizard: the case-control question offers a measured exposure, and its
   skip_if_no_ui()
   app <- ui_driver()
   .wizard_open(app)
-  app$click("design_wizard_restart"); app$wait_for_idle(500, timeout = 30000)
+  if (app$get_js("!!document.getElementById('design_wizard_restart')")) { app$click("design_wizard_restart"); app$wait_for_idle(500, timeout = 30000) }
   app$set_inputs(design_wizard_freetext = "Case-control study comparing mean serum lead level between cases and controls, unmatched")
   app$click("design_wizard_parse"); app$wait_for_idle(800, timeout = 30000)
   expect_match(ui_output_text(app, "design_wizard_body"), "Anything unusual about the two groups")
