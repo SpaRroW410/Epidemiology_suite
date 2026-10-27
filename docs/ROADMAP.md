@@ -1292,3 +1292,36 @@ fails) before it is published. First passing CI run: UI visible after 77 s, firs
 that check on its first run: Shinylive's package scan read `library(p, character.only = TRUE)` as a package called "p", so `bslib` was
 never attached; fixed by attaching by name. Not yet done: publishing (needs the owner steps in `docs/to_do_later.md`), a phone test, and
 trimming the download.
+
+
+### Start-up time, the Home wizard and a UI audit (27 Oct 2026)
+- **Lazy loading of the calculators** (`R/lazy_modules.R`, `epidemiologicasuite_app(lazy = TRUE)`): the page had about 65 modules, 1,500
+  inputs and 5.4 MB of HTML before the first screen. Now only four basic calculators (Proportions, Means, Correlation, 2x2
+  analysis) are built at start; the sidebars still list every calculator, the others are inserted when opened (or when a Home
+  button or the wizard jumps to them) and one by one in the background after the first screen. An indicator beside the
+  calculator lists shows what is ready and what is left (animated bar "20 of 61 ready", faint entries with a pulsing dot, a
+  spinner on the next one, a tick when one becomes ready). **Measured locally** (R process + headless Chrome to a usable screen): 30 s
+  before, 9 s after; DOM 5.4 MB -> 0.7 MB, 1,483 -> 101 inputs. **Not yet measured in the browser (WebAssembly) build**; the `app` job
+  of the `docs` workflow prints the number on every push. The package downloads (about 64 MB) are unchanged by this.
+- **A bug the UI tests found in my first version:** a lazily loaded calculator's server started before the browser had bound its
+  inputs, so renders that test `input$design` failed with "argument is of length zero" and flashed an error. Fixed by starting a
+  module's server only after the browser reports the inserted UI as bound (`lazy_bound`); a UI test now fails on any such R error.
+- **Home layout:** the helper card was a fill item, so it was as tall as the window with its content scrolling in a small
+  window, and the free-text box was a 300 px, 2-row box that cut its placeholder. The card now grows with its content and the box
+  is full width. UI tests check both.
+- **Wizard tree:** after "selected on exposure" a cohort now asks for its outcome (risk -> relative risk, a measurement -> difference
+  in means, rate per person-time -> rate ratio, time to event -> survival, ordinal); after "selected on outcome" a case-control
+  study asks whether the exposure is yes/no (odds ratio) or a measurement (difference in mean levels: independent, paired when
+  individually matched, or frequency-matched). Before, both went straight to relative risk / odds ratio and the cohort calculator
+  note itself said to look in the Means module. A **Back** button was added.
+- **Free-text rules:** new rules for trial unit and intent, cohort outcome, case-control exposure, nested case-control, case-cohort,
+  case-crossover, SCCS, ecological, correlation / regression, meta-analysis, "other" designs, diagnostic and agreement
+  sub-questions; fixes for "comparing" (the old pattern only matched "compare"), "case control" without a hyphen,
+  and "intracluster correlation" (it was sent to the correlation calculators). The parser still stops at a question when a
+  description does not settle it. A battery of 101 plain-language descriptions with their expected end node is in
+  `tests/testthat/test-design_wizard_battery.R`; every complete click path through the wizard (636) is checked to end on a terminal
+  with a valid catalog entry. Known limits: the parser is keywords, so unusual wording falls back to a question; "interrupted time
+  series" has no calculator; the individual-vs-cluster assumption for a plain "trial" is shown in the trail as Medium confidence.
+- **UI audit** (`tools/ui-audit/audit.R`, run by hand): every calculator and Home at 1366 px and 390 px: no horizontal scroll, no
+  content wider than the window, no small scroll windows, no clipped inputs, no output or R errors, no console errors; the detector was
+  checked against an injected fault. It covers layout and errors, not whether each result is numerically right (the unit tests do that).

@@ -186,3 +186,12 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] Re-snapshot `renv.lock` if a dependency is added or removed (it still lists the removed runtime packages, which is
   intended: the tests use them as oracles).
 - [ ] Keep `docs/checklist_by_design.md` / `checklist_by_test.md` in step with the Analyze and planning modules (they predate them).
+
+### Start-up, wizard and UI (27 Oct 2026)
+- [ ] Measure the lazy loading in the browser build (the `app` job prints `ui_visible_s`; the earlier number was 77 s) and on a phone.
+- [ ] The 64 MB package download of the browser build is the remaining start-up cost; trimming needs the item-16 dependency work.
+- [ ] Background loading order and the four start-up calculators are a guess at what people use first: revisit with real usage.
+- [ ] Wizard: a cohort with a *continuous exposure* (dose-response) and a case-control with a *categorical* exposure still go to the
+  yes/no routes; a case-control with several controls per case and a measured exposure uses the paired test (1:m is approximate).
+- [ ] The keyword parser is deliberately conservative; a language-model option would need an API decision (the app has none).
+- [ ] UI audit: not run on a real phone or with a screen reader; item 22 (accessibility, dark mode) is still open.
