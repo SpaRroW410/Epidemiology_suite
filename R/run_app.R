@@ -67,10 +67,12 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
   # bslib::nav_select("main_nav", ...) -- see jump_to_module() in registry.R.
   ui <- do.call(page_navbar, c(
     list(
-      id = "main_nav", title = "epidemiologicasuite",
+      id = "main_nav", title = "epidemiologicasuite", lang = "en",
       theme = bs_theme(
         version = 5,
         bootswatch = "litera",
+        # litera's blue (#4582ec) has a contrast of 3.7:1 against white; WCAG AA needs 4.5:1 for normal-size text
+        primary = "#2a66cf",
         # A local font stack, not bslib::font_google(): that downloads the font when the first page is
         # rendered, so the app could not start without internet (a Shinylive/offline build, a locked-down
         # server). "Source Serif 4" is used if it is installed on the viewer's machine.
@@ -78,7 +80,7 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
         heading_font = font_collection("Source Serif 4", "Georgia", "Cambria", "Times New Roman", "serif"),
         "font-size-base" = "0.95rem"
       ),
-      header = tagList(browser_notice_ui(), tags$style(HTML(.workbench_css)),
+      header = tagList(browser_notice_ui(), tags$style(HTML(.workbench_css)), accessibility_script(),
                        if (length(pending_titles)) lazy_sidebar_assets(pending_titles))
     ),
     list(home_panel),

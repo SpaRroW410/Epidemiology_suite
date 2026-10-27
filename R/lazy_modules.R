@@ -151,9 +151,10 @@ ul.nav-stacked a.lazy-flash::after { content: '\\2713'; position: absolute; righ
     document.querySelectorAll('ul.nav-stacked').forEach(function (ul) {
       if (ul.querySelector('.lazy-box')) return;
       var li = document.createElement('li');
-      li.className = 'lazy-box'; li.setAttribute('role', 'status'); li.setAttribute('aria-live', 'polite');
-      li.innerHTML = '<div class=\"lazy-caption\"><span>Loading calculators</span><span class=\"lazy-count\"></span></div>' +
-        '<div class=\"lazy-track\"><div class=\"lazy-fill\"></div></div><div class=\"lazy-next\"></div>';
+      li.className = 'lazy-box';
+      // the live region sits inside the <li>: a <ul> may only contain <li>, so the role cannot go on the <li> itself
+      li.innerHTML = '<div role=\"status\" aria-live=\"polite\"><div class=\"lazy-caption\"><span>Loading calculators</span><span class=\"lazy-count\"></span></div>' +
+        '<div class=\"lazy-track\"><div class=\"lazy-fill\"></div></div><div class=\"lazy-next\"></div></div>';
       ul.insertBefore(li, ul.firstChild);
     });
     paint();
