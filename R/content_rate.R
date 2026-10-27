@@ -42,7 +42,7 @@ rate_content <- list(
       "Parameter When the Expected Number of Events is <= 5. Am Stat.",
       "2002;56(2):85-89. (as implemented by presize::prec_rate)."
     ),
-    backend = "presize::prec_rate()"
+    backend = "closed form written out in the app, equal to presize::prec_rate() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   comparison = list(
@@ -137,7 +137,7 @@ rate_content <- list(
       "Signorini DF. Sample size for Poisson regression. Biometrika.",
       "1991;78(2):446-450."
     ),
-    backend = "powerMediation::sizePoisson()"
+    backend = "closed form written out in the app, equal to powerMediation::sizePoisson() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   negative_binomial = list(

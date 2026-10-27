@@ -391,3 +391,112 @@ for (m in registry) {
     })
   })
 }
+
+# --- lazy loading of the calculators (start-up time) -------------------------
+
+test_that("start-up builds only the core calculators; lazy = FALSE builds all (static check)", {
+  count_placeholders <- function(app) {
+    html <- htmltools::renderTags(attr(app, "ui_tags"))$html
+    lengths(regmatches(html, gregexpr('id="lazy_', html)))
+  }
+  n_lazy <- count_placeholders(epidemiologicasuite_app(lazy = TRUE))
+  expect_equal(n_lazy, length(module_registry()) - length(lazy_core_modules))
+  expect_equal(count_placeholders(epidemiologicasuite_app(lazy = FALSE)), 0)
+  expect_true(all(lazy_core_modules %in% vapply(module_registry(), `[[`, character(1), "id")))
+  # the first module of every workbench is a core module, so no workbench opens on a placeholder
+  firsts <- vapply(module_workbenches, function(wb) wb$groups[[1]]$module_ids[1], "")
+  expect_true(all(firsts %in% lazy_core_modules))
+})
+
+test_that("a Home jump to a calculator that is not loaded yet loads it and then sets its design", {
+  skip_if_no_ui()
+  app <- ui_fresh_driver(name = "lazy_jump")
+  withr::defer(app$stop())
+  expect_true(app$get_js("!!document.querySelector('#lazy_survey_selection > .lazy-note')"))   # not loaded at start
+  ids <- home_browse_button_ids()
+  btn <- names(ids)[ids == "survey_select_epi"][1]
+  app$run_js(sprintf("Shiny.setInputValue(%s, 1, {priority: 'event'})", ui_js_string(btn)))   # what the Home button sends
+  app$wait_for_js("Shiny.shinyapp.$inputValues['survey_selection-design'] === 'epi'", timeout = 60000)
+  expect_false(app$get_js("!!document.querySelector('#lazy_survey_selection > .lazy-note')"))
+  app$wait_for_idle(800, timeout = 60000)
+  expect_equal(ui_output_errors(app), 0)
+})
+
+test_that("background loading fills in every calculator with the indicator beside the lists, without errors", {
+  skip_if_no_ui()
+  old <- Sys.getenv("EPIDEMIOLOGICASUITE_BACKGROUND_LOAD"); on.exit(Sys.setenv(EPIDEMIOLOGICASUITE_BACKGROUND_LOAD = old), add = TRUE)
+  app <- ui_fresh_driver(background_load = TRUE, name = "lazy_bg")
+  withr::defer(app$stop())
+  # the indicator beside the calculator lists: faint entries for what is still to come, and a bar with the count
+  expect_true(app$get_js("document.querySelectorAll('ul.nav-stacked a.lazy-pending').length") > 0)
+  expect_true(app$get_js("document.querySelectorAll('.lazy-box').length") == 2)       # one per workbench
+  expect_true(app$get_js("document.querySelectorAll('.lazy-note').length") > 0)
+  app$wait_for_js("document.querySelectorAll('.lazy-note').length === 0", timeout = 240000)
+  app$wait_for_idle(1500, timeout = 120000)
+  expect_equal(app$get_js("document.querySelectorAll('ul.nav-stacked a.lazy-pending').length"), 0)   # nothing left to come
+  expect_equal(app$get_js("document.querySelectorAll('.lazy-box:not(.lazy-complete)').length"), 0)   # and the bar has finished
+  expect_equal(ui_output_errors(app), 0)
+  ui_open_module(app, "Epidemic Models and Herd Immunity")
+  # a calculator loaded in the background renders once its tab is shown; on a slow machine that is after "idle" first reads true
+  app$wait_for_js("(function(){var e=document.getElementById('epidemic_model-result'); return !!e && e.innerText.trim().length > 0;})()", timeout = 60000)
+  expect_match(ui_output_text(app, "epidemic_model-result"), "Herd-immunity threshold 91\\.7%")
+})
+
+# --- Home wizard (guided questions + free-text box) --------------------------
+
+.wizard_open <- function(app) {
+  ui_select_tab(app, "main_nav", "Home")
+  app$run_js(sprintf("%s.click()", ui_js_by_data_value("a[data-bs-toggle=tab][data-value]", "Which calculator? (guided wizard)")))
+  app$wait_for_js("!!document.getElementById('design_wizard_freetext')", timeout = 30000)
+  app$wait_for_idle(500, timeout = 30000)
+}
+
+test_that("the wizard's question box is full width and tall enough to read, and the Home card is not a small scroll window", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  .wizard_open(app)
+  box <- app$get_js("(function(){var r=document.getElementById('design_wizard_freetext').getBoundingClientRect(); return [r.width, r.height];})()")
+  expect_gt(box[[1]], 400); expect_gt(box[[2]], 70)
+  # no card body on the Home page scrolls inside a window smaller than its content
+  expect_equal(app$get_js("Array.from(document.querySelectorAll('.card-body')).filter(function(e){return e.clientHeight > 0 && e.scrollHeight > e.clientHeight + 4;}).length"), 0)
+})
+
+test_that("wizard: a cohort with a measured outcome reaches the means calculators, Back steps back, free text pre-fills", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  .wizard_open(app)
+  app$set_inputs(design_wizard_freetext = "Cohort study, difference in mean blood pressure between exposed and unexposed")
+  app$click("design_wizard_parse")
+  app$wait_for_idle(800, timeout = 30000)
+  txt <- ui_output_text(app, "design_wizard_trace")
+  expect_match(txt, "auto-suggested")
+  expect_match(txt, "Their exposure status")
+  expect_match(txt, "A measurement compared between exposed and unexposed")
+  expect_match(ui_output_text(app, "design_wizard_body"), "Anything unusual about the two groups")
+  # click through to the calculator
+  app$set_inputs(design_wizard_choice = "1"); app$click("design_wizard_next"); app$wait_for_idle(800, timeout = 30000)
+  expect_match(ui_output_text(app, "design_wizard_body"), "Two independent groups")
+  expect_match(ui_output_text(app, "design_wizard_body"), "Go to: Means")
+  # Back returns to the previous question
+  app$click("design_wizard_back"); app$wait_for_idle(800, timeout = 30000)
+  expect_match(ui_output_text(app, "design_wizard_body"), "Anything unusual about the two groups")
+  app$click("design_wizard_restart"); app$wait_for_idle(800, timeout = 30000)
+  expect_match(ui_output_text(app, "design_wizard_body"), "primary purpose of your study")
+  expect_equal(ui_output_errors(app), 0)
+})
+
+test_that("wizard: the case-control question offers a measured exposure, and its Go to button opens the means calculator", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  .wizard_open(app)
+  if (app$get_js("!!document.getElementById('design_wizard_restart')")) { app$click("design_wizard_restart"); app$wait_for_idle(500, timeout = 30000) }
+  app$set_inputs(design_wizard_freetext = "Case-control study comparing mean serum lead level between cases and controls, unmatched")
+  app$click("design_wizard_parse"); app$wait_for_idle(800, timeout = 30000)
+  expect_match(ui_output_text(app, "design_wizard_body"), "Anything unusual about the two groups")
+  app$set_inputs(design_wizard_choice = "1"); app$click("design_wizard_next"); app$wait_for_idle(800, timeout = 30000)
+  expect_match(ui_output_text(app, "design_wizard_body"), "Go to: Means")
+  app$click("design_wizard_jump")
+  app$wait_for_js("Shiny.shinyapp.$inputValues['main_nav'] === 'Plan: Sample Size'", timeout = 60000)
+  app$wait_for_js("Shiny.shinyapp.$inputValues['means-design'] !== undefined", timeout = 60000)
+  expect_equal(ui_output_errors(app), 0)
+})

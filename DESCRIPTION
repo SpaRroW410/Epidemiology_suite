@@ -17,16 +17,10 @@ Depends: R (>= 4.3.0)
 Imports:
     shiny,
     bslib,
-    pwr,
-    presize,
     clinfun,
-    powerSurvEpi,
     PowerTOST,
     Exact,
-    pmsampsize,
-    pROC,
-    TrialSize,
-    powerMediation,
+    kappaSize,
     mvtnorm,
     lme4,
     survival,
@@ -42,7 +36,14 @@ Suggests:
     tseries,
     BayesFactor,
     deSolve,
-    spc
+    spc,
+    pwr,
+    powerMediation,
+    pmsampsize,
+    pROC,
+    presize,
+    powerSurvEpi,
+    TrialSize
 Config/testthat/edition: 3
 URL: https://github.com/SpaRroW410/Sample_size_all
 BugReports: https://github.com/SpaRroW410/Sample_size_all/issues

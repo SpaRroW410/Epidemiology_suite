@@ -176,7 +176,7 @@ case_control_content <- list(
       "Risks. 2nd ed. Wiley; 2008. sec. 3.1 (continuous exposure, formulas",
       "24-25), sec. 3.3 (binary exposure, formula 38)."
     ),
-    backend = "powerSurvEpi::powerConLogistic.bin() / powerConLogistic.con()"
+    backend = "closed form written out in the app, equal to powerSurvEpi::powerConLogistic.bin() / powerConLogistic.con() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   case_cohort = list(

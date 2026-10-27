@@ -39,7 +39,7 @@ proportion_content <- list(
       "(arcsine-transformed effect size h, and one-sample proportion power",
       "analysis, as implemented by pwr::pwr.p.test)."
     ),
-    backend = "pwr::pwr.p.test (effect size via pwr::ES.h)"
+    backend = "closed form written out in the app, equal to pwr::pwr.p.test (effect size via pwr::ES.h) (compared with the package in the tests; the package is not a dependency)"
   ),
   precision = list(
     title = "Single Proportion -- Precision-Based (No Reference Value)",
@@ -131,7 +131,7 @@ proportion_content <- list(
       "(arcsine-transformed effect size h, and two-sample proportion power",
       "analysis, as implemented by pwr::pwr.2p.test)."
     ),
-    backend = "pwr::pwr.2p.test (effect size via pwr::ES.h)"
+    backend = "closed form written out in the app, equal to pwr::pwr.2p.test (effect size via pwr::ES.h) (compared with the package in the tests; the package is not a dependency)"
   ),
 
   posthoc_pairwise = list(
@@ -175,6 +175,6 @@ proportion_content <- list(
       "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
       "Research. New York: Marcel Dekker; 2003. Section 4.4.2."
     ),
-    backend = "TrialSize::OneWayANOVA.PairwiseComparison()"
+    backend = "closed form written out in the app, equal to TrialSize::OneWayANOVA.PairwiseComparison() (compared with the package in the tests; the package is not a dependency)"
   )
 )

@@ -1292,3 +1292,66 @@ fails) before it is published. First passing CI run: UI visible after 77 s, firs
 that check on its first run: Shinylive's package scan read `library(p, character.only = TRUE)` as a package called "p", so `bslib` was
 never attached; fixed by attaching by name. Not yet done: publishing (needs the owner steps in `docs/to_do_later.md`), a phone test, and
 trimming the download.
+
+
+### Start-up time, the Home wizard and a UI audit (27 Oct 2026)
+- **Lazy loading of the calculators** (`R/lazy_modules.R`, `epidemiologicasuite_app(lazy = TRUE)`): the page had about 65 modules, 1,500
+  inputs and 5.4 MB of HTML before the first screen. Now only four basic calculators (Proportions, Means, Correlation, 2x2
+  analysis) are built at start; the sidebars still list every calculator, the others are inserted when opened (or when a Home
+  button or the wizard jumps to them) and one by one in the background after the first screen. An indicator beside the
+  calculator lists shows what is ready and what is left (animated bar "20 of 61 ready", faint entries with a pulsing dot, a
+  spinner on the next one, a tick when one becomes ready). **Measured locally** (R process + headless Chrome to a usable screen): 30 s
+  before, 9 s after; DOM 5.4 MB -> 0.7 MB, 1,483 -> 101 inputs. **In the browser (WebAssembly) build on the CI runner:** UI visible after 27 s instead of 77 s, first calculation after 5.4 s instead of 12 s
+  (the `app` job of the `docs` workflow prints these on every push; not measured on a phone). The package downloads (about 63 MB) are unchanged by this.
+- **A bug the UI tests found in my first version:** a lazily loaded calculator's server started before the browser had bound its
+  inputs, so renders that test `input$design` failed with "argument is of length zero" and flashed an error. Fixed by starting a
+  module's server only after the browser reports the inserted UI as bound (`lazy_bound`); a UI test now fails on any such R error.
+- **Home layout:** the helper card was a fill item, so it was as tall as the window with its content scrolling in a small
+  window, and the free-text box was a 300 px, 2-row box that cut its placeholder. The card now grows with its content and the box
+  is full width. UI tests check both.
+- **Wizard tree:** after "selected on exposure" a cohort now asks for its outcome (risk -> relative risk, a measurement -> difference
+  in means, rate per person-time -> rate ratio, time to event -> survival, ordinal); after "selected on outcome" a case-control
+  study asks whether the exposure is yes/no (odds ratio) or a measurement (difference in mean levels: independent, paired when
+  individually matched, or frequency-matched). Before, both went straight to relative risk / odds ratio and the cohort calculator
+  note itself said to look in the Means module. A **Back** button was added.
+- **Free-text rules:** new rules for trial unit and intent, cohort outcome, case-control exposure, nested case-control, case-cohort,
+  case-crossover, SCCS, ecological, correlation / regression, meta-analysis, "other" designs, diagnostic and agreement
+  sub-questions; fixes for "comparing" (the old pattern only matched "compare"), "case control" without a hyphen,
+  and "intracluster correlation" (it was sent to the correlation calculators). The parser still stops at a question when a
+  description does not settle it. A battery of 101 plain-language descriptions with their expected end node is in
+  `tests/testthat/test-design_wizard_battery.R`; every complete click path through the wizard (636) is checked to end on a terminal
+  with a valid catalog entry. Known limits: the parser is keywords, so unusual wording falls back to a question; "interrupted time
+  series" has no calculator; the individual-vs-cluster assumption for a plain "trial" is shown in the trail as Medium confidence.
+- **UI audit** (`tools/ui-audit/audit.R`, run by hand): every calculator and Home at 1366 px and 390 px: no horizontal scroll, no
+  content wider than the window, no small scroll windows, no clipped inputs, no output or R errors, no console errors; the detector was
+  checked against an injected fault. It covers layout and errors, not whether each result is numerically right (the unit tests do that).
+
+
+### Dependency reduction, stage 2: the easy and moderate packages (28 Oct 2026)
+Seven more runtime packages were replaced by closed forms written out in the app and tested against the real package: **pwr**,
+**powerMediation**, **pmsampsize**, **pROC** (easy) and **presize**, **powerSurvEpi**, **TrialSize** (moderate). The packages moved from
+Imports to Suggests as verification oracles (`skip_if_not_installed()`); only `kappaSize` was added to Imports (see below). Files:
+`R/calc_closed_forms_pwr.R` (Cohen's t / ANOVA / f2 / correlation / chi-square / proportion power, ES.h / ES.w, logistic and Poisson
+regression sizes, ROC sizes), `R/calc_closed_forms_pm.R` (Riley et al. criteria), `R/calc_closed_forms_ts.R` (TrialSize formulas and
+the powerSurvEpi survival and matched case-control formulas), `R/calc_closed_forms_presize.R` (precision-based sizes), with
+`test-calc_closed_forms_{pwr,pm,ts,presize}.R` comparing each function with the package over grids of inputs (about 2,700 expectations;
+sample sizes identical, power functions and intervals to 1e-10 or better).
+- **What it buys, honestly.** The install closure goes from 77 to 68 packages and from 110 MB to 105 MB: **9 packages** (the seven plus
+  `plyr` and `pracma`) and about **5 MB** of 110. Most of the weight is `shiny`, `bslib`, `lme4` and their dependencies, which stay.
+  The gain is fewer packages to download in the browser build, fewer things that can fail to install or change their interface (the
+  epiR 3.0 problem, F13), and every formula now traceable in the app's own source.
+- **Two bugs in the packages, found while transcribing, and corrected (not copied):**
+  1. `pmsampsize` 1.1.3 (latest on CRAN), continuous outcome, criterion 4 (precision of the intercept): the loop uses `+qt(0.025, df)`
+     (negative), so when this criterion binds the interval limits swap, the ratio drops below 1 and the loop stops after one step.
+     Example: parameters 2, intercept 1.9, sd 0.6, R2 0.2, mmoe 1.02 gives n = 237 with a "lower" limit 1.97 above the "upper" 1.83;
+     the smallest n that really meets the criterion is about 765. The app had been reproducing this. Now the criterion is computed as
+     defined and tested against its definition; when it does not bind, results equal the package.
+  2. `presize::prec_pos_lr()` / `prec_neg_lr()` accept `conf.level` but do not pass it to `prec_lr()`, so the likelihood-ratio design
+     always used 95%. Now the level is used (tested against `prec_lr()`); results change for any level other than 95%.
+- **Not replaced: `kappaSize`.** Cohen's kappa sample size needs kappaSize's cell-probability tables for 2-6 raters and 2-5 categories
+  (eight functions of 240-390 lines each); the thin `presize::prec_kappa()` wrapper around it is written out and `kappaSize` is now a
+  direct import. Re-deriving the tables is possible but large and was not done.
+- **Verified how:** each function against its package (identical sample sizes), plus the independent definition for the corrected
+  criterion. The papers behind the formulas were not read (citations are those in the package documentation and the module content
+  files); the Reference tab of each calculator now says "closed form written out in the app, equal to <package function> (compared
+  with the package in the tests; the package is not a dependency)". `renv.lock` still lists the removed packages (re-snapshot pending).

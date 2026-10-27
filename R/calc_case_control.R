@@ -128,7 +128,7 @@ calc_case_control_nested_binary <- function(OR, pE, nD, nH, R2 = 0, alpha = 0.05
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n <- powerSurvEpi::powerConLogistic.bin(N = NULL, power = power, OR = OR, pE = pE,
+  n <- .cf_pse_conlogistic_bin(power = power, OR = OR, pE = pE,
                                            nD = nD, nH = nH, R2 = R2, alpha = alpha)
 
   new_ss_result(list(
@@ -164,7 +164,7 @@ calc_case_control_nested_continuous <- function(OR, sigma, nD, nH, R2 = 0, alpha
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n <- powerSurvEpi::powerConLogistic.con(N = NULL, power = power, OR = OR, sigma = sigma,
+  n <- .cf_pse_conlogistic_con(power = power, OR = OR, sigma = sigma,
                                            nD = nD, nH = nH, R2 = R2, alpha = alpha)
 
   new_ss_result(list(

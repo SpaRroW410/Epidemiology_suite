@@ -27,7 +27,7 @@ calc_regression_f2 <- function(r2, num_predictors, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(power, "power")
 
   f2 <- r2 / (1 - r2)
-  fit <- pwr::pwr.f2.test(u = num_predictors, v = NULL, f2 = f2,
+  fit <- .cf_pwr_f2_test(u = num_predictors, v = NULL, f2 = f2,
                            sig.level = alpha, power = power)
   v <- ceiling(fit$v)
   n <- v + num_predictors + 1
@@ -96,7 +96,7 @@ calc_regression_r2_increase <- function(r2_reduced, r2_full, num_predictors_adde
   .validate_unit_interval(power, "power")
 
   f2 <- (r2_full - r2_reduced) / (1 - r2_full)
-  fit <- pwr::pwr.f2.test(u = num_predictors_added, v = NULL, f2 = f2,
+  fit <- .cf_pwr_f2_test(u = num_predictors_added, v = NULL, f2 = f2,
                            sig.level = alpha, power = power)
   v <- ceiling(fit$v)
   n <- v + num_predictors_total + 1

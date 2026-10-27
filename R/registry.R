@@ -224,6 +224,8 @@ module_workbench_of <- function(module_title) {
 jump_to_module <- function(session, module_title) {
   wb <- module_workbench_of(module_title)
   if (is.null(wb)) stop("No workbench contains a module titled '", module_title, "'.")
+  # a module that has not been loaded yet (lazy_modules.R) is loaded first, so the caller can set its inputs right after
+  if (is.function(session$userData$ensure_module_title)) session$userData$ensure_module_title(module_title)
   nav_select("main_nav", wb$title, session = session)
   nav_select(wb$nav_id, module_title, session = session)
   invisible(wb)

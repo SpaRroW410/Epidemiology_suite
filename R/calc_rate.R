@@ -32,10 +32,10 @@ calc_rate_precision <- function(rate, conf_width, conf_level = 0.95,
     stop("conf_width should not exceed 5 times rate (presize::prec_rate's own guidance).")
   }
 
-  fit <- presize::prec_rate(r = rate, conf.width = conf_width,
+  fit <- .cf_prec_rate(r = rate, conf.width = conf_width,
                              conf.level = conf_level, method = method)
   n_events <- ceiling(fit$x)
-  achieved <- presize::prec_rate(r = rate, x = n_events,
+  achieved <- .cf_prec_rate(r = rate, x = n_events,
                                   conf.level = conf_level, method = method)
 
   new_ss_result(list(
@@ -162,7 +162,7 @@ calc_poisson_regression_continuous <- function(beta0, beta1, mu_x1, sigma2_x1,
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n <- powerMediation::sizePoisson(beta0 = beta0, beta1 = beta1, mu.x1 = mu_x1,
+  n <- .cf_size_poisson(beta0 = beta0, beta1 = beta1, mu.x1 = mu_x1,
                                     sigma2.x1 = sigma2_x1, mu.T = mu_T, phi = phi,
                                     alpha = alpha, power = power)
 

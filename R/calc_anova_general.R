@@ -44,7 +44,7 @@ calc_anova_general <- function(u, effect_size, effect_size_type = c("f2", "eta2"
 
   f2 <- if (effect_size_type == "eta2") effect_size / (1 - effect_size) else effect_size
 
-  fit <- pwr::pwr.f2.test(u = u, v = NULL, f2 = f2, sig.level = alpha, power = power)
+  fit <- .cf_pwr_f2_test(u = u, v = NULL, f2 = f2, sig.level = alpha, power = power)
   v <- ceiling(fit$v)
   n_total <- v + u + 1
 

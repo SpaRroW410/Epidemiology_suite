@@ -43,7 +43,7 @@ roc_content <- list(
       "2004;50(7):1118-1125. (formulas 2 and 3, as implemented by",
       "pROC::power.roc.test)."
     ),
-    backend = "pROC::power.roc.test()"
+    backend = "closed form written out in the app, equal to pROC::power.roc.test() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   compare_two_aucs = list(
@@ -99,6 +99,6 @@ roc_content <- list(
       "diagnostic accuracy studies involving binormal ROC curve",
       "indices. Stat Med. 1997;16(13):1529-1542."
     ),
-    backend = "pROC::power.roc.test() (list/binormal-parameter method)"
+    backend = "closed form written out in the app, equal to pROC::power.roc.test() (list/binormal-parameter method) (compared with the package in the tests; the package is not a dependency)"
   )
 )

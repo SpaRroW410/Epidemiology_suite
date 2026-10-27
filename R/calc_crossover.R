@@ -27,7 +27,7 @@ calc_crossover_2x2 <- function(delta, sigma, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n_per_sequence <- ceiling(TrialSize::TwoSampleCrossOver.Equality(
+  n_per_sequence <- ceiling(.cf_ts_crossover_equality(
     alpha = alpha, beta = 1 - power, sigma = sigma, margin = delta
   ))
 

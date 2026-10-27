@@ -138,7 +138,7 @@ calc_bfda_ttest <- function(effect_size, bf_threshold = 10, alpha = 0.05, power 
     stop("nsim must be a single whole number >= 50.")
   }
 
-  n_classical <- ceiling(pwr::pwr.t.test(d = effect_size, sig.level = alpha, power = power,
+  n_classical <- ceiling(.cf_pwr_t_test(d = effect_size, sig.level = alpha, power = power,
                                           type = "two.sample")$n)
 
   empirical_power <- function(n1, reps) {

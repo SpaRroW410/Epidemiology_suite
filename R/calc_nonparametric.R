@@ -46,7 +46,7 @@ calc_wilcoxon_rank_sum <- function(k = 1, p1, p2, p3, alpha = 0.05, power = 0.8)
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n <- TrialSize::Nonpara.Two.Sample(alpha = alpha, beta = 1 - power, k = k, p1 = p1, p2 = p2, p3 = p3)
+  n <- .cf_ts_nonpara_two(alpha = alpha, beta = 1 - power, k = k, p1 = p1, p2 = p2, p3 = p3)
 
   new_ss_result(list(
     n = ceiling(n),
@@ -77,7 +77,7 @@ calc_wilcoxon_signed_rank <- function(p2, p3, p4, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n <- TrialSize::Nonpara.One.Sample(alpha = alpha, beta = 1 - power, p2 = p2, p3 = p3, p4 = p4)
+  n <- .cf_ts_nonpara_one(alpha = alpha, beta = 1 - power, p2 = p2, p3 = p3, p4 = p4)
 
   new_ss_result(list(
     n = ceiling(n),
@@ -108,7 +108,7 @@ calc_kendall_tau <- function(p1, p2, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n <- TrialSize::Nonpara.Independ(alpha = alpha, beta = 1 - power, p1 = p1, p2 = p2)
+  n <- .cf_ts_nonpara_indep(alpha = alpha, beta = 1 - power, p1 = p1, p2 = p2)
 
   new_ss_result(list(
     n = ceiling(n),
@@ -148,7 +148,7 @@ calc_kruskal_wallis <- function(k, f, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  fit <- pwr::pwr.anova.test(k = k, f = f, sig.level = alpha, power = power)
+  fit <- .cf_pwr_anova_test(k = k, f = f, sig.level = alpha, power = power)
   n_anova <- ceiling(fit$n)
   n_per_group <- ceiling(n_anova / .ARE_WILCOXON_NORMAL)
 

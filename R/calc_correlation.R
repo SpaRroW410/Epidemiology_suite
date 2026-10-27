@@ -22,7 +22,7 @@ calc_correlation <- function(r, alpha = 0.05, power = 0.8,
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  fit <- pwr::pwr.r.test(r = r, sig.level = alpha, power = power,
+  fit <- .cf_pwr_r_test(r = r, sig.level = alpha, power = power,
                           alternative = alternative)
 
   new_ss_result(list(
@@ -103,7 +103,7 @@ calc_correlation_point_biserial <- function(r, alpha = 0.05, power = 0.8,
   .validate_unit_interval(power, "power")
 
   d <- 2 * r / sqrt(1 - r^2)
-  fit <- pwr::pwr.t.test(d = abs(d), sig.level = alpha, power = power,
+  fit <- .cf_pwr_t_test(d = abs(d), sig.level = alpha, power = power,
                           type = "two.sample", alternative = alternative)
   n_per_group <- ceiling(fit$n)
 
@@ -153,7 +153,7 @@ calc_regression_slope <- function(slope, sd_x, sd_y, alpha = 0.05, power = 0.8,
     stop("the implied correlation r = slope * sd_x / sd_y must be strictly between -1 and 1 -- check that slope, sd_x and sd_y are on consistent scales.")
   }
 
-  fit <- pwr::pwr.r.test(r = r, sig.level = alpha, power = power, alternative = alternative)
+  fit <- .cf_pwr_r_test(r = r, sig.level = alpha, power = power, alternative = alternative)
 
   new_ss_result(list(
     n = ceiling(fit$n),
@@ -199,7 +199,7 @@ calc_correlation_partial <- function(r, k, alpha = 0.05, power = 0.8,
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  fit <- pwr::pwr.r.test(r = r, sig.level = alpha, power = power, alternative = alternative)
+  fit <- .cf_pwr_r_test(r = r, sig.level = alpha, power = power, alternative = alternative)
 
   new_ss_result(list(
     n = ceiling(fit$n) + k,

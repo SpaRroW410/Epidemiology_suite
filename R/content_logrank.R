@@ -57,7 +57,7 @@ logrank_content <- list(
       "Rosner B. Fundamentals of Biostatistics. 6th ed. Belmont, CA:",
       "Thomson Brooks/Cole; 2006. Section 14.12, p. 807."
     ),
-    backend = "powerSurvEpi::ssizeCT.default()"
+    backend = "closed form written out in the app, equal to powerSurvEpi::ssizeCT.default() (compared with the package in the tests; the package is not a dependency)"
   ),
   cox_binary = list(
     title = "Cox Proportional-Hazards Regression (Binary Covariate of Interest)",
@@ -105,7 +105,7 @@ logrank_content <- list(
       "2004;23(20):3263-3274; Schoenfeld DA. Sample-size formula for the",
       "proportional-hazards regression model. Biometrics. 1983;39:499-503."
     ),
-    backend = "powerSurvEpi::ssizeEpi.default()"
+    backend = "closed form written out in the app, equal to powerSurvEpi::ssizeEpi.default() (compared with the package in the tests; the package is not a dependency)"
   ),
   cox_continuous = list(
     title = "Cox Proportional-Hazards Regression (Continuous Covariate of Interest)",
@@ -147,7 +147,7 @@ logrank_content <- list(
       "proportional hazards regression model with nonbinary covariates.",
       "Control Clin Trials. 2000;21(6):552-560."
     ),
-    backend = "powerSurvEpi::ssizeEpiCont.default()"
+    backend = "closed form written out in the app, equal to powerSurvEpi::ssizeEpiCont.default() (compared with the package in the tests; the package is not a dependency)"
   ),
   stratified = list(
     title = "Stratified Log-Rank Test, Exponential Survival",
@@ -192,7 +192,7 @@ logrank_content <- list(
       "in sample size determination for survival time studies. J Chronic",
       "Dis. 1985;38(9):801-809."
     ),
-    backend = "powerSurvEpi::ssize.stratify()"
+    backend = "closed form written out in the app, equal to powerSurvEpi::ssize.stratify() (compared with the package in the tests; the package is not a dependency)"
   ),
   noncompliance = list(
     title = "Log-Rank Test with Accrual, Follow-up, and Noncompliance",

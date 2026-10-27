@@ -45,6 +45,6 @@ crossover_content <- list(
       sep = "\n"
     ),
     citation = "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical Research. New York: Marcel Dekker; 2003. Chapter 3.",
-    backend = "TrialSize::TwoSampleCrossOver.Equality()"
+    backend = "closed form written out in the app, equal to TrialSize::TwoSampleCrossOver.Equality() (compared with the package in the tests; the package is not a dependency)"
   )
 )

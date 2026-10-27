@@ -35,11 +35,11 @@ free_text_rules <- list(
          option_index = 11, confidence = "Medium"),
     list(pattern = "secondary attack rate|food.?specific attack|attack rates? (table|by exposure|for each (food|exposure))|aberration (detection|alarm)|\\bears\\b.{0,20}(c[123]|aberration|surveillance)|\\bcusum\\b|outbreak (investigation|detection)|syndromic surveillance",
          option_index = 10, confidence = "Medium"),
-    list(pattern = "analy[sz]e (the |my |our )?(counts|summary|data (i|we) (already )?(have|collected))|already (have|collected) (the )?(counts|data|numbers)|from (the )?(summary )?counts|\\b2\\s?x\\s?2 table|mantel.?haenszel|standardi[sz]ed mortality ratio|\\bsmr\\b|confidence interval (for|of) (a |the |an )?(proportion|mean|rate|incidence)",
+    list(pattern = "(have|with) (the |some |my |our )?(summary )?(counts|numbers) (already|i|we|and)|analy[sz]e (the |my |our )?(counts|summary|data (i|we) (already )?(have|collected))|already (have|collected) (the )?(counts|data|numbers)|from (the )?(summary )?counts|\\b2\\s?x\\s?2 table|mantel.?haenszel|standardi[sz]ed mortality ratio|\\bsmr\\b|confidence interval (for|of) (a |the |an )?(proportion|mean|rate|incidence)",
          option_index = 10, confidence = "Medium"),
     list(pattern = "qualitative|in-depth interview|\\bfgd\\b|focus group|thematic",
          option_index = 6, confidence = "High"),
-    list(pattern = "validity of|accuracy of|sensitivity|specificity|gold standard|index test",
+    list(pattern = "validity of|accuracy of|diagnostic (accuracy|test|study)|screening test|predictive value|\\bppv\\b|\\bnpv\\b|sensitivity|specificity|gold standard|index test|\\bauc\\b|\\broc\\b",
          option_index = 4, confidence = "High"),
     list(pattern = "agreement|reliability|reproducibility|inter-observer|interobserver|concordance|\\bkappa\\b|\\bicc\\b",
          option_index = 5, confidence = "High"),
@@ -50,7 +50,13 @@ free_text_rules <- list(
     # groups/arms, "compare", "between X and Y") governs even when an
     # estimation-sounding word like "proportion of" also appears in the same
     # sentence (e.g. "comparing the proportion of X between two groups").
-    list(pattern = "compare|difference between|\\bversus\\b|\\bvs\\.?\\b|association between|effect of|efficacy of|impact of|randomi[sz]ed|allocated|\\btrial\\b|\\barm\\b|followed up|incidence of|developed over|cases and controls|case-control|non-inferior|equivalent|bioequivalence|between (two|2|three|3) (groups|arms)",
+    list(pattern = "meta.?analys|systematic review|trial sequential|pooled (effect|estimate)",
+         option_index = 7, confidence = "High"),
+    list(pattern = "\\blqas\\b|lot quality|\\bpilot\\b|feasibility|rare events?|\\banimal|\\bmice\\b|\\brats\\b|preclinical|psychometric|factor analysis|questionnaire development|\\bgwas\\b|genetic|genomic|genome.?wide|value of information|\\bevpi\\b",
+         option_index = 9, confidence = "Medium"),
+    list(pattern = "(?<!intracluster )(?<!intra-cluster )(?<!intraclass )(?<!intra-class )correlat|\\bregression\\b|\\bancova\\b|linear model",
+         option_index = 8, confidence = "High"),
+    list(pattern = "compar(e|ed|es|ing|ison)|dose.?finding|phase (i|ii|iii|1|2|3)\\b|multiplicity|multiple (primary )?(endpoints|comparisons)|interim analys|group.?sequential|bayesian|non.?inferior|equivalen|stepped.?wedge|cross.?over|case.?crossover|self.?controlled|\\bsccs\\b|nested case|case.?cohort|ecological study|case.?control|cases and controls|\\bcohorts?\\b|exposed (and|versus|vs\\.?) unexposed|\\bt-?tests?\\b|\\banova\\b|chi.?square|mann.?whitney|wilcoxon|\\blog.?rank|\\bhazard ratio|survival analysis|difference (in|of|between)|\\bversus\\b|\\bvs\\.?\\b|association between|effect of|efficacy of|impact of|randomi[sz]ed|allocated|\\btrial\\b|\\barm\\b|followed up|incidence of|developed over|cases and controls|case-control|non-inferior|equivalent|bioequivalence|between (two|2|three|3) (groups|arms)",
          option_index = 2, confidence = "Medium"),
     list(pattern = "prevalence of|estimate the|proportion of|magnitude of|assess the burden|mean level of|to determine the level|incidence rate of",
          option_index = 1, confidence = "High")
@@ -121,6 +127,56 @@ free_text_rules <- list(
     list(pattern = "\\b2\\s?x\\s?2\\b|risk ratio|relative risk|odds ratio|risk difference", option_index = 1, confidence = "High")
   ),
 
+  rel_type = list(
+    list(pattern = "\\bcox\\b|time.to.event|survival",                      option_index = 6, confidence = "High"),
+    list(pattern = "logistic|binary outcome",                              option_index = 3, confidence = "High"),
+    list(pattern = "ordinal|proportional odds",                            option_index = 4, confidence = "High"),
+    list(pattern = "poisson|count outcome|negative binomial",              option_index = 5, confidence = "High"),
+    list(pattern = "linear|continuous outcome|\\bancova\\b|multiple regression", option_index = 2, confidence = "High"),
+    list(pattern = "correlat|pearson|spearman|kendall",                    option_index = 1, confidence = "High")
+  ),
+
+  corr_type = list(
+    list(pattern = "spearman|rank",                                        option_index = 2, confidence = "High"),
+    list(pattern = "kendall",                                              option_index = 3, confidence = "High"),
+    list(pattern = "point.?biserial",                                      option_index = 4, confidence = "High"),
+    list(pattern = "pearson",                                              option_index = 1, confidence = "High")
+  ),
+
+  meta_type = list(
+    list(pattern = "network",                                              option_index = 3, confidence = "High"),
+    list(pattern = "trial sequential|information size|\\btsa\\b",           option_index = 2, confidence = "High"),
+    list(pattern = "number of studies|how many studies",                   option_index = 1, confidence = "High")
+  ),
+
+  agree_scale = list(
+    list(pattern = "cronbach|internal consistency",                        option_index = 5, confidence = "High"),
+    list(pattern = "bland|limits of agreement",                            option_index = 3, confidence = "High"),
+    list(pattern = "\\bccc\\b|concordance correlation",                     option_index = 4, confidence = "High"),
+    list(pattern = "deming|passing.?bablok",                               option_index = 6, confidence = "High"),
+    list(pattern = "\\bicc\\b|intraclass|continuous",                       option_index = 2, confidence = "High"),
+    list(pattern = "kappa|categorical|present.{0,3}absent",                option_index = 1, confidence = "High")
+  ),
+
+  diag_type = list(
+    list(pattern = "\\bauc\\b|\\broc\\b|area under",                         option_index = 6, confidence = "High"),
+    list(pattern = "predictive value|\\bppv\\b|\\bnpv\\b",                   option_index = 5, confidence = "High"),
+    list(pattern = "likelihood ratio",                                     option_index = 7, confidence = "High"),
+    list(pattern = "diagnostic odds",                                      option_index = 8, confidence = "High"),
+    list(pattern = "mrmc|multi.?reader",                                   option_index = 9, confidence = "High"),
+    list(pattern = "precision|confidence interval|margin|estimate (the )?(sensitivity|specificity)", option_index = 1, confidence = "Medium")
+  ),
+
+  other_purpose = list(
+    list(pattern = "\\blqas\\b|lot quality|survey|sampling|multistage",       option_index = 1, confidence = "Medium"),
+    list(pattern = "scale|questionnaire|factor analysis|psychometric|\\bsem\\b|\\birt\\b", option_index = 2, confidence = "Medium"),
+    list(pattern = "rare event|surveillance|zero events|rule of three",    option_index = 3, confidence = "Medium"),
+    list(pattern = "animal|\\bmice\\b|\\brats\\b|preclinical",              option_index = 4, confidence = "High"),
+    list(pattern = "pilot|feasibility",                                    option_index = 5, confidence = "High"),
+    list(pattern = "value of information|\\bevpi\\b|\\bevsi\\b",             option_index = 6, confidence = "High"),
+    list(pattern = "gwas|genetic|genomic|microarray",                      option_index = 7, confidence = "High")
+  ),
+
   est_type = list(
     list(pattern = "proportion|prevalence",  option_index = 1, confidence = "High"),
     list(pattern = "\\bmean\\b|average",      option_index = 2, confidence = "High"),
@@ -135,19 +191,73 @@ free_text_rules <- list(
   ),
 
   allocation = list(
-    list(pattern = "randomi[sz]ed|allocated|\\btrial\\b|\\barm\\b",
+    list(pattern = "randomi[sz]ed|allocated|assigned|\\btrial\\b|\\barm\\b|placebo|(?<!case)(?<!case-)(?<!case )cross.?over|stepped.?wedge|bioequivalen|non.?inferior|equivalen|multiplicity|interim|group.?sequential|bayesian|platform|basket|umbrella|phase (i|ii|2|1)\\b|dose.?finding|single.?arm",
          option_index = 1, confidence = "High"),
-    list(pattern = "cohort|followed up|incidence of|developed over|cases and controls|case-control|cross-sectional",
+    list(pattern = "cohort|followed up|incidence of|developed over|cases and controls|case.?control|cross.?sectional|exposed (and|versus|vs\\.?|or) unexposed|observational|registry|retrospective|prospective|case.?crossover|self.?controlled|\\bsccs\\b|nested|case.?cohort|ecological|propensity",
          option_index = 2, confidence = "Medium")
   ),
 
-  selection_basis = list(
-    list(pattern = "cases and controls|case-control|patients with .* and without",
+  exp_unit = list(
+    list(pattern = "stepped.?wedge",                                         option_index = 4, confidence = "High"),
+    list(pattern = "cross.?over",                                            option_index = 3, confidence = "High"),
+    list(pattern = "n.?of.?1|single subject",                                option_index = 5, confidence = "High"),
+    list(pattern = "cluster|villages?|schools?|wards?|\\bphcs?\\b|hospitals? (were|are) randomi|communities",
          option_index = 2, confidence = "High"),
-    list(pattern = "followed up|incidence of|developed over|exposure",
+    list(pattern = "individual(ly)?|patients|participants|subjects|volunteers|children were randomi|women were randomi|\\btrial\\b|randomi[sz]ed|bioequivalen|phase (i|ii|2|1)\\b|single.?arm",
+         option_index = 1, confidence = "Medium")
+  ),
+
+  exp_intent = list(
+    list(pattern = "bioequivalen|pharmacokinetic",                           option_index = 4, confidence = "High"),
+    list(pattern = "non.?inferior",                                          option_index = 2, confidence = "High"),
+    list(pattern = "equivalen",                                              option_index = 3, confidence = "High"),
+    list(pattern = "single.arm|phase (ii|2)\\b|simon",                      option_index = 5, confidence = "High"),
+    list(pattern = "interim|group.?sequential",                              option_index = 6, confidence = "High"),
+    list(pattern = "multiplicity|co.?primary|several primary",               option_index = 7, confidence = "Medium"),
+    list(pattern = "subgroup|interaction",                                   option_index = 8, confidence = "Medium"),
+    list(pattern = "bayes",                                                  option_index = 9, confidence = "Medium"),
+    list(pattern = "dose.?finding|phase (i|1)\\b|3\\+3|continual reassessment",   option_index = 10, confidence = "High"),
+    list(pattern = "platform|basket|umbrella",                               option_index = 11, confidence = "High"),
+    list(pattern = "superior|better|compar|differ|versus|\\bvs\\b|time to|hazard|survival|reduc|improv|effect of",          option_index = 1, confidence = "Medium")
+  ),
+
+  selection_basis = list(
+    list(pattern = "nested case",                                         option_index = 4, confidence = "High"),
+    list(pattern = "case.?cohort",                                        option_index = 5, confidence = "High"),
+    list(pattern = "case.?crossover",                                     option_index = 6, confidence = "High"),
+    list(pattern = "self.?controlled case|\\bsccs\\b",                      option_index = 7, confidence = "High"),
+    list(pattern = "ecological",                                          option_index = 8, confidence = "High"),
+    list(pattern = "propensity",                                          option_index = 9, confidence = "High"),
+    list(pattern = "time.?varying exposure",                              option_index = 10, confidence = "High"),
+    list(pattern = "cases and controls|case.?control|patients with .* and without",
+         option_index = 2, confidence = "High"),
+    list(pattern = "cohort|followed up|incidence of|developed over|exposed (and|versus|vs\\.?|or) unexposed|prospective|retrospective|exposure",
          option_index = 1, confidence = "Medium"),
-    list(pattern = "cross-sectional|both.{0,20}same time|simultaneous",
+    list(pattern = "cross.?sectional|both.{0,20}same time|simultaneous",
          option_index = 3, confidence = "Medium")
+  ),
+
+  cohort_outcome = list(
+    list(pattern = "time to|survival|hazard|kaplan|log.?rank|\\bcox\\b",              option_index = 4, confidence = "High"),
+    list(pattern = "per person|person.?(years|time|days)|incidence rate|rate ratio",   option_index = 3, confidence = "High"),
+    list(pattern = "ordinal|likert|\\bgrade\\b|\\bstage\\b",                          option_index = 5, confidence = "High"),
+    list(pattern = "\\bmean\\b|average|continuous|blood pressure|\\bbp\\b|haemoglobin|hemoglobin|\\bhb\\b|\\bbmi\\b|weight|\\bscore\\b|concentration|\\blevels?\\b|difference in",
+         option_index = 2, confidence = "Medium"),
+    list(pattern = "relative risk|risk ratio|\\brr\\b|incidence of|risk of|developed|occurrence|cumulative incidence|binary|proportion",
+         option_index = 1, confidence = "Medium")
+  ),
+
+  cc_exposure_type = list(
+    list(pattern = "\\bmean\\b|average|continuous|concentration|\\bserum\\b|\\blevels?\\b|difference in|haemoglobin|hemoglobin|\\bbmi\\b|blood pressure|\\bscore\\b",
+         option_index = 2, confidence = "Medium"),
+    list(pattern = "odds ratio|matched|unmatched|exposed|exposure|smok|\\buse\\b|history|yes.?no|binary|present|absent|\\bever\\b",
+         option_index = 1, confidence = "Medium")
+  ),
+
+  cc_cont_matching = list(
+    list(pattern = "individually matched|1:1|1:m|1-to-1|paired",           option_index = 2, confidence = "High"),
+    list(pattern = "frequency.matched|frequency matched",                  option_index = 3, confidence = "High"),
+    list(pattern = "unmatched|no matching|not matched",                    option_index = 1, confidence = "High")
   ),
 
   cc_matching = list(
@@ -166,18 +276,18 @@ free_text_rules <- list(
          option_index = 4, confidence = "High"),
     list(pattern = "count\\b|episodes per|person-time|person-years",
          option_index = 5, confidence = "Medium"),
-    list(pattern = "binary|cured|positive.{0,10}negative|dichotomous",
+    list(pattern = "binary|cured|cure rate|response rate|prevalence|odds ratio|relative risk|risk ratio|positive.{0,10}negative|dichotomous|proportion (of|with|who|cured|vaccinated|immuni[sz]ed)",
          option_index = 2, confidence = "Medium"),
     list(pattern = "categorical|blood group|diagnosis categor",
          option_index = 3, confidence = "Medium"),
-    list(pattern = "continuous|\\bmean\\b|\\bscore\\b|\\bbp\\b|\\bhb\\b|\\bbmi\\b",
+    list(pattern = "continuous|\\bmean\\b|average|\\bscore\\b|\\bbp\\b|\\bhb\\b|\\bbmi\\b|blood pressure|haemoglobin|hemoglobin|weight|cholesterol|glucose|concentration|\\bfev1?\\b",
          option_index = 1, confidence = "Medium")
   ),
 
   groups_count = list(
-    list(pattern = "3 or more group|three or more group|k group|multiple group",
+    list(pattern = "3 or more group|three or more group|(three|3|four|4|several|multiple|k) (groups|arms|treatments|drugs)|\\banova\\b",
          option_index = 3, confidence = "Medium"),
-    list(pattern = "2 group|two group|two independent|two arm",
+    list(pattern = "(2|two) (independent |separate )?(groups|arms|treatments|drugs|cohorts|samples|populations|means|proportions)|\\bversus\\b|\\bvs\\b",
          option_index = 2, confidence = "Medium"),
     list(pattern = "reference value|known value|historical value",
          option_index = 1, confidence = "Medium")

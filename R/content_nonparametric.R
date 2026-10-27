@@ -43,7 +43,7 @@ nonparametric_content <- list(
       "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
       "Research. New York: Marcel Dekker; 2003. Section 14.3."
     ),
-    backend = "TrialSize::Nonpara.Two.Sample()"
+    backend = "closed form written out in the app, equal to TrialSize::Nonpara.Two.Sample() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   wilcoxon_signed_rank = list(
@@ -82,7 +82,7 @@ nonparametric_content <- list(
       "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
       "Research. New York: Marcel Dekker; 2003. Section 14.2."
     ),
-    backend = "TrialSize::Nonpara.One.Sample()"
+    backend = "closed form written out in the app, equal to TrialSize::Nonpara.One.Sample() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   kendall_tau = list(
@@ -122,7 +122,7 @@ nonparametric_content <- list(
       "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
       "Research. New York: Marcel Dekker; 2003. Section 14.4."
     ),
-    backend = "TrialSize::Nonpara.Independ()"
+    backend = "closed form written out in the app, equal to TrialSize::Nonpara.Independ() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   kruskal_wallis = list(
@@ -179,7 +179,7 @@ nonparametric_content <- list(
       "Lawrence Erlbaum Associates; 1988 (one-way ANOVA power analysis,",
       "as implemented by pwr::pwr.anova.test)."
     ),
-    backend = "pwr::pwr.anova.test() inflated by the 3/pi asymptotic relative efficiency (Hodges & Lehmann 1956)"
+    backend = "closed form written out in the app, equal to pwr::pwr.anova.test() inflated by the 3/pi asymptotic relative efficiency (Hodges & Lehmann 1956) (compared with the package in the tests; the package is not a dependency)"
   ),
 
   jonckheere_terpstra = list(
@@ -237,7 +237,7 @@ nonparametric_content <- list(
       "Nonparametric Statistical Methods. 2nd ed. Wiley; 1999 (the",
       "trend-test-as-Kendall's-tau equivalence)."
     ),
-    backend = "TrialSize::Nonpara.Independ() (thin wrapper around this module's Kendall's tau design)"
+    backend = "closed form written out in the app, equal to TrialSize::Nonpara.Independ() (thin wrapper around this module's Kendall's tau design) (compared with the package in the tests; the package is not a dependency)"
   ),
 
   friedman = list(

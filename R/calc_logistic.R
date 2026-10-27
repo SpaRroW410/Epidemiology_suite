@@ -81,7 +81,7 @@ calc_logistic_binary <- function(p1, p2, prop_x1, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n <- powerMediation::SSizeLogisticBin(p1 = p1, p2 = p2, B = prop_x1, alpha = alpha, power = power)
+  n <- .cf_size_logistic_bin(p1 = p1, p2 = p2, B = prop_x1, alpha = alpha, power = power)
 
   new_ss_result(list(
     n = ceiling(n),
@@ -105,7 +105,7 @@ calc_logistic_continuous <- function(p1, or, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n <- powerMediation::SSizeLogisticCon(p1 = p1, OR = or, alpha = alpha, power = power)
+  n <- .cf_size_logistic_con(p1 = p1, OR = or, alpha = alpha, power = power)
 
   new_ss_result(list(
     n = ceiling(n),

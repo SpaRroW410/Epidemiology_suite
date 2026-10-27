@@ -47,7 +47,7 @@ correlation_content <- list(
       "(Fisher z' transformation and correlation power analysis, as",
       "implemented by pwr::pwr.r.test)."
     ),
-    backend = "pwr::pwr.r.test()"
+    backend = "closed form written out in the app, equal to pwr::pwr.r.test() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   two_independent = list(
@@ -141,7 +141,7 @@ correlation_content <- list(
       "2nd ed. Hillsdale, NJ: Lawrence Erlbaum Associates; 1988, ch. 2",
       "(the r-to-d conversion for equal group sizes)."
     ),
-    backend = "closed-form (Cohen 1988) via pwr::pwr.t.test()"
+    backend = "closed form written out in the app, equal to closed-form (Cohen 1988) via pwr::pwr.t.test() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   regression_slope = list(
@@ -188,7 +188,7 @@ correlation_content <- list(
       "Statistical Models. 5th ed. McGraw-Hill/Irwin; 2005 (the",
       "slope-correlation identity for simple linear regression)."
     ),
-    backend = "closed-form identity via pwr::pwr.r.test()"
+    backend = "closed form written out in the app, equal to closed-form identity via pwr::pwr.r.test() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   partial = list(
@@ -240,7 +240,7 @@ correlation_content <- list(
       "(partial correlation power analysis via the zero-order correlation",
       "table, entered with n - k)."
     ),
-    backend = "closed-form (Cohen 1988) via pwr::pwr.r.test()"
+    backend = "closed form written out in the app, equal to closed-form (Cohen 1988) via pwr::pwr.r.test() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   two_dependent = list(
@@ -358,6 +358,6 @@ correlation_content <- list(
       "here, via the same Fisher z'-type transformation already used by",
       "this module's own Pearson-correlation design)."
     ),
-    backend = "closed-form wrapper around calc_correlation() (pwr::pwr.r.test()), ARE-inflated"
+    backend = "closed form written out in the app, equal to closed-form wrapper around calc_correlation() (pwr::pwr.r.test()), ARE-inflated (compared with the package in the tests; the package is not a dependency)"
   )
 )

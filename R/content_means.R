@@ -42,7 +42,7 @@ means_content <- list(
       "(standardized effect size d, and one-sample t-test power analysis,",
       "as implemented by pwr::pwr.t.test)."
     ),
-    backend = "pwr::pwr.t.test(type = \"one.sample\")"
+    backend = "closed form written out in the app, equal to pwr::pwr.t.test(type = \"one.sample\") (compared with the package in the tests; the package is not a dependency)"
   ),
   two_sample = list(
     title = "Two Independent Means",
@@ -81,7 +81,7 @@ means_content <- list(
       "(standardized effect size d, and two-sample t-test power analysis,",
       "as implemented by pwr::pwr.t.test)."
     ),
-    backend = "pwr::pwr.t.test(type = \"two.sample\")"
+    backend = "closed form written out in the app, equal to pwr::pwr.t.test(type = \"two.sample\") (compared with the package in the tests; the package is not a dependency)"
   ),
   paired = list(
     title = "Two Paired Means (e.g. Before-After, Matched Pairs)",
@@ -120,7 +120,7 @@ means_content <- list(
       "(standardized effect size d, and paired t-test power analysis, as",
       "implemented by pwr::pwr.t.test)."
     ),
-    backend = "pwr::pwr.t.test(type = \"paired\")"
+    backend = "closed form written out in the app, equal to pwr::pwr.t.test(type = \"paired\") (compared with the package in the tests; the package is not a dependency)"
   ),
 
   anova = list(
@@ -170,7 +170,7 @@ means_content <- list(
       "(standardized effect size f, and one-way ANOVA power analysis, as",
       "implemented by pwr::pwr.anova.test)."
     ),
-    backend = "pwr::pwr.anova.test()"
+    backend = "closed form written out in the app, equal to pwr::pwr.anova.test() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   planned_contrast = list(
@@ -222,7 +222,7 @@ means_content <- list(
       "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
       "Research. New York: Marcel Dekker; 2003. Section 11.2."
     ),
-    backend = "TrialSize::Dose.Response.Linear()"
+    backend = "closed form written out in the app, equal to TrialSize::Dose.Response.Linear() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   single_precision = list(
@@ -305,7 +305,7 @@ means_content <- list(
       "2nd ed. Hillsdale, NJ: Lawrence Erlbaum Associates; 1988, Exercise",
       "2.3 p. 437. (as implemented by pwr::pwr.t2n.test)."
     ),
-    backend = "pwr::pwr.t2n.test()"
+    backend = "closed form written out in the app, equal to pwr::pwr.t2n.test() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   posthoc_pairwise = list(
@@ -363,7 +363,7 @@ means_content <- list(
       "comparison adjustment applied to the standard two-sample sample",
       "size formula."
     ),
-    backend = "TrialSize::OneWayANOVA.pairwise()"
+    backend = "closed form written out in the app, equal to TrialSize::OneWayANOVA.pairwise() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   welch = list(

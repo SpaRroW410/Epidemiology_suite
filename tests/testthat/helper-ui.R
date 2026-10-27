@@ -33,6 +33,9 @@ ui_driver <- local({
       # Chrome refuses to start as root (containers, some CI) without this.
       if (identical(unname(Sys.info()[["effective_user"]]), "root")) args <- c(args, "--no-sandbox")
       chromote::set_chrome_args(args)
+      # Calculators are loaded when opened (lazy_modules.R); the background loading that normally follows the first
+      # screen is off here so that "idle" is a stable signal. It has its own test (test-ui_smoke.R).
+      Sys.setenv(EPIDEMIOLOGICASUITE_BACKGROUND_LOAD = "false")
       app <<- shinytest2::AppDriver$new(ui_app_dir(), name = "smoke", load_timeout = 90000,
                                         timeout = 30000, view = FALSE)
       withr::defer(app$stop(), envir = testthat::teardown_env())
@@ -40,6 +43,16 @@ ui_driver <- local({
     app
   }
 })
+
+# A separate, fresh app (own R process) for tests about start-up state, which the shared driver above has already moved on from.
+ui_fresh_driver <- function(background_load = FALSE, name = "fresh", width = NULL, height = NULL) {
+  Sys.setenv(CHROMOTE_CHROME = ui_chrome_path(), EPIDEMIOLOGICASUITE_BACKGROUND_LOAD = if (background_load) "true" else "false")
+  args <- c("--disable-gpu", "--disable-dev-shm-usage")
+  if (identical(unname(Sys.info()[["effective_user"]]), "root")) args <- c(args, "--no-sandbox")
+  chromote::set_chrome_args(args)
+  shinytest2::AppDriver$new(ui_app_dir(), name = name, load_timeout = 90000, timeout = 30000, view = FALSE,
+                            width = width, height = height)
+}
 
 ui_js_string <- function(x) as.character(jsonlite::toJSON(x, auto_unbox = TRUE))
 
@@ -60,7 +73,14 @@ ui_open_module <- function(app, title) {
   stopifnot(!is.null(wb))
   ui_select_tab(app, "main_nav", wb$title)
   ui_select_tab(app, wb$nav_id, title)
+  # a calculator that was not loaded at start-up is inserted after the click: wait for its placeholder to go
+  app$wait_for_js(sprintf("!document.querySelector('#%s > .lazy-note')", lazy_container_id(module_id_of(title))), timeout = 120000)
   app$wait_for_idle(800, timeout = 120000)
+}
+
+module_id_of <- function(title) {
+  registry <- module_registry()
+  registry[[match(title, vapply(registry, `[[`, character(1), "title"))]]$id
 }
 
 ui_select_tab <- function(app, input_id, title) {

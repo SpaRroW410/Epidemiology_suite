@@ -37,9 +37,9 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
   lists, a downloadable PDF/Word protocol section (today: a copyable paragraph and CSV/JSON/BibTeX/RIS downloads).
 
 ### Dependency reduction (item 16, done in part)
-- [ ] Remaining low-weight imports: `pwr`, `powerMediation`, `pmsampsize`, `pROC` (each under 1 MB; reimplement and test against
+- [x] (done 28 Oct 2026, see ROADMAP) Remaining low-weight imports: `pwr`, `powerMediation`, `pmsampsize`, `pROC` (each under 1 MB; reimplement and test against
   the package as was done for `epiR`, `Hmisc`, `tseries`, `BayesFactor`, `rstatix`).
-- [ ] Moderate: `presize`, `powerSurvEpi`, `TrialSize`.
+- [x] (done 28 Oct 2026) Moderate: `presize`, `powerSurvEpi`, `TrialSize`. Left: `kappaSize` (kappa cell-probability tables, 8 large functions) is now the direct import instead of `presize`; re-deriving it would remove one more package.
 - [ ] Higher risk, defer: `PowerTOST` (also what breaks the browser build), `Exact` / Boschloo (needs `rootSolve`, no WebAssembly
   build), `clinfun` (`ph2simon`, group-sequential). `lme4` stays (the Monte Carlo mixed-model designs need it); `mvtnorm`, `shiny`,
   `bslib` stay.
@@ -153,7 +153,7 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] **Compare two dependent correlations** -- open: Non-common-index case
 - [ ] **Ordinal / multinomial regression** -- open: Nominal (multinomial) half
 - [ ] **Agreement** -- open: Weighted kappa
-- [ ] **Free-text study-design parser** -- open: RCT internals (individual vs. cluster, superiority vs. non-inferiority)
+- [x] **Free-text study-design parser** -- RCT internals done 27 Oct 2026 (unit, intent, outcome, groups rules; an unqualified "trial" is assumed individually randomised and the trail shows it as Medium confidence)
 - [ ] **Non-inferiority margins (RR / OR / HR / difference)** -- open: True **relative-risk-scale** margin. `TrialSize::RelativeRisk.NIS()` is really odds-ratio-based, so it ships as the OR design; no verified RR-scale source yet. *Added 28 Sep 2026 from the review-PDF cross-check*
 - [ ] **Holm / FDR** -- open: **Holm's step-down** as its own design. Bonferroni (shipped) is Holm's most conservative step; Holm's later thresholds depend on the observed p-values, so there is no single planning alpha — needs a simulation-based design. *Added 28 Sep 2026*
 - [ ] **Value of information (EVPI / EVSI)** -- open: Multi-parameter EVPPI and non-Normal outcomes (only the single-parameter, known-SD case ships). *Added 28 Sep 2026*
@@ -161,8 +161,7 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] **Multi-arm vs. common control** -- open: Dunnett for **binary** outcomes (means only; the wizard falls back to Bonferroni/Sidak two-proportion n). *Added 28 Sep 2026*
 
 ### A.4 Wizard
-- [ ] Free-text parser: the RCT-internals branch (individual vs cluster allocation, superiority vs non-inferiority) has no
-  keyword rules, deliberately; revisit with real user phrasing.
+- [x] Free-text parser: RCT internals now have rules (27 Oct 2026); revisit with real user phrasing.
 
 ---
 
@@ -186,3 +185,18 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] Re-snapshot `renv.lock` if a dependency is added or removed (it still lists the removed runtime packages, which is
   intended: the tests use them as oracles).
 - [ ] Keep `docs/checklist_by_design.md` / `checklist_by_test.md` in step with the Analyze and planning modules (they predate them).
+
+### Start-up, wizard and UI (27 Oct 2026)
+- [x] Lazy loading in the browser build on CI: UI visible 77 s -> 27 s, first calculation 12 s -> 5.4 s. [ ] Still to measure on a real phone.
+- [ ] The 64 MB package download of the browser build is the remaining start-up cost; trimming needs the item-16 dependency work.
+- [ ] Background loading order and the four start-up calculators are a guess at what people use first: revisit with real usage.
+- [ ] Wizard: a cohort with a *continuous exposure* (dose-response) and a case-control with a *categorical* exposure still go to the
+  yes/no routes; a case-control with several controls per case and a measured exposure uses the paired test (1:m is approximate).
+- [ ] The keyword parser is deliberately conservative; a language-model option would need an API decision (the app has none).
+- [ ] UI audit: not run on a real phone or with a screen reader; item 22 (accessibility, dark mode) is still open.
+
+### Dependency reduction stage 2 (28 Oct 2026)
+- [ ] Re-snapshot `renv.lock` (it still lists the seven removed runtime packages and kappaSize's place has changed).
+- [ ] Optional: re-derive `kappaSize`'s kappa tables (2-6 raters, 2-5 categories) and drop the last of the easy/moderate set.
+- [ ] Report the two package bugs upstream (pmsampsize continuous criterion 4 sign error; presize prec_pos_lr / prec_neg_lr ignoring conf.level).
+- [ ] Remaining heavier ones: `PowerTOST`, `Exact`, `clinfun`, `lme4` (see the dependency section above).

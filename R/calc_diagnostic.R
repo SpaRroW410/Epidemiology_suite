@@ -346,10 +346,10 @@ calc_diagnostic_likelihood_ratio <- function(sens, spec, prevalence,
   .validate_unit_interval(conf_level, "conf_level")
 
   res <- if (type == "positive") {
-    presize::prec_pos_lr(prev = prevalence, sens = sens, spec = spec,
+    .cf_prec_pos_lr(prev = prevalence, sens = sens, spec = spec,
                           n = NULL, conf.width = conf_width, conf.level = conf_level)
   } else {
-    presize::prec_neg_lr(prev = prevalence, sens = sens, spec = spec,
+    .cf_prec_neg_lr(prev = prevalence, sens = sens, spec = spec,
                           n = NULL, conf.width = conf_width, conf.level = conf_level)
   }
 

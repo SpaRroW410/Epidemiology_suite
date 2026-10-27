@@ -26,11 +26,13 @@ home_panel_ui <- function() {
       "the formula behind the calculator you need."
     )),
     hr(),
-    navset_card_tab(
+    # not a fill item: bslib's default makes the card as tall as the window and scrolls its content inside it, which left a
+    # small scroll window (and a cramped question box); here the card grows with its content and the page scrolls
+    bslib::remove_all_fill(navset_card_tab(
       nav_panel("Browse calculators", br(), home_finder_body()),
       nav_panel("Which calculator? (guided wizard)", br(), design_wizard_body()),
       nav_panel("Formulas & LaTeX", br(), home_sandbox_ui())
-    )
+    ))
   )
 }
 

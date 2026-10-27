@@ -63,7 +63,7 @@ prediction_content <- list(
       "size calculations for developing a prediction model with a binary",
       "outcome. Stat Med. 2021;40(4):859-864."
     ),
-    backend = "pmsampsize::pmsampsize(type = \"b\")"
+    backend = "closed form written out in the app, equal to pmsampsize::pmsampsize(type = \"b\") (compared with the package in the tests; the package is not a dependency)"
   ),
 
   continuous = list(
@@ -103,7 +103,7 @@ prediction_content <- list(
       "for developing a multivariable prediction model: Part I --",
       "continuous outcomes. Stat Med. 2019;38(7):1262-1275."
     ),
-    backend = "pmsampsize::pmsampsize(type = \"c\")"
+    backend = "Riley et al. criteria written out (equal to pmsampsize::pmsampsize(type = \"c\") when the intercept criterion does not bind; where it binds the package has a sign error, corrected here: see calc_closed_forms_pm.R)"
   ),
 
   survival = list(
@@ -142,7 +142,7 @@ prediction_content <- list(
       "required for developing a clinical prediction model. BMJ.",
       "2020;368:m441."
     ),
-    backend = "pmsampsize::pmsampsize(type = \"s\")"
+    backend = "closed form written out in the app, equal to pmsampsize::pmsampsize(type = \"s\") (compared with the package in the tests; the package is not a dependency)"
   ),
 
   external_validation = list(

@@ -352,7 +352,7 @@ diagnostic_content <- list(
       "Sample size estimation for diagnostic test studies. J Clin",
       "Epidemiol. 1991;44(8):763-770."
     ),
-    backend = "presize::prec_pos_lr() / presize::prec_neg_lr()"
+    backend = "closed form (equal to presize::prec_lr(); presize::prec_pos_lr() / prec_neg_lr() ignore the confidence level, here it is used)"
   ),
 
   odds_ratio = list(

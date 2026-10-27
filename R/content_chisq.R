@@ -41,7 +41,7 @@ chisq_content <- list(
       "(effect size w, and chi-squared goodness-of-fit power analysis,",
       "as implemented by pwr::ES.w1 and pwr::pwr.chisq.test)."
     ),
-    backend = "pwr::ES.w1() + pwr::pwr.chisq.test()"
+    backend = "closed form written out in the app, equal to pwr::ES.w1() + pwr::pwr.chisq.test() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   independence = list(
@@ -83,7 +83,7 @@ chisq_content <- list(
       "(effect size w, and chi-squared test-of-association power",
       "analysis, as implemented by pwr::ES.w2 and pwr::pwr.chisq.test)."
     ),
-    backend = "pwr::ES.w2() + pwr::pwr.chisq.test()"
+    backend = "closed form written out in the app, equal to pwr::ES.w2() + pwr::pwr.chisq.test() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   mcnemar = list(
@@ -131,7 +131,7 @@ chisq_content <- list(
       "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
       "Research. New York: Marcel Dekker; 2003. Section 6.4."
     ),
-    backend = "TrialSize::McNemar.Test()"
+    backend = "closed form written out in the app, equal to TrialSize::McNemar.Test() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   mantelhaenszel = list(
@@ -189,7 +189,7 @@ chisq_content <- list(
       "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
       "Research. New York: Marcel Dekker; 2003. Section 15.2.3."
     ),
-    backend = "TrialSize::Propensity.Score.strata() + TrialSize::Propensity.Score.nostrata()"
+    backend = "closed form written out in the app, equal to TrialSize::Propensity.Score.strata() + TrialSize::Propensity.Score.nostrata() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   cochran_armitage = list(
@@ -247,7 +247,7 @@ chisq_content <- list(
       "Chow SC, Shao J, Wang H. Sample Size Calculations in Clinical",
       "Research. New York: Marcel Dekker; 2003. Section 11.5."
     ),
-    backend = "TrialSize::Cochran.Armitage.Trend()"
+    backend = "closed form written out in the app, equal to TrialSize::Cochran.Armitage.Trend() (compared with the package in the tests; the package is not a dependency)"
   ),
 
   cochran_q = list(
