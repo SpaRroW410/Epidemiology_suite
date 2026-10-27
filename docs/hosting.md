@@ -5,7 +5,7 @@ One codebase (the R package), three ways to run it. They are built from the same
 | | Where | Runs on | Good for | Limits |
 |---|---|---|---|---|
 | **1. Browser build** | GitHub Pages: `https://sparrow410.github.io/Sample_size_all/app/` | your own device, in the browser (R compiled to WebAssembly) | desktop browsers; nothing is sent anywhere; no server, no cost | about 60 MB first download and about 1 GB of memory, so many phones cannot run it; a few designs that need compiled packages are unavailable; slower simulations |
-| **2. Phone / server version** | Posit Connect Cloud (once the owner sets it up) | a Posit server running R | phones and tablets: the phone only receives a web page | what people type goes to the server; free plans may sleep when idle and have limits (check Posit's pricing page); one R process serves several users |
+| **2. Phone / server version** | Posit Connect Cloud (live at https://sparrow410-epidemiological-suite.share.connect.posit.cloud) | a Posit server running R | phones and tablets: the phone only receives a web page | what people type goes to the server; free plans may sleep when idle and have limits (check Posit's pricing page); one R process serves several users |
 | **3. R package** | `remotes::install_github("SpaRroW410/Sample_size_all")`, then `epidemiologicasuite::run_app()`; or the Docker image | your own R | everything, offline, fastest, every design | needs R |
 
 ## How the three are produced
