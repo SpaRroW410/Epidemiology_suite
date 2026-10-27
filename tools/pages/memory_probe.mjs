@@ -15,7 +15,8 @@ const rss = () => {
   try { return Number(execSync("ps -eo rss,args | grep -E 'chrome.*--type=renderer' | grep -v grep | awk '{s+=$1} END {print s/1024}'").toString().trim() || 0); }
   catch (e) { return 0; }
 };
-const series = []; const t0 = Date.now();
+const series = []; const stages = []; const t0 = Date.now();
+page.on("console", (m) => { const t = m.text(); if (t.includes("MEMSTAGE")) stages.push(t.replace(/^.*MEMSTAGE /, "")); });
 const iv = setInterval(() => series.push([Math.round((Date.now() - t0) / 1000), Math.round(rss())]), 2000);
 await page.goto(url, { waitUntil: "load", timeout: 120000 });
 let ui = null;
@@ -26,7 +27,8 @@ try {
 await page.waitForTimeout(settle * 1000);
 clearInterval(iv);
 const peak = Math.max(0, ...series.map((s) => s[1]));
-const report = { url, marker, ui_visible_s: ui, peak_renderer_rss_mb: peak, final_renderer_rss_mb: series.at(-1)?.[1], series };
+const report = { url, marker, ui_visible_s: ui, peak_renderer_rss_mb: peak, final_renderer_rss_mb: series.at(-1)?.[1], stages, series };
 fs.writeFileSync(out, JSON.stringify(report));
 console.log(JSON.stringify({ ...report, series: undefined }));
+for (const s of stages) console.log("STAGE " + s);
 await browser.close();
