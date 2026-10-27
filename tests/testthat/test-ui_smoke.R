@@ -397,7 +397,7 @@ for (m in registry) {
 test_that("start-up builds only the core calculators; lazy = FALSE builds all (static check)", {
   count_placeholders <- function(app) {
     html <- htmltools::renderTags(attr(app, "ui_tags"))$html
-    lengths(regmatches(html, gregexpr("lazy-note", html)))
+    lengths(regmatches(html, gregexpr('id="lazy_', html)))
   }
   n_lazy <- count_placeholders(epidemiologicasuite_app(lazy = TRUE))
   expect_equal(n_lazy, length(module_registry()) - length(lazy_core_modules))
@@ -410,7 +410,8 @@ test_that("start-up builds only the core calculators; lazy = FALSE builds all (s
 
 test_that("a Home jump to a calculator that is not loaded yet loads it and then sets its design", {
   skip_if_no_ui()
-  app <- ui_driver()
+  app <- ui_fresh_driver(name = "lazy_jump")
+  withr::defer(app$stop())
   expect_true(app$get_js("!!document.querySelector('#lazy_survey_selection > .lazy-note')"))   # not loaded at start
   ids <- home_browse_button_ids()
   btn <- names(ids)[ids == "survey_select_epi"][1]
@@ -424,9 +425,7 @@ test_that("a Home jump to a calculator that is not loaded yet loads it and then 
 test_that("background loading fills in every calculator with the indicator beside the lists, without errors", {
   skip_if_no_ui()
   old <- Sys.getenv("EPIDEMIOLOGICASUITE_BACKGROUND_LOAD"); on.exit(Sys.setenv(EPIDEMIOLOGICASUITE_BACKGROUND_LOAD = old), add = TRUE)
-  Sys.setenv(EPIDEMIOLOGICASUITE_BACKGROUND_LOAD = "true")
-  chromote::set_chrome_args(c("--disable-gpu", "--disable-dev-shm-usage", "--no-sandbox"))
-  app <- shinytest2::AppDriver$new(ui_app_dir(), name = "lazy_bg", load_timeout = 90000, timeout = 30000, view = FALSE)
+  app <- ui_fresh_driver(background_load = TRUE, name = "lazy_bg")
   withr::defer(app$stop())
   # the indicator beside the calculator lists: faint entries for what is still to come, and a bar with the count
   expect_true(app$get_js("document.querySelectorAll('ul.nav-stacked a.lazy-pending').length") > 0)

@@ -44,6 +44,16 @@ ui_driver <- local({
   }
 })
 
+# A separate, fresh app (own R process) for tests about start-up state, which the shared driver above has already moved on from.
+ui_fresh_driver <- function(background_load = FALSE, name = "fresh", width = NULL, height = NULL) {
+  Sys.setenv(CHROMOTE_CHROME = ui_chrome_path(), EPIDEMIOLOGICASUITE_BACKGROUND_LOAD = if (background_load) "true" else "false")
+  args <- c("--disable-gpu", "--disable-dev-shm-usage")
+  if (identical(unname(Sys.info()[["effective_user"]]), "root")) args <- c(args, "--no-sandbox")
+  chromote::set_chrome_args(args)
+  shinytest2::AppDriver$new(ui_app_dir(), name = name, load_timeout = 90000, timeout = 30000, view = FALSE,
+                            width = width, height = height)
+}
+
 ui_js_string <- function(x) as.character(jsonlite::toJSON(x, auto_unbox = TRUE))
 
 # JS expression for the first element matching `selector` whose data-value is

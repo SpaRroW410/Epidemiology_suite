@@ -99,6 +99,8 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
         nav_id <- wb$nav_id
         observeEvent(input[[nav_id]], loader$ensure_title(input[[nav_id]]), ignoreNULL = TRUE)
       })
+      # the browser reports each inserted calculator once its inputs are bound; then its server starts
+      observeEvent(input$lazy_bound, for (id in input$lazy_bound$ids) loader$start_server(id), ignoreNULL = TRUE)
       loader$start_background()
     }
   }

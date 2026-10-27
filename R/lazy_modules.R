@@ -44,6 +44,17 @@ lazy_module_loader <- function(session, registry, core_ids, background = .backgr
   state$loaded <- core_ids
   n_lazy <- length(setdiff(ids, core_ids))
 
+  # A module's server must not start before the browser has bound the new UI's inputs: a render or observer that runs while
+  # input$design is still NULL fails (and flashes an error). So ensure() inserts the UI and tells the browser, which answers
+  # with `lazy_bound` once the inputs are bound (the module's own input values reach the server in the same message); the
+  # server is started then. Core modules, whose UI is in the first page, start at once as before.
+  started <- new.env()
+  start_server <- function(id) {
+    if (isTRUE(started[[id]])) return(invisible(FALSE))
+    started[[id]] <- TRUE
+    shiny::withReactiveDomain(session, by_id[[id]]$server(id))
+    invisible(TRUE)
+  }
   ensure <- function(id) {
     if (length(id) != 1 || is.na(id) || !id %in% ids || id %in% state$loaded) return(invisible(FALSE))
     state$loaded <- c(state$loaded, id)   # marked first, so a second request while this one runs does nothing
@@ -52,8 +63,8 @@ lazy_module_loader <- function(session, registry, core_ids, background = .backgr
       shiny::insertUI(selector = paste0("#", lazy_container_id(id)), where = "beforeEnd", ui = m$ui(m$id),
                       immediate = TRUE, session = session)
       shiny::removeUI(selector = paste0("#", lazy_container_id(id), " > .lazy-note"), immediate = TRUE, session = session)
-      m$server(m$id)
     })
+    session$sendCustomMessage("lazy_inserted", list(id = id))
     left <- setdiff(ids, state$loaded)
     session$sendCustomMessage("lazy_progress", list(
       ready = unname(titles[match(id, ids)]), total = n_lazy, done = n_lazy - length(left),
@@ -80,7 +91,7 @@ lazy_module_loader <- function(session, registry, core_ids, background = .backgr
     invisible(NULL)
   }
 
-  list(ensure = ensure, ensure_title = ensure_title, start_background = start_background,
+  list(ensure = ensure, ensure_title = ensure_title, start_background = start_background, start_server = start_server,
        loaded = function() state$loaded)
 }
 
@@ -149,6 +160,13 @@ ul.nav-stacked a.lazy-flash::after { content: '\\2713'; position: absolute; righ
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
   if (window.Shiny && Shiny.addCustomMessageHandler) {
+    // the inserted UI is bound by now: say so, so the server can start the module's logic
+    // (all ids so far are sent every time, so two modules inserted in one tick cannot overwrite each other)
+    var inserted = [];
+    Shiny.addCustomMessageHandler('lazy_inserted', function (m) {
+      inserted.push(m.id);
+      Shiny.setInputValue('lazy_bound', { ids: inserted.slice(), nonce: Math.random() }, { priority: 'event' });
+    });
     Shiny.addCustomMessageHandler('lazy_progress', function (m) {
       done = m.done; total = m.total; upcoming = m.upcoming || null;
       links(m.ready).forEach(function (a) {
