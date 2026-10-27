@@ -634,8 +634,8 @@ design_nodes <- list(
       "were selected)."
     ),
     options = list(
-      list(label = "Their exposure status (outcome measured/ascertained later)", next_id = "term_cohort_rr"),
-      list(label = "Their outcome/disease status (exposure ascertained backwards)", next_id = "cc_matching"),
+      list(label = "Their exposure status (outcome measured/ascertained later)", next_id = "cohort_outcome"),
+      list(label = "Their outcome/disease status (exposure ascertained backwards)", next_id = "cc_exposure_type"),
       list(label = "Neither -- both exposure and outcome measured at the same time (cross-sectional)", next_id = "outcome_type"),
       list(label = "Cases drawn from within a defined cohort, controls sampled from it (nested case-control)", next_id = "term_nested_cc"),
       list(label = "Cases + a randomly sampled sub-cohort from a defined cohort (case-cohort)", next_id = "term_case_cohort"),
@@ -644,6 +644,47 @@ design_nodes <- list(
       list(label = "The unit of observation is a group/area, not a person (ecological)", next_id = "term_ecological"),
       list(label = "Exposed and unexposed matched on a propensity score", next_id = "term_psm"),
       list(label = "Exposure changes over time within the same people (time-varying exposure)", next_id = "term_time_varying")
+    )
+  ),
+
+  # ---------------------------------------------------- Stage 2 (Q2.4a) ----
+  # A cohort is not only "relative risk of a yes/no outcome": the outcome can be a measurement compared between exposed and
+  # unexposed (a mean difference), a rate per person-time, or a time to event, and each has its own calculator.
+  cohort_outcome = list(
+    id = "cohort_outcome", stage = 2,
+    question = "What is the outcome in the cohort?",
+    help = "The exposed and unexposed groups are the two groups being compared; what matters here is how the outcome is measured.",
+    options = list(
+      list(label = "Whether the disease/event occurred (a risk: relative risk)", next_id = "term_cohort_rr"),
+      list(label = "A measurement compared between exposed and unexposed (a difference in means, e.g. blood pressure, haemoglobin)",
+           next_id = "indep_cont", set = list(outcome = "continuous")),
+      list(label = "An incidence rate per person-time (rate ratio)", next_id = "term_count_rate"),
+      list(label = "Time to an event (survival, hazard ratio)", next_id = "surv_type"),
+      list(label = "An ordinal outcome (e.g. a grade or stage)", next_id = "term_ordinal")
+    )
+  ),
+
+  # ---------------------------------------------------- Stage 2 (Q2.4b) ----
+  # A case-control study usually compares a yes/no exposure (odds ratio), but the exposure can be a measurement (a serum level)
+  # compared between cases and controls: that is a difference in means, not an odds ratio.
+  cc_exposure_type = list(
+    id = "cc_exposure_type", stage = 2,
+    question = "How is the exposure measured in cases and controls?",
+    help = "Cases and controls are the two groups being compared; what matters here is whether exposure is yes/no or a measurement.",
+    options = list(
+      list(label = "Exposed or not (yes/no): odds ratio", next_id = "cc_matching"),
+      list(label = "A measurement compared between cases and controls (a difference in mean levels, e.g. serum lead, vitamin D)",
+           next_id = "cc_cont_matching", set = list(outcome = "continuous"))
+    )
+  ),
+
+  cc_cont_matching = list(
+    id = "cc_cont_matching", stage = 2,
+    question = "Are cases and controls matched?",
+    options = list(
+      list(label = "No -- unmatched (two independent groups)", next_id = "indep_cont"),
+      list(label = "Yes -- individually matched (analysed as paired differences)", next_id = "term_two_groups_paired_cont"),
+      list(label = "Frequency-matched (analysed as two independent groups, adjusting for the matching factors)", next_id = "indep_cont")
     )
   ),
 
@@ -954,12 +995,9 @@ design_nodes <- list(
 
   term_cohort_rr = .term("term_cohort_rr", "Cohort study (relative risk)", "cohort_rr",
     note = paste(
-      "This module assumes a binary outcome (RR). If your cohort's outcome",
-      "is actually continuous (e.g. comparing a mean biomarker level",
-      "between exposed and unexposed groups followed forward), you want",
-      "\"Two independent means\" in the Means module instead; for an",
-      "incidence rate per person-time use Incidence Rate, and for time to",
-      "an event use Log-Rank / Survival.")),
+      "This module is for a yes/no outcome (relative risk). If the cohort's outcome is a measurement (a mean difference),",
+      "an incidence rate per person-time or a time to an event, go back and choose that answer for the outcome:",
+      "each has its own calculator.")),
   term_cc_unmatched = .term("term_cc_unmatched", "Unmatched case-control study", "case_control_unmatched"),
   term_cc_freq_matched = .term("term_cc_freq_matched", "Frequency-matched case-control study", "case_control_unmatched",
     note = "Frequency matching is analysed like an unmatched design (stratified), not the individually-matched formula -- use the unmatched calculator."),

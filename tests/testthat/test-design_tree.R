@@ -121,6 +121,7 @@ test_that("observational, selected on outcome, unmatched -> unmatched case-contr
   res <- .walk(c("Compare groups / test an association or hypothesis",
                  "I only observe what happened naturally",
                  "Their outcome/disease status (exposure ascertained backwards)",
+                 "Exposed or not (yes/no): odds ratio",
                  "No -- unmatched"))
   expect_true(isTRUE(res$node$terminal))
   expect_equal(res$node$catalog_key, "case_control_unmatched")
@@ -130,6 +131,7 @@ test_that("observational, selected on outcome, individually matched -> matched c
   res <- .walk(c("Compare groups / test an association or hypothesis",
                  "I only observe what happened naturally",
                  "Their outcome/disease status (exposure ascertained backwards)",
+                 "Exposed or not (yes/no): odds ratio",
                  "Yes -- individually matched 1:1 or 1:m"))
   expect_equal(res$node$catalog_key, "case_control_matched")
 })
@@ -146,11 +148,32 @@ test_that("observational, each case is own control -> case-crossover, reuses mat
   expect_equal(entry$design_value, "matched")
 })
 
-test_that("observational, selected on exposure -> cohort/RR", {
-  res <- .walk(c("Compare groups / test an association or hypothesis",
-                 "I only observe what happened naturally",
-                 "Their exposure status (outcome measured/ascertained later)"))
-  expect_equal(res$node$catalog_key, "cohort_rr")
+.key <- function(res) { k <- res$node$catalog_key; if (is.function(k)) k(res$flags) else k }
+
+test_that("observational, selected on exposure: the cohort's outcome decides the calculator", {
+  base <- c("Compare groups / test an association or hypothesis", "I only observe what happened naturally",
+            "Their exposure status (outcome measured/ascertained later)")
+  expect_equal(.key(.walk(c(base, "Whether the disease/event occurred (a risk: relative risk)"))), "cohort_rr")
+  # a measurement compared between exposed and unexposed is a difference in means, not a relative risk
+  cont <- c(base, "A measurement compared between exposed and unexposed (a difference in means, e.g. blood pressure, haemoglobin)")
+  expect_equal(.key(.walk(c(cont, "No -- equal group sizes and similar variances (t-test)"))), "means_two_indep")
+  expect_equal(.key(.walk(c(cont, "Unequal group sizes (e.g. 2:1 allocation)"))), "means_two_indep_unequal_n")
+  expect_equal(.key(.walk(c(cont, "Clearly unequal variances (Welch's t-test)"))), "means_welch")
+  expect_equal(.key(.walk(c(base, "An incidence rate per person-time (rate ratio)"))), "rate_comparison")
+  expect_equal(.key(.walk(c(base, "Time to an event (survival, hazard ratio)", "Log-rank test (two survival curves)"))), "logrank")
+})
+
+test_that("case-control: a yes/no exposure gives the odds-ratio calculators, a measured exposure the mean-difference ones", {
+  base <- c("Compare groups / test an association or hypothesis", "I only observe what happened naturally",
+            "Their outcome/disease status (exposure ascertained backwards)")
+  expect_equal(.key(.walk(c(base, "Exposed or not (yes/no): odds ratio", "No -- unmatched"))), "case_control_unmatched")
+  expect_equal(.key(.walk(c(base, "Exposed or not (yes/no): odds ratio", "Yes -- individually matched 1:1 or 1:m"))), "case_control_matched")
+  cont <- c(base, "A measurement compared between cases and controls (a difference in mean levels, e.g. serum lead, vitamin D)")
+  expect_equal(.key(.walk(c(cont, "No -- unmatched (two independent groups)", "No -- equal group sizes and similar variances (t-test)"))),
+               "means_two_indep")
+  expect_equal(.key(.walk(c(cont, "Yes -- individually matched (analysed as paired differences)"))), "means_two_dep")
+  expect_equal(.key(.walk(c(cont, "Frequency-matched (analysed as two independent groups, adjusting for the matching factors)",
+                            "Clearly unequal variances (Welch's t-test)"))), "means_welch")
 })
 
 test_that("comparison, time-to-event outcome -> log-rank", {
@@ -316,4 +339,29 @@ test_that("every not-built terminal is tracked in docs/ROADMAP.md", {
   for (id in names(tracked)) {
     expect_true(grepl(tracked[[id]], roadmap, fixed = TRUE), info = paste(id, "->", tracked[[id]]))
   }
+})
+
+test_that("every complete click path through the wizard ends on a terminal with a valid catalog entry, in at most 10 questions", {
+  bad <- character(); n_paths <- 0; deepest <- 0
+  walk <- function(id, flags, depth, seen) {
+    n <- design_nodes[[id]]
+    if (is.null(n)) { bad <<- c(bad, paste("missing node", id)); return(invisible()) }
+    if (isTRUE(n$terminal)) {
+      n_paths <<- n_paths + 1; deepest <<- max(deepest, depth)
+      k <- .resolve(n$catalog_key, flags)
+      if (is.character(k) && is.null(catalog_entry(k))) bad <<- c(bad, paste("no catalog entry for", id, k))
+      return(invisible())
+    }
+    if (id %in% seen) { bad <<- c(bad, paste("cycle at", id)); return(invisible()) }
+    if (length(n$options) == 0) { bad <<- c(bad, paste("question without options:", id)); return(invisible()) }
+    for (o in n$options) {
+      f <- flags
+      if (!is.null(o$set)) for (nm in names(o$set)) f[[nm]] <- o$set[[nm]]
+      walk(.resolve(o$next_id, f), f, depth + 1, c(seen, id))
+    }
+  }
+  walk("root", list(), 0, character())
+  expect_equal(bad, character(0))
+  expect_gt(n_paths, 500)
+  expect_lte(deepest, 10)
 })

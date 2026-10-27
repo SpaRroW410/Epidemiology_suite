@@ -62,11 +62,15 @@ test_that("diagnostic-accuracy phrasing stops at the diagnostic sub-question (no
   expect_equal(res$node_id, "diag_type")
 })
 
-test_that("RCT phrasing advances through allocation but stops at the unmodelled exp_unit branch", {
+test_that("RCT phrasing walks allocation, unit and intent, assuming individual randomisation unless clusters are named", {
   res <- walk_free_text("This is a randomised controlled trial comparing time to recurrence")
   expect_false(res$reached_terminal)
-  expect_equal(res$node_id, "exp_unit")
-  expect_length(res$trace, 2)
+  expect_equal(res$node_id, "surv_type")
+  expect_length(res$trace, 5)
+  expect_match(res$trace[[3]]$answer, "^Individual subjects")      # the assumption is shown in the trail, with its confidence
+  expect_equal(res$trace[[3]]$confidence, "Medium")
+  cl <- walk_free_text("Cluster randomised trial of villages comparing mean haemoglobin")
+  expect_true(isTRUE(cl$flags$cluster))                          # the cluster flag drives the design-effect reminder later
 })
 
 test_that("unrecognizable text degrades honestly to root with an empty trace", {

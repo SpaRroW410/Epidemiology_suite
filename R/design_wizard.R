@@ -24,7 +24,7 @@ design_wizard_body <- function() {
               "check the pre-filled trail and continue manually from there.",
               "This is keyword-based, not a language model: it never guesses",
               "a final answer, it only skips questions it's confident about.")),
-      textAreaInput("design_wizard_freetext", NULL, rows = 2,
+      textAreaInput("design_wizard_freetext", NULL, rows = 4, width = "100%", resize = "vertical",
                     placeholder = "e.g. \"We compared cases and controls, individually matched, for exposure to pesticide.\""),
       actionButton("design_wizard_parse", "Suggest from this text", class = "btn-outline-primary btn-sm")
     ),
@@ -34,9 +34,14 @@ design_wizard_body <- function() {
 }
 
 design_wizard_server <- function(input, output, session) {
-  state <- reactiveValues(node_id = "root", trace = list(), flags = list())
+  state <- reactiveValues(node_id = "root", trace = list(), flags = list(), history = list())
+  # one step back: every move first saves where the user was
+  remember <- function() {
+    state$history <- c(state$history, list(list(node_id = state$node_id, trace = state$trace, flags = state$flags)))
+  }
 
   observeEvent(input$design_wizard_parse, {
+    remember()
     res <- walk_free_text(input$design_wizard_freetext)
     state$node_id <- res$node_id
     state$trace <- res$trace
@@ -54,7 +59,8 @@ design_wizard_server <- function(input, output, session) {
 
   output$design_wizard_body <- renderUI({
     node <- design_nodes[[state$node_id]]
-    if (isTRUE(node$terminal)) .render_design_terminal(node, state$flags) else .render_design_question(node)
+    can_back <- length(state$history) > 0
+    if (isTRUE(node$terminal)) .render_design_terminal(node, state$flags, can_back) else .render_design_question(node, can_back)
   })
 
   observeEvent(input$design_wizard_next, {
@@ -66,14 +72,26 @@ design_wizard_server <- function(input, output, session) {
     if (!is.null(opt$set)) {
       for (nm in names(opt$set)) state$flags[[nm]] <- opt$set[[nm]]
     }
+    remember()
     state$trace <- c(state$trace, list(list(question = node$question, answer = opt$label)))
     state$node_id <- if (is.function(opt$next_id)) opt$next_id(state$flags) else opt$next_id
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$design_wizard_back, {
+    n <- length(state$history)
+    req(n > 0)
+    prev <- state$history[[n]]
+    state$history <- state$history[-n]
+    state$node_id <- prev$node_id
+    state$trace <- prev$trace
+    state$flags <- prev$flags
   }, ignoreInit = TRUE)
 
   observeEvent(input$design_wizard_restart, {
     state$node_id <- "root"
     state$trace <- list()
     state$flags <- list()
+    state$history <- list()
     updateTextAreaInput(session, "design_wizard_freetext", value = "")
   }, ignoreInit = TRUE)
 
@@ -92,14 +110,15 @@ design_wizard_server <- function(input, output, session) {
   }, ignoreInit = TRUE)
 }
 
-.render_design_question <- function(node) {
+.render_design_question <- function(node, can_back = FALSE) {
   choice_labels <- vapply(node$options, `[[`, character(1), "label")
   tagList(
     if (!is.null(node$help)) p(class = "text-muted", node$help),
-    radioButtons("design_wizard_choice", node$question,
+    radioButtons("design_wizard_choice", node$question, width = "100%",
                  choiceNames = as.list(choice_labels),
                  choiceValues = as.list(as.character(seq_along(node$options))),
                  selected = character(0)),
+    if (can_back) tagList(actionButton("design_wizard_back", "Back", class = "btn-outline-secondary"), " "),
     actionButton("design_wizard_next", "Next", class = "btn-primary"),
     if (!identical(node$id, "root")) tagList(
       " ", actionButton("design_wizard_restart", "Start over", class = "btn-link")
@@ -127,7 +146,7 @@ design_wizard_server <- function(input, output, session) {
                          "cluster_pps_optimal", "stepped_wedge_normal",
                          "glmm_lmm_continuous", "glmm_binary", "multilevel_three_level")
 
-.render_design_terminal <- function(node, flags) {
+.render_design_terminal <- function(node, flags, can_back = FALSE) {
   key <- .terminal_catalog_key(node, flags)
   entry <- if (!is.null(key)) catalog_entry(key) else NULL
 
@@ -158,6 +177,7 @@ design_wizard_server <- function(input, output, session) {
       actionButton("design_wizard_jump_glmm", "Go to: Monte Carlo Mixed Models", class = "btn-light btn-sm")),
     body,
     br(), br(),
+    if (can_back) tagList(actionButton("design_wizard_back", "Back one question", class = "btn-outline-secondary btn-sm"), " "),
     actionButton("design_wizard_restart", "Start over / this isn't my design", class = "btn-link")
   )
 }
