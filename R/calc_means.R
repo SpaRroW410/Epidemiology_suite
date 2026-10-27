@@ -288,7 +288,7 @@ calc_means_planned_contrast <- function(mu, sigma, ci, fi, alpha = 0.05, power =
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n_solved <- TrialSize::Dose.Response.Linear(
+  n_solved <- .cf_ts_dose_response_linear(
     alpha = alpha, beta = 1 - power, sigma = sigma, mui = mu, ci = ci, fi = fi
   )
   n_total <- ceiling(n_solved)
@@ -340,7 +340,7 @@ calc_means_posthoc_pairwise <- function(tau, sigma, margin, alpha = 0.05, power 
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n_solved <- TrialSize::OneWayANOVA.pairwise(
+  n_solved <- .cf_ts_anova_pairwise(
     alpha = alpha, beta = 1 - power, tau = tau, sigma = sigma, margin = margin
   )
 

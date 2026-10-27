@@ -98,7 +98,7 @@ calc_mcnemar <- function(p10, p01, alpha = 0.05, power = 0.8) {
   psai <- p01 / p10
   paid <- p10 + p01
 
-  n <- TrialSize::McNemar.Test(alpha = alpha, beta = 1 - power, psai = psai, paid = paid)
+  n <- .cf_ts_mcnemar(alpha = alpha, beta = 1 - power, psai = psai, paid = paid)
 
   new_ss_result(list(
     n = ceiling(n),
@@ -152,10 +152,10 @@ calc_mantelhaenszel <- function(alpha = 0.05, power = 0.8, a, b, p1, phi) {
     stop("phi (assumed odds ratio) must differ from 1 -- otherwise there's no effect to detect.")
   }
 
-  n_stratified <- TrialSize::Propensity.Score.strata(
+  n_stratified <- .cf_ts_ps_strata(
     alpha = alpha, beta = 1 - power, J = J, a = a, b = b, p1 = p1, phi = phi
   )
-  n_pooled <- TrialSize::Propensity.Score.nostrata(
+  n_pooled <- .cf_ts_ps_nostrata(
     alpha = alpha, beta = 1 - power, J = J, a = a, b = b, p1 = p1, phi = phi
   )
 
@@ -217,7 +217,7 @@ calc_cochran_armitage_trend <- function(pi, di, ni, delta = 0, alpha = 0.05, pow
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n1 <- TrialSize::Cochran.Armitage.Trend(alpha = alpha, beta = 1 - power,
+  n1 <- .cf_ts_cochran_armitage(alpha = alpha, beta = 1 - power,
                                            pi = pi, di = di, ni = ni, delta = delta)
   if (!is.finite(n1) || n1 <= 0) {
     stop("could not solve for a valid sample size with these inputs -- try adjusting pi, di, ni, or delta.")

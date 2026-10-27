@@ -143,7 +143,7 @@ calc_proportion_posthoc_pairwise <- function(tau, p1, p2, alpha = 0.05, power = 
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n_solved <- TrialSize::OneWayANOVA.PairwiseComparison(
+  n_solved <- .cf_ts_anova_pairwise_prop(
     alpha = alpha, beta = 1 - power, tau = tau, p1 = p1, p2 = p2, delta = p1 - p2
   )
 

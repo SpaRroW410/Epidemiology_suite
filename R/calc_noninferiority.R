@@ -117,7 +117,7 @@ calc_noninferiority_or <- function(pt, pc, margin, k = 1, alpha = 0.05, power = 
     stop("The implied log-odds-ratio equals the margin exactly (no effect to detect).")
   }
 
-  n_control <- TrialSize::RelativeRisk.NIS(alpha = alpha, beta = 1 - power, or = or,
+  n_control <- .cf_ts_rr_nis(alpha = alpha, beta = 1 - power, or = or,
                                             k = k, pt = pt, pc = pc, margin = margin)
   n_control <- ceiling(n_control)
   n_test <- ceiling(n_control * k)
@@ -157,7 +157,7 @@ calc_noninferiority_hr <- function(hr, margin, p1 = 0.5, d = 0.8, alpha = 0.05, 
     stop("The log-hazard-ratio equals the margin exactly (no effect to detect).")
   }
 
-  n <- TrialSize::Cox.NIS(alpha = alpha, beta = 1 - power, loghr = loghr,
+  n <- .cf_ts_cox_nis(alpha = alpha, beta = 1 - power, loghr = loghr,
                            p1 = p1, d = d, delta = margin)
 
   new_ss_result(list(
