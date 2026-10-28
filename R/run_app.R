@@ -73,6 +73,8 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
         bootswatch = "litera",
         # litera's blue (#4582ec) has a contrast of 3.7:1 against white; WCAG AA needs 4.5:1 for normal-size text
         primary = "#2a66cf",
+        # the same limit for litera's grey buttons (#adb5bd, 2.1:1) and its white-on-teal / white-on-amber alerts (3.0:1, 2.0:1)
+        secondary = "#5d6770", info = "#0b7285", warning = "#8a5300",
         # A local font stack, not bslib::font_google(): that downloads the font when the first page is
         # rendered, so the app could not start without internet (a Shinylive/offline build, a locked-down
         # server). "Source Serif 4" is used if it is installed on the viewer's machine.
