@@ -17,9 +17,8 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
   `shiny::ExtendedTask` with a background process so one user's running simulation does not block the other users of the
   same R process. Matters as soon as the app is hosted for several people.
 - [ ] **`bindCache()` for closed-form results** (Track E, P2): cheap speed-up for repeated identical inputs.
-- [ ] **Accessibility and mobile audit, dark mode (finding F11, item 22).** A WCAG AA pass (labels, contrast, keyboard use,
-  screen-reader names for the generated tables and plots), a small-screen layout pass for the calculator forms, a dark theme.
-  English only (D5).
+- [x] **Accessibility, dark mode (finding F11, item 22), first pass done 28 Oct 2026:** axe-core scan of every calculator (WCAG A/AA, desktop + phone, light + dark) fixed to 0 violations (`tools/ui-audit/a11y.R`), dark-mode switch added. English only (D5).
+- [ ] Still open from item 22: a person's keyboard and screen-reader walk-through (a scan cannot judge reading order or whether names make sense), text descriptions for the plots, dark-mode plots, text-resize / reduced-motion checks, a phone layout pass on a real phone.
 
 ### Analyze workbench (item 13, done) -- left out on purpose
 - [ ] Ury-Wiggins (1985) SMR limits: epiR's own code comment says its reference code was wrong and the constants could not be
