@@ -110,7 +110,7 @@ lazy_sidebar_assets <- function(pending_titles) {
   background: repeating-linear-gradient(45deg, var(--bs-primary, #2c7be5) 0 .5rem, color-mix(in srgb, var(--bs-primary, #2c7be5) 70%, white) .5rem 1rem);
   background-size: 1.41rem 100%; animation: lazy-stripes 0.9s linear infinite; }
 .lazy-box .lazy-next { margin-top: .3rem; color: var(--bs-secondary-color, #6c757d); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-ul.nav-stacked a.lazy-pending { opacity: .55; position: relative; }
+ul.nav-stacked a.lazy-pending { position: relative; font-style: italic; }
 ul.nav-stacked a.lazy-pending::after { content: ''; position: absolute; right: .55rem; top: 50%; width: .4rem; height: .4rem; margin-top: -.2rem;
   border-radius: 50%; background: var(--bs-secondary-color, #6c757d); animation: lazy-pulse 1.4s ease-in-out infinite; }
 ul.nav-stacked a.lazy-pending.lazy-next-up::after { width: .7rem; height: .7rem; margin-top: -.35rem; background: transparent;
