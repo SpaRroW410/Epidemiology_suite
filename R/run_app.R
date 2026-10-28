@@ -74,7 +74,7 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
         # litera's blue (#4582ec) has a contrast of 3.7:1 against white; WCAG AA needs 4.5:1 for normal-size text
         primary = "#2a66cf",
         # the same limit for litera's grey buttons (#adb5bd, 2.1:1) and its white-on-teal / white-on-amber alerts (3.0:1, 2.0:1)
-        secondary = "#5d6770", info = "#0b7285", warning = "#8a5300",
+        secondary = "#5d6770", info = "#0b7285", warning = "#8a5300", danger = "#c62828",
         # A local font stack, not bslib::font_google(): that downloads the font when the first page is
         # rendered, so the app could not start without internet (a Shinylive/offline build, a locked-down
         # server). "Source Serif 4" is used if it is installed on the viewer's machine.
@@ -88,7 +88,7 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
     list(home_panel),
     workbench_panels,
     # light / dark switch (starts from the viewer's operating-system setting)
-    list(bslib::nav_spacer(), bslib::nav_item(bslib::input_dark_mode(id = "dark_mode")))
+    list(bslib::nav_item(bslib::input_dark_mode(id = "dark_mode")))
   ))
 
   server <- function(input, output, session) {
@@ -125,6 +125,11 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
 html[data-bs-theme='dark'] nav.navbar.navbar-default { background-color: var(--bs-tertiary-bg) !important; }
 html[data-bs-theme='dark'] nav.navbar .navbar-brand, html[data-bs-theme='dark'] nav.navbar .nav-link { color: var(--bs-body-color) !important; }
 html[data-bs-theme='dark'] nav.navbar .nav-link.active { color: var(--bs-primary-text-emphasis) !important; }
+#main_nav > li.bslib-nav-item { margin-left: auto; }   /* the dark-mode switch sits at the right end of the navbar */
+/* the darker light-mode colours above (secondary, danger, warning) are too dark for the dark background */
+html[data-bs-theme='dark'] .btn-outline-secondary { --bs-btn-color: #adb5bd; --bs-btn-border-color: #adb5bd; --bs-btn-hover-bg: #adb5bd; --bs-btn-hover-border-color: #adb5bd; --bs-btn-hover-color: #212529; --bs-btn-active-bg: #adb5bd; --bs-btn-active-color: #212529; --bs-btn-disabled-color: #adb5bd; --bs-btn-disabled-border-color: #adb5bd; }
+html[data-bs-theme='dark'] .text-danger { color: #ea868f !important; }
+html[data-bs-theme='dark'] .text-warning { color: #ffda6a !important; }
 .tab-pane > .row > .col-sm-3 > ul.nav-stacked {
   position: sticky; top: 4.5rem; max-height: calc(100vh - 6rem); overflow-y: auto;
   padding-right: .5rem;
