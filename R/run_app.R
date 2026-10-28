@@ -86,7 +86,9 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
                        if (length(pending_titles)) lazy_sidebar_assets(pending_titles))
     ),
     list(home_panel),
-    workbench_panels
+    workbench_panels,
+    # light / dark switch (starts from the viewer's operating-system setting)
+    list(bslib::nav_spacer(), bslib::nav_item(bslib::input_dark_mode(id = "dark_mode")))
   ))
 
   server <- function(input, output, session) {
@@ -119,6 +121,10 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
 # items, which are far too large for a list heading). On phones the list stacks
 # above the calculator, so its height is capped.
 .workbench_css <- "
+/* litera's navbar is painted light with a fixed background; in dark mode its light-coloured links would be unreadable on it */
+html[data-bs-theme='dark'] nav.navbar.navbar-default { background-color: var(--bs-tertiary-bg) !important; }
+html[data-bs-theme='dark'] nav.navbar .navbar-brand, html[data-bs-theme='dark'] nav.navbar .nav-link { color: var(--bs-body-color) !important; }
+html[data-bs-theme='dark'] nav.navbar .nav-link.active { color: var(--bs-primary-text-emphasis) !important; }
 .tab-pane > .row > .col-sm-3 > ul.nav-stacked {
   position: sticky; top: 4.5rem; max-height: calc(100vh - 6rem); overflow-y: auto;
   padding-right: .5rem;
