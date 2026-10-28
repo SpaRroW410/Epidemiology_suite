@@ -72,9 +72,10 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
         version = 5,
         bootswatch = "litera",
         # litera's blue (#4582ec) has a contrast of 3.7:1 against white; WCAG AA needs 4.5:1 for normal-size text
-        primary = "#2a66cf",
+        primary = .theme_colours[["primary"]],
         # the same limit for litera's grey buttons (#adb5bd, 2.1:1) and its white-on-teal / white-on-amber alerts (3.0:1, 2.0:1)
-        secondary = "#5d6770", info = "#0b7285", warning = "#8a5300", danger = "#c62828",
+        secondary = .theme_colours[["secondary"]], info = .theme_colours[["info"]],
+        warning = .theme_colours[["warning"]], danger = .theme_colours[["danger"]],
         # A local font stack, not bslib::font_google(): that downloads the font when the first page is
         # rendered, so the app could not start without internet (a Shinylive/offline build, a locked-down
         # server). "Source Serif 4" is used if it is installed on the viewer's machine.
@@ -116,6 +117,9 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
   app
 }
 
+# Theme colours that replace litera's: each reaches the WCAG AA contrast of 4.5:1 against white (checked in test-accessibility.R)
+.theme_colours <- c(primary = "#2a66cf", secondary = "#5d6770", info = "#0b7285", warning = "#8a5300", danger = "#c62828")
+
 # Styling for the workbench sidebars: a scrollable, sticky module list whose group
 # headers are small caps labels (navset_pill_list renders them as .navbar-brand
 # items, which are far too large for a list heading). On phones the list stacks
@@ -128,6 +132,7 @@ html[data-bs-theme='dark'] nav.navbar .nav-link.active { color: var(--bs-primary
 #main_nav > li.bslib-nav-item { margin-left: auto; }   /* the dark-mode switch sits at the right end of the navbar */
 /* the darker light-mode colours above (secondary, danger, warning) are too dark for the dark background */
 html[data-bs-theme='dark'] .btn-outline-secondary { --bs-btn-color: #adb5bd; --bs-btn-border-color: #adb5bd; --bs-btn-hover-bg: #adb5bd; --bs-btn-hover-border-color: #adb5bd; --bs-btn-hover-color: #212529; --bs-btn-active-bg: #adb5bd; --bs-btn-active-color: #212529; --bs-btn-disabled-color: #adb5bd; --bs-btn-disabled-border-color: #adb5bd; }
+html[data-bs-theme='dark'] .btn-outline-primary { --bs-btn-color: #6ea8fe; --bs-btn-border-color: #6ea8fe; --bs-btn-hover-bg: #2a66cf; --bs-btn-hover-border-color: #2a66cf; --bs-btn-hover-color: #fff; --bs-btn-disabled-color: #6ea8fe; --bs-btn-disabled-border-color: #6ea8fe; }
 html[data-bs-theme='dark'] .text-danger { color: #ea868f !important; }
 html[data-bs-theme='dark'] .text-warning { color: #ffda6a !important; }
 .tab-pane > .row > .col-sm-3 > ul.nav-stacked {

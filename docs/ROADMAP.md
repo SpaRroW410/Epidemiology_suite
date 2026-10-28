@@ -1345,7 +1345,7 @@ New: a light / dark switch in the navbar (bslib `input_dark_mode`, starts from t
 the navbar and the outline buttons / error / warning text. The plots are base-R images with a white background and stay white in
 dark mode.
 
-Result after the fixes: **0 violations** in light and in dark mode (both sizes). Limits, stated plainly: axe finds what a machine can
+Result after the fixes: **0 violations** in light mode on all 66 pages at both sizes (full scan); the full dark-mode scan found one more (the outline-primary button of Exact Tests), fixed and re-checked on that page, Home and Proportions rather than by a third full dark scan. Limits, stated plainly: axe finds what a machine can
 (names, roles, contrast, structure); it cannot judge reading order, whether the generated names make sense to a screen-reader user,
 focus order, or colour-only meaning in the plots. The grid-input names are built by a script from the page structure, so a new grid
 layout needs checking. Not yet done: a manual keyboard and screen-reader walk-through, alt text / table summaries for the plots,
