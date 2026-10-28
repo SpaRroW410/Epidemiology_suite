@@ -1,0 +1,67 @@
+# The phone version (ROADMAP: three ways to use the app): a Posit Connect Cloud deployment, which runs the app as an ordinary Shiny
+# server so a phone only receives a web page. This workflow builds the deployment bundle -- tools/connect/app.R, the package's R/
+# directory and a manifest.json listing every R package and version -- on every change, checks it, and on `main` publishes it to the
+# branch `connect`. Connect Cloud is pointed at that branch (one-time setup by the owner, docs/hosting.md) and redeploys on each
+# push, so the server version cannot drift from the code on `main`. Nothing here needs a Posit account or token.
+name: connect-bundle
+
+on:
+  push:
+    branches: [main]
+    paths: ["R/**", "tools/connect/**", "DESCRIPTION", ".github/workflows/connect-bundle.yml"]
+  pull_request:
+    paths: ["R/**", "tools/connect/**", "DESCRIPTION", ".github/workflows/connect-bundle.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: connect-bundle-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          extra-packages: any::rsconnect, any::jsonlite, any::shinytest2, any::chromote
+          needs: connect
+      - name: Install RcppEigen with install.packages so the manifest records a normal source
+        run: Rscript -e 'install.packages("RcppEigen")'
+      - name: Build the bundle and manifest.json
+        run: Rscript tools/connect/make_manifest.R connect_bundle
+      - name: Start the bundle as a plain Shiny app and open it in Chrome
+        run: |
+          Rscript -e '
+            chromote::set_chrome_args(c("--no-sandbox", "--disable-gpu"))
+            app <- shinytest2::AppDriver$new("connect_bundle", load_timeout = 120000, timeout = 60000, view = FALSE)
+            app$wait_for_idle(800)
+            app$run_js("document.querySelector(\"a[data-value=\x27Plan: Sample Size\x27]\").click()")
+            app$wait_for_js("!!document.getElementById(\"proportion-result\") && document.getElementById(\"proportion-result\").innerText.length > 0", timeout = 90000)
+            txt <- app$get_js("document.getElementById(\"proportion-result\").innerText")
+            cat(txt, "\n"); stopifnot(grepl("385", txt)); app$stop()'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: connect-bundle
+          path: connect_bundle
+          retention-days: 14
+      - name: Publish the bundle to the branch `connect`
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          cd connect_bundle
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -q -b connect
+          git add -A
+          git commit -q -m "Connect Cloud bundle built from ${GITHUB_SHA}"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" connect
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

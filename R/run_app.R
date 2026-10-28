@@ -67,10 +67,15 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
   # bslib::nav_select("main_nav", ...) -- see jump_to_module() in registry.R.
   ui <- do.call(page_navbar, c(
     list(
-      id = "main_nav", title = "epidemiologicasuite",
+      id = "main_nav", title = "epidemiologicasuite", lang = "en",
       theme = bs_theme(
         version = 5,
         bootswatch = "litera",
+        # litera's blue (#4582ec) has a contrast of 3.7:1 against white; WCAG AA needs 4.5:1 for normal-size text
+        primary = .theme_colours[["primary"]],
+        # the same limit for litera's grey buttons (#adb5bd, 2.1:1) and its white-on-teal / white-on-amber alerts (3.0:1, 2.0:1)
+        secondary = .theme_colours[["secondary"]], info = .theme_colours[["info"]],
+        warning = .theme_colours[["warning"]], danger = .theme_colours[["danger"]],
         # A local font stack, not bslib::font_google(): that downloads the font when the first page is
         # rendered, so the app could not start without internet (a Shinylive/offline build, a locked-down
         # server). "Source Serif 4" is used if it is installed on the viewer's machine.
@@ -78,11 +83,13 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
         heading_font = font_collection("Source Serif 4", "Georgia", "Cambria", "Times New Roman", "serif"),
         "font-size-base" = "0.95rem"
       ),
-      header = tagList(browser_notice_ui(), tags$style(HTML(.workbench_css)),
+      header = tagList(browser_notice_ui(), tags$style(HTML(.workbench_css)), accessibility_script(),
                        if (length(pending_titles)) lazy_sidebar_assets(pending_titles))
     ),
     list(home_panel),
-    workbench_panels
+    workbench_panels,
+    # light / dark switch (starts from the viewer's operating-system setting)
+    list(bslib::nav_item(bslib::input_dark_mode(id = "dark_mode")))
   ))
 
   server <- function(input, output, session) {
@@ -110,11 +117,24 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
   app
 }
 
+# Theme colours that replace litera's: each reaches the WCAG AA contrast of 4.5:1 against white (checked in test-accessibility.R)
+.theme_colours <- c(primary = "#2a66cf", secondary = "#5d6770", info = "#0b7285", warning = "#8a5300", danger = "#c62828")
+
 # Styling for the workbench sidebars: a scrollable, sticky module list whose group
 # headers are small caps labels (navset_pill_list renders them as .navbar-brand
 # items, which are far too large for a list heading). On phones the list stacks
 # above the calculator, so its height is capped.
 .workbench_css <- "
+/* litera's navbar is painted light with a fixed background; in dark mode its light-coloured links would be unreadable on it */
+html[data-bs-theme='dark'] nav.navbar.navbar-default { background-color: var(--bs-tertiary-bg) !important; }
+html[data-bs-theme='dark'] nav.navbar .navbar-brand, html[data-bs-theme='dark'] nav.navbar .nav-link { color: var(--bs-body-color) !important; }
+html[data-bs-theme='dark'] nav.navbar .nav-link.active { color: var(--bs-primary-text-emphasis) !important; }
+#main_nav > li.bslib-nav-item { margin-left: auto; }   /* the dark-mode switch sits at the right end of the navbar */
+/* the darker light-mode colours above (secondary, danger, warning) are too dark for the dark background */
+html[data-bs-theme='dark'] .btn-outline-secondary { --bs-btn-color: #adb5bd; --bs-btn-border-color: #adb5bd; --bs-btn-hover-bg: #adb5bd; --bs-btn-hover-border-color: #adb5bd; --bs-btn-hover-color: #212529; --bs-btn-active-bg: #adb5bd; --bs-btn-active-color: #212529; --bs-btn-disabled-color: #adb5bd; --bs-btn-disabled-border-color: #adb5bd; }
+html[data-bs-theme='dark'] .btn-outline-primary { --bs-btn-color: #6ea8fe; --bs-btn-border-color: #6ea8fe; --bs-btn-hover-bg: #2a66cf; --bs-btn-hover-border-color: #2a66cf; --bs-btn-hover-color: #fff; --bs-btn-disabled-color: #6ea8fe; --bs-btn-disabled-border-color: #6ea8fe; }
+html[data-bs-theme='dark'] .text-danger { color: #ea868f !important; }
+html[data-bs-theme='dark'] .text-warning { color: #ffda6a !important; }
 .tab-pane > .row > .col-sm-3 > ul.nav-stacked {
   position: sticky; top: 4.5rem; max-height: calc(100vh - 6rem); overflow-y: auto;
   padding-right: .5rem;

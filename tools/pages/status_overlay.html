@@ -22,6 +22,7 @@
 <noscript>This app needs JavaScript. The R package runs without a browser: see the install instructions on the project page.</noscript>
 <script>
 (function () {
+  var MOBILE_URL = "__MOBILE_URL__";
   var t0 = Date.now(), lines = [];
   var box = document.getElementById("s2r-status"), msg = document.getElementById("s2r-msg"), pre = document.getElementById("s2r-log");
   function secs() { return Math.round((Date.now() - t0) / 1000); }
@@ -55,8 +56,9 @@
     if (s < 20) msg.textContent = "First visit: about 60 MB is downloaded and R is started in your browser. Nothing is sent anywhere.";
     else if (s < 150) msg.textContent = "Still starting (" + s + " s). On a phone the first visit can take two to five minutes; later visits are faster.";
     else msg.innerHTML = "Still starting (" + s + " s). If this never finishes: close other tabs and apps, turn off Private browsing / Lockdown mode, " +
-      "or open the page on a computer. The app needs about 1 GB of free memory. The R package runs without a browser (install instructions on the " +
-      "<a href=\"../\">project page</a>). Open <i>Details</i> and send them if you report this.";
+      "or open the page on a computer. The app needs about 1 GB of free memory. " +
+      (MOBILE_URL ? "<a href=\"" + MOBILE_URL + "\">Open the phone version</a> (runs on a server, nothing to download). " : "") +
+      "The R package runs without a browser (install instructions on the <a href=\"../\">project page</a>). Open <i>Details</i> and send them if you report this.";
   }, 1000);
   document.getElementById("s2r-copy").onclick = function () {
     var text = lines.join("\n");

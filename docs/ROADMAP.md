@@ -59,7 +59,7 @@ cannot reach — see §4.
 | F8 | **Resolved by relicensing to GPL-3 (D2, 28 Sep 2026).** Background: the project was MIT, but several modules were built by reading and transcribing source from GPL-licensed packages (e.g. `PracTools` GPL-3, `ssize.fdr` GPL-3, `voi` GPL-3, `clusterPower` GPL≥2, `semTools` GPL≥2, `simr` GPL≥2, `metapower` GPL-2, `WebPower` GPL≥3, `rpact` LGPL-3). Mathematical formulas aren't copyrightable, but closely transcribed code may count as a derivative work. *Not legal advice.* GPL-3 is compatible with all of these (GPL-2-only `metapower` is the one to watch: it was a verification reference, not a code source to ship) | package `DESCRIPTION` licenses; module header comments | Resolved; keep module header comments naming each source |
 | F9 | **Partly addressed (28 Sep 2026).** Shiny runs one R process per app instance; a 5–25 s simulation (Monte Carlo Mixed Models, RMST, weighted log-rank, BFDA, KS/runs/animal-rank) used to recompute on every input change — fixed, see P1 item 7. Still true: one user's simulation blocks every other user on the same app instance while it runs — needs `ExtendedTask` (P1 item 7, second half) | observed during browser verification | Was Medium (High once hosted); recompute-storm risk resolved, cross-user blocking remains |
 | F10 | **Resolved (28 Sep 2026).** Every module (except the two guidance-only ones) now offers CSV/JSON/BibTeX/RIS download and a justification paragraph — see P1 item 9 | download handlers exist for all 47 calculator modules | Was Medium; resolved |
-| F11 | **Accessibility and mobile layout never audited.** Translations are not planned (English only, D5) | — | Low–Medium |
+| F11 | **Largely addressed (28 Oct 2026, item 22).** ~~Accessibility and mobile layout never audited.~~ Layout was audited earlier (`tools/ui-audit/audit.R`); an axe-core accessibility scan (WCAG 2.0/2.1 A and AA rules) of every calculator at desktop and phone width found five kinds of problem on all or most pages, now fixed (see item 22 below). Not done: a screen-reader and keyboard walk-through by a person, which a machine scan cannot replace. Translations are not planned (English only, D5) | `tools/ui-audit/a11y.R` | Low |
 | F12 | **Fixed (17 Oct 2026).** ~~Open (found by the item 15 spike).~~ The theme uses `bslib::font_google("Source Serif 4")`, which downloads the font file when the page is first rendered. Without internet at that moment (a Shinylive build, an air-gapped server, `R CMD check` on a locked-down machine) the page fails to render at all | `R/run_app.R` (theme) | Medium; fix by shipping the font or using a system font stack; needed for any offline route |
 | F13 | **Fixed (17 Oct 2026, item 16).** ~~Open (found by the item 15 spike).~~ The app only works with the epiR version pinned in `renv.lock` (2.0.67). Current CRAN `epiR` (3.0.0, also what the webR repository serves) changed `epi.ssdetect()` (`prev`/`finite.correction`/`conf.level` became `pstar`/`se.psu`/`ss.se`), so Rule of Three "imperfect test" fails on a fresh install; the other `epi.ss*` calls were not re-checked against 3.0.0 | `R/calc_rule_of_three.R`; epiR 3.0.0 source | High for CRAN / fresh installs; best fixed by removing `epiR` from the runtime (item 16) rather than chasing its API |
 | F14 | **Fixed (17 Oct 2026, item 16).** ~~Open (found by the item 15 spike).~~ `rstatix` is declared an import for one call (`cochran_qtest`, Cochran's Q); it costs 21.8 MB of unique dependencies in a browser build and a long install otherwise | `R/calc_chisq.R:320` | Low effort, high weight reduction |
@@ -1034,7 +1034,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
 21. Raw-data analysis workbench (B6) — **deferred by D1** (summary-data only for now);
     evidence synthesis (B7) from study summaries stays in scope, and
     evidence synthesis (B7).
-22. Accessibility/mobile audit, dark mode (F11). Translations: not planned (D5, English only).
+22. Accessibility/mobile audit, dark mode (F11) -- **done in part (28 Oct 2026).** Translations: not planned (D5, English only). Details below.
 
 ---
 
@@ -1327,6 +1327,30 @@ trimming the download.
   checked against an injected fault. It covers layout and errors, not whether each result is numerically right (the unit tests do that).
 
 
+### Accessibility and dark mode (28 Oct 2026, item 22 first pass)
+
+`tools/ui-audit/a11y.R` opens every calculator (65) and Home in headless Chrome at 1366 px and 390 px and runs axe-core 4.10
+(WCAG 2.0 / 2.1 level A and AA rules) on the page; `A11Y_DARK=true` repeats it in dark mode. First scan (before any fix): five rule
+violations on nearly every page. What was wrong and what was done:
+
+| Finding (axe rule) | Pages | Fix |
+|---|---|---|
+| `<html>` had no `lang` (html-has-lang) | all | `page_navbar(lang = "en")` |
+| Text contrast below 4.5:1: litera's blue links/buttons (3.7:1), grey outline buttons (2.1:1), white on teal / amber alerts (3.0 / 2.0), red error text, and the dimmed "still loading" sidebar links | all | darker theme colours (primary, secondary, info, warning, danger); loading links are no longer dimmed (italic + the dot and bar instead) |
+| `<ul>` containing `<li role="status">` (list) | all | the live region moved inside the `<li>` |
+| Selectize drop-downs and the table-style input grids (2x2 tables, stratum rows, attrition stages) had no accessible name (label) | 26 | `R/accessibility.R`: selectize boxes are named from their label; grid inputs are named from their row label + column heading (e.g. "Exposed Outcome +"), composed from what is on screen |
+| Scrolling text and result areas not reachable by keyboard (scrollable-region-focusable) | 61 | the same script gives them `tabindex=0`, a region role and a name |
+
+New: a light / dark switch in the navbar (bslib `input_dark_mode`, starts from the operating-system setting); dark-mode colours for
+the navbar and the outline buttons / error / warning text. The plots are base-R images with a white background and stay white in
+dark mode.
+
+Result after the fixes: **0 violations** in light mode on all 66 pages at both sizes (full scan); the full dark-mode scan found one more (the outline-primary button of Exact Tests), fixed and re-checked on that page, Home and Proportions rather than by a third full dark scan. Limits, stated plainly: axe finds what a machine can
+(names, roles, contrast, structure); it cannot judge reading order, whether the generated names make sense to a screen-reader user,
+focus order, or colour-only meaning in the plots. The grid-input names are built by a script from the page structure, so a new grid
+layout needs checking. Not yet done: a manual keyboard and screen-reader walk-through, alt text / table summaries for the plots,
+dark-mode versions of the plots, and text-resize and reduced-motion checks.
+
 ### Dependency reduction, stage 2: the easy and moderate packages (28 Oct 2026)
 Seven more runtime packages were replaced by closed forms written out in the app and tested against the real package: **pwr**,
 **powerMediation**, **pmsampsize**, **pROC** (easy) and **presize**, **powerSurvEpi**, **TrialSize** (moderate). The packages moved from
@@ -1355,3 +1379,20 @@ sample sizes identical, power functions and intervals to 1e-10 or better).
   criterion. The papers behind the formulas were not read (citations are those in the package documentation and the module content
   files); the Reference tab of each calculator now says "closed form written out in the app, equal to <package function> (compared
   with the package in the tests; the package is not a dependency)". `renv.lock` still lists the removed packages (re-snapshot pending).
+
+
+### Three versions: browser build, phone/server version, R package (28 Oct 2026)
+The owner's phones (Safari and Brave on iOS) show a spinner that never ends on the browser build. It starts in iPhone-sized Chromium, in
+Linux WebKit and under a 4x CPU / 10 Mbit/s throttle (UI after 128 s), so the cause on the real devices could not be reproduced here; the
+runtime alone needs about 775 MB (an empty Shiny page) and the app about 1.1 GB, above what many phones allow a tab. Decision: instead
+of a cut-down "lite" webR build, keep the browser build for desktops and run the same package as an ordinary Shiny server on **Posit
+Connect Cloud** for phones, redirecting phones automatically. `docs/hosting.md` describes the three versions and the owner's steps.
+- `tools/connect/` + `.github/workflows/connect-bundle.yml`: builds the deployment bundle (`app.R`, `R/`, `manifest.json` with 68
+  packages, all CRAN) on every change to the code, starts it as a plain Shiny app in headless Chrome and checks a calculation, and on
+  `main` publishes it to the branch `connect` for Connect Cloud to deploy from. No Posit account or token is needed by CI.
+- `tools/pages/mobile_redirect.html` + `inject_status.py` + `mobile_url.txt`: phones and tablets are sent to the Connect address once it is
+  set (empty now: no redirect); `?full=1` keeps the browser build, `?mobile=1` undoes it. Tested in Chromium device emulation
+  (iPhone, Pixel, iPad with the desktop-site user agent, desktop, `?full=1`, remembered choice, `?mobile=1`).
+- **Not verified:** the Connect Cloud deployment itself (needs the owner's account), the free-plan limits, and any real phone. Posit
+  announced that shinyapps.io takes no new apps after the end of 2026 and migrates accounts to Connect Cloud from January 2027
+  (Posit's migration page; sources disagree on some dates), which is why Connect Cloud, not shinyapps.io, is the target.

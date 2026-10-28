@@ -16,7 +16,7 @@ Encoding: UTF-8
 Depends: R (>= 4.3.0)
 Imports:
     shiny,
-    bslib,
+    bslib (>= 0.6.0),
     clinfun,
     PowerTOST,
     Exact,

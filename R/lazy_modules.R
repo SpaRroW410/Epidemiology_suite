@@ -110,7 +110,7 @@ lazy_sidebar_assets <- function(pending_titles) {
   background: repeating-linear-gradient(45deg, var(--bs-primary, #2c7be5) 0 .5rem, color-mix(in srgb, var(--bs-primary, #2c7be5) 70%, white) .5rem 1rem);
   background-size: 1.41rem 100%; animation: lazy-stripes 0.9s linear infinite; }
 .lazy-box .lazy-next { margin-top: .3rem; color: var(--bs-secondary-color, #6c757d); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-ul.nav-stacked a.lazy-pending { opacity: .55; position: relative; }
+ul.nav-stacked a.lazy-pending { position: relative; font-style: italic; }
 ul.nav-stacked a.lazy-pending::after { content: ''; position: absolute; right: .55rem; top: 50%; width: .4rem; height: .4rem; margin-top: -.2rem;
   border-radius: 50%; background: var(--bs-secondary-color, #6c757d); animation: lazy-pulse 1.4s ease-in-out infinite; }
 ul.nav-stacked a.lazy-pending.lazy-next-up::after { width: .7rem; height: .7rem; margin-top: -.35rem; background: transparent;
@@ -151,9 +151,10 @@ ul.nav-stacked a.lazy-flash::after { content: '\\2713'; position: absolute; righ
     document.querySelectorAll('ul.nav-stacked').forEach(function (ul) {
       if (ul.querySelector('.lazy-box')) return;
       var li = document.createElement('li');
-      li.className = 'lazy-box'; li.setAttribute('role', 'status'); li.setAttribute('aria-live', 'polite');
-      li.innerHTML = '<div class=\"lazy-caption\"><span>Loading calculators</span><span class=\"lazy-count\"></span></div>' +
-        '<div class=\"lazy-track\"><div class=\"lazy-fill\"></div></div><div class=\"lazy-next\"></div>';
+      li.className = 'lazy-box';
+      // the live region sits inside the <li>: a <ul> may only contain <li>, so the role cannot go on the <li> itself
+      li.innerHTML = '<div role=\"status\" aria-live=\"polite\"><div class=\"lazy-caption\"><span>Loading calculators</span><span class=\"lazy-count\"></span></div>' +
+        '<div class=\"lazy-track\"><div class=\"lazy-fill\"></div></div><div class=\"lazy-next\"></div></div>';
       ul.insertBefore(li, ul.firstChild);
     });
     paint();
