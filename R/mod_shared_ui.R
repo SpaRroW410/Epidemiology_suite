@@ -57,6 +57,18 @@ monte_carlo_calculate_ui <- function(ns, note = "can take a few seconds. Set the
   )
 }
 
+# A folded "Advanced options" section for the inputs most people leave alone (the sidedness of the test, an optional finite-population
+# size, an allocation ratio). Closed by default. `condition` is the JavaScript condition under which the section exists at all, so a
+# design with nothing advanced to show does not get an empty section; inputs inside keep their own conditionalPanel()s. A collapsed
+# section still holds live inputs: their values are bound and used whether or not it is open.
+advanced_options_ui <- function(ns, ..., condition = NULL, title = "Advanced options") {
+  panel <- bslib::accordion(
+    id = ns("adv_acc"), open = FALSE, class = "mb-3",
+    bslib::accordion_panel(title, value = "advanced", ...)
+  )
+  if (is.null(condition)) panel else conditionalPanel(condition = condition, panel)
+}
+
 # Results export (ROADMAP P1 item 9 / finding F10): a copy-able sample-size
 # justification paragraph, CSV/JSON downloads, and a citation download
 # (BibTeX/RIS), generic across every design -- calc_export.R's functions

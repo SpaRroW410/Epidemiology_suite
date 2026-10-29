@@ -48,7 +48,10 @@ mod_case_control_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("unmatched", "matched"),
-        numericInput(ns("ratio"), "Controls per case (ratio)", value = 1, min = 0.1, step = 0.5),
+        numericInput(ns("ratio"), "Controls per case (ratio)", value = 1, min = 0.1, step = 0.5)
+      ),
+      advanced_options_ui(
+        ns, condition = design_is("unmatched", "matched"),
         selectInput(
           ns("alternative"), "Alternative hypothesis",
           choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")

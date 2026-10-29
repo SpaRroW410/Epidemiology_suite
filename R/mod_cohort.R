@@ -22,12 +22,15 @@ mod_cohort_ui <- function(id) {
       numericInput(ns("ratio"), "Exposed:unexposed ratio", value = 1, min = 0.1, step = 0.5),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-      selectInput(
-        ns("alternative"), "Alternative hypothesis",
-        choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+      advanced_options_ui(
+        ns,
+        selectInput(
+          ns("alternative"), "Alternative hypothesis",
+          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+        ),
+        numericInput(ns("N"), "Eligible population size N (optional; leave blank if effectively unlimited)",
+                     value = NA, min = 1)
       ),
-      numericInput(ns("N"), "Eligible population size N (optional; leave blank if effectively unlimited)",
-                   value = NA, min = 1),
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
