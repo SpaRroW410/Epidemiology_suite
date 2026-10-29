@@ -162,9 +162,9 @@ calc_patient_units_needed <- function(design = c("between_continuous", "between_
   if (design == "within_continuous") {
     .validate_number(delta, "delta"); .validate_positive(sd, "sd")
     if (delta == 0) stop("delta must not be 0 (no effect to detect).")
-    pw <- function(m) .cf_pwr_t_test(n = patients, d = abs(delta) / (sd * sqrt(2 * (1 - icc) / m)), sig.level = alpha, type = "paired")$power
-    if (pw(1) >= power) { m_exact <- 1 } else {
-      m_exact <- stats::uniroot(function(m) pw(m) - power, c(1, 1e9), tol = 1e-10)$root
+    pw_within <- function(m) .cf_pwr_t_test(n = patients, d = abs(delta) / (sd * sqrt(2 * (1 - icc) / m)), sig.level = alpha, type = "paired")$power
+    if (pw_within(1) >= power) { m_exact <- 1 } else {
+      m_exact <- stats::uniroot(function(m) pw_within(m) - power, c(1, 1e9), tol = 1e-10)$root
     }
     m <- .pu_ceil(m_exact)
     return(new_ss_result(list(

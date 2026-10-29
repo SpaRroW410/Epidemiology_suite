@@ -45,5 +45,6 @@ comparison needs versus the correctly stratified one.
 }
 \examples{
 # five strata (Cohen-style textbook example): stratified n = 447, naive pooled n = 1151
-calc_mantelhaenszel(alpha = 0.05, power = 0.80, a = c(0.15, 0.15, 0.20, 0.25, 0.25), b = c(0.4, 0.4, 0.5, 0.6, 0.6), p1 = c(0.5, 0.6, 0.7, 0.8, 0.9), phi = 2)
+calc_mantelhaenszel(alpha = 0.05, power = 0.80, a = c(0.15, 0.15, 0.20, 0.25, 0.25),
+                    b = c(0.4, 0.4, 0.5, 0.6, 0.6), p1 = c(0.5, 0.6, 0.7, 0.8, 0.9), phi = 2)
 }

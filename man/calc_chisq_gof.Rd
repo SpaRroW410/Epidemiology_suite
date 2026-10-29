@@ -25,5 +25,6 @@ Wraps pwr::ES.w1() (effect size w) + pwr::pwr.chisq.test().
 }
 \examples{
 # Cohen (1988) exercise 7.1: four equally likely categories against one larger share; N = 131
-calc_chisq_gof(P0 = rep(0.25, 4), P1 = c(0.375, rep((1 - 0.375) / 3, 3)), alpha = 0.05, power = 0.80)
+calc_chisq_gof(P0 = rep(0.25, 4), P1 = c(0.375, rep((1 - 0.375) / 3, 3)),
+               alpha = 0.05, power = 0.80)
 }

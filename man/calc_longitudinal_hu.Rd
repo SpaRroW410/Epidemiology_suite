@@ -61,5 +61,7 @@ coefficient regression model (RCRM) method of Hu, Mackey & Thomas
 }
 \examples{
 # no attrition until the last visit (p gives the share of subjects whose last visit is each one)
-calc_longitudinal_hu(visit_times = seq(0, 1.5, 0.25), p = c(rep(0, 6), 1), delta = 1.5, sigma2_slope = 24, sigma2_residual = 10, cor_intercept_slope = 0.5, power = 0.80)
+calc_longitudinal_hu(visit_times = seq(0, 1.5, 0.25), p = c(rep(0, 6), 1), delta = 1.5,
+                     sigma2_slope = 24, sigma2_residual = 10, cor_intercept_slope = 0.5,
+                     power = 0.80)
 }

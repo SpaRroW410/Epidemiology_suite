@@ -28,6 +28,14 @@ Imports:
     stats,
     utils
 Suggests:
+    DescTools,
+    chromote,
+    htmltools,
+    jsonlite,
+    lmerTest,
+    sampling,
+    shinytest2,
+    surveillance,
     testthat (>= 3.0.0),
     withr,
     epiR,

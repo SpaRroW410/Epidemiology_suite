@@ -32,5 +32,6 @@ WHO EPI cluster survey: PPS selection of clusters and the per-cluster take
 \examples{
 set.seed(3)
 villages <- round(runif(120, 200, 3000))   # populations of 120 villages
-calc_survey_epi_clusters(villages, n_clusters = 30, per_cluster = 7, seed = 11, labels = paste("Village", 1:120))
+calc_survey_epi_clusters(villages, n_clusters = 30, per_cluster = 7, seed = 11,
+                         labels = paste("Village", 1:120))
 }
