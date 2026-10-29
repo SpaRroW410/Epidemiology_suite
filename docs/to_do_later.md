@@ -6,7 +6,7 @@ Everything that is **not finished yet**, in one list, in roadmap order (start to
 without reading the whole [`ROADMAP.md`](ROADMAP.md). The roadmap stays the source of truth for the reasoning and the
 evidence; this file is the checklist. Tick an item here when it is done *and* record it in the roadmap.
 
-*Compiled 21 October 2026 from the roadmap as it then stood (items 1-19 and the browser/Docker work done; item 20 started).
+*Compiled 21 October 2026 and brought up to date on 29 October 2026 (items 1-22 built or started; Connect Cloud version, phone layout, task-first Home, exported functions with help pages, Cite tab and accessibility done; the new open items are in section 6).
 Items marked **[owner]** need a decision or an action only the repository owner can take (an account, a setting, a
 budget, a name). Items marked **[blocked]** wait on something outside the code (a paper, a package, an account).*
 
@@ -15,7 +15,7 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 ## 1. Open from the priority list (§3 of the roadmap)
 
 ### P0 / P1 leftovers
-- [ ] **Async compute for Monte Carlo designs (finding F9, item 7 second half).** The "Calculate" button exists; still missing is
+- [ ] **Async compute for Monte Carlo designs (finding F9, item 7 second half). [owner] needs a decision on a background-process package (`mirai` or `future`) as a runtime dependency; it also changes the browser build.** The "Calculate" button exists; still missing is
   `shiny::ExtendedTask` with a background process so one user's running simulation does not block the other users of the
   same R process. Matters as soon as the app is hosted for several people.
 - [ ] **`bindCache()` for closed-form results** (Track E, P2): cheap speed-up for repeated identical inputs.
@@ -48,7 +48,7 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 
 ### Browser build / offline (item 15, spike done)
 - [x] A real Shinylive build of the package -- done 21 Oct 2026 (`tools/pages/make_app.R`, `app` job of the `docs` workflow: export, boot in headless Chrome from `/app/`, pass/fail check; first passing run: UI visible after 77 s, first calculation 12 s, 64 MB transferred). It is assembled from the package's own `R/` directory (sourced, not a webR-compiled package: the package has no compiled code). Published to Pages under `/app/` beside the pkgdown site **only from `main`**.
-- [ ] **[owner]** Pages needs: Settings > Pages > Source: GitHub Actions, the repository public (free plan), and the branch merged to `main`; then check `https://sparrow410.github.io/Sample_size_all/app/` on a phone.
+- [x] Pages is on and the browser build is published from `main` (done by the owner, 27 Oct 2026). Phones now go to the Connect Cloud version instead; **[owner]** still to try it on a real phone.
 - [ ] The browser build downloads about 64 MB on first visit; consider trimming (drop unused heavy packages once item 16 is finished) and measure on a real phone connection.
 - [ ] Trial Sequential Analysis (risk ratio) did not finish within 150 s in the last browser crawl (it did in earlier ones): measure and
   speed up or gate it.
@@ -60,7 +60,7 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
   settled, park it again (`if: false`) or move it to a weekly schedule.
 
 ### Documentation site (item 17, built)
-- [ ] **[owner]** Settings > Pages > Source: *GitHub Actions*, then merge the working branch to `main` so the `docs` workflow deploys.
+- [x] Settings > Pages > Source: *GitHub Actions* and the merge to `main` (done by the owner).
 - [ ] **[owner]** The Pages build error reported on 17 Oct: the exact message and where it shows (Settings > Pages, Actions tab, or
   an e-mail) were never supplied; `.nojekyll` was added as a guess.
 - [ ] Look at the built site once (navigation, search, MathJax) -- pkgdown could not be run in the development sandbox.
@@ -73,7 +73,7 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 
 ### 18. Hosting, Docker, PWA, Android, desktop
 - [x] Docker image + CI smoke test (done 21 Oct 2026).
-- [ ] **[owner]** Where to host (shinyapps.io, Posit Connect, Fly.io / Render / a VPS running the image) and the budget.
+- [x] Hosting for phones: Posit Connect Cloud, deployed from the auto-built `connect` branch (28 Oct 2026). [ ] **[owner]** Long-term choice and budget: free-plan limits are not verified; shinyapps.io is closing to new apps (docs/hosting.md).
 - [ ] First publish of the image to GHCR (happens on the first push to `main` or a `v*` tag; not exercised yet).
 - [ ] Multi-user scaling: ShinyProxy or several replicas, until F9 (`ExtendedTask`) is done.
 - [ ] Image size and an arm64 build (amd64 only today).
@@ -217,3 +217,29 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] Mention in the app that the server version sends inputs to the server (the browser version does not); add to the Connect build's home text.
 - [ ] Phone layout pass (single column, large touch targets) now that phones will use the server version (item 22).
 - [ ] Async / several users on one R process (F9) matters more once phones use the server version.
+
+---
+
+## 6. Added on 29 October 2026 (open items)
+
+### Interface
+- [ ] "Advanced options" folded inside the other ~60 calculators (done for Proportions, Means, Case-Control, Cohort, Correlation, Diagnostic Accuracy): decide per calculator which inputs are optional, most-used first.
+- [ ] Two-column layout on wide screens (inputs left, result right) -- optional now that the result is pinned.
+- [ ] Phone: a separate slimmer app with only the common calculators (not built; the phone layout is the same app); the dark-mode switch is hidden on phones; a check on a **real phone and in Safari** (only an emulated iPhone has been tried).
+- [ ] A person's keyboard and screen-reader walk-through; dark-mode plots (plots stay white); text-resize and reduced-motion checks.
+- [ ] Home: the quick links and cards are a guess at what people use first -- revisit with real usage.
+
+### Package and citation
+- [ ] Vignettes per family (the help pages are done); more examples where a calculator has several designs.
+- [ ] r-universe release, then CRAN: split a computation-only core from the app, `skip_on_cran()` for the Monte Carlo and browser tests, ASCII-only source, a name decision. `R CMD check --as-cran` already passes the package checks.
+- [ ] **[owner]** Zenodo: archive a release and send the DOI; put it in `R/citation_info.R`, `CITATION.cff` and `inst/CITATION` (docs/hosting.md, "Adding the Zenodo DOI"); confirm the first version number (0.1.0 now).
+- [ ] **[owner]** Rename the repository (then update the addresses in the same three files, the Pages and Connect addresses, and `mobile_url.txt` if the Connect address changes).
+- [ ] Possible wrappers `ss_text()`, `ss_curve()`, `ss_export()` around the `ss_result` object; the `calc_*` names are the public API for now.
+
+### Eyes / Lesions per Patient (built 29 Oct 2026)
+- [ ] Binary outcome with both treatments in each patient (clustered McNemar; needs a checked source), a patient-by-treatment variance part for the split designs, unequal allocation, different numbers of units in the two arms, the analysis side (Rosner-Milton / Obuchowski tests).
+
+### Housekeeping
+- [ ] Section 1 of the roadmap has the current figures; the checklists (`checklist_by_design.md`, `checklist_by_test.md`) still do not list the Analyze, planning, survey and outbreak modules.
+- [ ] `renv.lock` still lists packages that were removed from the runtime (intended: the tests use them as oracles) and not the packages added for the tests (`shinytest2`, `chromote`, ...); re-snapshot when convenient.
+- [ ] The sandbox's `R CMD check` ends with a locale warning and a clock note that are not the package's; confirm on a normal machine or in CI.
