@@ -527,7 +527,18 @@ design_nodes <- list(
       list(label = "Same subject receives both, in sequence (crossover)", next_id = "term_crossover"),
       list(label = "Clusters cross over in sequence (stepped-wedge)", next_id = "term_stepped_wedge"),
       list(label = "Single subject, repeated periods (N-of-1)", next_id = "term_n_of_1"),
-      list(label = "Groups/clusters, and I want to simulate the mixed-model analysis directly (Monte Carlo)", next_id = "glmm_outcome", set = list(cluster = TRUE))
+      list(label = "Groups/clusters, and I want to simulate the mixed-model analysis directly (Monte Carlo)", next_id = "glmm_outcome", set = list(cluster = TRUE)),
+      list(label = "Each patient has several eyes, lesions or patches, and all of a patient's units get the same treatment", next_id = "pu_outcome"),
+      list(label = "Each patient has several eyes, lesions or patches, and gets both treatments (split-face, one eye per arm)", next_id = "term_pu_within")
+    )
+  ),
+
+  pu_outcome = list(
+    id = "pu_outcome", stage = 3,
+    question = "Is the outcome of each eye / lesion / patch continuous or binary?",
+    options = list(
+      list(label = "Continuous (a measurement, a score)", next_id = "term_pu_between_cont"),
+      list(label = "Binary (event or no event, healed or not)", next_id = "term_pu_between_bin")
     )
   ),
 
@@ -894,6 +905,9 @@ design_nodes <- list(
   term_cox_continuous = .term("term_cox_continuous", "Cox regression, continuous covariate", "cox_continuous"),
   term_poisson_reg = .term("term_poisson_reg", "Poisson regression, continuous predictor", "poisson_regression_continuous"),
 
+  term_pu_between_cont = .term("term_pu_between_cont", "Several units per patient, same treatment in all of a patient's units (two means)", "patient_units_between_continuous"),
+  term_pu_between_bin = .term("term_pu_between_bin", "Several units per patient, same treatment in all of a patient's units (two proportions)", "patient_units_between_binary"),
+  term_pu_within = .term("term_pu_within", "Both treatments in every patient (split-face, one eye per arm)", "patient_units_within_continuous"),
   term_cluster_deff = .term("term_cluster_deff", "Cluster / multistage sampling, design effect", "cluster_deff"),
   term_cluster_deff_var = .term("term_cluster_deff_var", "Cluster sampling, variable cluster size", "cluster_deff_variable"),
   term_cluster_survey = .term("term_cluster_survey", "WHO EPI-style cluster survey", "cluster_survey"),

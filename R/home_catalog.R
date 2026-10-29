@@ -760,6 +760,36 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Self-Controlled Case Series",
        module_input_id = NA, design_value = NA),
 
+  list(key = "patient_units_between_continuous",
+       label = "Several units per patient (eyes, lesions, patches), same treatment in all of a patient's units -- two means",
+       answers = paste(
+         "Answers: \"Each patient contributes several correlated measurements (both eyes, several lesions or patches) and every unit of",
+         "a patient gets the same treatment -- how many patients do I need to compare two means, and how many units per patient help?\""
+       ),
+       outcome_type = "patient_units", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Eyes / Lesions per Patient",
+       module_input_id = "patient_units-design", design_value = "between_continuous"),
+
+  list(key = "patient_units_between_binary",
+       label = "Several units per patient (eyes, lesions, patches), same treatment in all of a patient's units -- two proportions",
+       answers = paste(
+         "Answers: \"Each patient contributes several correlated yes/no outcomes (an eye with or without the event) and every unit of a",
+         "patient gets the same treatment -- how many patients do I need to compare two proportions?\""
+       ),
+       outcome_type = "patient_units", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Eyes / Lesions per Patient",
+       module_input_id = "patient_units-design", design_value = "between_binary"),
+
+  list(key = "patient_units_within_continuous",
+       label = "Both treatments in every patient (split-face, split-body, one eye per arm) -- two means",
+       answers = paste(
+         "Answers: \"Each patient receives both treatments (one eye on each drug, the two halves of the face) -- how many patients do I",
+         "need to compare two means, and what do extra units per treatment add?\""
+       ),
+       outcome_type = "patient_units", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Eyes / Lesions per Patient",
+       module_input_id = "patient_units-design", design_value = "within_continuous"),
+
   list(key = "capture_recapture",
        label = "Two-sample mark-recapture (Chapman-Petersen), precision-based",
        answers = paste(
@@ -2303,6 +2333,9 @@ study_design_families <- list(
   list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
        hint = "Inflating an existing sample size for cluster-sampled surveys, or solving a full cluster survey design (WHO EPI-style) directly.",
        catalog_keys = c("cluster_deff", "cluster_deff_variable", "cluster_survey", "cluster_pps_optimal")),
+  list(id = "patient_units", label = "Several Measurements per Patient (eyes, lesions, patches)",
+       hint = "Both eyes, several lesions or patches or teeth per patient: patients needed when a patient's units are correlated, treatment given to whole patients or to each patient's units (split-face), and how many units per patient are worth it.",
+       catalog_keys = c("patient_units_between_continuous", "patient_units_between_binary", "patient_units_within_continuous")),
   list(id = "capture_recapture", label = "Capture-Recapture",
        hint = "Planning a two-sample mark-recapture study's second-sample size for a target precision on an unknown population size.",
        catalog_keys = c("capture_recapture")),

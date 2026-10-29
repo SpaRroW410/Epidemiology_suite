@@ -27,7 +27,7 @@
   var box = document.getElementById("s2r-status"), msg = document.getElementById("s2r-msg"), pre = document.getElementById("s2r-log");
   function secs() { return Math.round((Date.now() - t0) / 1000); }
   function add(s) { lines.push(secs() + " s  " + s); if (lines.length > 60) lines.shift(); pre.textContent = lines.join("\n"); }
-  document.title = "epidemiologicasuite";
+  document.title = "Epidemiological suite";
   add("page " + location.pathname);
   add("browser: " + navigator.userAgent);
   add("WebAssembly: " + (typeof WebAssembly) + "; service workers: " + ("serviceWorker" in navigator) + "; SharedArrayBuffer: " + (typeof SharedArrayBuffer) +

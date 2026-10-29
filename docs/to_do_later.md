@@ -1,5 +1,7 @@
 # To do later
 
+> The plan at a glance, with finished items struck through, is [`PLAN.md`](PLAN.md); this file is the long flat checklist behind it.
+
 Everything that is **not finished yet**, in one list, in roadmap order (start to end), so it can be picked up later
 without reading the whole [`ROADMAP.md`](ROADMAP.md). The roadmap stays the source of truth for the reasoning and the
 evidence; this file is the checklist. Tick an item here when it is done *and* record it in the roadmap.
@@ -158,6 +160,14 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] **Value of information (EVPI / EVSI)** -- open: Multi-parameter EVPPI and non-Normal outcomes (only the single-parameter, known-SD case ships). *Added 28 Sep 2026*
 - [ ] **Bioequivalence (TOST)** -- open: Reference-scaled designs for highly variable drugs (RSABE / ABEL): the 2×2, 2×2×4 and 2×3×3 designs ship with fixed 80–125% limits; `PowerTOST::sampleN.RSABE()`/`sampleN.scABEL()` exist in a runtime package but are simulation-based and not wired in. (Named in the checklist, not in the review PDF.) *Added 28 Sep 2026*
 - [ ] **Multi-arm vs. common control** -- open: Dunnett for **binary** outcomes (means only; the wizard falls back to Bonferroni/Sidak two-proportion n). *Added 28 Sep 2026*
+
+### A.3b Several measurements per patient (asked and built 29 Oct 2026)
+- [x] Eyes / Lesions per Patient module: treatment between patients (two means, two proportions; fixed or varying units per patient),
+  treatment within patients (split-face, one eye per arm; two means), and "units per patient needed" for a fixed number of patients,
+  with the floor. Checked against `clusterPower::cpa.normal()` / `cpa.binary()`, `pwr` and simulation.
+- [ ] Open: binary outcome with both treatments in each patient (clustered McNemar; needs a checked source), a patient-by-treatment
+  variance part for the split designs, unequal allocation, different numbers of units in the two arms, the Rosner-Milton / Obuchowski
+  style tests for the analysis side, cluster-count curves for the units-needed mode.
 
 ### A.4 Wizard
 - [x] Free-text parser: RCT internals now have rules (27 Oct 2026); revisit with real user phrasing.

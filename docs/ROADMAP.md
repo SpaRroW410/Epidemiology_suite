@@ -1,11 +1,13 @@
-# Roadmap — epidemiologicasuite: from Sample Size Calculator to Epidemiology Suite
+# Roadmap — Epidemiological suite: from Sample Size Calculator to Epidemiology Suite
+
+> **Plan at a glance (what is done and what is next): [`PLAN.md`](PLAN.md).** This file keeps the reasoning and the evidence.
 
 | | |
 |---|---|
 | **Status** | Active — authoritative forward plan |
 | **Last reviewed** | 28 September 2026 (full codebase + docs review) |
 | **Owner** | Dr. Mukul Maheshwari |
-| **Name** | **epidemiologicasuite** (app, package and suite — decision D3) |
+| **Name** | **Epidemiological suite** as shown in the app; the R package is `epidemiologicasuite` (decision D3) |
 | **Licence** | GPL-3 (decision D2) |
 
 **How the docs fit together**
@@ -28,11 +30,11 @@
 
 | Measure | Value |
 |---|---|
-| Calculator modules | **65** (49 sample-size calculators, 11 Analyze tools, 2 planning tools, 2 survey tools, 1 infectious-disease model tool), in 17 groups in the Plan workbench and 2 in Analyze |
-| Individual designs | **156**, all in the Browse catalog (F2 fixed) |
+| Calculator modules | **66** (50 sample-size calculators, 11 Analyze tools, 2 planning tools, 2 survey tools, 1 infectious-disease model tool), in 17 groups in the Plan workbench and 2 in Analyze |
+| Individual designs | **159**, all in the Browse catalog (F2 fixed) |
 | Checklist coverage | By design: **81 / 94** done (13 open) · By test: **69 / 74** done (5 open) |
-| Unit tests | **487** `test_that()` blocks across 55 files, every design checked against a published worked example, a real package (oracle), or simulation |
-| Runtime packages | **14** in `DESCRIPTION` `Imports` + `survival`/`stats`/`graphics`/`utils` from base R (was 19; `epiR`, `rstatix`, `Hmisc`, `tseries`, `BayesFactor` removed in item 16) |
+| Unit tests | **907** test blocks in the default run (0 failures, 101 skipped as slow) across 83 test files, every design checked against a published worked example, a real package (oracle), or simulation |
+| Runtime packages | `DESCRIPTION` `Imports`: `shiny`, `bslib`, `clinfun`, `PowerTOST`, `Exact`, `kappaSize`, `mvtnorm`, `lme4`, plus `survival`, `stats`, `graphics`, `utils` (was 19; twelve removed in items 16 and the stage 2 that followed, each reimplemented and checked against the original) |
 | Verification-only packages | ~30 more (installed from the `github.com/cran` mirror, used only to check reimplementations — never shipped) |
 | Wizard coverage | "Which calculator?" reaches **49 / 49** modules and all 156 catalog entries, enforced by tests (F1 fixed) |
 | Distribution | Installable package (`remotes::install_github()` + `run_app()`), no hosted build. CI on GitHub Actions; versions locked in `renv.lock` |
