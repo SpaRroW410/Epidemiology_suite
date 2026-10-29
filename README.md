@@ -213,6 +213,13 @@ From a clone (development), the root `app.R` loads the package with
 `pkgload::load_all()`, so `shiny::runApp()` or `Rscript -e 'shiny::runApp()'` from
 the repository root still works.
 
+## How to cite
+
+The app has a **Cite** tab with the citation in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX and RIS, a ready-made sentence
+for a Methods section, and copy and download buttons. In R: `citation("epidemiologicasuite")`. GitHub's "Cite this repository" reads
+`CITATION.cff`. There is no DOI yet: after the first release is archived on Zenodo, put the DOI in three places (see
+`docs/hosting.md`, "Adding the Zenodo DOI"): `.citation_doi` in `R/citation_info.R`, `CITATION.cff` and `inst/CITATION`.
+
 ## Running in Docker
 
 ```sh

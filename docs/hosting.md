@@ -40,3 +40,14 @@ documentation for deploying from GitHub (the manifest route) if a label differs.
 - **Concurrency:** one R process per app instance; many simultaneous users share it until the async work (to-do list) is done.
 - **Not tested here:** the Connect Cloud deployment itself (no account), and any real phone. The bundle is tested as a plain Shiny app
   in headless Chrome; the redirect is tested in Chromium device emulation (iPhone, Pixel, iPad desktop-site, desktop, `?full=1`).
+
+## Adding the Zenodo DOI (owner steps)
+
+1. On zenodo.org, log in with GitHub, switch the repository on under *GitHub* settings, then publish a release on GitHub (tag, for
+   example `v0.1.0`). Zenodo archives it and issues a DOI (a concept DOI for all versions and one for this version; cite the version one
+   or the concept one as you prefer).
+2. Put the DOI, in the form `10.5281/zenodo.1234567` (a pasted `https://doi.org/...` address is also accepted), in
+   `.citation_doi` in `R/citation_info.R`; add it to `CITATION.cff` (the commented `identifiers:` block and `date-released`) and to
+   `inst/CITATION` (`doi = ...`). Open a PR. The Cite tab then shows the DOI and every format cites the DOI address; the tests check this.
+3. If the repository is renamed, update the addresses in the same three places (`url` in `R/citation_info.R`, `repository-code` and `url`
+   in `CITATION.cff`, `url` in `inst/CITATION`).

@@ -94,12 +94,14 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
     ),
     list(home_panel),
     workbench_panels,
+    list(nav_panel("Cite", cite_ui())),
     # light / dark switch (starts from the viewer's operating-system setting)
     list(bslib::nav_item(nav_search_ui()), bslib::nav_item(bslib::input_dark_mode(id = "dark_mode")))
   ))
 
   server <- function(input, output, session) {
     home_server(input, output, session)
+    cite_server(input, output, session)
     # opened from run_app(calculator = ...): go to that calculator once the page is connected (the navbar's value arrives first)
     if (!is.null(start_key)) observeEvent(input$main_nav, {
       entry <- catalog_entry(start_key)

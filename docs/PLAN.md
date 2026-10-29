@@ -44,6 +44,7 @@ suite 907 blocks with 0 failures.
 - ~~Automatic redirect of phones and tablets to that version~~ (28 Oct; to be confirmed on a real phone)
 - ~~Accessibility scan (axe-core, WCAG A/AA) of every calculator, light and dark, fixed to 0 violations; dark-mode switch~~ (28 Oct)
 - ~~Header renamed to "Epidemiological suite"~~ (29 Oct)
+- ~~Cite tab: the citation in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX, RIS and a Methods sentence, with copy and download; `CITATION.cff` and `citation()` too~~ (29 Oct). **Owner step:** archive a release on Zenodo and send the DOI (three places to edit, see docs/hosting.md)
 - [ ] Hosting decision for the long term (Connect Cloud free-plan limits not verified; shinyapps.io is closing to new apps)
 - [ ] Home-screen icon (PWA), then an Android wrapper (TWA); iOS stays PWA only; desktop wrapper not recommended
 - [ ] Multi-user scaling (Phase 6, background computation)
