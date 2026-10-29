@@ -29,6 +29,7 @@ suite 907 blocks with 0 failures.
 - ~~Outbreak and surveillance: attack rates, aberration detection (EARS, CUSUM)~~ (21 Oct)
 - ~~Teaching models: SIR / SEIR with vaccination~~ (21 Oct)
 - ~~Plain-language study-design parser and wizard battery (101 descriptions, 636 click paths checked)~~ (27 Oct)
+- [ ] **Several measurements per patient (eyes, lesions, patches, teeth, split-face / split-body):** a dedicated calculator is not built. Today's general tools cover parts of it (see `to_do_later.md`); a dedicated one would take the number of units per patient (fixed or varying), the correlation between units of the same patient, and say how many patients are needed and why adding more units stops helping. Sources still to be found and checked before any formula is written
 - Not promised, kept on the list: raking / post-stratification, seasonal detection baselines, age-structured models, line-list upload and R0 / Rt (deferred by decision D1)
 
 ## Phase 3 — Reaching people on every device
