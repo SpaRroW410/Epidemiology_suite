@@ -7,9 +7,17 @@ list of blocked sample-size items are in [`ROADMAP.md`](ROADMAP.md); the flat ch
 
 **Where it stands:** 66 calculators (50 sample-size, 11 analysis, 2 planning, 2 survey, 1 infectious-disease models), 159 designs,
 three versions live or ready (browser build on GitHub Pages, phone/server version on Posit Connect Cloud, R package), default test
-suite 907 blocks with 0 failures.
+suite 940 blocks with 0 failures; 195 calculation functions exported with help pages.
 
 ---
+
+## Waiting for you (owner decisions and steps)
+
+- [ ] Merge PR #11 (it contains #10 as well), then click **Republish** on Connect Cloud; try the phone redirect on a real phone
+- [ ] Zenodo: archive a release and send the **DOI**; confirm the first version number (0.1.0 now)
+- [ ] Decide on a background-process package (`mirai` or `future`) for running slow simulations without blocking other users (also changes the browser build)
+- [ ] Long-term hosting (Connect Cloud free-plan limits are not verified); rename of the GitHub repository (changes install and citation addresses)
+- [ ] The Pages build error text from 17 Oct, if it still happens
 
 ## Phase 1 — Foundations  (all done)
 
@@ -86,7 +94,7 @@ suite 907 blocks with 0 failures.
 
 ---
 
-## Design mock-ups (29 Oct 2026; pictures only, nothing here is built yet)
+## Design mock-ups (29 Oct 2026; A, the shared parts of B and D are now built, C is not)
 
 Today's pages: [Home](design-mockups/current_home.png), [calculator](design-mockups/current_calculator.png). Proposals:
 [A task-first Home](design-mockups/a_home.png), [B calculator with progressive disclosure](design-mockups/b_calc.png),
