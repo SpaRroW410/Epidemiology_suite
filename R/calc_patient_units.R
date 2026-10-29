@@ -72,12 +72,15 @@
 #'
 #' @param delta Difference between the two group means to detect (not 0)
 #' @param sd Standard deviation of a single unit's measurement (all patients and units together; > 0)
-#' @param icc Correlation between two units of the same patient, [0, 1)
+#' @param icc Correlation between two units of the same patient, \[0, 1)
 #' @param units_per_patient Number of units per patient (average, >= 1), e.g. 2 for both eyes
 #' @param cv Coefficient of variation of the number of units per patient (0 if every patient has the same number)
 #' @param alpha Two-sided significance level
 #' @param power Desired power
 #' @return list(n_patients_per_arm, n_patients_total, n_units_total, design_effect, ...)
+#' @examples
+#' calc_patient_units_between_continuous(delta = 0.5, sd = 1, icc = 0, units_per_patient = 1)
+#' @export
 calc_patient_units_between_continuous <- function(delta, sd, icc, units_per_patient, cv = 0, alpha = 0.05, power = 0.8) {
   .validate_number(delta, "delta"); .validate_positive(sd, "sd")
   .validate_unit_interval(alpha, "alpha"); .validate_unit_interval(power, "power")
@@ -89,7 +92,11 @@ calc_patient_units_between_continuous <- function(delta, sd, icc, units_per_pati
 #' Patients needed to compare two proportions when every unit of a patient gets the same treatment
 #'
 #' @param p1,p2 Proportions of units with the outcome in the two groups (strictly between 0 and 1, different)
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_patients_per_arm`, `n_patients_total`, `n_units_total`, `n_patients_per_arm_exact`, `design_effect`, `effective_units_per_patient`, `n_patients_per_arm_if_units_independent`, `n_patients_per_arm_floor` and `inputs`, the arguments the result was calculated from.
 #' @inheritParams calc_patient_units_between_continuous
+#' @examples
+#' calc_patient_units_between_binary(p1 = 0.4, p2 = 0.25, icc = 0.3, units_per_patient = 2)
+#' @export
 calc_patient_units_between_binary <- function(p1, p2, icc, units_per_patient, cv = 0, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(p1, "p1"); .validate_unit_interval(p2, "p2")
   .validate_unit_interval(alpha, "alpha"); .validate_unit_interval(power, "power")
@@ -103,10 +110,13 @@ calc_patient_units_between_binary <- function(p1, p2, icc, units_per_patient, cv
 #' Every patient has `units_per_arm` units on each treatment; the two arm means of a patient are compared with a paired t-test.
 #' @param delta Difference between treatments to detect (not 0)
 #' @param sd Standard deviation of a single unit's measurement (> 0)
-#' @param icc Correlation between any two units of the same patient (compound symmetry), [0, 1)
+#' @param icc Correlation between any two units of the same patient (compound symmetry), \[0, 1)
 #' @param units_per_arm Units per treatment in every patient (>= 1), e.g. 1 for one eye per arm
 #' @param alpha,power As above.
 #' @return list(n_patients, n_units_total, sd_difference, ...)
+#' @examples
+#' calc_patient_units_within_continuous(delta = 0.5, sd = 1, icc = 0.5, units_per_arm = 1)
+#' @export
 calc_patient_units_within_continuous <- function(delta, sd, icc, units_per_arm, alpha = 0.05, power = 0.8) {
   .validate_number(delta, "delta"); .validate_positive(sd, "sd")
   .validate_unit_interval(alpha, "alpha"); .validate_unit_interval(power, "power")
@@ -131,9 +141,17 @@ calc_patient_units_within_continuous <- function(delta, sd, icc, units_per_arm, 
 #'
 #' @param design "between_continuous", "between_binary" or "within_continuous"
 #' @param patients Patients per arm (between designs, >= 2) or patients in total (within design, >= 2)
-#' @param ... The effect inputs of the chosen design (`delta`, `sd` / `p1`, `p2`), `icc`, `cv` (between designs), `alpha`, `power`
-#' @return list(n_units_per_patient, achievable, ...). If even unlimited units per patient cannot reach the power with this many
-#'   patients, `achievable` is FALSE, `n_units_per_patient` is NA and `n_patients_per_arm_floor` says how many patients are the minimum.
+#' @return A named list of class `ss_result` with `n_units_per_patient` (whole units needed per patient, or per treatment in a patient for the
+#'   within design), `achievable`, `n_units_per_patient_exact`, `n_units_total`, `n_patients_per_arm_floor` and `inputs`. If even unlimited
+#'   units per patient cannot reach the power with this many patients, `achievable` is `FALSE`, `n_units_per_patient` is `NA` and
+#'   `n_patients_per_arm_floor` says how many patients are the minimum.
+#' @param p1 Proportion of units with the outcome in group 1 (`design = "between_binary"`; strictly between 0 and 1).
+#' @param p2 Proportion of units with the outcome in group 2 (`design = "between_binary"`; different from `p1`).
+#' @inheritParams calc_patient_units_between_continuous
+#' @examples
+#' calc_patient_units_needed("between_binary", patients = 150, p1 = 0.4, p2 = 0.25, 
+#'     icc = 0.3, cv = 0.2)
+#' @export
 calc_patient_units_needed <- function(design = c("between_continuous", "between_binary", "within_continuous"), patients,
                                       delta = NULL, sd = NULL, p1 = NULL, p2 = NULL, icc, cv = 0, alpha = 0.05, power = 0.8) {
   design <- match.arg(design)

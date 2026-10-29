@@ -29,6 +29,10 @@
 #'   "optimal" (Neyman allocation: proportion to Nh x Sh, minimizing
 #'   variance for a fixed total n)
 #' @return list(n_total, nh, wh, inputs)
+#' @examples
+#' calc_stratified_sampling(Nh = c(1e+05, 3e+05, 6e+05), Sh = c(1, 2, 3), e = 0.1, 
+#'     type = "proportional")
+#' @export
 calc_stratified_sampling <- function(Nh, Sh, e, conf_level = 0.95,
                                       type = c("proportional", "optimal")) {
   type <- match.arg(type)

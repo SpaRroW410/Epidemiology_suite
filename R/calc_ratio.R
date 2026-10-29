@@ -22,6 +22,9 @@
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @param method "koopman" (default, recommended) or "katz"
 #' @return list(n1, n2, n_total, achieved_width, inputs)
+#' @examples
+#' calc_precision_riskratio(p1 = 7/34, p2 = 1/34, r = 1, conf_width = 41.35486, method = "koopman")
+#' @export
 calc_precision_riskratio <- function(p1, p2, r = 1, conf_width = 1, conf_level = 0.95,
                                       method = c("koopman", "katz")) {
   method <- match.arg(method)
@@ -60,6 +63,9 @@ calc_precision_riskratio <- function(p1, p2, r = 1, conf_width = 1, conf_level =
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @param method "gart", "woolf", or "indip_smooth" (default)
 #' @return list(n1, n2, n_total, achieved_width, inputs)
+#' @examples
+#' calc_precision_or(p1 = 0.1, p2 = 0.15, r = 1, conf_width = 1.207484, method = "indip_smooth")
+#' @export
 calc_precision_or <- function(p1, p2, r = 1, conf_width = 1, conf_level = 0.95,
                                method = c("indip_smooth", "gart", "woolf")) {
   method <- match.arg(method)
@@ -101,6 +107,9 @@ calc_precision_or <- function(p1, p2, r = 1, conf_width = 1, conf_level = 0.95,
 #'   limit (> 1)
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @return list(n1, n2, n_total, achieved_prec_level, inputs)
+#' @examples
+#' calc_precision_rateratio(rate1 = 0.5, rate2 = 3, r = 1, prec_level = 3.814884)
+#' @export
 calc_precision_rateratio <- function(rate1, rate2, r = 1, prec_level = 2, conf_level = 0.95) {
   .validate_positive(rate1, "rate1")
   .validate_positive(rate2, "rate2")

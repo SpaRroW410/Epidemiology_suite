@@ -17,6 +17,9 @@
 #' @param n Number of subjects observed with zero events (whole number >= 1)
 #' @param conf_level Confidence level (0,1); e.g. 0.95 for the classic "3/n" rule
 #' @return list(approx_bound, exact_bound, inputs)
+#' @examples
+#' calc_rule_of_three_bound(n = 30, conf_level = 0.95)
+#' @export
 calc_rule_of_three_bound <- function(n, conf_level = 0.95) {
   if (!is.numeric(n) || length(n) != 1 || is.na(n) || n < 1 || n != round(n)) {
     stop("n must be a single whole number >= 1.")
@@ -44,6 +47,9 @@ calc_rule_of_three_bound <- function(n, conf_level = 0.95) {
 #' @param p Assumed true event rate (0,1)
 #' @param conf_level Desired probability of observing at least one event (0,1)
 #' @return list(n_exact, n_approx, inputs)
+#' @examples
+#' calc_rule_of_three_n(p = 0.01, conf_level = 0.95)
+#' @export
 calc_rule_of_three_n <- function(p, conf_level = 0.95) {
   .validate_unit_interval(p, "p")
   .validate_unit_interval(conf_level, "conf_level")
@@ -76,9 +82,9 @@ calc_rule_of_three_n <- function(p, conf_level = 0.95) {
 #' @param prev Assumed true prevalence if the condition/disease were
 #'   present (0,1)
 #' @param se Sensitivity of the test, or a length-2 vector of two tests'
-#'   sensitivities, each in (0,1]
+#'   sensitivities, each in (0,1\]
 #' @param sp Specificity of the test, or a length-2 vector of two tests'
-#'   specificities (same length as se), each in (0,1]
+#'   specificities (same length as se), each in (0,1\]
 #' @param interpretation For two tests, "series" (both must be positive
 #'   to call a case positive -- higher combined specificity, lower
 #'   sensitivity) or "parallel" (either positive suffices -- higher
@@ -87,6 +93,9 @@ calc_rule_of_three_n <- function(p, conf_level = 0.95) {
 #'   affected at the assumed prevalence, at least one case would be
 #'   detected (0,1)
 #' @return list(n_hypergeometric, n_binomial, combined_se, combined_sp, inputs)
+#' @examples
+#' calc_detect_event_imperfect_test(N = 1000, prev = 0.05, se = 0.9, sp = 1, conf_level = 0.95)
+#' @export
 calc_detect_event_imperfect_test <- function(N, prev, se, sp,
                                               interpretation = c("series", "parallel"),
                                               conf_level = 0.95) {

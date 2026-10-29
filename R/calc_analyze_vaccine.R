@@ -33,6 +33,10 @@
 #' @param n_vaccinated,n_unvaccinated Participants ("risk") or person-time ("rate").
 #' @param controls_vaccinated,controls_unvaccinated Controls ("odds" only).
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `design`, `ratio`, `ve`, `ve_koopman_lower`, `ve_koopman_upper`, `ve_katz_lower`, `ve_katz_upper`, `ve_adjusted_log_lower`, `ve_adjusted_log_upper`, `attack_rate_vaccinated`, `attack_rate_unvaccinated`, `risk_difference`, `test_p` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_vaccine_efficacy("risk", 8, 160, 1000, 1000)
+#' @export
 calc_analyze_vaccine_efficacy <- function(design = c("risk", "rate", "odds"),
                                           cases_vaccinated, cases_unvaccinated,
                                           n_vaccinated = NULL, n_unvaccinated = NULL,

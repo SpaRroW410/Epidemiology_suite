@@ -28,6 +28,10 @@
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_total, v, f2, inputs)
+#' @examples
+#' calc_anova_general(u = 3, effect_size = 0.25^2, effect_size_type = "f2", alpha = 0.05, 
+#'     power = 0.8)
+#' @export
 calc_anova_general <- function(u, effect_size, effect_size_type = c("f2", "eta2"),
                                 alpha = 0.05, power = 0.8) {
   effect_size_type <- match.arg(effect_size_type)

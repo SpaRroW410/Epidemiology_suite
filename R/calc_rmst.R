@@ -46,6 +46,7 @@
 #' @param alpha Two-sided alpha for the (unused here) CI -- kept for
 #'   parity with the source; only the point estimate and variance are used
 #' @return list(rmst, rmst.var)
+#' @noRd
 .rmst_one_arm <- function(time, status, tau, alpha = 0.05) {
   ft  <- survival::survfit(survival::Surv(time, status) ~ 1)
   idx <- ft$time <= tau
@@ -144,7 +145,7 @@
 #'   1 (treatment); default 1 (exponential)
 #' @param scale0,scale1 Weibull scale parameters, arm 0 and arm 1. Under
 #'   the proportional-hazards case (`shape0 == shape1`), `scale1` must be
-#'   >= `scale0`, since the arm1-minus-arm0 RMST difference is of interest
+#'   \>= `scale0`, since the arm1-minus-arm0 RMST difference is of interest
 #' @param margin Non-inferiority margin (>= 0); `margin = 0` (default)
 #'   selects a superiority test
 #' @param allocation1 Proportion of patients allocated to arm 1 (0,1),
@@ -158,6 +159,12 @@
 #' @param seed RNG seed for reproducibility
 #' @return list(n0, n1, n_total, n0_events, n1_events,
 #'   achieved_power_separate, achieved_power_pooled, inputs)
+#' @examples
+#' \donttest{
+#' calc_rmst_comparison(ac_period = 35, tot_time = 510, tau = 500, scale0 = 8500, 
+#'     scale1 = 8500, margin = 18, power = 0.8)
+#' }
+#' @export
 calc_rmst_comparison <- function(ac_period, tot_time, tau, shape0 = 1, scale0, shape1 = 1, scale1,
                                   margin = 0, allocation1 = 0.5, alpha = 0.05, power = 0.8,
                                   nsim = 100, seed = 20140618) {

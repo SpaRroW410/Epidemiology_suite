@@ -18,6 +18,10 @@
 #' @param N Optional finite eligible-population size. NULL (default) =
 #'   effectively infinite population.
 #' @return list(n_total, n_case, n_control, inputs)
+#' @examples
+#' calc_case_control_unmatched(p0 = 0.3, OR = 2, power = 0.9, ratio = 1, alpha = 0.05, 
+#'     alternative = "two.sided")
+#' @export
 calc_case_control_unmatched <- function(p0, OR, power = 0.8, ratio = 1,
                                          alpha = 0.05,
                                          alternative = c("two.sided", "less", "greater"),
@@ -60,6 +64,10 @@ calc_case_control_unmatched <- function(p0, OR, power = 0.8, ratio = 1,
 #' @param alternative "two.sided" or one-sided
 #' @param N Optional finite eligible-population size
 #' @return list(n_total, n_case, n_control, inputs)
+#' @examples
+#' calc_case_control_matched(p0 = 0.6, OR = 3, phi_coef = 0.2, power = 0.8, ratio = 1, 
+#'     alpha = 0.05, alternative = "two.sided")
+#' @export
 calc_case_control_matched <- function(p0, OR, phi_coef = 0.2, power = 0.8, ratio = 1,
                                        alpha = 0.05,
                                        alternative = c("two.sided", "less", "greater"),
@@ -115,6 +123,10 @@ calc_case_control_matched <- function(p0, OR, phi_coef = 0.2, power = 0.8, ratio
 #' @param power Desired power (0,1)
 #' @return list(n, inputs) where n is the number of matched sets required
 #'   (each set = nD cases + nH controls)
+#' @examples
+#' calc_case_control_nested_binary(OR = 3.5, pE = 0.15, nD = 1, nH = 2, R2 = 0, alpha = 0.05, 
+#'     power = 0.8)
+#' @export
 calc_case_control_nested_binary <- function(OR, pE, nD, nH, R2 = 0, alpha = 0.05,
                                              power = 0.8) {
   .validate_positive(OR, "OR")
@@ -151,6 +163,10 @@ calc_case_control_nested_binary <- function(OR, pE, nD, nH, R2 = 0, alpha = 0.05
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_sets, n_total, inputs)
+#' @examples
+#' calc_case_control_nested_continuous(OR = 1.39, sigma = 1, nD = 1, nH = 2, R2 = 0, 
+#'     alpha = 0.05, power = 0.85)
+#' @export
 calc_case_control_nested_continuous <- function(OR, sigma, nD, nH, R2 = 0, alpha = 0.05,
                                                  power = 0.8) {
   .validate_positive(OR, "OR")
@@ -191,6 +207,10 @@ calc_case_control_nested_continuous <- function(OR, sigma, nD, nH, R2 = 0, alpha
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(subcohort_n, full_cohort_n, inputs)
+#' @examples
+#' calc_case_control_case_cohort(n = 15792, pD = 0.03, p1 = 0.25, hr = 1.35, alpha = 0.05, 
+#'     power = 0.8)
+#' @export
 calc_case_control_case_cohort <- function(n, pD, p1, hr, alpha = 0.05, power = 0.8) {
   .validate_positive_integer(n, "n")
   .validate_unit_interval(pD, "pD")

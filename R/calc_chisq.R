@@ -9,12 +9,16 @@
 #' Wraps pwr::ES.w1() (effect size w) + pwr::pwr.chisq.test().
 #'
 #' @param P0 Numeric vector of null-hypothesis category proportions (length
-#'   >= 2, each in (0,1), summing to 1)
+#'   \>= 2, each in (0,1), summing to 1)
 #' @param P1 Numeric vector of alternative-hypothesis category proportions,
 #'   same length as P0, summing to 1
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(N, w, df, inputs)
+#' @examples
+#' # Cohen (1988) exercise 7.1: four equally likely categories against one larger share; N = 131
+#' calc_chisq_gof(P0 = rep(0.25, 4), P1 = c(0.375, rep((1 - 0.375) / 3, 3)), alpha = 0.05, power = 0.80)
+#' @export
 calc_chisq_gof <- function(P0, P1, alpha = 0.05, power = 0.8) {
   .validate_prob_vector(P0, "P0")
   .validate_prob_vector(P1, "P1")
@@ -45,6 +49,10 @@ calc_chisq_gof <- function(P0, P1, alpha = 0.05, power = 0.8) {
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(N, w, df, inputs)
+#' @examples
+#' # a 2 x 2 table of joint proportions; N = 589
+#' calc_chisq_independence(rbind(c(0.15, 0.35), c(0.10, 0.40)), alpha = 0.05, power = 0.80)
+#' @export
 calc_chisq_independence <- function(P, alpha = 0.05, power = 0.8) {
   if (!is.matrix(P) || nrow(P) < 2 || ncol(P) < 2) {
     stop("P must be a matrix with at least 2 rows and 2 columns.")
@@ -87,6 +95,9 @@ calc_chisq_independence <- function(P, alpha = 0.05, power = 0.8) {
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, inputs)
+#' @examples
+#' calc_mcnemar(p10 = 0.5, p01 = 0.2, alpha = 0.05, power = 0.8)
+#' @export
 calc_mcnemar <- function(p10, p01, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(p10, "p10")
   .validate_unit_interval(p01, "p01")
@@ -135,6 +146,10 @@ calc_mcnemar <- function(p10, p01, alpha = 0.05, power = 0.8) {
 #'   applied identically in every stratum to derive that stratum's p2
 #'   from its p1
 #' @return list(n_stratified, n_pooled, inputs)
+#' @examples
+#' # five strata (Cohen-style textbook example): stratified n = 447, naive pooled n = 1151
+#' calc_mantelhaenszel(alpha = 0.05, power = 0.80, a = c(0.15, 0.15, 0.20, 0.25, 0.25), b = c(0.4, 0.4, 0.5, 0.6, 0.6), p1 = c(0.5, 0.6, 0.7, 0.8, 0.9), phi = 2)
+#' @export
 calc_mantelhaenszel <- function(alpha = 0.05, power = 0.8, a, b, p1, phi) {
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
@@ -192,13 +207,17 @@ calc_mantelhaenszel <- function(alpha = 0.05, power = 0.8, a, b, p1, phi) {
 #'   for each group (e.g. 1,2,3,4, or actual doses)
 #' @param ni Numeric vector, same length as pi: the planned *relative*
 #'   allocation across groups (e.g. all equal for equal allocation) --
-#'   only the ratios ni/ni[1] matter, not the absolute values
+#'   only the ratios ni/ni\[1\] matter, not the absolute values
 #' @param delta Clinically meaningful minimal difference used in the
 #'   formula's small-sample correction term (Chow, Shao & Wang 2003);
 #'   0 is a reasonable default when no such minimal difference is known
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_group1, n_per_group, n_total, inputs)
+#' @examples
+#' calc_cochran_armitage_trend(pi = c(0.1, 0.3, 0.5, 0.7), di = c(1, 2, 3, 4), ni = c(10, 
+#'     10, 10, 10), delta = 1, alpha = 0.05, power = 0.8)
+#' @export
 calc_cochran_armitage_trend <- function(pi, di, ni, delta = 0, alpha = 0.05, power = 0.8) {
   if (!is.numeric(pi) || length(pi) < 2 || anyNA(pi) || any(pi <= 0) || any(pi >= 1)) {
     stop("pi must be a numeric vector of at least 2 values, each strictly between 0 and 1.")
@@ -300,6 +319,9 @@ calc_cochran_armitage_trend <- function(pi, di, ni, delta = 0, alpha = 0.05, pow
 #'   during the search (>= 100)
 #' @param seed RNG seed for reproducibility
 #' @return list(n, achieved_power, inputs)
+#' @examples
+#' calc_cochran_q(p = c(0.2, 0.3, 0.4, 0.5), sigma2_subject = 1, alpha = 0.05, power = 0.8)
+#' @export
 calc_cochran_q <- function(p, sigma2_subject, alpha = 0.05, power = 0.8,
                             nsim = 80, seed = 20230914) {
   if (!is.numeric(p) || length(p) < 3 || anyNA(p)) {

@@ -24,6 +24,10 @@
 #' @param conf_width Desired full width of the confidence interval for kappa
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @return list(n, inputs)
+#' @examples
+#' calc_kappa(kappa = 0.5, n_category = 2, raters = 4, props = c(0.3, 0.7), conf_width = 0.15, 
+#'     conf_level = 0.95)
+#' @export
 calc_kappa <- function(kappa, n_category = 2, raters = 2, props,
                         conf_width = 0.15, conf_level = 0.95) {
   if (!is.numeric(kappa) || length(kappa) != 1 || is.na(kappa) || kappa <= -1 || kappa >= 1) {
@@ -75,6 +79,9 @@ calc_kappa <- function(kappa, n_category = 2, raters = 2, props,
 #' @param conf_width Desired full width of the confidence interval for the ICC
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @return list(n, inputs)
+#' @examples
+#' calc_icc(rho = 0.85, k = 4, conf_width = 0.2, conf_level = 0.95)
+#' @export
 calc_icc <- function(rho, k, conf_width = 0.2, conf_level = 0.95) {
   .validate_unit_interval(rho, "rho")
   if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 2 || k != round(k)) {
@@ -104,6 +111,9 @@ calc_icc <- function(rho, k, conf_width = 0.2, conf_level = 0.95) {
 #' @param conf_width Desired full width of the confidence interval for alpha
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @return list(n, inputs)
+#' @examples
+#' calc_agreement_cronbach(k = 5, calpha = 0.7, conf_width = 0.1, conf_level = 0.95)
+#' @export
 calc_agreement_cronbach <- function(k, calpha, conf_width = 0.1, conf_level = 0.95) {
   if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 2 || k != round(k)) {
     stop("k must be a single whole number >= 2.")
@@ -147,6 +157,10 @@ calc_agreement_cronbach <- function(k, calpha, conf_width = 0.1, conf_level = 0.
 #'   confidence interval for the CCC
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @return list(n, inputs)
+#' @examples
+#' calc_agreement_ccc(rho_c = 0.7966592, rho = 0.8326027, u = 0.2696744, conf_width = 0.06060282, 
+#'     conf_level = 0.95)
+#' @export
 calc_agreement_ccc <- function(rho_c, rho, u = 0, conf_width = 0.2, conf_level = 0.95) {
   if (!is.numeric(rho_c) || length(rho_c) != 1 || is.na(rho_c) || rho_c <= -1 || rho_c >= 1) {
     stop("rho_c must be a single number strictly between -1 and 1.")
@@ -193,6 +207,9 @@ calc_agreement_ccc <- function(rho_c, rho, u = 0, conf_width = 0.2, conf_level =
 #'   limit of agreement, in SD-units of the paired differences
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @return list(n, inputs)
+#' @examples
+#' calc_agreement_bland_altman(conf_width = 1, conf_level = 0.95)
+#' @export
 calc_agreement_bland_altman <- function(conf_width = 1, conf_level = 0.95) {
   .validate_positive(conf_width, "conf_width")
   .validate_unit_interval(conf_level, "conf_level")

@@ -127,6 +127,7 @@ export_controls_ui <- function(ns) {
 #'   returns more than one `ss_result` in one go (e.g. Meta-Analysis Power
 #'   bundles a required-k result with a companion achieved-power one) --
 #'   pick whichever one is this module's own headline answer.
+#' @noRd
 render_export_handlers <- function(output, result, content_fn, value_fn = function(res) res$value) {
   build <- function(fn) {
     res <- result()
@@ -212,6 +213,7 @@ power_curves_ui <- function(ns) {
 #'     for inputs other than the ones they were computed from. Requires
 #'     `input`.
 #' @param input The module's own `input`; needed only for gated designs.
+#' @noRd
 render_power_curves <- function(output, curve_spec, input = NULL) {
   gated_store <- reactiveVal(NULL)
 

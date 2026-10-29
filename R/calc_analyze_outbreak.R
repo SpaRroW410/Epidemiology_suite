@@ -29,8 +29,13 @@
 }
 
 #' Attack rate with confidence intervals
-#' @param cases Number of cases. @param at_risk Population at risk (>= cases).
+#' @param cases Number of cases.
+#' @param at_risk Population at risk (>= cases).
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `cases`, `at_risk`, `attack_rate`, `attack_rate_per_100`, `wald_lower`, `wald_upper`, `wilson_lower`, `wilson_upper`, `exact_lower`, `exact_upper`, `agresti_coull_lower`, `agresti_coull_upper`, `jeffreys_lower`, `jeffreys_upper`, `mid_p_lower`, `mid_p_upper` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_attack_rate(30, 120)
+#' @export
 calc_analyze_attack_rate <- function(cases, at_risk, conf_level = 0.95) {
   .ob_whole(cases, "The number of cases"); .ob_whole(at_risk, "The population at risk", 1)
   if (cases > at_risk) stop("The number of cases cannot exceed the population at risk.")
@@ -45,6 +50,12 @@ calc_analyze_attack_rate <- function(cases, at_risk, conf_level = 0.95) {
 #' @param exposures Matrix or data frame with one row per exposure and columns ill_exposed, total_exposed,
 #'   ill_unexposed, total_unexposed.
 #' @param labels Optional exposure labels.
+#' @param conf_level Confidence level of the intervals reported for each exposure (default 0.95).
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_exposures`, `highest_risk_ratio`, `highest_risk_ratio_exposure` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' ex <- rbind(c(40, 50, 4, 30), c(25, 60, 19, 20), c(10, 12, 34, 68))   # per food: ill/total exposed, ill/total not exposed
+#' calc_analyze_exposure_table(ex, labels = c("Salad", "Chicken", "Dessert"))
+#' @export
 calc_analyze_exposure_table <- function(exposures, labels = NULL, conf_level = 0.95) {
   m <- tryCatch(as.matrix(as.data.frame(exposures)), error = function(e) NULL)
   if (is.null(m) || ncol(m) < 4 || nrow(m) < 1) stop("Give one row per exposure with four counts: ill and total among the exposed, ill and total among the unexposed.")
@@ -78,6 +89,11 @@ calc_analyze_exposure_table <- function(exposures, labels = NULL, conf_level = 0
 #' Secondary attack rate
 #' @param secondary_cases Secondary cases among the contacts.
 #' @param contacts Susceptible contacts exposed to the primary cases (not including the primary cases).
+#' @param conf_level Confidence level of the interval for the secondary attack rate (default 0.95).
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `secondary_cases`, `contacts`, `secondary_attack_rate`, `secondary_attack_rate_per_100`, `wald_lower`, `wald_upper`, `wilson_lower`, `wilson_upper`, `exact_lower`, `exact_upper`, `agresti_coull_lower`, `agresti_coull_upper`, `jeffreys_lower`, `jeffreys_upper`, `mid_p_lower`, `mid_p_upper` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_secondary_attack(9, 60)
+#' @export
 calc_analyze_secondary_attack <- function(secondary_cases, contacts, conf_level = 0.95) {
   .ob_whole(secondary_cases, "The number of secondary cases"); .ob_whole(contacts, "The number of susceptible contacts", 1)
   if (secondary_cases > contacts) stop("Secondary cases cannot exceed the number of susceptible contacts.")
@@ -89,8 +105,14 @@ calc_analyze_secondary_attack <- function(secondary_cases, contacts, conf_level 
 }
 
 #' Case fatality: crude and among resolved cases
-#' @param deaths Deaths among the cases. @param cases Total cases (>= deaths).
+#' @param deaths Deaths among the cases.
+#' @param cases Total cases (>= deaths).
 #' @param recovered Optional number recovered, to compute the ratio among resolved cases.
+#' @param conf_level Confidence level of the interval for the case fatality (default 0.95).
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `deaths`, `cases`, `case_fatality`, `case_fatality_percent`, `crude_wald_lower`, `crude_wald_upper`, `crude_wilson_lower`, `crude_wilson_upper`, `crude_exact_lower`, `crude_exact_upper`, `crude_agresti_coull_lower`, `crude_agresti_coull_upper`, `crude_jeffreys_lower`, `crude_jeffreys_upper`, `crude_mid_p_lower`, `crude_mid_p_upper` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_case_fatality(6, 80)
+#' @export
 calc_analyze_case_fatality <- function(deaths, cases, recovered = NULL, conf_level = 0.95) {
   .ob_whole(deaths, "The number of deaths"); .ob_whole(cases, "The number of cases", 1)
   if (deaths > cases) stop("Deaths cannot exceed the number of cases.")

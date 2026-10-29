@@ -13,6 +13,24 @@
 # 16/16 against real RTSA::ris() calls across all four outcome types and
 # varied alpha/beta/side.
 
+#' Required information size for a trial sequential analysis (fixed-effect meta-analysis)
+#'
+#' The number of participants a meta-analysis needs before its evidence is adequately powered for the anticipated effect, the
+#' quantity trial sequential analysis uses to build its monitoring boundaries. Fixed-effect form for a risk ratio, odds ratio,
+#' risk difference or mean difference; it is not adjusted for heterogeneity.
+#' @param outcome `"RR"` (risk ratio), `"OR"` (odds ratio), `"RD"` (risk difference) or `"MD"` (mean difference).
+#' @param mc Anticipated effect: the ratio for `RR` / `OR`, the risk difference for `RD`, the mean difference for `MD`.
+#' @param pC Event probability in the control arm (`RR`, `OR` and `RD`; strictly between 0 and 1).
+#' @param p1 Event probability in the intervention arm (`RD` only).
+#' @param sd_mc Standard deviation of the outcome (`MD` only; greater than 0).
+#' @param alpha Significance level (type I error rate), strictly between 0 and 1.
+#' @param beta Type II error rate, strictly between 0 and 1 (power = 1 - beta); default 0.1.
+#' @param side 1 for a one-sided or 2 for a two-sided test (default 2).
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_total`, `var_mc`, `mc_nf` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_tsa_information_size(outcome = "RR", mc = 0.8, pC = 0.12, alpha = 0.05, beta = 0.1, 
+#'     side = 2)
+#' @export
 calc_tsa_information_size <- function(outcome = c("RR", "OR", "RD", "MD"),
                                        mc, pC = NULL, p1 = NULL, sd_mc = NULL,
                                        alpha = 0.05, beta = 0.1, side = 2) {

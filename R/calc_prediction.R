@@ -19,6 +19,9 @@
 #' @param cstatistic Reported C-statistic of an existing model (0.5,1), or NULL
 #' @param shrinkage Desired shrinkage factor at internal validation (0,1); default 0.9
 #' @return list(n, events, csrsquared, max_r2a, nag_r2, epp, inputs)
+#' @examples
+#' calc_prediction_binary(parameters = 24, prevalence = 0.174, csrsquared = 0.288)
+#' @export
 calc_prediction_binary <- function(parameters, prevalence, csrsquared = NULL,
                                     cstatistic = NULL, shrinkage = 0.9) {
   if (is.null(csrsquared) == is.null(cstatistic)) {
@@ -67,6 +70,9 @@ calc_prediction_binary <- function(parameters, prevalence, csrsquared = NULL,
 #' @param shrinkage Desired shrinkage factor at internal validation (0,1); default 0.9
 #' @param mmoe Acceptable multiplicative margin of error for the intercept; default 1.1
 #' @return list(n, rsquared, spp, intercept_lci, intercept_uci, inputs)
+#' @examples
+#' calc_prediction_continuous(parameters = 25, intercept = 1.9, sd = 0.6, rsquared = 0.2)
+#' @export
 calc_prediction_continuous <- function(parameters, intercept, sd, rsquared,
                                         shrinkage = 0.9, mmoe = 1.1) {
   if (!is.numeric(parameters) || length(parameters) != 1 || is.na(parameters) ||
@@ -105,6 +111,10 @@ calc_prediction_continuous <- function(parameters, intercept, sd, rsquared,
 #' @param csrsquared Expected Cox-Snell R-squared of the new model (0,1)
 #' @param shrinkage Desired shrinkage factor at internal validation (0,1); default 0.9
 #' @return list(n, events, csrsquared, max_r2a, nag_r2, epp, inputs)
+#' @examples
+#' calc_prediction_survival(parameters = 30, rate = 0.065, timepoint = 2, meanfup = 2.07, 
+#'     csrsquared = 0.051)
+#' @export
 calc_prediction_survival <- function(parameters, rate, timepoint, meanfup,
                                       csrsquared, shrinkage = 0.9) {
   if (!is.numeric(parameters) || length(parameters) != 1 || is.na(parameters) ||
@@ -169,6 +179,10 @@ calc_prediction_survival <- function(parameters, rate, timepoint, meanfup,
 #' @param simobs Number of simulated observations for the LP distribution; default 1e6
 #' @param seed Random seed for the LP simulation (calibration-slope criterion only)
 #' @return list(n1, n2, n3, n4, n, events, se_oe, se_cslope, se_cstat, inputs)
+#' @examples
+#' calc_prediction_external_validation(prevalence = 0.018, cstatistic = 0.8, lp_method = "normal", 
+#'     lp_param1 = -5, lp_param2 = 2.5, oeciwidth = 1, simobs = 1e+06)
+#' @export
 calc_prediction_external_validation <- function(prevalence, cstatistic,
                                                  lp_method = c("normal", "beta"),
                                                  lp_param1, lp_param2,

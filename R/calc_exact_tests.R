@@ -26,6 +26,9 @@
 #' @param alternative "two.sided", "less", or "greater"
 #' @param n1_max Upper search bound on n1 (guards against a runaway search)
 #' @return list(n1, n2, n_total, achieved_power, inputs)
+#' @examples
+#' calc_fisher_exact(p1 = 0.15, p2 = 0.6, alpha = 0.05, power = 0.8, ratio = 2)
+#' @export
 calc_fisher_exact <- function(p1, p2, alpha = 0.05, power = 0.8, ratio = 1,
                                alternative = c("two.sided", "less", "greater"),
                                n1_max = 500) {
@@ -90,6 +93,11 @@ calc_fisher_exact <- function(p1, p2, alpha = 0.05, power = 0.8, ratio = 1,
 #' @param alternative "two.sided", "less", or "greater"
 #' @param n1_max Upper search bound on n1 (guards against a runaway search)
 #' @return list(n1, n2, n_total, achieved_power, inputs)
+#' @examples
+#' \donttest{
+#' calc_boschloo_exact(p1 = 0.3, p2 = 0.6, alpha = 0.05, power = 0.8)
+#' }
+#' @export
 calc_boschloo_exact <- function(p1, p2, alpha = 0.05, power = 0.8, ratio = 1,
                                  alternative = c("two.sided", "less", "greater"),
                                  n1_max = 500) {
@@ -133,8 +141,8 @@ calc_boschloo_exact <- function(p1, p2, alpha = 0.05, power = 0.8, ratio = 1,
 #'
 #' No package wraps this directly, so this orchestrates a search using base
 #' R's own stats::binom.test() at every candidate (n, x) pair -- the
-#' rejection region at each n is {x : binom.test(x, n, p0)$p.value <=
-#' alpha}, and achieved power is the alternative-hypothesis probability mass
+#' rejection region at each n is \{x : binom.test(x, n, p0)$p.value <=
+#' alpha\}, and achieved power is the alternative-hypothesis probability mass
 #' on that region. This calls binom.test() rather than re-deriving its
 #' rejection rule, so it can only ever agree with what stats::binom.test()
 #' itself would report at the returned n.
@@ -146,6 +154,9 @@ calc_boschloo_exact <- function(p1, p2, alpha = 0.05, power = 0.8, ratio = 1,
 #' @param alternative "two.sided", "less", or "greater"
 #' @param n_max Upper search bound on n (guards against a runaway search)
 #' @return list(n, achieved_power, inputs)
+#' @examples
+#' calc_binomial_exact(p0 = 0.1, p1 = 0.3, alpha = 0.05, power = 0.8)
+#' @export
 calc_binomial_exact <- function(p0, p1, alpha = 0.05, power = 0.8,
                                  alternative = c("two.sided", "less", "greater"),
                                  n_max = 2000) {
@@ -189,8 +200,8 @@ calc_binomial_exact <- function(p0, p1, alpha = 0.05, power = 0.8,
 #' rate different from a known background/standard rate?" No package
 #' wraps this directly, so this orchestrates a search using base R's own
 #' stats::poisson.test() at every candidate (T, x) pair -- the rejection
-#' region at each person-time T is {x : poisson.test(x, T, r=rate0)$p.value
-#' <= alpha}, and achieved power is the alternative-hypothesis (rate1)
+#' region at each person-time T is \{x : poisson.test(x, T, r=rate0)$p.value
+#' <= alpha\}, and achieved power is the alternative-hypothesis (rate1)
 #' Poisson probability mass on that region. This calls poisson.test()
 #' rather than re-deriving its rejection rule, so it can only ever agree
 #' with what stats::poisson.test() itself would report at the returned T.
@@ -204,6 +215,9 @@ calc_binomial_exact <- function(p0, p1, alpha = 0.05, power = 0.8,
 #' @param t_max Upper search bound on person-time T (guards against a
 #'   runaway search)
 #' @return list(person_time, expected_events, achieved_power, inputs)
+#' @examples
+#' calc_poisson_exact(rate0 = 5, rate1 = 10, alpha = 0.05, power = 0.8)
+#' @export
 calc_poisson_exact <- function(rate0, rate1, alpha = 0.05, power = 0.8,
                                 alternative = c("two.sided", "less", "greater"),
                                 t_max = 2000) {
@@ -262,6 +276,9 @@ calc_poisson_exact <- function(rate0, rate1, alpha = 0.05, power = 0.8,
 #' @param alternative "two.sided", "less", or "greater"
 #' @param n_max Upper search bound on n
 #' @return list(n, achieved_power, inputs)
+#' @examples
+#' calc_sign_test(p_pos = 0.7, alpha = 0.05, power = 0.8)
+#' @export
 calc_sign_test <- function(p_pos, alpha = 0.05, power = 0.8,
                             alternative = c("two.sided", "less", "greater"),
                             n_max = 2000) {

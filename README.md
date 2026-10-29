@@ -199,6 +199,13 @@ ss_find("eyes per patient")            # a data frame: key, design, calculator, 
 run_app(calculator = "eyes per patient")   # a design key from ss_find(), or words (the best match opens)
 ```
 
+Every calculation is also an exported function with its own help page and a worked example, for scripts and Quarto:
+
+```r
+?calc_means_paired
+calc_cluster_deff(n_base = 200, icc = 0.05, cluster_size = 10)   # design effect 1.45, effective n 290
+```
+
 In RStudio or Positron, *Addins > Find a sample size calculator* does the same from a search window. Setting the
 environment variable `EPIDEMIOLOGICASUITE_OPEN` to a design key makes a deployment open on that calculator.
 

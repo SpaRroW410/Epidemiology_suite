@@ -24,9 +24,12 @@
 #' @param n_base Required sample size under simple random sampling (whole
 #'   number >= 1), e.g. from a single-proportion or single-mean calculator
 #' @param icc Intraclass correlation coefficient (ICC / rho) between
-#'   subjects in the same cluster, [0, 1)
+#'   subjects in the same cluster, \[0, 1)
 #' @param cluster_size Average number of subjects sampled per cluster (>= 1)
 #' @return list(deff, n_effective, inputs)
+#' @examples
+#' calc_cluster_deff(n_base = 200, icc = 0.05, cluster_size = 10)
+#' @export
 calc_cluster_deff <- function(n_base, icc, cluster_size) {
   if (!is.numeric(n_base) || length(n_base) != 1 || is.na(n_base) ||
         n_base < 1 || n_base != round(n_base)) {
@@ -63,11 +66,14 @@ calc_cluster_deff <- function(n_base, icc, cluster_size) {
 #' @param n_base Required sample size under simple random sampling (whole
 #'   number >= 1), e.g. from a single-proportion or single-mean calculator
 #' @param icc Intraclass correlation coefficient (ICC / rho) between
-#'   subjects in the same cluster, [0, 1)
+#'   subjects in the same cluster, \[0, 1)
 #' @param cluster_size Average number of subjects sampled per cluster (>= 1)
 #' @param cv Coefficient of variation of cluster sizes (SD / mean across
 #'   clusters), >= 0; 0 means every cluster has the same size
 #' @return list(deff, n_effective, inputs)
+#' @examples
+#' calc_cluster_deff_variable(n_base = 200, icc = 0.05, cluster_size = 10, cv = 0)
+#' @export
 calc_cluster_deff_variable <- function(n_base, icc, cluster_size, cv) {
   if (!is.numeric(n_base) || length(n_base) != 1 || is.na(n_base) ||
         n_base < 1 || n_base != round(n_base)) {
@@ -127,12 +133,16 @@ calc_cluster_deff_variable <- function(n_base, icc, cluster_size, cv) {
 #' @param epsilon Desired precision / margin of error (> 0)
 #' @param error "relative" (epsilon as a fraction of p) or "absolute"
 #'   (epsilon on the same 0-1 scale as p)
-#' @param rho Intracluster correlation coefficient (ICC), [0, 1)
+#' @param rho Intracluster correlation coefficient (ICC), \[0, 1)
 #' @param N_psu Optional total number of clusters (PSUs) in the source
 #'   population, for a finite-population correction (NULL = effectively
 #'   infinite, the usual case for a large community/region)
 #' @param conf_level Confidence level (0,1)
 #' @return list(n_psu, n_ssu, deff, inputs)
+#' @examples
+#' calc_cluster_survey_binary(b = 75, p = 0.46, epsilon = 0.1, error = "relative", 
+#'     rho = 0.2, conf_level = 0.9)
+#' @export
 calc_cluster_survey_binary <- function(b, b_sd = NULL, p, epsilon,
                                         error = c("relative", "absolute"),
                                         rho, N_psu = NULL, conf_level = 0.95) {
@@ -201,6 +211,10 @@ calc_cluster_survey_binary <- function(b, b_sd = NULL, p, epsilon,
 #' @param target_cv Target coefficient of variation (> 0; required if
 #'   mode = "precision")
 #' @return list(n_opt, m_opt, cv, cost, inputs)
+#' @examples
+#' calc_cluster_pps_optimal_allocation(cost_psu = 750, cost_element = 100, delta = 0.05, 
+#'     unit_relvar = 1, k = 1, mode = "budget", total_budget = 1e+05)
+#' @export
 calc_cluster_pps_optimal_allocation <- function(cost_psu, cost_element, delta,
                                                  unit_relvar = 1, k = 1,
                                                  mode = c("budget", "precision"),

@@ -59,9 +59,9 @@ suite 907 blocks with 0 failures.
 
 ## Phase 5 — The R package for analysts
 
-- [ ] Public function API for the calculations themselves (`ss_*()` family: one function per design, plus text, curve and export helpers). **Needs an owner decision:** exporting the 195 `calc_*` functions fixes their names and arguments for users, and each needs a help page; the alternative is a smaller hand-picked set
+- ~~Public function API for the calculations themselves: all 195 `calc_*()` functions are exported, each with a help page (every argument described, the value described, a worked example taken from a verified test); `tests/testthat/test-help_pages.R` keeps it so~~ (29 Oct; owner decision: export all). The names stay `calc_*` (the planned `ss_*()` family was dropped); a smaller friendlier set of wrappers (`ss_text()`, `ss_curve()`, `ss_export()`) is still possible
 - ~~RStudio / Positron addin "Find a sample size calculator", `ss_find()` search from the console, and `run_app(calculator = ...)` to open the app on one calculator~~ (29 Oct)
-- [ ] Vignettes per family; more help pages
+- [ ] Vignettes per family (the help pages themselves are done)
 - [ ] Release: r-universe (binaries, including WebAssembly), then CRAN (computation core split from the app, ASCII-only source, fast examples, clean `R CMD check`)
 - [ ] **[owner]** Rename the GitHub repository (changes the install path), author details, first release number, `NEWS.md`
 

@@ -60,6 +60,9 @@
 #' @param strata Optional stratum labels (1 to 40).
 #' @param seed Whole-number seed that makes the list reproducible.
 #' @return An `ss_result` of flat summary fields; the list itself is in `attr(result, "allocation")`.
+#' @examples
+#' calc_randomization_list(50, seed = 5)
+#' @export
 calc_randomization_list <- function(n, arms = c("Intervention", "Control"), ratio = rep(1, length(arms)),
                                     method = c("block", "simple"), block_sizes = NULL, strata = NULL, seed) {
   method <- match.arg(method)

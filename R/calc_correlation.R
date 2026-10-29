@@ -12,6 +12,9 @@
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n, inputs)
+#' @examples
+#' calc_correlation(r = 0.3, alpha = 0.05, power = 0.8, alternative = "two.sided")
+#' @export
 calc_correlation <- function(r, alpha = 0.05, power = 0.8,
                               alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -47,6 +50,9 @@ calc_correlation <- function(r, alpha = 0.05, power = 0.8,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n_per_group, q, inputs)
+#' @examples
+#' calc_correlation_two_independent(r1 = 0.89, r2 = 0.76, alpha = 0.05, power = 0.9)
+#' @export
 calc_correlation_two_independent <- function(r1, r2, alpha = 0.05, power = 0.8,
                                               alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -92,6 +98,9 @@ calc_correlation_two_independent <- function(r1, r2, alpha = 0.05, power = 0.8,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n_per_group, n_total, d, inputs)
+#' @examples
+#' calc_correlation_point_biserial(r = 0.5, alpha = 0.05, power = 0.8)
+#' @export
 calc_correlation_point_biserial <- function(r, alpha = 0.05, power = 0.8,
                                              alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -138,6 +147,9 @@ calc_correlation_point_biserial <- function(r, alpha = 0.05, power = 0.8,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n, r, inputs)
+#' @examples
+#' calc_regression_slope(slope = 0.5, sd_x = 2, sd_y = 4, alpha = 0.05, power = 0.8)
+#' @export
 calc_regression_slope <- function(slope, sd_x, sd_y, alpha = 0.05, power = 0.8,
                                    alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -186,6 +198,9 @@ calc_regression_slope <- function(slope, sd_x, sd_y, alpha = 0.05, power = 0.8,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n, inputs)
+#' @examples
+#' calc_correlation_partial(r = 0.3, k = 2, alpha = 0.05, power = 0.8)
+#' @export
 calc_correlation_partial <- function(r, k, alpha = 0.05, power = 0.8,
                                       alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -238,7 +253,7 @@ calc_correlation_partial <- function(r, k, alpha = 0.05, power = 0.8,
 #'
 #' The "non-overlapping" case (comparing two correlations that share NO
 #' variable, e.g. r_yx1 vs r_zx2, needing all six pairwise correlations
-#' among {Y, X1, Z, X2}) is not covered here.
+#' among \{Y, X1, Z, X2\}) is not covered here.
 #'
 #' @param r_yx1 Expected correlation between Y and X1 (-1, 1)
 #' @param r_yx2 Expected correlation between Y and X2 (-1, 1); must differ from r_yx1
@@ -247,6 +262,10 @@ calc_correlation_partial <- function(r, k, alpha = 0.05, power = 0.8,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n, c, inputs)
+#' @examples
+#' calc_correlation_two_dependent(r_yx1 = 0.4, r_yx2 = 0.6, r_x1x2 = 0.3, alpha = 0.05, 
+#'     power = 0.8)
+#' @export
 calc_correlation_two_dependent <- function(r_yx1, r_yx2, r_x1x2, alpha = 0.05, power = 0.8,
                                             alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -314,6 +333,9 @@ calc_correlation_two_dependent <- function(r_yx1, r_yx2, r_x1x2, alpha = 0.05, p
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n, n_pearson, are, inputs)
+#' @examples
+#' calc_correlation_spearman(r = 0.3, alpha = 0.05, power = 0.8)
+#' @export
 calc_correlation_spearman <- function(r, alpha = 0.05, power = 0.8,
                                        alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)

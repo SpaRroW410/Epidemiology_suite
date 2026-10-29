@@ -320,6 +320,7 @@ free_text_rules <- list(
 #' function(flags)). Stops the instant a node has no rule table or no rule
 #' matches -- an honest "couldn't infer further, please continue manually"
 #' degrade, never a guess.
+#' @noRd
 walk_free_text <- function(text, nodes = design_nodes) {
   node_id <- "root"
   trace <- list()

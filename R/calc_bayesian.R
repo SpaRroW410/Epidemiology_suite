@@ -36,6 +36,10 @@
 #' @param alpha Significance level for the two-sided credible interval (0,1)
 #' @param power Target assurance (prior-averaged power) (0,1)
 #' @return list(n1, n2, n_total, achieved_power, inputs)
+#' @examples
+#' calc_bayesian_assurance_or(p1 = 0.3, p2 = 0.3, prior_type = "uniform", prior_lower = log(1.2), 
+#'     prior_upper = log(1.3), delta_w = 0, n_ratio = 1, alpha = 0.05, power = 0.9)
+#' @export
 calc_bayesian_assurance_or <- function(p1, p2,
                                         prior_type = c("normal", "uniform"),
                                         prior_mean = NULL, prior_sd = NULL,
@@ -126,6 +130,10 @@ calc_bayesian_assurance_or <- function(p1, p2,
 #'   defaults lower than the KS/runs-test designs' nsim)
 #' @param seed RNG seed for reproducibility
 #' @return list(n1, n2, n_total, n_classical, achieved_power, inputs)
+#' @examples
+#' calc_bfda_ttest(effect_size = 0.5, bf_threshold = 10, alpha = 0.05, power = 0.8, 
+#'     nsim = 50)
+#' @export
 calc_bfda_ttest <- function(effect_size, bf_threshold = 10, alpha = 0.05, power = 0.8,
                              nsim = 100, seed = 20240607) {
   .validate_positive(effect_size, "effect_size")

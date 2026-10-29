@@ -41,6 +41,9 @@
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_per_group, n_total, achieved_power, inputs)
+#' @examples
+#' calc_manova_hotelling(p = 1, d2 = 0.25, alpha = 0.05, power = 0.8)
+#' @export
 calc_manova_hotelling <- function(p, d2, alpha = 0.05, power = 0.8) {
   if (!is.numeric(p) || length(p) != 1 || is.na(p) || p < 1 || p != round(p)) {
     stop("p must be a single whole number, at least 1 (use the Means module's two independent means design for p = 1).")

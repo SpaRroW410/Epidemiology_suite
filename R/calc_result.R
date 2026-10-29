@@ -21,6 +21,7 @@
 #'   (whatever fields that specific design produces -- n, n_total, n1, n2,
 #'   achieved_power, inputs, ... -- nothing here is renamed or removed).
 #' @return `x`, unchanged, with class c("ss_result", class(x)) prepended.
+#' @noRd
 new_ss_result <- function(x) {
   stopifnot(is.list(x))
   class(x) <- c("ss_result", class(x))

@@ -83,6 +83,10 @@
 #' @param spending "OF" (O'Brien-Fleming-type) or "Pocock" (Pocock-type)
 #' @return list(n_total, n_control, n_experimental, boundary_interim,
 #'   boundary_final, alpha_spent, inflation_factor, inputs)
+#' @examples
+#' calc_lan_demets_normal(delta = 0.5, sd = 1, timing = 0.5, r = 1, alpha = 0.05, 
+#'     power = 0.8, spending = "OF")
+#' @export
 calc_lan_demets_normal <- function(delta, sd, timing = 0.5, r = 1, alpha = 0.05, power = 0.8,
                                     spending = c("OF", "Pocock")) {
   spending <- match.arg(spending)
@@ -175,6 +179,9 @@ calc_lan_demets_normal <- function(delta, sd, timing = 0.5, r = 1, alpha = 0.05,
 #' @param theta Standardized drift to assume going forward; if NULL (default),
 #'   uses the trend observed so far (z1 / sqrt(timing * n_max))
 #' @return list(theta, conditional_power)
+#' @examples
+#' calc_conditional_power_normal(z1 = 1.5, timing = 0.5, n_max = 128, boundary_final = 1.968586)
+#' @export
 calc_conditional_power_normal <- function(z1, timing, n_max, boundary_final, theta = NULL) {
   .validate_number(z1, "z1")
   if (!is.numeric(timing) || length(timing) != 1 || is.na(timing) || timing <= 0 || timing >= 1) {
@@ -209,6 +216,10 @@ calc_conditional_power_normal <- function(z1, timing, n_max, boundary_final, the
 #'   used as-is)
 #' @return list(theta, conditional_power_at_planned_n, adapted, n_remaining,
 #'   n_total_new)
+#' @examples
+#' calc_ssr_normal(z1 = 1.5, timing = 0.5, n_max = 128, boundary_final = 1.968586, 
+#'     target_power = 0.9)
+#' @export
 calc_ssr_normal <- function(z1, timing, n_max, boundary_final, target_power = 0.9,
                              theta = NULL, maxinc = 3, cpadj = c(0.3, 0.9)) {
   .validate_number(z1, "z1")

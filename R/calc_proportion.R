@@ -11,6 +11,9 @@
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n, h, inputs)
+#' @examples
+#' calc_proportion_1s(p0 = 0.3, p1 = 0.5, alpha = 0.05/3, power = 0.8)
+#' @export
 calc_proportion_1s <- function(p0, p1, alpha = 0.05, power = 0.8,
                                 alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -45,6 +48,9 @@ calc_proportion_1s <- function(p0, p1, alpha = 0.05, power = 0.8,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n_per_group, n_total, h, inputs)
+#' @examples
+#' calc_proportion_2s(p1 = 0.1, p2 = 0.3, alpha = 0.05, power = 0.8, alternative = "two.sided")
+#' @export
 calc_proportion_2s <- function(p1, p2, alpha = 0.05, power = 0.8,
                                 alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -87,6 +93,9 @@ calc_proportion_2s <- function(p1, p2, alpha = 0.05, power = 0.8,
 #' @param N Optional finite population size (>= 1). NULL (default) = no
 #'   correction, i.e. an effectively infinite population.
 #' @return list(n, n_unadjusted, z, N, inputs)
+#' @examples
+#' calc_proportion_precision(p = 0.5, d = 0.05, conf_level = 0.95)
+#' @export
 calc_proportion_precision <- function(p, d, conf_level = 0.95, N = NULL) {
   .validate_unit_interval(p, "p")
   .validate_unit_interval(conf_level, "conf_level")
@@ -131,6 +140,9 @@ calc_proportion_precision <- function(p, d, conf_level = 0.95, N = NULL) {
 #'   correction
 #' @param power Desired power (0,1)
 #' @return list(n_per_group, inputs)
+#' @examples
+#' calc_proportion_posthoc_pairwise(tau = 2, p1 = 0.2, p2 = 0.4, alpha = 0.05, power = 0.8)
+#' @export
 calc_proportion_posthoc_pairwise <- function(tau, p1, p2, alpha = 0.05, power = 0.8) {
   if (!is.numeric(tau) || length(tau) != 1 || is.na(tau) || tau < 1 || tau != round(tau)) {
     stop("tau must be a single whole number >= 1.")

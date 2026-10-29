@@ -12,6 +12,7 @@
 
 #' Per-study sampling variance for a meta-analysis effect size
 #' @keywords internal
+#' @noRd
 .meta_power_variance <- function(study_size, effect_size, es_type, con_table = NULL) {
   if (es_type == "d") {
     (study_size / 2 + study_size / 2) / ((study_size / 2) * (study_size / 2)) +
@@ -30,6 +31,7 @@
 
 #' CDF of the random-effects summary-effect test statistic (Jackson & Turner 2017)
 #' @keywords internal
+#' @noRd
 .meta_power_cdf <- function(t, k, ncp, i2) {
   df <- k - 1
   constant <- sqrt(1 - i2)
@@ -55,7 +57,7 @@
 #'   "r"; split evenly between two arms for "d")
 #' @param k Total number of studies in the meta-analysis (whole number >= 2)
 #' @param i2 Heterogeneity (I-squared), the proportion of total variance
-#'   due to between-study differences, [0, 1)
+#'   due to between-study differences, \[0, 1)
 #' @param es_type Effect size metric: "d" (Cohen's d), "r" (correlation),
 #'   or "or" (odds ratio, requires con_table)
 #' @param test_type "two-tailed" or "one-tailed"
@@ -65,6 +67,10 @@
 #'   unexposed-with-event, exposed-without-event, unexposed-without-event),
 #'   used to derive the log odds ratio and its variance
 #' @return list(fixed_power, random_power, effect_size_used, variance, inputs)
+#' @examples
+#' calc_meta_analysis_power(effect_size = 0.2, study_size = 10, k = 10, i2 = 0.5, 
+#'     es_type = "d")
+#' @export
 calc_meta_analysis_power <- function(effect_size = NULL, study_size, k, i2, es_type = c("d", "r", "or"),
                                       test_type = c("two-tailed", "one-tailed"),
                                       alpha = 0.05, con_table = NULL) {
@@ -132,11 +138,15 @@ calc_meta_analysis_power <- function(effect_size = NULL, study_size, k, i2, es_t
 #' fixed-effect or random-effects model, holding effect size, per-study
 #' size, and heterogeneity fixed.
 #'
-#' @inheritParams calc_meta_analysis_power
 #' @param power Target power (0,1)
 #' @param model "random" (accounts for heterogeneity -- the more realistic,
 #'   typically conservative default) or "fixed" (assumes zero heterogeneity)
 #' @return list(k, achieved_power, model, inputs)
+#' @inheritParams calc_meta_analysis_power
+#' @examples
+#' calc_meta_analysis_k(effect_size = 0.3, study_size = 25, i2 = 0.4, es_type = "d", 
+#'     power = 0.8, model = "random")
+#' @export
 calc_meta_analysis_k <- function(effect_size = NULL, study_size, i2, es_type = c("d", "r", "or"),
                                   test_type = c("two-tailed", "one-tailed"),
                                   alpha = 0.05, power = 0.8, con_table = NULL,

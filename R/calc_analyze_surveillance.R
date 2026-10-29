@@ -43,9 +43,15 @@
 }
 
 #' EARS C1, C2 and C3 aberration detection
-#' @param counts Counts in time order. @param method "C1", "C2" or "C3".
-#' @param baseline Length of the baseline (default 7). @param threshold Signal threshold (default 3; 2 for C3).
+#' @param counts Counts in time order.
+#' @param method "C1", "C2" or "C3".
+#' @param baseline Length of the baseline (default 7).
+#' @param threshold Signal threshold (default 3; 2 for C3).
 #' @param min_sd Smallest baseline sd allowed (default 0: undefined when the baseline has no variation).
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `method`, `n_obs`, `n_monitored`, `n_alarms`, `first_alarm`, `threshold`, `baseline`, `n_undefined` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_surveillance_ears(rep(5, 30), "C3")
+#' @export
 calc_surveillance_ears <- function(counts, method = c("C1", "C2", "C3"), baseline = 7, threshold = NULL, min_sd = 0) {
   method <- match.arg(method)
   if (!is.numeric(baseline) || length(baseline) != 1 || is.na(baseline) || baseline < 3 || baseline != round(baseline)) stop("The baseline must be a whole number of at least 3 observations.")
@@ -83,6 +89,11 @@ calc_surveillance_ears <- function(counts, method = c("C1", "C2", "C3"), baselin
 #' @param k,h Reference value and decision threshold (normal: sd units; Poisson: k is derived from `shift_ratio`).
 #' @param shift_ratio Poisson: the out-of-control mean as a multiple of the in-control mean (> 1).
 #' @param reset Restart the statistic at 0 after a signal.
+#' @param min_sd Smallest baseline standard deviation allowed (default 0.5), so that a flat baseline does not inflate the statistic.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `method`, `n_obs`, `n_monitored`, `n_alarms`, `first_alarm`, `threshold`, `baseline`, `baseline_mean`, `baseline_sd`, `reference_value` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_surveillance_cusum(rep(5, 40), "poisson")
+#' @export
 calc_surveillance_cusum <- function(counts, type = c("normal", "poisson"), baseline = 14, k = 0.5, h = 4,
                                     shift_ratio = 2, reset = TRUE, min_sd = 0.5) {
   type <- match.arg(type)

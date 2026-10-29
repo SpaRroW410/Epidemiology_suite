@@ -59,6 +59,10 @@
 #'   prevalence ratio and difference) or "case_control" (only the odds ratio is
 #'   estimable; the attributable fractions use the odds ratio).
 #' @param conf_level Confidence level for every interval.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_total`, `design`, `risk_exposed`, `risk_unexposed`, `risk_ratio`, `risk_ratio_lower`, `risk_ratio_upper`, `risk_difference`, `risk_difference_lower`, `risk_difference_upper`, `attributable_fraction_exposed`, `attributable_fraction_exposed_lower`, `attributable_fraction_exposed_upper`, `population_attributable_fraction`, `population_attributable_fraction_lower`, `population_attributable_fraction_upper`, `number_needed`, `number_needed_label`, `number_needed_lower`, `number_needed_upper`, `odds_ratio`, `odds_ratio_lower`, `odds_ratio_upper`, `chisq`, `chisq_p`, `fisher_p`, `min_expected_count`, `zero_cell` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_2x2(10, 190, 40, 160)
+#' @export
 calc_analyze_2x2 <- function(a, b, c, d, design = c("cohort", "cross_sectional", "case_control"), conf_level = 0.95) {
   design <- match.arg(design)
   .validate_2x2_counts(a, b, c, d)

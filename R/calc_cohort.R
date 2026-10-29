@@ -19,6 +19,9 @@
 #' @param N Optional finite eligible-population size. NULL (default) =
 #'   effectively infinite population.
 #' @return list(n_total, n_exposed, n_unexposed, rr, inputs)
+#' @examples
+#' calc_cohort(p0 = 0.15, p1 = 0.3, power = 0.8, ratio = 1, alpha = 0.05, alternative = "two.sided")
+#' @export
 calc_cohort <- function(p0, p1, power = 0.8, ratio = 1, alpha = 0.05,
                          alternative = c("two.sided", "less", "greater"),
                          N = NULL) {

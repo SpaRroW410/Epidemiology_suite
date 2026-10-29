@@ -116,6 +116,12 @@
 #' @param nsim Number of Monte Carlo replicates per candidate n; default 50
 #' @param seed Random seed for reproducibility; default 12345
 #' @return list(n_clusters, n_total, achieved_power, inputs)
+#' @examples
+#' \donttest{
+#' calc_glmm_lmm_power(cluster_size = 10, icc = 0.05, sigma_total = 1, delta = 0.8, 
+#'     power = 0.8, nsim = 30, seed = 1)
+#' }
+#' @export
 calc_glmm_lmm_power <- function(cluster_size, icc, sigma_total, delta,
                                  alpha = 0.05, power = 0.8, nsim = 50, seed = 12345) {
   if (!is.numeric(cluster_size) || length(cluster_size) != 1 || is.na(cluster_size) ||
@@ -176,6 +182,12 @@ calc_glmm_lmm_power <- function(cluster_size, icc, sigma_total, delta,
 #'   substantially slower)
 #' @param seed Random seed for reproducibility; default 12345
 #' @return list(n_clusters, n_total, achieved_power, inputs)
+#' @examples
+#' \donttest{
+#' calc_glmm_logistic_power(cluster_size = 20, sigma_u = 0.3, baseline_prob = 0.3, 
+#'     or = 4, power = 0.8, nsim = 20, seed = 42)
+#' }
+#' @export
 calc_glmm_logistic_power <- function(cluster_size, sigma_u, baseline_prob, or,
                                       alpha = 0.05, power = 0.8, nsim = 30, seed = 12345) {
   if (!is.numeric(cluster_size) || length(cluster_size) != 1 || is.na(cluster_size) ||
@@ -277,7 +289,7 @@ calc_glmm_logistic_power <- function(cluster_size, sigma_u, baseline_prob, or,
 #' @param sigma2_intercept Variance of the random intercept (> 0)
 #' @param sigma2_slope Variance of the random slope (> 0)
 #' @param cor_intercept_slope Correlation between the random intercept and
-#'   random slope, [-1, 1]
+#'   random slope, \[-1, 1\]
 #' @param sigma2_residual Residual (within-subject) variance (> 0)
 #' @param baseline_slope Common (control-arm) slope, before adding the
 #'   group difference; default 0
@@ -286,6 +298,12 @@ calc_glmm_logistic_power <- function(cluster_size, sigma_u, baseline_prob, or,
 #' @param nsim Number of Monte Carlo replicates per candidate n; default 50
 #' @param seed Random seed for reproducibility; default 12345
 #' @return list(n_per_group, n_total, achieved_power, inputs)
+#' @examples
+#' \donttest{
+#' calc_growth_curve_power(ntimes = 4, delta_slope = 0.8, sigma2_intercept = 1, sigma2_slope = 0.2, 
+#'     cor_intercept_slope = 0.1, sigma2_residual = 1, power = 0.8, nsim = 25, seed = 1)
+#' }
+#' @export
 calc_growth_curve_power <- function(ntimes, delta_slope, sigma2_intercept, sigma2_slope,
                                      cor_intercept_slope, sigma2_residual, baseline_slope = 0,
                                      alpha = 0.05, power = 0.8, nsim = 50, seed = 12345) {

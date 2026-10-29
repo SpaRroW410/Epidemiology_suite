@@ -96,7 +96,7 @@ INHERIT = {  # function -> functions whose @param texts it reuses for arguments 
     "calc_multiplicity_proportion_1s": ["calc_proportion_1s"],
     "calc_multiplicity_proportion_2s": ["calc_proportion_2s"],
     "calc_multiplicity_means_1s": ["calc_means_1s"],
-    "calc_multiplicity_means_2s": ["calc_means_2s"],
+    "calc_multiplicity_means_2s": ["calc_means_2s_indep"],
     "calc_patient_units_between_binary": ["calc_patient_units_between_continuous"],
     "calc_patient_units_needed": ["calc_patient_units_between_continuous"],
 }
@@ -114,8 +114,11 @@ def split_inline(blk):
     res = []
     for l in blk:
         body = l[2:]
-        parts = re.split(r"\s(?=@(?:param|return)\s)", body)
-        res.append("#'" + parts[0])
+        stripped = body.lstrip()
+        lead = body[: len(body) - len(stripped)]
+        # an inline tag later on a line ("... text. @param x ...") goes on its own line; a tag that starts the line is left alone
+        parts = re.split(r"\s+(?=@(?:param|return)\s)", stripped)
+        res.append("#'" + lead + parts[0])
         for p in parts[1:]:
             res.append("#' " + p)
     return res

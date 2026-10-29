@@ -41,8 +41,12 @@
 #' Inflate a required sample size for losses at one or several stages
 #'
 #' @param n_required Number that must be analyzable at the end.
-#' @param losses Fraction lost at each stage, in order (1 to 6 values, each in [0, 1)).
+#' @param losses Fraction lost at each stage, in order (1 to 6 values, each in \[0, 1)).
 #' @param stages Optional labels for the stages.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_enrolled`, `n_required`, `extra_to_recruit`, `overall_retention`, `overall_loss`, `n_if_loss_added_instead`, `expected_analyzable`, `n_stages`, `loss_1`, `expected_after_stage_1` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_attrition_stages(100, 0.2)
+#' @export
 calc_attrition_stages <- function(n_required, losses, stages = NULL) {
   .attr_validate_n(n_required, "The required sample size")
   if (!is.numeric(losses) || length(losses) < 1 || length(losses) > 6) stop("Give between 1 and 6 loss fractions.")
@@ -77,6 +81,10 @@ calc_attrition_stages <- function(n_required, losses, stages = NULL) {
 #' @param n_required Required analyzable number in each arm (length 2 to 6).
 #' @param losses Expected loss fraction in each arm (same length).
 #' @param arms Optional arm labels.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_enrolled_total`, `n_required_total`, `extra_to_recruit`, `overall_loss`, `n_total_if_average_loss_used`, `n_enrolled_arm_1`, `n_required_arm_1`, `loss_arm_1`, `n_enrolled_arm_2`, `n_required_arm_2`, `loss_arm_2` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_attrition_arms(c(100, 100), c(0.1, 0.3))
+#' @export
 calc_attrition_arms <- function(n_required, losses, arms = NULL) {
   if (!is.numeric(n_required) || length(n_required) < 2 || length(n_required) > 6) stop("Give between 2 and 6 arms.")
   if (!is.numeric(losses) || length(losses) != length(n_required)) stop("Give one loss fraction for each arm.")
@@ -110,8 +118,12 @@ calc_attrition_arms <- function(n_required, losses, arms = NULL) {
 #' Inflate a sample size for drop-out and drop-in (dilution of the treatment contrast)
 #'
 #' @param n_required Sample size computed for full compliance.
-#' @param dropout Fraction of the treatment arm that stops treatment (drop-out), in [0, 1).
-#' @param dropin Fraction of the control arm that takes up the treatment (drop-in), in [0, 1).
+#' @param dropout Fraction of the treatment arm that stops treatment (drop-out), in \[0, 1).
+#' @param dropin Fraction of the control arm that takes up the treatment (drop-in), in \[0, 1).
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_adjusted`, `n_required`, `dilution_factor`, `inflation_factor`, `n_if_simple_loss_used` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_attrition_noncompliance(100, 0.1, 0.05)
+#' @export
 calc_attrition_noncompliance <- function(n_required, dropout, dropin) {
   .attr_validate_n(n_required, "The required sample size")
   .attr_validate_loss(dropout, "The drop-out fraction")

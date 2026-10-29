@@ -14,6 +14,9 @@
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n, d, inputs)
+#' @examples
+#' calc_means_1s(mu0 = 0, mu1 = 0.5, sd = 1, alpha = 0.05, power = 0.8)
+#' @export
 calc_means_1s <- function(mu0, mu1, sd, alpha = 0.05, power = 0.8,
                            alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -48,6 +51,9 @@ calc_means_1s <- function(mu0, mu1, sd, alpha = 0.05, power = 0.8,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n_per_group, n_total, d, inputs)
+#' @examples
+#' calc_means_2s_indep(mu1 = 0.5, mu2 = 0, sd = 1, alpha = 0.05, power = 0.8)
+#' @export
 calc_means_2s_indep <- function(mu1, mu2, sd, alpha = 0.05, power = 0.8,
                                  alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -83,6 +89,9 @@ calc_means_2s_indep <- function(mu1, mu2, sd, alpha = 0.05, power = 0.8,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n, d, inputs)
+#' @examples
+#' calc_means_paired(mean_diff = 0.5, sd_diff = 1, alpha = 0.05, power = 0.8)
+#' @export
 calc_means_paired <- function(mean_diff, sd_diff, alpha = 0.05, power = 0.8,
                                alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -119,6 +128,9 @@ calc_means_paired <- function(mean_diff, sd_diff, alpha = 0.05, power = 0.8,
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_per_group, n_total, f, inputs)
+#' @examples
+#' calc_means_anova(group_means = c(9, 10, 11), sd = 4, alpha = 0.05, power = 0.8)
+#' @export
 calc_means_anova <- function(group_means, sd, alpha = 0.05, power = 0.8) {
   if (!is.numeric(group_means) || length(group_means) < 3 || anyNA(group_means)) {
     stop("group_means must be a numeric vector of at least 3 values.")
@@ -164,6 +176,10 @@ calc_means_anova <- function(group_means, sd, alpha = 0.05, power = 0.8) {
 #' @param N Optional finite eligible-population size. NULL (default) =
 #'   effectively infinite population.
 #' @return list(n, N, inputs)
+#' @examples
+#' calc_means_single_precision(mean = 1500 * 0.05, sd = 300 * 0.05, epsilon = 0.2, 
+#'     error = "relative", conf_level = 0.95, N = 20)
+#' @export
 calc_means_single_precision <- function(mean, sd, epsilon,
                                          error = c("relative", "absolute"),
                                          conf_level = 0.95, N = NULL) {
@@ -205,6 +221,10 @@ calc_means_single_precision <- function(mean, sd, epsilon,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n1, n2, n_total, d, inputs)
+#' @examples
+#' calc_means_2s_unequal_n(mu1 = 10, mu2 = 9.4, sd = 1, n1 = 90, alpha = 0.05, power = 0.8, 
+#'     alternative = "two.sided")
+#' @export
 calc_means_2s_unequal_n <- function(mu1, mu2, sd, n1, alpha = 0.05, power = 0.8,
                                      alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -270,6 +290,10 @@ calc_means_2s_unequal_n <- function(mu1, mu2, sd, n1, alpha = 0.05, power = 0.8,
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_total, n_per_group, inputs)
+#' @examples
+#' calc_means_planned_contrast(mu = c(0.05, 0.12, 0.14, 0.16), sigma = 0.22, ci = c(-6, 
+#'     1, 2, 3), fi = rep(0.25, 4), alpha = 0.05, power = 0.8)
+#' @export
 calc_means_planned_contrast <- function(mu, sigma, ci, fi, alpha = 0.05, power = 0.8) {
   k <- length(mu)
   if (!is.numeric(mu) || k < 2 || anyNA(mu)) {
@@ -328,6 +352,9 @@ calc_means_planned_contrast <- function(mu, sigma, ci, fi, alpha = 0.05, power =
 #'   correction
 #' @param power Desired power (0,1)
 #' @return list(n_per_group, inputs)
+#' @examples
+#' calc_means_posthoc_pairwise(tau = 3, sigma = 4, margin = 3, alpha = 0.05, power = 0.8)
+#' @export
 calc_means_posthoc_pairwise <- function(tau, sigma, margin, alpha = 0.05, power = 0.8) {
   if (!is.numeric(tau) || length(tau) != 1 || is.na(tau) || tau < 1 || tau != round(tau)) {
     stop("tau must be a single whole number >= 1.")
@@ -382,6 +409,10 @@ calc_means_posthoc_pairwise <- function(tau, sigma, margin, alpha = 0.05, power 
 #' @param ratio Group 2 size divided by group 1 size (> 0)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n1, n2, n_total, inputs)
+#' @examples
+#' calc_means_welch(mu1 = 0.05, mu2 = 0.1, sd1 = 0.1, sd2 = 0.1, alpha = 0.05, power = 0.8, 
+#'     ratio = 1)
+#' @export
 calc_means_welch <- function(mu1, mu2, sd1, sd2, alpha = 0.05, power = 0.8,
                               ratio = 1,
                               alternative = c("two.sided", "less", "greater")) {

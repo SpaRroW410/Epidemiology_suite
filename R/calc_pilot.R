@@ -21,6 +21,9 @@
 #' @param n Pilot sample size per arm (>= 2)
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @return list(lower_mult, upper_mult, inputs)
+#' @examples
+#' calc_pilot_sd_precision(n = 12, conf_level = 0.95)
+#' @export
 calc_pilot_sd_precision <- function(n, conf_level = 0.95) {
   if (!is.numeric(n) || length(n) != 1 || is.na(n) || n < 2 || n != round(n)) {
     stop("n must be a single whole number >= 2.")

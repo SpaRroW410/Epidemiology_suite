@@ -27,11 +27,11 @@
 #' @param ntimes Number of post-baseline time points/steps in the trial
 #'   (whole number >= 2)
 #' @param d Expected (absolute) treatment effect (> 0)
-#' @param icc Intracluster correlation coefficient, [0, 1)
+#' @param icc Intracluster correlation coefficient, \[0, 1)
 #' @param rho_c Cluster autocorrelation: the correlation between two
-#'   cluster-level means from the same cluster at different times, [0, 1]
+#'   cluster-level means from the same cluster at different times, \[0, 1\]
 #' @param rho_s Individual autocorrelation: the correlation between two
-#'   outcome measurements on the same individual at different times, [0, 1]
+#'   outcome measurements on the same individual at different times, \[0, 1\]
 #'   -- 0 for a cross-sectional design (new individuals sampled at each
 #'   time point), > 0 for a closed-cohort design (the same individuals
 #'   followed over time)
@@ -39,6 +39,10 @@
 #' @param alpha Two-sided type I error rate (0,1)
 #' @param power Desired power (0,1)
 #' @return list(nclusters, achieved_power, deff_cluster, deff_time, vif, inputs)
+#' @examples
+#' calc_stepped_wedge_normal(nsubjects = 50, ntimes = 5, d = 1.5, icc = 0.2, rho_c = 0.8, 
+#'     rho_s = 0, vart = 16)
+#' @export
 calc_stepped_wedge_normal <- function(nsubjects, ntimes, d, icc, rho_c, rho_s, vart,
                                        alpha = 0.05, power = 0.8) {
   .validate_positive(nsubjects, "nsubjects")

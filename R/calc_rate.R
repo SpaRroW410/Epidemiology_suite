@@ -22,6 +22,9 @@
 #'   "wald". "exact" is recommended when the expected number of events is
 #'   small (< 5).
 #' @return list(n_events, person_time, achieved_conf_width, inputs)
+#' @examples
+#' calc_rate_precision(rate = 2.5, conf_width = 2.243, conf_level = 0.95, method = "score")
+#' @export
 calc_rate_precision <- function(rate, conf_width, conf_level = 0.95,
                                  method = c("score", "vs", "exact", "wald")) {
   method <- match.arg(method)
@@ -72,6 +75,10 @@ calc_rate_precision <- function(rate, conf_width, conf_level = 0.95,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n_total, n_exposed, n_reference, inputs)
+#' @examples
+#' calc_rate_comparison(rate_ref = 2.798, rate_ratio = 0.8938, prop_exposed = 0.53, 
+#'     alpha = 0.05, power = 0.8)
+#' @export
 calc_rate_comparison <- function(rate_ref, rate_ratio, prop_exposed = 0.5,
                                   alpha = 0.05, power = 0.8,
                                   alternative = c("two.sided", "less", "greater")) {
@@ -147,6 +154,10 @@ calc_rate_comparison <- function(rate_ref, rate_ratio, prop_exposed = 0.5,
 #' @param alpha Significance level, two-sided (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_total, inputs)
+#' @examples
+#' calc_poisson_regression_continuous(beta0 = 0.1, beta1 = 0.5, mu_x1 = 0, sigma2_x1 = 1, 
+#'     mu_T = 1, phi = 1, alpha = 0.05, power = 0.8)
+#' @export
 calc_poisson_regression_continuous <- function(beta0, beta1, mu_x1, sigma2_x1,
                                                 mu_T = 1, phi = 1,
                                                 alpha = 0.05, power = 0.8) {
@@ -228,6 +239,10 @@ calc_poisson_regression_continuous <- function(beta0, beta1, mu_x1, sigma2_x1,
 #'   & Lakkis 2014); default 3, one of the two the authors' own
 #'   simulation study recommends (along with 2)
 #' @return list(n0, n1, n_total, inputs)
+#' @examples
+#' calc_negative_binomial_rates(mu0 = 10, RR = 1.5, theta = 1/5, duration = 1, ssize_ratio = 3/2, 
+#'     power = 0.8, approach = 3)
+#' @export
 calc_negative_binomial_rates <- function(mu0, RR, theta, duration = 1, ssize_ratio = 1,
                                           alpha = 0.05, power = 0.8,
                                           alternative = "two.sided", approach = 3) {

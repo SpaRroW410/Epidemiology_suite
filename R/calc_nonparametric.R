@@ -37,6 +37,9 @@
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, inputs)
+#' @examples
+#' calc_wilcoxon_rank_sum(k = 1, p1 = 0.7, p2 = 0.8, p3 = 0.8, alpha = 0.05, power = 0.8)
+#' @export
 calc_wilcoxon_rank_sum <- function(k = 1, p1, p2, p3, alpha = 0.05, power = 0.8) {
   .validate_positive(k, "k")
   .validate_unit_interval(p1, "p1")
@@ -69,6 +72,9 @@ calc_wilcoxon_rank_sum <- function(k = 1, p1, p2, p3, alpha = 0.05, power = 0.8)
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, inputs)
+#' @examples
+#' calc_wilcoxon_signed_rank(p2 = 0.3, p3 = 0.4, p4 = 0.05, alpha = 0.05, power = 0.8)
+#' @export
 calc_wilcoxon_signed_rank <- function(p2, p3, p4, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(p2, "p2")
   .validate_unit_interval(p3, "p3")
@@ -101,6 +107,9 @@ calc_wilcoxon_signed_rank <- function(p2, p3, p4, alpha = 0.05, power = 0.8) {
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, tau, inputs)
+#' @examples
+#' calc_kendall_tau(p1 = 0.6, p2 = 0.7, alpha = 0.05, power = 0.8)
+#' @export
 calc_kendall_tau <- function(p1, p2, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(p1, "p1")
   .validate_unit_interval(p2, "p2")
@@ -140,6 +149,9 @@ calc_kendall_tau <- function(p1, p2, alpha = 0.05, power = 0.8) {
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_per_group, n_total, n_anova_per_group, inputs)
+#' @examples
+#' calc_kruskal_wallis(k = 3, f = 0.25, alpha = 0.05, power = 0.8)
+#' @export
 calc_kruskal_wallis <- function(k, f, alpha = 0.05, power = 0.8) {
   if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 3 || k != round(k)) {
     stop("k must be a whole number, at least 3 (use Wilcoxon rank-sum for k = 2).")
@@ -201,11 +213,14 @@ calc_kruskal_wallis <- function(k, f, alpha = 0.05, power = 0.8) {
 #'   Wilcoxon signed-rank design above for k = 2)
 #' @param f Cohen's f effect size (> 0), same convention as
 #'   calc_rm_anova()'s within-subjects design
-#' @param nscor Nonsphericity correction coefficient in (0, 1]; 1 =
+#' @param nscor Nonsphericity correction coefficient in (0, 1\]; 1 =
 #'   sphericity assumption met (default) -- same as calc_rm_anova()
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, n_rm_anova, are, inputs)
+#' @examples
+#' calc_friedman(k = 4, f = 0.25, alpha = 0.05, power = 0.8)
+#' @export
 calc_friedman <- function(k, f, nscor = 1, alpha = 0.05, power = 0.8) {
   if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 3 || k != round(k)) {
     stop("k must be a whole number, at least 3 (use Wilcoxon signed-rank for k = 2).")
@@ -257,6 +272,9 @@ calc_friedman <- function(k, f, nscor = 1, alpha = 0.05, power = 0.8) {
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, tau, inputs)
+#' @examples
+#' calc_jonckheere_terpstra(p1 = 0.6, p2 = 0.7, alpha = 0.05, power = 0.8)
+#' @export
 calc_jonckheere_terpstra <- function(p1, p2, alpha = 0.05, power = 0.8) {
   base <- calc_kendall_tau(p1 = p1, p2 = p2, alpha = alpha, power = power)
   new_ss_result(list(
@@ -306,6 +324,9 @@ calc_jonckheere_terpstra <- function(p1, p2, alpha = 0.05, power = 0.8) {
 #'   of runtime)
 #' @param seed RNG seed for reproducibility
 #' @return list(n1, n2, n_total, achieved_power, inputs)
+#' @examples
+#' calc_ks_two_sample(effect_size = 0.8, alpha = 0.05, power = 0.8, nsim = 500)
+#' @export
 calc_ks_two_sample <- function(effect_size, alpha = 0.05, power = 0.8,
                                 n_ratio = 1, nsim = 500, seed = 20240607) {
   .validate_positive(effect_size, "effect_size")
@@ -371,6 +392,9 @@ calc_ks_two_sample <- function(effect_size, alpha = 0.05, power = 0.8,
 #'   during the search (>= 100)
 #' @param seed RNG seed for reproducibility
 #' @return list(n1, n2, n_total, achieved_power, inputs)
+#' @examples
+#' calc_wald_wolfowitz_runs(effect_size = 1.2, alpha = 0.05, power = 0.8, nsim = 500)
+#' @export
 calc_wald_wolfowitz_runs <- function(effect_size, alpha = 0.05, power = 0.8,
                                       n_ratio = 1, nsim = 500, seed = 20240607) {
   .validate_positive(effect_size, "effect_size")
@@ -450,6 +474,9 @@ calc_wald_wolfowitz_runs <- function(effect_size, alpha = 0.05, power = 0.8,
 #'   through to `power.ladesign()` (>= 1000)
 #' @param seed RNG seed for reproducibility
 #' @return list(n_per_group, n_total, k, achieved_power, inputs)
+#' @examples
+#' calc_animal_rank_test(k = 2, odds_ratio = 4, alpha = 0.05, power = 0.8, nrep = 50000)
+#' @export
 calc_animal_rank_test <- function(k, odds_ratio, alpha = 0.05, power = 0.8,
                                    statistic = c("Kruskal-Wallis", "Jonckheere-Terpstra"),
                                    alternative = c("two.sided", "one.sided"),

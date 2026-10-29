@@ -24,7 +24,7 @@
 #' @param aend Age at end of the observation period (> astart)
 #' @param p Vector/scalar of proportions of the case population exposed in
 #'   each age group (default 1: no age effects, everyone exposed); must sum
-#'   to a value in (0, 1]
+#'   to a value in (0, 1\]
 #' @param alpha Significance level, two-sided (0,1)
 #' @param power Desired power (0,1)
 #' @param eage Optional vector of age-group relative-incidence parameters
@@ -32,6 +32,10 @@
 #' @param agegrp Optional vector of age-group cut points (each value is the
 #'   start of the next age category); required together with eage
 #' @return list(n, inputs)
+#' @examples
+#' calc_sccs_samplesize(eexpo = 2.5, risk = 21, astart = 366, aend = 730, p = 1, alpha = 0.05, 
+#'     power = 0.8)
+#' @export
 calc_sccs_samplesize <- function(eexpo, risk, astart, aend, p = 1, alpha = 0.05,
                                   power = 0.8, eage = NULL, agegrp = NULL) {
   .validate_positive(eexpo, "eexpo")
