@@ -240,6 +240,6 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] Binary outcome with both treatments in each patient (clustered McNemar; needs a checked source), a patient-by-treatment variance part for the split designs, unequal allocation, different numbers of units in the two arms, the analysis side (Rosner-Milton / Obuchowski tests).
 
 ### Housekeeping
-- [ ] Section 1 of the roadmap has the current figures; the checklists (`checklist_by_design.md`, `checklist_by_test.md`) still do not list the Analyze, planning, survey and outbreak modules.
+- [x] The checklists now list the Analyze, planning, survey, outbreak, epidemic-model and eyes / lesions tools (`checklist_by_design.md` §18, `checklist_by_test.md`, 29 Oct 2026).
 - [ ] `renv.lock` still lists packages that were removed from the runtime (intended: the tests use them as oracles) and not the packages added for the tests (`shinytest2`, `chromote`, ...); re-snapshot when convenient.
 - [ ] The sandbox's `R CMD check` ends with a locale warning and a clock note that are not the package's; confirm on a normal machine or in CI.
