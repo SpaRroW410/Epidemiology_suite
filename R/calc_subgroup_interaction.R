@@ -45,6 +45,9 @@
 #'   the main effect's magnitude (> 0); default 1 (an interaction the
 #'   same size as the main effect -- Brookes et al.'s headline scenario)
 #' @return list(n_interaction_total, multiplier, inputs)
+#' @examples
+#' calc_subgroup_interaction(n_main_total = 100, effect_ratio = 1)
+#' @export
 calc_subgroup_interaction <- function(n_main_total, effect_ratio = 1) {
   if (!is.numeric(n_main_total) || length(n_main_total) != 1 || is.na(n_main_total) ||
         n_main_total < 2 || n_main_total != round(n_main_total)) {

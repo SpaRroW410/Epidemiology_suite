@@ -31,6 +31,9 @@
 #'   scale/model has (whole number >= 1)
 #' @return list(n_items, n_5to1, n_10to1, n_20to1, adjective_5to1,
 #'   adjective_10to1, adjective_20to1, inputs)
+#' @examples
+#' calc_efa_cfa_sample_size(n_items = 20)
+#' @export
 calc_efa_cfa_sample_size <- function(n_items) {
   if (!is.numeric(n_items) || length(n_items) != 1 || is.na(n_items) ||
         n_items < 1 || n_items != round(n_items)) {
@@ -55,6 +58,7 @@ calc_efa_cfa_sample_size <- function(n_items) {
 #' sample size: 50=very poor, 100=poor, 200=fair, 300=good, 500=very
 #' good, 1000+=excellent. Returns the highest threshold N meets or
 #' exceeds.
+#' @noRd
 .comrey_lee_adjective <- function(N) {
   if (N >= 1000) "excellent"
   else if (N >= 500) "very good"
@@ -86,6 +90,9 @@ calc_efa_cfa_sample_size <- function(n_items) {
 #' @param group Number of groups in a multi-group model (whole number >= 1;
 #'   1 for a single-group model)
 #' @return Power (0,1)
+#' @examples
+#' calc_sem_rmsea_power(rmsea0 = 0.08, rmseaA = 0.03, df = 50, n = 300, alpha = 0.05, group = 2)
+#' @export
 calc_sem_rmsea_power <- function(rmsea0, rmseaA, df, n, alpha = 0.05, group = 1) {
   if (!is.numeric(rmsea0) || length(rmsea0) != 1 || is.na(rmsea0) || rmsea0 < 0) {
     stop("rmsea0 must be a single number >= 0.")
@@ -123,9 +130,12 @@ calc_sem_rmsea_power <- function(rmsea0, rmseaA, df, n, alpha = 0.05, group = 1)
 #' search strategy (checked in blocks of 500 after an initial 5-500
 #' scan) for an exact match to its behavior.
 #'
-#' @inheritParams calc_sem_rmsea_power
 #' @param power Desired power (0,1)
 #' @return list(n, achieved_power, inputs)
+#' @inheritParams calc_sem_rmsea_power
+#' @examples
+#' calc_sem_rmsea_samplesize(rmsea0 = 0.05, rmseaA = 0.08, df = 20, power = 0.8, alpha = 0.05)
+#' @export
 calc_sem_rmsea_samplesize <- function(rmsea0, rmseaA, df, power = 0.8, alpha = 0.05, group = 1) {
   .validate_unit_interval(power, "power")
 
@@ -184,6 +194,9 @@ calc_sem_rmsea_samplesize <- function(rmsea0, rmseaA, df, power = 0.8, alpha = 0
 #' @param model Which IRT model is being calibrated: "rasch_1pl", "twopl",
 #'   "threepl", or "polytomous"
 #' @return list(model, n_minimum, n_precise, note, inputs)
+#' @examples
+#' calc_irt_calibration_guidance("rasch_1pl")
+#' @export
 calc_irt_calibration_guidance <- function(model = c("rasch_1pl", "twopl", "threepl", "polytomous")) {
   model <- match.arg(model)
 

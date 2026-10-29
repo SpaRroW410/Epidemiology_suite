@@ -20,6 +20,7 @@
 #'
 #' @param result An `ss_result`
 #' @return A flat named list of length-1 character/numeric/logical values
+#' @noRd
 ss_result_flatten <- function(result) {
   stopifnot(is.list(result))
 
@@ -48,6 +49,7 @@ ss_result_flatten <- function(result) {
 #' @return A single character string: a header line, a newline, a data
 #'   line -- ready to write directly to a `.csv` file (already newline-
 #'   terminated CSV text, not a data frame).
+#' @noRd
 ss_result_to_csv <- function(result) {
   flat <- ss_result_flatten(result)
   df <- as.data.frame(lapply(flat, function(v) if (is.na(v)) NA else as.character(v)),
@@ -69,6 +71,7 @@ ss_result_to_csv <- function(result) {
 #'
 #' @param result An `ss_result`
 #' @return A single-line JSON object as a character string
+#' @noRd
 ss_result_to_json <- function(result) {
   flat <- ss_result_flatten(result)
 
@@ -226,7 +229,7 @@ ss_result_to_json <- function(result) {
 #' content_*.R already carries a citation.
 #'
 #' @param design_title Human-readable design name, e.g. "Two independent
-#'   proportions" (a module's `<name>_content[[design]]$title`, or the
+#'   proportions" (a module's `<name>_content\[\[design\]\]$title`, or the
 #'   catalog's own label)
 #' @param result An `ss_result`
 #' @param citation Citation text for this design (`content_*.R`'s own
@@ -234,6 +237,7 @@ ss_result_to_json <- function(result) {
 #' @param backend Optional "implemented via" string (`content_*.R`'s own
 #'   `backend` field); omitted from the paragraph if NULL
 #' @return A single character string (one paragraph, no line breaks)
+#' @noRd
 format_justification <- function(design_title, result, citation, backend = NULL) {
   stopifnot(is.list(result))
   if (is.null(citation) || !nzchar(citation)) {
@@ -298,6 +302,7 @@ format_justification <- function(design_title, result, citation, backend = NULL)
 #' @param design_title Human-readable design name
 #' @param citation Citation text for this design
 #' @return A single character string, valid BibTeX for one `@misc` entry
+#' @noRd
 format_citation_bibtex <- function(design_title, citation) {
   design_title <- .ascii_safe(design_title)
   citation <- .ascii_safe(citation)
@@ -317,6 +322,7 @@ format_citation_bibtex <- function(design_title, citation) {
 #' @param design_title Human-readable design name
 #' @param citation Citation text for this design
 #' @return A single character string, valid RIS for one record
+#' @noRd
 format_citation_ris <- function(design_title, citation) {
   design_title <- .ascii_safe(design_title)
   citation <- .ascii_safe(citation)

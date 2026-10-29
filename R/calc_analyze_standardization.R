@@ -57,6 +57,10 @@
 #' @param events_b,person_time_b Optional second group over the same strata, to compare the two.
 #' @param multiplier Rates are reported per this many units of person-time.
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `strata`, `events`, `person_time`, `crude_rate`, `crude_rate_lower`, `crude_rate_upper`, `standardized_rate`, `standardized_rate_lower`, `standardized_rate_upper`, `multiplier` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_dsr(c(15, 46), c(48, 212), c(250, 250), multiplier = 1)
+#' @export
 calc_analyze_dsr <- function(events, person_time, standard, events_b = NULL, person_time_b = NULL,
                              multiplier = 1000, conf_level = 0.95) {
   g <- .std_validate_strata(events, person_time)
@@ -128,7 +132,7 @@ analyze_dsr_strata_table <- function(events, person_time, standard, multiplier =
 #' Confidence intervals by six methods are returned side by side, so the user can compare them (no one of
 #' them is "the" interval; the choice depends on the count -- see the notes in the module). With O observed
 #' and E expected events (E treated as fixed, O as Poisson):
-#'   exact         [chi2_{a/2, 2O}/(2E), chi2_{1-a/2, 2(O+1)}/(2E)]  (Garwood; Liddell 1984; Ulm 1990)
+#'   exact         \[chi2_\{a/2, 2O\}/(2E), chi2_\{1-a/2, 2(O+1)\}/(2E)\]  (Garwood; Liddell 1984; Ulm 1990)
 #'   mid-P exact   limits solving P(X > O) + P(X = O)/2 = a/2 and P(X < O) + P(X = O)/2 = a/2
 #'                 (Miettinen 1974; Rothman & Boice 1979)
 #'   Byar          O (1 - 1/(9O) - z/(3 sqrt O))^3 / E to (O + 1)(1 - 1/(9(O + 1)) + z/(3 sqrt(O + 1)))^3 / E
@@ -143,6 +147,10 @@ analyze_dsr_strata_table <- function(events, person_time, standard, multiplier =
 #' @param observed Observed number of events (a whole number).
 #' @param expected Expected number of events (positive), e.g. from reference rates.
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `observed`, `expected`, `smr`, `smr_exact_lower`, `smr_exact_upper`, `smr_mid_p_lower`, `smr_mid_p_upper`, `smr_byar_lower`, `smr_byar_upper`, `smr_rothman_greenland_lower`, `smr_rothman_greenland_upper`, `smr_vandenbroucke_lower`, `smr_vandenbroucke_upper`, `smr_wald_lower`, `smr_wald_upper`, `exact_test_p`, `mid_p_test_p`, `chisq`, `chisq_p`, `byar_z`, `byar_test_p` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_smr(40, 20)
+#' @export
 calc_analyze_smr <- function(observed, expected, conf_level = 0.95) {
   .rate_validate_count(observed, "Observed events")
   .rate_validate_time(expected, "Expected events")
@@ -202,6 +210,10 @@ analyze_smr_table <- function(result) {
 #' @param observed Total observed events in the study group.
 #' @param multiplier The unit the reference rates are expressed in.
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `observed`, `expected`, `smr`, `smr_exact_lower`, `smr_exact_upper`, `smr_mid_p_lower`, `smr_mid_p_upper`, `smr_byar_lower`, `smr_byar_upper`, `smr_rothman_greenland_lower`, `smr_rothman_greenland_upper`, `smr_vandenbroucke_lower`, `smr_vandenbroucke_upper`, `smr_wald_lower`, `smr_wald_upper`, `exact_test_p`, `mid_p_test_p`, `chisq`, `chisq_p`, `byar_z`, `byar_test_p`, `strata`, `multiplier` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_indirect(c(550, 450), c(0.025, 0.085), observed = 58, multiplier = 1)
+#' @export
 calc_analyze_indirect <- function(person_time, reference_rates, observed, multiplier = 1000, conf_level = 0.95) {
   g <- length(person_time)
   if (g < 2 || g > 20) stop("Use between 2 and 20 strata.")

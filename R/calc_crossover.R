@@ -20,6 +20,9 @@
 #' @param alpha Significance level, two-sided (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_per_sequence, n_total, inputs)
+#' @examples
+#' calc_crossover_2x2(delta = 0.2, sigma = 0.4, alpha = 0.05, power = 0.8)
+#' @export
 calc_crossover_2x2 <- function(delta, sigma, alpha = 0.05, power = 0.8) {
   .validate_number(delta, "delta")
   if (isTRUE(all.equal(delta, 0))) stop("delta must differ from 0 (no effect to detect).")

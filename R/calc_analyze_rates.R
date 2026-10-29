@@ -61,6 +61,10 @@
 #' @param person_time Person-time at risk (positive), in any unit.
 #' @param multiplier Rates are reported per this many person-time units (for example 1000).
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `events`, `person_time`, `rate`, `exact_lower`, `exact_upper`, `mid_p_lower`, `mid_p_upper`, `byar_lower`, `byar_upper`, `wald_lower`, `wald_upper`, `multiplier` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_rate_single(7, 1000, multiplier = 1000)
+#' @export
 calc_analyze_rate_single <- function(events, person_time, multiplier = 1000, conf_level = 0.95) {
   .rate_validate_count(events, "Events")
   .rate_validate_time(person_time, "Person-time")
@@ -93,6 +97,10 @@ calc_analyze_rate_single <- function(events, person_time, multiplier = 1000, con
 #' @param events_unexposed,person_time_unexposed Events and person-time in the unexposed group.
 #' @param multiplier Rates and the rate difference are reported per this many person-time units.
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `events_total`, `person_time_total`, `rate_exposed`, `rate_exposed_lower`, `rate_exposed_upper`, `rate_unexposed`, `rate_unexposed_lower`, `rate_unexposed_upper`, `rate_ratio`, `rate_ratio_exact_lower`, `rate_ratio_exact_upper`, `rate_ratio_mid_p_lower`, `rate_ratio_mid_p_upper`, `rate_ratio_wald_lower`, `rate_ratio_wald_upper`, `rate_difference`, `rate_difference_lower`, `rate_difference_upper`, `attributable_fraction_exposed`, `attributable_fraction_exposed_lower`, `attributable_fraction_exposed_upper`, `population_attributable_fraction`, `population_attributable_fraction_lower`, `population_attributable_fraction_upper`, `exact_test_p`, `mid_p_test_p`, `score_chisq`, `score_test_p`, `multiplier` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_rate_ratio(10, 2000, 4, 2500, multiplier = 1)
+#' @export
 calc_analyze_rate_ratio <- function(events_exposed, person_time_exposed, events_unexposed, person_time_unexposed,
                                     multiplier = 1000, conf_level = 0.95) {
   .rate_validate_count(events_exposed, "Events (exposed)")
@@ -221,6 +229,11 @@ analyze_rate_single_table <- function(result) {
 #'   person-time in the exposed group, then in the unexposed group).
 #' @param multiplier Rate differences are reported per this many person-time units.
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_strata`, `events_total`, `person_time_total`, `crude_rate_ratio`, `crude_rate_ratio_lower`, `crude_rate_ratio_upper`, `mh_rate_ratio`, `mh_rate_ratio_lower`, `mh_rate_ratio_upper`, `rate_ratio_change_percent`, `crude_rate_difference`, `crude_rate_difference_lower`, `crude_rate_difference_upper`, `mh_rate_difference`, `mh_rate_difference_lower`, `mh_rate_difference_upper`, `cmh_chisq`, `cmh_p`, `woolf_chisq`, `woolf_df`, `woolf_p`, `breslow_day_type_chisq`, `breslow_day_type_df`, `breslow_day_type_p`, `zero_count_strata`, `multiplier` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_rate_stratified(rbind(c(60, 1000, 10, 1000), c(10, 1000, 60, 1000), 
+#'     c(30, 1000, 30, 1000)))
+#' @export
 calc_analyze_rate_stratified <- function(strata, multiplier = 1000, conf_level = 0.95) {
   m <- .rate_parse_strata(strata)
   .rate_validate_time(multiplier, "The multiplier")

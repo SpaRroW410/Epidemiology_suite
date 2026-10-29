@@ -63,8 +63,14 @@
 }
 
 #' Simple random sample of units from a frame
-#' @param N Frame size. @param n Number to select. @param seed Whole-number seed.
+#' @param N Frame size.
+#' @param n Number to select.
+#' @param seed Whole-number seed.
 #' @param labels Optional unit labels (length N).
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `method`, `frame_size`, `n_selected`, `sampling_fraction`, `design_weight`, `seed` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_survey_select_srs(500, 40, seed = 3, labels = paste0("U", 1:500))
+#' @export
 calc_survey_select_srs <- function(N, n, seed, labels = NULL) {
   if (!is.numeric(N) || length(N) != 1 || is.na(N) || N < 2 || N != round(N)) stop("The frame size must be a whole number >= 2.")
   .survey_check_n(n, N, "units")
@@ -77,6 +83,14 @@ calc_survey_select_srs <- function(N, n, seed, labels = NULL) {
 }
 
 #' Systematic sample (random start, fractional interval allowed)
+#' @param N Size of the list (number of units, a whole number of at least 2).
+#' @param n Number of units to select.
+#' @param seed Whole-number seed, so that the same seed and settings give the same sample.
+#' @param labels Optional unit labels, one per unit of the list.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `method`, `frame_size`, `n_selected`, `interval`, `random_start`, `sampling_fraction`, `design_weight`, `seed` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_survey_select_systematic(100, 10, seed = 5)
+#' @export
 calc_survey_select_systematic <- function(N, n, seed, labels = NULL) {
   if (!is.numeric(N) || length(N) != 1 || is.na(N) || N < 2 || N != round(N)) stop("The frame size must be a whole number >= 2.")
   .survey_check_n(n, N, "units")
@@ -96,6 +110,12 @@ calc_survey_select_systematic <- function(N, n, seed, labels = NULL) {
 #' @param sizes Positive sizes (e.g. populations), one per unit, in frame order.
 #' @param n Number of units to select.
 #' @param randomize_order Shuffle the list before selecting (random-order systematic PPS).
+#' @param seed Whole-number seed, so that the same seed and settings give the same sample.
+#' @param labels Optional unit labels, one per unit.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `method`, `frame_size`, `total_size`, `n_selected`, `n_certainty`, `interval`, `random_start`, `ht_total_size`, `seed` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_survey_select_pps(c(100, 60, 10, 10, 10, 10), 3, seed = 1)
+#' @export
 calc_survey_select_pps <- function(sizes, n, seed, labels = NULL, randomize_order = FALSE) {
   if (!is.numeric(sizes) || length(sizes) < 2 || anyNA(sizes) || any(!is.finite(sizes)) || any(sizes <= 0)) {
     stop("Give at least two units, each with a positive size.")
@@ -157,7 +177,17 @@ calc_survey_select_pps <- function(sizes, n, seed, labels = NULL, randomize_orde
 }
 
 #' WHO EPI cluster survey: PPS selection of clusters and the per-cluster take
-#' @param n_clusters Clusters to select (30 in the EPI design). @param per_cluster Subjects per cluster (7).
+#' @param n_clusters Clusters to select (30 in the EPI design).
+#' @param per_cluster Subjects per cluster (7).
+#' @param sizes Positive sizes (for example village populations), one per cluster in the list.
+#' @param seed Whole-number seed, so that the same seed and settings give the same sample.
+#' @param labels Optional cluster labels, one per cluster in the list.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `method`, `frame_size`, `total_size`, `n_selected`, `n_certainty`, `interval`, `random_start`, `ht_total_size`, `seed`, `clusters`, `per_cluster`, `total_sample` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' set.seed(3)
+#' villages <- round(runif(120, 200, 3000))   # populations of 120 villages
+#' calc_survey_epi_clusters(villages, n_clusters = 30, per_cluster = 7, seed = 11, labels = paste("Village", 1:120))
+#' @export
 calc_survey_epi_clusters <- function(sizes, n_clusters = 30, per_cluster = 7, seed, labels = NULL) {
   if (!is.numeric(per_cluster) || length(per_cluster) != 1 || is.na(per_cluster) || per_cluster < 1 || per_cluster != round(per_cluster)) {
     stop("The number of subjects per cluster must be a whole number >= 1.")
@@ -196,6 +226,10 @@ survey_selection_methods_text <- function(result) {
 #' @param sampled Number sampled in each class n_h.
 #' @param responded Number of respondents in each class r_h (at least 1).
 #' @param labels Optional class labels.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_classes`, `population_total`, `sampled_total`, `respondents_total`, `unweighted_response_rate`, `weighted_response_rate`, `sum_of_adjusted_weights`, `cv_weights`, `design_effect_weighting`, `effective_sample_size`, `min_weight`, `max_weight`, `adjusted_weight_1`, `response_rate_1`, `adjusted_weight_2`, `response_rate_2`, `adjusted_weight_3`, `response_rate_3` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_survey_weights(c(500, 300, 200), c(50, 50, 40), c(40, 30, 35))
+#' @export
 calc_survey_weights <- function(population, sampled, responded, labels = NULL) {
   k <- length(population)
   if (k < 1 || k > 20 || length(sampled) != k || length(responded) != k) stop("Give the population, sampled and responded counts for each class (1 to 20 classes).")
@@ -236,6 +270,11 @@ calc_survey_weights <- function(population, sampled, responded, labels = NULL) {
 }
 
 #' Kish's effective sample size and design effect of unequal weights, from a list of weights
+#' @param weights Survey weights, one per respondent (at least two, all positive).
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n`, `effective_sample_size`, `design_effect_weighting`, `cv_weights`, `one_plus_cv_squared`, `min_weight`, `max_weight`, `max_to_min_ratio` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_survey_effective_n(c(1, 1, 2, 2))
+#' @export
 calc_survey_effective_n <- function(weights) {
   if (!is.numeric(weights) || length(weights) < 2 || anyNA(weights) || any(!is.finite(weights)) || any(weights <= 0)) {
     stop("Give at least two positive weights.")

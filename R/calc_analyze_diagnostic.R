@@ -80,6 +80,10 @@
 #' @param prevalence NULL to read PPV/NPV from the counts (valid when the
 #'   sample's prevalence is representative), or a prevalence in (0, 1) to
 #'   recompute them from Se and Sp at that prevalence.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_total`, `sensitivity`, `sensitivity_lower`, `sensitivity_upper`, `specificity`, `specificity_lower`, `specificity_upper`, `ppv`, `ppv_lower`, `ppv_upper`, `npv`, `npv_lower`, `npv_upper`, `lr_positive`, `lr_positive_lower`, `lr_positive_upper`, `lr_negative`, `lr_negative_lower`, `lr_negative_upper`, `accuracy`, `accuracy_lower`, `accuracy_upper`, `youden_index`, `prevalence_in_sample`, `prevalence_used_for_pv`, `predictive_values_from` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_dx_single(18, 3, 2, 77, ci_method = "wilson")
+#' @export
 calc_analyze_dx_single <- function(tp, fp, fn, tn, conf_level = 0.95,
                                    ci_method = c("exact", "wilson"), prevalence = NULL) {
   ci_method <- match.arg(ci_method)
@@ -189,6 +193,10 @@ calc_analyze_dx_single <- function(tp, fp, fn, tn, conf_level = 0.95,
 #'   subjects behind each test's Se / Sp; when both are given the combined
 #'   estimates get confidence intervals.
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_tests`, `test1_sensitivity`, `test1_sensitivity_lower`, `test1_sensitivity_upper`, `test1_specificity`, `test1_specificity_lower`, `test1_specificity_upper`, `test1_ppv`, `test1_ppv_lower`, `test1_ppv_upper`, `test1_npv`, `test1_npv_lower`, `test1_npv_upper`, `test1_lr_positive`, `test1_lr_negative`, `test2_sensitivity`, `test2_sensitivity_lower`, `test2_sensitivity_upper`, `test2_specificity`, `test2_specificity_lower`, `test2_specificity_upper`, `test2_ppv`, `test2_ppv_lower`, `test2_ppv_upper`, `test2_npv`, `test2_npv_lower`, `test2_npv_upper`, `test2_lr_positive`, `test2_lr_negative`, `test3_sensitivity`, `test3_sensitivity_lower`, `test3_sensitivity_upper`, `test3_specificity`, `test3_specificity_lower`, `test3_specificity_upper`, `test3_ppv`, `test3_ppv_lower`, `test3_ppv_upper`, `test3_npv`, `test3_npv_lower`, `test3_npv_upper`, `test3_lr_positive`, `test3_lr_negative`, `parallel_sensitivity`, `parallel_sensitivity_lower`, `parallel_sensitivity_upper`, `parallel_specificity`, `parallel_specificity_lower`, `parallel_specificity_upper`, `parallel_ppv`, `parallel_ppv_lower`, `parallel_ppv_upper`, `parallel_npv`, `parallel_npv_lower`, `parallel_npv_upper`, `parallel_lr_positive`, `parallel_lr_negative`, `serial_sensitivity`, `serial_sensitivity_lower`, `serial_sensitivity_upper`, `serial_specificity`, `serial_specificity_lower`, `serial_specificity_upper`, `serial_ppv`, `serial_ppv_lower`, `serial_ppv_upper`, `serial_npv`, `serial_npv_lower`, `serial_npv_upper`, `serial_lr_positive`, `serial_lr_negative` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_dx_combined(c(0.9, 0.8, 0.85), c(0.7, 0.9, 0.8), prevalence = 0.1)
+#' @export
 calc_analyze_dx_combined <- function(se, sp, prevalence, n_diseased = NULL, n_nondiseased = NULL,
                                      conf_level = 0.95) {
   k <- length(se)

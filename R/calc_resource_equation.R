@@ -21,6 +21,9 @@
 #' @param k_groups Number of treatment groups (whole number >= 2)
 #' @param e_target Desired error degrees of freedom E (whole number >= 1); default 10
 #' @return list(n_total, n_per_group, e, inputs)
+#' @examples
+#' calc_resource_equation_size(k_groups = 5, e_target = 10)
+#' @export
 calc_resource_equation_size <- function(k_groups, e_target = 10) {
   if (!is.numeric(k_groups) || length(k_groups) != 1 || is.na(k_groups) ||
         k_groups < 2 || k_groups != round(k_groups)) {
@@ -50,6 +53,9 @@ calc_resource_equation_size <- function(k_groups, e_target = 10) {
 #' @param n_per_group Number of experimental units per group (whole number >= 1)
 #' @return list(n_total, e, verdict, inputs) where verdict is one of
 #'   "too low", "adequate", "more than needed"
+#' @examples
+#' calc_resource_equation_check(k_groups = 5, n_per_group = 10)
+#' @export
 calc_resource_equation_check <- function(k_groups, n_per_group) {
   if (!is.numeric(k_groups) || length(k_groups) != 1 || is.na(k_groups) ||
         k_groups < 2 || k_groups != round(k_groups)) {

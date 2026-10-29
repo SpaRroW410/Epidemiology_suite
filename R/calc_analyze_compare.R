@@ -98,6 +98,10 @@
 #' @param x1,n1 Events and sample size in group 1 (the "exposed" / treatment group).
 #' @param x2,n2 Events and sample size in group 2 (the comparison group).
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_total`, `proportion_1`, `proportion_2`, `risk_difference`, `wald_lower`, `wald_upper`, `wald_cc_lower`, `wald_cc_upper`, `agresti_caffo_lower`, `agresti_caffo_upper`, `newcombe_lower`, `newcombe_upper`, `newcombe_cc_lower`, `newcombe_cc_upper`, `miettinen_nurminen_lower`, `miettinen_nurminen_upper`, `mee_lower`, `mee_upper`, `risk_ratio`, `ratio_katz_lower`, `ratio_katz_upper`, `ratio_adjusted_log_lower`, `ratio_adjusted_log_upper`, `ratio_koopman_lower`, `ratio_koopman_upper`, `odds_ratio`, `odds_ratio_woolf_lower`, `odds_ratio_woolf_upper`, `odds_ratio_conditional`, `odds_ratio_exact_lower`, `odds_ratio_exact_upper`, `chisq`, `chisq_p`, `fisher_p` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_compare_proportions(56, 70, 48, 80)
+#' @export
 calc_analyze_compare_proportions <- function(x1, n1, x2, n2, conf_level = 0.95) {
   for (nm in c("x1", "x2")) {
     v <- get(nm)
@@ -196,6 +200,10 @@ analyze_compare_proportions_table <- function(result) {
 #' @param n1,mean1,sd1 Sample size, mean and standard deviation of group 1.
 #' @param n2,mean2,sd2 The same for group 2.
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_total`, `mean_difference`, `welch_se`, `welch_df`, `welch_lower`, `welch_upper`, `welch_t`, `welch_p`, `pooled_se`, `pooled_df`, `pooled_lower`, `pooled_upper`, `pooled_t`, `pooled_p`, `variance_ratio`, `variance_ratio_lower`, `variance_ratio_upper`, `variance_ratio_p`, `cohens_d`, `cohens_d_lower`, `cohens_d_upper`, `hedges_g`, `hedges_g_lower`, `hedges_g_upper` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_compare_means(25, 52, 9, 31, 47, 12)
+#' @export
 calc_analyze_compare_means <- function(n1, mean1, sd1, n2, mean2, sd2, conf_level = 0.95) {
   for (nm in c("n1", "n2")) {
     v <- get(nm)

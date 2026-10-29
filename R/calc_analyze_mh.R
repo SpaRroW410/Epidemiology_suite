@@ -65,6 +65,10 @@
 #' @param design "cohort" (also gives the risk ratio and risk difference) or
 #'   "case_control" (odds ratio only).
 #' @param conf_level Confidence level for every interval.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_strata`, `n_total`, `design`, `crude_odds_ratio`, `crude_odds_ratio_lower`, `crude_odds_ratio_upper`, `mh_odds_ratio`, `mh_odds_ratio_lower`, `mh_odds_ratio_upper`, `odds_ratio_change_percent`, `crude_risk_ratio`, `crude_risk_ratio_lower`, `crude_risk_ratio_upper`, `mh_risk_ratio`, `mh_risk_ratio_lower`, `mh_risk_ratio_upper`, `risk_ratio_change_percent`, `crude_risk_difference`, `crude_risk_difference_lower`, `crude_risk_difference_upper`, `mh_risk_difference`, `mh_risk_difference_lower`, `mh_risk_difference_upper`, `cmh_chisq`, `cmh_p`, `cmh_chisq_corrected`, `cmh_p_corrected`, `strata_in_homogeneity_tests`, `woolf_or_chisq`, `woolf_or_df`, `woolf_or_p`, `woolf_rr_chisq`, `woolf_rr_df`, `woolf_rr_p`, `breslow_day_chisq`, `breslow_day_df`, `breslow_day_p`, `tarone_chisq`, `tarone_p`, `zero_cell_strata` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_mantel_haenszel(rbind(c(5, 5, 0, 10), c(0, 8, 3, 9)))
+#' @export
 calc_analyze_mantel_haenszel <- function(tables, design = c("cohort", "case_control"), conf_level = 0.95) {
   design <- match.arg(design)
   m <- .mh_parse_strata(tables)

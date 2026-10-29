@@ -42,13 +42,16 @@
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided" or "one.sided"
-#' @param boundary_shape Power-family boundary parameter, [0, 0.5]: 0 =
+#' @param boundary_shape Power-family boundary parameter, \[0, 0.5\]: 0 =
 #'   Pocock (constant boundary across looks), 0.5 = O'Brien-Fleming
 #'   (conservative early, liberal late) -- the two classic boundary shapes
 #' @param futility If TRUE, also compute a (non-binding) futility boundary
 #'   in the same power family
 #' @return list(n_total, n_control, n_experimental, ifrac,
 #'   efficacy_boundary, futility_boundary, inputs)
+#' @examples
+#' calc_group_sequential_normal(delta = 0.5, sd = 1, n_looks = 1, alpha = 0.05, power = 0.8)
+#' @export
 calc_group_sequential_normal <- function(delta, sd, n_looks, r = 1, alpha = 0.05, power = 0.8,
                                           alternative = c("two.sided", "one.sided"),
                                           boundary_shape = 0.5, futility = FALSE) {
@@ -96,10 +99,13 @@ calc_group_sequential_normal <- function(delta, sd, n_looks, r = 1, alpha = 0.05
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided" or "one.sided"
-#' @param boundary_shape Power-family boundary parameter, [0, 0.5]
+#' @param boundary_shape Power-family boundary parameter, \[0, 0.5\]
 #' @param futility If TRUE, also compute a futility boundary
 #' @return list(n_total, n_control, n_experimental, ifrac,
 #'   efficacy_boundary, futility_boundary, inputs)
+#' @examples
+#' calc_group_sequential_binary(pC = 0.3, pE = 0.5, n_looks = 1, alpha = 0.05, power = 0.8)
+#' @export
 calc_group_sequential_binary <- function(pC, pE, n_looks, r = 1, alpha = 0.05, power = 0.8,
                                           alternative = c("two.sided", "one.sided"),
                                           boundary_shape = 0.5, futility = FALSE) {
@@ -146,10 +152,13 @@ calc_group_sequential_binary <- function(pC, pE, n_looks, r = 1, alpha = 0.05, p
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided" or "one.sided"
-#' @param boundary_shape Power-family boundary parameter, [0, 0.5]
+#' @param boundary_shape Power-family boundary parameter, \[0, 0.5\]
 #' @param futility If TRUE, also compute a futility boundary
 #' @return list(n_events_total, ifrac, efficacy_boundary,
 #'   futility_boundary, inputs)
+#' @examples
+#' calc_group_sequential_survival(haz_ratio = 0.5, n_looks = 1, alpha = 0.05, power = 0.8)
+#' @export
 calc_group_sequential_survival <- function(haz_ratio, n_looks, r = 1, alpha = 0.05, power = 0.8,
                                             alternative = c("two.sided", "one.sided"),
                                             boundary_shape = 0.5, futility = FALSE) {

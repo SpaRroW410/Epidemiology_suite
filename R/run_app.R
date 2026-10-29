@@ -8,12 +8,14 @@
 #' Starts the sample size / power calculator in the default web browser (or the
 #' RStudio viewer). Blocks until the app is stopped.
 #'
+#' @param calculator Optional: open the app straight on one calculator. Either a design key from [ss_find()]
+#'   (the `key` column) or a few words describing it (the best match of [ss_find()] is opened).
 #' @param ... Passed on to [shiny::runApp()], e.g. `port = 8080`,
 #'   `host = "0.0.0.0"` or `launch.browser = FALSE`.
 #' @return Does not return while the app is running.
 #' @export
-run_app <- function(...) {
-  shiny::runApp(epidemiologicasuite_app(), ...)
+run_app <- function(calculator = NULL, ...) {
+  shiny::runApp(epidemiologicasuite_app(calculator = calculator), ...)
 }
 
 #' Build the epidemiologicasuite Shiny app object
@@ -26,9 +28,13 @@ run_app <- function(...) {
 #'   starts and the others are loaded when opened, and in the background with a progress bar,
 #'   which makes the first screen much faster; `FALSE` builds every calculator up front.
 #'   The default can be changed with `options(epidemiologicasuite.lazy = FALSE)`.
+#' @param calculator Optional design key or search words (see [run_app()]): the calculator the app opens on. Defaults to the
+#'   environment variable `EPIDEMIOLOGICASUITE_OPEN` when it is set (for a deployment that should open on one calculator), else none.
 #' @return A [shiny::shinyApp()] object.
 #' @export
-epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy", TRUE)) {
+epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy", TRUE),
+                                    calculator = if (nzchar(Sys.getenv("EPIDEMIOLOGICASUITE_OPEN"))) Sys.getenv("EPIDEMIOLOGICASUITE_OPEN")) {
+  start_key <- if (is.null(calculator)) NULL else .resolve_calculator(calculator)
   registry <- module_registry()
   registry_by_id <- setNames(registry, vapply(registry, `[[`, character(1), "id"))
   # Modules that exist at start-up; the others are placeholders filled by lazy_module_loader() (lazy_modules.R).
@@ -88,12 +94,20 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
     ),
     list(home_panel),
     workbench_panels,
+    list(nav_panel("Cite", cite_ui())),
     # light / dark switch (starts from the viewer's operating-system setting)
-    list(bslib::nav_item(bslib::input_dark_mode(id = "dark_mode")))
+    list(bslib::nav_item(nav_search_ui()), bslib::nav_item(bslib::input_dark_mode(id = "dark_mode")))
   ))
 
   server <- function(input, output, session) {
     home_server(input, output, session)
+    cite_server(input, output, session)
+    # opened from run_app(calculator = ...): go to that calculator once the page is connected (the navbar's value arrives first)
+    if (!is.null(start_key)) observeEvent(input$main_nav, {
+      entry <- catalog_entry(start_key)
+      jump_to_module(session, entry$nav_target)
+      if (!is.na(entry$module_input_id)) updateRadioButtons(session, entry$module_input_id, selected = entry$design_value)
+    }, once = TRUE)
     for (m in registry[names(registry_by_id) %in% core_ids]) {
       m$server(m$id)
     }
@@ -129,7 +143,16 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
 html[data-bs-theme='dark'] nav.navbar.navbar-default { background-color: var(--bs-tertiary-bg) !important; }
 html[data-bs-theme='dark'] nav.navbar .navbar-brand, html[data-bs-theme='dark'] nav.navbar .nav-link { color: var(--bs-body-color) !important; }
 html[data-bs-theme='dark'] nav.navbar .nav-link.active { color: var(--bs-primary-text-emphasis) !important; }
-#main_nav > li.bslib-nav-item { margin-left: auto; }   /* the dark-mode switch sits at the right end of the navbar */
+#main_nav > li.bslib-nav-item:nth-last-child(2) { margin-left: auto; }   /* the search box and the dark-mode switch sit at the right end */
+#main_nav > li.bslib-nav-item .form-group { margin-bottom: 0; }
+.navbar .selectize-input { padding: .2rem .6rem; min-height: 0; font-size: .85rem; border-radius: 1rem; }
+.navbar .selectize-input, .navbar .selectize-input input, .navbar .selectize-dropdown { color: var(--bs-body-color) !important; }
+.navbar .selectize-input input::placeholder { color: var(--bs-secondary-color); }
+.navbar .selectize-dropdown { min-width: 26rem; right: 0; left: auto !important; }
+html { scroll-padding-bottom: 7rem; }   /* a focused input is scrolled clear of the pinned result below */
+/* a short calculator result stays at the bottom of the window while the inputs above it are changed */
+.pin-result { position: sticky; bottom: 0; z-index: 5; background: var(--bs-body-bg); border-top: 2px solid var(--bs-primary);
+  box-shadow: 0 -6px 12px rgba(0, 0, 0, .07); padding: .5rem .25rem .25rem; margin-bottom: .5rem; }   /* the dark-mode switch sits at the right end of the navbar */
 /* the darker light-mode colours above (secondary, danger, warning) are too dark for the dark background */
 html[data-bs-theme='dark'] .btn-outline-secondary { --bs-btn-color: #adb5bd; --bs-btn-border-color: #adb5bd; --bs-btn-hover-bg: #adb5bd; --bs-btn-hover-border-color: #adb5bd; --bs-btn-hover-color: #212529; --bs-btn-active-bg: #adb5bd; --bs-btn-active-color: #212529; --bs-btn-disabled-color: #adb5bd; --bs-btn-disabled-border-color: #adb5bd; }
 html[data-bs-theme='dark'] .btn-outline-primary { --bs-btn-color: #6ea8fe; --bs-btn-border-color: #6ea8fe; --bs-btn-hover-bg: #2a66cf; --bs-btn-hover-border-color: #2a66cf; --bs-btn-hover-color: #fff; --bs-btn-disabled-color: #6ea8fe; --bs-btn-disabled-border-color: #6ea8fe; }

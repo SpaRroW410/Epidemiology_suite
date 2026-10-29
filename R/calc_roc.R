@@ -15,6 +15,9 @@
 #' @param power Desired power (0,1)
 #' @param kappa Ratio of controls to cases (> 0); 1 = equal allocation
 #' @return list(n_cases, n_controls, n_total, inputs)
+#' @examples
+#' calc_roc_auc(auc = 0.73, alpha = 0.05, power = 0.95, kappa = 1.7)
+#' @export
 calc_roc_auc <- function(auc, alpha = 0.05, power = 0.8, kappa = 1) {
   if (!is.numeric(auc) || length(auc) != 1 || is.na(auc) || auc <= 0.5 || auc >= 1) {
     stop("auc must be a single number strictly between 0.5 and 1.")
@@ -61,6 +64,10 @@ calc_roc_auc <- function(auc, alpha = 0.05, power = 0.8, kappa = 1) {
 #' @param fpr11,fpr12 Upper/lower FPR bounds for curve 1's partial AUC (both NULL = full AUC)
 #' @param fpr21,fpr22 Upper/lower FPR bounds for curve 2's partial AUC (both NULL = full AUC)
 #' @return list(n_cases, n_controls, n_total, inputs)
+#' @examples
+#' calc_compare_two_aucs(A1 = 2.6, B1 = 1, A2 = 1.9, B2 = 1, rn = 0.6, ra = 0.6, delta = 0.037, 
+#'     alpha = 0.05, power = 0.8, fpr11 = 0, fpr12 = 0.2, fpr21 = 0, fpr22 = 0.2)
+#' @export
 calc_compare_two_aucs <- function(A1, B1, A2, B2, rn, ra, delta,
                                    alpha = 0.05, power = 0.8, kappa = 1,
                                    fpr11 = NULL, fpr12 = NULL, fpr21 = NULL, fpr22 = NULL) {

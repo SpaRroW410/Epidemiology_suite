@@ -44,24 +44,25 @@ suite 907 blocks with 0 failures.
 - ~~Automatic redirect of phones and tablets to that version~~ (28 Oct; to be confirmed on a real phone)
 - ~~Accessibility scan (axe-core, WCAG A/AA) of every calculator, light and dark, fixed to 0 violations; dark-mode switch~~ (28 Oct)
 - ~~Header renamed to "Epidemiological suite"~~ (29 Oct)
+- ~~Cite tab: the citation in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX, RIS and a Methods sentence, with copy and download; `CITATION.cff` and `citation()` too~~ (29 Oct). **Owner step:** archive a release on Zenodo and send the DOI (three places to edit, see docs/hosting.md)
 - [ ] Hosting decision for the long term (Connect Cloud free-plan limits not verified; shinyapps.io is closing to new apps)
 - [ ] Home-screen icon (PWA), then an Android wrapper (TWA); iOS stays PWA only; desktop wrapper not recommended
 - [ ] Multi-user scaling (Phase 6, background computation)
 
-## Phase 4 — Interface, next up  (mock-ups approved in principle, no icons before headings)
+## Phase 4 — Interface  (first part done 29 Oct; mock-ups approved in principle, no icons before headings)
 
-- [ ] **A. Task-first Home:** one search box, four task cards (Plan a study, Analyze counts I have, Outbreak and surveillance, Survey and field work), a "not sure?" guide; the 45-row accordion moves behind "Browse all"
-- [ ] **B. Calculator pages with progressive disclosure:** essential inputs first, "Advanced options" folded, a sticky result card, Formula / Reference / Curves / Export folded; built once in the shared module layout so all 65 pages change together
+- ~~**A. Task-first Home:** one search box (searches all built designs by name and description), quick links to the six most used calculators, four task cards, a "not sure?" guide banner; the 45-row accordion, the wizard and the formulas moved behind one folded section~~ (29 Oct)
+- [ ] **B. Calculator pages with progressive disclosure.** Done for every calculator at once (29 Oct): ~~Export and Power / sensitivity curves are folded panels, closed by default (and the curves are not drawn until opened); a short result stays pinned at the bottom of the window while the inputs above are edited~~. Still open: "Advanced options" folded inside each calculator (a per-module change, most-used first), a two-column layout on wide screens, a design-selector that is not a long radio list
 - [ ] **C. Phone shell:** bottom navigation, one question per screen for the guide, large result card; the most common 8–10 calculators first, the rest loaded when opened
-- [ ] Search across all calculators (jump straight to a calculator from any page)
+- ~~Search from every page: a small search box in the navbar next to the dark-mode switch, the same search as on Home~~ (29 Oct)
 - [ ] Re-run the layout and accessibility scans after each step (`tools/ui-audit/audit.R`, `a11y.R`)
 - [ ] Still to do for accessibility: a person's keyboard and screen-reader walk-through, text descriptions for plots, dark-mode plots, text-resize checks, a layout pass on a real phone
 
 ## Phase 5 — The R package for analysts
 
-- [ ] Public function API (`ss_*()` family: one function per design, plus text, curve and export helpers)
-- [ ] RStudio / Positron addin: "Find a sample-size calculator"
-- [ ] Vignettes per family; more help pages
+- ~~Public function API for the calculations themselves: all 195 `calc_*()` functions are exported, each with a help page (every argument described, the value described, a worked example taken from a verified test); `tests/testthat/test-help_pages.R` keeps it so~~ (29 Oct; owner decision: export all). The names stay `calc_*` (the planned `ss_*()` family was dropped); a smaller friendlier set of wrappers (`ss_text()`, `ss_curve()`, `ss_export()`) is still possible
+- ~~RStudio / Positron addin "Find a sample size calculator", `ss_find()` search from the console, and `run_app(calculator = ...)` to open the app on one calculator~~ (29 Oct)
+- [ ] Vignettes per family (the help pages themselves are done)
 - [ ] Release: r-universe (binaries, including WebAssembly), then CRAN (computation core split from the app, ASCII-only source, fast examples, clean `R CMD check`)
 - [ ] **[owner]** Rename the GitHub repository (changes the install path), author details, first release number, `NEWS.md`
 

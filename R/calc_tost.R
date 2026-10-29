@@ -18,6 +18,9 @@
 #' @param alpha Significance level, one-sided (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_total, n_per_group, achieved_power, inputs)
+#' @examples
+#' calc_tost_means(mean_diff = -0.05, margin = 0.2, sd = 0.2, alpha = 0.05, power = 0.8)
+#' @export
 calc_tost_means <- function(mean_diff, margin, sd, alpha = 0.05, power = 0.8) {
   .validate_number(mean_diff, "mean_diff")
   .validate_positive(margin, "margin")
@@ -69,6 +72,9 @@ calc_tost_means <- function(mean_diff, margin, sd, alpha = 0.05, power = 0.8) {
 #' @param design One of "2x2" (classical 2x2x2 crossover), "2x2x4"
 #'   (full replicate), or "2x3x3" (partial replicate)
 #' @return list(n_total, achieved_power, inputs)
+#' @examples
+#' calc_tost_bioequivalence(cv = 0.3, design = "2x2")
+#' @export
 calc_tost_bioequivalence <- function(cv, theta0 = 0.95, theta1 = 0.8, theta2 = 1.25,
                                       alpha = 0.05, power = 0.8,
                                       design = c("2x2", "2x2x4", "2x3x3")) {
@@ -138,6 +144,9 @@ calc_tost_bioequivalence <- function(cv, theta0 = 0.95, theta1 = 0.8, theta2 = 1
 #'   (full replicate), or "2x3x3" (partial replicate) -- assumed to be
 #'   the design of both the prior study and the planned study
 #' @return list(n_total, achieved_expected_power, inputs)
+#' @examples
+#' calc_tost_assurance(cv = 0.3, prior_n = 30, design = "2x2")
+#' @export
 calc_tost_assurance <- function(cv, prior_n, theta0 = 0.95, theta1 = 0.8, theta2 = 1.25,
                                  alpha = 0.05, power = 0.8,
                                  design = c("2x2", "2x2x4", "2x3x3")) {
@@ -190,6 +199,10 @@ calc_tost_assurance <- function(cv, prior_n, theta0 = 0.95, theta1 = 0.8, theta2
 #' @param ratio Number in the new-treatment group divided by the number in
 #'   the standard-treatment group (> 0)
 #' @return list(n_total, n_new, n_standard, inputs)
+#' @examples
+#' calc_tost_proportions(p_new = 0.5, p_standard = 0.5, margin = 0.2, alpha = 0.1, 
+#'     power = 0.8, ratio = 1)
+#' @export
 calc_tost_proportions <- function(p_new, p_standard, margin,
                                    alpha = 0.05, power = 0.8, ratio = 1) {
   .validate_unit_interval(p_new, "p_new")

@@ -23,12 +23,16 @@
 #'   effect to test)
 #' @param nm Number of repeated measurements/occasions (>= 2)
 #' @param f Cohen's f effect size (> 0)
-#' @param nscor Nonsphericity correction coefficient in (0, 1]; 1 = sphericity
+#' @param nscor Nonsphericity correction coefficient in (0, 1\]; 1 = sphericity
 #'   assumption met (default)
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @param type One of "between", "within", "interaction"
 #' @return list(n, inputs)
+#' @examples
+#' calc_rm_anova(ng = 3, nm = 4, f = 0.36, nscor = 0.7, alpha = 0.05, power = 0.8, 
+#'     type = "between")
+#' @export
 calc_rm_anova <- function(ng, nm, f, nscor = 1, alpha = 0.05, power = 0.8,
                            type = c("between", "within", "interaction")) {
   type <- match.arg(type)

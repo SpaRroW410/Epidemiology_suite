@@ -34,6 +34,10 @@
 #'   (1 - (1-alpha)^(1/m), exact under independence, slightly less
 #'   conservative)
 #' @return adjusted per-comparison significance level (0,1)
+#' @examples
+#' calc_multiplicity_adjusted_alpha(0.05, m = 4, method = "bonferroni")   # 0.0125
+#' calc_multiplicity_adjusted_alpha(0.05, m = 4, method = "sidak")        # 0.0127415
+#' @export
 calc_multiplicity_adjusted_alpha <- function(alpha, m, method = c("bonferroni", "sidak")) {
   method <- match.arg(method)
   .validate_unit_interval(alpha, "alpha")
@@ -46,6 +50,13 @@ calc_multiplicity_adjusted_alpha <- function(alpha, m, method = c("bonferroni", 
 
 #' Multiplicity-adjusted sample size, single proportion vs. reference
 #' @return list(n, h, alpha_adjusted, m, method, inputs)
+#' @param m Number of simultaneous comparisons the significance level is shared between (at least 1).
+#' @param method `"bonferroni"` (alpha / m) or `"sidak"` (1 - (1 - alpha)^(1/m)) adjustment of the significance level.
+#' @inheritParams calc_proportion_1s
+#' @examples
+#' calc_multiplicity_proportion_1s(p0 = 0.3, p1 = 0.5, m = 3, method = "bonferroni", 
+#'     alpha = 0.05, power = 0.8)
+#' @export
 calc_multiplicity_proportion_1s <- function(p0, p1, m, method = c("bonferroni", "sidak"),
                                              alpha = 0.05, power = 0.8,
                                              alternative = c("two.sided", "less", "greater")) {
@@ -64,6 +75,13 @@ calc_multiplicity_proportion_1s <- function(p0, p1, m, method = c("bonferroni", 
 
 #' Multiplicity-adjusted sample size, two independent proportions
 #' @return list(n_per_group, n_total, h, alpha_adjusted, m, method, inputs)
+#' @param m Number of simultaneous comparisons the significance level is shared between (at least 1).
+#' @param method `"bonferroni"` (alpha / m) or `"sidak"` (1 - (1 - alpha)^(1/m)) adjustment of the significance level.
+#' @inheritParams calc_proportion_2s
+#' @examples
+#' calc_multiplicity_proportion_2s(p1 = 0.5, p2 = 0.65, m = 1, method = "bonferroni", 
+#'     alpha = 0.05, power = 0.8)
+#' @export
 calc_multiplicity_proportion_2s <- function(p1, p2, m, method = c("bonferroni", "sidak"),
                                              alpha = 0.05, power = 0.8,
                                              alternative = c("two.sided", "less", "greater")) {
@@ -82,6 +100,13 @@ calc_multiplicity_proportion_2s <- function(p1, p2, m, method = c("bonferroni", 
 
 #' Multiplicity-adjusted sample size, single mean vs. reference
 #' @return list(n, d, alpha_adjusted, m, method, inputs)
+#' @param m Number of simultaneous comparisons the significance level is shared between (at least 1).
+#' @param method `"bonferroni"` (alpha / m) or `"sidak"` (1 - (1 - alpha)^(1/m)) adjustment of the significance level.
+#' @inheritParams calc_means_1s
+#' @examples
+#' calc_multiplicity_means_1s(mu0 = 0, mu1 = 0.5, sd = 1, m = 2, method = "sidak", 
+#'     alpha = 0.05, power = 0.8)
+#' @export
 calc_multiplicity_means_1s <- function(mu0, mu1, sd, m, method = c("bonferroni", "sidak"),
                                         alpha = 0.05, power = 0.8,
                                         alternative = c("two.sided", "less", "greater")) {
@@ -100,6 +125,13 @@ calc_multiplicity_means_1s <- function(mu0, mu1, sd, m, method = c("bonferroni",
 
 #' Multiplicity-adjusted sample size, two independent means
 #' @return list(n_per_group, n_total, d, alpha_adjusted, m, method, inputs)
+#' @param m Number of simultaneous comparisons the significance level is shared between (at least 1).
+#' @param method `"bonferroni"` (alpha / m) or `"sidak"` (1 - (1 - alpha)^(1/m)) adjustment of the significance level.
+#' @inheritParams calc_means_2s_indep
+#' @examples
+#' calc_multiplicity_means_2s(mu1 = 10, mu2 = 12, sd = 5, m = 3, method = "sidak", 
+#'     alpha = 0.05, power = 0.8)
+#' @export
 calc_multiplicity_means_2s <- function(mu1, mu2, sd, m, method = c("bonferroni", "sidak"),
                                         alpha = 0.05, power = 0.8,
                                         alternative = c("two.sided", "less", "greater")) {
@@ -133,8 +165,8 @@ calc_multiplicity_means_2s <- function(mu1, mu2, sd, m, method = c("bonferroni",
 #' at nominal level `fdr_level` (q) is, for a large number of tests, well
 #' approximated (Jung 2005; Storey 2002-style FDR theory) by rejecting
 #' every test at a fixed per-test significance threshold alpha* solving
-#' the self-consistency equation FDR = E[false rejections] / E[total
-#' rejections] = (m0*alpha*) / (m0*alpha* + m1*power), where m1 = pi1*m
+#' the self-consistency equation FDR = E\[false rejections\] / E\[total
+#' rejections\] = (m0*alpha*) / (m0*alpha* + m1*power), where m1 = pi1*m
 #' truly non-null tests and m0 = m - m1 truly null tests. Solving this
 #' equation for alpha* directly (given the target average power and FDR
 #' level) gives a closed form:
@@ -169,6 +201,9 @@ calc_multiplicity_means_2s <- function(mu1, mu2, sd, m, method = c("bonferroni",
 #' @param power Target average power -- the expected proportion of truly
 #'   non-null tests that get detected (0,1)
 #' @return list(n_per_group, n_total, alpha_star, m, m1, m0, pi1, inputs)
+#' @examples
+#' calc_multiplicity_fdr_means(d = 2, m = 1000, pi1 = 0.1, fdr_level = 0.1, power = 0.8)
+#' @export
 calc_multiplicity_fdr_means <- function(d, m, pi1, fdr_level = 0.05, power = 0.8) {
   .validate_positive(d, "d")
   if (!is.numeric(m) || length(m) != 1 || is.na(m) || m < 2 || m != round(m)) {
@@ -246,6 +281,9 @@ calc_multiplicity_fdr_means <- function(d, m, pi1, fdr_level = 0.05, power = 0.8
 #' @param seed RNG seed for reproducibility of `mvtnorm::qmvt()`'s
 #'   internal randomized quadrature
 #' @return list(n_per_arm, n_total, k, critical_value, achieved_power, inputs)
+#' @examples
+#' calc_multiplicity_dunnett(d = 0.5, k = 2, alpha = 0.05, power = 0.8)
+#' @export
 calc_multiplicity_dunnett <- function(d, k, alpha = 0.05, power = 0.8, seed = 20240913) {
   .validate_positive(d, "d")
   if (!is.numeric(k) || length(k) != 1 || is.na(k) || k < 2 || k != round(k)) {
@@ -318,6 +356,10 @@ calc_multiplicity_dunnett <- function(d, k, alpha = 0.05, power = 0.8, seed = 20
 #' @param side "two-sided", "upper", or "lower" (matching
 #'   `ssize.fdr::ssize.twoSamp()`'s own `side` argument)
 #' @return list(n_per_group, n_total, achieved_power, critical_value, inputs)
+#' @examples
+#' calc_fdr_microarray_two_sample(delta = 1, sigma = 0.5, fdr_level = 0.05, power = 0.8, 
+#'     pi0 = 0.5, max_n = 20)
+#' @export
 calc_fdr_microarray_two_sample <- function(delta, sigma, fdr_level = 0.05, power = 0.8,
                                             pi0 = 0.95, max_n = 35,
                                             side = c("two-sided", "upper", "lower")) {

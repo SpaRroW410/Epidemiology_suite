@@ -39,3 +39,13 @@ reference:
     contents:
       - run_app
       - epidemiologicasuite_app
+  - title: Find a calculator
+    contents:
+      - ss_find
+      - ss_find_addin
+  - title: Calculation functions
+    desc: >
+      Every calculation of the app as a function, for scripts, Quarto and R Markdown. Each returns a list of class
+      `ss_result` and has a worked example taken from the tests (checked against a published value, a package or a simulation).
+    contents:
+      - starts_with("calc_")

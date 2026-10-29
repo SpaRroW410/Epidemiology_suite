@@ -17,6 +17,9 @@
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, f2, v, inputs)
+#' @examples
+#' calc_regression_f2(r2 = 0.1, num_predictors = 5, alpha = 0.05, power = 0.8)
+#' @export
 calc_regression_f2 <- function(r2, num_predictors, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(r2, "r2")
   if (!is.numeric(num_predictors) || length(num_predictors) != 1 || is.na(num_predictors) ||
@@ -73,6 +76,10 @@ calc_regression_f2 <- function(r2, num_predictors, alpha = 0.05, power = 0.8) {
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, f2, v, inputs)
+#' @examples
+#' calc_regression_r2_increase(r2_reduced = 0.3, r2_full = 0.4, num_predictors_added = 2, 
+#'     num_predictors_total = 5, alpha = 0.05, power = 0.8)
+#' @export
 calc_regression_r2_increase <- function(r2_reduced, r2_full, num_predictors_added,
                                          num_predictors_total, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(r2_reduced, "r2_reduced")

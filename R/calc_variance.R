@@ -37,6 +37,9 @@
 #' @param alternative "two.sided", "greater" (sigma1 > sigma0), or
 #'   "less" (sigma1 < sigma0)
 #' @return list(n, inputs)
+#' @examples
+#' calc_variance_single(sigma0 = 10, sigma1 = 14, alpha = 0.05, power = 0.8, alternative = "greater")
+#' @export
 calc_variance_single <- function(sigma0, sigma1, alpha = 0.05, power = 0.8,
                                   alternative = c("two.sided", "greater", "less")) {
   alternative <- match.arg(alternative)
@@ -95,6 +98,9 @@ calc_variance_single <- function(sigma0, sigma1, alpha = 0.05, power = 0.8,
 #' @param alternative "two.sided", "greater" (sigma1 > sigma2), or
 #'   "less" (sigma1 < sigma2)
 #' @return list(n_per_group, n_total, inputs)
+#' @examples
+#' calc_variance_two(sigma1 = 10, sigma2 = 14, alpha = 0.05, power = 0.8, alternative = "two.sided")
+#' @export
 calc_variance_two <- function(sigma1, sigma2, alpha = 0.05, power = 0.8,
                                alternative = c("two.sided", "greater", "less")) {
   alternative <- match.arg(alternative)
@@ -172,6 +178,9 @@ calc_variance_two <- function(sigma1, sigma2, alpha = 0.05, power = 0.8,
 #'   (> 0)
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @return list(n, lower_mult, upper_mult, inputs)
+#' @examples
+#' calc_variance_sd_precision(target_width = 0.5)
+#' @export
 calc_variance_sd_precision <- function(target_width, conf_level = 0.95) {
   .validate_positive(target_width, "target_width")
   .validate_unit_interval(conf_level, "conf_level")

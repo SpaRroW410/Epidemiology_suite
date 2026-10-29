@@ -34,6 +34,9 @@
 #'   truly low-performing area (at p_lower) as high-performing; default 0.10
 #' @param n_max Upper search bound on n; default 2000
 #' @return list(n, d, alpha_achieved, beta_achieved, inputs)
+#' @examples
+#' calc_lqas(p_upper = 0.8, p_lower = 0.5, alpha = 0.1, beta = 0.1)
+#' @export
 calc_lqas <- function(p_upper, p_lower, alpha = 0.10, beta = 0.10, n_max = 2000) {
   .validate_unit_interval(p_upper, "p_upper")
   .validate_unit_interval(p_lower, "p_lower")

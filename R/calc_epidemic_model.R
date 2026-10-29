@@ -39,8 +39,13 @@
 }
 
 #' Herd-immunity threshold and the vaccination coverage needed
-#' @param r0 Basic reproduction number. @param vaccine_efficacy Share of vaccinated people protected (0-1).
+#' @param r0 Basic reproduction number.
+#' @param vaccine_efficacy Share of vaccinated people protected (0-1).
 #' @param coverage Optional vaccination coverage (0-1) to evaluate.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `r0`, `vaccine_efficacy`, `herd_immunity_threshold`, `coverage_needed`, `attainable`, `max_reduction_in_r0`, `coverage`, `immune_share`, `effective_r0`, `above_threshold`, `final_attack_rate`, `final_attack_rate_no_vaccination` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_herd_immunity(12, 0.95, 0.9)
+#' @export
 calc_herd_immunity <- function(r0, vaccine_efficacy = 1, coverage = NULL) {
   .em_pos(r0, "R0", 50)
   .em_pos(vaccine_efficacy, "Vaccine efficacy"); .em_unit(vaccine_efficacy, "Vaccine efficacy")
@@ -65,11 +70,19 @@ calc_herd_immunity <- function(r0, vaccine_efficacy = 1, coverage = NULL) {
 }
 
 #' Deterministic SIR / SEIR epidemic with vaccination before the start
-#' @param r0 Basic reproduction number. @param infectious_period Mean infectious period (days).
+#' @param r0 Basic reproduction number.
+#' @param infectious_period Mean infectious period (days).
 #' @param latent_period Mean latent period (days); 0 gives an SIR model.
 #' @param coverage,vaccine_efficacy Share vaccinated before the start and the share of those protected.
-#' @param population Population size. @param initial_infected Infectious people at day 0.
-#' @param days Days to simulate. @param steps_per_day Runge-Kutta steps per day.
+#' @param population Population size.
+#' @param initial_infected Infectious people at day 0.
+#' @param days Days to simulate.
+#' @param steps_per_day Runge-Kutta steps per day.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `model`, `r0`, `population`, `immune_at_start`, `effective_r0`, `final_size_fraction`, `final_size_cases`, `final_size_fraction_no_vaccination`, `infections_averted`, `peak_infectious`, `peak_infectious_fraction`, `peak_infectious_analytic`, `peak_day`, `simulated_attack_fraction`, `epidemic_over`, `growth_rate`, `doubling_time`, `generation_interval` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_epidemic_sim(2.5, infectious_period = 7, population = 1e+05, initial_infected = 10, 
+#'     days = 400)
+#' @export
 calc_epidemic_sim <- function(r0, infectious_period = 7, latent_period = 0, coverage = 0, vaccine_efficacy = 1,
                               population = 100000, initial_infected = 10, days = 365, steps_per_day = 20) {
   .em_pos(r0, "R0", 50); .em_pos(infectious_period, "The infectious period", 365)
@@ -134,10 +147,15 @@ calc_epidemic_sim <- function(r0, infectious_period = 7, latent_period = 0, cove
 
 #' R0 from an observed growth rate or a final attack fraction
 #' @param method "growth" (needs growth_rate or doubling_time, and the infectious / latent periods) or "final_size".
-#' @param growth_rate Exponential growth rate per day. @param doubling_time Days to double (alternative to growth_rate).
+#' @param growth_rate Exponential growth rate per day.
+#' @param doubling_time Days to double (alternative to growth_rate).
 #' @param infectious_period,latent_period Mean periods in days (latent 0 gives the SIR form).
 #' @param final_attack Share of the whole population infected over the whole epidemic.
 #' @param immune_share Share immune before the epidemic (final-size method).
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `method`, `growth_rate`, `doubling_time`, `r0`, `model` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_r0_estimate("growth", growth_rate = (2.2 * (1 - 1e-06) - 1)/8, infectious_period = 8)
+#' @export
 calc_r0_estimate <- function(method = c("growth", "final_size"), growth_rate = NULL, doubling_time = NULL,
                              infectious_period = 7, latent_period = 0, final_attack = NULL, immune_share = 0) {
   method <- match.arg(method)

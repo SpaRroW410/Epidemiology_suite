@@ -9,8 +9,8 @@
 #'   N_hat = (n1+1)(n2+1)/(m2+1) - 1          (Chapman 1951)
 #' whose exact variance (Seber 1982, "The Estimation of Animal Abundance",
 #' 2nd ed., section 3.2) is:
-#'   Var(N_hat) = (n1+1)(n2+1)(n1-m2)(n2-m2) / [(m2+1)^2 (m2+2)]
-#' Substituting the hypergeometric expectation E[m2] = n1*n2/N (the
+#'   Var(N_hat) = (n1+1)(n2+1)(n1-m2)(n2-m2) / \[(m2+1)^2 (m2+2)\]
+#' Substituting the hypergeometric expectation E\[m2\] = n1*n2/N (the
 #' standard large-sample approximation used throughout the mark-recapture
 #' planning literature, e.g. Robson & Regier (1964), "Sample Size in
 #' Petersen Mark-Recapture Experiments," Trans Am Fish Soc 93(3):215-226)
@@ -46,6 +46,9 @@
 #' @param conf_level Confidence level for that precision target (0,1)
 #' @return list(n1, n2, N, precision, conf_level, expected_recaptures,
 #'   achieved_cv, achieved_precision, inputs)
+#' @examples
+#' calc_capture_recapture_n2(N = 1000, n1 = 100, precision = 0.1)
+#' @export
 calc_capture_recapture_n2 <- function(N, n1, precision, conf_level = 0.95) {
   .validate_population(N, "N")
   .validate_positive(n1, "n1")

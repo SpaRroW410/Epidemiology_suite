@@ -21,6 +21,10 @@
 #' @param ratio Number in the new-treatment group divided by the number in
 #'   the standard-treatment group (> 0)
 #' @return list(n_total, n_new, n_standard, inputs)
+#' @examples
+#' calc_noninferiority_means(mean_new = 0.2, mean_standard = 0.2, sd = 0.1, margin = 0.05, 
+#'     alpha = 0.05, power = 0.8, ratio = 1)
+#' @export
 calc_noninferiority_means <- function(mean_new, mean_standard, sd, margin,
                                        alpha = 0.05, power = 0.8, ratio = 1) {
   .validate_number(mean_new, "mean_new")
@@ -57,6 +61,10 @@ calc_noninferiority_means <- function(mean_new, mean_standard, sd, margin,
 #' @param ratio Number in the new-treatment group divided by the number in
 #'   the standard-treatment group (> 0)
 #' @return list(n_total, n_new, n_standard, inputs)
+#' @examples
+#' calc_noninferiority_proportions(p_new = 0.85, p_standard = 0.65, margin = 0.1, 
+#'     alpha = 0.05, power = 0.8, ratio = 1)
+#' @export
 calc_noninferiority_proportions <- function(p_new, p_standard, margin,
                                              alpha = 0.05, power = 0.8, ratio = 1) {
   .validate_unit_interval(p_new, "p_new")
@@ -104,6 +112,10 @@ calc_noninferiority_proportions <- function(p_new, p_standard, margin,
 #' @param alpha One-sided significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_control, n_test, n_total, or, inputs)
+#' @examples
+#' calc_noninferiority_or(pt = 0.4, pc = 0.25, margin = 0.2, k = 1, alpha = 0.05, 
+#'     power = 0.8)
+#' @export
 calc_noninferiority_or <- function(pt, pc, margin, k = 1, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(pt, "pt")
   .validate_unit_interval(pc, "pc")
@@ -144,6 +156,9 @@ calc_noninferiority_or <- function(pt, pc, margin, k = 1, alpha = 0.05, power = 
 #' @param alpha One-sided significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, hr, inputs)
+#' @examples
+#' calc_noninferiority_hr(hr = 2, margin = 0.5, p1 = 0.5, d = 0.8, alpha = 0.05, power = 0.8)
+#' @export
 calc_noninferiority_hr <- function(hr, margin, p1 = 0.5, d = 0.8, alpha = 0.05, power = 0.8) {
   .validate_positive(hr, "hr")
   .validate_number(margin, "margin")

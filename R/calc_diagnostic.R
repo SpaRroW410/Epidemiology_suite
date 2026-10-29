@@ -20,6 +20,10 @@
 #' @param prec_spec Desired precision (CI half-width) for specificity (0,1)
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @return list(n, n_sens, n_spec, binding, n_diseased, n_healthy, z, inputs)
+#' @examples
+#' calc_diagnostic_accuracy(sens = 0.9, spec = 0.85, prevalence = 0.1, prec_sens = 0.05, 
+#'     prec_spec = 0.05, conf_level = 0.95)
+#' @export
 calc_diagnostic_accuracy <- function(sens, spec, prevalence,
                                       prec_sens = 0.05, prec_spec = 0.05,
                                       conf_level = 0.95) {
@@ -85,6 +89,10 @@ calc_diagnostic_accuracy <- function(sens, spec, prevalence,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n, n_sens, n_spec, binding, n_diseased, n_healthy, inputs)
+#' @examples
+#' calc_diagnostic_vs_reference(sens0 = 0.9, sens1 = 0.95, spec0 = 0.8, spec1 = 0.85, 
+#'     prevalence = 0.4, alpha = 0.05, power = 0.9, alternative = "two.sided")
+#' @export
 calc_diagnostic_vs_reference <- function(sens0, sens1, spec0, spec1, prevalence,
                                           alpha = 0.05, power = 0.9,
                                           alternative = c("two.sided", "less", "greater")) {
@@ -142,6 +150,9 @@ calc_diagnostic_vs_reference <- function(sens0, sens1, spec0, spec1, prevalence,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n_per_group, n_total, inputs)
+#' @examples
+#' calc_diagnostic_two_indep(p1 = 0.8, p2 = 0.7, alpha = 0.05, power = 0.8, alternative = "greater")
+#' @export
 calc_diagnostic_two_indep <- function(p1, p2, alpha = 0.05, power = 0.8,
                                       alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -186,6 +197,9 @@ calc_diagnostic_two_indep <- function(p1, p2, alpha = 0.05, power = 0.8,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n_min, n_max, psi_min, psi_max, inputs)
+#' @examples
+#' calc_diagnostic_two_paired(p1 = 0.7, p2 = 0.8, alpha = 0.05, power = 0.8, alternative = "greater")
+#' @export
 calc_diagnostic_two_paired <- function(p1, p2, alpha = 0.05, power = 0.8,
                                        alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -237,6 +251,10 @@ calc_diagnostic_two_paired <- function(p1, p2, alpha = 0.05, power = 0.8,
 #' @param prec_npv Desired precision (CI half-width) for NPV (0,1)
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @return list(n, n_ppv, n_npv, binding, ppv, npv, z, inputs)
+#' @examples
+#' calc_diagnostic_ppv_npv(sens = 0.9, spec = 0.85, prevalence = 0.2, prec_ppv = 0.05, 
+#'     prec_npv = 0.05, conf_level = 0.95)
+#' @export
 calc_diagnostic_ppv_npv <- function(sens, spec, prevalence,
                                      prec_ppv = 0.05, prec_npv = 0.05,
                                      conf_level = 0.95) {
@@ -277,7 +295,7 @@ calc_diagnostic_ppv_npv <- function(sens, spec, prevalence,
 #' Sample size to test a diagnostic odds ratio (DOR) against 1 (no
 #' discrimination)
 #'
-#' The diagnostic odds ratio is DOR = [Se/(1-Se)] / [(1-Sp)/Sp] -- the odds
+#' The diagnostic odds ratio is DOR = \[Se/(1-Se)\] / \[(1-Sp)/Sp\] -- the odds
 #' of a positive test result in diseased subjects relative to the odds of
 #' a positive result in non-diseased subjects. Testing H0: DOR=1 given an
 #' assumed sensitivity and specificity is mathematically identical to
@@ -295,6 +313,9 @@ calc_diagnostic_ppv_npv <- function(sens, spec, prevalence,
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
 #' @return list(n_diseased, n_healthy, n_total, dor, inputs)
+#' @examples
+#' calc_diagnostic_odds_ratio(sens = 0.8, spec = 0.7, alpha = 0.05, power = 0.8)
+#' @export
 calc_diagnostic_odds_ratio <- function(sens, spec, alpha = 0.05, power = 0.8,
                                         alternative = c("two.sided", "less", "greater")) {
   alternative <- match.arg(alternative)
@@ -335,6 +356,10 @@ calc_diagnostic_odds_ratio <- function(sens, spec, alpha = 0.05, power = 0.8,
 #' @param conf_width Desired full width of the confidence interval for the LR
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @return list(n, n_diseased, n_healthy, lr, lwr, upr, inputs)
+#' @examples
+#' calc_diagnostic_likelihood_ratio(sens = 0.8, spec = 0.73, prevalence = 0.5, type = "positive", 
+#'     conf_width = 2.2, conf_level = 0.95)
+#' @export
 calc_diagnostic_likelihood_ratio <- function(sens, spec, prevalence,
                                               type = c("positive", "negative"),
                                               conf_width, conf_level = 0.95) {

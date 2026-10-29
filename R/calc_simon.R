@@ -20,6 +20,9 @@
 #'   effective drug) (0,1)
 #' @param nmax Maximum total sample size to search (<= 1000)
 #' @return list(minimax = list(r1,n1,r,n,EN,PET), optimal = list(...), inputs)
+#' @examples
+#' calc_simon(pu = 0.2, pa = 0.4, alpha = 0.1, beta = 0.1)
+#' @export
 calc_simon <- function(pu, pa, alpha = 0.1, beta = 0.1, nmax = 100) {
   .validate_unit_interval(pu, "pu")
   .validate_unit_interval(pa, "pa")

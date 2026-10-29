@@ -99,7 +99,10 @@ mod_diagnostic_ui <- function(id) {
       conditionalPanel(
         condition = design_is("vs_reference", "two_indep", "two_paired", "odds_ratio"),
         numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
-        numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
+        numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
+      ),
+      advanced_options_ui(
+        ns, condition = design_is("vs_reference", "two_indep", "two_paired", "odds_ratio"),
         selectInput(
           ns("alternative"), "Alternative hypothesis",
           choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")

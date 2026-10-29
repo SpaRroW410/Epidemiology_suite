@@ -56,6 +56,9 @@
 #'   relevant time horizon who would benefit from resolving this
 #'   uncertainty (> 0); leave at 1 for a per-patient value
 #' @return list(evpi_per_patient, evpi_population, inputs)
+#' @examples
+#' calc_evpi_normal(mean_inb = 100, sd_inb = 200)
+#' @export
 calc_evpi_normal <- function(mean_inb, sd_inb, population = 1) {
   .validate_number(mean_inb, "mean_inb")
   .validate_positive(sd_inb, "sd_inb")
@@ -81,6 +84,9 @@ calc_evpi_normal <- function(mean_inb, sd_inb, population = 1) {
 #' @param n Proposed study's sample size (> 0)
 #' @param population Number of current/future patients (> 0); 1 = per-patient
 #' @return list(evsi_per_patient, evsi_population, inputs)
+#' @examples
+#' calc_evsi_normal(mean_inb = 100, sd_inb = 200, sampling_sd = 300, n = 200)
+#' @export
 calc_evsi_normal <- function(mean_inb, sd_inb, sampling_sd, n, population = 1) {
   .validate_number(mean_inb, "mean_inb")
   .validate_positive(sd_inb, "sd_inb")
@@ -116,6 +122,10 @@ calc_evsi_normal <- function(mean_inb, sd_inb, sampling_sd, n, population = 1) {
 #' @param n_max Upper bound for the sample-size search (> 1)
 #' @return list(n_optimal, evsi_at_optimal, enbs_at_optimal, evpi_population,
 #'   inputs)
+#' @examples
+#' calc_enbs_optimal_n(mean_inb = 1000, sd_inb = 3000, sampling_sd = 8000, cost_per_patient = 500, 
+#'     population = 50000)
+#' @export
 calc_enbs_optimal_n <- function(mean_inb, sd_inb, sampling_sd, cost_per_patient,
                                  population = 1, fixed_cost = 0, n_max = 1e6) {
   .validate_number(mean_inb, "mean_inb")

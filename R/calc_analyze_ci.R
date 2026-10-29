@@ -41,6 +41,10 @@
 #' @param x Number of successes (events), a whole number between 0 and n.
 #' @param n Number of trials (the sample size), a positive whole number.
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_total`, `successes`, `proportion`, `wald_lower`, `wald_upper`, `wilson_lower`, `wilson_upper`, `exact_lower`, `exact_upper`, `agresti_coull_lower`, `agresti_coull_upper`, `jeffreys_lower`, `jeffreys_upper`, `mid_p_lower`, `mid_p_upper` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_ci_proportion(0, 25)
+#' @export
 calc_analyze_ci_proportion <- function(x, n, conf_level = 0.95) {
   if (!is.numeric(n) || length(n) != 1 || is.na(n) || !is.finite(n) || n < 1 || n != round(n)) {
     stop("n must be a single positive whole number.")
@@ -88,6 +92,10 @@ calc_analyze_ci_proportion <- function(x, n, conf_level = 0.95) {
 #' @param mean Sample mean.
 #' @param sd Sample standard deviation (positive).
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_total`, `mean`, `sd`, `standard_error`, `mean_lower`, `mean_upper`, `mean_z_lower`, `mean_z_upper`, `sd_lower`, `sd_upper`, `t_quantile` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_ci_mean(30, 10, 2)
+#' @export
 calc_analyze_ci_mean <- function(n, mean, sd, conf_level = 0.95) {
   if (!is.numeric(n) || length(n) != 1 || is.na(n) || !is.finite(n) || n < 2 || n != round(n)) {
     stop("n must be a single whole number of at least 2.")

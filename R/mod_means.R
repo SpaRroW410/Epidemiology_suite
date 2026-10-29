@@ -49,10 +49,7 @@ mod_means_ui <- function(id) {
                     choices = c("Relative (fraction of the mean)" = "relative",
                                 "Absolute (same units as the mean)" = "absolute")),
         numericInput(ns("conf_level_precision"), "Confidence level",
-                     value = 0.95, min = 0.5, max = 0.999, step = 0.01),
-        numericInput(ns("N_precision"),
-                     "Population size N (optional; leave blank for a large/community population)",
-                     value = NA, min = 1)
+                     value = 0.95, min = 0.5, max = 0.999, step = 0.01)
       ),
       conditionalPanel(
         condition = design_is("single"),
@@ -128,11 +125,20 @@ mod_means_ui <- function(id) {
         numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
       ),
-      conditionalPanel(
-        condition = design_is("single", "two_sample", "two_sample_unequal_n", "welch", "paired"),
-        selectInput(
-          ns("alternative"), "Alternative hypothesis",
-          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+      advanced_options_ui(
+        ns, condition = design_is("single_precision", "single", "two_sample", "two_sample_unequal_n", "welch", "paired"),
+        conditionalPanel(
+          condition = design_is("single_precision"),
+          numericInput(ns("N_precision"),
+                       "Population size N (optional; leave blank for a large/community population)",
+                       value = NA, min = 1)
+        ),
+        conditionalPanel(
+          condition = design_is("single", "two_sample", "two_sample_unequal_n", "welch", "paired"),
+          selectInput(
+            ns("alternative"), "Alternative hypothesis",
+            choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+          )
         )
       ),
       hr(),

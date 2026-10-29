@@ -41,6 +41,23 @@
     pt(-crit, df, ncp = abs(lambda), lower.tail = TRUE)
 }
 
+#' Subjects per arm for a two-level longitudinal design (subjects with repeated measures)
+#'
+#' Power of the test of a difference in slopes between two arms when each subject is measured repeatedly (random intercept
+#' and random slope, equal numbers of subjects per arm, equally spaced occasions, no missing data). The closed form of
+#' `powerlmm::study_parameters()` with `get_power()`, which it reproduces exactly (see the file header for how it was checked).
+#' @param n1 Number of measurement occasions per subject (at least 2: a baseline and at least one follow-up), equally spaced.
+#' @param T_end Study duration: the time of the last measurement, the first being at time 0 (any time unit).
+#' @param var_ratio Variance of the subject-level slopes divided by the residual variance `sigma_error^2` (greater than 0).
+#' @param delta Expected difference between the two arms in the outcome at the end of the study, that is the slope difference times `T_end` (not 0).
+#' @param sigma_error Residual (single-occasion) standard deviation, default 10.
+#' @param alpha Significance level (type I error rate), strictly between 0 and 1.
+#' @param power Desired power, strictly between 0 and 1.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_per_arm`, `n_total`, `achieved_power` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_multilevel_two_level(n1 = 11, T_end = 10, var_ratio = 0.02, delta = -0.9, 
+#'     sigma_error = 10, alpha = 0.05, power = 0.8)
+#' @export
 calc_multilevel_two_level <- function(n1, T_end, var_ratio, delta, sigma_error = 10,
                                        alpha = 0.05, power = 0.8) {
   .validate_positive(n1, "n1 (number of measurement occasions)")
@@ -76,6 +93,24 @@ calc_multilevel_two_level <- function(n1, T_end, var_ratio, delta, sigma_error =
   ))
 }
 
+#' Clusters per arm for a three-level longitudinal design (subjects nested in clusters)
+#'
+#' As [calc_multilevel_two_level()], with subjects nested in clusters that are the unit of randomisation (for example a
+#' cluster-randomised trial with repeated measures): the number of clusters per arm, for a given number of subjects per cluster.
+#' @param n1 Number of measurement occasions per subject (at least 2), equally spaced.
+#' @param n2 Subjects per cluster.
+#' @param T_end Study duration: the time of the last measurement, the first being at time 0 (any time unit).
+#' @param var_ratio Variance of the subject-level slopes divided by the residual variance `sigma_error^2` (greater than 0).
+#' @param icc_slope Share of the slope variance that lies between clusters rather than between subjects of the same cluster, in \[0, 1).
+#' @param delta Expected difference between the two arms in the outcome at the end of the study, that is the slope difference times `T_end` (not 0).
+#' @param sigma_error Residual (single-occasion) standard deviation, default 10.
+#' @param alpha Significance level (type I error rate), strictly between 0 and 1.
+#' @param power Desired power, strictly between 0 and 1.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_clusters_per_arm`, `n_subjects_per_cluster`, `n_total_clusters`, `n_total_subjects`, `achieved_power` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_multilevel_three_level(n1 = 11, n2 = 10, T_end = 10, var_ratio = 0.02, icc_slope = 0.1, 
+#'     delta = -0.9, sigma_error = 10, alpha = 0.05, power = 0.8)
+#' @export
 calc_multilevel_three_level <- function(n1, n2, T_end, var_ratio, icc_slope, delta,
                                          sigma_error = 10, alpha = 0.05, power = 0.8) {
   .validate_positive(n1, "n1 (number of measurement occasions)")

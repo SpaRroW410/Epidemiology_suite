@@ -52,6 +52,11 @@ accessibility_script <- function() {
       var name = parts.join(' ').trim() || inp.placeholder || '';
       if (name) inp.setAttribute('aria-label', name);
     });
+    // keep a short result in view while the inputs above it are edited (a tall result is left in the page flow)
+    document.querySelectorAll('[id$=\"-result\"].shiny-html-output').forEach(function (el) {
+      var short = el.offsetHeight > 0 && el.offsetHeight <= window.innerHeight * 0.3;
+      el.classList.toggle('pin-result', short);
+    });
     document.querySelectorAll('pre.shiny-text-output, .shiny-table-output, .table-responsive').forEach(function (el) {
       if (el.hasAttribute('tabindex')) return;
       el.setAttribute('tabindex', '0');

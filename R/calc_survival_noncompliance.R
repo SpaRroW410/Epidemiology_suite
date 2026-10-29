@@ -28,12 +28,16 @@
 #' @param accrual Duration of the accrual (enrollment) period
 #' @param tmin Minimum follow-up time (for the last-enrolled subject)
 #' @param noncomp_c Percent of control-arm subjects who cross over to the
-#'   intervention ("drop-ins"), in [0,100)
+#'   intervention ("drop-ins"), in \[0,100)
 #' @param noncomp_i Percent of intervention-arm subjects who do not adhere
-#'   to it, in [0,100)
+#'   to it, in \[0,100)
 #' @param alpha Two-sided significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_total, n_per_group, achieved_power, inputs)
+#' @examples
+#' calc_survival_noncompliance(tref = 5, mc = 0.18, pct_reduction = 15, accrual = 1.5, 
+#'     tmin = 5, noncomp_c = 15, noncomp_i = 25, alpha = 0.05, power = 0.8)
+#' @export
 calc_survival_noncompliance <- function(tref, mc, pct_reduction, accrual, tmin,
                                          noncomp_c = 0, noncomp_i = 0,
                                          alpha = 0.05, power = 0.8) {

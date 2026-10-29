@@ -38,6 +38,10 @@
 #' @param a,b,c,d Both positive (a), test 1 positive / test 2 negative (b), test 1 negative /
 #'   test 2 positive (c), both negative (d).
 #' @param conf_level Confidence level for every interval.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_pairs`, `discordant_pairs`, `positive_test1`, `positive_test2`, `mcnemar_chisq`, `mcnemar_p`, `mcnemar_chisq_corrected`, `mcnemar_p_corrected`, `exact_p`, `mid_p`, `matched_odds_ratio`, `matched_odds_ratio_exact_lower`, `matched_odds_ratio_exact_upper`, `matched_odds_ratio_wald_lower`, `matched_odds_ratio_wald_upper`, `paired_difference`, `paired_difference_lower`, `paired_difference_upper` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_mcnemar(20, 0, 0, 30)
+#' @export
 calc_analyze_mcnemar <- function(a, b, c, d, conf_level = 0.95) {
   .tt_count(a, "Cell a"); .tt_count(b, "Cell b"); .tt_count(c, "Cell c"); .tt_count(d, "Cell d")
   .validate_unit_interval(conf_level, "Confidence level")
@@ -77,6 +81,10 @@ calc_analyze_mcnemar <- function(a, b, c, d, conf_level = 0.95) {
 #' @param table A square numeric matrix of counts (rows = rater 1, columns = rater 2), 2 to 6 categories.
 #' @param weights "unweighted", "linear" (equal-spacing) or "quadratic" (Fleiss-Cohen) agreement weights.
 #' @param conf_level Confidence level.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_total`, `categories`, `weights`, `kappa`, `kappa_se`, `kappa_lower`, `kappa_upper`, `observed_agreement`, `expected_agreement`, `z_test_kappa0`, `p_value_kappa0`, `pabak` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_kappa(matrix(c(30, 0, 0, 70), 2, byrow = TRUE))
+#' @export
 calc_analyze_kappa <- function(table, weights = c("unweighted", "linear", "quadratic"), conf_level = 0.95) {
   weights <- match.arg(weights)
   x <- tryCatch(as.matrix(table), error = function(e) NULL)
@@ -139,6 +147,10 @@ analyze_kappa_label <- function(kappa) {
 #' @param events,totals Events and group sizes, one per group (2 to 8 groups).
 #' @param scores Group scores (default 1, 2, ..., g): equally spaced unless you supply doses.
 #' @param conf_level Confidence level for the per-group Wilson intervals.
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_total`, `events_total`, `overall_proportion`, `groups`, `trend_chisq`, `trend_p`, `trend_direction`, `group1_proportion`, `group1_wilson_lower`, `group1_wilson_upper`, `group2_proportion`, `group2_wilson_lower`, `group2_wilson_upper`, `group3_proportion`, `group3_wilson_lower`, `group3_wilson_upper`, `group4_proportion`, `group4_wilson_lower`, `group4_wilson_upper` and `inputs`, the arguments the result was calculated from.
+#' @examples
+#' calc_analyze_trend(c(10, 20, 35, 50), rep(100, 4))
+#' @export
 calc_analyze_trend <- function(events, totals, scores = seq_along(events), conf_level = 0.95) {
   g <- length(events)
   if (g < 2 || g > 8) stop("Use between 2 and 8 groups.")

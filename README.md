@@ -191,9 +191,34 @@ epidemiologicasuite::run_app()
 `run_app(port = 8080, launch.browser = FALSE)`); `epidemiologicasuite_app()` returns the
 Shiny app object without running it.
 
+Find a calculator without opening the app, and open the app straight on one:
+
+```r
+library(epidemiologicasuite)
+ss_find("eyes per patient")            # a data frame: key, design, calculator, answers
+run_app(calculator = "eyes per patient")   # a design key from ss_find(), or words (the best match opens)
+```
+
+Every calculation is also an exported function with its own help page and a worked example, for scripts and Quarto:
+
+```r
+?calc_means_paired
+calc_cluster_deff(n_base = 200, icc = 0.05, cluster_size = 10)   # design effect 1.45, effective n 290
+```
+
+In RStudio or Positron, *Addins > Find a sample size calculator* does the same from a search window. Setting the
+environment variable `EPIDEMIOLOGICASUITE_OPEN` to a design key makes a deployment open on that calculator.
+
 From a clone (development), the root `app.R` loads the package with
 `pkgload::load_all()`, so `shiny::runApp()` or `Rscript -e 'shiny::runApp()'` from
 the repository root still works.
+
+## How to cite
+
+The app has a **Cite** tab with the citation in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX and RIS, a ready-made sentence
+for a Methods section, and copy and download buttons. In R: `citation("epidemiologicasuite")`. GitHub's "Cite this repository" reads
+`CITATION.cff`. There is no DOI yet: after the first release is archived on Zenodo, put the DOI in three places (see
+`docs/hosting.md`, "Adding the Zenodo DOI"): `.citation_doi` in `R/citation_info.R`, `CITATION.cff` and `inst/CITATION`.
 
 ## Running in Docker
 

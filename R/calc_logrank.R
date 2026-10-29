@@ -20,6 +20,9 @@
 #' @param alpha Significance level, two-sided (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n_exp, n_control, n_total, inputs)
+#' @examples
+#' calc_logrank(pE = 0.3707, pC = 0.489, hr = 0.7, ratio = 1, alpha = 0.05, power = 0.8)
+#' @export
 calc_logrank <- function(pE, pC, hr, ratio = 1, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(pE, "pE")
   .validate_unit_interval(pC, "pC")
@@ -56,9 +59,12 @@ calc_logrank <- function(pE, pC, hr, ratio = 1, alpha = 0.05, power = 0.8) {
 #' @param p Proportion of subjects with the covariate of interest = 1 (0,1)
 #' @param psi Proportion of subjects who experience the event of interest (0,1)
 #' @param rho2 Squared correlation between the covariate of interest and
-#'   any other adjustment covariate, [0, 1); 0 = unadjusted/randomized
+#'   any other adjustment covariate, \[0, 1); 0 = unadjusted/randomized
 #' @param alpha Significance level, two-sided (0,1)
 #' @return list(n, inputs)
+#' @examples
+#' calc_cox_binary(power = 0.8, theta = 2, p = 0.39, psi = 0.505, rho2 = 0.132^2)
+#' @export
 calc_cox_binary <- function(power, theta, p, psi, rho2 = 0, alpha = 0.05) {
   .validate_unit_interval(power, "power")
   .validate_positive(theta, "theta")
@@ -90,9 +96,13 @@ calc_cox_binary <- function(power, theta, p, psi, rho2 = 0, alpha = 0.05) {
 #' @param sigma2 Variance of the covariate of interest, > 0
 #' @param psi Proportion of subjects who experience the event of interest (0,1)
 #' @param rho2 Squared multiple correlation between the covariate of
-#'   interest and other adjustment covariates, [0, 1); 0 = unadjusted
+#'   interest and other adjustment covariates, \[0, 1); 0 = unadjusted
 #' @param alpha Significance level, two-sided (0,1)
 #' @return list(n, inputs)
+#' @examples
+#' calc_cox_continuous(power = 0.806, theta = exp(1), sigma2 = 0.3126^2, psi = 0.738, 
+#'     rho2 = 0.1837, alpha = 0.1)
+#' @export
 calc_cox_continuous <- function(power, theta, sigma2, psi, rho2 = 0, alpha = 0.05) {
   .validate_unit_interval(power, "power")
   .validate_positive(theta, "theta")
@@ -134,6 +144,10 @@ calc_cox_continuous <- function(power, theta, sigma2, psi, rho2 = 0, alpha = 0.0
 #'   stratum, > 0, same length as gVec
 #' @param alpha Significance level, two-sided (0,1)
 #' @return list(n_total, inputs)
+#' @examples
+#' calc_survival_stratified(power = 0.9, timeUnit = 1.25, gVec = c(0.5, 0.5), pVec = c(0.5, 
+#'     0.5), hr = 1/1.91, lambda0Vec = c(2.303, 1.139), alpha = 0.05)
+#' @export
 calc_survival_stratified <- function(power, timeUnit, gVec, pVec, hr, lambda0Vec, alpha = 0.05) {
   .validate_unit_interval(power, "power")
   .validate_positive(timeUnit, "timeUnit")
@@ -272,6 +286,12 @@ calc_survival_stratified <- function(power, timeUnit, gVec, pVec, hr, lambda0Vec
 #'   during the search (>= 100)
 #' @param seed RNG seed for reproducibility
 #' @return list(n0, n1, n_total, achieved_power, inputs)
+#' @examples
+#' \donttest{
+#' calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4, effect_timing = "delayed", 
+#'     accrual = 12, tot_time = 30, rho = 0, power = 0.8)
+#' }
+#' @export
 calc_weighted_logrank <- function(hazard0, hr, change_time, effect_timing = "delayed",
                                    accrual, tot_time, rho = 0, allocation1 = 0.5,
                                    alpha = 0.05, power = 0.8, nsim = 300, seed = 20200601) {

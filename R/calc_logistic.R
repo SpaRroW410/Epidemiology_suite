@@ -38,6 +38,10 @@
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, eff, inputs)
+#' @examples
+#' calc_ordinal_proportional_odds(p = c(0.1, 0.2, 0.4, 0.3), odds_ratio = 1.2, fraction = 0.5, 
+#'     alpha = 0.05, power = 0.8)
+#' @export
 calc_ordinal_proportional_odds <- function(p, odds_ratio, fraction = 0.5,
                                             alpha = 0.05, power = 0.8) {
   if (!is.numeric(p) || length(p) < 2 || anyNA(p) || any(p <= 0) || any(p >= 1)) {
@@ -73,6 +77,9 @@ calc_ordinal_proportional_odds <- function(p, odds_ratio, fraction = 0.5,
 #' @param alpha Significance level, two-sided (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, inputs)
+#' @examples
+#' calc_logistic_binary(p1 = 0.4, p2 = 0.5, prop_x1 = 0.5, alpha = 0.05, power = 0.95)
+#' @export
 calc_logistic_binary <- function(p1, p2, prop_x1, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(p1, "p1")
   .validate_unit_interval(p2, "p2")
@@ -98,6 +105,9 @@ calc_logistic_binary <- function(p1, p2, prop_x1, alpha = 0.05, power = 0.8) {
 #' @param alpha Significance level, two-sided (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, inputs)
+#' @examples
+#' calc_logistic_continuous(p1 = 0.5, or = exp(0.405), alpha = 0.05, power = 0.95)
+#' @export
 calc_logistic_continuous <- function(p1, or, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(p1, "p1")
   .validate_positive(or, "or")
@@ -137,6 +147,10 @@ calc_logistic_continuous <- function(p1, or, alpha = 0.05, power = 0.8) {
 #' @param alpha Significance level, two-sided (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, n_unadjusted, inputs)
+#' @examples
+#' calc_logistic_binary_adjusted(p1 = 0.4, p2 = 0.5, prop_x1 = 0.5, r2 = 0, alpha = 0.05, 
+#'     power = 0.95)
+#' @export
 calc_logistic_binary_adjusted <- function(p1, p2, prop_x1, r2, alpha = 0.05, power = 0.8) {
   if (!is.numeric(r2) || length(r2) != 1 || is.na(r2) || r2 < 0 || r2 >= 1) {
     stop("r2 must be a single number in [0, 1).")
@@ -165,6 +179,10 @@ calc_logistic_binary_adjusted <- function(p1, p2, prop_x1, r2, alpha = 0.05, pow
 #' @param alpha Significance level, two-sided (0,1)
 #' @param power Desired power (0,1)
 #' @return list(n, n_unadjusted, inputs)
+#' @examples
+#' calc_logistic_continuous_adjusted(p1 = 0.5, or = exp(0.405), r2 = 0, alpha = 0.05, 
+#'     power = 0.95)
+#' @export
 calc_logistic_continuous_adjusted <- function(p1, or, r2, alpha = 0.05, power = 0.8) {
   if (!is.numeric(r2) || length(r2) != 1 || is.na(r2) || r2 < 0 || r2 >= 1) {
     stop("r2 must be a single number in [0, 1).")

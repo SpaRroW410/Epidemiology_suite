@@ -37,12 +37,16 @@
 #' @param accrual Length of the patient accrual (enrollment) period (>= 0)
 #' @param follow_up Maximum follow-up period, measured from the start of
 #'   accrual (> accrual)
-#' @param attrition Attrition rate due to loss to follow-up [0,1)
+#' @param attrition Attrition rate due to loss to follow-up \[0,1)
 #' @param a1 Allocation proportion to group 1 (0,1)
 #' @param alpha Significance level, two-sided (0,1)
 #' @param power Desired power (0,1)
 #' @return list(chi2_events, chi2_n, max_events, max_n, bonferroni_events,
 #'   bonferroni_n, inputs)
+#' @examples
+#' calc_competing_risks_joint(lambda_11 = 0.3, hr_1 = 1.44, hr_all = 1.33, rr = 0.8, 
+#'     accrual = 1, follow_up = 8, attrition = 0.1, a1 = 0.5, alpha = 0.05, power = 0.8)
+#' @export
 calc_competing_risks_joint <- function(lambda_11, hr_1, hr_all, rr, accrual, follow_up,
                                         attrition = 0, a1 = 0.5,
                                         alpha = 0.05, power = 0.8) {

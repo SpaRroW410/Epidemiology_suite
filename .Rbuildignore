@@ -19,3 +19,4 @@
 ^Dockerfile$
 ^\.dockerignore$
 ^docker-compose\.yml$
+^CITATION\.cff$

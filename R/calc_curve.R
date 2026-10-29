@@ -53,6 +53,7 @@
 #'   (e.g. an effect size outside the formula's valid domain, or the "no
 #'   effect to detect" guard when a scan range happens to include it) is
 #'   simply not a row -- a sparser curve, never a fabricated point.
+#' @noRd
 ss_curve_points <- function(calc_fn, args, vary_param, vary_values, time_limit = Inf) {
   xs <- numeric(0)
   ys <- numeric(0)
@@ -84,12 +85,14 @@ ss_curve_points <- function(calc_fn, args, vary_param, vary_values, time_limit =
 # each one inventing its own grid.
 
 #' A scan range for a proportion-like effect parameter, bounded to (0, 1).
+#' @noRd
 curve_range_proportion <- function(n = 40) seq(0.02, 0.98, length.out = n)
 
 #' A scan range for an unbounded (mean-difference-like) effect parameter,
 #' centered on a reference value with a spread in the same units (typically
 #' a multiple of the design's own SD). The center itself is dropped so a
 #' scan never lands exactly on a design's own "no effect to detect" guard.
+#' @noRd
 curve_range_around <- function(center, spread, n = 40) {
   v <- seq(center - spread, center + spread, length.out = n)
   v[abs(v - center) > 1e-9]
@@ -97,11 +100,13 @@ curve_range_around <- function(center, spread, n = 40) {
 
 #' A scan range for power -- the same (0.5, 0.99) domain every
 #' `numericInput("power", ...)` in this app already restricts entry to.
+#' @noRd
 curve_range_power <- function(n = 40) seq(0.5, 0.99, length.out = n)
 
 #' A scan range for a correlation-like effect parameter, bounded to
 #' (-1, 1) with 0 (no effect) excluded, since every design that takes a
 #' bare correlation guards against exactly zero.
+#' @noRd
 curve_range_correlation <- function(n = 40) {
   v <- seq(-0.95, 0.95, length.out = n)
   v[abs(v) > 1e-9]
@@ -111,6 +116,7 @@ curve_range_correlation <- function(n = 40) {
 #' ratio, relative risk, ...): a fixed log-spaced grid spanning a typical
 #' clinically plausible range, with 1 (no effect) excluded since every
 #' such design guards against it.
+#' @noRd
 curve_range_ratio <- function(lower = 0.2, upper = 5, n = 40) {
   v <- exp(seq(log(lower), log(upper), length.out = n))
   v[abs(v - 1) > 1e-9]
@@ -122,6 +128,7 @@ curve_range_ratio <- function(lower = 0.2, upper = 5, n = 40) {
 #' bounded by another *input*, so this can't be a fixed grid). A small
 #' fractional pad keeps the grid off both open-interval endpoints, which
 #' every such design's own validation rejects exactly at the boundary.
+#' @noRd
 curve_range_within <- function(lower, upper, n = 40, margin_frac = 0.02) {
   pad <- (upper - lower) * margin_frac
   seq(lower + pad, upper - pad, length.out = n)
@@ -132,6 +139,7 @@ curve_range_within <- function(lower, upper, n = 40, margin_frac = 0.02) {
 #' unlike curve_range_around(), which is symmetric in raw units and can go
 #' negative or zero for a center not far from it. The center itself is
 #' excluded, same reasoning as curve_range_around().
+#' @noRd
 curve_range_multiplicative <- function(center, lower_mult = 0.3, upper_mult = 3, n = 40) {
   v <- exp(seq(log(center * lower_mult), log(center * upper_mult), length.out = n))
   v[abs(v - center) > 1e-9]
@@ -143,4 +151,5 @@ curve_range_multiplicative <- function(center, lower_mult = 0.3, upper_mult = 3,
 #' proportions) rather than one scalar: `m = 1` reproduces the entered
 #' values and the curve's x axis becomes "how much larger or smaller the
 #' differences are", which is the one knob every such design actually has.
+#' @noRd
 curve_scale_about <- function(x, ref, m) ref + m * (x - ref)
