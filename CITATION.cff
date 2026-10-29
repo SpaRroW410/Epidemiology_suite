@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Epidemiological suite"
+abstract: >-
+  Sample size, power and analysis tools for community medicine, epidemiology and clinical research: calculators for about
+  160 study designs, each with its formula, a worked example and a citable source. Available as a web application and as
+  the R package epidemiologicasuite.
+type: software
+version: 0.1.0
+authors:
+  - family-names: Maheshwari
+    given-names: Mukul
+license: GPL-3.0-or-later
+repository-code: "https://github.com/SpaRroW410/Sample_size_all"
+url: "https://sparrow410.github.io/Sample_size_all/"
+keywords:
+  - sample size
+  - power analysis
+  - epidemiology
+  - study design
+  - R package
+  - Shiny
+# Once Zenodo has issued the DOI, add it here (and in R/citation_info.R and inst/CITATION) and add date-released:
+# identifiers:
+#   - type: doi
+#     value: 10.5281/zenodo.XXXXXXX
