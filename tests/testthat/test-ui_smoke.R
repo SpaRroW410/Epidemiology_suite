@@ -446,8 +446,8 @@ test_that("background loading fills in every calculator with the indicator besid
 
 .wizard_open <- function(app) {
   ui_select_tab(app, "main_nav", "Home")
-  app$run_js(sprintf("%s.click()", ui_js_by_data_value("a[data-bs-toggle=tab][data-value]", "Which calculator? (guided wizard)")))
-  app$wait_for_js("!!document.getElementById('design_wizard_freetext')", timeout = 30000)
+  app$run_js("document.getElementById('home_go_wizard').click()")   # "Start the guide": opens the folded section and the wizard tab
+  app$wait_for_js("(function(){var e=document.getElementById('design_wizard_freetext'); return !!e && e.getBoundingClientRect().width > 0;})()", timeout = 30000)
   app$wait_for_idle(500, timeout = 30000)
 }
 
