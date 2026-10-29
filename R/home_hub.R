@@ -26,6 +26,19 @@
   0L
 }
 
+# The small search box at the right of the navbar, so a calculator can be found from any page.
+nav_search_ui <- function() {
+  selectizeInput(
+    "nav_search",
+    label = tags$span(class = "visually-hidden", "Search all calculators"),
+    choices = NULL, width = "15rem",
+    options = list(
+      placeholder = "Search calculators", valueField = "key", labelField = "label",
+      searchField = c("label", "answers", "module"), maxOptions = 12, openOnFocus = FALSE
+    )
+  )
+}
+
 # One row per built calculator for the search box: the catalog key it opens, its label, a short "answers" text and the module it lives in.
 .home_search_table <- function() {
   built <- Filter(function(e) isTRUE(e$built), calculator_catalog)
@@ -120,17 +133,20 @@ home_server <- function(input, output, session) {
   home_finder_server(input, output, session)
   design_wizard_server(input, output, session)
 
-  # search box: choose a calculator and it opens, on the design that was named
+  # search boxes (the big one on Home and the small one in the navbar): choose a calculator and it opens, on the design that was named
   search_table <- .home_search_table()
-  updateSelectizeInput(session, "home_search", choices = search_table, server = TRUE)
-  observeEvent(input$home_search, {
-    key <- input$home_search
-    if (is.null(key) || !nzchar(key)) return()
-    entry <- catalog_entry(key)
-    jump_to_module(session, entry$nav_target)
-    if (!is.na(entry$module_input_id)) updateRadioButtons(session, entry$module_input_id, selected = entry$design_value)
-    updateSelectizeInput(session, "home_search", selected = "")
-  }, ignoreInit = TRUE)
+  for (box in c("home_search", "nav_search")) local({
+    box <- box
+    updateSelectizeInput(session, box, choices = search_table, server = TRUE)
+    observeEvent(input[[box]], {
+      key <- input[[box]]
+      if (is.null(key) || !nzchar(key)) return()
+      entry <- catalog_entry(key)
+      jump_to_module(session, entry$nav_target)
+      if (!is.na(entry$module_input_id)) updateRadioButtons(session, entry$module_input_id, selected = entry$design_value)
+      updateSelectizeInput(session, box, selected = "")
+    }, ignoreInit = TRUE)
+  })
 
   # quick links and task cards
   for (id in .home_quick_ids) local({

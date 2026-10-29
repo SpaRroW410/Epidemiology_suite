@@ -89,7 +89,7 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
     list(home_panel),
     workbench_panels,
     # light / dark switch (starts from the viewer's operating-system setting)
-    list(bslib::nav_item(bslib::input_dark_mode(id = "dark_mode")))
+    list(bslib::nav_item(nav_search_ui()), bslib::nav_item(bslib::input_dark_mode(id = "dark_mode")))
   ))
 
   server <- function(input, output, session) {
@@ -129,7 +129,12 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
 html[data-bs-theme='dark'] nav.navbar.navbar-default { background-color: var(--bs-tertiary-bg) !important; }
 html[data-bs-theme='dark'] nav.navbar .navbar-brand, html[data-bs-theme='dark'] nav.navbar .nav-link { color: var(--bs-body-color) !important; }
 html[data-bs-theme='dark'] nav.navbar .nav-link.active { color: var(--bs-primary-text-emphasis) !important; }
-#main_nav > li.bslib-nav-item { margin-left: auto; }
+#main_nav > li.bslib-nav-item:nth-last-child(2) { margin-left: auto; }   /* the search box and the dark-mode switch sit at the right end */
+#main_nav > li.bslib-nav-item .form-group { margin-bottom: 0; }
+.navbar .selectize-input { padding: .2rem .6rem; min-height: 0; font-size: .85rem; border-radius: 1rem; }
+.navbar .selectize-input, .navbar .selectize-input input, .navbar .selectize-dropdown { color: var(--bs-body-color) !important; }
+.navbar .selectize-input input::placeholder { color: var(--bs-secondary-color); }
+.navbar .selectize-dropdown { min-width: 26rem; right: 0; left: auto !important; }
 html { scroll-padding-bottom: 7rem; }   /* a focused input is scrolled clear of the pinned result below */
 /* a short calculator result stays at the bottom of the window while the inputs above it are changed */
 .pin-result { position: sticky; bottom: 0; z-index: 5; background: var(--bs-body-bg); border-top: 2px solid var(--bs-primary);
