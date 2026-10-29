@@ -1353,6 +1353,10 @@ focus order, or colour-only meaning in the plots. The grid-input names are built
 layout needs checking. Not yet done: a manual keyboard and screen-reader walk-through, alt text / table summaries for the plots,
 dark-mode versions of the plots, and text-resize and reduced-motion checks.
 
+### Interface, first part (29 Oct 2026, item 22 follow-up)
+
+Task-first Home (`R/home_hub.R`): a search box over every built design (matches the label, the "answers" text and the module name; choosing one opens the calculator on that design, also when it is not loaded yet), quick links to six common calculators, four task cards (the counts on them are read from the workbench definitions, not typed in), a guide banner, and the long lists (browse by design or test family, the guided wizard, the formula sandbox) folded into one section. Every calculator: the export block and the power / sensitivity curves are folded panels (closed panels are not rendered, so the curves are not computed until opened), and a short result is pinned to the bottom of the window (`R/accessibility.R` marks results shorter than 30% of the window; tall results stay in the page flow; `scroll-padding-bottom` keeps a focused input clear of it). Checked: full default test suite (923 blocks, 0 failures) after updating the two UI tests that assumed the lists were visible; the axe-core scan of all 66 pages at both sizes in light and dark mode: 0 violations. Not done: "Advanced options" folding inside each calculator, a two-column layout, search from every page, and a look at it on a real phone.
+
 ### Dependency reduction, stage 2: the easy and moderate packages (28 Oct 2026)
 Seven more runtime packages were replaced by closed forms written out in the app and tested against the real package: **pwr**,
 **powerMediation**, **pmsampsize**, **pROC** (easy) and **presize**, **powerSurvEpi**, **TrialSize** (moderate). The packages moved from
