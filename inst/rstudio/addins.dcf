@@ -1,0 +1,4 @@
+Name: Find a sample size calculator
+Description: Search the calculators by words and open the app on the one you choose.
+Binding: ss_find_addin
+Interactive: true

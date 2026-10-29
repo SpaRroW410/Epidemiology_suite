@@ -2,13 +2,19 @@
 \alias{epidemiologicasuite_app}
 \title{Build the epidemiologicasuite Shiny app object}
 \usage{
-epidemiologicasuite_app(lazy = getOption("epidemiologicasuite.lazy", TRUE))
+epidemiologicasuite_app(
+  lazy = getOption("epidemiologicasuite.lazy", TRUE),
+  calculator = if (nzchar(Sys.getenv("EPIDEMIOLOGICASUITE_OPEN"))) Sys.getenv("EPIDEMIOLOGICASUITE_OPEN")
+)
 }
 \arguments{
 \item{lazy}{If \code{TRUE} (the default) only a few basic calculators are built when the app
 starts and the others are loaded when opened, and in the background with a progress bar,
 which makes the first screen much faster; \code{FALSE} builds every calculator up front.
 The default can be changed with \code{options(epidemiologicasuite.lazy = FALSE)}.}
+
+\item{calculator}{Optional design key or search words (see \code{\link[=run_app]{run_app()}}): the calculator the app opens on. Defaults to the
+environment variable \code{EPIDEMIOLOGICASUITE_OPEN} when it is set (for a deployment that should open on one calculator), else none.}
 }
 \value{
 A \code{shiny::shinyApp()} object.

@@ -8,12 +8,14 @@
 #' Starts the sample size / power calculator in the default web browser (or the
 #' RStudio viewer). Blocks until the app is stopped.
 #'
+#' @param calculator Optional: open the app straight on one calculator. Either a design key from [ss_find()]
+#'   (the `key` column) or a few words describing it (the best match of [ss_find()] is opened).
 #' @param ... Passed on to [shiny::runApp()], e.g. `port = 8080`,
 #'   `host = "0.0.0.0"` or `launch.browser = FALSE`.
 #' @return Does not return while the app is running.
 #' @export
-run_app <- function(...) {
-  shiny::runApp(epidemiologicasuite_app(), ...)
+run_app <- function(calculator = NULL, ...) {
+  shiny::runApp(epidemiologicasuite_app(calculator = calculator), ...)
 }
 
 #' Build the epidemiologicasuite Shiny app object
@@ -26,9 +28,13 @@ run_app <- function(...) {
 #'   starts and the others are loaded when opened, and in the background with a progress bar,
 #'   which makes the first screen much faster; `FALSE` builds every calculator up front.
 #'   The default can be changed with `options(epidemiologicasuite.lazy = FALSE)`.
+#' @param calculator Optional design key or search words (see [run_app()]): the calculator the app opens on. Defaults to the
+#'   environment variable `EPIDEMIOLOGICASUITE_OPEN` when it is set (for a deployment that should open on one calculator), else none.
 #' @return A [shiny::shinyApp()] object.
 #' @export
-epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy", TRUE)) {
+epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy", TRUE),
+                                    calculator = if (nzchar(Sys.getenv("EPIDEMIOLOGICASUITE_OPEN"))) Sys.getenv("EPIDEMIOLOGICASUITE_OPEN")) {
+  start_key <- if (is.null(calculator)) NULL else .resolve_calculator(calculator)
   registry <- module_registry()
   registry_by_id <- setNames(registry, vapply(registry, `[[`, character(1), "id"))
   # Modules that exist at start-up; the others are placeholders filled by lazy_module_loader() (lazy_modules.R).
@@ -94,6 +100,12 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
 
   server <- function(input, output, session) {
     home_server(input, output, session)
+    # opened from run_app(calculator = ...): go to that calculator once the page is connected (the navbar's value arrives first)
+    if (!is.null(start_key)) observeEvent(input$main_nav, {
+      entry <- catalog_entry(start_key)
+      jump_to_module(session, entry$nav_target)
+      if (!is.na(entry$module_input_id)) updateRadioButtons(session, entry$module_input_id, selected = entry$design_value)
+    }, once = TRUE)
     for (m in registry[names(registry_by_id) %in% core_ids]) {
       m$server(m$id)
     }

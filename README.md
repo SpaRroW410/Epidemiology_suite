@@ -191,6 +191,17 @@ epidemiologicasuite::run_app()
 `run_app(port = 8080, launch.browser = FALSE)`); `epidemiologicasuite_app()` returns the
 Shiny app object without running it.
 
+Find a calculator without opening the app, and open the app straight on one:
+
+```r
+library(epidemiologicasuite)
+ss_find("eyes per patient")            # a data frame: key, design, calculator, answers
+run_app(calculator = "eyes per patient")   # a design key from ss_find(), or words (the best match opens)
+```
+
+In RStudio or Positron, *Addins > Find a sample size calculator* does the same from a search window. Setting the
+environment variable `EPIDEMIOLOGICASUITE_OPEN` to a design key makes a deployment open on that calculator.
+
 From a clone (development), the root `app.R` loads the package with
 `pkgload::load_all()`, so `shiny::runApp()` or `Rscript -e 'shiny::runApp()'` from
 the repository root still works.

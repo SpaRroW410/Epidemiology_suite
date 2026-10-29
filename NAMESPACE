@@ -3,6 +3,8 @@
 # every other runtime package is called with pkg:: and needs no entry here.
 export(epidemiologicasuite_app)
 export(run_app)
+export(ss_find)
+export(ss_find_addin)
 import(shiny)
 importFrom(bslib,accordion)
 importFrom(bslib,accordion_panel)

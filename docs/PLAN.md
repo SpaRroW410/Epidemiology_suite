@@ -59,8 +59,8 @@ suite 907 blocks with 0 failures.
 
 ## Phase 5 — The R package for analysts
 
-- [ ] Public function API (`ss_*()` family: one function per design, plus text, curve and export helpers)
-- [ ] RStudio / Positron addin: "Find a sample-size calculator"
+- [ ] Public function API for the calculations themselves (`ss_*()` family: one function per design, plus text, curve and export helpers). **Needs an owner decision:** exporting the 195 `calc_*` functions fixes their names and arguments for users, and each needs a help page; the alternative is a smaller hand-picked set
+- ~~RStudio / Positron addin "Find a sample size calculator", `ss_find()` search from the console, and `run_app(calculator = ...)` to open the app on one calculator~~ (29 Oct)
 - [ ] Vignettes per family; more help pages
 - [ ] Release: r-universe (binaries, including WebAssembly), then CRAN (computation core split from the app, ASCII-only source, fast examples, clean `R CMD check`)
 - [ ] **[owner]** Rename the GitHub repository (changes the install path), author details, first release number, `NEWS.md`
