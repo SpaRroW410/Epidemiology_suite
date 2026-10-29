@@ -45,5 +45,6 @@ the marginal/GEE-style method from Diggle, Heagerty, Liang & Zeger
 }
 \examples{
 # Diggle et al. (2002) p. 29: 3 visits at 0, 2 and 5, one-sided; 313 per group
-calc_longitudinal_diggle(visit_times = c(0, 2, 5), delta = 0.5, sigma2 = 100, rho = 0.2, alternative = "one.sided", power = 0.80)
+calc_longitudinal_diggle(visit_times = c(0, 2, 5), delta = 0.5, sigma2 = 100, rho = 0.2,
+                         alternative = "one.sided", power = 0.80)
 }

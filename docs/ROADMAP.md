@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Status** | Active — authoritative forward plan |
-| **Last reviewed** | 28 September 2026 (full codebase + docs review) |
+| **Last reviewed** | 29 October 2026 (status refreshed after items 15-22; the 28 September review findings in §2 stand, with their fixes noted) |
 | **Owner** | Dr. Mukul Maheshwari |
 | **Name** | **Epidemiological suite** as shown in the app; the R package is `epidemiologicasuite` (decision D3) |
 | **Licence** | GPL-3 (decision D2) |
@@ -33,11 +33,13 @@
 | Calculator modules | **66** (50 sample-size calculators, 11 Analyze tools, 2 planning tools, 2 survey tools, 1 infectious-disease model tool), in 17 groups in the Plan workbench and 2 in Analyze |
 | Individual designs | **159**, all in the Browse catalog (F2 fixed) |
 | Checklist coverage | By design: **81 / 94** done (13 open) · By test: **69 / 74** done (5 open) |
-| Unit tests | **907** test blocks in the default run (0 failures, 101 skipped as slow) across 83 test files, every design checked against a published worked example, a real package (oracle), or simulation |
+| Unit tests | **942** test blocks in the default run (0 failures, 103 skipped as slow) across 89 test files, plus browser (shinytest2) tests, every design checked against a published worked example, a real package (oracle), or simulation |
 | Runtime packages | `DESCRIPTION` `Imports`: `shiny`, `bslib`, `clinfun`, `PowerTOST`, `Exact`, `kappaSize`, `mvtnorm`, `lme4`, plus `survival`, `stats`, `graphics`, `utils` (was 19; twelve removed in items 16 and the stage 2 that followed, each reimplemented and checked against the original) |
 | Verification-only packages | ~30 more (installed from the `github.com/cran` mirror, used only to check reimplementations — never shipped) |
-| Wizard coverage | "Which calculator?" reaches **49 / 49** modules and all 156 catalog entries, enforced by tests (F1 fixed) |
-| Distribution | Installable package (`remotes::install_github()` + `run_app()`), no hosted build. CI on GitHub Actions; versions locked in `renv.lock` |
+| Wizard coverage | "Which calculator?" reaches every built calculator and all 159 catalog designs, enforced by tests (F1 fixed); 101 plain-language descriptions and 636 click paths are checked |
+| Distribution | Three versions from one code base: browser build on GitHub Pages (desktop), phone / server version on Posit Connect Cloud (deployed from the auto-built `connect` branch; phones and tablets are redirected to it), and the R package (`remotes::install_github()` + `run_app()`; a Docker image too). CI on GitHub Actions; versions locked in `renv.lock`. See [`hosting.md`](hosting.md) |
+| R functions | All **195** `calc_*()` functions exported, each with a help page (every argument and the value described, a worked example); `ss_find()`, `run_app(calculator = ...)` and an RStudio / Positron addin; `R CMD check --as-cran` passes all package checks (the remaining warning and note come from the development sandbox) |
+| Interface | Task-first Home with search (also in the navbar), folded Advanced options / export / curves, a pinned result, a phone layout, light / dark mode, text descriptions of plots, a Cite tab; axe-core scan clean at desktop and phone width in light and dark |
 
 The sample-size catalog is now effectively complete within the project's own rules
 (every formula traceable to a published source and verified numerically; no new
@@ -967,7 +969,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       the image behind a proxy that starts one container per session (e.g. ShinyProxy) or scale replicas. *Image size and
       arm64* were not measured or built (amd64 only; Apple-silicon users get emulation). *HTTPS/domain*, **PWA** (D4) and
       the **Android TWA** (D5a) need a public HTTPS host first; the **desktop wrapper** (D7) is not started.
-19. r-universe release, then CRAN (Track C4).
+19. r-universe release, then CRAN (Track C4). **Package groundwork done (29 Oct 2026); the releases themselves are open.** Every calculation function is exported with a help page and an example (a hand-written `NAMESPACE`; roxygen2 builds only the help pages), `ss_find()` / `run_app(calculator = ...)` / the addin exist, `CITATION.cff` and `inst/CITATION` are in place, and `R CMD check --as-cran` passes every package check. Still open: vignettes per family; the CRAN-specific work (split a computation-only core from the app, `skip_on_cran()` for Monte Carlo tests, ASCII-only source, a decision on the repository name and first version number); the Zenodo DOI (owner step, `hosting.md`).
 20. Survey/field-epi tools (B3), outbreak & surveillance (B4), ID modelling for
     teaching (B5). **B3, B4 (counts-based parts) and B5 done (21 Oct 2026); line lists, epidemic curves and Rt stay deferred (D1).**
     - **Survey Sample Selection** (`calc_survey.R`, module `survey_selection`, group "Survey & Field Tools" of the Plan
@@ -1160,6 +1162,8 @@ summary-data tools). The navbar title is now "epidemiologicasuite" (D3).
 
 ## 6. Track C — making it an R package
 
+*Status 29 Oct 2026:* C1 (package skeleton) done; C2 (public API) done by exporting every `calc_*()` function with a help page plus `ss_find()`; C3/C4 (CRAN, r-universe) open, see item 19.
+
 The codebase is already close: computation is in pure functions with roxygen-style
 comments, content is data, and tests use `testthat`.
 
@@ -1203,6 +1207,8 @@ expansion (D3).
 ---
 
 ## 7. Track D — deployment and distribution
+
+*Status 29 Oct 2026:* the browser build (D3), the container image (D1, first half) and the phone / server version on Posit Connect Cloud are built; phones are redirected to the last. Open: PWA (D4), Android wrapper (D5a), long-term hosting choice, background computation for several users (needs a decision on a background-process package, F9).
 
 | Option | How | Offline? | Needs a server? | Feasibility today | Main blockers / notes |
 |---|---|---|---|---|---|
@@ -1353,9 +1359,27 @@ focus order, or colour-only meaning in the plots. The grid-input names are built
 layout needs checking. Not yet done: a manual keyboard and screen-reader walk-through, alt text / table summaries for the plots,
 dark-mode versions of the plots, and text-resize and reduced-motion checks.
 
+### Summary of the 29 October 2026 work (for readers arriving later)
+
+- **Eyes / Lesions per Patient** (several correlated measurements per patient). Between-patient designs use the design effect
+  1 + ((CV^2 + 1)m - 1)rho with a noncentral-t power (Donner & Klar 2000; Eldridge, Ashby & Kerry 2006 for unequal numbers of units),
+  equal to `clusterPower::cpa.normal(method = "weighted")` and `cpa.binary()`; the within-patient (split-face) design is a paired t on
+  the difference of arm means, variance 2 sigma^2 (1 - rho) / m (my derivation, flagged as such), equal to `pwr`'s paired t and
+  confirmed by simulation; "units per patient needed" and the floor on patients (about n x rho) are solved from the same power
+  function. Not covered: a binary outcome with both treatments in each patient, unequal allocation, a patient-by-treatment variance.
+- **Interface:** task-first Home, search from every page, folded export / curves / Advanced options, pinned result, phone layout,
+  plot descriptions, dark mode, Cite tab (see the two sections below and `PLAN.md`).
+- **Package:** `calc_*()` exported with help pages and examples; `ss_find()`, `run_app(calculator = ...)`, the addin; `R CMD check`.
+- **Devices:** Connect Cloud version, phone redirect, accessibility scan (five rule violations found and fixed), see `hosting.md`.
+- **Tests:** 942 blocks (from 487 on 28 September).
+
 ### Interface, first part (29 Oct 2026, item 22 follow-up)
 
 Task-first Home (`R/home_hub.R`): a search box over every built design (matches the label, the "answers" text and the module name; choosing one opens the calculator on that design, also when it is not loaded yet), quick links to six common calculators, four task cards (the counts on them are read from the workbench definitions, not typed in), a guide banner, and the long lists (browse by design or test family, the guided wizard, the formula sandbox) folded into one section. Every calculator: the export block and the power / sensitivity curves are folded panels (closed panels are not rendered, so the curves are not computed until opened), and a short result is pinned to the bottom of the window (`R/accessibility.R` marks results shorter than 30% of the window; tall results stay in the page flow; `scroll-padding-bottom` keeps a focused input clear of it). Checked: full default test suite (923 blocks, 0 failures) after updating the two UI tests that assumed the lists were visible; the axe-core scan of all 66 pages at both sizes in light and dark mode: 0 violations. The same search is also a small box in the navbar, so it works from every page. Not done: "Advanced options" folding inside each calculator, a two-column layout, and a look at it on a real phone.
+
+### Phone layout (29 Oct 2026, `R/phone_shell.R`)
+
+One app, shaped by screen width (a CSS media query at 575 px and a small script): bottom tab bar instead of the top navbar (the long tab name "Plan: Sample Size" is shown as "Plan", its full name kept as the accessible name), a grouped drop-down instead of the calculator list (it follows the open calculator and loads one that is still loading), touch-sized form controls, the pinned result moved above the bar, the navbar search hidden (Home has the big one). Checked in an emulated iPhone 13 in Chromium (screenshots), by browser tests of both layouts, and by the axe-core scan at 390 px for the pages tried (Home, Proportions, Cohort, Eyes / Lesions, 2x2 table; light and dark). Not checked on a real phone or in Safari.
 
 ### Dependency reduction, stage 2: the easy and moderate packages (28 Oct 2026)
 Seven more runtime packages were replaced by closed forms written out in the app and tested against the real package: **pwr**,

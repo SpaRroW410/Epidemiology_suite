@@ -89,7 +89,7 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
         heading_font = font_collection("Source Serif 4", "Georgia", "Cambria", "Times New Roman", "serif"),
         "font-size-base" = "0.95rem"
       ),
-      header = tagList(browser_notice_ui(), tags$style(HTML(.workbench_css)), accessibility_script(),
+      header = tagList(browser_notice_ui(), tags$style(HTML(.workbench_css)), accessibility_script(), phone_shell_assets(),
                        if (length(pending_titles)) lazy_sidebar_assets(pending_titles))
     ),
     list(home_panel),

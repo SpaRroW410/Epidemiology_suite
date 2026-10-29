@@ -53,7 +53,8 @@ calc_analyze_attack_rate <- function(cases, at_risk, conf_level = 0.95) {
 #' @param conf_level Confidence level of the intervals reported for each exposure (default 0.95).
 #' @return A named list of class `ss_result` (printed by `print()`) with the components `n_exposures`, `highest_risk_ratio`, `highest_risk_ratio_exposure` and `inputs`, the arguments the result was calculated from.
 #' @examples
-#' ex <- rbind(c(40, 50, 4, 30), c(25, 60, 19, 20), c(10, 12, 34, 68))   # per food: ill/total exposed, ill/total not exposed
+#' # per food: ill and total among the exposed, ill and total among the unexposed
+#' ex <- rbind(c(40, 50, 4, 30), c(25, 60, 19, 20), c(10, 12, 34, 68))
 #' calc_analyze_exposure_table(ex, labels = c("Salad", "Chicken", "Dessert"))
 #' @export
 calc_analyze_exposure_table <- function(exposures, labels = NULL, conf_level = 0.95) {

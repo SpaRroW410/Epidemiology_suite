@@ -44,5 +44,6 @@ pilot estimates.
 }
 \examples{
 # the documented Alzheimer example: 208 per group
-calc_longitudinal_edland(visit_times = seq(0, 1.5, 0.25), delta = 1.5, sigma2_slope = 24, sigma2_residual = 10, alpha = 0.05, power = 0.80)
+calc_longitudinal_edland(visit_times = seq(0, 1.5, 0.25), delta = 1.5, sigma2_slope = 24,
+                         sigma2_residual = 10, alpha = 0.05, power = 0.80)
 }

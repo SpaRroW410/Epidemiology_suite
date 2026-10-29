@@ -1,10 +1,10 @@
 # Software Design Document
-## epidemiologicasuite — Comprehensive Sample Size Calculator for Community Medicine / Epidemiology
+## Epidemiological suite (R package `epidemiologicasuite`) — sample size, power and analysis tools for community medicine / epidemiology
 
 | | |
 |---|---|
-| **Status** | v0.2 — sample-size catalog essentially complete; suite expansion planned |
-| **Date** | 28 September 2026 (v0.1: 18 August 2026) |
+| **Status** | v0.3 — catalog essentially complete; Analyze, planning, survey and outbreak tools built; three versions (browser, phone / server, R package); accessibility audited |
+| **Date** | 29 October 2026 (v0.2: 28 September 2026; v0.1: 18 August 2026) |
 | **Author** | Mukul |
 | **Type** | R Shiny web application |
 
@@ -26,17 +26,29 @@ contributors.
 
 ### 1.2 In scope (as built)
 - Sample size / power calculators across epidemiological and clinical study designs
-  (49 modules, ~155 designs — see §7)
+  (50 modules, 159 designs in all with the tools below — see §7)
+- An *Analyze* workbench (11 tools) that works on counts the user already has; planning tools (randomization lists, attrition),
+  survey tools (sample selection, weights) and an infectious-disease model tool
 - Per-calculator help content: formula, plain-language explanation, worked example
 - Per-calculator citation to the original methodological source and the implementing
-  package/formula
-- Three ways to find a calculator: browse by design, browse by test family, guided
-  wizard (with free-text pre-fill)
-- Single-user, stateless, browser-based tool (no accounts, no saved sessions)
+  package/formula; export of a justification paragraph, CSV, JSON, BibTeX and RIS
+- Ways to find a calculator: a search box (Home and navbar), quick links and task cards, browse by design, browse by test
+  family, guided wizard (with free-text pre-fill); from R, `ss_find()` and `run_app(calculator = ...)`
+- A phone layout (same app), a light / dark switch, text descriptions of plots, and a **Cite** tab (nine citation formats)
+- Every calculation exported as a documented R function (`calc_*()`, 195 of them)
+- Single-user, stateless tool (no accounts, no saved sessions); three delivery routes (§13)
 
 ### 1.3 Out of scope for the sample-size app — and where each now stands
 | Item | Status |
 |---|---|
+| User accounts, saved calculation history | Still out of scope |
+| Results / report export (PDF, DOCX, methods text) | Methods paragraph, CSV, JSON, BibTeX, RIS done; PDF / Word still open (ROADMAP Track B2) |
+| Study-design consulting (randomization, protocol text) | Randomization lists and attrition built; protocol text partly (the justification paragraph) |
+| Meta-analysis pooling | Meta-analysis *power* is built; pooling planned — ROADMAP B7 |
+| Mobile app | Phone layout of the same app done (bottom tab bar, one drop-down); PWA home-screen icon and Android wrapper planned — ROADMAP Track D |
+| Analysis of collected data | Summary-data *Analyze* workbench built; raw-data analysis deferred (decision D1) |
+
+---|---|
 | User accounts, saved calculation history | Still out of scope |
 | Results / report export (PDF, DOCX, methods text) | Planned — ROADMAP P1 |
 | Study-design consulting (randomization, protocol text) | Partly planned — ROADMAP Track B2 |
@@ -75,12 +87,12 @@ combination, plus long-term extensibility — not novel statistical methodology.
 ```
 ┌───────────────────────────────────────────────────────────────┐
 │  UI shell  (R/run_app.R — bslib::page_navbar)                  │
-│  Home hub + workbenches (Plan, Analyze) from module_workbenches │
+│  Home hub + workbenches (Plan, Analyze) + Cite tab; phone layout │
 └──────────────┬──────────────────────────────┬─────────────────┘
                │                              │
 ┌──────────────▼───────────────┐   ┌──────────▼──────────────────┐
 │  Home hub (R/home_*.R)        │   │  Calculator modules          │
-│  home_catalog.R  — 152 design │   │  (R/mod_*.R)                 │
+│  home_catalog.R  — design     │   │  (R/mod_*.R)                 │
 │    entries, two family indexes│   │  UI fn + server fn + meta    │
 │  home_finder.R — Browse       │──▶│  Calculate | Formula/Help |  │
 │  design_tree/_wizard.R — wizard│  │  Reference                   │
@@ -106,6 +118,11 @@ The app is the R package `epidemiologicasuite` (`DESCRIPTION`, `NAMESPACE`, flat
 module) and `module_workbenches` (which workbench and sidebar group each module sits in);
 `R/run_app.R` builds the navbar from them (`epidemiologicasuite_app()`; `run_app()` runs it). The Home hub jumps to a module with
 `bslib::nav_select()` and presets its design with `updateRadioButtons()`.
+
+Around these layers sit three small cross-cutting pieces: `R/accessibility.R` (accessible names for generated controls, keyboard
+access to scrolling results, the pinned result), `R/phone_shell.R` (the phone layout: a media query at 575 px and a script that
+builds the calculator drop-down) and `R/citation_info.R` / `R/home_cite.R` (the one place for the citation facts and the Cite tab).
+The public R API is the `calc_*()` functions (exported, each documented), `ss_find()`, `run_app()` and `epidemiologicasuite_app()`.
 
 ### 4.2 Design principles
 - **Modules are self-contained.** A module owns its inputs, its calculation call, and
@@ -146,26 +163,34 @@ module) and `module_workbenches` (which workbench and sidebar group each module 
 
 ```
 Sample_size_all/
-├── DESCRIPTION, NAMESPACE # package metadata (hand-maintained, no roxygen2)
+├── DESCRIPTION, NAMESPACE # package metadata (NAMESPACE hand-written; roxygen2 builds only the help pages)
+├── CITATION.cff           # citation for GitHub / Zenodo
 ├── app.R                  # development entry point: pkgload::load_all() + epidemiologicasuite_app()
 ├── R/                     # flat (R requires it); grouped by file-name prefix
-│   ├── run_app.R          # run_app(), epidemiologicasuite_app(): navbar + Home hub from the registry
-│   ├── registry.R         # module_registry(), module_groups
-│   ├── calc_*.R           # pure functions; calc_utils.R — validators, MC search
+│   ├── run_app.R          # run_app(), epidemiologicasuite_app(): navbar, theme, Home hub, Cite tab
+│   ├── registry.R         # module_registry(), module_workbenches
+│   ├── calc_*.R           # pure functions, exported with roxygen help; calc_utils.R — validators, MC search
 │   ├── content_*.R        # formula, explanation, example, citation, backend
-│   ├── mod_*.R            # Shiny UI + server; mod_shared_ui.R
-│   └── home_*.R, design_*.R   # home_catalog.R, home_finder.R, home_hub.R,
-│                          # home_design_tree.R, design_wizard.R, design_free_text.R
-├── tests/testthat/        # test-calc_*.R, test-design_tree.R, test-design_free_text.R,
-│                          # test-catalog_consistency.R, ...
+│   ├── mod_*.R            # Shiny UI + server; mod_shared_ui.R (export, curves, advanced options)
+│   ├── home_*.R, design_*.R   # home_catalog.R, home_finder.R, home_hub.R, home_cite.R,
+│   │                      # home_design_tree.R, design_wizard.R, design_free_text.R
+│   ├── ss_find.R, citation_info.R, accessibility.R, phone_shell.R, lazy_modules.R, browser_build.R
+├── man/                   # 199 help pages (built with roxygen2, roclets = "rd")
+├── inst/                  # CITATION, rstudio/addins.dcf
+├── tests/testthat/        # test-calc_*.R, wizard, catalog, help pages, citation, phone layout, UI smoke, ...
 ├── docs/
-│   ├── ROADMAP.md         # forward plan (authoritative for "what next")
+│   ├── PLAN.md            # the plan at a glance (what is done, what is next, owner decisions)
+│   ├── ROADMAP.md         # forward plan with reasoning and evidence
 │   ├── SDD.md             # this document
+│   ├── hosting.md         # the three versions, Connect Cloud steps, adding the Zenodo DOI
+│   ├── to_do_later.md     # everything still open, as a checklist
 │   ├── checklist_by_design.md, checklist_by_test.md
-│   ├── design_identification_algorithm.md
+│   ├── design_identification_algorithm.md, design-mockups/
 │   └── project-brief.md   # original brief (historical)
+├── tools/                 # docs/ (site and help-page tools), pages/ (browser build, phone redirect),
+│                          # connect/ (Posit Connect Cloud bundle), ui-audit/ (layout and accessibility scans), webr-spike/
 ├── .claude/               # SessionStart hook + settings
-├── .github/workflows/     # tests.yml — CI
+├── .github/workflows/     # tests.yml, docs.yml (site + browser build), connect-bundle.yml, docker.yml, ...
 ├── renv.lock              # locked package versions
 ├── README.md
 └── LICENSE                # GPL-3 (relicensed from MIT, ROADMAP D2)
@@ -186,7 +211,12 @@ status and verification evidence:
 Every calculator should be reachable from both files, from the Home hub's Browse
 catalog, and — where the decision tree has a branch — from the wizard.
 
-The table below is a snapshot of what is live (28 Sep 2026).
+The table below is a snapshot of the sample-size modules as of 28 Sep 2026. Since then the app gained: the *Analyze* workbench (11 tools),
+planning tools (randomization list, attrition), survey tools (sample selection, survey weights), an infectious-disease model tool
+(herd immunity, SIR / SEIR, R0), outbreak and surveillance tools (attack rates, EARS / CUSUM) and the **Eyes / Lesions per Patient**
+module (several correlated measurements per patient: patients needed for a between-patient comparison of two means or proportions,
+a within-patient (split-face) comparison of two means, and units per patient needed for a fixed number of patients; verified against
+`clusterPower`, `pwr` and simulation). The module list in `R/registry.R` is authoritative.
 
 | Family (module) | Designs | Backend | Status |
 |---|---|---|---|
@@ -337,6 +367,12 @@ one `calculator_catalog` entry per design plus family-index keys in
 `home_catalog.R`; a wizard route in `design_tree.R` (the tests require one); tests; and a
 tick in both checklists. `run_app.R` never changes.
 
+**Documentation of the calculation function** — every `calc_*()` function is exported and documented: a roxygen block with a title,
+one `@param` per argument, `@return` (the components of the `ss_result`), `@examples` (a real worked example with literal values;
+long-running ones inside `\donttest{}`) and `@export`; `export(calc_<name>)` in `NAMESPACE`; help pages built with
+`roxygen2::roxygenise(roclets = "rd")`. Interval notation in plain-text comments is escaped (`\[0, 1)`) because roxygen reads
+markdown. `tests/testthat/test-help_pages.R` enforces all of it. Internal helpers carry `@noRd`.
+
 ---
 
 ## 9. Help / Reference Content Design
@@ -370,8 +406,10 @@ standard output and unaffected.
 |---|---|---|
 | Extensibility | New calculator = module + calc + content files + registry/catalog entries | Met |
 | Input validation | Every numeric input bounded/sanity-checked; inline messages, not crashes | Met |
-| Performance | Closed-form designs are near-instant. Monte Carlo designs take ~5–25 s and currently recompute on input change, blocking the R process | Needs a Calculate button + async (ROADMAP F9, P1) |
-| Accessibility | `bslib` semantic components; labelled inputs | Not audited (ROADMAP P3) |
+| Performance | Closed-form designs are near-instant. Monte Carlo designs take ~5–25 s, run only on a Calculate click, but still block the R process while they run; the curves are not drawn until their panel is opened; calculators load lazily (UI visible in ~27 s in the browser build instead of ~77 s) | Calculate button done; background computation (`ExtendedTask`) waits for a decision on a background-process package (ROADMAP F9) |
+| Accessibility | axe-core scan (WCAG 2.0/2.1 A and AA) of every page at desktop and phone width, light and dark: 0 violations; contrast-checked theme colours; names and keyboard access for generated controls; text descriptions of plots; dark mode | Machine-checked (`tools/ui-audit/a11y.R`); a person's keyboard and screen-reader walk-through still open |
+| Mobile | Phone layout of the same app: bottom tab bar, one calculator drop-down, touch-sized controls (`R/phone_shell.R`); phone / server version on Posit Connect Cloud | Checked in an emulated iPhone; not on a real phone |
+| Citability | Cite tab (nine formats), `CITATION.cff`, `citation()`; every calculator cites its formula's source | Met; the Zenodo DOI is an owner step |
 | Browser support | Modern evergreen browsers | Met |
 | Portability | Deployable to shinyapps.io as-is. Shinylive (WebAssembly) depends on every runtime package having a webR binary — compiled packages (`lme4`, `BayesFactor`, `Hmisc`, `mvtnorm`) are the risk | Spike planned (ROADMAP D3) |
 | Reproducibility | Same inputs → same output, including Monte Carlo designs (fixed seeds) | Met in code; package versions not locked (ROADMAP P0) |
@@ -379,33 +417,40 @@ standard output and unaffected.
 ---
 
 ## 12. Testing Strategy
-- **Unit tests** (`testthat`, 474 `test_that()` blocks, 54 files) on every
-  `calc_*.R` function and on the wizard/free-text/content logic.
+- **Unit tests** (`testthat`, 942 `test_that()` blocks, 89 files) on every `calc_*.R` function and on the
+  wizard / free-text / content / citation logic.
 - **Three verification modes** (at least one per design): published worked example;
-  real package as oracle (often bit-for-bit, packages installed only for this);
-  Monte Carlo simulation of the actual test. Oracle comparisons are recorded in test
-  comments and checklist notes.
+  real package as oracle (often bit-for-bit, packages installed only for this and
+  guarded by `skip_if_not_installed()`); Monte Carlo simulation of the actual test.
+  Oracle comparisons are recorded in test comments and checklist notes.
 - **Monte Carlo designs** additionally test type-I-error control, monotonicity (more
   effect → smaller n), and reproducibility under a fixed seed.
-- **Browser checks**: each new design is exercised in the running app with Playwright
-  before commit (currently ad-hoc scripts, not in the repo).
-- **Runtime**: the default run takes ~1 min. The 27 slowest tests (Monte Carlo,
-  ≥ 5 s each) call `skip_if_not_slow()` and run only with `S2R_SLOW_TESTS=true`;
-  the full suite takes ~13 min, mostly `test-calc_glmm.R`.
-- **CI**: `.github/workflows/tests.yml` — fast suite on every push/PR, full suite
-  weekly or on demand, packages restored from `renv.lock`.
+- **Browser tests** (`shinytest2`, headless Chrome): `test-ui_smoke.R` opens every module and
+  checks no output errors; further tests cover the lazy loading, the wizard, Home search, the Cite tab, the phone layout, the
+  plot descriptions and `run_app(calculator = ...)`. They skip themselves without Chrome or with `S2R_SKIP_UI=true`.
+- **Accessibility and layout scans** (not part of the suite): `tools/ui-audit/audit.R` (layout) and `tools/ui-audit/a11y.R`
+  (axe-core, light and dark).
+- **Help pages**: `test-help_pages.R` (every export documented, every argument described); `R CMD check --as-cran` also runs
+  every example (with `--run-donttest`) and checks code against documentation.
+- **Runtime**: the default run skips the slowest tests (Monte Carlo, ≥ 5 s each; `skip_if_not_slow()`); they run with
+  `S2R_SLOW_TESTS=true`.
+- **CI**: `.github/workflows/tests.yml` — fast suite on every push/PR, full suite weekly or on demand, packages restored from
+  `renv.lock`; `docs.yml` builds the documentation site and the browser build and boots it in headless Chrome;
+  `connect-bundle.yml` builds and runs the Connect bundle; `docker.yml` builds the image.
 - **Consistency tests**: `test-design_tree.R` (reachability of every node and built
   entry) and `test-catalog_consistency.R` (navbar ↔ catalog ↔ module design radios).
-- **Planned** (ROADMAP P1): `shinytest2` smoke tests.
 
 ---
 
 ## 13. Deployment Architecture
-- **Today**: run from source (`shiny::runApp()`); shinyapps.io-compatible as-is.
-- **Planned** (ROADMAP Track D): Docker image / hosted server; installable R package
-  with `run_app()`; Shinylive static site → PWA → Android APK via Trusted Web
-  Activity; desktop wrapper. The Shinylive spike is the go/no-go for all offline
-  options.
+One code base, three ways to use it (details and owner steps in [`hosting.md`](hosting.md)):
+- **Browser build** (Shinylive / WebAssembly) on GitHub Pages, built by `docs.yml` from the package's own `R/`; desktop browsers.
+  Phones cannot run it (about 1 GB of memory, a 64 MB download); a status panel explains the wait, and a redirect sends phones and
+  tablets to the version below.
+- **Phone / server version** on Posit Connect Cloud: a bundle (`app.R`, `R/`, `manifest.json`) built and run in CI and published
+  to the branch `connect` on every push to `main`; Connect Cloud deploys from that branch. Same app, narrow-screen layout.
+- **R package** (`remotes::install_github()`, then `run_app()`); a Docker image (`docker.yml`) for institutions.
+- **Planned** (ROADMAP Track D): PWA home-screen icon, Android wrapper, r-universe and CRAN releases, desktop wrapper.
 
 ---
 
@@ -422,7 +467,10 @@ The forward plan is [`ROADMAP.md`](ROADMAP.md). The build stages used so far:
 | 4 — niche/simulation & guidance | `simr`-style simulation, SEM, TSA, qualitative/animal guidance, genetics | **Done except genetics** (GWAS / G×E open — ROADMAP A.1) |
 | 5 — wizard, free-text half | Keyword parser pre-filling the wizard | **Done** (RCT-internals rules open) |
 | 6 — remaining backlog | Everything else in the checklists | **Effectively complete** — 8 batches plus a closing audit; remaining items blocked with documented reasons (ROADMAP §4) |
-| 8 — dependency reduction | Shrink runtime package list where reimplementation is safe | **Planned** — now ROADMAP P2 |
+| 7 — suite expansion | Analyze workbench, planning and survey tools, outbreak / surveillance tools, infectious-disease models, Eyes / Lesions per Patient | **Done** (summary-data only; raw-data workbench deferred, D1) |
+| 8 — dependency reduction | Shrink runtime package list where reimplementation is safe | **Done in part** — 12 packages replaced by checked reimplementations (two upstream bugs found); `PowerTOST`, `Exact`, `clinfun`, `kappaSize`, `lme4` remain |
+| 9 — devices and interface | Browser build, phone / server version, phone layout, lazy loading, task-first Home, search, accessibility, dark mode | **Done** (a real-phone check is open) |
+| 10 — package API | Every calculation exported with help pages, `ss_find()`, addin, Cite tab | **Done**; vignettes, r-universe and CRAN open |
 
 Items still open, blocked, or paused by the owner are kept in ROADMAP §4 with their
 unblock conditions. The two owner-paused items are external validation for
@@ -439,7 +487,7 @@ time-to-event models and model updating/recalibration.
 | Docs and navigation drift from the code | Consistency tests (ROADMAP P0); ROADMAP as the single forward-looking doc |
 | Development environment lost on container reset | SessionStart hook rebuilds it; `renv.lock` records the exact versions |
 | Development sandbox cannot reach CRAN or journal sites | `github.com/cran` mirror + apt for packages; web search for citations; items needing paper access stay open rather than guessed |
-| Monte Carlo designs block other users on a shared server | Calculate button + `ExtendedTask` before hosting widely (ROADMAP F9) |
+| Monte Carlo designs block other users on a shared server | Calculate button done; background computation (`ExtendedTask`) needs a background-process package, an owner decision (ROADMAP F9) |
 | Licence of reimplementations transcribed from GPL packages | Resolved: project relicensed to GPL-3 (ROADMAP F8 / D2); module headers keep naming each source package |
 | Scope creep as the project grows into a suite | Workbench-by-workbench milestones with exit criteria (ROADMAP §11) |
 
@@ -463,12 +511,15 @@ enforced by consistency tests rather than habit.
 
 ## Appendix: Dependencies
 
-**Runtime** (`DESCRIPTION` `Imports`): `shiny`, `bslib`, `pwr`, `presize`,
-`clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`,
-`powerMediation`, `mvtnorm`, `lme4`;
-plus `survival`, `graphics`, `stats` and `utils` from base R.
+**Runtime** (`DESCRIPTION` `Imports`): `shiny`, `bslib` (>= 0.6.0), `clinfun`, `PowerTOST`, `Exact`, `kappaSize`, `mvtnorm`, `lme4`;
+plus `survival`, `graphics`, `stats` and `utils` from base R. (Twelve earlier imports, among them `pwr`, `presize`, `epiR`,
+`pROC`, `powerMediation`, `pmsampsize`, `powerSurvEpi` and `TrialSize`, were replaced by reimplementations that are tested against
+the originals.)
 
-**Testing**: `testthat` (and `lmerTest`, optional, for one cross-check). `epiR`, `rstatix`, `Hmisc`, `tseries` and `BayesFactor` (`Suggests`) are oracles for the closed-form routines in `R/calc_closed_forms.R` and for the Analyze workbench.
+**Testing and verification** (`Suggests`): `testthat`, `withr`, `shinytest2`, `chromote`, `jsonlite`, `htmltools`, and the packages used
+as oracles by the tests (`pwr`, `epiR`, `powerMediation`, `pmsampsize`, `pROC`, `presize`, `powerSurvEpi`, `TrialSize`, `deSolve`,
+`spc`, `rstatix`, `Hmisc`, `tseries`, `BayesFactor`, `DescTools`, `lmerTest`, `sampling`, `surveillance`, ...); tests that need one
+skip themselves when it is not installed. `roxygen2` builds the help pages (development only).
 
 **Verification-only (development)**: installed from `github.com/cran/<pkg>` when a
 design is built, never loaded by the app — e.g. `longpower`, `powerlmm`, `RTSA`,

@@ -7,9 +7,17 @@ list of blocked sample-size items are in [`ROADMAP.md`](ROADMAP.md); the flat ch
 
 **Where it stands:** 66 calculators (50 sample-size, 11 analysis, 2 planning, 2 survey, 1 infectious-disease models), 159 designs,
 three versions live or ready (browser build on GitHub Pages, phone/server version on Posit Connect Cloud, R package), default test
-suite 907 blocks with 0 failures.
+suite 940 blocks with 0 failures; 195 calculation functions exported with help pages.
 
 ---
+
+## Waiting for you (owner decisions and steps)
+
+- [ ] Merge PR #11 (it contains #10 as well), then click **Republish** on Connect Cloud; try the phone redirect on a real phone
+- [ ] Zenodo: archive a release and send the **DOI**; confirm the first version number (0.1.0 now)
+- [ ] Decide on a background-process package (`mirai` or `future`) for running slow simulations without blocking other users (also changes the browser build)
+- [ ] Long-term hosting (Connect Cloud free-plan limits are not verified); rename of the GitHub repository (changes install and citation addresses)
+- [ ] The Pages build error text from 17 Oct, if it still happens
 
 ## Phase 1 — Foundations  (all done)
 
@@ -53,10 +61,10 @@ suite 907 blocks with 0 failures.
 
 - ~~**A. Task-first Home:** one search box (searches all built designs by name and description), quick links to the six most used calculators, four task cards, a "not sure?" guide banner; the 45-row accordion, the wizard and the formulas moved behind one folded section~~ (29 Oct)
 - [ ] **B. Calculator pages with progressive disclosure.** Done for every calculator at once (29 Oct): ~~Export and Power / sensitivity curves are folded panels, closed by default (and the curves are not drawn until opened); a short result stays pinned at the bottom of the window while the inputs above are edited~~. Still open: "Advanced options" folded inside each calculator (a per-module change, most-used first), a two-column layout on wide screens, a design-selector that is not a long radio list
-- [ ] **C. Phone shell:** bottom navigation, one question per screen for the guide, large result card; the most common 8–10 calculators first, the rest loaded when opened
+- ~~**C. Phone layout** (the same app, one URL): on screens up to 575 px wide the navbar becomes a bar of large tabs at the bottom (Home, Plan, Analyze, Cite), the long calculator list becomes one drop-down grouped like the list, controls and buttons get touch-sized heights, and the pinned result sits above the bar; wide screens are unchanged~~ (29 Oct). Not done: a separate slimmer app with only the common calculators, one-question-per-screen for the guide (the guide already shows one question at a time), the dark-mode switch on phones (they follow the phone's setting), a check on a real phone
 - ~~Search from every page: a small search box in the navbar next to the dark-mode switch, the same search as on Home~~ (29 Oct)
 - [ ] Re-run the layout and accessibility scans after each step (`tools/ui-audit/audit.R`, `a11y.R`)
-- [ ] Still to do for accessibility: a person's keyboard and screen-reader walk-through, text descriptions for plots, dark-mode plots, text-resize checks, a layout pass on a real phone
+- [ ] Still to do for accessibility: a person's keyboard and screen-reader walk-through, dark-mode plots, text-resize checks, a layout pass on a real phone. ~~Text descriptions for the plots~~ done 29 Oct: the power / sensitivity curves, the surveillance chart and the epidemic-model chart carry an alt text with axes, ranges, trend and the current value, computed from the same numbers as the plot
 
 ## Phase 5 — The R package for analysts
 
@@ -86,7 +94,7 @@ suite 907 blocks with 0 failures.
 
 ---
 
-## Design mock-ups (29 Oct 2026; pictures only, nothing here is built yet)
+## Design mock-ups (29 Oct 2026; A, the shared parts of B and D are now built, C is not)
 
 Today's pages: [Home](design-mockups/current_home.png), [calculator](design-mockups/current_calculator.png). Proposals:
 [A task-first Home](design-mockups/a_home.png), [B calculator with progressive disclosure](design-mockups/b_calc.png),

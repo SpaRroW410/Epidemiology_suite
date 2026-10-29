@@ -21,6 +21,7 @@ A named list of class \code{ss_result} (printed by \code{print()}) with the comp
 Exposure-specific attack rates and risk ratios (food-specific attack-rate table)
 }
 \examples{
-ex <- rbind(c(40, 50, 4, 30), c(25, 60, 19, 20), c(10, 12, 34, 68))   # per food: ill/total exposed, ill/total not exposed
+# per food: ill and total among the exposed, ill and total among the unexposed
+ex <- rbind(c(40, 50, 4, 30), c(25, 60, 19, 20), c(10, 12, 34, 68))
 calc_analyze_exposure_table(ex, labels = c("Salad", "Chicken", "Dessert"))
 }

@@ -1,4 +1,4 @@
-# epidemiologicasuite — Sample Size Calculator
+# Epidemiological suite — sample size, power and analysis tools
 
 An R Shiny web app for sample size and power calculations in community medicine,
 epidemiology and clinical research. Every calculator comes with its formula
@@ -6,17 +6,20 @@ epidemiology and clinical research. Every calculator comes with its formula
 example, the original methodological citation, and the name of the package or
 formula that implements it.
 
-**Current state:** 49 sample-size calculator modules (156 designs) plus eleven
-*Analyze* tools (2x2 table analysis, stratified Mantel-Haenszel analysis, person-time rates, standardization and SMR, paired/agreement/trend tests, diagnostic test evaluation, confidence intervals, comparison of two proportions or means, vaccine efficacy, outbreak measures, aberration detection), planning, survey and infectious-disease-model tools, 600+ unit-test blocks and browser-driven
-UI smoke tests. The project, app and future package are named **epidemiologicasuite**. The sample-size catalog is essentially complete; the project is now
-planning its next step — growing into a wider **epidemiology suite**, an installable
-**R package**, and offline/mobile distribution. See
-[`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Current state (29 October 2026):** 66 calculators (50 sample-size, 11 *Analyze* tools, 2 planning tools,
+2 survey tools, 1 infectious-disease model tool) covering 159 designs, each with its formula, a worked example and a
+citable source, checked against a published value, a real package or a simulation. The app is called **Epidemiological
+suite**; the R package is `epidemiologicasuite`. There are three ways to use it (see below): the browser build on GitHub Pages,
+the phone / server version on Posit Connect Cloud, and the R package, in which **every calculation is an exported function
+with its own help page**. 942 unit-test blocks plus browser-driven UI tests, an accessibility scan (axe-core, WCAG A/AA, light and
+dark mode, desktop and phone width) and `R CMD check --as-cran` back it. What is done and what is next:
+[`docs/PLAN.md`](docs/PLAN.md); the reasoning and evidence: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 | Document | What it's for |
 |---|---|
 | **Documentation site** (pkgdown, `tools/docs/`) | One page per calculator -- formula, explanation, worked example, citation, how it is computed -- plus the roadmap and design documents. Built from the package's own text on every push; published to GitHub Pages from `main` (see below) |
 | [`docs/PLAN.md`](docs/PLAN.md) | The plan at a glance: what is done (struck through) and what is next |
+| [`docs/hosting.md`](docs/hosting.md) | The three versions (browser, phone / server, R package), how each is built, Connect Cloud steps, adding the Zenodo DOI |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Priorities, review findings, suite/package/deployment plans, and every open or blocked item |
 | [`docs/checklist_by_design.md`](docs/checklist_by_design.md) · [`docs/checklist_by_test.md`](docs/checklist_by_test.md) | Per-design build status and the verification evidence behind each one |
 | [`docs/to_do_later.md`](docs/to_do_later.md) | Everything not finished yet, in roadmap order, as a checklist (owner decisions marked) |
@@ -48,6 +51,7 @@ workbench lists its modules in a sidebar, under group headers ordered roughly si
 | **Diagnostic & Screening** | Diagnostic Accuracy | Se/Sp precision-based; vs. reference value; two tests unpaired/paired; PPV/NPV; LR+/LR−; diagnostic odds ratio |
 | | ROC / AUC | single AUC vs. 0.5; two correlated AUCs |
 | **Agreement & Reliability** | Agreement / Reliability | Cohen's kappa; ICC; Cronbach's alpha; Bland-Altman limits of agreement; Lin's CCC |
+| **Several Measurements per Patient** | Eyes / Lesions per Patient | both eyes, several lesions, patches or teeth per patient: patients needed when a patient's units are correlated, with the same treatment in all of a patient's units (two means, two proportions, fixed or varying units per patient) or both treatments in each patient (split-face, one eye per arm; two means); units per patient needed for a fixed number of patients; the floor on patients that extra units cannot get below |
 | **Clinical Trials** | Pilot / Feasibility | 12/arm rule; precision of a pilot SD |
 | | Simon Two-Stage | minimax and optimal phase II designs |
 | | Equivalence (TOST) | two means; two proportions; PK bioequivalence (2×2, 2×2×4, 2×3×3); bioequivalence by expected power |
@@ -125,21 +129,37 @@ reimplements the verified formula instead of adding a runtime dependency.
 
 ## Finding a calculator
 
-The **Home** tab has three helpers:
+The **Home** page is task-first:
 
-- **Browse calculators** — one accordion of every built design, switchable between
-  *by study design* and *by test family* (G*Power-style). Each entry jumps straight
-  to the right module with the right design pre-selected.
-- **Which calculator? (guided wizard)** — asks one question at a time (aim,
-  experimental vs. observational, selection basis, outcome, groups) and shows its
-  reasoning. An optional free-text box pre-fills the answers from a one-sentence
-  description of the study. Every one of the 156 designs can be reached from it,
-  either through the study-design questions or through its last option, "I
-  already know which statistical test I'll use", which browses by test family.
-  Designs that are not built yet say so, and say what would unblock them
-  (`docs/ROADMAP.md` §4). Tests enforce both.
-- **Formulas & LaTeX** — how formulas are written in this app, plus a live LaTeX
-  sandbox.
+- **Search** — one box over every built design (it matches the design's name, the question it answers and the calculator
+  it lives in; "two means", "kappa", "stepped wedge", "eyes per patient"). Choosing a result opens that calculator on that
+  design. A smaller copy of the box sits in the navbar, so it works from every page.
+- **Quick links and task cards** — the six most-used calculators, and four cards: *Plan a study*, *Analyze counts I have*,
+  *Outbreak and surveillance*, *Survey and field work*.
+- **Not sure which calculator?** — opens the guided wizard: one question at a time (aim, experimental vs. observational,
+  selection basis, outcome, groups) with its reasoning, plus an optional free-text box that pre-fills the answers from a
+  one-sentence description of the study. Every one of the 159 designs can be reached from it, either through the study-design
+  questions or through its last option, "I already know which statistical test I'll use". Designs that are not built yet say
+  so and say what would unblock them (`docs/ROADMAP.md` §4). Tests enforce both.
+- **Browse all calculators, the guided wizard, formulas** (one folded section) — the accordion of every built design,
+  switchable between *by study design* and *by test family* (G*Power-style), the wizard, and a live LaTeX sandbox.
+
+From R, without opening the app: `ss_find("eyes per patient")` returns the matching designs, and
+`run_app(calculator = "eyes per patient")` opens the app on one (a design key from `ss_find()` or a few words). An RStudio /
+Positron addin, *Find a sample size calculator*, wraps both.
+
+## Using a calculator page
+
+- **Calculate / Formula / Help / Reference** tabs per calculator; a design selector where a module has several.
+- **Advanced options** (folded; sidedness of the test, optional population size) in the most-used calculators.
+- **A short result stays pinned** at the bottom of the window while the inputs above it are changed.
+- **Export** (folded): a ready-to-paste justification paragraph for a protocol, CSV, JSON, and the citation of the formula's source
+  (BibTeX, RIS). **Power / sensitivity curves** (folded; drawn only when opened) have a text description for screen readers.
+- **Light / dark** switch in the navbar (starts from the system setting).
+- **On a phone** (screens up to 575 px wide) the navbar becomes a bottom tab bar (Home, Plan, Analyze, Cite), the long list of
+  calculators becomes one drop-down, and controls get touch-sized heights. It is the same app and the same address.
+- **Cite** tab: how to cite the software in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX, RIS or as a sentence for a Methods
+  section, with copy and download buttons.
 
 ---
 
@@ -199,7 +219,8 @@ ss_find("eyes per patient")            # a data frame: key, design, calculator, 
 run_app(calculator = "eyes per patient")   # a design key from ss_find(), or words (the best match opens)
 ```
 
-Every calculation is also an exported function with its own help page and a worked example, for scripts and Quarto:
+Every calculation is also an exported function (195 `calc_*()` functions) with its own help page, every argument described and a
+worked example taken from a verified test, for scripts, Quarto and R Markdown:
 
 ```r
 ?calc_means_paired
@@ -250,8 +271,8 @@ testthat::test_local()   # loads the package from the working directory first
 The tests call internal functions, so they must run inside the package namespace:
 use `test_local()` (or `devtools::test()`), not `test_dir()` on its own.
 
-This takes about a minute: the 27 slowest tests (Monte Carlo simulations, ≥ 5 s
-each) are skipped. To run everything (~13 minutes, mostly `test-calc_glmm.R`):
+The default run (about 940 test blocks in 89 files) skips the slowest tests (Monte Carlo simulations, ≥ 5 s
+each) and takes about ten minutes with the browser tests, about a minute without them. To run everything (~13 minutes more, mostly `test-calc_glmm.R`):
 
 ```sh
 S2R_SLOW_TESTS=true Rscript -e 'testthat::test_local()'
@@ -267,6 +288,14 @@ themselves when either is missing, or with `S2R_SKIP_UI=true`. `shinytest2` is n
 `renv.lock` (its current release needs a newer `rlang` than the lock pins); CI installs
 version 0.4.1 explicitly. Locally: `remotes::install_version("shinytest2", "0.4.1")`.
 
+Other checks that are not part of the test suite:
+
+- `tools/ui-audit/audit.R` — every calculator at desktop and phone width: horizontal scroll, clipped controls, output and console errors.
+- `tools/ui-audit/a11y.R` — axe-core (WCAG 2.0/2.1 A and AA) over every calculator; `A11Y_DARK=true` for dark mode. Needs `npm i axe-core` and `AXE_JS=/path/to/axe.min.js`.
+- `R CMD build . && R CMD check --as-cran` — help pages, examples (also `--run-donttest`), code/documentation consistency, tests. In the development sandbox it ends with a warning about the missing English UTF-8 locale and a note about the unverifiable clock; both are the sandbox's.
+
+`tests/testthat/test-help_pages.R` fails if an exported function lacks a help page, an argument description, a value or (for `calc_*`) an example.
+
 A new Monte Carlo test should start with `skip_if_not_slow()`
 (`tests/testthat/helper-slow.R`). To run one file:
 `testthat::test_local(filter = "calc_proportion")`.
@@ -279,22 +308,29 @@ request, and the full suite weekly or on demand from the Actions tab.
 ## Repository structure
 
 ```
-DESCRIPTION, NAMESPACE package metadata (hand-maintained; no roxygen2)
+DESCRIPTION, NAMESPACE package metadata (NAMESPACE is hand-written; roxygen2 builds only the help pages, roclets = "rd")
+CITATION.cff           citation for GitHub and Zenodo (the DOI goes here once issued, see docs/hosting.md)
 app.R                  development entry point: pkgload::load_all() + epidemiologicasuite_app()
 R/                     the package (flat, as R requires; grouped by file-name prefix):
-├── run_app.R          run_app() / epidemiologicasuite_app(): grouped navbar + Home hub
-├── registry.R         module_registry() + module_groups
-├── calc_*.R           pure calculation functions, no Shiny (+ calc_utils.R)
+├── run_app.R          run_app() / epidemiologicasuite_app(): grouped navbar, theme, Home hub, Cite tab
+├── registry.R         module_registry() + module_workbenches (groups)
+├── calc_*.R           pure calculation functions, no Shiny, all exported with roxygen help (+ calc_utils.R)
 ├── content_*.R        per-module formula / explanation / example / citation
-├── mod_*.R            Shiny UI + server per module (+ mod_shared_ui.R)
-└── home_*.R, design_*.R   Home hub: catalog, browse finder, wizard, free-text parser
-man/                   help pages for the two exported functions
-tests/testthat/        unit tests (calc_*.R functions, wizard, catalog consistency)
-docs/                  roadmap, SDD, checklists, algorithm doc, original brief
+├── mod_*.R            Shiny UI + server per module (+ mod_shared_ui.R: export, curves, advanced options)
+├── home_*.R, design_*.R   Home hub (home_hub.R search, cards), catalog, browse finder, wizard, free-text parser
+├── ss_find.R          ss_find() and the RStudio / Positron addin
+├── home_cite.R, citation_info.R   the Cite tab and the facts behind every citation format (author, version, DOI)
+├── accessibility.R    names and keyboard access for generated controls, the pinned result
+├── phone_shell.R      the phone layout (bottom tab bar, calculator drop-down)
+└── lazy_modules.R, browser_build.R   lazy loading with progress; notice and checks for the browser build
+man/                   help pages (199: every exported function)
+inst/                  CITATION (what citation("epidemiologicasuite") prints), rstudio/addins.dcf
+tests/testthat/        unit tests, browser (shinytest2) tests, help-page, citation, phone-layout and plot-description tests
+docs/                  PLAN.md, ROADMAP.md, SDD.md, hosting.md, to_do_later.md, checklists, design-mockups/
 .claude/               SessionStart hook that rebuilds the R environment
-.github/workflows/     CI (tests.yml), documentation site (docs.yml), container image (docker.yml), browser-build spike (shinylive-spike.yml)
+.github/workflows/     CI (tests.yml), documentation site and browser build (docs.yml), phone-version bundle (connect-bundle.yml), container image (docker.yml), memory and browser spikes
 Dockerfile, docker-compose.yml, .dockerignore   container image (tools/docker/ holds its browser smoke test)
-tools/                 docs/ (site generator), pages/ (browser build for GitHub Pages), webr-spike/ (Shinylive feasibility checks)
+tools/                 docs/ (site generator, help-page tools), pages/ (browser build and phone redirect), connect/ (Posit Connect Cloud bundle), ui-audit/ (layout and accessibility scans), webr-spike/
 renv.lock              locked package versions
 ```
 
@@ -336,8 +372,14 @@ Every calculator is three files plus registry entries.
    picks up new `test_families` keys automatically. `test-design_tree.R` fails if
    any built catalog entry is unreachable, and `test-catalog_consistency.R` fails if
    the catalog, the navbar and the module's `design` radio values disagree.
-5. Add `tests/testthat/test-calc_<name>.R` with a published worked example.
-6. Tick the item in both checklists with a short verification note.
+5. Add `tests/testthat/test-calc_<name>.R` with a published worked example, and, where a package computes the same thing, a
+   comparison with it (guarded by `skip_if_not_installed()`).
+6. Document the `calc_*` function for users: a roxygen block with a title, one `@param` per argument, `@return`, `@examples`
+   (a real worked example, literal values) and `@export`; add `export(calc_<name>)` to `NAMESPACE`; rebuild the help pages with
+   `roxygen2::roxygenise(roclets = "rd")`. `tests/testthat/test-help_pages.R` fails if any of that is missing. Plain-text roxygen
+   comments use markdown: write interval notation as `\[0, 1)`.
+7. Check the new page with `tools/ui-audit/audit.R` and `tools/ui-audit/a11y.R` (no horizontal scroll, no accessibility rule violations).
+8. Tick the item in both checklists with a short verification note.
 
 ---
 

@@ -58,5 +58,6 @@ may drop out (retention < 1) at later visits.
 }
 \examples{
 # retention at four visits in each arm; 37 in the first arm
-calc_mmrm_ar1(rho = 0.6, ra = c(1, 0.76, 0.63, 0.52), rb = c(1, 0.87, 0.81, 0.78), sigma = 1, lambda = sqrt(1.25 / 1.75), delta = 0.9, power = 0.904)
+calc_mmrm_ar1(rho = 0.6, ra = c(1, 0.76, 0.63, 0.52), rb = c(1, 0.87, 0.81, 0.78), sigma = 1,
+              lambda = sqrt(1.25 / 1.75), delta = 0.9, power = 0.904)
 }

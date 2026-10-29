@@ -291,27 +291,49 @@ render_power_curves <- function(output, curve_spec, input = NULL) {
     }
   }
 
-  .plot_curve <- function(spec, which) {
+  # the points of one curve (shared by the plot and its text description, so they are computed once)
+  .curve_pts <- function(spec, which) {
     axis <- spec[[which]]
     req(axis)
-    pts <- if (is_gated(spec)) {
+    if (is_gated(spec)) {
       store <- gated_store()
       req(store_matches(store, spec))
       store$pts[[which]]
     } else {
       ss_curve_points(spec$calc_fn, spec$args, axis$param, axis$values, time_limit = 2)
     }
-    .draw_curve(pts, spec, which)
+  }
+  pts_effect <- reactive({ spec <- curve_spec(); req(spec); .curve_pts(spec, "effect") })
+  pts_power <- reactive({ spec <- curve_spec(); req(spec); .curve_pts(spec, "power") })
+
+  # text description of a curve for people who cannot see it (the plot's alt text): axes, ranges, the trend, and the current setting
+  .curve_alt <- function(pts, spec, which) {
+    axis <- spec[[which]]
+    label <- if (!is.null(axis$label)) axis$label else axis$param
+    main <- if (!is.null(axis$title)) axis$title else
+      if (which == "power") "Required n vs. power" else "Required n vs. effect size"
+    if (is.null(pts) || nrow(pts) == 0) return(sprintf("%s. No valid points for the current inputs, so no curve is drawn.", main))
+    fmt <- function(v) format(signif(v, 3), trim = TRUE)
+    d <- diff(pts$y)
+    trend <- if (all(d <= 1e-9)) "The required n falls as the horizontal value increases."
+      else if (all(d >= -1e-9)) "The required n rises as the horizontal value increases."
+      else sprintf("The required n is lowest at %s = %s and highest at %s = %s.", label, fmt(pts$x[which.min(pts$y)]), label, fmt(pts$x[which.max(pts$y)]))
+    cur <- if (is_gated(spec)) NULL else tryCatch(do.call(spec$calc_fn, spec$args), error = function(e) NULL)
+    fname <- if (is.null(cur)) NULL else .ss_curve_n_field(cur)
+    now <- if (!is.null(fname)) sprintf(" At the current setting, %s = %s, the required n is %s (marked with a red dot).",
+                                         label, fmt(spec$args[[axis$param]]), fmt(cur[[fname]])) else ""
+    sprintf("Line chart: %s. Horizontal axis: %s, from %s to %s. Vertical axis: required n, from %s to %s. %s%s",
+            main, label, fmt(min(pts$x)), fmt(max(pts$x)), fmt(min(pts$y)), fmt(max(pts$y)), trend, now)
   }
 
   output$curve_effect <- renderPlot({
     spec <- curve_spec()
     req(spec)
-    .plot_curve(spec, "effect")
-  })
+    .draw_curve(pts_effect(), spec, "effect")
+  }, alt = function() { spec <- curve_spec(); req(spec); .curve_alt(pts_effect(), spec, "effect") })
   output$curve_power <- renderPlot({
     spec <- curve_spec()
     req(spec)
-    .plot_curve(spec, "power")
-  })
+    .draw_curve(pts_power(), spec, "power")
+  }, alt = function() { spec <- curve_spec(); req(spec); .curve_alt(pts_power(), spec, "power") })
 }

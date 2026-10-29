@@ -183,7 +183,8 @@ calc_longitudinal_slope_diff <- function(visit_times, delta, sigma2_intercept, s
 #' @return list(n1, n2, n_total, inputs)
 #' @examples
 #' # retention at four visits in each arm; 37 in the first arm
-#' calc_mmrm_ar1(rho = 0.6, ra = c(1, 0.76, 0.63, 0.52), rb = c(1, 0.87, 0.81, 0.78), sigma = 1, lambda = sqrt(1.25 / 1.75), delta = 0.9, power = 0.904)
+#' calc_mmrm_ar1(rho = 0.6, ra = c(1, 0.76, 0.63, 0.52), rb = c(1, 0.87, 0.81, 0.78), sigma = 1,
+#'               lambda = sqrt(1.25 / 1.75), delta = 0.9, power = 0.904)
 #' @export
 calc_mmrm_ar1 <- function(rho, ra, rb = NULL, sigma, times = seq_along(ra), lambda = 1,
                            delta, alpha = 0.05, power = 0.8, alternative = "two.sided") {
@@ -283,7 +284,8 @@ calc_mmrm_ar1 <- function(rho, ra, rb = NULL, sigma, times = seq_along(ra), lamb
 #' @return list(n_total, n_per_group, inputs)
 #' @examples
 #' # Diggle et al. (2002) p. 29: 3 visits at 0, 2 and 5, one-sided; 313 per group
-#' calc_longitudinal_diggle(visit_times = c(0, 2, 5), delta = 0.5, sigma2 = 100, rho = 0.2, alternative = "one.sided", power = 0.80)
+#' calc_longitudinal_diggle(visit_times = c(0, 2, 5), delta = 0.5, sigma2 = 100, rho = 0.2,
+#'                          alternative = "one.sided", power = 0.80)
 #' @export
 calc_longitudinal_diggle <- function(visit_times, delta, sigma2, rho,
                                       alpha = 0.05, power = 0.8,
@@ -337,7 +339,8 @@ calc_longitudinal_diggle <- function(visit_times, delta, sigma2, rho,
 #' @return list(n_total, n_per_group, inputs)
 #' @examples
 #' # the documented Alzheimer example: 208 per group
-#' calc_longitudinal_edland(visit_times = seq(0, 1.5, 0.25), delta = 1.5, sigma2_slope = 24, sigma2_residual = 10, alpha = 0.05, power = 0.80)
+#' calc_longitudinal_edland(visit_times = seq(0, 1.5, 0.25), delta = 1.5, sigma2_slope = 24,
+#'                          sigma2_residual = 10, alpha = 0.05, power = 0.80)
 #' @export
 calc_longitudinal_edland <- function(visit_times, delta, sigma2_slope, sigma2_residual,
                                       alpha = 0.05, power = 0.8,
@@ -428,7 +431,9 @@ calc_longitudinal_edland <- function(visit_times, delta, sigma2_slope, sigma2_re
 #' @return list(n1, n2, n_total, inputs)
 #' @examples
 #' # no attrition until the last visit (p gives the share of subjects whose last visit is each one)
-#' calc_longitudinal_hu(visit_times = seq(0, 1.5, 0.25), p = c(rep(0, 6), 1), delta = 1.5, sigma2_slope = 24, sigma2_residual = 10, cor_intercept_slope = 0.5, power = 0.80)
+#' calc_longitudinal_hu(visit_times = seq(0, 1.5, 0.25), p = c(rep(0, 6), 1), delta = 1.5,
+#'                      sigma2_slope = 24, sigma2_residual = 10, cor_intercept_slope = 0.5,
+#'                      power = 0.80)
 #' @export
 calc_longitudinal_hu <- function(visit_times, p, delta, sigma2_slope, sigma2_residual,
                                   sigma2_intercept = 0, cor_intercept_slope = 0, lambda = 1,

@@ -17,7 +17,8 @@
 #' @return list(N, w, df, inputs)
 #' @examples
 #' # Cohen (1988) exercise 7.1: four equally likely categories against one larger share; N = 131
-#' calc_chisq_gof(P0 = rep(0.25, 4), P1 = c(0.375, rep((1 - 0.375) / 3, 3)), alpha = 0.05, power = 0.80)
+#' calc_chisq_gof(P0 = rep(0.25, 4), P1 = c(0.375, rep((1 - 0.375) / 3, 3)),
+#'                alpha = 0.05, power = 0.80)
 #' @export
 calc_chisq_gof <- function(P0, P1, alpha = 0.05, power = 0.8) {
   .validate_prob_vector(P0, "P0")
@@ -148,7 +149,8 @@ calc_mcnemar <- function(p10, p01, alpha = 0.05, power = 0.8) {
 #' @return list(n_stratified, n_pooled, inputs)
 #' @examples
 #' # five strata (Cohen-style textbook example): stratified n = 447, naive pooled n = 1151
-#' calc_mantelhaenszel(alpha = 0.05, power = 0.80, a = c(0.15, 0.15, 0.20, 0.25, 0.25), b = c(0.4, 0.4, 0.5, 0.6, 0.6), p1 = c(0.5, 0.6, 0.7, 0.8, 0.9), phi = 2)
+#' calc_mantelhaenszel(alpha = 0.05, power = 0.80, a = c(0.15, 0.15, 0.20, 0.25, 0.25),
+#'                     b = c(0.4, 0.4, 0.5, 0.6, 0.6), p1 = c(0.5, 0.6, 0.7, 0.8, 0.9), phi = 2)
 #' @export
 calc_mantelhaenszel <- function(alpha = 0.05, power = 0.8, a, b, p1, phi) {
   .validate_unit_interval(alpha, "alpha")

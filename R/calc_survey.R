@@ -186,7 +186,8 @@ calc_survey_select_pps <- function(sizes, n, seed, labels = NULL, randomize_orde
 #' @examples
 #' set.seed(3)
 #' villages <- round(runif(120, 200, 3000))   # populations of 120 villages
-#' calc_survey_epi_clusters(villages, n_clusters = 30, per_cluster = 7, seed = 11, labels = paste("Village", 1:120))
+#' calc_survey_epi_clusters(villages, n_clusters = 30, per_cluster = 7, seed = 11,
+#'                          labels = paste("Village", 1:120))
 #' @export
 calc_survey_epi_clusters <- function(sizes, n_clusters = 30, per_cluster = 7, seed, labels = NULL) {
   if (!is.numeric(per_cluster) || length(per_cluster) != 1 || is.na(per_cluster) || per_cluster < 1 || per_cluster != round(per_cluster)) {
