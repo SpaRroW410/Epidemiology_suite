@@ -53,7 +53,7 @@ suite 907 blocks with 0 failures.
 - ~~**A. Task-first Home:** one search box (searches all built designs by name and description), quick links to the six most used calculators, four task cards, a "not sure?" guide banner; the 45-row accordion, the wizard and the formulas moved behind one folded section~~ (29 Oct)
 - [ ] **B. Calculator pages with progressive disclosure.** Done for every calculator at once (29 Oct): ~~Export and Power / sensitivity curves are folded panels, closed by default (and the curves are not drawn until opened); a short result stays pinned at the bottom of the window while the inputs above are edited~~. Still open: "Advanced options" folded inside each calculator (a per-module change, most-used first), a two-column layout on wide screens, a design-selector that is not a long radio list
 - [ ] **C. Phone shell:** bottom navigation, one question per screen for the guide, large result card; the most common 8–10 calculators first, the rest loaded when opened
-- [ ] Search from every page, not only Home (the Home search is done)
+- ~~Search from every page: a small search box in the navbar next to the dark-mode switch, the same search as on Home~~ (29 Oct)
 - [ ] Re-run the layout and accessibility scans after each step (`tools/ui-audit/audit.R`, `a11y.R`)
 - [ ] Still to do for accessibility: a person's keyboard and screen-reader walk-through, text descriptions for plots, dark-mode plots, text-resize checks, a layout pass on a real phone
 
