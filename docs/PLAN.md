@@ -5,7 +5,7 @@ list of blocked sample-size items are in [`ROADMAP.md`](ROADMAP.md); the flat ch
 [`to_do_later.md`](to_do_later.md). The package is still named `epidemiologicasuite`; the app and the suite are shown to people as
 **Epidemiological suite**.*
 
-**Where it stands:** 65 calculators (49 sample-size, 11 analysis, 2 planning, 2 survey, 1 infectious-disease models), 156 designs,
+**Where it stands:** 66 calculators (50 sample-size, 11 analysis, 2 planning, 2 survey, 1 infectious-disease models), 159 designs,
 three versions live or ready (browser build on GitHub Pages, phone/server version on Posit Connect Cloud, R package), default test
 suite 907 blocks with 0 failures.
 
@@ -29,7 +29,7 @@ suite 907 blocks with 0 failures.
 - ~~Outbreak and surveillance: attack rates, aberration detection (EARS, CUSUM)~~ (21 Oct)
 - ~~Teaching models: SIR / SEIR with vaccination~~ (21 Oct)
 - ~~Plain-language study-design parser and wizard battery (101 descriptions, 636 click paths checked)~~ (27 Oct)
-- [ ] **Several measurements per patient (eyes, lesions, patches, teeth, split-face / split-body):** a dedicated calculator is not built. Today's general tools cover parts of it (see `to_do_later.md`); a dedicated one would take the number of units per patient (fixed or varying), the correlation between units of the same patient, and say how many patients are needed and why adding more units stops helping. Sources still to be found and checked before any formula is written
+- ~~Several measurements per patient (eyes, lesions, patches, split-face): patients needed when treatment is given to whole patients (two means, two proportions) or to each patient's units (two means), units per patient needed for a fixed number of patients, and the floor that extra units cannot get below~~ (29 Oct; checked against clusterPower, pwr and simulation; not covered: binary outcome with both treatments in each patient, unequal allocation, patient-by-treatment interaction)
 - Not promised, kept on the list: raking / post-stratification, seasonal detection baselines, age-structured models, line-list upload and R0 / Rt (deferred by decision D1)
 
 ## Phase 3 — Reaching people on every device

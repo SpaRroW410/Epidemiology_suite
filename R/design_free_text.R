@@ -198,12 +198,24 @@ free_text_rules <- list(
   ),
 
   exp_unit = list(
+    # several eyes / lesions / patches per patient: both treatments in each patient first (split-face, fellow eye), then the same treatment for all of a patient's units
+    list(pattern = "split.?(face|body|mouth|eye)|fellow eye|contralateral|one eye (per|in each|on each|for each)|(left|right) (eye|side|half)|each patient (gets?|receives?|has) both|both treatments in (each|every) patient",
+         option_index = 8, confidence = "High"),
+    list(pattern = "both eyes|each eye|two eyes|eyes per patient|per eye\\b|lesions? per (patient|person|subject)|patches? per (patient|person|subject)|multiple lesions|several lesions|teeth per (patient|person)|bilateral|several measurements per (patient|person|subject)|clustered within (patient|person|subject)",
+         option_index = 7, confidence = "High"),
     list(pattern = "stepped.?wedge",                                         option_index = 4, confidence = "High"),
     list(pattern = "cross.?over",                                            option_index = 3, confidence = "High"),
     list(pattern = "n.?of.?1|single subject",                                option_index = 5, confidence = "High"),
     list(pattern = "cluster|villages?|schools?|wards?|\\bphcs?\\b|hospitals? (were|are) randomi|communities",
          option_index = 2, confidence = "High"),
     list(pattern = "individual(ly)?|patients|participants|subjects|volunteers|children were randomi|women were randomi|\\btrial\\b|randomi[sz]ed|bioequivalen|phase (i|ii|2|1)\\b|single.?arm",
+         option_index = 1, confidence = "Medium")
+  ),
+
+  pu_outcome = list(
+    list(pattern = "binary|yes.?no|event|healed|cured|response|proportion|prevalence|incidence|present or absent|odds",
+         option_index = 2, confidence = "Medium"),
+    list(pattern = "continuous|mean|score|pressure|thickness|acuity|measurement|diameter|size|level",
          option_index = 1, confidence = "Medium")
   ),
 

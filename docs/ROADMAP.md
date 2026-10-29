@@ -30,8 +30,8 @@
 
 | Measure | Value |
 |---|---|
-| Calculator modules | **65** (49 sample-size calculators, 11 Analyze tools, 2 planning tools, 2 survey tools, 1 infectious-disease model tool), in 17 groups in the Plan workbench and 2 in Analyze |
-| Individual designs | **156**, all in the Browse catalog (F2 fixed) |
+| Calculator modules | **66** (50 sample-size calculators, 11 Analyze tools, 2 planning tools, 2 survey tools, 1 infectious-disease model tool), in 17 groups in the Plan workbench and 2 in Analyze |
+| Individual designs | **159**, all in the Browse catalog (F2 fixed) |
 | Checklist coverage | By design: **81 / 94** done (13 open) · By test: **69 / 74** done (5 open) |
 | Unit tests | **907** test blocks in the default run (0 failures, 101 skipped as slow) across 83 test files, every design checked against a published worked example, a real package (oracle), or simulation |
 | Runtime packages | `DESCRIPTION` `Imports`: `shiny`, `bslib`, `clinfun`, `PowerTOST`, `Exact`, `kappaSize`, `mvtnorm`, `lme4`, plus `survival`, `stats`, `graphics`, `utils` (was 19; twelve removed in items 16 and the stage 2 that followed, each reimplemented and checked against the original) |

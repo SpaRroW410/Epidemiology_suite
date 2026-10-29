@@ -161,12 +161,13 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] **Bioequivalence (TOST)** -- open: Reference-scaled designs for highly variable drugs (RSABE / ABEL): the 2×2, 2×2×4 and 2×3×3 designs ship with fixed 80–125% limits; `PowerTOST::sampleN.RSABE()`/`sampleN.scABEL()` exist in a runtime package but are simulation-based and not wired in. (Named in the checklist, not in the review PDF.) *Added 28 Sep 2026*
 - [ ] **Multi-arm vs. common control** -- open: Dunnett for **binary** outcomes (means only; the wizard falls back to Bonferroni/Sidak two-proportion n). *Added 28 Sep 2026*
 
-### A.3b Several measurements per patient (asked 29 Oct 2026)
-- [ ] Dedicated calculator for eyes per patient, lesions / patches / teeth per patient, split-face and split-body designs. Today's
-  nearest tools: Cluster / Design Effect (1 + (m - 1) x rho, also with varying cluster size), Cluster-randomized trial (Monte Carlo,
-  continuous and binary), Multilevel 2- and 3-level, paired means and McNemar for within-patient treatment comparisons. Missing: a tool that
-  names the units (patient, eye, patch), handles one-eye patients, and shows the plateau (more units per patient cannot reduce the
-  patients needed below about n x rho). Needs a citable source and a package or published worked example to check against first.
+### A.3b Several measurements per patient (asked and built 29 Oct 2026)
+- [x] Eyes / Lesions per Patient module: treatment between patients (two means, two proportions; fixed or varying units per patient),
+  treatment within patients (split-face, one eye per arm; two means), and "units per patient needed" for a fixed number of patients,
+  with the floor. Checked against `clusterPower::cpa.normal()` / `cpa.binary()`, `pwr` and simulation.
+- [ ] Open: binary outcome with both treatments in each patient (clustered McNemar; needs a checked source), a patient-by-treatment
+  variance part for the split designs, unequal allocation, different numbers of units in the two arms, the Rosner-Milton / Obuchowski
+  style tests for the analysis side, cluster-count curves for the units-needed mode.
 
 ### A.4 Wizard
 - [x] Free-text parser: RCT internals now have rules (27 Oct 2026); revisit with real user phrasing.
