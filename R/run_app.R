@@ -67,7 +67,7 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
   # bslib::nav_select("main_nav", ...) -- see jump_to_module() in registry.R.
   ui <- do.call(page_navbar, c(
     list(
-      id = "main_nav", title = "epidemiologicasuite", lang = "en",
+      id = "main_nav", title = "Epidemiological suite", lang = "en",
       theme = bs_theme(
         version = 5,
         bootswatch = "litera",

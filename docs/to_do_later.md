@@ -1,5 +1,7 @@
 # To do later
 
+> The plan at a glance, with finished items struck through, is [`PLAN.md`](PLAN.md); this file is the long flat checklist behind it.
+
 Everything that is **not finished yet**, in one list, in roadmap order (start to end), so it can be picked up later
 without reading the whole [`ROADMAP.md`](ROADMAP.md). The roadmap stays the source of truth for the reasoning and the
 evidence; this file is the checklist. Tick an item here when it is done *and* record it in the roadmap.

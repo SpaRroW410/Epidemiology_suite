@@ -9,7 +9,7 @@ if "s2r-status" in html:
     sys.exit("overlay already present")
 if "</body>" not in html:
     sys.exit("no </body> in " + str(index))
-html = html.replace("<title>Shiny App</title>", "<title>epidemiologicasuite</title>", 1)
+html = html.replace("<title>Shiny App</title>", "<title>Epidemiological suite</title>", 1)
 
 # the phone version: redirect phones there when its address is set, and offer the link in the "still starting" message
 urls = [l.strip() for l in (pathlib.Path(__file__).parent / "mobile_url.txt").read_text(encoding="utf-8").splitlines()
