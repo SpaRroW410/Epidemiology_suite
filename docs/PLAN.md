@@ -56,7 +56,7 @@ suite 907 blocks with 0 failures.
 - [ ] **C. Phone shell:** bottom navigation, one question per screen for the guide, large result card; the most common 8–10 calculators first, the rest loaded when opened
 - ~~Search from every page: a small search box in the navbar next to the dark-mode switch, the same search as on Home~~ (29 Oct)
 - [ ] Re-run the layout and accessibility scans after each step (`tools/ui-audit/audit.R`, `a11y.R`)
-- [ ] Still to do for accessibility: a person's keyboard and screen-reader walk-through, text descriptions for plots, dark-mode plots, text-resize checks, a layout pass on a real phone
+- [ ] Still to do for accessibility: a person's keyboard and screen-reader walk-through, dark-mode plots, text-resize checks, a layout pass on a real phone. ~~Text descriptions for the plots~~ done 29 Oct: the power / sensitivity curves, the surveillance chart and the epidemic-model chart carry an alt text with axes, ranges, trend and the current value, computed from the same numbers as the plot
 
 ## Phase 5 — The R package for analysts
 

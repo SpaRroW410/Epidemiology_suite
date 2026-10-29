@@ -125,7 +125,16 @@ mod_analyze_surveillance_server <- function(id) {
       graphics::plot(s$t, s$statistic, type = "b", pch = 16, cex = 0.6, col = "#2C3E50", xlab = "Observation", ylab = "Statistic", main = "Detection statistic and threshold")
       graphics::abline(h = s$threshold[1], lty = 2, col = "#C0392B")
       graphics::points(s$t[al], s$statistic[al], pch = 19, col = "#C0392B")
-    }, res = 96)
+    }, res = 96, alt = function() {
+      res <- result()
+      req(res$ok)
+      v <- res$value; s <- attr(v, "series")
+      sprintf(paste0("Two charts over %d observations. Top: the count at each observation, with signals in red; %s. ",
+                     "Bottom: the detection statistic at each observation against a dashed threshold of %s; a signal is a point above the threshold."),
+              nrow(s), if (v$n_alarms == 0) "there are no signals" else sprintf("there %s %d signal%s, the first at observation %d",
+                                                                            if (v$n_alarms == 1) "is" else "are", v$n_alarms, if (v$n_alarms == 1) "" else "s", v$first_alarm),
+              format(signif(v$threshold, 3)))
+    })
 
     render_export_handlers(output, result, function() analyze_surveillance_content[[input$design]])
   })

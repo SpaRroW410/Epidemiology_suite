@@ -156,7 +156,16 @@ mod_epidemic_model_server <- function(id) {
       graphics::matplot(s$day, s[, keep, drop = FALSE], type = "l", lty = 1, lwd = 2, col = cols[keep], xlab = "Day", ylab = "People",
                         main = sprintf("%s epidemic", res$value$model))
       graphics::legend("right", legend = keep, col = cols[keep], lwd = 2, bty = "n")
-    }, res = 96)
+    }, res = 96, alt = function() {
+      res <- result()
+      req(res$ok, res$design == "sim")
+      v <- res$value
+      sprintf(paste0("Line chart of a %s epidemic over %d days: the number of people who are %s over time. ",
+                     "The number infectious peaks at %s people (%.1f%% of the population) on day %s; in the end about %.1f%% of the population has been infected."),
+              v$model, max(attr(v, "series")$day), if (v$model == "SEIR") "susceptible, exposed, infectious and removed" else "susceptible, infectious and removed",
+              format(round(v$peak_infectious), big.mark = ","), 100 * v$peak_infectious_fraction, format(round(v$peak_day, 1)),
+              100 * v$simulated_attack_fraction)
+    })
 
     render_export_handlers(output, result, function() epidemic_model_content[[input$design]])
   })
