@@ -19,6 +19,7 @@ dark mode, desktop and phone width) and `R CMD check --as-cran` back it. What is
 |---|---|
 | **Documentation site** (pkgdown, `tools/docs/`) | One page per calculator -- formula, explanation, worked example, citation, how it is computed -- plus the roadmap and design documents. Built from the package's own text on every push; published to GitHub Pages from `main` (see below) |
 | [`docs/PLAN.md`](docs/PLAN.md) | The plan at a glance: what is done (struck through) and what is next |
+| [`docs/hosting.md`](docs/hosting.md) | The three versions (browser, phone / server, R package), how each is built, Connect Cloud steps, adding the Zenodo DOI |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Priorities, review findings, suite/package/deployment plans, and every open or blocked item |
 | [`docs/checklist_by_design.md`](docs/checklist_by_design.md) · [`docs/checklist_by_test.md`](docs/checklist_by_test.md) | Per-design build status and the verification evidence behind each one |
 | [`docs/to_do_later.md`](docs/to_do_later.md) | Everything not finished yet, in roadmap order, as a checklist (owner decisions marked) |
