@@ -32,6 +32,8 @@ test_that("a Home 'Browse calculators' button that shares its calculator with an
   key <- dup_keys[[1]]
   entry <- catalog_entry(key)
   btn <- tail(names(lens)[lens == key], 1)
+  app$run_js("document.querySelector('#home_more .accordion-button').click()")   # the lists are folded away until opened
+  app$wait_for_js("!!document.getElementById('home_browse_axis')", timeout = 30000)
   app$set_inputs(home_browse_axis = axis, wait_ = FALSE)
   app$wait_for_idle(800, timeout = 30000)
   expect_equal(app$get_js(sprintf("Array.from(document.querySelectorAll('[id]')).filter(function(e){return e.id === %s;}).length", ui_js_string(btn))), 1)

@@ -129,7 +129,11 @@ epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy",
 html[data-bs-theme='dark'] nav.navbar.navbar-default { background-color: var(--bs-tertiary-bg) !important; }
 html[data-bs-theme='dark'] nav.navbar .navbar-brand, html[data-bs-theme='dark'] nav.navbar .nav-link { color: var(--bs-body-color) !important; }
 html[data-bs-theme='dark'] nav.navbar .nav-link.active { color: var(--bs-primary-text-emphasis) !important; }
-#main_nav > li.bslib-nav-item { margin-left: auto; }   /* the dark-mode switch sits at the right end of the navbar */
+#main_nav > li.bslib-nav-item { margin-left: auto; }
+html { scroll-padding-bottom: 7rem; }   /* a focused input is scrolled clear of the pinned result below */
+/* a short calculator result stays at the bottom of the window while the inputs above it are changed */
+.pin-result { position: sticky; bottom: 0; z-index: 5; background: var(--bs-body-bg); border-top: 2px solid var(--bs-primary);
+  box-shadow: 0 -6px 12px rgba(0, 0, 0, .07); padding: .5rem .25rem .25rem; margin-bottom: .5rem; }   /* the dark-mode switch sits at the right end of the navbar */
 /* the darker light-mode colours above (secondary, danger, warning) are too dark for the dark background */
 html[data-bs-theme='dark'] .btn-outline-secondary { --bs-btn-color: #adb5bd; --bs-btn-border-color: #adb5bd; --bs-btn-hover-bg: #adb5bd; --bs-btn-hover-border-color: #adb5bd; --bs-btn-hover-color: #212529; --bs-btn-active-bg: #adb5bd; --bs-btn-active-color: #212529; --bs-btn-disabled-color: #adb5bd; --bs-btn-disabled-border-color: #adb5bd; }
 html[data-bs-theme='dark'] .btn-outline-primary { --bs-btn-color: #6ea8fe; --bs-btn-border-color: #6ea8fe; --bs-btn-hover-bg: #2a66cf; --bs-btn-hover-border-color: #2a66cf; --bs-btn-hover-color: #fff; --bs-btn-disabled-color: #6ea8fe; --bs-btn-disabled-border-color: #6ea8fe; }

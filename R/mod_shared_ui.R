@@ -65,31 +65,34 @@ monte_carlo_calculate_ui <- function(ns, note = "can take a few seconds. Set the
 # (`export_controls_ui()`) and one server call (`render_export_handlers()`)
 # per module; add both once, not per design.
 export_controls_ui <- function(ns) {
-  tagList(
-    hr(),
-    h5("Export this result"),
-    p(class = "text-muted small",
-      "A ready-to-paste justification paragraph for a protocol or ethics submission."),
-    verbatimTextOutput(ns("justification_text")),
-    tags$button(
-      "Copy paragraph", type = "button",
-      class = "btn btn-sm btn-outline-secondary mb-2",
-      onclick = sprintf(
-        paste0(
-          "navigator.clipboard.writeText(document.getElementById('%s').innerText)",
-          ".then(function(btn){ return function(){",
-          "  var old = btn.innerText; btn.innerText = 'Copied!';",
-          "  setTimeout(function(){ btn.innerText = old; }, 1500);",
-          "}; }(this));"
-        ),
-        ns("justification_text")
+  # folded by default: most visits only want the number, and a closed panel is not rendered until it is opened
+  bslib::accordion(
+    id = ns("export_acc"), open = FALSE, class = "mt-3",
+    bslib::accordion_panel(
+      "Export this result: protocol paragraph, CSV, JSON, citation", value = "export",
+      p(class = "text-muted small",
+        "A ready-to-paste justification paragraph for a protocol or ethics submission."),
+      verbatimTextOutput(ns("justification_text")),
+      tags$button(
+        "Copy paragraph", type = "button",
+        class = "btn btn-sm btn-outline-secondary mb-2",
+        onclick = sprintf(
+          paste0(
+            "navigator.clipboard.writeText(document.getElementById('%s').innerText)",
+            ".then(function(btn){ return function(){",
+            "  var old = btn.innerText; btn.innerText = 'Copied!';",
+            "  setTimeout(function(){ btn.innerText = old; }, 1500);",
+            "}; }(this));"
+          ),
+          ns("justification_text")
+        )
+      ),
+      div(
+        downloadButton(ns("download_csv"), "CSV", class = "btn-sm btn-outline-secondary"),
+        downloadButton(ns("download_json"), "JSON", class = "btn-sm btn-outline-secondary"),
+        downloadButton(ns("download_bibtex"), "Citation (BibTeX)", class = "btn-sm btn-outline-secondary"),
+        downloadButton(ns("download_ris"), "Citation (RIS)", class = "btn-sm btn-outline-secondary")
       )
-    ),
-    div(
-      downloadButton(ns("download_csv"), "CSV", class = "btn-sm btn-outline-secondary"),
-      downloadButton(ns("download_json"), "JSON", class = "btn-sm btn-outline-secondary"),
-      downloadButton(ns("download_bibtex"), "Citation (BibTeX)", class = "btn-sm btn-outline-secondary"),
-      downloadButton(ns("download_ris"), "Citation (RIS)", class = "btn-sm btn-outline-secondary")
     )
   )
 }
@@ -154,24 +157,27 @@ render_export_handlers <- function(output, result, content_fn, value_fn = functi
 # ss_curve_points() from the design's own calc_*() function and current
 # inputs -- base R graphics (plot()), no new dependency.
 power_curves_ui <- function(ns) {
-  tagList(
-    hr(),
-    h5("Power / sensitivity curves"),
-    p(class = "text-muted small",
-      "Every other input held at its current value. A point where the",
-      "formula has no solution (e.g. an effect size outside its valid",
-      "range) is simply omitted, not fabricated."),
-    uiOutput(ns("curve_unavailable")),
-    # Only shown for a design whose curve is too slow to recompute on every
-    # input change (see render_power_curves()'s `gated`). The button is
-    # static so its click count survives re-renders of the rest of the block.
-    conditionalPanel(
-      condition = sprintf("output['%s'] == 'yes'", ns("curve_gated")),
-      uiOutput(ns("curve_gate_note")),
-      actionButton(ns("curve_go"), "Compute / recompute curves", class = "btn-sm btn-outline-primary mb-2")
-    ),
-    plotOutput(ns("curve_effect"), height = "260px"),
-    plotOutput(ns("curve_power"), height = "260px")
+  # folded by default; the plots are not drawn (so not computed) until the panel is opened
+  bslib::accordion(
+    id = ns("curves_acc"), open = FALSE, class = "mt-2",
+    bslib::accordion_panel(
+      "Power / sensitivity curves", value = "curves",
+      p(class = "text-muted small",
+        "Every other input held at its current value. A point where the",
+        "formula has no solution (e.g. an effect size outside its valid",
+        "range) is simply omitted, not fabricated."),
+      uiOutput(ns("curve_unavailable")),
+      # Only shown for a design whose curve is too slow to recompute on every
+      # input change (see render_power_curves()'s `gated`). The button is
+      # static so its click count survives re-renders of the rest of the block.
+      conditionalPanel(
+        condition = sprintf("output['%s'] == 'yes'", ns("curve_gated")),
+        uiOutput(ns("curve_gate_note")),
+        actionButton(ns("curve_go"), "Compute / recompute curves", class = "btn-sm btn-outline-primary mb-2")
+      ),
+      plotOutput(ns("curve_effect"), height = "260px"),
+      plotOutput(ns("curve_power"), height = "260px")
+    )
   )
 }
 

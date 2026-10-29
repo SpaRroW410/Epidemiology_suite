@@ -57,6 +57,7 @@ home_panel_ui <- function() {
 .home-quick .btn { margin: .15rem; border-radius: 2rem; }
 .home-task-card { height: 100%; }
 .home-task-card .card-body { flex: 1 1 auto !important; display: flex; flex-direction: column; justify-content: flex-start !important; }
+.home-guide .card-body > div { flex: 1 1 14rem; min-width: 0; }
 .home-guide .card-body { flex-direction: row !important; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 1rem; }
 ")),
     div(class = "home-hero",
@@ -67,11 +68,12 @@ home_panel_ui <- function() {
         label = tags$span(class = "visually-hidden", "Search all calculators"),
         choices = NULL, width = "100%",
         options = list(
-          placeholder = "Search the calculators: try \"two means\", \"kappa\", \"stepped wedge\", \"eyes per patient\"",
+          placeholder = "Search the calculators",
           valueField = "key", labelField = "label", searchField = c("label", "answers", "module"),
           maxOptions = 12, openOnFocus = FALSE
         )
       ),
+      p(class = "text-muted small mt-1 mb-2", "Try: two means, kappa, stepped wedge, eyes per patient"),
       div(class = "home-quick",
         lapply(.home_quick_ids, function(id) actionButton(paste0("home_quick_", id), .home_module_title(id), class = "btn-outline-secondary btn-sm")))
     ),
