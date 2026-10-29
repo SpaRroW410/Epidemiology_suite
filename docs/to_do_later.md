@@ -230,7 +230,7 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] Home: the quick links and cards are a guess at what people use first -- revisit with real usage.
 
 ### Package and citation
-- [ ] Vignettes per family (the help pages are done); more examples where a calculator has several designs.
+- [x] Three vignettes (Getting started, Sample sizes from R, Analysing summary data from R), 30 Oct 2026. [ ] More per-family vignettes (survival, trials, diagnostic accuracy, surveillance) and more examples where a calculator has several designs.
 - [ ] r-universe release, then CRAN: split a computation-only core from the app, `skip_on_cran()` for the Monte Carlo and browser tests, ASCII-only source, a name decision. `R CMD check --as-cran` already passes the package checks.
 - [ ] **[owner]** Zenodo: archive a release and send the DOI; put it in `R/citation_info.R`, `CITATION.cff` and `inst/CITATION` (docs/hosting.md, "Adding the Zenodo DOI"); confirm the first version number (0.1.0 now).
 - [ ] **[owner]** Rename the repository (then update the addresses in the same three files, the Pages and Connect addresses, and `mobile_url.txt` if the Connect address changes).

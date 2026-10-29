@@ -1,0 +1,95 @@
+---
+title: "Sample sizes from R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Sample sizes from R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(epidemiologicasuite)
+```
+
+Worked examples of the sample-size functions. Each help page (for example `?calc_means_2s_indep`) lists every argument and gives the
+source of the formula; the numbers below are computed when this page is built.
+
+## One proportion, one mean
+
+How many people are needed to estimate a prevalence of about 50% to within 5 percentage points?
+
+```{r prop}
+calc_proportion_precision(p = 0.5, d = 0.05)$n
+```
+
+## Comparing two groups
+
+Two means: a difference of half a standard deviation, 80% power, 5% significance.
+
+```{r means}
+m <- calc_means_2s_indep(mu1 = 0, mu2 = 0.5, sd = 1)
+m$n_per_group
+```
+
+Two proportions, 40% against 25%:
+
+```{r props}
+calc_proportion_2s(p1 = 0.40, p2 = 0.25)
+```
+
+Paired measurements (before and after in the same people), where `sd_diff` is the standard deviation of the differences:
+
+```{r paired}
+calc_means_paired(mean_diff = 0.5, sd_diff = 1)$n
+```
+
+## Survival
+
+A log-rank comparison: event probabilities of 40% (experimental) and 60% (control) over follow-up give a hazard ratio of
+`r round(log(1 - 0.4) / log(1 - 0.6), 2)`.
+
+```{r logrank}
+calc_logrank(pE = 0.4, pC = 0.6, hr = log(1 - 0.4) / log(1 - 0.6))
+```
+
+## Clustered data
+
+When people are sampled or treated in clusters (villages, clinics), the sample size is inflated by the design effect
+`1 + (m - 1) * rho`.
+
+```{r cluster}
+calc_cluster_deff(n_base = 200, icc = 0.05, cluster_size = 10)
+```
+
+The same logic applies when one patient contributes several correlated measurements (both eyes, several lesions). Two eye drops are
+compared with both eyes of a patient on the same drop, a between-eye correlation of 0.3 and a difference of half a standard
+deviation:
+
+```{r eyes}
+eyes <- calc_patient_units_between_continuous(delta = 0.5, sd = 1, icc = 0.3, units_per_patient = 2)
+eyes$n_patients_per_arm
+eyes$design_effect
+eyes$n_patients_per_arm_if_units_independent
+eyes$n_patients_per_arm_floor
+```
+
+Counting the 2 eyes as 2 independent people would suggest `r eyes$n_patients_per_arm_if_units_independent` patients per arm instead of
+`r eyes$n_patients_per_arm`. And more eyes or patches per patient help less and less: however many units each patient contributes,
+at least `r eyes$n_patients_per_arm_floor` patients per arm are needed at this correlation. With only 30 patients per arm available,
+how many units per patient would be needed?
+
+```{r units}
+calc_patient_units_needed("between_continuous", patients = 30, delta = 0.5, sd = 1, icc = 0.3)[c("achievable", "n_units_per_patient")]
+```
+
+If each patient receives both treatments (one eye on each drug, the two halves of the face) the patient's own level cancels out and far
+fewer patients are needed:
+
+```{r split}
+calc_patient_units_within_continuous(delta = 0.5, sd = 1, icc = 0.3, units_per_arm = 1)$n_patients
+```
+
+## Allowing for loss to follow-up
+
+Inflate a sample size for expected loss with the attrition functions (`?calc_attrition_stages`, `?calc_attrition_arms`).

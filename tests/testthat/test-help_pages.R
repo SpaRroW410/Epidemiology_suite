@@ -47,3 +47,12 @@ test_that("all calc_*() functions are exported", {
   calc <- calc[vapply(calc, function(n) is.function(get(n, ns)), TRUE)]
   expect_setequal(intersect(exports(r), calc), calc)
 })
+
+test_that("the print and format methods of a result are registered, so an installed package prints a result readably", {
+  r <- root(); skip_if(is.null(r), "package sources not available")
+  ns <- readLines(file.path(r, "NAMESPACE"), warn = FALSE)
+  expect_true("S3method(print, ss_result)" %in% ns)
+  expect_true("S3method(format, ss_result)" %in% ns)
+  res <- calc_proportion_precision(p = 0.5, d = 0.05)
+  expect_match(paste(capture.output(print(res)), collapse = "\n"), "n: 385")
+})
