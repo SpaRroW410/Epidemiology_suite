@@ -223,7 +223,7 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 ## 6. Added on 29 October 2026 (open items)
 
 ### Interface
-- [ ] "Advanced options" folded inside the other ~60 calculators (done for Proportions, Means, Case-Control, Cohort, Correlation, Diagnostic Accuracy): decide per calculator which inputs are optional, most-used first.
+- [ ] "Advanced options" folded inside the other ~60 calculators (done for Proportions, Means, Case-Control, Cohort, Correlation, Diagnostic Accuracy and, 30 Oct, the alternative hypothesis of Variance Tests and Multiplicity Adjustment): decide per calculator which inputs are optional, most-used first. Looked at on 30 Oct and left as they are: Longitudinal (one alternative-hypothesis choice per design, and the Diggle design defaults to one-sided, which should stay visible) and Group Sequential (the alternative belongs to the boundary set-up). The other modules have no optional inputs of this kind.
 - [ ] Two-column layout on wide screens (inputs left, result right) -- optional now that the result is pinned.
 - [ ] Phone: a separate slimmer app with only the common calculators (not built; the phone layout is the same app); the dark-mode switch is hidden on phones; a check on a **real phone and in Safari** (only an emulated iPhone has been tried).
 - [ ] A person's keyboard and screen-reader walk-through; dark-mode plots (plots stay white); text-resize and reduced-motion checks.
