@@ -44,7 +44,10 @@ mod_variance_ui <- function(id) {
       conditionalPanel(
         condition = paste0("!(", design_is("sd_precision"), ")"),
         numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
-        numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
+        numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
+      ),
+      advanced_options_ui(
+        ns, condition = paste0("!(", design_is("sd_precision"), ")"),
         selectInput(
           ns("alternative"), "Alternative hypothesis",
           choices = c("Two-sided" = "two.sided", "Greater" = "greater", "Less" = "less")

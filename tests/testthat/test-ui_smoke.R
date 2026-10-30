@@ -63,6 +63,23 @@ for (m in registry) {
   })
 }
 
+test_that("Variance Tests and Multiplicity Adjustment keep the alternative hypothesis in a folded Advanced options panel", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  for (m in list(list(title = "Variance Tests", id = "variance"), list(title = "Multiplicity Adjustment", id = "multiplicity"))) {
+    ui_open_module(app, m$title)
+    sel <- sprintf("#%s-adv_acc", m$id)
+    expect_true(app$get_js(sprintf("document.querySelector(%s) !== null", ui_js_string(sel))), info = m$title)
+    # the select sits inside the panel, which is closed, and it still has a value the calculation reads
+    expect_true(app$get_js(sprintf("document.querySelector(%s) !== null",
+                                   ui_js_string(paste(sel, sprintf("#%s-alternative", m$id))))), info = m$title)
+    expect_false(app$get_js(sprintf("document.querySelector(%s).classList.contains('show')",
+                                    ui_js_string(paste(sel, ".accordion-collapse")))), info = m$title)
+    expect_equal(app$get_value(input = paste0(m$id, "-alternative")), "two.sided", info = m$title)
+    expect_gt(nchar(ui_output_text(app, paste0(m$id, "-result"))), 0)
+  }
+})
+
 test_that("Diagnostic Test Evaluation: single test shows CIs; combining 3 tests lists serial and parallel, with CIs once n is given", {
   skip_if_no_ui()
   app <- ui_driver()
