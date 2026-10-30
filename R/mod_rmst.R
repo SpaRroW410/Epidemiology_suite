@@ -59,7 +59,7 @@ mod_rmst_server <- function(id) {
         req(input$ac_period, input$tot_time, input$tau, input$shape0, input$scale0,
             input$shape1, input$scale1, input$margin, input$allocation1, input$alpha, input$power)
         tryCatch(
-          list(ok = TRUE, value = calc_rmst_comparison(
+          list(ok = TRUE, value = memo_calc("calc_rmst_comparison",
             ac_period = input$ac_period, tot_time = input$tot_time, tau = input$tau,
             shape0 = input$shape0, scale0 = input$scale0,
             shape1 = input$shape1, scale1 = input$scale1,

@@ -244,7 +244,7 @@ mod_chisq_server <- function(id) {
         tryCatch(
           {
             p_vals <- .parse_numeric_vec(input$p_cq)
-            list(ok = TRUE, value = calc_cochran_q(
+            list(ok = TRUE, value = memo_calc("calc_cochran_q",
               p = p_vals, sigma2_subject = input$sigma2_cq,
               alpha = input$alpha, power = input$power
             ))

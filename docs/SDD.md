@@ -174,7 +174,7 @@ Epidemiology_suite/
 │   ├── mod_*.R            # Shiny UI + server; mod_shared_ui.R (export, curves, advanced options)
 │   ├── home_*.R, design_*.R   # home_catalog.R, home_finder.R, home_hub.R, home_cite.R,
 │   │                      # home_design_tree.R, design_wizard.R, design_free_text.R
-│   ├── ss_find.R, citation_info.R, accessibility.R, phone_shell.R, lazy_modules.R, browser_build.R
+│   ├── ss_find.R, citation_info.R, accessibility.R, phone_shell.R, lazy_modules.R, browser_build.R, memo_cache.R (result cache of the Monte Carlo calculators)
 ├── man/                   # 199 help pages (built with roxygen2, roclets = "rd")
 ├── vignettes/             # three package vignettes; articles/ (generated, git-ignored) holds the site's per-calculator pages
 ├── inst/                  # CITATION, rstudio/addins.dcf
