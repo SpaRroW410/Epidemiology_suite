@@ -15,13 +15,18 @@ test_that("the version and year in the citation are the package's and the curren
   desc <- NULL
   for (p in c("../../DESCRIPTION", "../../../DESCRIPTION", "DESCRIPTION")) if (file.exists(p)) { desc <- read.dcf(p); break }
   skip_if(is.null(desc), "DESCRIPTION not available")
-  expect_equal(suite_citation_info()$version, unname(desc[1, "Version"]))
+  label <- suite_citation_info()$version
+  expect_match(label, "^[0-9]+[.][0-9]+(-(alpha|beta|rc[0-9]*))?$")
+  pkg <- package_version(unname(desc[1, "Version"]))
+  base <- package_version(paste0(sub("-.*$", "", label), ".0"))
+  # a pre-release label (1.0-alpha) is written in DESCRIPTION as a number below the release (0.99.x); a final release as itself
+  if (grepl("-", label)) expect_true(pkg < base) else expect_true(pkg == base)
 })
 
 test_that("formats follow the usual layouts", {
-  expect_match(citation_text("apa"), "^Maheshwari, M\\. \\(2026\\)\\. Epidemiological suite \\(Version 0\\.1\\.0\\) \\[Computer software\\]\\. ")
-  expect_match(citation_text("vancouver"), "^Maheshwari M\\. Epidemiological suite \\[computer program\\]\\. Version 0\\.1\\.0\\. 2026\\. ")
-  expect_match(citation_text("ieee"), "^M\\. Maheshwari, \"Epidemiological suite,\" version 0\\.1\\.0, 2026\\. \\[Online\\]\\. Available: ")
+  expect_match(citation_text("apa"), "^Maheshwari, M\\. \\(2026\\)\\. Epidemiological suite \\(Version 1\\.0-alpha\\) \\[Computer software\\]\\. ")
+  expect_match(citation_text("vancouver"), "^Maheshwari M\\. Epidemiological suite \\[computer program\\]\\. Version 1\\.0-alpha\\. 2026\\. ")
+  expect_match(citation_text("ieee"), "^M\\. Maheshwari, \"Epidemiological suite,\" version 1\\.0-alpha, 2026\\. \\[Online\\]\\. Available: ")
   expect_match(citation_text("bibtex"), "^@misc\\{maheshwari2026suite,\\n  author = \\{Maheshwari, Mukul\\},")
   expect_match(citation_text("ris"), "^TY  - COMP\\nAU  - Maheshwari, Mukul\\n")
   expect_match(citation_text("ris"), "ER  - $")

@@ -1,6 +1,6 @@
 Package: epidemiologicasuite
 Title: Sample Size and Power Calculator for Study Design
-Version: 0.1.0
+Version: 0.99.0
 Authors@R: person("Mukul", "Maheshwari", role = c("aut", "cre", "cph"),
     email = "ryan00700@gmail.com")
 Description: A 'shiny' application that helps choose a study design and
