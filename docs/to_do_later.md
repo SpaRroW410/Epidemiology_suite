@@ -87,8 +87,8 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
   source (escape `²` and the like), `R CMD check` clean, `available::available("epidemiologysuite")` for the name.
 - [ ] Public API (C2): decide the exported function names (a consistent `ss_*()` family), more than the two help pages that exist,
   vignettes per family.
-- [ ] **[owner]** Rename the GitHub repository from `Epidemiology_suite` (changes the install path), `Authors@R` details, first public
-  release number and a `NEWS.md`.
+- [ ] **[owner]** Rename the GitHub repository (done 30 Oct 2026: `Sample_size_all` -> `Epidemiology_suite`), first release number (done: 1.0.0),
+  `NEWS.md` (done 30 Oct 2026); `Authors@R` details for CRAN are still open.
 
 ### 20. Survey / field epidemiology (B3), outbreak and surveillance (B4), infectious-disease teaching models (B5)
 - [x] **B3** sample selection (SRS, systematic, PPS, EPI 30 x 7) and survey weights -- done 21 Oct 2026.
@@ -223,7 +223,7 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 ## 6. Added on 29 October 2026 (open items)
 
 ### Interface
-- [ ] "Advanced options" folded inside the other ~60 calculators (done for Proportions, Means, Case-Control, Cohort, Correlation, Diagnostic Accuracy): decide per calculator which inputs are optional, most-used first.
+- [ ] "Advanced options" folded inside the other ~60 calculators (done for Proportions, Means, Case-Control, Cohort, Correlation, Diagnostic Accuracy and, 30 Oct, the alternative hypothesis of Variance Tests and Multiplicity Adjustment): decide per calculator which inputs are optional, most-used first. Looked at on 30 Oct and left as they are: Longitudinal (one alternative-hypothesis choice per design, and the Diggle design defaults to one-sided, which should stay visible) and Group Sequential (the alternative belongs to the boundary set-up). The other modules have no optional inputs of this kind.
 - [ ] Two-column layout on wide screens (inputs left, result right) -- optional now that the result is pinned.
 - [ ] Phone: a separate slimmer app with only the common calculators (not built; the phone layout is the same app); the dark-mode switch is hidden on phones; a check on a **real phone and in Safari** (only an emulated iPhone has been tried).
 - [ ] A person's keyboard and screen-reader walk-through; dark-mode plots (plots stay white); text-resize and reduced-motion checks.

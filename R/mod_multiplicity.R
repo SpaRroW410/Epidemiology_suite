@@ -104,7 +104,10 @@ mod_multiplicity_ui <- function(id) {
           choices = c("Bonferroni (always valid)" = "bonferroni",
                       "Sidak (exact under independence)" = "sidak"),
           selected = "bonferroni"
-        ),
+        )
+      ),
+      advanced_options_ui(
+        ns, condition = paste0("!(", design_is("fdr_means_2s", "fdr_microarray", "dunnett"), ")"),
         selectInput(
           ns("alternative"), "Alternative hypothesis",
           choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
