@@ -3,8 +3,8 @@
 
 | | |
 |---|---|
-| **Status** | v0.3 — catalog essentially complete; Analyze, planning, survey and outbreak tools built; three versions (browser, phone / server, R package); accessibility audited |
-| **Date** | 29 October 2026 (v0.2: 28 September 2026; v0.1: 18 August 2026) |
+| **Status** | v1.0.0 — the release (R package `epidemiologysuite` 1.0.0): catalog essentially complete; Analyze, planning, survey and outbreak tools built; three versions (browser, phone / server, R package); accessibility audited |
+| **Date** | 30 October 2026 (v0.3: 29 October 2026; v0.2: 28 September 2026; v0.1: 18 August 2026) |
 | **Author** | Mukul |
 | **Type** | R Shiny web application |
 
