@@ -81,11 +81,12 @@ doc_page("docs/SDD.md", "design", "Software design", "Architecture, module contr
 doc_page("docs/design_identification_algorithm.md", "algorithm", "Study-design identification algorithm", "How the guided wizard routes a question to a calculator")
 
 tpl <- readLines("tools/docs/pkgdown_template.yml", warn = FALSE)
-pages <- function(ids) paste0("      - ", ids)
+# articles in vignettes/articles/ are named "articles/<file>" by pkgdown
+pages <- function(ids) paste0("      - articles/", ids)
 art <- c("articles:",
-         "  - title: Start here", "    contents:", "      - calculators",
+         "  - title: Start here", "    contents:", "      - articles/calculators",
          "  - title: Using it from R", "    contents:", "      - getting-started", "      - sample-size-from-r", "      - analyze-from-r",
-         "  - title: Project", "    contents:", "      - roadmap", "      - design", "      - algorithm")
+         "  - title: Project", "    contents:", "      - articles/roadmap", "      - articles/design", "      - articles/algorithm")
 for (wb in module_workbenches) for (g in wb$groups) {
   art <- c(art, paste0("  - title: ", yq(paste0(wb$title, ": ", g$title))), "    contents:", pages(g$module_ids))
 }

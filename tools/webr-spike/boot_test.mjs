@@ -23,7 +23,7 @@ report.page_load_s = (Date.now() - t0) / 1000;
 try {
   // Shinylive renders the app in an iframe; the navbar title is the signal that the UI is up.
   const frame = page.frameLocator("iframe").first();
-  await frame.locator("text=epidemiologicasuite").first().waitFor({ timeout: 480000 });
+  await frame.locator("nav.navbar >> text=Epidemiological suite").first().waitFor({ timeout: 480000 });
   report.ui_visible_s = (Date.now() - t0) / 1000;
   // the start-up status overlay (tools/pages/status_overlay.html) must remove itself once the app is on screen
   await page.waitForTimeout(4000);

@@ -32,7 +32,7 @@ jobs:
           (cd out && python3 -m http.server 8008 >/dev/null 2>&1 &)
           sleep 3
           npm init -y >/dev/null && npm install playwright-core >/dev/null   # at the repository root, where the ES module finds it
-          marker=epidemiologicasuite; [ "${{ matrix.variant }}" = hello ] && marker="Hello memory probe"
+          marker="Epidemiological suite"; [ "${{ matrix.variant }}" = hello ] && marker="Hello memory probe"
           node tools/pages/memory_probe.mjs http://localhost:8008/app/ "$marker" mem-${{ matrix.variant }}.json 30
       - uses: actions/upload-artifact@v4
         with:

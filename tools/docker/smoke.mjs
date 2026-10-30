@@ -9,7 +9,7 @@ const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));
 const t0 = Date.now();
 await page.goto(url, { waitUntil: "load", timeout: 120000 });
-await page.locator("text=epidemiologicasuite").first().waitFor({ timeout: 120000 });
+await page.locator("nav.navbar >> text=Epidemiological suite").first().waitFor({ state: "visible", timeout: 120000 });
 console.log(`navbar after ${(Date.now() - t0) / 1000}s`);
 await page.locator("a[data-value='Plan: Sample Size']").first().click();
 await page.locator("a[data-value='Rule of Three']").first().click();
