@@ -19,9 +19,9 @@ test_that("the version and year in the citation are the package's and the curren
 })
 
 test_that("formats follow the usual layouts", {
-  expect_match(citation_text("apa"), "^Maheshwari, M\\. \\(2026\\)\\. Epidemiological suite \\(Version 0\\.1\\.0\\) \\[Computer software\\]\\. ")
-  expect_match(citation_text("vancouver"), "^Maheshwari M\\. Epidemiological suite \\[computer program\\]\\. Version 0\\.1\\.0\\. 2026\\. ")
-  expect_match(citation_text("ieee"), "^M\\. Maheshwari, \"Epidemiological suite,\" version 0\\.1\\.0, 2026\\. \\[Online\\]\\. Available: ")
+  expect_match(citation_text("apa"), "^Maheshwari, M\\. \\(2026\\)\\. Epidemiological suite \\(Version 1\\.0\\.0\\) \\[Computer software\\]\\. ")
+  expect_match(citation_text("vancouver"), "^Maheshwari M\\. Epidemiological suite \\[computer program\\]\\. Version 1\\.0\\.0\\. 2026\\. ")
+  expect_match(citation_text("ieee"), "^M\\. Maheshwari, \"Epidemiological suite,\" version 1\\.0\\.0, 2026\\. \\[Online\\]\\. Available: ")
   expect_match(citation_text("bibtex"), "^@misc\\{maheshwari2026suite,\\n  author = \\{Maheshwari, Mukul\\},")
   expect_match(citation_text("ris"), "^TY  - COMP\\nAU  - Maheshwari, Mukul\\n")
   expect_match(citation_text("ris"), "ER  - $")

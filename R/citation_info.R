@@ -6,12 +6,15 @@
 # web address instead. This is the only line to change when the DOI arrives (plus CITATION.cff and inst/CITATION).
 .citation_doi <- NA_character_
 
+# The release the citations name, and the tag of the GitHub / Zenodo release ("v" + this). Keep it equal to DESCRIPTION's version (a test checks it).
+.release_label <- "1.0.0"
+
 suite_citation_info <- function() {
   list(
     title = "Epidemiological suite",
     subtitle = "sample size, power and analysis tools for epidemiology and clinical research",
     family = "Maheshwari", given = "Mukul",
-    version = "0.1.0", year = "2026",
+    version = .release_label, year = "2026",
     url = "https://github.com/SpaRroW410/Sample_size_all",
     site = "https://sparrow410.github.io/Sample_size_all/",
     doi = if (is.na(.citation_doi) || !nzchar(.citation_doi)) NA_character_ else sub("^https?://(dx[.])?doi[.]org/", "", .citation_doi),
