@@ -1,5 +1,5 @@
 # Shinylive / webR feasibility spike, stage 1 (ROADMAP item 15, Track D3):
-# does every runtime package of epidemiologicasuite -- and everything it needs
+# does every runtime package of epidemiologysuite -- and everything it needs
 # -- exist as a WebAssembly build on the webR package repository, and how big
 # is the download? Base R only. Run on a machine with internet access:
 #   Rscript tools/webr-spike/check_packages.R [out_dir]

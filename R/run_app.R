@@ -3,7 +3,7 @@
 # module_registry() and to the right group of module_workbenches; nothing in this
 # file needs to change beyond that.
 
-#' Run the epidemiologicasuite application
+#' Run the epidemiologysuite application
 #'
 #' Starts the sample size / power calculator in the default web browser (or the
 #' RStudio viewer). Blocks until the app is stopped.
@@ -15,10 +15,10 @@
 #' @return Does not return while the app is running.
 #' @export
 run_app <- function(calculator = NULL, ...) {
-  shiny::runApp(epidemiologicasuite_app(calculator = calculator), ...)
+  shiny::runApp(epidemiologysuite_app(calculator = calculator), ...)
 }
 
-#' Build the epidemiologicasuite Shiny app object
+#' Build the epidemiologysuite Shiny app object
 #'
 #' The app object itself, without running it -- for `shiny::runApp()`, for the
 #' root `app.R` used during development, and for deployment or testing
@@ -27,13 +27,13 @@ run_app <- function(calculator = NULL, ...) {
 #' @param lazy If `TRUE` (the default) only a few basic calculators are built when the app
 #'   starts and the others are loaded when opened, and in the background with a progress bar,
 #'   which makes the first screen much faster; `FALSE` builds every calculator up front.
-#'   The default can be changed with `options(epidemiologicasuite.lazy = FALSE)`.
+#'   The default can be changed with `options(epidemiologysuite.lazy = FALSE)`.
 #' @param calculator Optional design key or search words (see [run_app()]): the calculator the app opens on. Defaults to the
-#'   environment variable `EPIDEMIOLOGICASUITE_OPEN` when it is set (for a deployment that should open on one calculator), else none.
+#'   environment variable `EPIDEMIOLOGYSUITE_OPEN` when it is set (for a deployment that should open on one calculator), else none.
 #' @return A [shiny::shinyApp()] object.
 #' @export
-epidemiologicasuite_app <- function(lazy = getOption("epidemiologicasuite.lazy", TRUE),
-                                    calculator = if (nzchar(Sys.getenv("EPIDEMIOLOGICASUITE_OPEN"))) Sys.getenv("EPIDEMIOLOGICASUITE_OPEN")) {
+epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRUE),
+                                    calculator = if (nzchar(Sys.getenv("EPIDEMIOLOGYSUITE_OPEN"))) Sys.getenv("EPIDEMIOLOGYSUITE_OPEN")) {
   start_key <- if (is.null(calculator)) NULL else .resolve_calculator(calculator)
   registry <- module_registry()
   registry_by_id <- setNames(registry, vapply(registry, `[[`, character(1), "id"))

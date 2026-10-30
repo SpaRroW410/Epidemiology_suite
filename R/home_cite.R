@@ -21,7 +21,7 @@ cite_ui <- function() {
     p("Every calculator's Reference tab names the original source of its formula, and each result can be exported with that citation",
       "(BibTeX or RIS). Please cite those sources where you report a sample size or power calculation."),
     h5("In R"),
-    tags$pre(class = "border rounded p-2", "citation(\"epidemiologicasuite\")")
+    tags$pre(class = "border rounded p-2", "citation(\"epidemiologysuite\")")
   )
 }
 

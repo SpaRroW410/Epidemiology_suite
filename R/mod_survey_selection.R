@@ -150,7 +150,7 @@ mod_survey_selection_server <- function(id) {
     output$methods_text <- renderText({ res <- result(); req(res$ok); survey_selection_methods_text(res$value) })
 
     output$download_list <- downloadHandler(
-      filename = function() "epidemiologicasuite_survey_selection.csv",
+      filename = function() "epidemiologysuite_survey_selection.csv",
       content = function(file) { res <- result(); req(res$ok); utils::write.csv(attr(res$value, "selection"), file, row.names = FALSE, na = "") }
     )
   })

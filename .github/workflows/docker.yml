@@ -1,6 +1,6 @@
 # Container image (docs/ROADMAP.md item 18). Every relevant push builds the image, starts it and drives it in
 # headless Chrome (open a calculator, read a result). Pushes to `main` and version tags also publish it to GHCR
-# (ghcr.io/<owner>/epidemiologicasuite); that needs no setup beyond the default GITHUB_TOKEN.
+# (ghcr.io/<owner>/epidemiologysuite); that needs no setup beyond the default GITHUB_TOKEN.
 name: docker
 
 on:
@@ -37,13 +37,13 @@ jobs:
         with:
           context: .
           load: true
-          tags: epidemiologicasuite:test
+          tags: epidemiologysuite:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Start the container
         run: |
-          docker run -d --name app -p 3838:3838 epidemiologicasuite:test
+          docker run -d --name app -p 3838:3838 epidemiologysuite:test
           for i in $(seq 1 60); do
             if curl -fsS http://localhost:3838/ > page.html; then echo "up after ${i}x2 s"; break; fi
             sleep 2
@@ -75,8 +75,8 @@ jobs:
         if: env.PUBLISH == 'true'
         run: |
           owner=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          image=ghcr.io/${owner}/epidemiologicasuite
+          image=ghcr.io/${owner}/epidemiologysuite
           tag=latest; if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then tag=${GITHUB_REF#refs/tags/}; fi
-          docker tag epidemiologicasuite:test ${image}:${tag}
+          docker tag epidemiologysuite:test ${image}:${tag}
           docker push ${image}:${tag}
           echo "published ${image}:${tag}"

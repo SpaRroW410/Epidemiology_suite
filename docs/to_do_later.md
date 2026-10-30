@@ -84,10 +84,10 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 ### 19. Release channels (Track C3 / C4)
 - [ ] r-universe release (automatic binaries, including WebAssembly builds).
 - [ ] CRAN: split a computation-only core from the app (C3), Monte Carlo tests behind `skip_on_cran()`, fast examples, ASCII-only
-  source (escape `²` and the like), `R CMD check` clean, `available::available("epidemiologicasuite")` for the name.
+  source (escape `²` and the like), `R CMD check` clean, `available::available("epidemiologysuite")` for the name.
 - [ ] Public API (C2): decide the exported function names (a consistent `ss_*()` family), more than the two help pages that exist,
   vignettes per family.
-- [ ] **[owner]** Rename the GitHub repository from `Sample_size_all` (changes the install path), `Authors@R` details, first public
+- [ ] **[owner]** Rename the GitHub repository from `Epidemiology_suite` (changes the install path), `Authors@R` details, first public
   release number and a `NEWS.md`.
 
 ### 20. Survey / field epidemiology (B3), outbreak and surveillance (B4), infectious-disease teaching models (B5)

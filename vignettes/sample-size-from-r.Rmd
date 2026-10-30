@@ -9,7 +9,7 @@ vignette: >
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(epidemiologicasuite)
+library(epidemiologysuite)
 ```
 
 Worked examples of the sample-size functions. Each help page (for example `?calc_means_2s_indep`) lists every argument and gives the

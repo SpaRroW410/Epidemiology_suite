@@ -4,15 +4,15 @@ title: "Epidemiological suite"
 abstract: >-
   Sample size, power and analysis tools for community medicine, epidemiology and clinical research: calculators for about
   160 study designs, each with its formula, a worked example and a citable source. Available as a web application and as
-  the R package epidemiologicasuite.
+  the R package epidemiologysuite.
 type: software
 version: 1.0.0
 authors:
   - family-names: Maheshwari
     given-names: Mukul
 license: GPL-3.0-or-later
-repository-code: "https://github.com/SpaRroW410/Sample_size_all"
-url: "https://sparrow410.github.io/Sample_size_all/"
+repository-code: "https://github.com/SpaRroW410/Epidemiology_suite"
+url: "https://sparrow410.github.io/Epidemiology_suite/"
 keywords:
   - sample size
   - power analysis

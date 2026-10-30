@@ -6,4 +6,4 @@ suppressPackageStartupMessages({
   library(bslib)
 })
 for (f in sort(list.files("R", pattern = "[.]R$", full.names = TRUE))) source(f, local = FALSE)
-epidemiologicasuite_app()
+epidemiologysuite_app()

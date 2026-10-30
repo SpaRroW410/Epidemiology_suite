@@ -2,7 +2,7 @@
 % Please edit documentation in R/run_app.R
 \name{run_app}
 \alias{run_app}
-\title{Run the epidemiologicasuite application}
+\title{Run the epidemiologysuite application}
 \usage{
 run_app(calculator = NULL, ...)
 }

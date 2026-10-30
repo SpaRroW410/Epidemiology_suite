@@ -136,7 +136,7 @@ render_export_handlers <- function(output, result, content_fn, value_fn = functi
     fn(value_fn(res), entry)
   }
   # Reuses calc_export.R's own BibTeX-key slugifier so a design's exported
-  # files are named after it (e.g. "epidemiologicasuite_two_independent_
+  # files are named after it (e.g. "epidemiologysuite_two_independent_
   # proportions.csv") instead of a generic name every design would collide on.
   slug <- function() .citation_key(content_fn()$title)
 
@@ -144,21 +144,21 @@ render_export_handlers <- function(output, result, content_fn, value_fn = functi
     build(function(v, entry) format_justification(entry$title, v, entry$citation, entry$backend))
   })
   output$download_csv <- downloadHandler(
-    filename = function() paste0("epidemiologicasuite_", slug(), ".csv"),
+    filename = function() paste0("epidemiologysuite_", slug(), ".csv"),
     content = function(file) writeLines(build(function(v, entry) ss_result_to_csv(v)), file)
   )
   output$download_json <- downloadHandler(
-    filename = function() paste0("epidemiologicasuite_", slug(), ".json"),
+    filename = function() paste0("epidemiologysuite_", slug(), ".json"),
     content = function(file) writeLines(build(function(v, entry) ss_result_to_json(v)), file)
   )
   output$download_bibtex <- downloadHandler(
-    filename = function() paste0("epidemiologicasuite_", slug(), ".bib"),
+    filename = function() paste0("epidemiologysuite_", slug(), ".bib"),
     content = function(file) {
       writeLines(build(function(v, entry) format_citation_bibtex(entry$title, entry$citation)), file)
     }
   )
   output$download_ris <- downloadHandler(
-    filename = function() paste0("epidemiologicasuite_", slug(), ".ris"),
+    filename = function() paste0("epidemiologysuite_", slug(), ".ris"),
     content = function(file) {
       writeLines(build(function(v, entry) format_citation_ris(entry$title, entry$citation)), file)
     }

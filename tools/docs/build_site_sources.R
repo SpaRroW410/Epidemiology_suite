@@ -10,7 +10,7 @@
 # It needs only pkgload (to read the content objects); building the site then needs pkgdown + pandoc.
 
 suppressMessages(pkgload::load_all(".", quiet = TRUE))
-ns <- asNamespace("epidemiologicasuite")
+ns <- asNamespace("epidemiologysuite")
 registry <- module_registry()
 by_id <- setNames(registry, vapply(registry, `[[`, "", "id"))
 out_dir <- "vignettes/articles"   # pkgdown-only articles; the hand-written package vignettes sit in vignettes/

@@ -4,7 +4,7 @@
 # Usage (repository root): Rscript tools/docs/extract_examples.R <out.json>
 suppressMessages(pkgload::load_all(".", quiet = TRUE))
 out <- commandArgs(trailingOnly = TRUE)[1]
-ns <- asNamespace("epidemiologicasuite")
+ns <- asNamespace("epidemiologysuite")
 fns <- sort(grep("^calc_", ls(ns), value = TRUE)); fns <- fns[vapply(fns, function(n) is.function(get(n, ns)), TRUE)]
 skip_wrappers <- c("expect_error", "expect_warning", "expect_message", "expect_snapshot", "expect_condition", "tryCatch", "try", "suppressWarnings")
 found <- setNames(vector("list", length(fns)), fns)
