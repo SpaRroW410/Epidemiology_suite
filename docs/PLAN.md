@@ -14,7 +14,7 @@ suite 940 blocks with 0 failures; 195 calculation functions exported with help p
 ## Waiting for you (owner decisions and steps)
 
 - [ ] Merge PR #11 (it contains #10 as well), then click **Republish** on Connect Cloud; try the phone redirect on a real phone
-- ~~Version bumped to **1.0-alpha** (30 Oct; the tag of the release is `v1.0-alpha`; DESCRIPTION carries 0.99.0 because R accepts only numbers there)~~
+- ~~Version bumped to **1.0-alpha** (30 Oct; the tag of the release is `v1.0-alpha`; DESCRIPTION carries 1.0.0 because R accepts only numbers there)~~
 - [ ] Zenodo: the first record (wrong version tag) was removed; publish the `v1.0-alpha` release again and send the new **DOI**
 - [ ] Decide on a background-process package (`mirai` or `future`) for running slow simulations without blocking other users (also changes the browser build)
 - [ ] Long-term hosting (Connect Cloud free-plan limits are not verified); rename of the GitHub repository (changes install and citation addresses)

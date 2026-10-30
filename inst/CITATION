@@ -5,6 +5,6 @@ bibentry(
   title = "Epidemiological suite: Sample Size and Power Calculator for Study Design",
   author = person("Mukul", "Maheshwari"),
   year = "2026",
-  note = "Release 1.0-alpha (R package version 0.99.0)",
+  note = "Release 1.0-alpha (R package version 1.0.0)",
   url = "https://github.com/SpaRroW410/Sample_size_all"
 )

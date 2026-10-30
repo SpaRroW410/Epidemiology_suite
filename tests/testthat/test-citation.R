@@ -19,8 +19,8 @@ test_that("the version and year in the citation are the package's and the curren
   expect_match(label, "^[0-9]+[.][0-9]+(-(alpha|beta|rc[0-9]*))?$")
   pkg <- package_version(unname(desc[1, "Version"]))
   base <- package_version(paste0(sub("-.*$", "", label), ".0"))
-  # a pre-release label (1.0-alpha) is written in DESCRIPTION as a number below the release (0.99.x); a final release as itself
-  if (grepl("-", label)) expect_true(pkg < base) else expect_true(pkg == base)
+  # DESCRIPTION can hold only numbers, so a pre-release label (1.0-alpha) is written there as its number (1.0.0)
+  expect_true(pkg == base)
 })
 
 test_that("formats follow the usual layouts", {

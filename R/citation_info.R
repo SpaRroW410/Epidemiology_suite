@@ -7,7 +7,7 @@
 .citation_doi <- NA_character_
 
 # The release the citations name, and the tag of the GitHub / Zenodo release ("v" + this). R only accepts numbers in the DESCRIPTION
-# version, so a pre-release cannot be written there: DESCRIPTION carries 0.99.x, which sorts before 1.0.0, until the final 1.0 release.
+# version, so the "-alpha" cannot be written there: DESCRIPTION carries the number alone (1.0.0).
 .release_label <- "1.0-alpha"
 
 suite_citation_info <- function() {
