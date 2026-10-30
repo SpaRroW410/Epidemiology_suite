@@ -6,9 +6,8 @@
 # web address instead. This is the only line to change when the DOI arrives (plus CITATION.cff and inst/CITATION).
 .citation_doi <- NA_character_
 
-# The release the citations name, and the tag of the GitHub / Zenodo release ("v" + this). R only accepts numbers in the DESCRIPTION
-# version, so the "-alpha" cannot be written there: DESCRIPTION carries the number alone (1.0.0).
-.release_label <- "1.0-alpha"
+# The release the citations name, and the tag of the GitHub / Zenodo release ("v" + this). Keep it equal to DESCRIPTION's version (a test checks it).
+.release_label <- "1.0.0"
 
 suite_citation_info <- function() {
   list(

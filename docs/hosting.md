@@ -44,7 +44,7 @@ documentation for deploying from GitHub (the manifest route) if a label differs.
 ## Adding the Zenodo DOI (owner steps)
 
 1. On zenodo.org, log in with GitHub, switch the repository on under *GitHub* settings, then publish a release on GitHub (tag, for
-   example `v1.0-alpha`, the release label in `R/citation_info.R`). Zenodo archives it and issues a DOI (a concept DOI for all versions and one for this version; cite the version one
+   example `v1.0.0`, the release label in `R/citation_info.R`). Zenodo archives it and issues a DOI (a concept DOI for all versions and one for this version; cite the version one
    or the concept one as you prefer).
 2. Put the DOI, in the form `10.5281/zenodo.1234567` (a pasted `https://doi.org/...` address is also accepted), in
    `.citation_doi` in `R/citation_info.R`; add it to `CITATION.cff` (the commented `identifiers:` block and `date-released`) and to

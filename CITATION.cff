@@ -6,7 +6,7 @@ abstract: >-
   160 study designs, each with its formula, a worked example and a citable source. Available as a web application and as
   the R package epidemiologicasuite.
 type: software
-version: 1.0-alpha
+version: 1.0.0
 authors:
   - family-names: Maheshwari
     given-names: Mukul
