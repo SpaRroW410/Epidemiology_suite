@@ -43,6 +43,8 @@ documentation for deploying from GitHub (the manifest route) if a label differs.
 
 ## Adding the Zenodo DOI (owner steps)
 
+Done for the first release: **10.5281/zenodo.23793833** (30 Oct 2026) is set in the three places below. The steps stay here for the next release.
+
 1. On zenodo.org, log in with GitHub, switch the repository on under *GitHub* settings, then publish a release on GitHub (tag, for
    example `v0.1.0`). Zenodo archives it and issues a DOI (a concept DOI for all versions and one for this version; cite the version one
    or the concept one as you prefer).

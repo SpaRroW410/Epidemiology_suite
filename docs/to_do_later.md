@@ -232,7 +232,8 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 ### Package and citation
 - [x] Three vignettes (Getting started, Sample sizes from R, Analysing summary data from R), 30 Oct 2026. [ ] More per-family vignettes (survival, trials, diagnostic accuracy, surveillance) and more examples where a calculator has several designs.
 - [ ] r-universe release, then CRAN: split a computation-only core from the app, `skip_on_cran()` for the Monte Carlo and browser tests, ASCII-only source, a name decision. `R CMD check --as-cran` already passes the package checks.
-- [ ] **[owner]** Zenodo: archive a release and send the DOI; put it in `R/citation_info.R`, `CITATION.cff` and `inst/CITATION` (docs/hosting.md, "Adding the Zenodo DOI"); confirm the first version number (0.1.0 now).
+- [x] **[owner]** Zenodo DOI 10.5281/zenodo.23793833 received 30 Oct and set in `R/citation_info.R`, `CITATION.cff` and `inst/CITATION`.
+- [ ] **[owner]** The Zenodo record's *version* field reads "Epidemiology"; correct it to 0.1.0 (what the app and package carry), or tell me the version to use. Also say whether the DOI is the version DOI or the concept DOI.
 - [ ] **[owner]** Rename the repository (then update the addresses in the same three files, the Pages and Connect addresses, and `mobile_url.txt` if the Connect address changes).
 - [ ] Possible wrappers `ss_text()`, `ss_curve()`, `ss_export()` around the `ss_result` object; the `calc_*` names are the public API for now.
 

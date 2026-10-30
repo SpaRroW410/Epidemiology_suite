@@ -2,9 +2,9 @@
 # citation formats shown on the app's Cite tab. Keep the version equal to DESCRIPTION's (a test checks it) and the year, version
 # and address in step with CITATION.cff and inst/CITATION.
 
-# The DOI that Zenodo issues for a release, e.g. "10.5281/zenodo.1234567". NA until it exists: the Cite tab then says so and cites the
+# The DOI that Zenodo issued for the first release (30 Oct 2026). Set to NA to fall back on the web address: the Cite tab then says so and cites the
 # web address instead. This is the only line to change when the DOI arrives (plus CITATION.cff and inst/CITATION).
-.citation_doi <- NA_character_
+.citation_doi <- "10.5281/zenodo.23793833"
 
 suite_citation_info <- function() {
   list(

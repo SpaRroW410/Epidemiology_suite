@@ -14,7 +14,8 @@ suite 940 blocks with 0 failures; 195 calculation functions exported with help p
 ## Waiting for you (owner decisions and steps)
 
 - [ ] Merge PR #11 (it contains #10 as well), then click **Republish** on Connect Cloud; try the phone redirect on a real phone
-- [ ] Zenodo: archive a release and send the **DOI**; confirm the first version number (0.1.0 now)
+- ~~Zenodo: archive a release and send the **DOI**~~ (30 Oct: 10.5281/zenodo.23793833, now in the Cite tab, `CITATION.cff` and `inst/CITATION`)
+- [ ] Zenodo record: its *version* field reads "Epidemiology"; correct it to 0.1.0 (the version the app and package carry) and re-check the citation
 - [ ] Decide on a background-process package (`mirai` or `future`) for running slow simulations without blocking other users (also changes the browser build)
 - [ ] Long-term hosting (Connect Cloud free-plan limits are not verified); rename of the GitHub repository (changes install and citation addresses)
 - [ ] The Pages build error text from 17 Oct, if it still happens
@@ -52,7 +53,7 @@ suite 940 blocks with 0 failures; 195 calculation functions exported with help p
 - ~~Automatic redirect of phones and tablets to that version~~ (28 Oct; to be confirmed on a real phone)
 - ~~Accessibility scan (axe-core, WCAG A/AA) of every calculator, light and dark, fixed to 0 violations; dark-mode switch~~ (28 Oct)
 - ~~Header renamed to "Epidemiological suite"~~ (29 Oct)
-- ~~Cite tab: the citation in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX, RIS and a Methods sentence, with copy and download; `CITATION.cff` and `citation()` too~~ (29 Oct). **Owner step:** archive a release on Zenodo and send the DOI (three places to edit, see docs/hosting.md)
+- ~~Cite tab: the citation in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX, RIS and a Methods sentence, with copy and download; `CITATION.cff` and `citation()` too~~ (29 Oct). DOI 10.5281/zenodo.23793833 added 30 Oct
 - [ ] Hosting decision for the long term (Connect Cloud free-plan limits not verified; shinyapps.io is closing to new apps)
 - [ ] Home-screen icon (PWA), then an Android wrapper (TWA); iOS stays PWA only; desktop wrapper not recommended
 - [ ] Multi-user scaling (Phase 6, background computation)
