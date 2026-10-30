@@ -170,7 +170,7 @@ mod_randomization_server <- function(id) {
     })
 
     output$download_list <- downloadHandler(
-      filename = function() "epidemiologicasuite_randomization_list.csv",
+      filename = function() "epidemiologysuite_randomization_list.csv",
       content = function(file) {
         res <- result()
         req(res$ok)

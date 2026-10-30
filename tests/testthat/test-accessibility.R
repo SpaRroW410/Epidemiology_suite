@@ -1,11 +1,11 @@
 # The browser-level check is tools/ui-audit/a11y.R (axe-core over every calculator, light and dark); these tests keep the
 # pieces it depends on from being removed by accident, without needing a browser.
 
-page_text <- function() as.character(htmltools::as.tags(attr(epidemiologicasuite_app(lazy = FALSE), "ui_tags")))
+page_text <- function() as.character(htmltools::as.tags(attr(epidemiologysuite_app(lazy = FALSE), "ui_tags")))
 
 test_that("the page declares its language, has a dark-mode switch and carries the accessibility repair script", {
   page <- page_text()
-  expect_identical(attr(attr(epidemiologicasuite_app(lazy = FALSE), "ui_tags"), "lang"), "en")   # becomes <html lang="en">
+  expect_identical(attr(attr(epidemiologysuite_app(lazy = FALSE), "ui_tags"), "lang"), "en")   # becomes <html lang="en">
   expect_match(page, "bslib-input-dark-mode", fixed = TRUE)
   expect_match(page, "combobox", fixed = TRUE)      # selectize search boxes get a name from their label
   expect_match(page, "tabindex", fixed = TRUE)      # scrollable result areas get keyboard access

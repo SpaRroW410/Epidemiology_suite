@@ -2,7 +2,7 @@
 services:
   app:
     build: .
-    image: epidemiologicasuite:local
+    image: epidemiologysuite:local
     ports:
       - "3838:3838"
     environment:

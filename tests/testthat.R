@@ -1,4 +1,4 @@
 library(testthat)
-library(epidemiologicasuite)
+library(epidemiologysuite)
 
-test_check("epidemiologicasuite")
+test_check("epidemiologysuite")

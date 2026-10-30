@@ -9,7 +9,7 @@ vignette: >
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(epidemiologicasuite)
+library(epidemiologysuite)
 ```
 
 Epidemiological suite has two faces: an interactive app and a set of R functions. They share the same formulas, so a number
@@ -18,7 +18,7 @@ you read in the app is the number the function returns.
 ## The app
 
 ```{r app, eval = FALSE}
-library(epidemiologicasuite)
+library(epidemiologysuite)
 run_app()                                  # opens the app in your browser
 run_app(calculator = "eyes per patient")   # opens it on one calculator
 ```
@@ -62,7 +62,7 @@ Results are reproducible: designs that simulate take a `seed`, and the same seed
 ## Citing
 
 ```{r cite}
-citation("epidemiologicasuite")
+citation("epidemiologysuite")
 ```
 
 The app's *Cite* tab gives the same citation in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX and RIS. Each calculator's

@@ -9,7 +9,7 @@ vignette: >
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(epidemiologicasuite)
+library(epidemiologysuite)
 ```
 
 The *Analyze* tools work on counts you already have, not on a data file. They are the functions whose names start with

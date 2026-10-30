@@ -4,7 +4,7 @@
 # every other runtime package is called with pkg:: and needs no entry here.
 S3method(format, ss_result)
 S3method(print, ss_result)
-export(epidemiologicasuite_app)
+export(epidemiologysuite_app)
 export(run_app)
 export(calc_agreement_bland_altman)
 export(calc_agreement_ccc)

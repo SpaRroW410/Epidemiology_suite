@@ -5,8 +5,8 @@
 
 # Single place for the install instructions, so a repository rename touches one line.
 .install_instructions <- paste0(
-  "install.packages(\"remotes\"); remotes::install_github(\"SpaRroW410/Sample_size_all\"); ",
-  "epidemiologicasuite::run_app()"
+  "install.packages(\"remotes\"); remotes::install_github(\"SpaRroW410/Epidemiology_suite\"); ",
+  "epidemiologysuite::run_app()"
 )
 
 # TRUE when running inside webR (the browser build).

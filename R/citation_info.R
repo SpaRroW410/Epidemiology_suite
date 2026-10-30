@@ -15,8 +15,8 @@ suite_citation_info <- function() {
     subtitle = "sample size, power and analysis tools for epidemiology and clinical research",
     family = "Maheshwari", given = "Mukul",
     version = .release_label, year = "2026",
-    url = "https://github.com/SpaRroW410/Sample_size_all",
-    site = "https://sparrow410.github.io/Sample_size_all/",
+    url = "https://github.com/SpaRroW410/Epidemiology_suite",
+    site = "https://sparrow410.github.io/Epidemiology_suite/",
     doi = if (is.na(.citation_doi) || !nzchar(.citation_doi)) NA_character_ else sub("^https?://(dx[.])?doi[.]org/", "", .citation_doi),
     publisher = "Zenodo"
   )

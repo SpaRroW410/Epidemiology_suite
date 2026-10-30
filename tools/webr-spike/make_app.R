@@ -57,7 +57,7 @@ lines <- c(
   "  r <- try(source(f, local = FALSE), silent = TRUE)",
   "  if (inherits(r, 'try-error')) message('SOURCE FAILED: ', f, ': ', conditionMessage(attr(r, 'condition')))",
   "}",
-  "epidemiologicasuite_app()"
+  "epidemiologysuite_app()"
 )
 writeLines(lines, file.path(out, "app.R"))
 cat(sprintf("Wrote %s (%s variant, %d library() calls, %d R files)\n", out, variant, length(pkgs), length(list.files(file.path(out, "R")))))

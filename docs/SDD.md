@@ -1,5 +1,5 @@
 # Software Design Document
-## Epidemiological suite (R package `epidemiologicasuite`) — sample size, power and analysis tools for community medicine / epidemiology
+## Epidemiological suite (R package `epidemiologysuite`) — sample size, power and analysis tools for community medicine / epidemiology
 
 | | |
 |---|---|
@@ -113,16 +113,16 @@ combination, plus long-term extensibility — not novel statistical methodology.
                                     └──────────────────────────────┘
 ```
 
-The app is the R package `epidemiologicasuite` (`DESCRIPTION`, `NAMESPACE`, flat `R/`).
+The app is the R package `epidemiologysuite` (`DESCRIPTION`, `NAMESPACE`, flat `R/`).
 `R/registry.R` defines `module_registry()` (id, nav title, UI, server for each
 module) and `module_workbenches` (which workbench and sidebar group each module sits in);
-`R/run_app.R` builds the navbar from them (`epidemiologicasuite_app()`; `run_app()` runs it). The Home hub jumps to a module with
+`R/run_app.R` builds the navbar from them (`epidemiologysuite_app()`; `run_app()` runs it). The Home hub jumps to a module with
 `bslib::nav_select()` and presets its design with `updateRadioButtons()`.
 
 Around these layers sit three small cross-cutting pieces: `R/accessibility.R` (accessible names for generated controls, keyboard
 access to scrolling results, the pinned result), `R/phone_shell.R` (the phone layout: a media query at 575 px and a script that
 builds the calculator drop-down) and `R/citation_info.R` / `R/home_cite.R` (the one place for the citation facts and the Cite tab).
-The public R API is the `calc_*()` functions (exported, each documented), `ss_find()`, `run_app()` and `epidemiologicasuite_app()`.
+The public R API is the `calc_*()` functions (exported, each documented), `ss_find()`, `run_app()` and `epidemiologysuite_app()`.
 
 ### 4.2 Design principles
 - **Modules are self-contained.** A module owns its inputs, its calculation call, and
@@ -162,12 +162,12 @@ The public R API is the `calc_*()` functions (exported, each documented), `ss_fi
 ## 6. Repository Structure
 
 ```
-Sample_size_all/
+Epidemiology_suite/
 ├── DESCRIPTION, NAMESPACE # package metadata (NAMESPACE hand-written; roxygen2 builds only the help pages)
 ├── CITATION.cff           # citation for GitHub / Zenodo
-├── app.R                  # development entry point: pkgload::load_all() + epidemiologicasuite_app()
+├── app.R                  # development entry point: pkgload::load_all() + epidemiologysuite_app()
 ├── R/                     # flat (R requires it); grouped by file-name prefix
-│   ├── run_app.R          # run_app(), epidemiologicasuite_app(): navbar, theme, Home hub, Cite tab
+│   ├── run_app.R          # run_app(), epidemiologysuite_app(): navbar, theme, Home hub, Cite tab
 │   ├── registry.R         # module_registry(), module_workbenches
 │   ├── calc_*.R           # pure functions, exported with roxygen help; calc_utils.R — validators, MC search
 │   ├── content_*.R        # formula, explanation, example, citation, backend

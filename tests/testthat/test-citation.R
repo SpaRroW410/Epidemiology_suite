@@ -50,7 +50,7 @@ test_that("an unknown format is refused and each format has a download name", {
 })
 
 test_that("the Cite tab is in the page and its files exist", {
-  page <- as.character(htmltools::as.tags(attr(epidemiologicasuite_app(lazy = FALSE), "ui_tags")))
+  page <- as.character(htmltools::as.tags(attr(epidemiologysuite_app(lazy = FALSE), "ui_tags")))
   expect_match(page, "How to cite", fixed = TRUE)
   expect_match(page, "cite_format", fixed = TRUE)
   for (p in c("../../CITATION.cff", "../../inst/CITATION")) if (file.exists(p)) expect_true(TRUE)

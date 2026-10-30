@@ -48,7 +48,7 @@ writeLines(c(
   "  if (inherits(r, 'try-error')) message('SOURCE FAILED: ', f, ': ', conditionMessage(attr(r, 'condition')))",
   "}",
   stage("after_source"),
-  if (variant == "instrumented") "app_obj <- epidemiologicasuite_app()" else "app_obj <- epidemiologicasuite_app()",
+  if (variant == "instrumented") "app_obj <- epidemiologysuite_app()" else "app_obj <- epidemiologysuite_app()",
   stage("after_app_object"),
   if (variant == "instrumented") "invisible(htmltools::renderTags(attr(app_obj, 'ui_tags')))" else character(),
   stage("after_render_page_with_theme"),

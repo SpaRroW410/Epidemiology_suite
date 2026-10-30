@@ -37,12 +37,12 @@ test_that("run_app's calculator argument takes a design key or words, and says w
   expect_equal(k, "patient_units_between_continuous")
   expect_error(.resolve_calculator("zzzzqqq"), "No calculator matches")
   expect_error(.resolve_calculator(""), "design key")
-  expect_error(epidemiologicasuite_app(calculator = "zzzzqqq"), "No calculator matches")
+  expect_error(epidemiologysuite_app(calculator = "zzzzqqq"), "No calculator matches")
 })
 
 test_that("the app opens on the requested calculator and design (browser test)", {
   skip_if_no_ui()
-  withr::local_envvar(EPIDEMIOLOGICASUITE_OPEN = "patient_units_within_continuous")
+  withr::local_envvar(EPIDEMIOLOGYSUITE_OPEN = "patient_units_within_continuous")
   app <- ui_fresh_driver(background_load = FALSE, name = "open_on")
   withr::defer(app$stop())
   app$wait_for_js("Shiny.shinyapp.$inputValues['patient_units-design'] === 'within_continuous'", timeout = 60000)
@@ -51,7 +51,7 @@ test_that("the app opens on the requested calculator and design (browser test)",
 })
 
 test_that("the addin is registered for RStudio and Positron", {
-  dcf <- read.dcf(system.file("rstudio", "addins.dcf", package = "epidemiologicasuite"))
+  dcf <- read.dcf(system.file("rstudio", "addins.dcf", package = "epidemiologysuite"))
   expect_equal(unname(dcf[1, "Binding"]), "ss_find_addin")
   expect_true(is.function(ss_find_addin))
 })

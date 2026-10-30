@@ -28,7 +28,7 @@ test_that("every exported function has a help page with every argument documente
   ex <- exports(r); expect_gt(length(ex), 195)
   infos <- lapply(list.files(file.path(r, "man"), pattern = "[.]Rd$", full.names = TRUE), rd_info)
   by_alias <- list(); for (i in infos) for (a in i$aliases) by_alias[[a]] <- i
-  ns <- asNamespace("epidemiologicasuite")
+  ns <- asNamespace("epidemiologysuite")
   for (f in ex) {
     info <- by_alias[[f]]
     expect_false(is.null(info), info = paste("no help page for", f))
@@ -42,7 +42,7 @@ test_that("every exported function has a help page with every argument documente
 
 test_that("all calc_*() functions are exported", {
   r <- root(); skip_if(is.null(r), "package sources not available")
-  ns <- asNamespace("epidemiologicasuite")
+  ns <- asNamespace("epidemiologysuite")
   calc <- grep("^calc_", ls(ns), value = TRUE)
   calc <- calc[vapply(calc, function(n) is.function(get(n, ns)), TRUE)]
   expect_setequal(intersect(exports(r), calc), calc)

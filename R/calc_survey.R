@@ -215,7 +215,7 @@ survey_selection_methods_text <- function(result) {
                   if (result$n_certainty > 0) sprintf("; %d units taken with certainty", result$n_certainty) else ""),
     epi = sprintf("a two-stage cluster sample: %d clusters selected with probability proportional to size (systematic, interval %s, random start %s) and %d subjects per cluster (%d in total)",
                   result$clusters, format(round(result$interval, 1)), format(round(result$random_start, 1)), result$per_cluster, result$total_sample))
-  sprintf("The sample was drawn by computer as %s, reproducible from the seed %s (R %s, Mersenne-Twister generator; epidemiologicasuite). [Describe how the frame was built, how it was ordered, and how subjects inside each selected unit are chosen.]",
+  sprintf("The sample was drawn by computer as %s, reproducible from the seed %s (R %s, Mersenne-Twister generator; epidemiologysuite). [Describe how the frame was built, how it was ordered, and how subjects inside each selected unit are chosen.]",
           how, result$seed, paste0(R.version$major, ".", R.version$minor))
 }
 

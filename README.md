@@ -9,7 +9,7 @@ formula that implements it.
 **Current state (29 October 2026):** 66 calculators (50 sample-size, 11 *Analyze* tools, 2 planning tools,
 2 survey tools, 1 infectious-disease model tool) covering 159 designs, each with its formula, a worked example and a
 citable source, checked against a published value, a real package or a simulation. The app is called **Epidemiological
-suite**; the R package is `epidemiologicasuite`. There are three ways to use it (see below): the browser build on GitHub Pages,
+suite**; the R package is `epidemiologysuite`. There are three ways to use it (see below): the browser build on GitHub Pages,
 the phone / server version on Posit Connect Cloud, and the R package, in which **every calculation is an exported function
 with its own help page**. 942 unit-test blocks plus browser-driven UI tests, an accessibility scan (axe-core, WCAG A/AA, light and
 dark mode, desktop and phone width) and `R CMD check --as-cran` back it. What is done and what is next:
@@ -187,7 +187,7 @@ available, otherwise the `github.com/cran` mirror).
 
 One codebase, built into three forms by CI (details and the owner's setup steps: [`docs/hosting.md`](docs/hosting.md)):
 
-1. **In the browser, nothing to install** -- GitHub Pages, `https://sparrow410.github.io/Sample_size_all/app/`. The same code compiled to
+1. **In the browser, nothing to install** -- GitHub Pages, `https://sparrow410.github.io/Epidemiology_suite/app/`. The same code compiled to
    WebAssembly runs on your own device and nothing you type is sent to a server. The first visit downloads about 60 MB and needs
    about 1 GB of memory, so it suits desktop browsers; a few designs that need compiled packages are not available there.
 2. **Phone / server version** -- the same app running on Posit Connect Cloud, so a phone only receives a web page (set up by the
@@ -199,22 +199,22 @@ so the three cannot drift apart.
 
 ## Installing and running the app
 
-epidemiologicasuite is an R package (GPL-3). Install it from GitHub and start the app:
+epidemiologysuite is an R package (GPL-3). Install it from GitHub and start the app:
 
 ```r
 install.packages("remotes")
-remotes::install_github("SpaRroW410/Sample_size_all")
-epidemiologicasuite::run_app()
+remotes::install_github("SpaRroW410/Epidemiology_suite")
+epidemiologysuite::run_app()
 ```
 
 `run_app(...)` passes its arguments on to `shiny::runApp()` (e.g.
-`run_app(port = 8080, launch.browser = FALSE)`); `epidemiologicasuite_app()` returns the
+`run_app(port = 8080, launch.browser = FALSE)`); `epidemiologysuite_app()` returns the
 Shiny app object without running it.
 
 Find a calculator without opening the app, and open the app straight on one:
 
 ```r
-library(epidemiologicasuite)
+library(epidemiologysuite)
 ss_find("eyes per patient")            # a data frame: key, design, calculator, answers
 run_app(calculator = "eyes per patient")   # a design key from ss_find(), or words (the best match opens)
 ```
@@ -228,7 +228,7 @@ calc_cluster_deff(n_base = 200, icc = 0.05, cluster_size = 10)   # design effect
 ```
 
 In RStudio or Positron, *Addins > Find a sample size calculator* does the same from a search window. Setting the
-environment variable `EPIDEMIOLOGICASUITE_OPEN` to a design key makes a deployment open on that calculator.
+environment variable `EPIDEMIOLOGYSUITE_OPEN` to a design key makes a deployment open on that calculator.
 
 From a clone (development), the root `app.R` loads the package with
 `pkgload::load_all()`, so `shiny::runApp()` or `Rscript -e 'shiny::runApp()'` from
@@ -237,22 +237,22 @@ the repository root still works.
 ## How to cite
 
 The app has a **Cite** tab with the citation in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX and RIS, a ready-made sentence
-for a Methods section, and copy and download buttons. In R: `citation("epidemiologicasuite")`. GitHub's "Cite this repository" reads
+for a Methods section, and copy and download buttons. In R: `citation("epidemiologysuite")`. GitHub's "Cite this repository" reads
 `CITATION.cff`. There is no DOI yet: after the first release is archived on Zenodo, put the DOI in three places (see
 `docs/hosting.md`, "Adding the Zenodo DOI"): `.citation_doi` in `R/citation_info.R`, `CITATION.cff` and `inst/CITATION`.
 
 ## Running in Docker
 
 ```sh
-docker build -t epidemiologicasuite .
-docker run --rm -p 3838:3838 epidemiologicasuite      # then open http://localhost:3838
+docker build -t epidemiologysuite .
+docker run --rm -p 3838:3838 epidemiologysuite      # then open http://localhost:3838
 # or:  docker compose up --build
 ```
 
 The image is built from a pinned R base image, installs the dependencies listed in `DESCRIPTION` and the package itself, runs as an
 unprivileged user and listens on `$PORT` (default 3838). It needs no internet access at run time. The `docker` workflow builds
 it on every relevant push and drives it in headless Chrome; pushes to `main` and `v*` tags also publish it to
-`ghcr.io/<owner>/epidemiologicasuite`.
+`ghcr.io/<owner>/epidemiologysuite`.
 
 ## Documentation site
 
@@ -310,9 +310,9 @@ request, and the full suite weekly or on demand from the Actions tab.
 ```
 DESCRIPTION, NAMESPACE package metadata (NAMESPACE is hand-written; roxygen2 builds only the help pages, roclets = "rd")
 CITATION.cff           citation for GitHub and Zenodo (the DOI goes here once issued, see docs/hosting.md)
-app.R                  development entry point: pkgload::load_all() + epidemiologicasuite_app()
+app.R                  development entry point: pkgload::load_all() + epidemiologysuite_app()
 R/                     the package (flat, as R requires; grouped by file-name prefix):
-├── run_app.R          run_app() / epidemiologicasuite_app(): grouped navbar, theme, Home hub, Cite tab
+├── run_app.R          run_app() / epidemiologysuite_app(): grouped navbar, theme, Home hub, Cite tab
 ├── registry.R         module_registry() + module_workbenches (groups)
 ├── calc_*.R           pure calculation functions, no Shiny, all exported with roxygen help (+ calc_utils.R)
 ├── content_*.R        per-module formula / explanation / example / citation
@@ -324,7 +324,7 @@ R/                     the package (flat, as R requires; grouped by file-name pr
 ├── phone_shell.R      the phone layout (bottom tab bar, calculator drop-down)
 └── lazy_modules.R, browser_build.R   lazy loading with progress; notice and checks for the browser build
 man/                   help pages (199: every exported function)
-inst/                  CITATION (what citation("epidemiologicasuite") prints), rstudio/addins.dcf
+inst/                  CITATION (what citation("epidemiologysuite") prints), rstudio/addins.dcf
 tests/testthat/        unit tests, browser (shinytest2) tests, help-page, citation, phone-layout and plot-description tests
 docs/                  PLAN.md, ROADMAP.md, SDD.md, hosting.md, to_do_later.md, checklists, design-mockups/
 .claude/               SessionStart hook that rebuilds the R environment
@@ -389,7 +389,7 @@ Every calculator is three files plus registry entries.
   Because modules namespace input ids (`proportion-design`, not `design`), the
   condition string is built with `ns("design")` so it stays correct under any
   module id.
-- **`do.call()` builds the navbar.** `epidemiologicasuite_app()` creates one navbar item per
+- **`do.call()` builds the navbar.** `epidemiologysuite_app()` creates one navbar item per
   `module_workbenches` entry (a `navset_pill_list()` sidebar of grouped modules inside it) and
   passes the variable-length list to `page_navbar()` via `do.call()`, which calls a function with
   an argument list assembled at runtime. `jump_to_module()` selects the workbench and then the module.
@@ -420,7 +420,7 @@ Every calculator is three files plus registry entries.
 
 Copyright (C) 2026 Dr. Mukul Maheshwari.
 
-epidemiologicasuite is free software: you can redistribute it and/or modify it under the
+epidemiologysuite is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
 Foundation, version 3 — see [`LICENSE`](LICENSE). It is distributed in the hope that
 it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of

@@ -2,7 +2,7 @@
 
 *Updated 29 October 2026. Struck-through items are done (the date in brackets is when). The reasoning, evidence and the full
 list of blocked sample-size items are in [`ROADMAP.md`](ROADMAP.md); the flat checklist of everything open is
-[`to_do_later.md`](to_do_later.md). The package is still named `epidemiologicasuite`; the app and the suite are shown to people as
+[`to_do_later.md`](to_do_later.md). The package is named `epidemiologysuite` (renamed from `epidemiologicasuite` on 30 Oct 2026, with the repository); the app and the suite are shown to people as
 **Epidemiological suite**.*
 
 **Where it stands:** 66 calculators (50 sample-size, 11 analysis, 2 planning, 2 survey, 1 infectious-disease models), 159 designs,

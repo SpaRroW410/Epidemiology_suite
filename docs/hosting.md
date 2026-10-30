@@ -1,12 +1,12 @@
-# Three ways to use epidemiologicasuite
+# Three ways to use epidemiologysuite
 
 One codebase (the R package), three ways to run it. They are built from the same `R/` directory by CI, so they cannot drift apart.
 
 | | Where | Runs on | Good for | Limits |
 |---|---|---|---|---|
-| **1. Browser build** | GitHub Pages: `https://sparrow410.github.io/Sample_size_all/app/` | your own device, in the browser (R compiled to WebAssembly) | desktop browsers; nothing is sent anywhere; no server, no cost | about 60 MB first download and about 1 GB of memory, so many phones cannot run it; a few designs that need compiled packages are unavailable; slower simulations |
+| **1. Browser build** | GitHub Pages: `https://sparrow410.github.io/Epidemiology_suite/app/` | your own device, in the browser (R compiled to WebAssembly) | desktop browsers; nothing is sent anywhere; no server, no cost | about 60 MB first download and about 1 GB of memory, so many phones cannot run it; a few designs that need compiled packages are unavailable; slower simulations |
 | **2. Phone / server version** | Posit Connect Cloud (live at https://sparrow410-epidemiological-suite.share.connect.posit.cloud) | a Posit server running R | phones and tablets: the phone only receives a web page | what people type goes to the server; free plans may sleep when idle and have limits (check Posit's pricing page); one R process serves several users |
-| **3. R package** | `remotes::install_github("SpaRroW410/Sample_size_all")`, then `epidemiologicasuite::run_app()`; or the Docker image | your own R | everything, offline, fastest, every design | needs R |
+| **3. R package** | `remotes::install_github("SpaRroW410/Epidemiology_suite")`, then `epidemiologysuite::run_app()`; or the Docker image | your own R | everything, offline, fastest, every design | needs R |
 
 ## How the three are produced
 - **Browser build:** `docs` workflow -> `tools/pages/make_app.R` -> `shinylive::export()` -> `/app/` on Pages (boot-tested in headless Chrome).
@@ -26,7 +26,7 @@ These need a Posit account, so only the repository owner can do them. The wordin
 documentation for deploying from GitHub (the manifest route) if a label differs.
 1. Merge the PR that adds `connect-bundle` to `main`; the workflow creates the `connect` branch on its first run on `main`
    (Actions tab -> `connect-bundle`; or run it by hand with *Run workflow*).
-2. Create a Posit Connect Cloud account, connect it to GitHub, publish new content from the repository `SpaRroW410/Sample_size_all`,
+2. Create a Posit Connect Cloud account, connect it to GitHub, publish new content from the repository `SpaRroW410/Epidemiology_suite`,
    choose the branch **`connect`**, content type Shiny, primary file `app.R` (the manifest is in that branch).
 3. Open the address Connect gives you on a phone. Then put that address in `tools/pages/mobile_url.txt` and open a PR.
 4. Each later push to `main` that changes `R/`, `DESCRIPTION` or `tools/connect/` rebuilds the `connect` branch; Connect Cloud redeploys

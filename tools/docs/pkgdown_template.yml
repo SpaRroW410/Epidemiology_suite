@@ -1,6 +1,6 @@
 # Base of _pkgdown.yml; tools/docs/build_site_sources.R appends the generated `articles:` section and writes
 # the result to _pkgdown.yml (which is not committed).
-url: https://sparrow410.github.io/Sample_size_all/
+url: https://sparrow410.github.io/Epidemiology_suite/
 
 # not `docs/`, which holds the project's markdown documents
 destination: site_out
@@ -38,7 +38,7 @@ reference:
   - title: Run the app
     contents:
       - run_app
-      - epidemiologicasuite_app
+      - epidemiologysuite_app
   - title: Find a calculator
     contents:
       - ss_find

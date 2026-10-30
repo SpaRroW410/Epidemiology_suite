@@ -9,7 +9,7 @@
 # "12 of 61 ready" above the list, calculators still to come drawn faint with a pulsing dot, the one being loaded next with
 # a spinner, and a brief tick when one becomes ready.
 # Nothing about a module changes: the same ui() is inserted with insertUI() and the same server() started, so a module behaves
-# the same whenever it is loaded. `epidemiologicasuite_app(lazy = FALSE)` builds everything up front as before.
+# the same whenever it is loaded. `epidemiologysuite_app(lazy = FALSE)` builds everything up front as before.
 
 # The calculators that are ready at start-up: the first of each workbench plus the commonest basic ones.
 lazy_core_modules <- c("proportion", "means", "correlation", "analyze_2x2")
@@ -20,11 +20,11 @@ lazy_placeholder <- function(id) {
   div(id = lazy_container_id(id), p(class = "lazy-note text-muted py-3", "Loading this calculator..."))
 }
 
-# Background loading can be switched off for tests and debugging: options(epidemiologicasuite.background_load = FALSE)
-# or the environment variable EPIDEMIOLOGICASUITE_BACKGROUND_LOAD=false.
+# Background loading can be switched off for tests and debugging: options(epidemiologysuite.background_load = FALSE)
+# or the environment variable EPIDEMIOLOGYSUITE_BACKGROUND_LOAD=false.
 .background_load_enabled <- function() {
-  env <- tolower(Sys.getenv("EPIDEMIOLOGICASUITE_BACKGROUND_LOAD", "true"))
-  isTRUE(getOption("epidemiologicasuite.background_load", TRUE)) && !identical(env, "false")
+  env <- tolower(Sys.getenv("EPIDEMIOLOGYSUITE_BACKGROUND_LOAD", "true"))
+  isTRUE(getOption("epidemiologysuite.background_load", TRUE)) && !identical(env, "false")
 }
 
 # Module ids in the order the sidebars list them (workbench by workbench, group by group), then any not listed.

@@ -19,7 +19,7 @@ snip <- list(
 ex <- jsonlite::read_json(path)
 for (n in names(snip)) {
   t0 <- Sys.time()
-  r <- eval(parse(text = snip[[n]]), new.env(parent = asNamespace("epidemiologicasuite")))
+  r <- eval(parse(text = snip[[n]]), new.env(parent = asNamespace("epidemiologysuite")))
   # the last expression's value is what is printed; take the result of the last call for the field names
   if (!is.list(r) && !is.numeric(r)) stop("unexpected result for ", n)
   ex[[n]] <- list(call = snip[[n]], seconds = round(as.numeric(difftime(Sys.time(), t0, units = "secs")), 2),

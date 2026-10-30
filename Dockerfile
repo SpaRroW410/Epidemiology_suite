@@ -1,6 +1,6 @@
-# epidemiologicasuite as a container (docs/ROADMAP.md item 18, Track D1).
-#   docker build -t epidemiologicasuite .
-#   docker run --rm -p 3838:3838 epidemiologicasuite       # then open http://localhost:3838
+# epidemiologysuite as a container (docs/ROADMAP.md item 18, Track D1).
+#   docker build -t epidemiologysuite .
+#   docker run --rm -p 3838:3838 epidemiologysuite       # then open http://localhost:3838
 # The app listens on 0.0.0.0:$PORT (default 3838) and needs no internet at run time: the theme uses a local font
 # stack and every dependency is installed at build time.
 FROM rocker/r-ver:4.4.3
@@ -20,7 +20,7 @@ RUN Rscript -e 'install.packages("remotes"); remotes::install_deps(dependencies 
 
 COPY . .
 RUN R CMD INSTALL --no-docs --no-multiarch --no-test-load . \
- && Rscript -e 'library(epidemiologicasuite); stopifnot(is.function(run_app))' \
+ && Rscript -e 'library(epidemiologysuite); stopifnot(is.function(run_app))' \
  && rm -rf /build
 
 # Run as an unprivileged user.
@@ -34,4 +34,4 @@ EXPOSE 3838
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
   CMD curl -fsS "http://localhost:${PORT}/" > /dev/null || exit 1
 
-CMD ["R", "--quiet", "--no-save", "-e", "epidemiologicasuite::run_app(host = '0.0.0.0', port = as.integer(Sys.getenv('PORT', '3838')), launch.browser = FALSE)"]
+CMD ["R", "--quiet", "--no-save", "-e", "epidemiologysuite::run_app(host = '0.0.0.0', port = as.integer(Sys.getenv('PORT', '3838')), launch.browser = FALSE)"]

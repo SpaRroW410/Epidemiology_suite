@@ -1,4 +1,4 @@
-Package: epidemiologicasuite
+Package: epidemiologysuite
 Title: Sample Size and Power Calculator for Study Design
 Version: 1.0.0
 Authors@R: person("Mukul", "Maheshwari", role = c("aut", "cre", "cph"),
@@ -56,8 +56,8 @@ Suggests:
     TrialSize
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-URL: https://sparrow410.github.io/Sample_size_all/,
-    https://github.com/SpaRroW410/Sample_size_all
-BugReports: https://github.com/SpaRroW410/Sample_size_all/issues
+URL: https://sparrow410.github.io/Epidemiology_suite/,
+    https://github.com/SpaRroW410/Epidemiology_suite
+BugReports: https://github.com/SpaRroW410/Epidemiology_suite/issues
 Roxygen: list(markdown = TRUE, roclets = "rd")
 Config/roxygen2/version: 8.1.1

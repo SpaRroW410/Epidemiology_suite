@@ -401,9 +401,9 @@ test_that("start-up builds only the core calculators; lazy = FALSE builds all (s
     html <- htmltools::renderTags(attr(app, "ui_tags"))$html
     lengths(regmatches(html, gregexpr('id="lazy_', html)))
   }
-  n_lazy <- count_placeholders(epidemiologicasuite_app(lazy = TRUE))
+  n_lazy <- count_placeholders(epidemiologysuite_app(lazy = TRUE))
   expect_equal(n_lazy, length(module_registry()) - length(lazy_core_modules))
-  expect_equal(count_placeholders(epidemiologicasuite_app(lazy = FALSE)), 0)
+  expect_equal(count_placeholders(epidemiologysuite_app(lazy = FALSE)), 0)
   expect_true(all(lazy_core_modules %in% vapply(module_registry(), `[[`, character(1), "id")))
   # the first module of every workbench is a core module, so no workbench opens on a placeholder
   firsts <- vapply(module_workbenches, function(wb) wb$groups[[1]]$module_ids[1], "")
@@ -426,7 +426,7 @@ test_that("a Home jump to a calculator that is not loaded yet loads it and then 
 
 test_that("background loading fills in every calculator with the indicator beside the lists, without errors", {
   skip_if_no_ui()
-  old <- Sys.getenv("EPIDEMIOLOGICASUITE_BACKGROUND_LOAD"); on.exit(Sys.setenv(EPIDEMIOLOGICASUITE_BACKGROUND_LOAD = old), add = TRUE)
+  old <- Sys.getenv("EPIDEMIOLOGYSUITE_BACKGROUND_LOAD"); on.exit(Sys.setenv(EPIDEMIOLOGYSUITE_BACKGROUND_LOAD = old), add = TRUE)
   app <- ui_fresh_driver(background_load = TRUE, name = "lazy_bg")
   withr::defer(app$stop())
   # the indicator beside the calculator lists: faint entries for what is still to come, and a bar with the count

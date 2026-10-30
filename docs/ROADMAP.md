@@ -7,7 +7,7 @@
 | **Status** | Active — authoritative forward plan |
 | **Last reviewed** | 29 October 2026 (status refreshed after items 15-22; the 28 September review findings in §2 stand, with their fixes noted) |
 | **Owner** | Dr. Mukul Maheshwari |
-| **Name** | **Epidemiological suite** as shown in the app; the R package is `epidemiologicasuite` (decision D3) |
+| **Name** | **Epidemiological suite** as shown in the app; the R package is `epidemiologysuite` (decision D3) |
 | **Licence** | GPL-3 (decision D2) |
 
 **How the docs fit together**
@@ -160,7 +160,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    them). `mod_shared_ui.R`'s `export_controls_ui()`/`render_export_handlers()`
    wire a "Copy paragraph" button + CSV/JSON/BibTeX/RIS downloads into a
    module in two lines, filenamed from the design (e.g.
-   `epidemiologicasuite_two_independent_proportions.csv`).
+   `epidemiologysuite_two_independent_proportions.csv`).
    Found and fixed along the way (real bug, not sandbox-only — same root
    cause could bite a deployment with a similarly minimal locale): this
    sandbox has no working multibyte locale at all, under which R's own
@@ -505,16 +505,16 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
     batch -- RM-ANOVA's three designs share one unconditional code path,
     which a naive per-batch tally undercounted): **78 designs wired
     across 31 modules** by batch 8; superseded by the completion block above (136 states across 44 modules).
-11. **Package skeleton (Track C1) -- done (14 Oct 2026)**, named `epidemiologicasuite` (GPL-3).
+11. **Package skeleton (Track C1) -- done (14 Oct 2026)**, named `epidemiologysuite` (GPL-3).
     The app is now an installable R package; install with
-    `remotes::install_github("SpaRroW410/Sample_size_all")`, run with
-    `epidemiologicasuite::run_app()`.
+    `remotes::install_github("SpaRroW410/Epidemiology_suite")`, run with
+    `epidemiologysuite::run_app()`.
     - **Layout.** `R/` flattened with `git mv` (162 files; no name collisions).
       `global.R` is gone: `R/registry.R` holds `module_registry()` (now a
       *function*, so it is evaluated after the whole namespace has loaded) and
-      `module_groups`; `R/run_app.R` holds `epidemiologicasuite_app()` (the navbar
+      `module_groups`; `R/run_app.R` holds `epidemiologysuite_app()` (the navbar
       shell, formerly `app.R`) and `run_app(...)` (= `shiny::runApp()`). Root
-      `app.R` is `pkgload::load_all()` + `epidemiologicasuite_app()` for development.
+      `app.R` is `pkgload::load_all()` + `epidemiologysuite_app()` for development.
     - **Load order.** Package files load alphabetically, and only one file had a
       load-time dependency: `design_tree.R` builds its "browse by test" branch from
       `home_catalog.R`'s `test_families`. It is renamed `home_design_tree.R` so it
@@ -531,7 +531,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       The ~30 verification-only packages stay out of `Imports`.
     - **Tests.** All `source()` lines removed; the suite runs inside the package
       namespace via `testthat::test_local()` (CI updated), `tests/testthat.R` is
-      `test_check("epidemiologicasuite")`. `test-catalog_consistency.R` calls
+      `test_check("epidemiologysuite")`. `test-catalog_consistency.R` calls
       `module_registry()`; the ROADMAP-tracking test in `test-design_tree.R` skips
       when `docs/` is absent (it is `.Rbuildignore`d from the installed package).
     - **Verified.** Fast suite via `test_local()`: 523 tests, 2043 assertions, 0
@@ -547,11 +547,11 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       (required: `R CMD build` rejects a package with no maintainer e-mail;
       supplied by the owner on 14 Oct 2026, after a first version of this item
       used a GitHub no-reply address).
-    - **Not done / still open (Track C1 leftovers).** The GitHub repository is
-      still called `Sample_size_all` and the navbar title still reads "Sample Size
+    - **Not done / still open (Track C1 leftovers).** The GitHub repository was
+      still called `Sample_size_all` at that time and the navbar title still reads "Sample Size
       Calculator" (renaming the repository changes the install path, so it is the
       owner's call). Deployment: a hosted deployment must now install the package
-      and call `epidemiologicasuite::run_app()`/`epidemiologicasuite_app()` from its `app.R`;
+      and call `epidemiologysuite::run_app()`/`epidemiologysuite_app()` from its `app.R`;
       the earlier note that "a two-line `app.R` keeps shinyapps.io working" was
       not tested and is withdrawn until item 18 (hosted deployment, D1).
 12. **Automated UI smoke tests (F6) -- done (14 Oct 2026)** with `shinytest2`.
@@ -962,7 +962,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
       `.github/workflows/docker.yml` builds it, starts the container and drives it in headless Chrome
       (`tools/docker/smoke.mjs`: navbar appears, Rule of Three returns the exact bound 0.0950): the first CI run
       passed, with the navbar visible after 5.8 s. Pushes to `main` and `v*` tags also publish to
-      `ghcr.io/<owner>/epidemiologicasuite` with the default `GITHUB_TOKEN` (not exercised yet: no push to `main` since).
+      `ghcr.io/<owner>/epidemiologysuite` with the default `GITHUB_TOKEN` (not exercised yet: no push to `main` since).
     - **Not done / decisions for the owner.** *Where to host it* (shinyapps.io, Posit Connect, Fly.io / Render / a VPS
       running the image) needs an account and a budget; the image runs anywhere that runs a container. *Multi-user
       load*: Shiny is one R process per container, so concurrent simulations queue (F9, still open: `ExtendedTask`); put
@@ -1135,7 +1135,7 @@ published worked example.
 now a top level of *workbenches* with a grouped sidebar inside each, instead of one
 dropdown per group (bslib dropdowns cannot nest, and 15 no longer fit). Built: **Home,
 Plan: Sample Size** (the 49 calculators, 14 group headers) and **Analyze** (the two
-summary-data tools). The navbar title is now "epidemiologicasuite" (D3).
+summary-data tools). The navbar title is now "epidemiologysuite" (D3).
 - `R/registry.R`: `module_workbenches` (id, title, `nav_id`, groups) replaces
   `module_groups`; `module_workbench_of()` and `jump_to_module()` open a module from
   anywhere by selecting its workbench and then the module. `R/run_app.R` builds the UI with
@@ -1173,10 +1173,10 @@ comments, content is data, and tests use `testthat`.
 - Flatten `R/` (required by R packages). File names are already prefixed
   (`calc_`, `content_`, `mod_`, `home_`/`design_`), so this is mechanical.
 - (done, item 11) Replace `global.R`'s `source()` loop and `pacman::p_load()` with the
-  package namespace; expose `run_app()` and `epidemiologicasuite_app()`. Root `app.R` is a
+  package namespace; expose `run_app()` and `epidemiologysuite_app()`. Root `app.R` is a
   development shim (`pkgload::load_all()`); hosted deployment is untested (item 18, D1).
 - Rewrite test headers to use the package (drop the `source()` lines).
-- Install path: `remotes::install_github("SpaRroW410/Sample_size_all")`.
+- Install path: `remotes::install_github("SpaRroW410/Epidemiology_suite")`.
 
 **C2 — public API (P2).** Decide exported names (e.g. a consistent `ss_*()` family),
 adopt the common result class (P1 item 8), write one vignette per family, publish a
@@ -1190,18 +1190,18 @@ licence declared (D2), and ≤ 20 Imports (Phase 8 helps).
 **C4 — release channels (P3).** GitHub → **r-universe** (automatic binaries,
 including WebAssembly builds for webR, which Track D3 needs) → CRAN.
 
-**Name.** `epidemiologicasuite` (D3, revised 14 Oct 2026). The package was first
-called `sample2result`; the owner then asked for `epidemiologica_suite`, but an R
-package name may contain only letters, digits and dots (no underscore), so it is
-spelled `epidemiologicasuite` (the dotted `epidemiologica.suite` would also be
-legal but reads like an S3 method name). Availability, checked 14 Oct 2026: no
+**Name.** `epidemiologysuite` (D3, revised 30 Oct 2026). The package was first
+called `sample2result`, then `epidemiologicasuite` (14 Oct 2026: the owner had asked for `epidemiologica_suite`, but an R
+package name may contain only letters, digits and dots, no underscore). On 30 Oct 2026 the owner renamed the GitHub repository to
+`Epidemiology_suite` and the package followed it, as `epidemiologysuite` (the underscore cannot be kept). Availability of the earlier
+name `epidemiologicasuite`, checked 14 Oct 2026: no
 `github.com/cran/epidemiologicasuite` repository exists (the CRAN mirror answers
 for real packages such as `pwr` and not for this name), and a web search found no
 package, repository or page with that name or the dotted/underscore variants. CRAN,
 Bioconductor and the CRAN index were not directly reachable from the sandbox, so
-confirm with `available::available("epidemiologicasuite")` before the first public
-release. The GitHub repository is still `Sample_size_all` (renaming it is an owner
-action and changes the install path); the navbar title changes with the suite
+confirm with `available::available("epidemiologysuite")` (not yet checked for the new name) before the first public
+release. The GitHub repository was renamed `Epidemiology_suite` on 30 Oct 2026 (an owner
+action that changed the install path); the navbar title changes with the suite
 expansion (D3).
 
 ---
@@ -1272,7 +1272,7 @@ Recorded 28 September 2026.
 |---|---|---|---|
 | D1 | Suite scope: summary-data calculators only, or also a raw-data analysis workbench? | **Summary-data calculators only, for now** | B1–B5 and B7 (from summaries) stay in scope; B6 and the line-list parts of B4 are deferred, not dropped |
 | D2 | Licence: keep MIT or relicense to GPL-3? | **GPL-3** | `LICENSE` replaced with the GPL-3 text; resolves F8. The package `DESCRIPTION` will say `License: GPL-3` |
-| D3 | Suite and package name | **`epidemiologicasuite`** (was `sample2result`; `epidemiologica_suite` is not a legal package name) | Used for the package (C1), the app title and the suite; single package until CRAN, then consider a core + app split (C3) |
+| D3 | Suite and package name | **`epidemiologysuite`** (was `sample2result`; `epidemiologica_suite` is not a legal package name) | Used for the package (C1), the app title and the suite; single package until CRAN, then consider a core + app split (C3) |
 | D4 | Primary distribution target: hosted web, or offline/APK first? | **Offline / APK later** | Hosted web + R package first (D1, D2); the Shinylive spike (D3) and APK (D5a) stay at P2/P3 |
 | D5 | Languages | **English only** | No translation layer; F11 narrows to accessibility and mobile layout |
 | D6 | When to reopen the two paused items (A.2) | *Open* | Suggested: once paper access is available |
@@ -1282,7 +1282,7 @@ Recorded 28 September 2026.
 | Milestone | Contents | Exit criterion |
 |---|---|---|
 | **M0 Hygiene** | P0 items 1–6 | Wizard and catalog tests pass (done); fast suite < 2 min (done, ~1 min); CI green |
-| **M1 Foundations** | Calculate button + async, result object, export + justification text, power curves, `epidemiologicasuite` package skeleton | `run_app()` works from an installed package; results downloadable |
+| **M1 Foundations** | Calculate button + async, result object, export + justification text, power curves, `epidemiologysuite` package skeleton | `run_app()` works from an installed package; results downloadable |
 | **M2 Analyze v1** | B1 calculators + navigation redesign | Reproduces OpenEpi/`epiR` worked examples; wizard covers analysis tasks |
 | **M3 Portability** | Shinylive spike, Phase 8 tier 1, pkgdown site | Go/no-go on offline/APK, with evidence |
 | **M4 Planning & field tools** | B2, B3 | Randomization lists reproducible by seed |
@@ -1303,7 +1303,7 @@ trimming the download.
 
 
 ### Start-up time, the Home wizard and a UI audit (27 Oct 2026)
-- **Lazy loading of the calculators** (`R/lazy_modules.R`, `epidemiologicasuite_app(lazy = TRUE)`): the page had about 65 modules, 1,500
+- **Lazy loading of the calculators** (`R/lazy_modules.R`, `epidemiologysuite_app(lazy = TRUE)`): the page had about 65 modules, 1,500
   inputs and 5.4 MB of HTML before the first screen. Now only four basic calculators (Proportions, Means, Correlation, 2x2
   analysis) are built at start; the sidebars still list every calculator, the others are inserted when opened (or when a Home
   button or the wizard jumps to them) and one by one in the background after the first screen. An indicator beside the
