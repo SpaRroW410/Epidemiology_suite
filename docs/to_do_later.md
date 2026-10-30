@@ -88,7 +88,7 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 - [ ] Public API (C2): decide the exported function names (a consistent `ss_*()` family), more than the two help pages that exist,
   vignettes per family.
 - [ ] **[owner]** Rename the GitHub repository from `Epidemiology_suite` (changes the install path), `Authors@R` details, first public
-  release number and a `NEWS.md`.
+  release number and a `NEWS.md` (all three done 30 Oct 2026).
 
 ### 20. Survey / field epidemiology (B3), outbreak and surveillance (B4), infectious-disease teaching models (B5)
 - [x] **B3** sample selection (SRS, systematic, PPS, EPI 30 x 7) and survey weights -- done 21 Oct 2026.

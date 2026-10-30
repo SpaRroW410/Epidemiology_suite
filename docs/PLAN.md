@@ -13,11 +13,12 @@ suite 940 blocks with 0 failures; 195 calculation functions exported with help p
 
 ## Waiting for you (owner decisions and steps)
 
-- [ ] Merge PR #11 (it contains #10 as well), then click **Republish** on Connect Cloud; try the phone redirect on a real phone
+- [ ] Click **Republish** on Connect Cloud after the rename PR (#17) is merged; try the phone redirect on a real phone
 - ~~Version set to **1.0.0** (30 Oct; the tag of the release is `v1.0.0`)~~
 - [ ] Zenodo: the first record (wrong version tag) was removed; publish the `v1.0.0` release again and send the new **DOI**
 - [ ] Decide on a background-process package (`mirai` or `future`) for running slow simulations without blocking other users (also changes the browser build)
-- [ ] Long-term hosting (Connect Cloud free-plan limits are not verified); rename of the GitHub repository (changes install and citation addresses)
+- [ ] Long-term hosting (Connect Cloud free-plan limits are not verified)
+- ~~Repository renamed to `Epidemiology_suite` (30 Oct); the package followed as `epidemiologysuite`~~ **Owner steps left:** check the new Pages address, rename `EPIDEMIOLOGICASUITE_OPEN` to `EPIDEMIOLOGYSUITE_OPEN` on Connect if it was set there, republish
 - [ ] The Pages build error text from 17 Oct, if it still happens
 
 ## Phase 1 — Foundations  (all done)
@@ -74,7 +75,8 @@ suite 940 blocks with 0 failures; 195 calculation functions exported with help p
 - ~~Vignettes: Getting started, Sample sizes from R, Analysing summary data from R (built with the package; also on the documentation site under "Using it from R")~~ (30 Oct). More per-family vignettes can follow
 - ~~Bug found and fixed while writing them: `print()` of a result showed a raw list in an installed package (the S3 methods were not registered in `NAMESPACE`)~~ (30 Oct)
 - [ ] Release: r-universe (binaries, including WebAssembly), then CRAN (computation core split from the app, ASCII-only source, fast examples, clean `R CMD check`)
-- [ ] **[owner]** Rename the GitHub repository (changes the install path), author details, first release number, `NEWS.md`
+- ~~Rename of the GitHub repository (30 Oct), first release number (1.0.0, 30 Oct) and `NEWS.md` (30 Oct)~~
+- [ ] **[owner]** Author details for CRAN
 
 ## Phase 6 — Engineering and speed
 
