@@ -12,7 +12,7 @@
 ^LICENSE$
 ^_disable_autoload\.R$
 ^tools$
-^vignettes$
+^vignettes/articles$
 ^_pkgdown\.yml$
 ^site_out$
 ^\.nojekyll$

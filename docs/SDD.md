@@ -176,6 +176,7 @@ Sample_size_all/
 │   │                      # home_design_tree.R, design_wizard.R, design_free_text.R
 │   ├── ss_find.R, citation_info.R, accessibility.R, phone_shell.R, lazy_modules.R, browser_build.R
 ├── man/                   # 199 help pages (built with roxygen2, roclets = "rd")
+├── vignettes/             # three package vignettes; articles/ (generated, git-ignored) holds the site's per-calculator pages
 ├── inst/                  # CITATION, rstudio/addins.dcf
 ├── tests/testthat/        # test-calc_*.R, wizard, catalog, help pages, citation, phone layout, UI smoke, ...
 ├── docs/

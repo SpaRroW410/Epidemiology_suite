@@ -230,7 +230,7 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] Home: the quick links and cards are a guess at what people use first -- revisit with real usage.
 
 ### Package and citation
-- [ ] Vignettes per family (the help pages are done); more examples where a calculator has several designs.
+- [x] Three vignettes (Getting started, Sample sizes from R, Analysing summary data from R), 30 Oct 2026. [ ] More per-family vignettes (survival, trials, diagnostic accuracy, surveillance) and more examples where a calculator has several designs.
 - [ ] r-universe release, then CRAN: split a computation-only core from the app, `skip_on_cran()` for the Monte Carlo and browser tests, ASCII-only source, a name decision. `R CMD check --as-cran` already passes the package checks.
 - [ ] **[owner]** Zenodo: archive a release and send the DOI; put it in `R/citation_info.R`, `CITATION.cff` and `inst/CITATION` (docs/hosting.md, "Adding the Zenodo DOI"); confirm the first version number (0.1.0 now).
 - [ ] **[owner]** Rename the repository (then update the addresses in the same three files, the Pages and Connect addresses, and `mobile_url.txt` if the Connect address changes).
@@ -240,6 +240,6 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] Binary outcome with both treatments in each patient (clustered McNemar; needs a checked source), a patient-by-treatment variance part for the split designs, unequal allocation, different numbers of units in the two arms, the analysis side (Rosner-Milton / Obuchowski tests).
 
 ### Housekeeping
-- [ ] Section 1 of the roadmap has the current figures; the checklists (`checklist_by_design.md`, `checklist_by_test.md`) still do not list the Analyze, planning, survey and outbreak modules.
+- [x] The checklists now list the Analyze, planning, survey, outbreak, epidemic-model and eyes / lesions tools (`checklist_by_design.md` §18, `checklist_by_test.md`, 29 Oct 2026).
 - [ ] `renv.lock` still lists packages that were removed from the runtime (intended: the tests use them as oracles) and not the packages added for the tests (`shinytest2`, `chromote`, ...); re-snapshot when convenient.
 - [ ] The sandbox's `R CMD check` ends with a locale warning and a clock note that are not the package's; confirm on a normal machine or in CI.

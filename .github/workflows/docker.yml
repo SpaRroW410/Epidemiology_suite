@@ -48,7 +48,7 @@ jobs:
             if curl -fsS http://localhost:3838/ > page.html; then echo "up after ${i}x2 s"; break; fi
             sleep 2
           done
-          grep -q "epidemiologicasuite" page.html
+          grep -q "Epidemiological suite" page.html
           docker ps
 
       - name: Drive it in a browser

@@ -184,6 +184,29 @@ Two complementary, copy-pasteable markdown files for your R Shiny sample size ca
 
 -----
 
+### 18. Tools beyond sample size and power (added 29 Oct 2026; every one built and verified)
+
+These were not in the original review checklist; they were built as the "Analyze", planning, survey and outbreak workbenches
+(ROADMAP items 13, 14, 20). Verification detail for each is in the ROADMAP item named in brackets.
+
+- [x] **2x2 table analysis** — cohort / cross-sectional / case-control layouts; RR or PR, OR, RD, attributable fractions, NNT/NNH with CIs, chi-square and Fisher (module `analyze_2x2`, item 13 slice 1) *(verified: `epiR::epi.2by2()` to 1e-6 on four tables x two designs; the published Willeberg 1977 example)*
+- [x] **Diagnostic test evaluation** — one test from TP/FP/FN/TN (Se, Sp, PPV, NPV, LR+, LR-, accuracy, Youden; exact or Wilson CIs; predictive values at a stated prevalence) and serial / parallel combinations of 2-6 tests (`analyze_dx`, slice 2) *(verified: `epiR::epi.tests()`; the published Scott et al. 2008 example; exhaustive enumeration of all 2^k patterns for the combinations; simulation for the variances. Limit: combined figures assume conditional independence)*
+- [x] **Confidence intervals** — six proportion intervals side by side (Wilson, exact, Agresti-Coull, Jeffreys, mid-P, Wald) and mean / SD intervals (`analyze_ci`, slice 3) *(verified: `epiR::epi.conf()`, `binom.test()`, `t.test()`; coverage simulations)*
+- [x] **Stratified analysis (Mantel-Haenszel)** — 2-8 strata; crude and MH OR / RR / RD, CMH test, Woolf, Breslow-Day and Tarone homogeneity (`analyze_mh`, slice 4) *(verified: `epiR::epi.2by2()`, `stats::mantelhaen.test()`, `DescTools::BreslowDayTest()`; one deliberate difference from epiR's Woolf test, documented)*
+- [x] **Rates and rate ratios** — exact / mid-P / Byar limits, rate ratio and difference, attributable fraction, stratified MH rate ratio (`analyze_rates`, slices 5 and 9) *(verified: `epiR::epi.conf()`, `poisson.test()`, `epi.2by2(method = "cohort.time")`; the published Feychting et al. 1998 example; 3000-replicate coverage simulation)*
+- [x] **Paired, agreement and trend tests** — McNemar, Cohen's kappa (unweighted, linear, quadratic), PABAK, chi-square test for trend (`analyze_tests`, slice 6) *(verified: `stats::mcnemar.test()`, `DescTools::CohenKappa()`, `epiR::epi.kappa()`, `prop.trend.test()`)*
+- [x] **Standardization and SMR** — direct and indirect standardization, SMR, comparison of two standardized rates (`analyze_std`, slice 7) *(verified: the published Thrusfield 2007 example to 7 digits; `epiR::epi.directadj()`, `epi.indirectadj()`, `poisson.test()`. The delta-method variance of a ratio of two standardized rates is derived here, not cited; checked by simulation)*
+- [x] **Compare two groups** — two proportions (Wald, Newcombe, Miettinen-Nurminen, Mee, Koopman, Katz, ...) and two means (Welch, pooled, variance ratio, Cohen's d, Hedges' g) (`analyze_compare`, slice 8) *(verified: `DescTools::BinomDiffCI()` / `BinomRatioCI()`, `fisher.test()`, `t.test()`, `var.test()`; the published Newcombe 1998 example)*
+- [x] **Vaccine efficacy** — VE = 1 - RR from cases / participants, cases / person-time, or case-control / test-negative counts (`analyze_vaccine`, slice 9) *(verified against the two-group and rate tools it is built on)*
+- [x] **Outbreak measures** — attack rate, exposure-specific attack-rate table, secondary attack rate, case fatality (`analyze_outbreak`, item 20) *(re-arrangement of the verified CI and 2x2 tools; cautions are in the interface)*
+- [x] **Aberration detection** — CDC EARS C1-C3 and one-sided CUSUM (normal and Poisson) on a pasted series (`analyze_surveillance`, item 20) *(verified: C1 and C2 equal `surveillance::earsC()`; C3 by direct recomputation because earsC's C3 rule differs; CUSUM run lengths agree with `spc::xcusum.arl()` by simulation)*
+- [x] **Randomization list** — permuted blocks (fixed or random sizes, any ratio), stratified blocks, simple randomization (`randomization`, item 14) *(verified by defining properties: exact balance in every complete block, every block ordering equally likely, reproducibility; no package computes "the right list")*
+- [x] **Attrition / non-response inflation** — expected-loss inflation of a sample size, drop-out / drop-in dilution (`attrition`, item 14)
+- [x] **Survey sample selection** — simple random, systematic, PPS systematic (Madow 1949) with certainty units, WHO EPI 30 x 7 clusters (`survey_selection`, item 20) *(verified: exact sample size, inclusion probabilities by simulation, the Horvitz-Thompson identity over 120 random frames, PPS compared with `sampling::UPsystematic()` on 60 frames)*
+- [x] **Survey weights** — design weights, non-response and weighting-class adjustment, Kish effective sample size and design effect (`survey_weights`, item 20) *(verified by identities and hand values)*
+- [x] **Epidemic models and herd immunity** — herd-immunity threshold and coverage needed with an imperfect vaccine; SIR / SEIR with vaccination; R0 from a growth rate or a final size (`epidemic_model`, item 20) *(verified: the stepped solution equals `deSolve::ode()` to rtol 1e-11; closed-form final size and peak)*
+- [x] **Several measurements per patient (eyes, lesions, patches, teeth; split-face)** — patients needed when a patient's units are correlated, treatment given to whole patients (two means, two proportions) or within patients (two means), units per patient for a fixed number of patients, the floor on patients (`patient_units`) *(verified: `clusterPower::cpa.normal()` / `cpa.binary()`, `pwr`'s paired t, simulation; the variance of the difference of arm means is derived here. Not covered: a binary outcome with both treatments in each patient, unequal allocation, a patient-by-treatment variance)*
+
 ## Recommendations (staged build plan)
 
 > **Forward plan moved (2026-09-28):** the stages below are the historical build plan

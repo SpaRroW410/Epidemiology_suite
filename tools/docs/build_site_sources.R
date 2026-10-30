@@ -1,8 +1,8 @@
 # Generates the sources of the documentation site (ROADMAP item 17) from the package itself:
-#   vignettes/<module>.Rmd   one page per calculator, built from its <module>_content object
+#   vignettes/articles/<module>.Rmd   one page per calculator, built from its <module>_content object
 #                                     (title, formula, explanation, worked example, citation, "implemented via")
-#   vignettes/calculators.Rmd   the overview by workbench and group
-#   vignettes/{roadmap,design,algorithm}.Rmd   the docs/*.md files with a header
+#   vignettes/articles/calculators.Rmd   the overview by workbench and group
+#   vignettes/articles/{roadmap,design,algorithm}.Rmd   the docs/*.md files with a header
 #   _pkgdown.yml                      tools/docs/pkgdown_template.yml plus the generated article menu
 # Nothing generated is committed (see .gitignore): the pages are rebuilt from the source of truth on every
 # build, so the site cannot drift from the app. Run from the repository root:
@@ -13,7 +13,7 @@ suppressMessages(pkgload::load_all(".", quiet = TRUE))
 ns <- asNamespace("epidemiologicasuite")
 registry <- module_registry()
 by_id <- setNames(registry, vapply(registry, `[[`, "", "id"))
-out_dir <- "vignettes"
+out_dir <- "vignettes/articles"   # pkgdown-only articles; the hand-written package vignettes sit in vignettes/
 unlink(out_dir, recursive = TRUE)
 dir.create(out_dir, recursive = TRUE)
 
@@ -81,10 +81,12 @@ doc_page("docs/SDD.md", "design", "Software design", "Architecture, module contr
 doc_page("docs/design_identification_algorithm.md", "algorithm", "Study-design identification algorithm", "How the guided wizard routes a question to a calculator")
 
 tpl <- readLines("tools/docs/pkgdown_template.yml", warn = FALSE)
-pages <- function(ids) paste0("      - ", ids)
+# articles in vignettes/articles/ are named "articles/<file>" by pkgdown
+pages <- function(ids) paste0("      - articles/", ids)
 art <- c("articles:",
-         "  - title: Start here", "    contents:", "      - calculators",
-         "  - title: Project", "    contents:", "      - roadmap", "      - design", "      - algorithm")
+         "  - title: Start here", "    contents:", "      - articles/calculators",
+         "  - title: Using it from R", "    contents:", "      - getting-started", "      - sample-size-from-r", "      - analyze-from-r",
+         "  - title: Project", "    contents:", "      - articles/roadmap", "      - articles/design", "      - articles/algorithm")
 for (wb in module_workbenches) for (g in wb$groups) {
   art <- c(art, paste0("  - title: ", yq(paste0(wb$title, ": ", g$title))), "    contents:", pages(g$module_ids))
 }

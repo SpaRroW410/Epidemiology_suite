@@ -1,0 +1,56 @@
+---
+title: "Analysing summary data from R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Analysing summary data from R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(epidemiologicasuite)
+```
+
+The *Analyze* tools work on counts you already have, not on a data file. They are the functions whose names start with
+`calc_analyze_`.
+
+## A 2x2 table
+
+A cohort study: 13 of 2176 exposed and 5 of 3354 unexposed developed the outcome (the `a`, `b`, `c`, `d` cells are
+exposed-with-outcome, exposed-without, unexposed-with, unexposed-without).
+
+```{r twobytwo}
+tab <- calc_analyze_2x2(a = 13, b = 2163, c = 5, d = 3349, design = "cohort")
+names(tab)
+```
+
+## A confidence interval for a proportion
+
+Six intervals are shown side by side in the app because they differ most for small samples:
+
+```{r ci}
+ci <- calc_analyze_ci_proportion(x = 7, n = 40)
+ci
+```
+
+## Paired data and agreement
+
+McNemar's test for the same people tested twice (cells: positive-positive, positive-negative, negative-positive,
+negative-negative):
+
+```{r mcnemar}
+calc_analyze_mcnemar(a = 30, b = 12, c = 5, d = 53)
+```
+
+Cohen's kappa from a table of two raters' classifications:
+
+```{r kappa}
+calc_analyze_kappa(rbind(c(20, 5), c(10, 15)))
+```
+
+## Where the formulas come from
+
+Every function's help page (`?calc_analyze_2x2`) names the estimator, and the app's *Reference* tab for the matching tool lists the
+source. The functions were compared with the established R packages that compute the same quantities (`epiR`, `DescTools`, `stats`)
+and with published worked examples.

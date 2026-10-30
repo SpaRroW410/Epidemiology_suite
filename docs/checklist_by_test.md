@@ -144,6 +144,19 @@
 - [x] **[ADV]** Single-variance & two-variance (F) tests — *(implemented: new Variance Tests module — single-variance chi-squared test (see above) plus "Two-variance test (compare two groups)", `calc_variance_two()`; closed-form F-distribution power function solved via `uniroot()` (equal group sizes), same `TrialSize::ISV.Equality()`/`ISCV.Equality()` dead end documented in the module's code comments and content; verified sigma1=10, sigma2=14, two-sided, alpha=0.05, power=0.80 -> n=72/group (144 total), cross-checked by 20,000-replicate Monte Carlo simulation (empirical power 0.804))*
 - [x] **[ADV]** One-sample & two-sample Poisson rate — `epiR`, Epi Info StatCalc — *(fully covered by three already-built designs, not one new calculator: the one-sample case by the Incidence Rate module's precision-based design (`calc_rate_precision()`, `presize::prec_rate()`) and the Exact Tests module's "Exact Poisson test" (`calc_poisson_exact()`, `stats::poisson.test()`, ADV batch 24); the two-sample case by the Incidence Rate module's "Comparison of two rates" design (`calc_rate_comparison()`, a closed-form Poisson-regression Wald test verified against `WebPower::wp.poisson()`'s own documented example). No `epiR`-specific Poisson function exists to wrap (`epiR` has none), so these closed-form/base-R routes were used instead)*
 
+### Tests and intervals built into the Analyze workbench (summary data; added 29 Oct 2026)
+
+Not sample-size designs: these *analyse* counts the user already has. Each is verified as listed in `checklist_by_design.md` §18.
+
+- [x] McNemar's test (both corrections, exact) and the matched-pair odds ratio — `analyze_tests`
+- [x] Cohen's kappa (unweighted, linear, quadratic weights) with CI, PABAK — `analyze_tests`
+- [x] Chi-square test for trend in proportions — `analyze_tests`
+- [x] Pearson chi-square and Fisher's exact test on a 2x2 table; Cochran-Mantel-Haenszel, Woolf, Breslow-Day and Tarone tests across strata — `analyze_2x2`, `analyze_mh`
+- [x] Exact (Clopper-Pearson), Wilson, Agresti-Coull, Jeffreys, mid-P and Wald intervals for a proportion; t, normal and chi-square intervals for a mean and SD — `analyze_ci`
+- [x] Differences, ratios and odds ratios of two proportions by Wald, Newcombe, Miettinen-Nurminen, Mee, Koopman and Katz methods; Welch and pooled t, variance-ratio F, Cohen's d and Hedges' g — `analyze_compare`
+- [x] Exact Poisson and mid-P tests and intervals for a rate and a rate ratio; score and Woolf homogeneity tests across strata — `analyze_rates`
+- [x] EARS C1-C3 and CUSUM aberration detection — `analyze_surveillance`
+
 ### Summary mapping table (selected CORE items)
 
 |Scenario                      |Typical inputs                |R package/function                            |G*Power|Original source                   |Status|
