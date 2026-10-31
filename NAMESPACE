@@ -204,6 +204,10 @@ export(calc_wilcoxon_signed_rank)
 export(ss_find)
 export(ss_find_addin)
 import(shiny)
+# lme4 and survival are used through .pkg_fn() (R/browser_build.R), so that the browser build can fetch them on demand; these
+# imports keep them attached to the installed package as before
+importFrom(lme4,lmer)
+importFrom(survival,Surv)
 importFrom(bslib,accordion)
 importFrom(bslib,accordion_panel)
 importFrom(bslib,bs_theme)

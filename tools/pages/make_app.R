@@ -17,21 +17,21 @@ if (variant == "hello") {
 unlink(out, recursive = TRUE); dir.create(file.path(out, "R"), recursive = TRUE)
 invisible(file.copy(list.files("R", full.names = TRUE), file.path(out, "R")))
 
-# Shinylive bundles the packages it finds by scanning the sources for pkg:: references. MASS (needed by lme4) is not
-# found that way and webR's own library has MASS without its compiled part, so name it in a branch that never runs.
+# Shinylive bundles the packages it finds by scanning the sources for pkg:: references. webR's own library has MASS without
+# its compiled part, so name it in a branch that never runs. lme4 and survival are deliberately not bundled: the app looks
+# their functions up by name (.pkg_fn() in R/browser_build.R) and the first calculation that needs one downloads it.
 writeLines(c("# bundle hints for shinylive's package scan; never executed",
-             "if (FALSE) {", "  MASS::mvrnorm", "  nlme::lme", "}"),
+             "if (FALSE) {", "  MASS::mvrnorm", "}"),
            file.path(out, "R", "zz_bundle_hints.R"))
 
-# In webR, MASS and lme4 must be loaded first (loaded late, their compiled parts fail to load); the font is a local
+# In webR, MASS is loaded first (loaded late, its compiled part failed to load). lme4 and survival are no longer loaded at
+# start-up (31 Oct 2026, to shorten the first download and the start): they are fetched when a calculation first needs them
+# (.pkg_fn()); the CI crawl checks that the mixed-model, RMST and weighted log-rank designs still run. The font is a local
 # stack, so no download is needed to render the page.
 prelude <- if (variant == "noprelude") character() else c(
   "if (identical(Sys.info()[['sysname']], 'Emscripten') && requireNamespace('webr', quietly = TRUE)) {",
   "  try(webr::install('MASS', quiet = TRUE), silent = TRUE)",
   "  message('PRELUDE load MASS: ', tryCatch({ loadNamespace('MASS'); 'ok' }, error = function(e) conditionMessage(e)))",
-  "  message('PRELUDE load lme4: ', tryCatch({ loadNamespace('lme4'); 'ok' }, error = function(e) conditionMessage(e)))",
-  # survival too: loaded late (first by the RMST calculator) its compiled part failed to load in the 30 Oct 2026 crawl
-  "  message('PRELUDE load survival: ', tryCatch({ loadNamespace('survival'); 'ok' }, error = function(e) conditionMessage(e)))",
   "}")
 stage <- function(name) if (variant == "instrumented") sprintf("message('MEMSTAGE %s ', paste(round(gc()[, 6], 1), collapse = ' '))", name) else character()
 writeLines(c(

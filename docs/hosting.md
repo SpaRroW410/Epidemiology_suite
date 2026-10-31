@@ -34,6 +34,8 @@ documentation for deploying from GitHub (the manifest route) if a label differs.
 
 ## Things to know
 
+- **Browser build start-up (31 Oct 2026).** `lme4` and `survival` are no longer part of the first download or loaded at
+  start-up; the first mixed-model, RMST or weighted log-rank calculation fetches the package it needs (a few seconds, once).
 - **Background workers.** On Connect Cloud and in the Docker image the Monte Carlo calculators run in one background R process
   (`mirai`), so a simulation does not block other users. Set the environment variable `EPIDEMIOLOGYSUITE_WORKERS` to change the
   number (0 turns it off). Each worker is a full R process: check the plan's memory limit before raising it. The browser build

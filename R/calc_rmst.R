@@ -48,7 +48,8 @@
 #' @return list(rmst, rmst.var)
 #' @noRd
 .rmst_one_arm <- function(time, status, tau, alpha = 0.05) {
-  ft  <- survival::survfit(survival::Surv(time, status) ~ 1)
+  Surv <- .pkg_fn("survival", "Surv")   # found by the formula below, whose environment is this function's
+  ft  <- .pkg_fn("survival", "survfit")(Surv(time, status) ~ 1)
   idx <- ft$time <= tau
 
   wk.time    <- sort(c(ft$time[idx], tau))
