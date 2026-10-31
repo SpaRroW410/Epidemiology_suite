@@ -79,8 +79,7 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 
 ### 19. Release channels (Track C3 / C4)
 - [ ] r-universe release (automatic binaries, including WebAssembly builds).
-- [ ] CRAN: split a computation-only core from the app (C3), Monte Carlo tests behind `skip_on_cran()`, fast examples, ASCII-only
-  source (escape `²` and the like), `R CMD check` clean, `available::available("epidemiologysuite")` for the name.
+- [x] CRAN groundwork: ASCII-only source, fast examples, browser tests skipped on CRAN, `R CMD check --as-cran` clean apart from check-machine notes, name free on CRAN / Bioconductor (30 Oct 2026). Still optional: split a computation-only core from the app (C3).
 - [ ] Public API (C2): decide the exported function names (a consistent `ss_*()` family), more than the two help pages that exist,
   vignettes per family.
 - [ ] **[owner]** Rename the GitHub repository (done 30 Oct 2026: `Sample_size_all` -> `Epidemiology_suite`), first release number (done: 1.0.0),
@@ -227,9 +226,9 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 
 ### Package and citation
 - [x] Three vignettes (Getting started, Sample sizes from R, Analysing summary data from R), 30 Oct 2026. [ ] More per-family vignettes (survival, trials, diagnostic accuracy, surveillance) and more examples where a calculator has several designs.
-- [ ] r-universe release, then CRAN: split a computation-only core from the app, `skip_on_cran()` for the Monte Carlo and browser tests, ASCII-only source, a name decision. `R CMD check --as-cran` already passes the package checks.
+- [ ] r-universe release, then CRAN. Ready to submit (30 Oct 2026: `R CMD check --as-cran` of the built tarball gives 0 errors; its warnings and notes all come from the check machine -- no access to GitHub, no `qpdf`, no `en_US.UTF-8` locale, `DescTools` not installed. Source is ASCII-only, the browser tests skip on CRAN, the slow examples now run in under 5 s each, tests take 202 s, `cran-comments.md` written. Name checked against CRAN, its archive and Bioconductor: free.) Left: the owner's submission (with `Authors@R` details, e.g. an ORCID) and running `available::available()` on an ordinary computer; optional, a computation-only core split from the app (C3) and method references (DOIs) in the Description, which CRAN reviewers often ask for.
 - [ ] **[owner]** Zenodo: archive a release and send the DOI; put it in `R/citation_info.R`, `CITATION.cff` and `inst/CITATION` (docs/hosting.md, "Adding the Zenodo DOI"); the first record was removed because its version tag was wrong; publish the release `v1.0.0` again (the version is now 1.0.0, set in `DESCRIPTION`, `R/citation_info.R`, `CITATION.cff` and `inst/CITATION`).
-- [ ] **[owner]** Rename the repository (then update the addresses in the same three files, the Pages and Connect addresses, and `mobile_url.txt` if the Connect address changes).
+- [x] **[owner]** Repository renamed to `Epidemiology_suite` (30 Oct 2026); addresses updated (the Connect address did not change).
 - [ ] Possible wrappers `ss_text()`, `ss_curve()`, `ss_export()` around the `ss_result` object; the `calc_*` names are the public API for now.
 
 ### Eyes / Lesions per Patient (built 29 Oct 2026)

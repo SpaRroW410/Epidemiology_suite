@@ -1,15 +1,19 @@
 Package: epidemiologysuite
-Title: Sample Size and Power Calculator for Study Design
+Title: Sample Size, Power and Analysis Tools for Epidemiology
 Version: 1.0.0
 Authors@R: person("Mukul", "Maheshwari", role = c("aut", "cre", "cph"),
     email = "ryan00700@gmail.com")
-Description: A 'shiny' application that helps choose a study design and
-    calculates the sample size or power for about 150 designs (proportions,
-    means, diagnostic accuracy, agreement, observational studies, clinical
-    trials, survival, prediction models, general statistical tests and more).
-    Every calculator shows its formula, a worked example and a citable source,
-    and results can be exported as a methods-section paragraph, CSV, JSON,
-    BibTeX or RIS. Calculations are closed-form or simulation-based and are
+Description: A 'shiny' application and a set of R functions that help
+    choose a study design and calculate the sample size or power for about
+    160 designs (proportions, means, diagnostic accuracy, agreement,
+    observational studies, clinical trials, survival, prediction models,
+    cluster and multilevel designs, general statistical tests and more), with
+    tools for analysing summary data (2 x 2 tables, rates, Mantel-Haenszel and
+    standardization, vaccine efficacy, outbreak measures, aberration
+    detection), drawing survey samples and randomization lists. Every
+    calculator shows its formula, a worked example and a citable source, and
+    results can be exported as a methods-section paragraph, CSV, JSON, BibTeX
+    or RIS. Calculations are closed-form or simulation-based and are
     cross-checked against established R packages.
 License: GPL (>= 3)
 Encoding: UTF-8
