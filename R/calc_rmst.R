@@ -161,8 +161,9 @@
 #'   achieved_power_separate, achieved_power_pooled, inputs)
 #' @examples
 #' \donttest{
+#' # nsim is kept small so that the example runs quickly; use the default (or more) for a real calculation
 #' calc_rmst_comparison(ac_period = 35, tot_time = 510, tau = 500, scale0 = 8500, 
-#'     scale1 = 8500, margin = 18, power = 0.8)
+#'     scale1 = 8500, margin = 18, power = 0.8, nsim = 50)
 #' }
 #' @export
 calc_rmst_comparison <- function(ac_period, tot_time, tau, shape0 = 1, scale0, shape1 = 1, scale1,

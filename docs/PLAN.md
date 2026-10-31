@@ -74,7 +74,8 @@ suite 940 blocks with 0 failures; 195 calculation functions exported with help p
 - ~~RStudio / Positron addin "Find a sample size calculator", `ss_find()` search from the console, and `run_app(calculator = ...)` to open the app on one calculator~~ (29 Oct)
 - ~~Vignettes: Getting started, Sample sizes from R, Analysing summary data from R (built with the package; also on the documentation site under "Using it from R")~~ (30 Oct). More per-family vignettes can follow
 - ~~Bug found and fixed while writing them: `print()` of a result showed a raw list in an installed package (the S3 methods were not registered in `NAMESPACE`)~~ (30 Oct)
-- [ ] Release: r-universe (binaries, including WebAssembly), then CRAN (computation core split from the app, ASCII-only source, fast examples, clean `R CMD check`)
+- ~~CRAN groundwork: ASCII-only source, fast examples, browser tests skipped on CRAN, `R CMD check --as-cran` clean apart from check-machine notes, `cran-comments.md`~~ (30 Oct)
+- [ ] Release: r-universe (binaries, including WebAssembly), then CRAN submission by the owner (computation core split from the app is optional)
 - ~~Rename of the GitHub repository (30 Oct), first release number (1.0.0, 30 Oct) and `NEWS.md` (30 Oct)~~
 - [ ] **[owner]** Author details for CRAN
 
