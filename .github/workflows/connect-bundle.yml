@@ -31,7 +31,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::rsconnect, any::jsonlite, any::shinytest2, any::chromote
+          extra-packages: any::rsconnect, any::jsonlite, any::shinytest2, any::chromote, any::mirai
           needs: connect
       - name: Install RcppEigen with install.packages so the manifest records a normal source
         run: Rscript -e 'install.packages("RcppEigen")'
