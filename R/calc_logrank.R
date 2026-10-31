@@ -236,11 +236,13 @@ calc_survival_stratified <- function(power, timeUnit, gVec, pVec, hr, lambda0Vec
 .wlr_empirical_power <- function(n0, n1, hazard0, hr, change_time, effect_timing,
                                   accrual, tot_time, rho, alpha, reps, seed) {
   set.seed(seed)
+  survdiff <- .pkg_fn("survival", "survdiff")
+  Surv <- .pkg_fn("survival", "Surv")   # found by the formula below, whose environment is this function's
   rejections <- replicate(reps, {
     d <- .simulate_wlr_trial(n0, n1, hazard0, hr, change_time, effect_timing, accrual, tot_time)
     d <- d[d$time > 0, ]
     sd <- tryCatch(
-      survival::survdiff(survival::Surv(time, status) ~ arm, data = d, rho = rho),
+      survdiff(Surv(time, status) ~ arm, data = d, rho = rho),
       error = function(e) NULL
     )
     if (is.null(sd)) return(FALSE)

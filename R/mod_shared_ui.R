@@ -54,7 +54,8 @@ render_formula_block <- function(latex) {
 # button says "Calculating..." until it is done.
 monte_carlo_calculate_ui <- function(ns, note = "can take a few seconds. Set the inputs above, then click Calculate.") {
   tagList(
-    div(class = "alert alert-warning small", strong("Monte Carlo simulation: "), note),
+    div(class = "alert alert-warning small", strong("Monte Carlo simulation: "), note,
+        if (is_browser_build()) " In the browser version the first run may also download a package it needs, once."),
     bslib::input_task_button(ns("calculate"), "Calculate", label_busy = "Calculating...", type = "primary")
   )
 }
