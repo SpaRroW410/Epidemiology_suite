@@ -19,7 +19,6 @@ Imports:
     bslib (>= 0.7.0),
     promises,
     clinfun,
-    PowerTOST,
     kappaSize,
     mvtnorm,
     lme4,
@@ -29,6 +28,7 @@ Imports:
     utils
 Suggests:
     Exact,
+    PowerTOST,
     knitr,
     mirai (>= 2.0.0),
     pkgload,

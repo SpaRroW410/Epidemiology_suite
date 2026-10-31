@@ -16,7 +16,7 @@ WORKDIR /build
 # rocker/r-ver points R at a dated Posit Package Manager snapshot, which serves Linux binaries.
 COPY DESCRIPTION ./
 RUN Rscript -e 'install.packages("remotes"); remotes::install_deps(dependencies = c("Depends", "Imports"), upgrade = "never"); install.packages("mirai")' \
- && Rscript -e 'stopifnot(all(c("shiny","bslib","lme4","kappaSize","PowerTOST","mirai") %in% rownames(installed.packages())))'
+ && Rscript -e 'stopifnot(all(c("shiny","bslib","lme4","kappaSize","mirai") %in% rownames(installed.packages())))'
 
 COPY . .
 RUN R CMD INSTALL --no-docs --no-multiarch --no-test-load . \

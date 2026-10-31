@@ -150,7 +150,7 @@ The public R API is the `calc_*()` functions (exported, each documented), `ss_fi
 | UI theme/layout | `bslib::page_navbar()` + `navset_pill_list()`, Bootswatch "litera", Source Serif 4 | workbenches with grouped sidebars |
 | Formula rendering | MathJax via `withMathJax()`, wrapped by `render_formula_block()` | adds a copyable LaTeX view |
 | Modularity | Shiny modules (`NS()`, `moduleServer()`) | |
-| Runtime stats packages | `pwr`, `presize`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `mvtnorm`, `lme4` (+ `survival`, `stats`); `epiR`, `rstatix`, `Hmisc`, `tseries` and `BayesFactor` were removed from the runtime in item 16 | 14 imports in `DESCRIPTION` incl. `shiny`/`bslib` |
+| Runtime stats packages | `pwr`, `presize`, `clinfun`, `powerSurvEpi`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `mvtnorm`, `lme4` (+ `survival`, `stats`); `epiR`, `rstatix`, `Hmisc`, `tseries` and `BayesFactor` were removed from the runtime in item 16 | 14 imports in `DESCRIPTION` incl. `shiny`/`bslib` |
 | Verification-only packages | e.g. `longpower`, `powerlmm`, `RTSA`, `rpact`, `clusterPower`, `ssize.fdr`, `metapower`, `semTools`, `simr`, `voi`, `PracTools`, `WebPower` | installed from `github.com/cran/<pkg>` during development; never loaded by the app |
 | Testing | `testthat` unit tests (fast/slow split), GitHub Actions CI; manual browser checks with Playwright | `shinytest2` planned (ROADMAP P1) |
 | Dev environment | `.claude/hooks/session-start.sh` rebuilds R + packages on a fresh container; `renv.lock` records the versions (CI restores from it) | — |
@@ -238,7 +238,7 @@ a within-patient (split-face) comparison of two means, and units per patient nee
 | Agreement / Reliability | Kappa; ICC; Cronbach's alpha; Bland-Altman; Lin's CCC | `presize::prec_kappa()`, `prec_icc()`, `prec_cronb()`, `prec_lim_agree()`; closed form (Lin 1989/2000) | Live |
 | Pilot / Feasibility | 12/arm rule; precision of a pilot SD | Julious 2005; chi-square CI theory | Live |
 | Simon Two-Stage | Minimax and optimal designs | `clinfun::ph2simon()` | Live |
-| Equivalence (TOST) | Means; proportions; PK bioequivalence (2×2, 2×2×4, 2×3×3); expected-power bioequivalence | `PowerTOST::sampleN.TOST()`, `expsampleN.TOST()`; `epiR::epi.ssequb()` | Live |
+| Equivalence (TOST) | Means; proportions; PK bioequivalence (2×2, 2×2×4, 2×3×3); expected-power bioequivalence | `PowerTOST`'s `sampleN.TOST()` / `expsampleN.TOST()` logic, transcribed (`calc_closed_forms_tost.R`); `epiR::epi.ssequb()` | Live |
 | Non-Inferiority | Means; proportions; OR; HR | closed forms `.cf_ssninfc()`, `.cf_ssninfb()` (verified vs. `epiR::epi.ssninfc()`, `epi.ssninfb()`); `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
 | Crossover Trial (2×2) | Continuous, difference | `TrialSize::TwoSampleCrossOver.Equality()` | Live |
 | Group Sequential Design | Continuous/binary/survival boundaries; Lan-DeMets spending (2 looks) + conditional power and sample-size re-estimation | `clinfun::gsdesign.*()`; spending functions verified vs. `rpact`; inverse-normal combination (Lehmacher & Wassmer 1999) | Live |
@@ -260,7 +260,7 @@ a within-patient (split-face) comparison of two means, and units per patient nee
 | Multiple Regression | R² vs. zero; R² increase | `pwr::pwr.f2.test()` | Live |
 | Factorial ANOVA / ANCOVA | General F-test | `pwr::pwr.f2.test()` | Live |
 | Logistic Regression | Binary/continuous predictor, simple or covariate-adjusted; ordinal | `powerMediation::SSizeLogisticBin()`/`Con()`; 1/(1−R²) inflation; closed form `.cf_posamsize()` (verified vs. `Hmisc::posamsize()`) | Live |
-| Exact Tests | Binomial; Fisher; Boschloo; exact Poisson; sign test | `stats::binom.test()`, `poisson.test()` searches; `Exact::power.exact.test()` | Live |
+| Exact Tests | Binomial; Fisher; Boschloo; exact Poisson; sign test | `stats::binom.test()`, `poisson.test()` searches; exact power over every 2x2 table (`calc_closed_forms_exact.R`, equal to `Exact::power.exact.test()`) | Live |
 | RM-ANOVA / Mixed ANOVA | Between; within; interaction | reimplemented `WebPower::wp.rmanova()` | Live |
 | Nonparametric Tests | Wilcoxon ×2; Kendall's tau; Kruskal-Wallis; Jonckheere-Terpstra; Friedman; KS; runs test (`.cf_runs_test_p()`, verified vs. `tseries::runs.test()`); animal K-sample rank test | `TrialSize::Nonpara.*()`; ARE inflation; simulation of `ks.test()`/`tseries::runs.test()`; `clinfun::power.ladesign()` | Live |
 | Variance Tests | One variance; two variances; SD precision | closed form (chi-square / F) | Live |
@@ -469,7 +469,7 @@ The forward plan is [`ROADMAP.md`](ROADMAP.md). The build stages used so far:
 | 5 — wizard, free-text half | Keyword parser pre-filling the wizard | **Done** (RCT-internals rules open) |
 | 6 — remaining backlog | Everything else in the checklists | **Effectively complete** — 8 batches plus a closing audit; remaining items blocked with documented reasons (ROADMAP §4) |
 | 7 — suite expansion | Analyze workbench, planning and survey tools, outbreak / surveillance tools, infectious-disease models, Eyes / Lesions per Patient | **Done** (summary-data only; raw-data workbench deferred, D1) |
-| 8 — dependency reduction | Shrink runtime package list where reimplementation is safe | **Done in part** — 12 packages replaced by checked reimplementations (two upstream bugs found); `PowerTOST`, `Exact`, `clinfun`, `kappaSize`, `lme4` remain |
+| 8 — dependency reduction | Shrink runtime package list where reimplementation is safe | **Done** — 14 packages replaced by checked reimplementations (two upstream bugs found), `PowerTOST` and `Exact` the last (31 Oct 2026); `clinfun`, `kappaSize` and `lme4` kept on purpose (they work in the browser; replacing them adds risk without a gain) |
 | 9 — devices and interface | Browser build, phone / server version, phone layout, lazy loading, task-first Home, search, accessibility, dark mode | **Done** (a real-phone check is open) |
 | 10 — package API | Every calculation exported with help pages, `ss_find()`, addin, Cite tab | **Done**; vignettes, r-universe and CRAN open |
 
@@ -512,9 +512,9 @@ enforced by consistency tests rather than habit.
 
 ## Appendix: Dependencies
 
-**Runtime** (`DESCRIPTION` `Imports`): `shiny`, `bslib` (>= 0.6.0), `clinfun`, `PowerTOST`, `Exact`, `kappaSize`, `mvtnorm`, `lme4`;
-plus `survival`, `graphics`, `stats` and `utils` from base R. (Twelve earlier imports, among them `pwr`, `presize`, `epiR`,
-`pROC`, `powerMediation`, `pmsampsize`, `powerSurvEpi` and `TrialSize`, were replaced by reimplementations that are tested against
+**Runtime** (`DESCRIPTION` `Imports`): `shiny` (>= 1.8.1), `bslib` (>= 0.7.0), `promises`, `clinfun`, `kappaSize`, `mvtnorm`, `lme4`;
+plus `survival`, `graphics`, `stats` and `utils` from base R. (Fourteen earlier imports, among them `pwr`, `presize`, `epiR`,
+`pROC`, `powerMediation`, `pmsampsize`, `powerSurvEpi`, `TrialSize`, `PowerTOST` and `Exact`, were replaced by reimplementations that are tested against
 the originals.)
 
 **Testing and verification** (`Suggests`): `testthat`, `withr`, `shinytest2`, `chromote`, `jsonlite`, `htmltools`, and the packages used
