@@ -20,7 +20,6 @@ Imports:
     promises,
     clinfun,
     PowerTOST,
-    Exact,
     kappaSize,
     mvtnorm,
     lme4,
@@ -29,6 +28,7 @@ Imports:
     stats,
     utils
 Suggests:
+    Exact,
     knitr,
     mirai (>= 2.0.0),
     pkgload,
