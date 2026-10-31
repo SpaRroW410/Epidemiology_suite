@@ -42,6 +42,9 @@ ui_driver <- local({
                                         timeout = 30000, view = FALSE)
       withr::defer(app$stop(), envir = testthat::teardown_env())
     }
+    # Another app opened by a test (ui_fresh_driver()) takes the browser's focus, and when it closes this page stays "hidden";
+    # since shiny 1.11 a hidden page defers its output updates, so the tests after it would read stale outputs.
+    try(app$get_chromote_session()$Page$bringToFront(), silent = TRUE)
     app
   }
 })
