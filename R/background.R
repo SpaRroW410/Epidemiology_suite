@@ -61,9 +61,18 @@ background_available <- function() {
   ok <- tryCatch({
     loader <- .bg_loader()
     .mirai("daemons")(background_workers(), .compute = .bg_profile)
+    # the workers search the app's own library paths (a package installed in a user or project library would not be found otherwise)
+    .mirai("everywhere")(.libPaths(lib), lib = .libPaths(), .compute = .bg_profile)
     do.call(.mirai("everywhere"), c(list(.expr = loader$expr), loader$data, list(.compute = .bg_profile)))
+    # check that a worker really has the functions; otherwise fall back to the session rather than fail every calculation
+    probe <- .mirai("mirai")(
+      exists("calc_ks_two_sample", envir = if (isNamespaceLoaded(pkg)) asNamespace(pkg) else globalenv(), mode = "function"),
+      pkg = "epidemiologysuite", .compute = .bg_profile)
+    found <- .mirai("call_mirai")(probe)$data
+    if (!isTRUE(found)) stop("the workers could not load the calculation functions")
     TRUE
   }, error = function(e) {
+    try(.mirai("daemons")(0, .compute = .bg_profile), silent = TRUE)
     message("epidemiologysuite: background computation not available (", conditionMessage(e), "); calculating in the session.")
     FALSE
   })
