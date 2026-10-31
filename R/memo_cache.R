@@ -16,22 +16,44 @@
 
 .memo_max_entries <- 200L
 
-# Calls the calculation function named `fn_name` with the arguments in `...`, or returns the stored result of an identical earlier call.
-memo_calc <- function(fn_name, ...) {
-  fn <- get(fn_name, envir = environment(memo_calc), mode = "function")
-  if (!isTRUE(getOption("epidemiologysuite.cache", TRUE))) return(fn(...))
-  args <- list(...)
-  key <- paste0(fn_name, "|", paste(deparse(args, control = c("keepNA", "keepInteger", "niceNames", "showAttributes", "digits17")), collapse = ""))
-  if (exists(key, envir = .memo_cache$store, inherits = FALSE)) return(get(key, envir = .memo_cache$store, inherits = FALSE))
-  value <- do.call(fn, args)
+# The cache key of a call: the function name and the deparsed arguments (names, exact values, attributes).
+.memo_key <- function(fn_name, args) {
+  paste0(fn_name, "|", paste(deparse(args, control = c("keepNA", "keepInteger", "niceNames", "showAttributes", "digits17")), collapse = ""))
+}
+
+.memo_enabled <- function() isTRUE(getOption("epidemiologysuite.cache", TRUE))
+
+# list(found = TRUE/FALSE, value = the stored result)
+memo_lookup <- function(key) {
+  if (.memo_enabled() && exists(key, envir = .memo_cache$store, inherits = FALSE)) {
+    list(found = TRUE, value = get(key, envir = .memo_cache$store, inherits = FALSE))
+  } else {
+    list(found = FALSE, value = NULL)
+  }
+}
+
+memo_store <- function(key, value) {
+  force(value)   # a failing calculation must fail here, before anything is recorded
+  if (!.memo_enabled()) return(invisible(value))
+  if (!exists(key, envir = .memo_cache$store, inherits = FALSE)) .memo_cache$order <- c(.memo_cache$order, key)
   assign(key, value, envir = .memo_cache$store)
-  .memo_cache$order <- c(.memo_cache$order, key)
   if (length(.memo_cache$order) > .memo_max_entries) {
     drop <- .memo_cache$order[seq_len(length(.memo_cache$order) - .memo_max_entries)]
     rm(list = drop, envir = .memo_cache$store)
     .memo_cache$order <- setdiff(.memo_cache$order, drop)
   }
-  value
+  invisible(value)
+}
+
+# Calls the calculation function named `fn_name` with the arguments in `...`, or returns the stored result of an identical earlier call.
+memo_calc <- function(fn_name, ...) {
+  fn <- get(fn_name, envir = environment(memo_calc), mode = "function")
+  if (!.memo_enabled()) return(fn(...))
+  args <- list(...)
+  key <- .memo_key(fn_name, args)
+  hit <- memo_lookup(key)
+  if (hit$found) return(hit$value)
+  memo_store(key, do.call(fn, args))
 }
 
 # Empties the cache (used by the tests).

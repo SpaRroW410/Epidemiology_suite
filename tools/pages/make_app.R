@@ -30,6 +30,8 @@ prelude <- if (variant == "noprelude") character() else c(
   "  try(webr::install('MASS', quiet = TRUE), silent = TRUE)",
   "  message('PRELUDE load MASS: ', tryCatch({ loadNamespace('MASS'); 'ok' }, error = function(e) conditionMessage(e)))",
   "  message('PRELUDE load lme4: ', tryCatch({ loadNamespace('lme4'); 'ok' }, error = function(e) conditionMessage(e)))",
+  # survival too: loaded late (first by the RMST calculator) its compiled part failed to load in the 30 Oct 2026 crawl
+  "  message('PRELUDE load survival: ', tryCatch({ loadNamespace('survival'); 'ok' }, error = function(e) conditionMessage(e)))",
   "}")
 stage <- function(name) if (variant == "instrumented") sprintf("message('MEMSTAGE %s ', paste(round(gc()[, 6], 1), collapse = ' '))", name) else character()
 writeLines(c(

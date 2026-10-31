@@ -49,11 +49,13 @@ render_formula_block <- function(latex) {
 # affected module: the reactive depends on the design radio (so switching
 # TO a Monte Carlo design still computes once with its current defaults)
 # and the Calculate button, but isolates every other input so typing in a
-# numeric field no longer re-triggers the simulation.
+# numeric field no longer re-triggers the simulation. On a server the
+# calculation itself runs in a background R process (background.R), and the
+# button says "Calculating..." until it is done.
 monte_carlo_calculate_ui <- function(ns, note = "can take a few seconds. Set the inputs above, then click Calculate.") {
   tagList(
     div(class = "alert alert-warning small", strong("Monte Carlo simulation: "), note),
-    actionButton(ns("calculate"), "Calculate", class = "btn-primary")
+    bslib::input_task_button(ns("calculate"), "Calculate", label_busy = "Calculating...", type = "primary")
   )
 }
 

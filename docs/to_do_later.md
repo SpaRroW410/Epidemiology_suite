@@ -15,9 +15,7 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 ## 1. Open from the priority list (§3 of the roadmap)
 
 ### P0 / P1 leftovers
-- [ ] **Async compute for Monte Carlo designs (finding F9, item 7 second half). [owner] needs a decision on a background-process package (`mirai` or `future`) as a runtime dependency; it also changes the browser build.** The "Calculate" button exists; still missing is
-  `shiny::ExtendedTask` with a background process so one user's running simulation does not block the other users of the
-  same R process. Matters as soon as the app is hosted for several people.
+- [x] **Async compute for Monte Carlo designs (finding F9, item 7 second half)** -- done 31 Oct 2026: background computation with `mirai` (owner's decision, 31 Oct 2026): on a server the 10 Monte Carlo calculators run in a separate R process through `shiny::ExtendedTask` (`R/background.R`), the Calculate button shows "Calculating...", and the results are identical to the in-session ones (same seed and random-number generator, checked by the tests). One worker by default; `EPIDEMIOLOGYSUITE_WORKERS` (or `options(epidemiologysuite.workers)`) sets the number, 0 turns it off. `mirai` is suggested, not required: without it, or in the browser build, the calculation runs in the session. In the browser build a simulation now runs only when Calculate is pressed.
 - [x] **Caching of repeated results** (Track E, P2; done 30 Oct 2026): result cache for the 10 Monte Carlo calculators (`R/memo_cache.R`, `memo_calc()`): a repeated identical calculation (same inputs and seed) is returned at once, shared by every session of the R process, at most 200 results kept, switch off with `options(epidemiologysuite.cache = FALSE)`. Closed-form results are not cached on purpose: they take microseconds, less than building the key, so `bindCache()` would add nothing there.
 - [x] **Accessibility, dark mode (finding F11, item 22), first pass done 28 Oct 2026:** axe-core scan of every calculator (WCAG A/AA, desktop + phone, light + dark) fixed to 0 violations (`tools/ui-audit/a11y.R`), dark-mode switch added. English only (D5).
 - [ ] Still open from item 22: a person's keyboard and screen-reader walk-through (a scan cannot judge reading order or whether names make sense), dark-mode plots (the text descriptions of the plots are done), text-resize / reduced-motion checks, a phone layout pass on a real phone.
@@ -75,7 +73,7 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 - [x] Docker image + CI smoke test (done 21 Oct 2026).
 - [x] Hosting for phones: Posit Connect Cloud, deployed from the auto-built `connect` branch (28 Oct 2026). [ ] **[owner]** Long-term choice and budget: free-plan limits are not verified; shinyapps.io is closing to new apps (docs/hosting.md).
 - [ ] First publish of the image to GHCR (happens on the first push to `main` or a `v*` tag; not exercised yet).
-- [ ] Multi-user scaling: ShinyProxy or several replicas, until F9 (`ExtendedTask`) is done.
+- [ ] Multi-user scaling: F9 is done (background workers); for many simultaneous users, more workers or several replicas (ShinyProxy) -- check the memory each worker uses on the chosen host first.
 - [ ] Image size and an arm64 build (amd64 only today).
 - [ ] HTTPS and a domain; then the **PWA** (D4: manifest + service worker), the **Android TWA** (D5a, recommended APK route),
   the **Capacitor bundle** (D5b, needs the browser build), **iOS** via PWA (D6), the **desktop wrapper** (D7, Tauri/Electron).

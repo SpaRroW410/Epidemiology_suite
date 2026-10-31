@@ -80,11 +80,11 @@ suite 940 blocks with 0 failures; 195 calculation functions exported with help p
 
 ## Phase 6 — Engineering and speed
 
-- [ ] Background computation for the slow Monte Carlo designs (`ExtendedTask`), so one user's run does not block the others
+- ~~Background computation~~ (31 Oct): background computation with `mirai` (owner's decision, 31 Oct 2026): on a server the 10 Monte Carlo calculators run in a separate R process through `shiny::ExtendedTask` (`R/background.R`), the Calculate button shows "Calculating...", and the results are identical to the in-session ones (same seed and random-number generator, checked by the tests). One worker by default; `EPIDEMIOLOGYSUITE_WORKERS` (or `options(epidemiologysuite.workers)`) sets the number, 0 turns it off. `mirai` is suggested, not required: without it, or in the browser build, the calculation runs in the session. In the browser build a simulation now runs only when Calculate is pressed
 - ~~Caching of repeated results~~ (30 Oct): result cache for the 10 Monte Carlo calculators (`R/memo_cache.R`, `memo_calc()`): a repeated identical calculation (same inputs and seed) is returned at once, shared by every session of the R process, at most 200 results kept, switch off with `options(epidemiologysuite.cache = FALSE)`. Closed-form results are not cached on purpose: they take microseconds, less than building the key, so `bindCache()` would add nothing there
 - [ ] Dependencies: ~~tier 1 (17 Oct) and the easy / moderate packages (28 Oct) removed from the runtime: five packages (tier 1) and seven (stage 2) reimplemented and checked against the originals, two upstream bugs found and corrected~~; left: `PowerTOST`, `Exact`, `clinfun`, `kappaSize` (optional), `lme4` stays
-- [ ] Re-snapshot `renv.lock`; report the two upstream bugs (pmsampsize, presize)
-- [ ] Trial Sequential Analysis speed in the browser build
+- ~~`renv.lock` updated (shiny 1.14.0, bslib 0.12.0, promises 1.5.0, mirai 2.7.3 and their dependencies; 31 Oct); the two upstream bug reports drafted in `docs/upstream_reports.md`~~ **Owner step:** file them
+- ~~Trial Sequential Analysis in the browser build~~ (31 Oct): not slow itself (0.3 ms per calculation); in the crawl it waited behind the GLMM simulations that start when that calculator opens, which now run only on Calculate in the browser build. The crawl also showed RMST failing to load `survival`'s compiled code in the browser; `survival` is now loaded at start-up like `MASS` and `lme4`. To confirm in the next CI crawl
 
 ## Phase 7 — Bigger workbenches  (later, some need decisions)
 

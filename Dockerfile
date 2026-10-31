@@ -15,8 +15,8 @@ WORKDIR /build
 # Dependencies first, from DESCRIPTION alone, so this layer is cached until the dependency list changes.
 # rocker/r-ver points R at a dated Posit Package Manager snapshot, which serves Linux binaries.
 COPY DESCRIPTION ./
-RUN Rscript -e 'install.packages("remotes"); remotes::install_deps(dependencies = c("Depends", "Imports"), upgrade = "never")' \
- && Rscript -e 'stopifnot(all(c("shiny","bslib","lme4","kappaSize","PowerTOST") %in% rownames(installed.packages())))'
+RUN Rscript -e 'install.packages("remotes"); remotes::install_deps(dependencies = c("Depends", "Imports"), upgrade = "never"); install.packages("mirai")' \
+ && Rscript -e 'stopifnot(all(c("shiny","bslib","lme4","kappaSize","PowerTOST","mirai") %in% rownames(installed.packages())))'
 
 COPY . .
 RUN R CMD INSTALL --no-docs --no-multiarch --no-test-load . \

@@ -105,12 +105,16 @@ mod_bayesian_ui <- function(id) {
 
 mod_bayesian_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # the simulations run in a background R process on a server (background.R); `result` is the finished calculation
+    bg <- background_calc()
+    result <- bg$result(function() result_now())
+
     # bfda is Monte Carlo (ROADMAP F9/P1#7): once that design is selected,
     # recompute only on Calculate, not on every keystroke -- see
     # monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
     SLOW_DESIGNS <- "bfda"
 
-    result <- reactive({
+    result_now <- reactive({
       req(input$design)
       is_slow <- input$design %in% SLOW_DESIGNS
       if (is_slow) input$calculate
@@ -147,7 +151,7 @@ mod_bayesian_server <- function(id) {
         req(input$effect_size_bfda, input$bf_threshold, input$nsim_bfda,
             input$alpha_bfda, input$power_bfda)
         tryCatch(
-          list(ok = TRUE, design = "bfda", value = memo_calc("calc_bfda_ttest",
+          list(ok = TRUE, design = "bfda", value = bg$calc("calc_bfda_ttest",
             effect_size = input$effect_size_bfda, bf_threshold = input$bf_threshold,
             alpha = input$alpha_bfda, power = input$power_bfda, nsim = input$nsim_bfda
           )),

@@ -230,6 +230,10 @@ calc_cluster_deff(n_base = 200, icc = 0.05, cluster_size = 10)   # design effect
 In RStudio or Positron, *Addins > Find a sample size calculator* does the same from a search window. Setting the
 environment variable `EPIDEMIOLOGYSUITE_OPEN` to a design key makes a deployment open on that calculator.
 
+On a server, the Monte Carlo calculators run in a background R process (package `mirai`, suggested), so one user's
+simulation does not hold up the others. `EPIDEMIOLOGYSUITE_WORKERS` sets the number of background processes (default 1,
+0 = calculate in the session); each one is a full R process with its own memory.
+
 From a clone (development), the root `app.R` loads the package with
 `pkgload::load_all()`, so `shiny::runApp()` or `Rscript -e 'shiny::runApp()'` from
 the repository root still works.

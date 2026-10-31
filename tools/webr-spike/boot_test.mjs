@@ -96,6 +96,10 @@ try {
             for (; waited < maxWait; waited++) {
               await page.waitForTimeout(1000);
               const p = await probe();
+              // a Monte Carlo design runs only on Calculate in the browser build: press it once if the result stays empty
+              if (waited === 2 && p.has_result && !p.result && !p.errs.length && !p.danger.length) {
+                await f.evaluate((id) => { const b = document.getElementById(id); if (b && b.offsetParent !== null) b.click(); }, rec.prefix + "-calculate");
+              }
               const changed = p.result !== prevResult || (p.errs[0] || p.danger[0] || "") !== prevErr;
               if (waited >= 1 && changed && (p.errs.length || p.danger.length || (p.has_result && p.result.length > 0))) break;
               if (!p.has_result && waited >= 2) break;
@@ -109,6 +113,9 @@ try {
           for (; waited < maxWait; waited++) {
             const p = await probe();
             if (p.errs.length || p.danger.length || (p.has_result && p.result.length > 0) || (!p.has_result && waited >= 2)) break;
+            if (waited === 2 && p.has_result && !p.result) {   // Monte Carlo: runs on Calculate in the browser build
+              await f.evaluate((id) => { const b = document.getElementById(id); if (b && b.offsetParent !== null) b.click(); }, rec.prefix + "-calculate");
+            }
             await page.waitForTimeout(1000);
           }
           await visit("(single view)", waited + 1);

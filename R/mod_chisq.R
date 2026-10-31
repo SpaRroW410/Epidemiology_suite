@@ -160,6 +160,10 @@ mod_chisq_ui <- function(id) {
 
 mod_chisq_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # the simulations run in a background R process on a server (background.R); `result` is the finished calculation
+    bg <- background_calc()
+    result <- bg$result(function() result_now())
+
     output$gof_props_ui <- renderUI({
       req(input$k_gof)
       k <- as.integer(input$k_gof)
@@ -231,7 +235,7 @@ mod_chisq_server <- function(id) {
     # monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
     SLOW_DESIGNS <- "cochran_q"
 
-    result <- reactive({
+    result_now <- reactive({
       req(input$design)
       is_slow <- input$design %in% SLOW_DESIGNS
       if (is_slow) input$calculate
@@ -244,7 +248,7 @@ mod_chisq_server <- function(id) {
         tryCatch(
           {
             p_vals <- .parse_numeric_vec(input$p_cq)
-            list(ok = TRUE, value = memo_calc("calc_cochran_q",
+            list(ok = TRUE, value = bg$calc("calc_cochran_q",
               p = p_vals, sigma2_subject = input$sigma2_cq,
               alpha = input$alpha, power = input$power
             ))

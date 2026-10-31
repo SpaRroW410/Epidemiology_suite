@@ -185,6 +185,10 @@ mod_logrank_ui <- function(id) {
 
 mod_logrank_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # the simulations run in a background R process on a server (background.R); `result` is the finished calculation
+    bg <- background_calc()
+    result <- bg$result(function() result_now())
+
     output$strata_ui <- renderUI({
       req(input$m_strata)
       m <- as.integer(input$m_strata)
@@ -205,7 +209,7 @@ mod_logrank_server <- function(id) {
     # monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
     SLOW_DESIGNS <- "weighted_logrank"
 
-    result <- reactive({
+    result_now <- reactive({
       req(input$design)
       is_slow <- input$design %in% SLOW_DESIGNS
       if (is_slow) input$calculate
@@ -274,7 +278,7 @@ mod_logrank_server <- function(id) {
             input$accrual_wlr, input$tot_time_wlr, input$rho_wlr, input$allocation1_wlr,
             input$alpha_wlr, input$power_wlr)
         tryCatch(
-          list(ok = TRUE, value = memo_calc("calc_weighted_logrank",
+          list(ok = TRUE, value = bg$calc("calc_weighted_logrank",
             hazard0 = input$hazard0_wlr, hr = input$hr_wlr, change_time = input$change_time_wlr,
             effect_timing = input$effect_timing_wlr, accrual = input$accrual_wlr,
             tot_time = input$tot_time_wlr, rho = input$rho_wlr, allocation1 = input$allocation1_wlr,

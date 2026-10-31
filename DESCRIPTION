@@ -15,8 +15,9 @@ License: GPL (>= 3)
 Encoding: UTF-8
 Depends: R (>= 4.3.0)
 Imports:
-    shiny,
-    bslib (>= 0.6.0),
+    shiny (>= 1.8.1),
+    bslib (>= 0.7.0),
+    promises,
     clinfun,
     PowerTOST,
     Exact,
@@ -29,6 +30,8 @@ Imports:
     utils
 Suggests:
     knitr,
+    mirai (>= 2.0.0),
+    pkgload,
     rmarkdown,
     DescTools,
     chromote,

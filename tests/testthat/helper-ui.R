@@ -36,6 +36,8 @@ ui_driver <- local({
       # Calculators are loaded when opened (lazy_modules.R); the background loading that normally follows the first
       # screen is off here so that "idle" is a stable signal. It has its own test (test-ui_smoke.R).
       Sys.setenv(EPIDEMIOLOGYSUITE_BACKGROUND_LOAD = "false")
+      # Monte Carlo results are computed in the session here, so that "idle" means "done"; background computation has its own test.
+      Sys.setenv(EPIDEMIOLOGYSUITE_WORKERS = "0")
       app <<- shinytest2::AppDriver$new(ui_app_dir(), name = "smoke", load_timeout = 90000,
                                         timeout = 30000, view = FALSE)
       withr::defer(app$stop(), envir = testthat::teardown_env())
@@ -45,8 +47,9 @@ ui_driver <- local({
 })
 
 # A separate, fresh app (own R process) for tests about start-up state, which the shared driver above has already moved on from.
-ui_fresh_driver <- function(background_load = FALSE, name = "fresh", width = NULL, height = NULL) {
-  Sys.setenv(CHROMOTE_CHROME = ui_chrome_path(), EPIDEMIOLOGYSUITE_BACKGROUND_LOAD = if (background_load) "true" else "false")
+ui_fresh_driver <- function(background_load = FALSE, name = "fresh", width = NULL, height = NULL, workers = 0L) {
+  Sys.setenv(CHROMOTE_CHROME = ui_chrome_path(), EPIDEMIOLOGYSUITE_BACKGROUND_LOAD = if (background_load) "true" else "false",
+             EPIDEMIOLOGYSUITE_WORKERS = as.character(workers))
   args <- c("--disable-gpu", "--disable-dev-shm-usage")
   if (identical(unname(Sys.info()[["effective_user"]]), "root")) args <- c(args, "--no-sandbox")
   chromote::set_chrome_args(args)

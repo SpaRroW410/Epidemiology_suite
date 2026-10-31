@@ -174,7 +174,7 @@ Epidemiology_suite/
 │   ├── mod_*.R            # Shiny UI + server; mod_shared_ui.R (export, curves, advanced options)
 │   ├── home_*.R, design_*.R   # home_catalog.R, home_finder.R, home_hub.R, home_cite.R,
 │   │                      # home_design_tree.R, design_wizard.R, design_free_text.R
-│   ├── ss_find.R, citation_info.R, accessibility.R, phone_shell.R, lazy_modules.R, browser_build.R, memo_cache.R (result cache of the Monte Carlo calculators)
+│   ├── ss_find.R, citation_info.R, accessibility.R, phone_shell.R, lazy_modules.R, browser_build.R, memo_cache.R (result cache of the Monte Carlo calculators), background.R (background workers)
 ├── man/                   # 199 help pages (built with roxygen2, roclets = "rd")
 ├── vignettes/             # three package vignettes; articles/ (generated, git-ignored) holds the site's per-calculator pages
 ├── inst/                  # CITATION, rstudio/addins.dcf
@@ -407,7 +407,7 @@ standard output and unaffected.
 |---|---|---|
 | Extensibility | New calculator = module + calc + content files + registry/catalog entries | Met |
 | Input validation | Every numeric input bounded/sanity-checked; inline messages, not crashes | Met |
-| Performance | Closed-form designs are near-instant. Monte Carlo designs take ~5–25 s, run only on a Calculate click, but still block the R process while they run; the curves are not drawn until their panel is opened; calculators load lazily (UI visible in ~27 s in the browser build instead of ~77 s) | Calculate button done; background computation (`ExtendedTask`) waits for a decision on a background-process package (ROADMAP F9) |
+| Performance | Closed-form designs are near-instant. Monte Carlo designs take ~5–25 s and run in a background R process on a server (`R/background.R`, `mirai` + `ExtendedTask`), so they no longer block other users; repeats come from a cache; the curves are not drawn until their panel is opened; calculators load lazily (UI visible in ~27 s in the browser build instead of ~77 s) | Met on a server (background workers); in the browser build simulations run in the page, only on Calculate |
 | Accessibility | axe-core scan (WCAG 2.0/2.1 A and AA) of every page at desktop and phone width, light and dark: 0 violations; contrast-checked theme colours; names and keyboard access for generated controls; text descriptions of plots; dark mode | Machine-checked (`tools/ui-audit/a11y.R`); a person's keyboard and screen-reader walk-through still open |
 | Mobile | Phone layout of the same app: bottom tab bar, one calculator drop-down, touch-sized controls (`R/phone_shell.R`); phone / server version on Posit Connect Cloud | Checked in an emulated iPhone; not on a real phone |
 | Citability | Cite tab (nine formats), `CITATION.cff`, `citation()`; every calculator cites its formula's source | Met; the Zenodo DOI is an owner step |
@@ -488,7 +488,7 @@ time-to-event models and model updating/recalibration.
 | Docs and navigation drift from the code | Consistency tests (ROADMAP P0); ROADMAP as the single forward-looking doc |
 | Development environment lost on container reset | SessionStart hook rebuilds it; `renv.lock` records the exact versions |
 | Development sandbox cannot reach CRAN or journal sites | `github.com/cran` mirror + apt for packages; web search for citations; items needing paper access stay open rather than guessed |
-| Monte Carlo designs block other users on a shared server | Calculate button done; background computation (`ExtendedTask`) needs a background-process package, an owner decision (ROADMAP F9) |
+| Monte Carlo designs block other users on a shared server | Resolved 31 Oct 2026: background workers (`mirai`); each worker is a full R process, so its memory counts against the host's limit |
 | Licence of reimplementations transcribed from GPL packages | Resolved: project relicensed to GPL-3 (ROADMAP F8 / D2); module headers keep naming each source package |
 | Scope creep as the project grows into a suite | Workbench-by-workbench milestones with exit criteria (ROADMAP §11) |
 
