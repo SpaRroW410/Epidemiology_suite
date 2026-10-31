@@ -57,7 +57,7 @@ tost_content <- list(
       "for bioequivalence assessment by means of confidence intervals.",
       "Int J Clin Pharmacol Ther Toxicol. 1991;29(1):1-8."
     ),
-    backend = "PowerTOST::sampleN.TOST(logscale = FALSE, design = \"parallel\")"
+    backend = "PowerTOST::sampleN.TOST(logscale = FALSE, design = \"parallel\") logic, transcribed (calc_closed_forms_tost.R; equal to the package over grids, which is a test oracle only)"
   ),
 
   proportions = list(
@@ -159,7 +159,7 @@ tost_content <- list(
       "for bioequivalence assessment by means of confidence intervals.",
       "Int J Clin Pharmacol Ther Toxicol. 1991;29(1):1-8."
     ),
-    backend = "PowerTOST::sampleN.TOST(logscale = TRUE, design = \"2x2\"/\"2x2x4\"/\"2x3x3\")"
+    backend = "PowerTOST::sampleN.TOST(logscale = TRUE, design = \"2x2\"/\"2x2x4\"/\"2x3x3\") logic, transcribed (calc_closed_forms_tost.R; equal to the package over grids)"
   ),
 
   assurance = list(
@@ -214,6 +214,6 @@ tost_content <- list(
       "design. Pharm Stat. 2005;4:187-201; Grieve AP. Confidence",
       "intervals and sample sizes. Biometrics. 1991;47:1597-1603."
     ),
-    backend = "PowerTOST::expsampleN.TOST(prior.type = \"CV\")"
+    backend = "PowerTOST::expsampleN.TOST(prior.type = \"CV\") logic, transcribed (calc_closed_forms_tost.R; equal to the package over grids)"
   )
 )

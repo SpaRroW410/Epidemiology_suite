@@ -33,11 +33,17 @@ documentation for deploying from GitHub (the manifest route) if a label differs.
    from it (check that the app is set to follow the branch).
 
 ## Things to know
+
+- **Background workers.** On Connect Cloud and in the Docker image the Monte Carlo calculators run in one background R process
+  (`mirai`), so a simulation does not block other users. Set the environment variable `EPIDEMIOLOGYSUITE_WORKERS` to change the
+  number (0 turns it off). Each worker is a full R process: check the plan's memory limit before raising it. The browser build
+  cannot start processes; there a simulation runs in the page, only when Calculate is pressed.
 - **Privacy:** the browser build and the package keep what you type on your own device. The server version sends it to Posit's
   server. The README and the app say so.
 - **Cost and limits:** not verified here. Check Posit's pricing page for the Connect Cloud free plan (apps, active hours, memory).
   shinyapps.io is being retired in favour of Connect Cloud (Posit's announcement: no new apps after the end of 2026).
-- **Concurrency:** one R process per app instance; many simultaneous users share it until the async work (to-do list) is done.
+- **Concurrency:** one R process per app instance for the page itself; the slow simulations go to the background worker(s) above,
+  so they no longer hold up the other users.
 - **Not tested here:** the Connect Cloud deployment itself (no account), and any real phone. The bundle is tested as a plain Shiny app
   in headless Chrome; the redirect is tested in Chromium device emulation (iPhone, Pixel, iPad desktop-site, desktop, `?full=1`).
 

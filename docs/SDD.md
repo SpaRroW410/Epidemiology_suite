@@ -150,7 +150,7 @@ The public R API is the `calc_*()` functions (exported, each documented), `ss_fi
 | UI theme/layout | `bslib::page_navbar()` + `navset_pill_list()`, Bootswatch "litera", Source Serif 4 | workbenches with grouped sidebars |
 | Formula rendering | MathJax via `withMathJax()`, wrapped by `render_formula_block()` | adds a copyable LaTeX view |
 | Modularity | Shiny modules (`NS()`, `moduleServer()`) | |
-| Runtime stats packages | `pwr`, `presize`, `clinfun`, `powerSurvEpi`, `PowerTOST`, `Exact`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `mvtnorm`, `lme4` (+ `survival`, `stats`); `epiR`, `rstatix`, `Hmisc`, `tseries` and `BayesFactor` were removed from the runtime in item 16 | 14 imports in `DESCRIPTION` incl. `shiny`/`bslib` |
+| Runtime stats packages | `pwr`, `presize`, `clinfun`, `powerSurvEpi`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `mvtnorm`, `lme4` (+ `survival`, `stats`); `epiR`, `rstatix`, `Hmisc`, `tseries` and `BayesFactor` were removed from the runtime in item 16 | 14 imports in `DESCRIPTION` incl. `shiny`/`bslib` |
 | Verification-only packages | e.g. `longpower`, `powerlmm`, `RTSA`, `rpact`, `clusterPower`, `ssize.fdr`, `metapower`, `semTools`, `simr`, `voi`, `PracTools`, `WebPower` | installed from `github.com/cran/<pkg>` during development; never loaded by the app |
 | Testing | `testthat` unit tests (fast/slow split), GitHub Actions CI; manual browser checks with Playwright | `shinytest2` planned (ROADMAP P1) |
 | Dev environment | `.claude/hooks/session-start.sh` rebuilds R + packages on a fresh container; `renv.lock` records the versions (CI restores from it) | — |
@@ -174,7 +174,7 @@ Epidemiology_suite/
 │   ├── mod_*.R            # Shiny UI + server; mod_shared_ui.R (export, curves, advanced options)
 │   ├── home_*.R, design_*.R   # home_catalog.R, home_finder.R, home_hub.R, home_cite.R,
 │   │                      # home_design_tree.R, design_wizard.R, design_free_text.R
-│   ├── ss_find.R, citation_info.R, accessibility.R, phone_shell.R, lazy_modules.R, browser_build.R, memo_cache.R (result cache of the Monte Carlo calculators)
+│   ├── ss_find.R, citation_info.R, accessibility.R, phone_shell.R, lazy_modules.R, browser_build.R, memo_cache.R (result cache of the Monte Carlo calculators), background.R (background workers)
 ├── man/                   # 199 help pages (built with roxygen2, roclets = "rd")
 ├── vignettes/             # three package vignettes; articles/ (generated, git-ignored) holds the site's per-calculator pages
 ├── inst/                  # CITATION, rstudio/addins.dcf
@@ -238,7 +238,7 @@ a within-patient (split-face) comparison of two means, and units per patient nee
 | Agreement / Reliability | Kappa; ICC; Cronbach's alpha; Bland-Altman; Lin's CCC | `presize::prec_kappa()`, `prec_icc()`, `prec_cronb()`, `prec_lim_agree()`; closed form (Lin 1989/2000) | Live |
 | Pilot / Feasibility | 12/arm rule; precision of a pilot SD | Julious 2005; chi-square CI theory | Live |
 | Simon Two-Stage | Minimax and optimal designs | `clinfun::ph2simon()` | Live |
-| Equivalence (TOST) | Means; proportions; PK bioequivalence (2×2, 2×2×4, 2×3×3); expected-power bioequivalence | `PowerTOST::sampleN.TOST()`, `expsampleN.TOST()`; `epiR::epi.ssequb()` | Live |
+| Equivalence (TOST) | Means; proportions; PK bioequivalence (2×2, 2×2×4, 2×3×3); expected-power bioequivalence | `PowerTOST`'s `sampleN.TOST()` / `expsampleN.TOST()` logic, transcribed (`calc_closed_forms_tost.R`); `epiR::epi.ssequb()` | Live |
 | Non-Inferiority | Means; proportions; OR; HR | closed forms `.cf_ssninfc()`, `.cf_ssninfb()` (verified vs. `epiR::epi.ssninfc()`, `epi.ssninfb()`); `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
 | Crossover Trial (2×2) | Continuous, difference | `TrialSize::TwoSampleCrossOver.Equality()` | Live |
 | Group Sequential Design | Continuous/binary/survival boundaries; Lan-DeMets spending (2 looks) + conditional power and sample-size re-estimation | `clinfun::gsdesign.*()`; spending functions verified vs. `rpact`; inverse-normal combination (Lehmacher & Wassmer 1999) | Live |
@@ -260,7 +260,7 @@ a within-patient (split-face) comparison of two means, and units per patient nee
 | Multiple Regression | R² vs. zero; R² increase | `pwr::pwr.f2.test()` | Live |
 | Factorial ANOVA / ANCOVA | General F-test | `pwr::pwr.f2.test()` | Live |
 | Logistic Regression | Binary/continuous predictor, simple or covariate-adjusted; ordinal | `powerMediation::SSizeLogisticBin()`/`Con()`; 1/(1−R²) inflation; closed form `.cf_posamsize()` (verified vs. `Hmisc::posamsize()`) | Live |
-| Exact Tests | Binomial; Fisher; Boschloo; exact Poisson; sign test | `stats::binom.test()`, `poisson.test()` searches; `Exact::power.exact.test()` | Live |
+| Exact Tests | Binomial; Fisher; Boschloo; exact Poisson; sign test | `stats::binom.test()`, `poisson.test()` searches; exact power over every 2x2 table (`calc_closed_forms_exact.R`, equal to `Exact::power.exact.test()`) | Live |
 | RM-ANOVA / Mixed ANOVA | Between; within; interaction | reimplemented `WebPower::wp.rmanova()` | Live |
 | Nonparametric Tests | Wilcoxon ×2; Kendall's tau; Kruskal-Wallis; Jonckheere-Terpstra; Friedman; KS; runs test (`.cf_runs_test_p()`, verified vs. `tseries::runs.test()`); animal K-sample rank test | `TrialSize::Nonpara.*()`; ARE inflation; simulation of `ks.test()`/`tseries::runs.test()`; `clinfun::power.ladesign()` | Live |
 | Variance Tests | One variance; two variances; SD precision | closed form (chi-square / F) | Live |
@@ -407,7 +407,7 @@ standard output and unaffected.
 |---|---|---|
 | Extensibility | New calculator = module + calc + content files + registry/catalog entries | Met |
 | Input validation | Every numeric input bounded/sanity-checked; inline messages, not crashes | Met |
-| Performance | Closed-form designs are near-instant. Monte Carlo designs take ~5–25 s, run only on a Calculate click, but still block the R process while they run; the curves are not drawn until their panel is opened; calculators load lazily (UI visible in ~27 s in the browser build instead of ~77 s) | Calculate button done; background computation (`ExtendedTask`) waits for a decision on a background-process package (ROADMAP F9) |
+| Performance | Closed-form designs are near-instant. Monte Carlo designs take ~5–25 s and run in a background R process on a server (`R/background.R`, `mirai` + `ExtendedTask`), so they no longer block other users; repeats come from a cache; the curves are not drawn until their panel is opened; calculators load lazily (UI visible in ~27 s in the browser build instead of ~77 s) | Met on a server (background workers); in the browser build simulations run in the page, only on Calculate |
 | Accessibility | axe-core scan (WCAG 2.0/2.1 A and AA) of every page at desktop and phone width, light and dark: 0 violations; contrast-checked theme colours; names and keyboard access for generated controls; text descriptions of plots; dark mode | Machine-checked (`tools/ui-audit/a11y.R`); a person's keyboard and screen-reader walk-through still open |
 | Mobile | Phone layout of the same app: bottom tab bar, one calculator drop-down, touch-sized controls (`R/phone_shell.R`); phone / server version on Posit Connect Cloud | Checked in an emulated iPhone; not on a real phone |
 | Citability | Cite tab (nine formats), `CITATION.cff`, `citation()`; every calculator cites its formula's source | Met; the Zenodo DOI is an owner step |
@@ -469,7 +469,7 @@ The forward plan is [`ROADMAP.md`](ROADMAP.md). The build stages used so far:
 | 5 — wizard, free-text half | Keyword parser pre-filling the wizard | **Done** (RCT-internals rules open) |
 | 6 — remaining backlog | Everything else in the checklists | **Effectively complete** — 8 batches plus a closing audit; remaining items blocked with documented reasons (ROADMAP §4) |
 | 7 — suite expansion | Analyze workbench, planning and survey tools, outbreak / surveillance tools, infectious-disease models, Eyes / Lesions per Patient | **Done** (summary-data only; raw-data workbench deferred, D1) |
-| 8 — dependency reduction | Shrink runtime package list where reimplementation is safe | **Done in part** — 12 packages replaced by checked reimplementations (two upstream bugs found); `PowerTOST`, `Exact`, `clinfun`, `kappaSize`, `lme4` remain |
+| 8 — dependency reduction | Shrink runtime package list where reimplementation is safe | **Done** — 14 packages replaced by checked reimplementations (two upstream bugs found), `PowerTOST` and `Exact` the last (31 Oct 2026); `clinfun`, `kappaSize` and `lme4` kept on purpose (they work in the browser; replacing them adds risk without a gain) |
 | 9 — devices and interface | Browser build, phone / server version, phone layout, lazy loading, task-first Home, search, accessibility, dark mode | **Done** (a real-phone check is open) |
 | 10 — package API | Every calculation exported with help pages, `ss_find()`, addin, Cite tab | **Done**; vignettes, r-universe and CRAN open |
 
@@ -488,7 +488,7 @@ time-to-event models and model updating/recalibration.
 | Docs and navigation drift from the code | Consistency tests (ROADMAP P0); ROADMAP as the single forward-looking doc |
 | Development environment lost on container reset | SessionStart hook rebuilds it; `renv.lock` records the exact versions |
 | Development sandbox cannot reach CRAN or journal sites | `github.com/cran` mirror + apt for packages; web search for citations; items needing paper access stay open rather than guessed |
-| Monte Carlo designs block other users on a shared server | Calculate button done; background computation (`ExtendedTask`) needs a background-process package, an owner decision (ROADMAP F9) |
+| Monte Carlo designs block other users on a shared server | Resolved 31 Oct 2026: background workers (`mirai`); each worker is a full R process, so its memory counts against the host's limit |
 | Licence of reimplementations transcribed from GPL packages | Resolved: project relicensed to GPL-3 (ROADMAP F8 / D2); module headers keep naming each source package |
 | Scope creep as the project grows into a suite | Workbench-by-workbench milestones with exit criteria (ROADMAP §11) |
 
@@ -512,9 +512,9 @@ enforced by consistency tests rather than habit.
 
 ## Appendix: Dependencies
 
-**Runtime** (`DESCRIPTION` `Imports`): `shiny`, `bslib` (>= 0.6.0), `clinfun`, `PowerTOST`, `Exact`, `kappaSize`, `mvtnorm`, `lme4`;
-plus `survival`, `graphics`, `stats` and `utils` from base R. (Twelve earlier imports, among them `pwr`, `presize`, `epiR`,
-`pROC`, `powerMediation`, `pmsampsize`, `powerSurvEpi` and `TrialSize`, were replaced by reimplementations that are tested against
+**Runtime** (`DESCRIPTION` `Imports`): `shiny` (>= 1.8.1), `bslib` (>= 0.7.0), `promises`, `clinfun`, `kappaSize`, `mvtnorm`, `lme4`;
+plus `survival`, `graphics`, `stats` and `utils` from base R. (Fourteen earlier imports, among them `pwr`, `presize`, `epiR`,
+`pROC`, `powerMediation`, `pmsampsize`, `powerSurvEpi`, `TrialSize`, `PowerTOST` and `Exact`, were replaced by reimplementations that are tested against
 the originals.)
 
 **Testing and verification** (`Suggests`): `testthat`, `withr`, `shinytest2`, `chromote`, `jsonlite`, `htmltools`, and the packages used

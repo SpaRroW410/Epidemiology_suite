@@ -36,17 +36,23 @@ ui_driver <- local({
       # Calculators are loaded when opened (lazy_modules.R); the background loading that normally follows the first
       # screen is off here so that "idle" is a stable signal. It has its own test (test-ui_smoke.R).
       Sys.setenv(EPIDEMIOLOGYSUITE_BACKGROUND_LOAD = "false")
+      # Monte Carlo results are computed in the session here, so that "idle" means "done"; background computation has its own test.
+      Sys.setenv(EPIDEMIOLOGYSUITE_WORKERS = "0")
       app <<- shinytest2::AppDriver$new(ui_app_dir(), name = "smoke", load_timeout = 90000,
                                         timeout = 30000, view = FALSE)
       withr::defer(app$stop(), envir = testthat::teardown_env())
     }
+    # Another app opened by a test (ui_fresh_driver()) takes the browser's focus, and when it closes this page stays "hidden";
+    # since shiny 1.11 a hidden page defers its output updates, so the tests after it would read stale outputs.
+    try(app$get_chromote_session()$Page$bringToFront(), silent = TRUE)
     app
   }
 })
 
 # A separate, fresh app (own R process) for tests about start-up state, which the shared driver above has already moved on from.
-ui_fresh_driver <- function(background_load = FALSE, name = "fresh", width = NULL, height = NULL) {
-  Sys.setenv(CHROMOTE_CHROME = ui_chrome_path(), EPIDEMIOLOGYSUITE_BACKGROUND_LOAD = if (background_load) "true" else "false")
+ui_fresh_driver <- function(background_load = FALSE, name = "fresh", width = NULL, height = NULL, workers = 0L) {
+  Sys.setenv(CHROMOTE_CHROME = ui_chrome_path(), EPIDEMIOLOGYSUITE_BACKGROUND_LOAD = if (background_load) "true" else "false",
+             EPIDEMIOLOGYSUITE_WORKERS = as.character(workers))
   args <- c("--disable-gpu", "--disable-dev-shm-usage")
   if (identical(unname(Sys.info()[["effective_user"]]), "root")) args <- c(args, "--no-sandbox")
   chromote::set_chrome_args(args)
@@ -126,4 +132,12 @@ ui_console_errors <- function(app) {
   r <- logs[logs$location == "shiny", "message", drop = TRUE]
   r <- r[grepl("^(Error|Warning: Error)", r)]
   c(js, r)
+}
+
+# Wait until an input that a renderUI() has just (re)drawn is connected to Shiny. Since shiny 1.11 inputs inside re-rendered
+# output are bound a moment after the output arrives, so "idle" alone can come before set_inputs() could find them.
+ui_wait_bound <- function(app, id, timeout = 30000) {
+  app$wait_for_js(sprintf("(function(){var e=document.getElementById(%s); return !!e && !!$(e).data('shiny-input-binding');})()",
+                          ui_js_string(id)), timeout = timeout)
+  app$wait_for_idle(300, timeout = timeout)
 }

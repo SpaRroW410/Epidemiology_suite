@@ -15,9 +15,7 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 ## 1. Open from the priority list (§3 of the roadmap)
 
 ### P0 / P1 leftovers
-- [ ] **Async compute for Monte Carlo designs (finding F9, item 7 second half). [owner] needs a decision on a background-process package (`mirai` or `future`) as a runtime dependency; it also changes the browser build.** The "Calculate" button exists; still missing is
-  `shiny::ExtendedTask` with a background process so one user's running simulation does not block the other users of the
-  same R process. Matters as soon as the app is hosted for several people.
+- [x] **Async compute for Monte Carlo designs (finding F9, item 7 second half)** -- done 31 Oct 2026: background computation with `mirai` (owner's decision, 31 Oct 2026): on a server the 10 Monte Carlo calculators run in a separate R process through `shiny::ExtendedTask` (`R/background.R`), the Calculate button shows "Calculating...", and the results are identical to the in-session ones (same seed and random-number generator, checked by the tests). One worker by default; `EPIDEMIOLOGYSUITE_WORKERS` (or `options(epidemiologysuite.workers)`) sets the number, 0 turns it off. `mirai` is suggested, not required: without it, or in the browser build, the calculation runs in the session. In the browser build a simulation now runs only when Calculate is pressed.
 - [x] **Caching of repeated results** (Track E, P2; done 30 Oct 2026): result cache for the 10 Monte Carlo calculators (`R/memo_cache.R`, `memo_calc()`): a repeated identical calculation (same inputs and seed) is returned at once, shared by every session of the R process, at most 200 results kept, switch off with `options(epidemiologysuite.cache = FALSE)`. Closed-form results are not cached on purpose: they take microseconds, less than building the key, so `bindCache()` would add nothing there.
 - [x] **Accessibility, dark mode (finding F11, item 22), first pass done 28 Oct 2026:** axe-core scan of every calculator (WCAG A/AA, desktop + phone, light + dark) fixed to 0 violations (`tools/ui-audit/a11y.R`), dark-mode switch added. English only (D5).
 - [ ] Still open from item 22: a person's keyboard and screen-reader walk-through (a scan cannot judge reading order or whether names make sense), dark-mode plots (the text descriptions of the plots are done), text-resize / reduced-motion checks, a phone layout pass on a real phone.
@@ -41,9 +39,7 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 - [x] (done 28 Oct 2026, see ROADMAP) Remaining low-weight imports: `pwr`, `powerMediation`, `pmsampsize`, `pROC` (each under 1 MB; reimplement and test against
   the package as was done for `epiR`, `Hmisc`, `tseries`, `BayesFactor`, `rstatix`).
 - [x] (done 28 Oct 2026) Moderate: `presize`, `powerSurvEpi`, `TrialSize`. Left: `kappaSize` (kappa cell-probability tables, 8 large functions) is now the direct import instead of `presize`; re-deriving it would remove one more package.
-- [ ] Higher risk, defer: `PowerTOST` (also what breaks the browser build), `Exact` / Boschloo (needs `rootSolve`, no WebAssembly
-  build), `clinfun` (`ph2simon`, group-sequential). `lme4` stays (the Monte Carlo mixed-model designs need it); `mvtnorm`, `shiny`,
-  `bslib` stay.
+- [x] `Exact` and `PowerTOST` removed from the runtime (31 Oct 2026): Fisher and Boschloo exact power written from the tests' definitions (`R/calc_closed_forms_exact.R`; `Exact` is GPL-2 only, so its code was not copied), the TOST, bioequivalence and expected-power sample sizes transcribed from `PowerTOST` (GPL >= 2; `R/calc_closed_forms_tost.R`); both equal the packages exactly over grids of inputs and the three designs now run in the browser build. Kept on purpose: `clinfun` (Simon two-stage, group-sequential boundaries; compiled numerical code that works in the browser) and `kappaSize` (pure R, works in the browser, long polynomial tables) -- replacing them would add risk without a gain for users. `lme4` stays (the Monte Carlo mixed-model designs need it); `mvtnorm`, `shiny`, `bslib` stay.
 - [ ] Re-check `epi.ssdetect()` against epiR 3.0.0 (different interface; the app follows 2.0.67 semantics).
 
 ### Browser build / offline (item 15, spike done)
@@ -75,7 +71,7 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 - [x] Docker image + CI smoke test (done 21 Oct 2026).
 - [x] Hosting for phones: Posit Connect Cloud, deployed from the auto-built `connect` branch (28 Oct 2026). [ ] **[owner]** Long-term choice and budget: free-plan limits are not verified; shinyapps.io is closing to new apps (docs/hosting.md).
 - [ ] First publish of the image to GHCR (happens on the first push to `main` or a `v*` tag; not exercised yet).
-- [ ] Multi-user scaling: ShinyProxy or several replicas, until F9 (`ExtendedTask`) is done.
+- [ ] Multi-user scaling: F9 is done (background workers); for many simultaneous users, more workers or several replicas (ShinyProxy) -- check the memory each worker uses on the chosen host first.
 - [ ] Image size and an arm64 build (amd64 only today).
 - [ ] HTTPS and a domain; then the **PWA** (D4: manifest + service worker), the **Android TWA** (D5a, recommended APK route),
   the **Capacitor bundle** (D5b, needs the browser build), **iOS** via PWA (D6), the **desktop wrapper** (D7, Tauri/Electron).
@@ -204,10 +200,10 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] UI audit: not run on a real phone or with a screen reader; item 22 (accessibility, dark mode) is still open.
 
 ### Dependency reduction stage 2 (28 Oct 2026)
-- [ ] Re-snapshot `renv.lock` (it still lists the seven removed runtime packages and kappaSize's place has changed).
+- [x] `renv.lock` updated 31 Oct 2026 (shiny 1.14.0, bslib 0.12.0, promises 1.5.0, mirai 2.7.3 and their dependencies).
 - [ ] Optional: re-derive `kappaSize`'s kappa tables (2-6 raters, 2-5 categories) and drop the last of the easy/moderate set.
-- [ ] Report the two package bugs upstream (pmsampsize continuous criterion 4 sign error; presize prec_pos_lr / prec_neg_lr ignoring conf.level).
-- [ ] Remaining heavier ones: `PowerTOST`, `Exact`, `clinfun`, `lme4` (see the dependency section above).
+- [ ] **[owner]** Report the two package bugs upstream: drafts ready in `docs/upstream_reports.md` (pmsampsize continuous criterion 4 sign error; presize prec_pos_lr / prec_neg_lr ignoring conf.level).
+- [x] Heavier ones: `PowerTOST` and `Exact` done 31 Oct 2026; `clinfun` and `lme4` kept (see the dependency section above).
 
 ### Three versions (28 Oct 2026, see docs/hosting.md)
 - [ ] **[owner]** Create the Posit Connect Cloud account, publish from the branch `connect`, then put its address in `tools/pages/mobile_url.txt` (PR).

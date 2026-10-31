@@ -19,11 +19,10 @@ License: GPL (>= 3)
 Encoding: UTF-8
 Depends: R (>= 4.3.0)
 Imports:
-    shiny,
-    bslib (>= 0.6.0),
+    shiny (>= 1.8.1),
+    bslib (>= 0.7.0),
+    promises,
     clinfun,
-    PowerTOST,
-    Exact,
     kappaSize,
     mvtnorm,
     lme4,
@@ -32,7 +31,11 @@ Imports:
     stats,
     utils
 Suggests:
+    Exact,
+    PowerTOST,
     knitr,
+    mirai (>= 2.0.0),
+    pkgload,
     rmarkdown,
     DescTools,
     chromote,

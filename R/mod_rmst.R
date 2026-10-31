@@ -20,7 +20,7 @@ mod_rmst_ui <- function(id) {
       numericInput(ns("scale0"), "Weibull scale, arm 0 (control)", value = 8500, min = 0.001, step = 100),
       numericInput(ns("shape1"), "Weibull shape, arm 1 (treatment)", value = 1, min = 0.001, step = 0.1),
       numericInput(ns("scale1"), "Weibull scale, arm 1 (treatment)", value = 8500, min = 0.001, step = 100),
-      numericInput(ns("margin"), "Non-inferiority margin (0 = superiority test)", value = 0, min = 0, step = 1),
+      numericInput(ns("margin"), "Non-inferiority margin (0 = superiority test)", value = 18, min = 0, step = 1),
       numericInput(ns("allocation1"), "Allocation proportion to arm 1", value = 0.5, min = 0.001, max = 0.999, step = 0.01),
       numericInput(ns("alpha"), "Significance level (alpha, two-sided)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
@@ -51,15 +51,19 @@ mod_rmst_ui <- function(id) {
 
 mod_rmst_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # the simulations run in a background R process on a server (background.R); `result` is the finished calculation
+    bg <- background_calc()
+    result <- bg$result(function() result_now())
+
     # Monte Carlo (ROADMAP F9/P1#7): recompute only on Calculate, not on every
     # keystroke -- see monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
-    result <- reactive({
+    result_now <- reactive({
       input$calculate
       isolate({
         req(input$ac_period, input$tot_time, input$tau, input$shape0, input$scale0,
             input$shape1, input$scale1, input$margin, input$allocation1, input$alpha, input$power)
         tryCatch(
-          list(ok = TRUE, value = memo_calc("calc_rmst_comparison",
+          list(ok = TRUE, value = bg$calc("calc_rmst_comparison",
             ac_period = input$ac_period, tot_time = input$tot_time, tau = input$tau,
             shape0 = input$shape0, scale0 = input$scale0,
             shape1 = input$shape1, scale1 = input$scale1,

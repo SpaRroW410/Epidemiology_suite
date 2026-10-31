@@ -220,12 +220,16 @@ mod_nonparametric_ui <- function(id) {
 
 mod_nonparametric_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # the simulations run in a background R process on a server (background.R); `result` is the finished calculation
+    bg <- background_calc()
+    result <- bg$result(function() result_now())
+
     # ks/runs/animal_rank are Monte Carlo (ROADMAP F9/P1#7): once one of
     # them is selected, recompute only on Calculate, not on every keystroke
     # -- see monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
     SLOW_DESIGNS <- c("ks", "runs", "animal_rank")
 
-    result <- reactive({
+    result_now <- reactive({
       req(input$design)
       is_slow <- input$design %in% SLOW_DESIGNS
       if (is_slow) input$calculate
@@ -270,13 +274,13 @@ mod_nonparametric_server <- function(id) {
           )
         } else if (input$design == "ks") {
           req(input$effect_size_ks, input$nsim_ks)
-          memo_calc("calc_ks_two_sample",
+          bg$calc("calc_ks_two_sample",
             effect_size = input$effect_size_ks, alpha = input$alpha, power = input$power,
             nsim = input$nsim_ks
           )
         } else if (input$design == "runs") {
           req(input$effect_size_runs, input$nsim_runs)
-          memo_calc("calc_wald_wolfowitz_runs",
+          bg$calc("calc_wald_wolfowitz_runs",
             effect_size = input$effect_size_runs, alpha = input$alpha, power = input$power,
             nsim = input$nsim_runs
           )
@@ -287,7 +291,7 @@ mod_nonparametric_server <- function(id) {
           if (anyNA(odds_ratio) || length(odds_ratio) == 0) {
             stop("Odds ratio(s) must be one or more comma-separated numbers.")
           }
-          memo_calc("calc_animal_rank_test",
+          bg$calc("calc_animal_rank_test",
             k = as.integer(input$k_animal), odds_ratio = odds_ratio,
             alpha = input$alpha, power = input$power,
             statistic = input$statistic_animal, alternative = input$alternative_animal,

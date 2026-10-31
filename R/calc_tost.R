@@ -1,11 +1,11 @@
 # Pure calculation function for equivalence testing (TOST) sample size. No
 # Shiny dependency here so this is directly unit-testable (see
-# tests/testthat). Wraps PowerTOST::sampleN.TOST() rather than
+# tests/testthat). Uses PowerTOST's sampleN.TOST() logic (transcribed in calc_closed_forms_tost.R) rather than
 # reimplementing the underlying math (project convention).
 
 #' Sample size for a two one-sided tests (TOST) equivalence trial on means
 #'
-#' Wraps PowerTOST::sampleN.TOST() on the *original* (untransformed) scale
+#' PowerTOST's sampleN.TOST() (transcribed, calc_closed_forms_tost.R) on the *original* (untransformed) scale
 #' (logscale = FALSE) with a parallel-groups design -- i.e. raw units, not
 #' the log-ratio/CV framing used for pharmacokinetic bioequivalence
 #' (PowerTOST's more common use case, and still available via this same
@@ -31,20 +31,16 @@ calc_tost_means <- function(mean_diff, margin, sd, alpha = 0.05, power = 0.8) {
     stop("mean_diff must fall strictly within (-margin, margin) -- otherwise equivalence can't be shown even with infinite sample size.")
   }
 
-  .require_pkg("PowerTOST", "The equivalence sample size for means")
-  fit <- PowerTOST::sampleN.TOST(
-    alpha = alpha, targetpower = power, logscale = FALSE,
-    theta0 = mean_diff, theta1 = -margin, theta2 = margin,
-    CV = sd, design = "parallel", print = FALSE
-  )
+  fit <- .tost_sample_size(alpha = alpha, targetpower = power, logscale = FALSE,
+                           theta0 = mean_diff, theta1 = -margin, theta2 = margin, CV = sd, design = "parallel")
 
-  n_total <- fit[["Sample size"]]
+  n_total <- fit$n
   n_per_group <- ceiling(n_total / 2)
 
   new_ss_result(list(
     n_total = n_per_group * 2,
     n_per_group = n_per_group,
-    achieved_power = fit[["Achieved power"]],
+    achieved_power = fit$power,
     inputs = list(mean_diff = mean_diff, margin = margin, sd = sd,
                   alpha = alpha, power = power)
   ))
@@ -52,7 +48,7 @@ calc_tost_means <- function(mean_diff, margin, sd, alpha = 0.05, power = 0.8) {
 
 #' Sample size for a pharmacokinetic bioequivalence crossover trial
 #'
-#' Wraps PowerTOST::sampleN.TOST() on the *log-transformed* scale
+#' PowerTOST's sampleN.TOST() (transcribed, calc_closed_forms_tost.R) on the *log-transformed* scale
 #' (logscale = TRUE) -- the classic pharmacokinetic bioequivalence
 #' framing (comparing a test and reference formulation's AUC or Cmax via
 #' a ratio, not a raw difference), for a standard 2x2 crossover or a
@@ -89,16 +85,12 @@ calc_tost_bioequivalence <- function(cv, theta0 = 0.95, theta1 = 0.8, theta2 = 1
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  .require_pkg("PowerTOST", "The pharmacokinetic bioequivalence sample size")
-  fit <- PowerTOST::sampleN.TOST(
-    alpha = alpha, targetpower = power, logscale = TRUE,
-    theta0 = theta0, theta1 = theta1, theta2 = theta2,
-    CV = cv, design = design, print = FALSE
-  )
+  fit <- .tost_sample_size(alpha = alpha, targetpower = power, logscale = TRUE,
+                           theta0 = theta0, theta1 = theta1, theta2 = theta2, CV = cv, design = design)
 
   new_ss_result(list(
-    n_total = fit[["Sample size"]],
-    achieved_power = fit[["Achieved power"]],
+    n_total = fit$n,
+    achieved_power = fit$power,
     inputs = list(cv = cv, theta0 = theta0, theta1 = theta1, theta2 = theta2,
                   alpha = alpha, power = power, design = design)
   ))
@@ -116,7 +108,7 @@ calc_tost_bioequivalence <- function(cv, theta0 = 0.95, theta1 = 0.8, theta2 = 1
 #' the uncertainty in the CV estimate given how many subjects it was
 #' estimated from (prior_n) -- the "probability of trial success"
 #' concept named in checklist_by_test.md's "Assurance / expected power"
-#' item. Wraps PowerTOST::expsampleN.TOST() with prior.type = "CV" --
+#' item. PowerTOST's expsampleN.TOST() with prior.type = "CV" (transcribed, calc_closed_forms_tost.R) --
 #' PowerTOST is already a project dependency (used by
 #' calc_tost_means()/calc_tost_bioequivalence() above), and this is
 #' exactly the `exp.*` function family that checklist item names.
@@ -165,18 +157,12 @@ calc_tost_assurance <- function(cv, prior_n, theta0 = 0.95, theta1 = 0.8, theta2
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  .require_pkg("PowerTOST", "The expected-power bioequivalence sample size")
-  fit <- PowerTOST::expsampleN.TOST(
-    alpha = alpha, targetpower = power, logscale = TRUE,
-    theta0 = theta0, theta1 = theta1, theta2 = theta2,
-    CV = cv, design = design, prior.type = "CV",
-    prior.parm = list(m = prior_n, design = design),
-    print = FALSE
-  )
+  fit <- .tost_exp_sample_size(alpha = alpha, targetpower = power, theta0 = theta0, theta1 = theta1, theta2 = theta2,
+                               CV = cv, design = design, m = prior_n)
 
   new_ss_result(list(
-    n_total = fit[["Sample size"]],
-    achieved_expected_power = fit[["Achieved power"]],
+    n_total = fit$n,
+    achieved_expected_power = fit$power,
     inputs = list(cv = cv, prior_n = prior_n, theta0 = theta0, theta1 = theta1,
                   theta2 = theta2, alpha = alpha, power = power, design = design)
   ))
