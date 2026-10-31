@@ -130,3 +130,11 @@ ui_console_errors <- function(app) {
   r <- r[grepl("^(Error|Warning: Error)", r)]
   c(js, r)
 }
+
+# Wait until an input that a renderUI() has just (re)drawn is connected to Shiny. Since shiny 1.11 inputs inside re-rendered
+# output are bound a moment after the output arrives, so "idle" alone can come before set_inputs() could find them.
+ui_wait_bound <- function(app, id, timeout = 30000) {
+  app$wait_for_js(sprintf("(function(){var e=document.getElementById(%s); return !!e && !!$(e).data('shiny-input-binding');})()",
+                          ui_js_string(id)), timeout = timeout)
+  app$wait_for_idle(300, timeout = timeout)
+}
