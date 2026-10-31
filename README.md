@@ -242,8 +242,12 @@ the repository root still works.
 
 The app has a **Cite** tab with the citation in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX and RIS, a ready-made sentence
 for a Methods section, and copy and download buttons. In R: `citation("epidemiologysuite")`. GitHub's "Cite this repository" reads
-`CITATION.cff`. There is no DOI yet: after the first release is archived on Zenodo, put the DOI in three places (see
-`docs/hosting.md`, "Adding the Zenodo DOI"): `.citation_doi` in `R/citation_info.R`, `CITATION.cff` and `inst/CITATION`.
+`CITATION.cff`. Release v1.0.0 is archived on Zenodo, DOI [10.5281/zenodo.23794230](https://doi.org/10.5281/zenodo.23794230):
+
+> Maheshwari, M. (2026). Epidemiological suite (Version 1.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.23794230
+
+The DOI is set in three places (`docs/hosting.md`, "Adding the Zenodo DOI"): `.citation_doi` in `R/citation_info.R`,
+`CITATION.cff` and `inst/CITATION`.
 
 ## Running in Docker
 
@@ -313,7 +317,7 @@ request, and the full suite weekly or on demand from the Actions tab.
 
 ```
 DESCRIPTION, NAMESPACE package metadata (NAMESPACE is hand-written; roxygen2 builds only the help pages, roclets = "rd")
-CITATION.cff           citation for GitHub and Zenodo (the DOI goes here once issued, see docs/hosting.md)
+CITATION.cff           citation for GitHub and Zenodo (carries the Zenodo DOI, see docs/hosting.md)
 app.R                  development entry point: pkgload::load_all() + epidemiologysuite_app()
 R/                     the package (flat, as R requires; grouped by file-name prefix):
 ├── run_app.R          run_app() / epidemiologysuite_app(): grouped navbar, theme, Home hub, Cite tab

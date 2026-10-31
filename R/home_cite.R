@@ -32,7 +32,7 @@ cite_server <- function(input, output, session) {
     info <- suite_citation_info()
     if (is.na(info$doi)) {
       div(class = "alert alert-info small",
-          strong("DOI: "), "a DOI (from Zenodo) will be added here when the first release is archived. Until then the citations give the web address and the version.")
+          strong("DOI: "), "no DOI is set, so the citations give the web address and the version.")
     } else {
       p(strong("DOI: "), tags$a(href = paste0("https://doi.org/", info$doi), info$doi))
     }

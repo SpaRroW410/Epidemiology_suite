@@ -2,9 +2,9 @@
 # citation formats shown on the app's Cite tab. Keep the version equal to DESCRIPTION's (a test checks it) and the year, version
 # and address in step with CITATION.cff and inst/CITATION.
 
-# The DOI that Zenodo issues for a release, e.g. "10.5281/zenodo.1234567". NA until it exists: the Cite tab then says so and cites the
-# web address instead. This is the only line to change when the DOI arrives (plus CITATION.cff and inst/CITATION).
-.citation_doi <- NA_character_
+# The DOI Zenodo issued for release v1.0.0 (GitHub release of 31 Oct 2026). With NA the Cite tab says there is no DOI and cites the web
+# address instead. Keep it in step with CITATION.cff and inst/CITATION.
+.citation_doi <- "10.5281/zenodo.23794230"
 
 # The release the citations name, and the tag of the GitHub / Zenodo release ("v" + this). Keep it equal to DESCRIPTION's version (a test checks it).
 .release_label <- "1.0.0"

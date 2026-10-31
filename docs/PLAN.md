@@ -15,7 +15,7 @@ suite 940 blocks with 0 failures; 195 calculation functions exported with help p
 
 - [ ] Click **Republish** on Connect Cloud after the rename PR (#17) is merged; try the phone redirect on a real phone
 - ~~Version set to **1.0.0** (30 Oct; the tag of the release is `v1.0.0`)~~
-- [ ] Zenodo: the first record (wrong version tag) was removed; publish the `v1.0.0` release again and send the new **DOI**
+- ~~Zenodo: release `v1.0.0` archived, DOI **10.5281/zenodo.23794230**~~ (31 Oct; in the Cite tab, `CITATION.cff` and `citation()`)
 - [ ] Decide on a background-process package (`mirai` or `future`) for running slow simulations without blocking other users (also changes the browser build)
 - [ ] Long-term hosting (Connect Cloud free-plan limits are not verified)
 - ~~Repository renamed to `Epidemiology_suite` (30 Oct); the package followed as `epidemiologysuite`~~ **Owner steps left:** check the new Pages address, rename `EPIDEMIOLOGICASUITE_OPEN` to `EPIDEMIOLOGYSUITE_OPEN` on Connect if it was set there, republish

@@ -18,7 +18,7 @@ GitHub repository to `Epidemiology_suite`; the app is shown to people as **Epide
 * **Design wizard and plain-language search.** Describe a study in words, or answer a few questions, and the app suggests calculators.
   In R, `ss_find()` does the same (also as an RStudio add-in).
 * **Cite tab.** The citation in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX and RIS, and a sentence for a Methods section, with
-  copy and download buttons; `citation("epidemiologysuite")` and `CITATION.cff` too. No DOI is set yet.
+  copy and download buttons; `citation("epidemiologysuite")` and `CITATION.cff` too. Archived on Zenodo: doi:10.5281/zenodo.23794230.
 
 ## From R
 
