@@ -56,5 +56,10 @@ jobs:
         run: |
           Rscript -e 'install.packages("remotes"); remotes::install_version("shinytest2", version = "0.4.1", upgrade = "never")'
 
+      # mirai (background computation, R/background.R) is suggested, not in renv.lock: renv's restore failed to download
+      # its dependency nanonext (the same binary downloads fine with install.packages), so both are installed here.
+      - name: Install mirai
+        run: Rscript -e 'install.packages("mirai"); stopifnot(requireNamespace("mirai"))'
+
       - name: Run tests
         run: Rscript -e 'testthat::test_local(".", stop_on_failure = TRUE)'
