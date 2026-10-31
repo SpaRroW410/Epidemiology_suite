@@ -288,8 +288,9 @@ calc_survival_stratified <- function(power, timeUnit, gVec, pVec, hr, lambda0Vec
 #' @return list(n0, n1, n_total, achieved_power, inputs)
 #' @examples
 #' \donttest{
+#' # nsim is kept small so that the example runs quickly; use the default (or more) for a real calculation
 #' calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4, effect_timing = "delayed", 
-#'     accrual = 12, tot_time = 30, rho = 0, power = 0.8)
+#'     accrual = 12, tot_time = 30, rho = 0, power = 0.8, nsim = 100)
 #' }
 #' @export
 calc_weighted_logrank <- function(hazard0, hr, change_time, effect_timing = "delayed",

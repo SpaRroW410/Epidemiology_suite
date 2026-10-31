@@ -2,7 +2,7 @@
 # Once Zenodo has issued the DOI, add   doi = "10.5281/zenodo.XXXXXXX",   to the entry below (and see R/citation_info.R).
 bibentry(
   "Manual",
-  title = "Epidemiological suite: Sample Size and Power Calculator for Study Design",
+  title = "Epidemiological suite: Sample Size, Power and Analysis Tools for Epidemiology",
   author = person("Mukul", "Maheshwari"),
   year = "2026",
   note = "R package version 1.0.0",

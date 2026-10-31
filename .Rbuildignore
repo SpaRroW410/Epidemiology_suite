@@ -20,3 +20,4 @@
 ^\.dockerignore$
 ^docker-compose\.yml$
 ^CITATION\.cff$
+^cran-comments\.md$
