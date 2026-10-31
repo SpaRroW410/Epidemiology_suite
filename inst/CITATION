@@ -1,10 +1,11 @@
 # What citation("epidemiologysuite") prints. Keep the release, version and year in step with DESCRIPTION and R/citation_info.R.
-# Once Zenodo has issued the DOI, add   doi = "10.5281/zenodo.XXXXXXX",   to the entry below (and see R/citation_info.R).
+# The DOI is the Zenodo archive of release v1.0.0; keep it in step with R/citation_info.R and CITATION.cff.
 bibentry(
   "Manual",
   title = "Epidemiological suite: Sample Size, Power and Analysis Tools for Epidemiology",
   author = person("Mukul", "Maheshwari"),
   year = "2026",
   note = "R package version 1.0.0",
-  url = "https://github.com/SpaRroW410/Epidemiology_suite"
+  doi = "10.5281/zenodo.23794230",
+  url = "https://doi.org/10.5281/zenodo.23794230"
 )

@@ -20,7 +20,8 @@ keywords:
   - study design
   - R package
   - Shiny
-# Once Zenodo has issued the DOI, add it here (and in R/citation_info.R and inst/CITATION) and add date-released:
-# identifiers:
-#   - type: doi
-#     value: 10.5281/zenodo.XXXXXXX
+date-released: "2026-10-31"
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.23794230
+    description: Zenodo archive of release v1.0.0
