@@ -274,7 +274,7 @@ mod_logrank_server <- function(id) {
             input$accrual_wlr, input$tot_time_wlr, input$rho_wlr, input$allocation1_wlr,
             input$alpha_wlr, input$power_wlr)
         tryCatch(
-          list(ok = TRUE, value = calc_weighted_logrank(
+          list(ok = TRUE, value = memo_calc("calc_weighted_logrank",
             hazard0 = input$hazard0_wlr, hr = input$hr_wlr, change_time = input$change_time_wlr,
             effect_timing = input$effect_timing_wlr, accrual = input$accrual_wlr,
             tot_time = input$tot_time_wlr, rho = input$rho_wlr, allocation1 = input$allocation1_wlr,

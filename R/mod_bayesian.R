@@ -147,7 +147,7 @@ mod_bayesian_server <- function(id) {
         req(input$effect_size_bfda, input$bf_threshold, input$nsim_bfda,
             input$alpha_bfda, input$power_bfda)
         tryCatch(
-          list(ok = TRUE, design = "bfda", value = calc_bfda_ttest(
+          list(ok = TRUE, design = "bfda", value = memo_calc("calc_bfda_ttest",
             effect_size = input$effect_size_bfda, bf_threshold = input$bf_threshold,
             alpha = input$alpha_bfda, power = input$power_bfda, nsim = input$nsim_bfda
           )),

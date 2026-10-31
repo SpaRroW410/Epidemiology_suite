@@ -82,7 +82,7 @@ suite 940 blocks with 0 failures; 195 calculation functions exported with help p
 ## Phase 6 — Engineering and speed
 
 - [ ] Background computation for the slow Monte Carlo designs (`ExtendedTask`), so one user's run does not block the others
-- [ ] `bindCache()` for repeated closed-form results
+- ~~Caching of repeated results~~ (30 Oct): result cache for the 10 Monte Carlo calculators (`R/memo_cache.R`, `memo_calc()`): a repeated identical calculation (same inputs and seed) is returned at once, shared by every session of the R process, at most 200 results kept, switch off with `options(epidemiologysuite.cache = FALSE)`. Closed-form results are not cached on purpose: they take microseconds, less than building the key, so `bindCache()` would add nothing there
 - [ ] Dependencies: ~~tier 1 (17 Oct) and the easy / moderate packages (28 Oct) removed from the runtime: five packages (tier 1) and seven (stage 2) reimplemented and checked against the originals, two upstream bugs found and corrected~~; left: `PowerTOST`, `Exact`, `clinfun`, `kappaSize` (optional), `lme4` stays
 - [ ] Re-snapshot `renv.lock`; report the two upstream bugs (pmsampsize, presize)
 - [ ] Trial Sequential Analysis speed in the browser build

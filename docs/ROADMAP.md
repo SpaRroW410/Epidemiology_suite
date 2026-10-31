@@ -1240,7 +1240,7 @@ Phase 8 dependency reduction matters beyond tidiness.
 | UI tests | `shinytest2`, one smoke test per module | P1 |
 | Async compute | Calculate button, then `ExtendedTask` for Monte Carlo modules | P1 |
 | Result object | Common S3 class across all `calc_*()` | P1 |
-| Caching | `bindCache()` for pure closed-form results | P2 |
+| Caching | Done 30 Oct 2026: `memo_calc()` caches the Monte Carlo results (closed-form ones are too fast to gain from it) | P2 |
 | Accessibility / mobile | WCAG AA audit, small-screen layout pass | P3 |
 
 ---

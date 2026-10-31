@@ -131,7 +131,7 @@ mod_glmm_server <- function(id) {
         req(input$cluster_size_lmm, input$icc, input$sigma_total, input$delta_lmm,
             input$alpha_lmm, input$power_lmm, input$nsim_lmm, input$seed_lmm)
         tryCatch(
-          list(ok = TRUE, value = calc_glmm_lmm_power(
+          list(ok = TRUE, value = memo_calc("calc_glmm_lmm_power",
             cluster_size = input$cluster_size_lmm, icc = input$icc, sigma_total = input$sigma_total,
             delta = input$delta_lmm, alpha = input$alpha_lmm, power = input$power_lmm,
             nsim = input$nsim_lmm, seed = input$seed_lmm
@@ -142,7 +142,7 @@ mod_glmm_server <- function(id) {
         req(input$cluster_size_glmm, input$sigma_u, input$baseline_prob, input$or,
             input$alpha_glmm, input$power_glmm, input$nsim_glmm, input$seed_glmm)
         tryCatch(
-          list(ok = TRUE, value = calc_glmm_logistic_power(
+          list(ok = TRUE, value = memo_calc("calc_glmm_logistic_power",
             cluster_size = input$cluster_size_glmm, sigma_u = input$sigma_u,
             baseline_prob = input$baseline_prob, or = input$or,
             alpha = input$alpha_glmm, power = input$power_glmm,
@@ -155,7 +155,7 @@ mod_glmm_server <- function(id) {
             input$cor_is_gc, input$sigma2_residual_gc, input$baseline_slope_gc,
             input$alpha_gc, input$power_gc, input$nsim_gc, input$seed_gc)
         tryCatch(
-          list(ok = TRUE, value = calc_growth_curve_power(
+          list(ok = TRUE, value = memo_calc("calc_growth_curve_power",
             ntimes = input$ntimes_gc, delta_slope = input$delta_slope_gc,
             sigma2_intercept = input$sigma2_intercept_gc, sigma2_slope = input$sigma2_slope_gc,
             cor_intercept_slope = input$cor_is_gc, sigma2_residual = input$sigma2_residual_gc,

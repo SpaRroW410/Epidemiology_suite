@@ -270,13 +270,13 @@ mod_nonparametric_server <- function(id) {
           )
         } else if (input$design == "ks") {
           req(input$effect_size_ks, input$nsim_ks)
-          calc_ks_two_sample(
+          memo_calc("calc_ks_two_sample",
             effect_size = input$effect_size_ks, alpha = input$alpha, power = input$power,
             nsim = input$nsim_ks
           )
         } else if (input$design == "runs") {
           req(input$effect_size_runs, input$nsim_runs)
-          calc_wald_wolfowitz_runs(
+          memo_calc("calc_wald_wolfowitz_runs",
             effect_size = input$effect_size_runs, alpha = input$alpha, power = input$power,
             nsim = input$nsim_runs
           )
@@ -287,7 +287,7 @@ mod_nonparametric_server <- function(id) {
           if (anyNA(odds_ratio) || length(odds_ratio) == 0) {
             stop("Odds ratio(s) must be one or more comma-separated numbers.")
           }
-          calc_animal_rank_test(
+          memo_calc("calc_animal_rank_test",
             k = as.integer(input$k_animal), odds_ratio = odds_ratio,
             alpha = input$alpha, power = input$power,
             statistic = input$statistic_animal, alternative = input$alternative_animal,

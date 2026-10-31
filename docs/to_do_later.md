@@ -18,7 +18,7 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 - [ ] **Async compute for Monte Carlo designs (finding F9, item 7 second half). [owner] needs a decision on a background-process package (`mirai` or `future`) as a runtime dependency; it also changes the browser build.** The "Calculate" button exists; still missing is
   `shiny::ExtendedTask` with a background process so one user's running simulation does not block the other users of the
   same R process. Matters as soon as the app is hosted for several people.
-- [ ] **`bindCache()` for closed-form results** (Track E, P2): cheap speed-up for repeated identical inputs.
+- [x] **Caching of repeated results** (Track E, P2; done 30 Oct 2026): result cache for the 10 Monte Carlo calculators (`R/memo_cache.R`, `memo_calc()`): a repeated identical calculation (same inputs and seed) is returned at once, shared by every session of the R process, at most 200 results kept, switch off with `options(epidemiologysuite.cache = FALSE)`. Closed-form results are not cached on purpose: they take microseconds, less than building the key, so `bindCache()` would add nothing there.
 - [x] **Accessibility, dark mode (finding F11, item 22), first pass done 28 Oct 2026:** axe-core scan of every calculator (WCAG A/AA, desktop + phone, light + dark) fixed to 0 violations (`tools/ui-audit/a11y.R`), dark-mode switch added. English only (D5).
 - [ ] Still open from item 22: a person's keyboard and screen-reader walk-through (a scan cannot judge reading order or whether names make sense), dark-mode plots (the text descriptions of the plots are done), text-resize / reduced-motion checks, a phone layout pass on a real phone.
 
