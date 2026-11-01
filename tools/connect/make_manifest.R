@@ -14,10 +14,13 @@ m <- jsonlite::fromJSON(file.path(out, "manifest.json"), simplifyVector = FALSE)
 need <- c("shiny", "bslib", "lme4", "clinfun", "kappaSize", "mvtnorm", "survival", "mirai")
 missing <- setdiff(need, names(m$packages))
 if (length(missing)) stop("manifest.json lacks packages the app uses: ", paste(missing, collapse = ", "))
-# Connect can install from CRAN or a mirror of it (what the CI runner installs from: the source reads "CRAN", "RSPM", "standard" ...);
-# it cannot install from GitHub or a local copy, so refuse those
+# Connect can install only from CRAN or a mirror of it: the source must say so ("CRAN", "RSPM") and the repository must be a URL. A
+# package from GitHub or a local copy, or one installed by pak as any::pkg (source "any", repository "RSPM"), cannot be downloaded.
 src <- vapply(m$packages, function(p) if (is.null(p$Source)) "none" else as.character(p$Source), "")
-bad <- names(src)[tolower(src) %in% c("github", "gitlab", "bitbucket", "git", "local", "url", "source", "none", "unknown")]
-if (length(bad)) stop("packages Connect could not install (source in brackets): ", paste0(bad, " [", src[bad], "]", collapse = ", "))
+repo <- vapply(m$packages, function(p) if (is.null(p$Repository)) "" else as.character(p$Repository), "")
+bad <- names(src)[!(src %in% c("CRAN", "RSPM", "Bioconductor") & grepl("^https?://", repo))]
+if (length(bad)) {
+  stop("packages Connect could not install (source, repository in brackets): ", paste0(bad, " [", src[bad], ", ", repo[bad], "]", collapse = ", "))
+}
 cat("package sources:", paste(names(table(vapply(m$packages, function(p) p$Source, ""))), table(vapply(m$packages, function(p) p$Source, "")), collapse = ", "), "\n")
 cat(sprintf("Wrote %s/manifest.json: %d packages, %d files\n", out, length(m$packages), length(m$files)))
