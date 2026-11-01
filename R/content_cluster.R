@@ -61,7 +61,7 @@ cluster_content <- list(
     title = "Cluster Survey Precision (WHO EPI-Style)",
     formula_latex = paste0(
       "$$n_{ssu} = \\frac{z^2 \\, p(1-p) \\, D}{\\epsilon_a^2}, \\quad ",
-      "D = 1 + (b-1)\\rho, \\quad n_{psu} = n_{ssu}/b$$"
+      "D = 1 + (b-1)\\rho, \\quad n_{psu} = n_{ssu}/b, \\quad b_{\\text{enrol}} = \\left\\lceil \\frac{b}{1-r} \\right\\rceil$$"
     ),
     explanation = paste(
       "Solves the full two-stage (or one-stage) cluster survey design in",
@@ -92,6 +92,16 @@ cluster_content <- list(
       "- **Total clusters (N, optional)** - the total number of clusters",
       "  in the source population, if known and not effectively",
       "  unlimited, for a finite-population correction.",
+      "- **Non-response r (optional)** - the fraction of the people selected",
+      "  in a cluster who will not give a usable answer. The number of",
+      "  clusters stays the same; each cluster selects b / (1 - r), rounded",
+      "  up, so that b are analyzable.",
+      "",
+      "The absolute precision (epsilon, or epsilon x p if relative) must be",
+      "smaller than p and than 1 - p, and a relative precision of 100% or more",
+      "is refused; a relative precision above 20%, and p below 10% with a",
+      "precision above p/4, give a warning. See \"When should I use absolute or",
+      "relative precision?\" under the inputs.",
       "",
       "**A package quirk worth knowing:** epiR provides two same-",
       "sounding functions here, `epi.ssclus1estb()` (\"one-stage\", every",

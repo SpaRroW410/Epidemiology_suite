@@ -36,7 +36,7 @@ fall strictly within (theta1, theta2)}
 list(n_total, achieved_power, inputs)
 }
 \description{
-Wraps PowerTOST::sampleN.TOST() on the \emph{log-transformed} scale
+PowerTOST's sampleN.TOST() (transcribed, calc_closed_forms_tost.R) on the \emph{log-transformed} scale
 (logscale = TRUE) -- the classic pharmacokinetic bioequivalence
 framing (comparing a test and reference formulation's AUC or Cmax via
 a ratio, not a raw difference), for a standard 2x2 crossover or a

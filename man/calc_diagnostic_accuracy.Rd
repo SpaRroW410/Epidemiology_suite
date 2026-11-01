@@ -10,7 +10,9 @@ calc_diagnostic_accuracy(
   prevalence,
   prec_sens = 0.05,
   prec_spec = 0.05,
-  conf_level = 0.95
+  conf_level = 0.95,
+  error = c("absolute", "relative"),
+  nonresponse = 0
 )
 }
 \arguments{
@@ -25,9 +27,16 @@ calc_diagnostic_accuracy(
 \item{prec_spec}{Desired precision (CI half-width) for specificity (0,1)}
 
 \item{conf_level}{Confidence level (0,1), e.g. 0.95}
+
+\item{error}{"absolute" (default: \code{prec_sens} and \code{prec_spec} are half-widths on the 0-1 scale) or "relative" (fractions of
+\code{sens} and \code{spec}, so the half-widths are prec_sens x sens and prec_spec x spec)}
+
+\item{nonresponse}{Expected fraction of those enrolled who are not analyzable (no reference-standard result, loss to
+follow-up), in [0, 1); the number to enrol is n / (1 - nonresponse), rounded up}
 }
 \value{
-list(n, n_sens, n_spec, binding, n_diseased, n_healthy, z, inputs)
+A named list of class \code{ss_result} with \code{n} (to analyze), \code{n_enrolled} (when \code{nonresponse} > 0), \code{n_sens}, \code{n_spec},
+\code{binding}, \code{n_diseased}, \code{n_healthy}, \code{z}, \code{prec_sens_absolute}, \code{prec_spec_absolute}, \code{precision_notes} and \code{inputs}.
 }
 \description{
 Buderer's method (Buderer 1996): sizes a diagnostic accuracy study to
@@ -38,6 +47,11 @@ subjects to the specificity estimate -- so the prevalence of the target
 condition determines how many \emph{total} subjects are needed to obtain
 enough of each. The larger of the two implied totals is returned, so
 both targets are met in the same study.
+}
+\details{
+The calculation is refused when an interval would pass 0 or 1 (half-width >= sens or >= 1 - sens, the same for spec)
+or a relative precision is 100\% or more; a relative precision above 20\%, and a value below 10\% or above 90\% with a half-width
+above one-fourth of its distance from 0 or 1, give a warning in \code{precision_notes}.
 }
 \examples{
 calc_diagnostic_accuracy(sens = 0.9, spec = 0.85, prevalence = 0.1, prec_sens = 0.05, 

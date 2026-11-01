@@ -79,42 +79,58 @@ calc_proportion_2s <- function(p1, p2, alpha = 0.05, power = 0.8,
 
 #' Sample size for a single proportion, precision-based (no reference value)
 #'
-#' Cochran's formula: estimates a proportion to within a desired absolute
-#' precision (margin of error), with no hypothesis test and no comparison
-#' group or reference value -- just "how many do I need to estimate my own
-#' prevalence within +/- d?". Optionally applies the finite population
-#' correction (FPC) when sampling from a population of known, limited size N
-#' (e.g. all students in one college) rather than an effectively unlimited
-#' community.
+#' Cochran's formula: estimates a proportion to within a desired precision (margin of error), with no hypothesis test and no
+#' comparison group or reference value -- just "how many do I need to estimate my own prevalence within +/- d?". The precision is
+#' absolute (d, on the 0-1 scale of p) or relative (epsilon, a fraction of p, so d = epsilon x p). Optionally applies the finite
+#' population correction (FPC) when sampling from a population of known, limited size N (e.g. all students in one college) rather
+#' than an effectively unlimited community, and inflates the result for non-response or loss to follow-up.
 #'
-#' @param p Expected proportion (0,1). Use 0.5 if unknown (most conservative).
-#' @param d Desired absolute precision / margin of error (0,1), e.g. 0.05
+#' The calculation is refused when the interval p +/- d would pass 0 or 1 (d >= p or d >= 1 - p) or a relative precision is 100% or
+#' more. A relative precision above 20%, and a proportion below 10% (or above 90%) with d above one-fourth of p (of 1 - p), give a
+#' warning in `precision_notes` (Pourhoseingholi et al. 2013 for the small-proportion rule).
+#'
+#' @param p Expected proportion (0,1). Use 0.5 if unknown (most conservative for absolute precision).
+#' @param d Desired precision: the absolute margin of error (e.g. 0.05 for +/- 5 percentage points), or with `error = "relative"`
+#'   the margin as a fraction of p (e.g. 0.1 for +/- 10% of p)
 #' @param conf_level Confidence level (0,1), e.g. 0.95
 #' @param N Optional finite population size (>= 1). NULL (default) = no
 #'   correction, i.e. an effectively infinite population.
-#' @return list(n, n_unadjusted, z, N, inputs)
+#' @param error "absolute" (default) or "relative"
+#' @param nonresponse Expected fraction not analyzable (non-response, refusal or loss to follow-up), in \[0, 1); the number to enrol
+#'   is n / (1 - nonresponse), rounded up
+#' @return A named list of class `ss_result` with `n` (to analyze), `n_enrolled` (when `nonresponse` > 0), `n_unadjusted` (before the
+#'   finite population correction), `d_absolute`, `epsilon_relative`, `z`, `N`, `precision_notes` (warnings) and `inputs`.
 #' @examples
 #' calc_proportion_precision(p = 0.5, d = 0.05, conf_level = 0.95)
+#' calc_proportion_precision(p = 0.2, d = 0.1, error = "relative", nonresponse = 0.1)
 #' @export
-calc_proportion_precision <- function(p, d, conf_level = 0.95, N = NULL) {
+calc_proportion_precision <- function(p, d, conf_level = 0.95, N = NULL, error = c("absolute", "relative"), nonresponse = 0) {
+  error <- match.arg(error)
   .validate_unit_interval(p, "p")
   .validate_unit_interval(conf_level, "conf_level")
-  if (!is.numeric(d) || length(d) != 1 || is.na(d) || d <= 0 || d >= 1) {
+  if (!is.numeric(d) || length(d) != 1 || is.na(d) || d <= 0 || (error == "absolute" && d >= 1)) {
     stop("d must be a single number strictly between 0 and 1.")
   }
   if (!is.null(N)) .validate_population(N)
+  .validate_nonresponse(nonresponse)
+  chk <- .precision_checks_proportion(p, d, error, "p")
 
   z <- stats::qnorm(1 - (1 - conf_level) / 2)
-  n0 <- (z^2 * p * (1 - p)) / d^2
+  n0 <- (z^2 * p * (1 - p)) / chk$d^2
   n_adj <- if (is.null(N)) n0 else n0 / (1 + (n0 - 1) / N)
+  n <- ceiling(n_adj)
 
-  new_ss_result(list(
-    n = ceiling(n_adj),
+  out <- list(n = n)
+  if (nonresponse > 0) out$n_enrolled <- .inflate_nonresponse(n, nonresponse)
+  new_ss_result(c(out, list(
     n_unadjusted = ceiling(n0),
+    d_absolute = chk$d,
+    epsilon_relative = chk$epsilon,
     z = z,
     N = N,
-    inputs = list(p = p, d = d, conf_level = conf_level, N = N)
-  ))
+    precision_notes = chk$notes,
+    inputs = list(p = p, d = d, error = error, conf_level = conf_level, N = N, nonresponse = nonresponse)
+  )))
 }
 
 #' Sample size for a Bonferroni-adjusted post-hoc pairwise comparison of

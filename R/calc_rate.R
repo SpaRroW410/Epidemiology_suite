@@ -21,16 +21,32 @@
 #' @param method One of "score", "vs" (variance-stabilizing), "exact", or
 #'   "wald". "exact" is recommended when the expected number of events is
 #'   small (< 5).
-#' @return list(n_events, person_time, achieved_conf_width, inputs)
+#' @param epsilon Relative precision instead of `conf_width`: the half-width of the interval as a fraction of `rate` (e.g. 0.2 for
+#'   +/- 20% of the rate), so `conf_width` = 2 x epsilon x rate. Give either `conf_width` or `epsilon`. 100% or more is refused, and
+#'   above 20% gives a warning in `precision_notes`.
+#' @param nonresponse Expected fraction of the planned person-time lost (loss to follow-up, withdrawal), in \[0, 1); the
+#'   person-time to plan is person_time / (1 - nonresponse)
+#' @return A named list of class `ss_result` with `n_events`, `person_time`, `person_time_planned` (when `nonresponse` > 0),
+#'   `achieved_conf_width`, `d_absolute` (half-width), `epsilon_relative`, `precision_notes` and `inputs`.
 #' @examples
 #' calc_rate_precision(rate = 2.5, conf_width = 2.243, conf_level = 0.95, method = "score")
+#' calc_rate_precision(rate = 2.5, epsilon = 0.2, nonresponse = 0.1)
 #' @export
-calc_rate_precision <- function(rate, conf_width, conf_level = 0.95,
-                                 method = c("score", "vs", "exact", "wald")) {
+calc_rate_precision <- function(rate, conf_width = NULL, conf_level = 0.95,
+                                 method = c("score", "vs", "exact", "wald"), epsilon = NULL, nonresponse = 0) {
   method <- match.arg(method)
   .validate_positive(rate, "rate")
+  if (is.null(conf_width) == is.null(epsilon)) stop("Give either conf_width (absolute) or epsilon (relative), not both.")
+  error <- if (is.null(epsilon)) "absolute" else "relative"
+  notes <- character()
+  if (error == "relative") {
+    .validate_positive(epsilon, "epsilon")
+    notes <- .prec_relative_checks(epsilon, "relative", "the rate")
+    conf_width <- 2 * epsilon * rate
+  }
   .validate_positive(conf_width, "conf_width")
   .validate_unit_interval(conf_level, "conf_level")
+  .validate_nonresponse(nonresponse)
   if (conf_width > 5 * rate) {
     stop("conf_width should not exceed 5 times rate (presize::prec_rate's own guidance).")
   }
@@ -41,13 +57,16 @@ calc_rate_precision <- function(rate, conf_width, conf_level = 0.95,
   achieved <- .cf_prec_rate(r = rate, x = n_events,
                                   conf.level = conf_level, method = method)
 
-  new_ss_result(list(
-    n_events = n_events,
-    person_time = n_events / rate,
+  out <- list(n_events = n_events, person_time = n_events / rate)
+  if (nonresponse > 0) out$person_time_planned <- out$person_time / (1 - nonresponse)
+  new_ss_result(c(out, list(
     achieved_conf_width = achieved$conf.width,
-    inputs = list(rate = rate, conf_width = conf_width,
-                  conf_level = conf_level, method = method)
-  ))
+    d_absolute = conf_width / 2,
+    epsilon_relative = conf_width / (2 * rate),
+    precision_notes = notes,
+    inputs = list(rate = rate, conf_width = conf_width, epsilon = epsilon, error = error,
+                  conf_level = conf_level, method = method, nonresponse = nonresponse)
+  )))
 }
 
 #' Sample size to compare two incidence rates (Poisson regression, single

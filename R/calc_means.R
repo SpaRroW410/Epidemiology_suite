@@ -175,14 +175,19 @@ calc_means_anova <- function(group_means, sd, alpha = 0.05, power = 0.8) {
 #' @param conf_level Confidence level (0,1)
 #' @param N Optional finite eligible-population size. NULL (default) =
 #'   effectively infinite population.
-#' @return list(n, N, inputs)
+#' @param nonresponse Expected fraction not analyzable (non-response, refusal or loss to follow-up), in \[0, 1); the number to enrol
+#'   is n / (1 - nonresponse), rounded up
+#' @details A relative precision of 100% or more is refused (the interval would reach 0). A relative precision above 20%, and an
+#'   absolute precision at least as large as the mean, give a warning in `precision_notes`.
+#' @return A named list of class `ss_result` with `n` (to analyze), `n_enrolled` (when `nonresponse` > 0), `d_absolute`,
+#'   `epsilon_relative`, `N`, `precision_notes` (warnings) and `inputs`.
 #' @examples
 #' calc_means_single_precision(mean = 1500 * 0.05, sd = 300 * 0.05, epsilon = 0.2, 
 #'     error = "relative", conf_level = 0.95, N = 20)
 #' @export
 calc_means_single_precision <- function(mean, sd, epsilon,
                                          error = c("relative", "absolute"),
-                                         conf_level = 0.95, N = NULL) {
+                                         conf_level = 0.95, N = NULL, nonresponse = 0) {
   error <- match.arg(error)
   .validate_number(mean, "mean")
   if (isTRUE(all.equal(mean, 0))) {
@@ -192,6 +197,8 @@ calc_means_single_precision <- function(mean, sd, epsilon,
   .validate_positive(epsilon, "epsilon")
   .validate_unit_interval(conf_level, "conf_level")
   if (!is.null(N)) .validate_population(N)
+  .validate_nonresponse(nonresponse)
+  chk <- .precision_checks_mean(mean, epsilon, error)
 
   n <- .cf_sssimpleestc(
     N = if (is.null(N)) NA else N,
@@ -199,12 +206,16 @@ calc_means_single_precision <- function(mean, sd, epsilon,
     conf.level = conf_level
   )
 
-  new_ss_result(list(
-    n = n,
+  out <- list(n = n)
+  if (nonresponse > 0) out$n_enrolled <- .inflate_nonresponse(n, nonresponse)
+  new_ss_result(c(out, list(
+    d_absolute = chk$d,
+    epsilon_relative = chk$epsilon,
     N = N,
+    precision_notes = chk$notes,
     inputs = list(mean = mean, sd = sd, epsilon = epsilon, error = error,
-                  conf_level = conf_level, N = N)
-  ))
+                  conf_level = conf_level, N = N, nonresponse = nonresponse)
+  )))
 }
 
 #' Sample size for two independent means with unequal group sizes

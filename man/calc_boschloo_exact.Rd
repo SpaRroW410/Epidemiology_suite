@@ -34,7 +34,7 @@ calc_boschloo_exact(
 list(n1, n2, n_total, achieved_power, inputs)
 }
 \description{
-Wraps Exact::power.exact.test(method = "boschloo") -- the same package
+Exact power of Boschloo's test (calc_closed_forms_exact.R, equal to Exact::power.exact.test(method = "boschloo")) -- the same
 and search strategy as calc_fisher_exact() above, just a different
 method argument. Boschloo's test is the classic "unconditional" exact
 test for two proportions (as opposed to Fisher's exact test, which

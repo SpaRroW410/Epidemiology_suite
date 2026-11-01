@@ -10,7 +10,8 @@ calc_means_single_precision(
   epsilon,
   error = c("relative", "absolute"),
   conf_level = 0.95,
-  N = NULL
+  N = NULL,
+  nonresponse = 0
 )
 }
 \arguments{
@@ -28,9 +29,13 @@ relative terms per \code{error}}
 
 \item{N}{Optional finite eligible-population size. NULL (default) =
 effectively infinite population.}
+
+\item{nonresponse}{Expected fraction not analyzable (non-response, refusal or loss to follow-up), in [0, 1); the number to enrol
+is n / (1 - nonresponse), rounded up}
 }
 \value{
-list(n, N, inputs)
+A named list of class \code{ss_result} with \code{n} (to analyze), \code{n_enrolled} (when \code{nonresponse} > 0), \code{d_absolute},
+\code{epsilon_relative}, \code{N}, \code{precision_notes} (warnings) and \code{inputs}.
 }
 \description{
 Wraps epiR::epi.sssimpleestc() rather than reimplementing the underlying
@@ -39,6 +44,10 @@ math (project convention). Note this formula is built around a
 non-zero mean -- appropriate for physical/clinical measurements that are
 inherently positive (BP, Hb, BMI, weight), not for values that can
 legitimately be zero or negative (e.g. a symmetric change score).
+}
+\details{
+A relative precision of 100\% or more is refused (the interval would reach 0). A relative precision above 20\%, and an
+absolute precision at least as large as the mean, give a warning in \code{precision_notes}.
 }
 \examples{
 calc_means_single_precision(mean = 1500 * 0.05, sd = 300 * 0.05, epsilon = 0.2, 

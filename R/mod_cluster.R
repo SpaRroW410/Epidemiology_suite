@@ -62,15 +62,19 @@ mod_cluster_ui <- function(id) {
         numericInput(ns("epsilon_survey"), "Desired precision (epsilon)",
                      value = 0.10, min = 0.0001, step = 0.01),
         selectInput(ns("error_survey"), "Precision expressed as",
-                    choices = c("Relative (fraction of p)" = "relative",
-                                "Absolute (same scale as p)" = "absolute")),
+                    choices = c("Relative (fraction of p, e.g. 0.10 = +/- 10% of p)" = "relative",
+                                "Absolute (same 0-1 scale as p, e.g. 0.05 = +/- 5 points)" = "absolute")),
         numericInput(ns("rho_survey"), "Intracluster correlation (rho)",
                      value = 0.20, min = 0, max = 0.999, step = 0.01),
         numericInput(ns("N_psu_survey"),
                      "Total number of clusters in the population (optional; leave blank if unlimited)",
                      value = NA, min = 1),
         numericInput(ns("conf_level_survey"), "Confidence level",
-                     value = 0.90, min = 0.5, max = 0.999, step = 0.01)
+                     value = 0.90, min = 0.5, max = 0.999, step = 0.01),
+        nonresponse_input(ns("nonresponse_survey"),
+                          "Expected non-response within clusters (fraction; 0 = none, 0.1 = 10%)"),
+        uiOutput(ns("precision_equiv_survey")),
+        precision_guidance_ui("cluster")
       ),
       conditionalPanel(
         condition = design_is("pps_optimal"),
@@ -153,6 +157,10 @@ mod_cluster_ui <- function(id) {
 
 mod_cluster_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    output$precision_equiv_survey <- renderUI({
+      precision_equivalents_ui(precision_equivalents_text(input$p_survey, input$epsilon_survey, input$error_survey,
+                                                          input$conf_level_survey, "proportion", "p"))
+    })
     result <- reactive({
       req(input$design)
 
@@ -184,7 +192,8 @@ mod_cluster_server <- function(id) {
           list(ok = TRUE, value = calc_cluster_survey_binary(
             b = input$b_survey, b_sd = b_sd, p = input$p_survey,
             epsilon = input$epsilon_survey, error = input$error_survey,
-            rho = input$rho_survey, N_psu = N_psu, conf_level = input$conf_level_survey
+            rho = input$rho_survey, N_psu = N_psu, conf_level = input$conf_level_survey,
+            nonresponse = .nonresponse_value(input$nonresponse_survey)
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -224,8 +233,18 @@ mod_cluster_server <- function(id) {
       } else if (input$design == "survey") {
         tagList(
           p(strong("Required number of clusters (PSUs): "), v$n_psu),
-          p(strong("Required total individuals (SSUs): "), v$n_ssu),
-          p(sprintf("Design effect = %.3f", v$deff))
+          p(strong("Required total individuals (SSUs, to analyze): "), v$n_ssu),
+          if (!is.null(v$b_enrolled)) {
+            p(strong(sprintf("To select, allowing for %s non-response: ", .prec_pct(v$inputs$nonresponse))),
+              sprintf("%s per cluster, %s in total", v$b_enrolled, v$n_ssu_enrolled),
+              span(class = "text-muted", sprintf(" (b / (1 - %s) = %s / %s, rounded up; the number of clusters is unchanged)",
+                                                 format(v$inputs$nonresponse, trim = TRUE), format(v$inputs$b, trim = TRUE),
+                                                 format(1 - v$inputs$nonresponse, trim = TRUE))))
+          },
+          p(sprintf("Design effect = %.3f", v$deff)),
+          p(sprintf("Precision (%s): +/- %s on the 0-1 scale = +/- %s of p.", v$inputs$error,
+                    .prec_fmt(v$d_absolute), .prec_pct(v$epsilon_relative))),
+          precision_notes_ui(v$precision_notes)
         )
       } else {
         tagList(

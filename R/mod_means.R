@@ -46,10 +46,13 @@ mod_means_ui <- function(id) {
         numericInput(ns("epsilon_precision"), "Desired precision (epsilon)",
                      value = 0.20, min = 0.0001),
         selectInput(ns("error_precision"), "Precision expressed as",
-                    choices = c("Relative (fraction of the mean)" = "relative",
+                    choices = c("Relative (fraction of the mean, e.g. 0.10 = +/- 10%)" = "relative",
                                 "Absolute (same units as the mean)" = "absolute")),
         numericInput(ns("conf_level_precision"), "Confidence level",
-                     value = 0.95, min = 0.5, max = 0.999, step = 0.01)
+                     value = 0.95, min = 0.5, max = 0.999, step = 0.01),
+        nonresponse_input(ns("nonresponse_precision")),
+        uiOutput(ns("precision_equiv")),
+        precision_guidance_ui("mean")
       ),
       conditionalPanel(
         condition = design_is("single"),
@@ -248,6 +251,10 @@ mod_means_ui <- function(id) {
 
 mod_means_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    output$precision_equiv <- renderUI({
+      precision_equivalents_ui(precision_equivalents_text(input$mean_precision, input$epsilon_precision, input$error_precision,
+                                                          input$conf_level_precision, "mean"))
+    })
     output$group_means_ui <- renderUI({
       req(input$k)
       k <- as.integer(input$k)
@@ -278,13 +285,13 @@ mod_means_server <- function(id) {
       if (input$design == "single_precision") {
         req(input$mean_precision, input$sd_precision, input$epsilon_precision,
             input$error_precision, input$conf_level_precision)
-        N <- input$N_precision
-        if (is.null(N) || is.na(N)) N <- NULL
+        N <- .input_or_null(input$N_precision)
         return(tryCatch(
           list(ok = TRUE, value = calc_means_single_precision(
             mean = input$mean_precision, sd = input$sd_precision,
             epsilon = input$epsilon_precision, error = input$error_precision,
-            conf_level = input$conf_level_precision, N = N
+            conf_level = input$conf_level_precision, N = N,
+            nonresponse = .nonresponse_value(input$nonresponse_precision)
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         ))
@@ -404,8 +411,12 @@ mod_means_server <- function(id) {
       v <- res$value
       if (input$design == "single_precision") {
         tagList(
-          p(strong("Required sample size: "), v$n),
-          if (!is.null(v$N)) p(sprintf("(finite population correction applied, N = %s)", v$N))
+          p(strong("Required sample size (to analyze): "), v$n),
+          if (!is.null(v$N)) p(sprintf("(finite population correction applied, N = %s)", v$N)),
+          nonresponse_result_ui(v$n_enrolled, v$n, v$inputs$nonresponse),
+          p(sprintf("Precision (%s): +/- %s in the units of the mean = +/- %s of the mean.", v$inputs$error,
+                    .prec_fmt(v$d_absolute), .prec_pct(v$epsilon_relative))),
+          precision_notes_ui(v$precision_notes)
         )
       } else if (input$design == "two_sample") {
         tagList(
