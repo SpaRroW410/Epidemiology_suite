@@ -7,9 +7,11 @@ incidence rate estimate}
 \usage{
 calc_rate_precision(
   rate,
-  conf_width,
+  conf_width = NULL,
   conf_level = 0.95,
-  method = c("score", "vs", "exact", "wald")
+  method = c("score", "vs", "exact", "wald"),
+  epsilon = NULL,
+  nonresponse = 0
 )
 }
 \arguments{
@@ -25,9 +27,17 @@ exceed 5 times \code{rate}.}
 \item{method}{One of "score", "vs" (variance-stabilizing), "exact", or
 "wald". "exact" is recommended when the expected number of events is
 small (< 5).}
+
+\item{epsilon}{Relative precision instead of \code{conf_width}: the half-width of the interval as a fraction of \code{rate} (e.g. 0.2 for
++/- 20\% of the rate), so \code{conf_width} = 2 x epsilon x rate. Give either \code{conf_width} or \code{epsilon}. 100\% or more is refused, and
+above 20\% gives a warning in \code{precision_notes}.}
+
+\item{nonresponse}{Expected fraction of the planned person-time lost (loss to follow-up, withdrawal), in [0, 1); the
+person-time to plan is person_time / (1 - nonresponse)}
 }
 \value{
-list(n_events, person_time, achieved_conf_width, inputs)
+A named list of class \code{ss_result} with \code{n_events}, \code{person_time}, \code{person_time_planned} (when \code{nonresponse} > 0),
+\code{achieved_conf_width}, \code{d_absolute} (half-width), \code{epsilon_relative}, \code{precision_notes} and \code{inputs}.
 }
 \description{
 Solves for the number of events needed to achieve a target confidence
@@ -38,4 +48,5 @@ conf.width.
 }
 \examples{
 calc_rate_precision(rate = 2.5, conf_width = 2.243, conf_level = 0.95, method = "score")
+calc_rate_precision(rate = 2.5, epsilon = 0.2, nonresponse = 0.1)
 }

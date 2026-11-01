@@ -4,30 +4,48 @@
 \alias{calc_proportion_precision}
 \title{Sample size for a single proportion, precision-based (no reference value)}
 \usage{
-calc_proportion_precision(p, d, conf_level = 0.95, N = NULL)
+calc_proportion_precision(
+  p,
+  d,
+  conf_level = 0.95,
+  N = NULL,
+  error = c("absolute", "relative"),
+  nonresponse = 0
+)
 }
 \arguments{
-\item{p}{Expected proportion (0,1). Use 0.5 if unknown (most conservative).}
+\item{p}{Expected proportion (0,1). Use 0.5 if unknown (most conservative for absolute precision).}
 
-\item{d}{Desired absolute precision / margin of error (0,1), e.g. 0.05}
+\item{d}{Desired precision: the absolute margin of error (e.g. 0.05 for +/- 5 percentage points), or with \code{error = "relative"}
+the margin as a fraction of p (e.g. 0.1 for +/- 10\% of p)}
 
 \item{conf_level}{Confidence level (0,1), e.g. 0.95}
 
 \item{N}{Optional finite population size (>= 1). NULL (default) = no
 correction, i.e. an effectively infinite population.}
+
+\item{error}{"absolute" (default) or "relative"}
+
+\item{nonresponse}{Expected fraction not analyzable (non-response, refusal or loss to follow-up), in [0, 1); the number to enrol
+is n / (1 - nonresponse), rounded up}
 }
 \value{
-list(n, n_unadjusted, z, N, inputs)
+A named list of class \code{ss_result} with \code{n} (to analyze), \code{n_enrolled} (when \code{nonresponse} > 0), \code{n_unadjusted} (before the
+finite population correction), \code{d_absolute}, \code{epsilon_relative}, \code{z}, \code{N}, \code{precision_notes} (warnings) and \code{inputs}.
 }
 \description{
-Cochran's formula: estimates a proportion to within a desired absolute
-precision (margin of error), with no hypothesis test and no comparison
-group or reference value -- just "how many do I need to estimate my own
-prevalence within +/- d?". Optionally applies the finite population
-correction (FPC) when sampling from a population of known, limited size N
-(e.g. all students in one college) rather than an effectively unlimited
-community.
+Cochran's formula: estimates a proportion to within a desired precision (margin of error), with no hypothesis test and no
+comparison group or reference value -- just "how many do I need to estimate my own prevalence within +/- d?". The precision is
+absolute (d, on the 0-1 scale of p) or relative (epsilon, a fraction of p, so d = epsilon x p). Optionally applies the finite
+population correction (FPC) when sampling from a population of known, limited size N (e.g. all students in one college) rather
+than an effectively unlimited community, and inflates the result for non-response or loss to follow-up.
+}
+\details{
+The calculation is refused when the interval p +/- d would pass 0 or 1 (d >= p or d >= 1 - p) or a relative precision is 100\% or
+more. A relative precision above 20\%, and a proportion below 10\% (or above 90\%) with d above one-fourth of p (of 1 - p), give a
+warning in \code{precision_notes} (Pourhoseingholi et al. 2013 for the small-proportion rule).
 }
 \examples{
 calc_proportion_precision(p = 0.5, d = 0.05, conf_level = 0.95)
+calc_proportion_precision(p = 0.2, d = 0.1, error = "relative", nonresponse = 0.1)
 }

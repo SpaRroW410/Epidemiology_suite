@@ -36,12 +36,26 @@ mod_proportion_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("precision"),
-        numericInput(ns("p_precision"), "p (expected proportion; use 0.5 if unknown)",
+        numericInput(ns("p_precision"), "p (expected proportion; use 0.5 if unknown and the precision is absolute)",
                      value = 0.5, min = 0, max = 1, step = 0.01),
-        numericInput(ns("d_precision"), "d (desired precision / margin of error)",
-                     value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        precision_type_input(ns("error_precision"),
+                             absolute = "Absolute (+/- d on the 0-1 scale of p)",
+                             relative = "Relative (+/- a fraction of p)"),
+        conditionalPanel(
+          condition = sprintf("input['%s'] != 'relative'", ns("error_precision")),
+          numericInput(ns("d_precision"), "d (absolute margin of error, e.g. 0.05 = +/- 5 percentage points)",
+                       value = 0.05, min = 0.001, max = 0.5, step = 0.01)
+        ),
+        conditionalPanel(
+          condition = sprintf("input['%s'] == 'relative'", ns("error_precision")),
+          numericInput(ns("eps_precision"), "Relative margin of error (fraction of p, e.g. 0.10 = +/- 10% of p)",
+                       value = 0.10, min = 0.001, max = 0.99, step = 0.01)
+        ),
         numericInput(ns("conf_level"), "Confidence level",
-                     value = 0.95, min = 0.5, max = 0.999, step = 0.01)
+                     value = 0.95, min = 0.5, max = 0.999, step = 0.01),
+        nonresponse_input(ns("nonresponse_precision")),
+        uiOutput(ns("precision_equiv")),
+        precision_guidance_ui("proportion")
       ),
       conditionalPanel(
         condition = design_is("single"),
@@ -140,20 +154,27 @@ mod_proportion_ui <- function(id) {
 
 mod_proportion_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    precision_error <- reactive(if (identical(input$error_precision, "relative")) "relative" else "absolute")
+    precision_value <- reactive(if (precision_error() == "relative") input$eps_precision else input$d_precision)
+    output$precision_equiv <- renderUI({
+      precision_equivalents_ui(precision_equivalents_text(input$p_precision, precision_value(), precision_error(),
+                                                          input$conf_level, "proportion", "p"))
+    })
+
     result <- reactive({
       req(input$design)
 
       if (input$design == "precision") {
-        req(input$p_precision, input$d_precision, input$conf_level)
+        req(input$p_precision, precision_value(), input$conf_level)
         # N_precision is optional: numericInput(value = NA) renders an empty
         # field, which Shiny reports as NULL (untouched) or NA (cleared) --
         # either means "no finite population correction".
-        N <- input$N_precision
-        if (is.null(N) || is.na(N)) N <- NULL
+        N <- .input_or_null(input$N_precision)
         tryCatch(
           list(ok = TRUE, value = calc_proportion_precision(
-            p = input$p_precision, d = input$d_precision,
-            conf_level = input$conf_level, N = N
+            p = input$p_precision, d = precision_value(),
+            conf_level = input$conf_level, N = N, error = precision_error(),
+            nonresponse = .nonresponse_value(input$nonresponse_precision)
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -198,12 +219,15 @@ mod_proportion_server <- function(id) {
       v <- res$value
       if (input$design == "precision") {
         tagList(
-          p(strong("Required sample size: "), v$n),
+          p(strong("Required sample size (to analyze): "), v$n),
           if (!is.null(v$N)) {
             p(sprintf("(before finite population correction: %d, for population N = %s)",
                       v$n_unadjusted, v$N))
           },
-          p(sprintf("Z = %.4f", v$z))
+          nonresponse_result_ui(v$n_enrolled, v$n, v$inputs$nonresponse),
+          p(sprintf("Precision (%s): +/- %s on the 0-1 scale = +/- %s of p. Z = %.4f", v$inputs$error,
+                    .prec_fmt(v$d_absolute), .prec_pct(v$epsilon_relative), v$z)),
+          precision_notes_ui(v$precision_notes)
         )
       } else if (input$design == "single") {
         tagList(
@@ -261,18 +285,19 @@ mod_proportion_server <- function(id) {
       } else if (input$design == "precision") {
         # Precision-based: there is no power, so the two curves are n against
         # the key assumption (p) and against the precision target (d).
-        req(input$p_precision, input$d_precision, input$conf_level)
-        N <- input$N_precision
-        if (is.null(N) || is.na(N)) N <- NULL
+        req(input$p_precision, precision_value(), input$conf_level)
+        N <- .input_or_null(input$N_precision)
+        rel <- precision_error() == "relative"
         list(
           calc_fn = calc_proportion_precision,
-          args = list(p = input$p_precision, d = input$d_precision, conf_level = input$conf_level, N = N),
+          args = list(p = input$p_precision, d = precision_value(), conf_level = input$conf_level, N = N,
+                      error = precision_error()),
           effect = list(param = "p", values = curve_range_proportion(),
                       label = "p (expected proportion)",
                       title = "Required n vs. expected proportion"),
-          power = list(param = "d", values = curve_range_multiplicative(input$d_precision, 0.25, 2),
-                      label = "d (desired margin of error)",
-                      title = "Required n vs. precision (margin of error d)")
+          power = list(param = "d", values = curve_range_multiplicative(precision_value(), 0.25, 2),
+                      label = if (rel) "Relative margin of error (fraction of p)" else "d (desired margin of error)",
+                      title = if (rel) "Required n vs. relative precision" else "Required n vs. precision (margin of error d)")
         )
       } else {
         NULL

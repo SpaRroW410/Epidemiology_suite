@@ -1,3 +1,25 @@
+# epidemiologysuite (development version)
+
+## Absolute and relative precision, non-response
+
+* The five precision-based calculators (single proportion, single mean, cluster survey of a proportion, incidence rate, diagnostic
+  accuracy) take the precision as **absolute** (+/- d on the scale of the estimate) or **relative** (+/- a fraction of it, d = epsilon x
+  estimate). Single proportion, incidence rate (`epsilon =`) and diagnostic accuracy (`error = "relative"`) gain the relative form; means
+  and the cluster survey already had it.
+* **Refused:** a precision whose interval would pass 0 or 1 (d >= p or d >= 1 - p for a proportion, sensitivity or specificity) and a
+  relative precision of 100% or more.
+* **Warned, not refused:** a relative precision above 20% (a common rule of thumb; no published source checked, and the text says so); a
+  proportion below 10% with d above one-fourth of it (Pourhoseingholi, Vahedi & Rahimzadeh, Gastroenterol Hepatol Bed Bench
+  2013;6:14-17), applied by the app to 1 - p above 90%; for a mean, an absolute precision as large as the mean. The warnings are in the
+  result's `precision_notes`.
+* **Non-response / loss to follow-up** (`nonresponse =`): the number to enrol is n / (1 - r), rounded up (`n_enrolled`); for the cluster
+  survey each cluster selects b / (1 - r) and the number of clusters is unchanged; for a rate the person-time to plan is divided by
+  1 - r.
+* Each calculator shows its precision both ways under the inputs and has a "When should I use absolute or relative precision?" panel.
+  The protocol paragraph, CSV and JSON state the precision type and the inflation.
+* Verified against Pourhoseingholi et al.'s Table 1 (8 of 9 cells; the ninth, p = 0.05 with d = 0.1, is now refused) and against
+  `epiR::epi.sssimpleestb()` for relative and absolute precision.
+
 # epidemiologysuite 1.0.0
 
 First release (tag `v1.0.0`). The package was called `epidemiologicasuite` until 30 October 2026, when it followed the renaming of the

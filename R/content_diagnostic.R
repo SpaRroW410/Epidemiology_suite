@@ -17,7 +17,7 @@ diagnostic_content <- list(
     formula_latex = paste0(
       "$$n_{Sn} = \\frac{Z_{1-\\alpha/2}^2 \\, Sn(1-Sn)}{W_{Sn}^2 \\times P}$$",
       "$$n_{Sp} = \\frac{Z_{1-\\alpha/2}^2 \\, Sp(1-Sp)}{W_{Sp}^2 \\times (1-P)}$$",
-      "$$N = \\max(n_{Sn},\\, n_{Sp})$$"
+      "$$N = \\max(n_{Sn},\\, n_{Sp}), \\qquad W = \\epsilon \\times Sn \\text{ (or } Sp\\text{) if relative}, \\qquad N_{\\text{enrol}} = \\left\\lceil \\frac{N}{1-r} \\right\\rceil$$"
     ),
     explanation = paste(
       "Estimating a diagnostic test's sensitivity and specificity is",
@@ -38,8 +38,15 @@ diagnostic_content <- list(
       "  half-width) for sensitivity and specificity respectively, e.g.",
       "  0.05 for a result reported as \"sensitivity +/- 5 percentage",
       "  points\". These can be set equal, or looser/tighter for whichever",
-      "  metric matters more to your study.",
+      "  metric matters more to your study. As a **relative** precision they",
+      "  are fractions of Sn and Sp (0.05 = +/- 5% of the value). An absolute",
+      "  half-width must be smaller than the value and than 1 minus the value",
+      "  (Sn = 0.95 with +/- 0.05 would reach 1): the calculator refuses it. A",
+      "  relative precision above 20% gives a warning, 100% or more is refused.",
       "- **Confidence level** - typically 0.95 (95%), giving Z = 1.96.",
+      "- **Non-response / loss r (optional)** - the fraction of those enrolled",
+      "  expected to have no usable index-test or reference-standard result;",
+      "  the number to enrol is N / (1 - r), rounded up.",
       "",
       "n_Sn and n_Sp are each the *total* sample size (not just the",
       "diseased or healthy subgroup) needed to hit that metric's precision",

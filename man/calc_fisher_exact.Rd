@@ -33,7 +33,7 @@ calc_fisher_exact(
 list(n1, n2, n_total, achieved_power, inputs)
 }
 \description{
-Wraps Exact::power.exact.test(method = "fisher") -- searches n1 upward
+Exact power of Fisher's test (calc_closed_forms_exact.R, equal to Exact::power.exact.test(method = "fisher")) -- searches n1 upward
 (with n2 = ceiling(n1 * ratio)) for the smallest n1 where achieved power
 is at or above the target and stays there for a couple more steps.
 }

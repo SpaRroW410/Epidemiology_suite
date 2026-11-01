@@ -6,7 +6,8 @@ rate_content <- list(
   precision = list(
     title = "Incidence Rate Estimation, Precision-Based",
     formula_latex = paste0(
-      "$$\\text{time} = x / r \\quad \\text{(person-time needed to accumulate } x \\text{ events)}$$"
+      "$$\\text{time} = x / r \\quad \\text{(person-time needed to accumulate } x \\text{ events)}, \\quad ",
+      "\\text{width} = 2\\epsilon r \\;\\text{(relative)}, \\quad \\text{time}_{\\text{plan}} = \\frac{\\text{time}}{1 - l}$$"
     ),
     explanation = paste(
       "This calculator finds the number of events (and the corresponding",
@@ -17,7 +18,14 @@ rate_content <- list(
       "- **rate** - the expected rate (events per unit person-time, e.g.",
       "  per person-year).",
       "- **conf_width** - the desired full width of the confidence interval,",
-      "  in the same units as rate; should not exceed 5x the rate.",
+      "  in the same units as rate; should not exceed 5x the rate. Or, as a",
+      "  **relative** precision, epsilon: the interval is +/- epsilon x rate,",
+      "  i.e. a width of 2 x epsilon x rate (100% or more is refused, above 20%",
+      "  gives a warning; see \"When should I use absolute or relative",
+      "  precision?\" under the inputs).",
+      "- **Loss to follow-up l (optional)** - the fraction of the planned",
+      "  person-time expected to be lost; the person-time to plan is the",
+      "  required person-time / (1 - l).",
       "- **conf_level** - the confidence level, typically 0.95.",
       "- **method** - \"exact\" is recommended when you expect fewer than 5",
       "  events; \"score\" is a good general-purpose default otherwise.",
@@ -35,6 +43,10 @@ rate_content <- list(
       "calculator returns 21 events needed (rounding presize's own 20.005",
       "up), requiring about 8.4 units of person-time -- matching presize's",
       "own reported figures for this rate/width combination.",
+      "",
+      "As a relative precision, the same rate within +/- 20% (a width of",
+      "1.0) needs 97 events and 38.8 units of person-time; with 10% loss to",
+      "follow-up, plan 38.8 / 0.9 = 43.1.",
       sep = "\n"
     ),
     citation = paste(

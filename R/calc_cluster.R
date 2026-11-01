@@ -138,14 +138,21 @@ calc_cluster_deff_variable <- function(n_base, icc, cluster_size, cv) {
 #'   population, for a finite-population correction (NULL = effectively
 #'   infinite, the usual case for a large community/region)
 #' @param conf_level Confidence level (0,1)
-#' @return list(n_psu, n_ssu, deff, inputs)
+#' @param nonresponse Expected fraction of the individuals selected in each cluster who are not analyzable (non-response,
+#'   refusal), in \[0, 1). The number of clusters is unchanged; each cluster selects b / (1 - nonresponse) individuals, rounded up.
+#' @details The calculation is refused when the interval p +/- d would pass 0 or 1 (d >= p or d >= 1 - p, d = epsilon x p for a
+#'   relative precision) or a relative precision is 100% or more; a relative precision above 20%, and a proportion below 10% (above
+#'   90%) with d above one-fourth of p (of 1 - p), give a warning in `precision_notes`.
+#' @return A named list of class `ss_result` with `n_psu` (clusters), `n_ssu` (individuals to analyze), `deff`, and when
+#'   `nonresponse` > 0 `b_enrolled` (individuals to select per cluster) and `n_ssu_enrolled` (n_psu x b_enrolled), then
+#'   `d_absolute`, `epsilon_relative`, `precision_notes` and `inputs`.
 #' @examples
 #' calc_cluster_survey_binary(b = 75, p = 0.46, epsilon = 0.1, error = "relative", 
 #'     rho = 0.2, conf_level = 0.9)
 #' @export
 calc_cluster_survey_binary <- function(b, b_sd = NULL, p, epsilon,
                                         error = c("relative", "absolute"),
-                                        rho, N_psu = NULL, conf_level = 0.95) {
+                                        rho, N_psu = NULL, conf_level = 0.95, nonresponse = 0) {
   error <- match.arg(error)
   .validate_positive(b, "b")
   if (!is.null(b_sd)) .validate_positive(b_sd, "b_sd")
@@ -156,6 +163,8 @@ calc_cluster_survey_binary <- function(b, b_sd = NULL, p, epsilon,
   }
   if (!is.null(N_psu)) .validate_population(N_psu, "N_psu")
   .validate_unit_interval(conf_level, "conf_level")
+  .validate_nonresponse(nonresponse)
+  chk <- .precision_checks_proportion(p, epsilon, error, "p")
 
   b_arg <- if (is.null(b_sd)) b else c(b, b_sd)
 
@@ -165,13 +174,18 @@ calc_cluster_survey_binary <- function(b, b_sd = NULL, p, epsilon,
     conf.level = conf_level
   )
 
-  new_ss_result(list(
-    n_psu = fit$n.psu,
-    n_ssu = fit$n.ssu,
-    deff = fit$DEF,
+  out <- list(n_psu = fit$n.psu, n_ssu = fit$n.ssu, deff = fit$DEF)
+  if (nonresponse > 0) {
+    out$b_enrolled <- .inflate_nonresponse(b, nonresponse)
+    out$n_ssu_enrolled <- fit$n.psu * out$b_enrolled
+  }
+  new_ss_result(c(out, list(
+    d_absolute = chk$d,
+    epsilon_relative = chk$epsilon,
+    precision_notes = chk$notes,
     inputs = list(b = b, b_sd = b_sd, p = p, epsilon = epsilon, error = error,
-                  rho = rho, N_psu = N_psu, conf_level = conf_level)
-  ))
+                  rho = rho, N_psu = N_psu, conf_level = conf_level, nonresponse = nonresponse)
+  )))
 }
 
 #' Optimal two-stage (PPS) cluster sample allocation: PSUs and take-b

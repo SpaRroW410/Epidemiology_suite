@@ -275,6 +275,42 @@ test_that("Attrition and Non-response: 200 analyzable with 10/15/20% losses need
   expect_equal(ui_output_errors(app), 0)
 })
 
+test_that("precision calculators: relative precision, the hard stop, the 20% warning and non-response inflation", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Proportions")
+  expect_match(ui_output_text(app, "proportion-result"), "Required sample size \\(to analyze\\): 385")
+  expect_match(ui_output_text(app, "proportion-precision_equiv"), "relative \\+/- 10% of p")
+  app$set_inputs(`proportion-p_precision` = 0.03)
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "proportion-result"), "would reach below 0")
+  app$set_inputs(`proportion-p_precision` = 0.2, `proportion-error_precision` = "relative", `proportion-eps_precision` = 0.1,
+                 `proportion-nonresponse_precision` = 0.1)
+  app$wait_for_idle(800, timeout = 60000)
+  st <- ui_output_text(app, "proportion-result")
+  expect_match(st, ": 1537")
+  expect_match(st, "non-response / loss to follow-up: 1708")
+  app$set_inputs(`proportion-eps_precision` = 0.3)
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "proportion-result"), "above 20%")
+
+  ui_open_module(app, "Incidence Rate")
+  app$set_inputs(`rate-error_rate` = "relative", `rate-epsilon_rate` = 0.2, `rate-nonresponse_rate` = 0.1)
+  app$wait_for_idle(800, timeout = 60000)
+  st <- ui_output_text(app, "rate-result")
+  expect_match(st, "Required number of events: 97")
+  expect_match(st, "43.11")
+
+  ui_open_module(app, "Diagnostic Accuracy")
+  app$set_inputs(`diagnostic-sens` = 0.95)
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "diagnostic-result"), "1 - sensitivity")
+  app$set_inputs(`diagnostic-sens` = 0.9, `diagnostic-nonresponse_precision` = 0.1)
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "diagnostic-result"), "non-response / loss to follow-up")
+  expect_equal(ui_output_errors(app), 0)
+})
+
 test_that("Randomization List: the same seed gives the same list; blocks balance; stratified lists per site", {
   skip_if_no_ui()
   app <- ui_driver()

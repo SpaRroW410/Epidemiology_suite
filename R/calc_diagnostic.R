@@ -19,42 +19,60 @@
 #' @param prec_sens Desired precision (CI half-width) for sensitivity (0,1)
 #' @param prec_spec Desired precision (CI half-width) for specificity (0,1)
 #' @param conf_level Confidence level (0,1), e.g. 0.95
-#' @return list(n, n_sens, n_spec, binding, n_diseased, n_healthy, z, inputs)
+#' @param error "absolute" (default: `prec_sens` and `prec_spec` are half-widths on the 0-1 scale) or "relative" (fractions of
+#'   `sens` and `spec`, so the half-widths are prec_sens x sens and prec_spec x spec)
+#' @param nonresponse Expected fraction of those enrolled who are not analyzable (no reference-standard result, loss to
+#'   follow-up), in \[0, 1); the number to enrol is n / (1 - nonresponse), rounded up
+#' @details The calculation is refused when an interval would pass 0 or 1 (half-width >= sens or >= 1 - sens, the same for spec)
+#'   or a relative precision is 100% or more; a relative precision above 20%, and a value below 10% or above 90% with a half-width
+#'   above one-fourth of its distance from 0 or 1, give a warning in `precision_notes`.
+#' @return A named list of class `ss_result` with `n` (to analyze), `n_enrolled` (when `nonresponse` > 0), `n_sens`, `n_spec`,
+#'   `binding`, `n_diseased`, `n_healthy`, `z`, `prec_sens_absolute`, `prec_spec_absolute`, `precision_notes` and `inputs`.
 #' @examples
 #' calc_diagnostic_accuracy(sens = 0.9, spec = 0.85, prevalence = 0.1, prec_sens = 0.05, 
 #'     prec_spec = 0.05, conf_level = 0.95)
 #' @export
 calc_diagnostic_accuracy <- function(sens, spec, prevalence,
                                       prec_sens = 0.05, prec_spec = 0.05,
-                                      conf_level = 0.95) {
+                                      conf_level = 0.95, error = c("absolute", "relative"), nonresponse = 0) {
+  error <- match.arg(error)
   .validate_unit_interval(sens, "sens")
   .validate_unit_interval(spec, "spec")
   .validate_unit_interval(prevalence, "prevalence")
   .validate_unit_interval(prec_sens, "prec_sens")
   .validate_unit_interval(prec_spec, "prec_spec")
   .validate_unit_interval(conf_level, "conf_level")
+  .validate_nonresponse(nonresponse)
+  chk_sens <- .precision_checks_proportion(sens, prec_sens, error, "sensitivity")
+  chk_spec <- .precision_checks_proportion(spec, prec_spec, error, "specificity")
+  w_sens <- chk_sens$d
+  w_spec <- chk_spec$d
 
   z <- stats::qnorm(1 - (1 - conf_level) / 2)
-  n_sens <- (z^2 * sens * (1 - sens)) / (prec_sens^2 * prevalence)
-  n_spec <- (z^2 * spec * (1 - spec)) / (prec_spec^2 * (1 - prevalence))
+  n_sens <- (z^2 * sens * (1 - sens)) / (w_sens^2 * prevalence)
+  n_spec <- (z^2 * spec * (1 - spec)) / (w_spec^2 * (1 - prevalence))
 
   n_sens_ceil <- ceiling(n_sens)
   n_spec_ceil <- ceiling(n_spec)
   n <- max(n_sens_ceil, n_spec_ceil)
   binding <- if (n_sens_ceil >= n_spec_ceil) "sensitivity" else "specificity"
 
-  new_ss_result(list(
-    n = n,
+  out <- list(n = n)
+  if (nonresponse > 0) out$n_enrolled <- .inflate_nonresponse(n, nonresponse)
+  new_ss_result(c(out, list(
     n_sens = n_sens_ceil,
     n_spec = n_spec_ceil,
     binding = binding,
     n_diseased = ceiling(n * prevalence),
     n_healthy = ceiling(n * (1 - prevalence)),
     z = z,
+    prec_sens_absolute = w_sens,
+    prec_spec_absolute = w_spec,
+    precision_notes = c(chk_sens$notes, chk_spec$notes),
     inputs = list(sens = sens, spec = spec, prevalence = prevalence,
-                  prec_sens = prec_sens, prec_spec = prec_spec,
-                  conf_level = conf_level)
-  ))
+                  prec_sens = prec_sens, prec_spec = prec_spec, error = error,
+                  conf_level = conf_level, nonresponse = nonresponse)
+  )))
 }
 
 # Z critical value for a hypothesis test, alpha split per alternative -- used

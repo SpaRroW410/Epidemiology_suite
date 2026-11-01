@@ -229,7 +229,8 @@ means_content <- list(
     title = "Single Mean, Precision-Based (No Reference Value)",
     formula_latex = paste0(
       "$$V^2 = \\sigma^2/\\bar{x}^2, \\quad ",
-      "n = \\frac{Z_{1-\\alpha/2}^2 \\, V^2}{Z_{1-\\alpha/2}^2 \\, V^2 / N_\\infty + \\epsilon_r^2}$$"
+      "n = \\frac{Z_{1-\\alpha/2}^2 \\, V^2}{Z_{1-\\alpha/2}^2 \\, V^2 / N_\\infty + \\epsilon_r^2}, \\quad ",
+      "\\epsilon_r = \\epsilon / \\bar{x} \\text{ (absolute)}, \\quad n_{\\text{enrol}} = \\left\\lceil \\frac{n}{1-r} \\right\\rceil$$"
     ),
     explanation = paste(
       "This calculator finds the sample size needed to estimate a mean to a",
@@ -249,6 +250,13 @@ means_content <- list(
       "- **N** - optional finite population size; leave blank for an",
       "  effectively infinite population (a finite population correction is",
       "  applied automatically when supplied).",
+      "- **Non-response / loss to follow-up r** - optional; the number to enrol",
+      "  is n / (1 - r), rounded up.",
+      "",
+      "A relative precision of 100% or more is refused (the interval would reach",
+      "0); above 20%, and an absolute precision as large as the mean, give a",
+      "warning. See \"When should I use absolute or relative precision?\" under",
+      "the inputs.",
       sep = "\n"
     ),
     worked_example = paste(
