@@ -253,14 +253,14 @@ free_text_rules <- list(
     list(pattern = "time to|survival|hazard|kaplan|log.?rank|\\bcox\\b",              option_index = 4, confidence = "High"),
     list(pattern = "per person|person.?(years|time|days)|incidence rate|rate ratio",   option_index = 3, confidence = "High"),
     list(pattern = "ordinal|likert|\\bgrade\\b|\\bstage\\b",                          option_index = 5, confidence = "High"),
-    list(pattern = "\\bmean\\b|average|continuous|blood pressure|\\bbp\\b|haemoglobin|hemoglobin|\\bhb\\b|\\bbmi\\b|weight|\\bscore\\b|concentration|\\blevels?\\b|difference in",
+    list(pattern = "\\bmean\\b|median|interquartile|\\biqr\\b|average|continuous|blood pressure|\\bbp\\b|haemoglobin|hemoglobin|\\bhb\\b|\\bbmi\\b|weight|\\bscore\\b|concentration|\\blevels?\\b|difference in",
          option_index = 2, confidence = "Medium"),
     list(pattern = "relative risk|risk ratio|\\brr\\b|incidence of|risk of|developed|occurrence|cumulative incidence|binary|proportion",
          option_index = 1, confidence = "Medium")
   ),
 
   cc_exposure_type = list(
-    list(pattern = "\\bmean\\b|average|continuous|concentration|\\bserum\\b|\\blevels?\\b|difference in|haemoglobin|hemoglobin|\\bbmi\\b|blood pressure|\\bscore\\b",
+    list(pattern = "\\bmean\\b|median|interquartile|\\biqr\\b|average|continuous|concentration|\\bserum\\b|\\blevels?\\b|difference in|haemoglobin|hemoglobin|\\bbmi\\b|blood pressure|\\bscore\\b",
          option_index = 2, confidence = "Medium"),
     list(pattern = "odds ratio|matched|unmatched|exposed|exposure|smok|\\buse\\b|history|yes.?no|binary|present|absent|\\bever\\b",
          option_index = 1, confidence = "Medium")
@@ -292,8 +292,13 @@ free_text_rules <- list(
          option_index = 2, confidence = "Medium"),
     list(pattern = "categorical|blood group|diagnosis categor",
          option_index = 3, confidence = "Medium"),
-    list(pattern = "continuous|\\bmean\\b|average|\\bscore\\b|\\bbp\\b|\\bhb\\b|\\bbmi\\b|blood pressure|haemoglobin|hemoglobin|weight|cholesterol|glucose|concentration|\\bfev1?\\b",
+    list(pattern = "continuous|\\bmean\\b|median|interquartile|\\biqr\\b|length of stay|average|\\bscore\\b|\\bbp\\b|\\bhb\\b|\\bbmi\\b|blood pressure|haemoglobin|hemoglobin|weight|cholesterol|glucose|concentration|\\bfev1?\\b",
          option_index = 1, confidence = "Medium")
+  ),
+
+  cont_summary = list(
+    list(pattern = "median|interquartile|\\biqr\\b|skewed|non.?normal",                                    option_index = 2, confidence = "High"),
+    list(pattern = "\\bmean\\b|average|standard deviation|\\bsd\\b|normally distributed",                  option_index = 1, confidence = "Medium")
   ),
 
   groups_count = list(

@@ -668,7 +668,7 @@ design_nodes <- list(
     options = list(
       list(label = "Whether the disease/event occurred (a risk: relative risk)", next_id = "term_cohort_rr"),
       list(label = "A measurement compared between exposed and unexposed (a difference in means, e.g. blood pressure, haemoglobin)",
-           next_id = "indep_cont", set = list(outcome = "continuous")),
+           next_id = "cont_summary", set = list(outcome = "continuous", cont_next = "indep_cont")),
       list(label = "An incidence rate per person-time (rate ratio)", next_id = "term_count_rate"),
       list(label = "Time to an event (survival, hazard ratio)", next_id = "surv_type"),
       list(label = "An ordinal outcome (e.g. a grade or stage)", next_id = "term_ordinal")
@@ -685,7 +685,7 @@ design_nodes <- list(
     options = list(
       list(label = "Exposed or not (yes/no): odds ratio", next_id = "cc_matching"),
       list(label = "A measurement compared between cases and controls (a difference in mean levels, e.g. serum lead, vitamin D)",
-           next_id = "cc_cont_matching", set = list(outcome = "continuous"))
+           next_id = "cont_summary", set = list(outcome = "continuous", cont_next = "cc_cont_matching"))
     )
   ),
 
@@ -710,12 +710,29 @@ design_nodes <- list(
     )
   ),
 
+  # A continuous outcome is planned from a mean and SD; when the pilot data or the literature give a median and IQR instead
+  # (a skewed outcome), the path is the same -- paired or unpaired groups -- and the calculator page then explains how to estimate
+  # a mean and SD from them (Wan et al. 2014) or offers the rank-based test. `cont_next` (set by the option that led here) says
+  # which question follows.
+  cont_summary = list(
+    id = "cont_summary", stage = 3,
+    question = "How is the outcome summarised in your pilot data or in the literature?",
+    help = "Symmetric measurements are usually reported as mean and SD; skewed ones (length of stay, costs, many biomarkers) as median and IQR.",
+    options = list(
+      list(label = "Mean and standard deviation (roughly symmetric)", set = list(summary = "mean"),
+           next_id = function(flags) if (is.null(flags$cont_next)) "groups_count" else flags$cont_next),
+      list(label = "Median and interquartile range (skewed)", set = list(summary = "median"),
+           next_id = function(flags) if (is.null(flags$cont_next)) "groups_count" else flags$cont_next)
+    )
+  ),
+
   # ---------------------------------------------------------- Stage 3 ----
   outcome_type = list(
     id = "outcome_type", stage = 3,
     question = "What type is the outcome (dependent) variable?",
     options = list(
-      list(label = "Continuous (e.g. BP, Hb, BMI, a score)", next_id = "groups_count", set = list(outcome = "continuous")),
+      list(label = "Continuous (e.g. BP, Hb, BMI, a score)", next_id = "cont_summary",
+           set = list(outcome = "continuous", cont_next = "groups_count")),
       list(label = "Binary (e.g. cured/not, positive/negative)", next_id = "groups_count", set = list(outcome = "binary")),
       list(label = "Categorical, 3+ unordered categories", next_id = "term_chisq_independence_direct"),
       list(label = "Ordinal (e.g. Likert, stage, grade)", next_id = "term_ordinal"),
@@ -1184,7 +1201,7 @@ design_nodes <- list(
   nodes$bytest_family <- list(
     id = "bytest_family", stage = 3,
     question = "Which family of statistical test?",
-    help = "The same grouping as the \"Browse calculators\" tab's test-family view.",
+    help = "The same grouping as the \"Browse all calculators\" tab's test-family view.",
     options = fam_opts
   )
   nodes
@@ -1197,6 +1214,7 @@ design_nodes <- c(design_nodes, .bytest_nodes())
 design_reachable_keys <- function(nodes = design_nodes) {
   flag_sets <- c(
     list(list(outcome = "continuous"), list(outcome = "binary")),
+    lapply(c("groups_count", "indep_cont", "cc_cont_matching"), function(n) list(outcome = "continuous", cont_next = n)),
     lapply(c("RR", "OR", "RD", "MD"), function(t) list(tsa_outcome = t))
   )
   resolve <- function(x, flags) if (is.function(x)) x(flags) else x

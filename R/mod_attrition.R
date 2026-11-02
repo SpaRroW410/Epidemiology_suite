@@ -162,7 +162,7 @@ mod_attrition_server <- function(id) {
             tags$tbody(rows)
           ),
           h6("Protocol wording"),
-          p(class = "border rounded p-2 bg-light small",
+          p(class = "border rounded p-2 bg-body-tertiary small",
             sprintf("Analysis of %d participants is required. Allowing for an overall loss of %s (%s), %d participants will be enrolled.",
                     v$n_required, pct(v$overall_loss), paste(sprintf("%s %s", tolower(st), pct(unlist(lapply(seq_len(k), function(i) v[[paste0("loss_", i)]])))), collapse = ", "), v$n_enrolled))
         )

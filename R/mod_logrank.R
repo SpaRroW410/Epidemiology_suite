@@ -39,7 +39,13 @@ mod_logrank_ui <- function(id) {
                      value = 0.3707, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("pC"), "pC (cumulative event probability, control group)",
                      value = 0.4890, min = 0.001, max = 0.999, step = 0.01),
-        numericInput(ns("hr_logrank"), "Postulated hazard ratio (HR)", value = 0.7, min = 0.01, step = 0.05),
+        radioButtons(ns("hr_as_logrank"), "Hazard ratio",
+                     choices = c("Enter it" = "value", "Calculate from pE and pC (proportional hazards)" = "implied")),
+        conditionalPanel(
+          condition = sprintf("input['%s'] != 'implied'", ns("hr_as_logrank")),
+          numericInput(ns("hr_logrank"), "Postulated hazard ratio (HR)", value = 0.7, min = 0.01, step = 0.05)
+        ),
+        uiOutput(ns("hr_implied_logrank")),
         numericInput(ns("ratio"), "Experimental:control allocation ratio", value = 1, min = 0.1, step = 0.5),
         numericInput(ns("alpha_logrank"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_logrank"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
@@ -185,6 +191,16 @@ mod_logrank_ui <- function(id) {
 
 mod_logrank_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # the hazard ratio of the two-group design: as entered, or NULL so that calc_logrank() calculates it from pE and pC
+    logrank_hr <- function() if (identical(input$hr_as_logrank, "implied")) NULL else { req(input$hr_logrank); input$hr_logrank }
+    output$hr_implied_logrank <- renderUI({
+      pE <- input$pE; pC <- input$pC
+      ok <- function(x) is.numeric(x) && length(x) == 1 && !is.na(x) && x > 0 && x < 1
+      if (!ok(pE) || !ok(pC)) return(NULL)
+      div(class = "text-muted small mb-2", sprintf(
+        "With proportional hazards, pE = %s and pC = %s imply a hazard ratio of %.3f (log(1 - pE) / log(1 - pC)).",
+        format(pE), format(pC), log(1 - pE) / log(1 - pC)))
+    })
     # the simulations run in a background R process on a server (background.R); `result` is the finished calculation
     bg <- background_calc()
     result <- bg$result(function() result_now())
@@ -216,10 +232,10 @@ mod_logrank_server <- function(id) {
 
       compute <- function() {
       if (input$design == "logrank") {
-        req(input$pE, input$pC, input$hr_logrank, input$ratio, input$alpha_logrank, input$power_logrank)
+        req(input$pE, input$pC, input$ratio, input$alpha_logrank, input$power_logrank)
         tryCatch(
           list(ok = TRUE, value = calc_logrank(
-            pE = input$pE, pC = input$pC, hr = input$hr_logrank, ratio = input$ratio,
+            pE = input$pE, pC = input$pC, hr = logrank_hr(), ratio = input$ratio,
             alpha = input$alpha_logrank, power = input$power_logrank
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
@@ -302,7 +318,10 @@ mod_logrank_server <- function(id) {
       if (input$design == "logrank") {
         tagList(
           p(strong("Total sample size: "), v$n_total),
-          p(sprintf("Experimental group: %d, Control group: %d", v$n_exp, v$n_control))
+          p(sprintf("Experimental group: %d, Control group: %d", v$n_exp, v$n_control)),
+          p(class = "text-muted small", sprintf("Hazard ratio used: %.3f%s", v$hr,
+                                                if (is.null(v$inputs$hr) || identical(input$hr_as_logrank, "implied")) " (from pE and pC)" else "")),
+          lapply(v$notes, function(n) div(class = "text-warning", n))
         )
       } else if (input$design == "stratified") {
         tagList(
@@ -336,10 +355,10 @@ mod_logrank_server <- function(id) {
     # "weighted_logrank" (Monte Carlo).
     render_power_curves(output, function() {
       if (input$design == "logrank") {
-        req(input$pE, input$pC, input$hr_logrank, input$ratio, input$alpha_logrank, input$power_logrank)
+        req(input$pE, input$pC, input$ratio, input$alpha_logrank, input$power_logrank)
         list(
           calc_fn = calc_logrank,
-          args = list(pE = input$pE, pC = input$pC, hr = input$hr_logrank, ratio = input$ratio,
+          args = list(pE = input$pE, pC = input$pC, hr = logrank_hr(), ratio = input$ratio,
                        alpha = input$alpha_logrank, power = input$power_logrank),
           effect = list(param = "hr", values = curve_range_ratio(n = 20), label = "Hazard ratio (HR)"),
           power = list(param = "power", values = curve_range_power(n = 20))

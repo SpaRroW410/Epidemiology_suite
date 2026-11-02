@@ -32,7 +32,9 @@ test_that("a Home 'Browse calculators' button that shares its calculator with an
   key <- dup_keys[[1]]
   entry <- catalog_entry(key)
   btn <- tail(names(lens)[lens == key], 1)
-  app$run_js("document.querySelector('#home_more .accordion-button').click()")   # the lists are folded away until opened
+  ui_select_tab(app, "main_nav", "Home")
+  app$run_js("document.getElementById('home_go_browse').click()")   # "Browse all calculators": the Find a calculator tab
+  app$wait_for_js("Shiny.shinyapp.$inputValues['main_nav'] === 'Find a calculator' && Shiny.shinyapp.$inputValues['home_helper'] === 'Browse all calculators'", timeout = 30000)
   app$wait_for_js("!!document.getElementById('home_browse_axis')", timeout = 30000)
   app$set_inputs(home_browse_axis = axis, wait_ = FALSE)
   app$wait_for_idle(800, timeout = 30000)
@@ -311,6 +313,41 @@ test_that("precision calculators: relative precision, the hard stop, the 20% war
   expect_equal(ui_output_errors(app), 0)
 })
 
+test_that("effect inputs: case-control p1 and phi from a pairs table, log-rank HR from pE and pC, a rate ratio from two rates, mean and SD from a median and IQR", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Case-Control")
+  app$set_inputs(`case_control-effect_as` = "p1", `case_control-p1_cases` = 0.4615385)
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "case_control-result"), "Total sample size: 282")    # the same as OR = 2 with p0 = 0.3
+  expect_match(ui_output_text(app, "case_control-effect_equiv"), "odds ratio of 2")
+  app$set_inputs(`case_control-design` = "matched")
+  app$wait_for_idle(800, timeout = 60000)
+  ui_choose_radio(app, "case_control-phi_as", "table")
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "case_control-phi_table_result"), "phi = 0.328 from 100 pairs")
+  expect_match(ui_output_text(app, "case_control-result"), "phi 0.328")
+
+  ui_open_module(app, "Log-Rank / Survival")
+  ui_choose_radio(app, "logrank-hr_as_logrank", "implied")
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "logrank-result"), "Hazard ratio used: 0.690 \\(from pE and pC\\)")
+
+  ui_open_module(app, "Incidence Rate")
+  app$set_inputs(`rate-design` = "comparison")
+  app$wait_for_idle(800, timeout = 60000)
+  before <- ui_output_text(app, "rate-result")
+  app$set_inputs(`rate-ratio_as_comp` = "rate", `rate-rate_exp` = 2.798 * 0.8938)
+  app$wait_for_idle(800, timeout = 60000)
+  expect_equal(ui_output_text(app, "rate-result"), before)
+
+  ui_open_module(app, "Means")
+  app$run_js("document.querySelectorAll('details').forEach(function(d){d.open = true})")
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "means-iqr_result"), "Estimated mean 45.67, SD 12.15")
+  expect_equal(ui_output_errors(app), 0)
+})
+
 test_that("Randomization List: the same seed gives the same list; blocks balance; stratified lists per site", {
   skip_if_no_ui()
   app <- ui_driver()
@@ -501,7 +538,8 @@ test_that("background loading fills in every calculator with the indicator besid
 
 .wizard_open <- function(app) {
   ui_select_tab(app, "main_nav", "Home")
-  app$run_js("document.getElementById('home_go_wizard').click()")   # "Start the guide": opens the folded section and the wizard tab
+  app$run_js("document.getElementById('home_go_wizard').click()")   # "Start the guide": the Find a calculator tab, guided questions
+  app$wait_for_js("Shiny.shinyapp.$inputValues['main_nav'] === 'Find a calculator' && Shiny.shinyapp.$inputValues['home_helper'] === 'Guided questions'", timeout = 30000)
   app$wait_for_js("(function(){var e=document.getElementById('design_wizard_freetext'); return !!e && e.getBoundingClientRect().width > 0;})()", timeout = 30000)
   app$wait_for_idle(500, timeout = 30000)
 }

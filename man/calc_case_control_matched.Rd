@@ -6,23 +6,24 @@
 \usage{
 calc_case_control_matched(
   p0,
-  OR,
+  OR = NULL,
   phi_coef = 0.2,
   power = 0.8,
   ratio = 1,
   alpha = 0.05,
   alternative = c("two.sided", "less", "greater"),
-  N = NULL
+  N = NULL,
+  p1 = NULL
 )
 }
 \arguments{
 \item{p0}{Expected prevalence of exposure among controls (0,1)}
 
-\item{OR}{Expected odds ratio (> 0, != 1)}
+\item{OR}{Expected odds ratio (> 0, != 1). Give either \code{OR} or \code{p1}.}
 
 \item{phi_coef}{Correlation between case and control exposures for
 matched pairs (-1, 1); use ~0.2 (moderate) if no prior estimate is
-available, per Dupont (1988)}
+available, per Dupont (1988). \code{\link[=calc_matched_pairs_phi]{calc_matched_pairs_phi()}} calculates it from a table of matched pairs.}
 
 \item{power}{Desired power (0,1)}
 
@@ -33,9 +34,12 @@ available, per Dupont (1988)}
 \item{alternative}{"two.sided" or one-sided}
 
 \item{N}{Optional finite eligible-population size}
+
+\item{p1}{Expected proportion of cases exposed (0,1), instead of \code{OR}: the odds ratio is then p1 (1 - p0) / (p0 (1 - p1)).}
 }
 \value{
-list(n_total, n_case, n_control, inputs)
+A named list of class \code{ss_result} with \code{n_total}, \code{n_case}, \code{n_control}, \code{OR} and \code{p1} (both, whichever was given) and
+\code{inputs}.
 }
 \description{
 Wraps epiR::epi.sscc(method = "matched").

@@ -133,3 +133,14 @@ test_that("calc_weighted_logrank rejects invalid inputs", {
     "positive"
   )
 })
+
+test_that("log-rank: the hazard ratio can be calculated from pE and pC (proportional hazards), and a mismatch is flagged", {
+  r <- calc_logrank(pE = 0.3707, pC = 0.4890, ratio = 1, alpha = 0.05, power = 0.8)
+  expect_equal(r$hr, log(1 - 0.3707) / log(1 - 0.4890))
+  expect_equal(r$n_total, calc_logrank(pE = 0.3707, pC = 0.4890, hr = r$hr)$n_total)
+  # proportional hazards: S_E(t) = S_C(t)^HR, so 1 - pE = (1 - pC)^HR
+  expect_equal(1 - 0.3707, (1 - 0.4890)^r$hr)
+  expect_length(calc_logrank(pE = 0.3707, pC = 0.4890, hr = 0.7)$notes, 0)    # within 10% of 0.690
+  expect_match(calc_logrank(pE = 0.3707, pC = 0.4890, hr = 0.5)$notes, "does not match pE and pC")
+  expect_error(calc_logrank(pE = 0.4, pC = 0.4), "must differ from 1")
+})

@@ -38,13 +38,44 @@ mod_case_control_ui <- function(id) {
                      value = 0.30, min = 0.001, max = 0.999, step = 0.01)
       ),
       conditionalPanel(
-        condition = design_is("unmatched", "matched", "nested"),
+        condition = design_is("unmatched", "matched"),
+        radioButtons(ns("effect_as"), "Effect to detect, given as",
+                     choices = c("Odds ratio (OR)" = "or", "Proportion of cases exposed (p1)" = "p1"), inline = TRUE)
+      ),
+      conditionalPanel(
+        condition = sprintf("(%s) && input['%s'] == 'p1'", design_is("unmatched", "matched"), ns("effect_as")),
+        numericInput(ns("p1_cases"), "p1 (expected proportion of cases exposed)",
+                     value = 0.46, min = 0.001, max = 0.999, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = sprintf("(%s) || ((%s) && input['%s'] != 'p1')", design_is("nested"), design_is("unmatched", "matched"),
+                            ns("effect_as")),
         numericInput(ns("OR"), "Expected odds ratio (OR)", value = 2, min = 0.01, step = 0.1)
       ),
       conditionalPanel(
+        condition = design_is("unmatched", "matched"),
+        uiOutput(ns("effect_equiv"))
+      ),
+      conditionalPanel(
         condition = design_is("matched"),
-        numericInput(ns("phi_coef"), "Correlation between matched case/control exposures (phi)",
-                     value = 0.2, min = -0.99, max = 0.99, step = 0.01)
+        radioButtons(ns("phi_as"), "Correlation of exposure within matched pairs (phi)",
+                     choices = c("Enter phi (0.2 if unknown)" = "value",
+                                 "Calculate from a table of matched pairs (pilot or published)" = "table")),
+        conditionalPanel(
+          condition = sprintf("input['%s'] != 'table'", ns("phi_as")),
+          numericInput(ns("phi_coef"), "phi", value = 0.2, min = -0.99, max = 0.99, step = 0.01)
+        ),
+        conditionalPanel(
+          condition = sprintf("input['%s'] == 'table'", ns("phi_as")),
+          p(class = "small text-muted mb-1", "Number of matched pairs in which:"),
+          div(class = "row g-2",
+            div(class = "col-6", numericInput(ns("pairs_both"), "both were exposed", value = 30, min = 0, step = 1)),
+            div(class = "col-6", numericInput(ns("pairs_case"), "only the case was exposed", value = 25, min = 0, step = 1)),
+            div(class = "col-6", numericInput(ns("pairs_control"), "only the control was exposed", value = 10, min = 0, step = 1)),
+            div(class = "col-6", numericInput(ns("pairs_neither"), "neither was exposed", value = 35, min = 0, step = 1))
+          ),
+          uiOutput(ns("phi_table_result"))
+        )
       ),
       conditionalPanel(
         condition = design_is("unmatched", "matched"),
@@ -146,27 +177,60 @@ mod_case_control_ui <- function(id) {
 
 mod_case_control_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # the effect as calc_case_control_*() takes it: list(OR = ...) or list(p1 = ...)
+    effect_args <- function() {
+      if (identical(input$effect_as, "p1")) { req(input$p1_cases); list(p1 = input$p1_cases) } else { req(input$OR); list(OR = input$OR) }
+    }
+    pairs_table <- reactive({
+      req(identical(input$phi_as, "table"))
+      calc_matched_pairs_phi(input$pairs_both, input$pairs_case, input$pairs_control, input$pairs_neither)
+    })
+    phi_value <- function() if (identical(input$phi_as, "table")) pairs_table()$phi else { req(input$phi_coef); input$phi_coef }
+
+    output$effect_equiv <- renderUI({
+      p0 <- input$p0
+      ok <- function(x) is.numeric(x) && length(x) == 1 && !is.na(x)
+      if (!ok(p0) || p0 <= 0 || p0 >= 1) return(NULL)
+      txt <- if (identical(input$effect_as, "p1")) {
+        p1 <- input$p1_cases
+        if (!ok(p1) || p1 <= 0 || p1 >= 1) return(NULL)
+        sprintf("p1 = %s with p0 = %s is an odds ratio of %s.", format(p1), format(p0), format(round(p1 * (1 - p0) / (p0 * (1 - p1)), 3)))
+      } else {
+        or <- input$OR
+        if (!ok(or) || or <= 0) return(NULL)
+        sprintf("OR = %s with p0 = %s means %s of cases exposed (p1).", format(or), format(p0), format(round(or * p0 / (1 - p0 + or * p0), 3)))
+      }
+      div(class = "text-muted small mb-2", txt)
+    })
+    output$phi_table_result <- renderUI({
+      t <- tryCatch(pairs_table(), error = function(e) e)
+      if (inherits(t, "error")) return(div(class = "text-danger small", conditionMessage(t)))
+      div(class = "text-muted small mb-2",
+          sprintf("phi = %.3f from %d pairs. The same table has %.1f%% of controls and %.1f%% of cases exposed (odds ratio %.2f; matched-pairs odds ratio %s); enter those above if they are the values you plan for.",
+                  t$phi, t$n_pairs, 100 * t$p0, 100 * t$p1, t$OR, if (is.finite(t$OR_matched)) sprintf("%.2f", t$OR_matched) else "not finite"))
+    })
+
     result <- reactive({
       req(input$design, input$alpha, input$power)
 
       tryCatch({
         value <- if (input$design == "unmatched") {
-          req(input$p0, input$OR, input$ratio, input$alternative)
+          req(input$p0, input$ratio, input$alternative)
           N <- input$N
           if (is.null(N) || is.na(N)) N <- NULL
-          calc_case_control_unmatched(
-            p0 = input$p0, OR = input$OR, power = input$power, ratio = input$ratio,
+          do.call(calc_case_control_unmatched, c(list(
+            p0 = input$p0, power = input$power, ratio = input$ratio,
             alpha = input$alpha, alternative = input$alternative, N = N
-          )
+          ), effect_args()))
         } else if (input$design == "matched") {
-          req(input$p0, input$OR, input$phi_coef, input$ratio, input$alternative)
+          req(input$p0, input$ratio, input$alternative)
           N <- input$N
           if (is.null(N) || is.na(N)) N <- NULL
-          calc_case_control_matched(
-            p0 = input$p0, OR = input$OR, phi_coef = input$phi_coef,
+          do.call(calc_case_control_matched, c(list(
+            p0 = input$p0, phi_coef = phi_value(),
             power = input$power, ratio = input$ratio, alpha = input$alpha,
             alternative = input$alternative, N = N
-          )
+          ), effect_args()))
         } else if (input$design == "nested") {
           req(input$exposure_type, input$OR, input$nD, input$nH, input$R2)
           if (input$exposure_type == "binary") {
@@ -203,7 +267,10 @@ mod_case_control_server <- function(id) {
       if (res$design %in% c("unmatched", "matched")) {
         tagList(
           p(strong("Total sample size: "), v$n_total),
-          p(sprintf("Cases: %d, Controls: %d", v$n_case, v$n_control))
+          p(sprintf("Cases: %d, Controls: %d", v$n_case, v$n_control)),
+          p(class = "text-muted small", sprintf("Odds ratio %.3f; proportion of cases exposed %.3f; of controls %s%s.", v$OR, v$p1,
+                                                format(v$inputs$p0),
+                                                if (res$design == "matched") sprintf("; phi %.3f", v$inputs$phi_coef) else ""))
         )
       } else if (res$design == "nested") {
         tagList(
@@ -226,23 +293,23 @@ mod_case_control_server <- function(id) {
     # incremental rollout as items 8/9.
     render_power_curves(output, function() {
       if (input$design == "unmatched") {
-        req(input$p0, input$OR, input$ratio, input$alpha, input$power, input$alternative)
+        req(input$p0, input$ratio, input$alpha, input$power, input$alternative, isTRUE(result()$ok))
         N <- input$N
         if (is.null(N) || is.na(N)) N <- NULL
         list(
           calc_fn = calc_case_control_unmatched,
-          args = list(p0 = input$p0, OR = input$OR, power = input$power, ratio = input$ratio,
+          args = list(p0 = input$p0, OR = result()$value$OR, power = input$power, ratio = input$ratio,
                        alpha = input$alpha, alternative = input$alternative, N = N),
           effect = list(param = "OR", values = curve_range_ratio(), label = "Odds ratio (OR)"),
           power = list(param = "power", values = curve_range_power())
         )
       } else if (input$design == "matched") {
-        req(input$p0, input$OR, input$phi_coef, input$ratio, input$alpha, input$power, input$alternative)
+        req(input$p0, input$ratio, input$alpha, input$power, input$alternative, isTRUE(result()$ok))
         N <- input$N
         if (is.null(N) || is.na(N)) N <- NULL
         list(
           calc_fn = calc_case_control_matched,
-          args = list(p0 = input$p0, OR = input$OR, phi_coef = input$phi_coef, power = input$power,
+          args = list(p0 = input$p0, OR = result()$value$OR, phi_coef = result()$value$inputs$phi_coef, power = input$power,
                        ratio = input$ratio, alpha = input$alpha, alternative = input$alternative, N = N),
           effect = list(param = "OR", values = curve_range_ratio(), label = "Odds ratio (OR)"),
           power = list(param = "power", values = curve_range_power())
