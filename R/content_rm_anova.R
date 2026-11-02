@@ -28,6 +28,8 @@ rm_anova_content <- list(
       "  case). Lower values (down to 1/(nm-1)) inflate the required",
       "  sample size to compensate for violated sphericity.",
       "- **alpha, power** - as elsewhere.",
+      "",
+      "**Other ways to enter the effect.** Cohen's f can be worked out from the group means and the common SD, or from eta-squared.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -65,6 +67,8 @@ rm_anova_content <- list(
       "- **f** - Cohen's f effect size for the within-subjects effect.",
       "- **nscor (epsilon)** - nonsphericity correction, as above.",
       "- **alpha, power** - as elsewhere.",
+      "",
+      "**Other ways to enter the effect.** Cohen's f can be worked out from the group means and the common SD, or from eta-squared.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -104,6 +108,8 @@ rm_anova_content <- list(
       "- **f** - Cohen's f effect size for the interaction.",
       "- **nscor (epsilon)** - nonsphericity correction, as above.",
       "- **alpha, power** - as elsewhere.",
+      "",
+      "**Other ways to enter the effect.** Cohen's f can be worked out from the group means and the common SD, or from eta-squared.",
       sep = "\n"
     ),
     worked_example = paste(

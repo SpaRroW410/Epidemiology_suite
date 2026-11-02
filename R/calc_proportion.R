@@ -42,21 +42,28 @@ calc_proportion_1s <- function(p0, p1, alpha = 0.05, power = 0.8,
 #'
 #' Wraps pwr::pwr.2p.test (Cohen's arcsine-transformed effect size h).
 #'
-#' @param p1 Proportion in group 1 (0,1)
+#' @param p1 Proportion in group 1 (0,1). Instead of `p1` give ONE of `OR`, `RR` or `RD`: group 2 is then the reference and `p1` is
+#'   calculated from `p2` (as in OpenEpi's "fill in 1 of the following").
 #' @param p2 Proportion in group 2 (0,1)
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
-#' @return list(n_per_group, n_total, h, inputs)
+#' @param OR Odds ratio of group 1 versus group 2, instead of `p1`
+#' @param RR Risk ratio p1 / p2, instead of `p1`
+#' @param RD Risk difference p1 - p2, instead of `p1`
+#' @return list(n_per_group, n_total, h, p1, odds_ratio, inputs)
 #' @examples
 #' calc_proportion_2s(p1 = 0.1, p2 = 0.3, alpha = 0.05, power = 0.8, alternative = "two.sided")
 #' @export
-calc_proportion_2s <- function(p1, p2, alpha = 0.05, power = 0.8,
-                                alternative = c("two.sided", "less", "greater")) {
+calc_proportion_2s <- function(p1 = NULL, p2, alpha = 0.05, power = 0.8,
+                                alternative = c("two.sided", "less", "greater"),
+                                OR = NULL, RR = NULL, RD = NULL) {
   alternative <- match.arg(alternative)
 
-  .validate_unit_interval(p1, "p1")
   .validate_unit_interval(p2, "p2")
+  eff <- calc_es_proportions(p2, p1 = p1, OR = OR, RR = RR, RD = RD)
+  given <- list(p1 = p1, OR = OR, RR = RR, RD = RD)
+  p1 <- eff$p1
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
   if (isTRUE(all.equal(p1, p2))) {
@@ -72,8 +79,10 @@ calc_proportion_2s <- function(p1, p2, alpha = 0.05, power = 0.8,
     n_per_group = n_per_group,
     n_total = n_per_group * 2,
     h = h,
-    inputs = list(p1 = p1, p2 = p2, alpha = alpha, power = power,
-                  alternative = alternative)
+    p1 = p1,
+    odds_ratio = eff$OR,
+    inputs = c(Filter(Negate(is.null), given), list(p2 = p2, alpha = alpha, power = power,
+                  alternative = alternative))
   ))
 }
 

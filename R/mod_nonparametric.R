@@ -34,7 +34,7 @@ mod_nonparametric_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("rank_sum"),
-        numericInput(ns("k_rs"), "Allocation ratio (k = n1/n2)", value = 1, min = 0.1, step = 0.1),
+        numericInput(ns("k_rs"), with_tip("Allocation ratio (k = n1/n2)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1),
         numericInput(ns("p1_rs"), "p1 = P(Y >= X)", value = 0.7, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("p2_rs"), "p2", value = 0.8, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("p3_rs"), "p3", value = 0.8, min = 0.001, max = 0.999, step = 0.01)
@@ -54,7 +54,7 @@ mod_nonparametric_ui <- function(id) {
       conditionalPanel(
         condition = design_is("kruskal_wallis"),
         selectInput(ns("k_kw"), "Number of groups (k)", choices = 3:8, selected = 3),
-        numericInput(ns("f_kw"), "Cohen's f effect size", value = 0.25, min = 0.001, step = 0.01)
+        effect_f_ui(ns, "f_kw", 0.25)
       ),
       conditionalPanel(
         condition = design_is("jonckheere"),
@@ -65,7 +65,7 @@ mod_nonparametric_ui <- function(id) {
       conditionalPanel(
         condition = design_is("friedman"),
         selectInput(ns("k_fr"), "Number of repeated measurements (k)", choices = 3:8, selected = 4),
-        numericInput(ns("f_fr"), "Cohen's f effect size", value = 0.25, min = 0.001, step = 0.01),
+        effect_f_ui(ns, "f_fr", 0.25),
         numericInput(ns("nscor_fr"), "Nonsphericity correction (1 = sphericity assumed)",
                      value = 1, min = 0.01, max = 1, step = 0.01)
       ),
@@ -220,6 +220,8 @@ mod_nonparametric_ui <- function(id) {
 
 mod_nonparametric_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    effect_f_server(input, output, "f_kw")
+    effect_f_server(input, output, "f_fr")
     # the simulations run in a background R process on a server (background.R); `result` is the finished calculation
     bg <- background_calc()
     result <- bg$result(function() result_now())
@@ -256,9 +258,9 @@ mod_nonparametric_server <- function(id) {
             p1 = input$p1_k, p2 = input$p2_k, alpha = input$alpha, power = input$power
           )
         } else if (input$design == "kruskal_wallis") {
-          req(input$k_kw, input$f_kw)
+          req(input$k_kw)
           calc_kruskal_wallis(
-            k = as.integer(input$k_kw), f = input$f_kw,
+            k = as.integer(input$k_kw), f = effect_f_value(input, "f_kw"),
             alpha = input$alpha, power = input$power
           )
         } else if (input$design == "jonckheere") {
@@ -267,9 +269,9 @@ mod_nonparametric_server <- function(id) {
             p1 = input$p1_jt, p2 = input$p2_jt, alpha = input$alpha, power = input$power
           )
         } else if (input$design == "friedman") {
-          req(input$k_fr, input$f_fr, input$nscor_fr)
+          req(input$k_fr, input$nscor_fr)
           calc_friedman(
-            k = as.integer(input$k_fr), f = input$f_fr, nscor = input$nscor_fr,
+            k = as.integer(input$k_fr), f = effect_f_value(input, "f_fr"), nscor = input$nscor_fr,
             alpha = input$alpha, power = input$power
           )
         } else if (input$design == "ks") {
@@ -358,20 +360,22 @@ mod_nonparametric_server <- function(id) {
     # the Monte Carlo designs (ks, runs, animal_rank).
     render_power_curves(output, function() {
       if (input$design == "kruskal_wallis") {
-        req(input$k_kw, input$f_kw, input$alpha, input$power)
+        fv <- effect_f_value(input, "f_kw")
+        req(input$k_kw, fv, input$alpha, input$power)
         list(
           calc_fn = calc_kruskal_wallis,
-          args = list(k = as.integer(input$k_kw), f = input$f_kw, alpha = input$alpha, power = input$power),
-          effect = list(param = "f", values = curve_range_multiplicative(input$f_kw), label = "Cohen's f"),
+          args = list(k = as.integer(input$k_kw), f = fv, alpha = input$alpha, power = input$power),
+          effect = list(param = "f", values = curve_range_multiplicative(fv), label = "Cohen's f"),
           power = list(param = "power", values = curve_range_power())
         )
       } else if (input$design == "friedman") {
-        req(input$k_fr, input$f_fr, input$nscor_fr, input$alpha, input$power)
+        fv <- effect_f_value(input, "f_fr")
+        req(input$k_fr, fv, input$nscor_fr, input$alpha, input$power)
         list(
           calc_fn = calc_friedman,
-          args = list(k = as.integer(input$k_fr), f = input$f_fr, nscor = input$nscor_fr,
+          args = list(k = as.integer(input$k_fr), f = fv, nscor = input$nscor_fr,
                        alpha = input$alpha, power = input$power),
-          effect = list(param = "f", values = curve_range_multiplicative(input$f_fr), label = "Cohen's f"),
+          effect = list(param = "f", values = curve_range_multiplicative(fv), label = "Cohen's f"),
           power = list(param = "power", values = curve_range_power())
         )
       } else {

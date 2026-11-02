@@ -157,6 +157,8 @@ nonparametric_content <- list(
       "non-normal distributions, since the Kruskal-Wallis test's",
       "efficiency relative to ANOVA is often *higher* than 3/pi when the",
       "data are non-normal.",
+      "",
+      "**Other ways to enter the effect.** Cohen's f can be worked out from the group means and the common SD, or from eta-squared.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -272,6 +274,8 @@ nonparametric_content <- list(
       "depends on k itself: ARE = (3/pi) x k/(k+1), only approaching the",
       "familiar 3/pi limit as k grows large (Zimmerman & Zumbo 1993). This",
       "is an asymptotic approximation, not an exact finite-sample formula.",
+      "",
+      "**Other ways to enter the effect.** Cohen's f can be worked out from the group means and the common SD, or from eta-squared.",
       sep = "\n"
     ),
     worked_example = paste(

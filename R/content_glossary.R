@@ -131,8 +131,11 @@ glossary <- list(
     long = "The larger it is, the less new information each extra person in a cluster adds, so more people are needed (see design effect). Typical values in community studies are small, 0.01 to 0.1, but vary a lot."),
   deff = list(
     label = "Design effect (DEFF)",
-    short = "The factor by which cluster sampling inflates the sample size needed compared with simple random sampling.",
-    long = "DEFF = 1 + (m - 1) x ICC, for m people per cluster. A DEFF of 2 means twice as many people are needed.",
+    short = "How many times larger a cluster sample must be than a simple random sample for the same precision. Often taken as 1.5 or 2 if unknown.",
+    long = paste("DEFF = 1 + (m - 1) x ICC, for m people per cluster. A DEFF of 2 means twice as many people are needed. It applies to any cluster design:",
+                 "a survey of villages or schools, a cluster-randomised trial, or a quasi-experimental community trial. If the ICC is not known, a",
+                 "design effect of 1.5 or 2 is commonly assumed (a planning habit; no source checked); it can also be worked out from the variance",
+                 "between clusters."),
     formula = "DEFF = 1 + (m - 1) ICC"),
   allocation_ratio = list(
     label = "Allocation ratio",

@@ -79,6 +79,9 @@ proportion_content <- list(
       "Unlike the *vs. known value* calculator above, this formula does not",
       "test a hypothesis or require a power target -- there is no effect",
       "size and no comparison, only an estimation precision target.",
+      "",
+      "**Cluster or multistage surveys.** This is for a simple random sample. If people are sampled in clusters (villages, schools, wards),",
+      "multiply the result by the design effect: see the Cluster / Design Effect calculator, which also works the design effect out.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -134,6 +137,10 @@ proportion_content <- list(
       "  (1 - Type II error rate), typically 0.8 or 0.9.",
       "",
       "Total sample size is twice the per-group value (n1 = n2).",
+      "",
+      "**Other ways to enter the effect.** Group 2 is the reference. Instead of group 1's proportion you can give the **odds ratio**, the",
+      "**risk (prevalence) ratio** or the **risk difference**; the proportion and the other measures are calculated and shown under the inputs",
+      "(as in OpenEpi's \"fill in 1 of the following\").",
       sep = "\n"
     ),
     worked_example = paste(

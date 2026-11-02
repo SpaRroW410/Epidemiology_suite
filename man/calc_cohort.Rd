@@ -6,18 +6,22 @@
 \usage{
 calc_cohort(
   p0,
-  p1,
+  p1 = NULL,
   power = 0.8,
   ratio = 1,
   alpha = 0.05,
   alternative = c("two.sided", "less", "greater"),
-  N = NULL
+  N = NULL,
+  OR = NULL,
+  RR = NULL,
+  RD = NULL
 )
 }
 \arguments{
 \item{p0}{Expected incidence risk of the outcome in the unexposed group (0,1)}
 
-\item{p1}{Expected incidence risk of the outcome in the exposed group (0,1)}
+\item{p1}{Expected incidence risk of the outcome in the exposed group (0,1). Instead of \code{p1} give ONE of \code{OR}, \code{RR} or \code{RD}, as in
+OpenEpi's "fill in 1 of the following": the others, and \code{p1}, are then calculated from \code{p0}.}
 
 \item{power}{Desired power (0,1)}
 
@@ -30,9 +34,15 @@ unexposed group (> 0)}
 
 \item{N}{Optional finite eligible-population size. NULL (default) =
 effectively infinite population.}
+
+\item{OR}{Odds ratio (exposed versus unexposed), instead of \code{p1}}
+
+\item{RR}{Risk ratio p1 / p0, instead of \code{p1}}
+
+\item{RD}{Risk difference p1 - p0, instead of \code{p1}}
 }
 \value{
-list(n_total, n_exposed, n_unexposed, rr, inputs)
+A named list of class \code{ss_result} with \code{n_total}, \code{n_exposed}, \code{n_unexposed}, \code{rr}, \code{p1}, \code{odds_ratio}, \code{risk_difference} and \code{inputs}.
 }
 \description{
 Wraps epiR::epi.sscohortc(), which uses individual count data (as

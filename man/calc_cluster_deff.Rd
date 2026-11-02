@@ -4,7 +4,7 @@
 \alias{calc_cluster_deff}
 \title{Design-effect-inflated sample size for a cluster/multistage sample}
 \usage{
-calc_cluster_deff(n_base, icc, cluster_size)
+calc_cluster_deff(n_base, icc = NULL, cluster_size = NULL, deff = NULL)
 }
 \arguments{
 \item{n_base}{Required sample size under simple random sampling (whole
@@ -14,6 +14,8 @@ number >= 1), e.g. from a single-proportion or single-mean calculator}
 subjects in the same cluster, [0, 1)}
 
 \item{cluster_size}{Average number of subjects sampled per cluster (>= 1)}
+
+\item{deff}{The design effect itself (> 0), instead of \code{icc} and \code{cluster_size}}
 }
 \value{
 list(deff, n_effective, inputs)
@@ -23,8 +25,16 @@ Given a base sample size already computed under a simple-random-sampling
 assumption (e.g. from the Proportions or Means modules), inflates it for
 the loss of statistical efficiency from cluster sampling: subjects within
 the same cluster tend to be more alike than subjects drawn independently,
-so more total subjects are needed to reach the same precision/power.
+so more total subjects are needed to reach the same precision/power. This
+applies to any cluster design: a survey of villages or schools, a
+cluster-randomised trial, or a quasi-experimental community trial.
+}
+\details{
+Give the design effect itself (\code{deff}), or the ICC and the average cluster size, or work it out from the variance between clusters
+with \code{\link[=calc_cluster_deff_variance]{calc_cluster_deff_variance()}}. When nothing is known, a design effect of 1.5 is commonly assumed, and 2 is also common; no source
+for these values was checked.
 }
 \examples{
 calc_cluster_deff(n_base = 200, icc = 0.05, cluster_size = 10)
+calc_cluster_deff(n_base = 200, deff = 1.5)
 }

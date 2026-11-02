@@ -146,7 +146,7 @@ design_wizard_server <- function(input, output, session) {
 
 # Terminals that already account for clustering themselves -- no need to
 # tell the user to inflate their n afterwards.
-.cluster_aware_keys <- c("cluster_deff", "cluster_deff_variable", "cluster_survey",
+.cluster_aware_keys <- c("cluster_deff", "cluster_deff_calc", "cluster_deff_variable", "cluster_survey",
                          "cluster_pps_optimal", "stepped_wedge_normal",
                          "glmm_lmm_continuous", "glmm_binary", "multilevel_three_level")
 

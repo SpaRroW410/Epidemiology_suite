@@ -31,7 +31,7 @@ mod_ratio_ui <- function(id) {
         condition = design_is("risk_ratio"),
         numericInput(ns("p1_rr"), "p1 (risk in exposed group)", value = 0.2, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("p2_rr"), "p2 (risk in unexposed group)", value = 0.03, min = 0.001, max = 0.999, step = 0.01),
-        numericInput(ns("r_rr"), "Allocation ratio (r = n2/n1)", value = 1, min = 0.1, step = 0.1),
+        numericInput(ns("r_rr"), with_tip("Allocation ratio (r = n2/n1)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1),
         numericInput(ns("conf_width_rr"), "Desired CI width", value = 5, min = 0.01, step = 0.5),
         numericInput(ns("conf_level_rr"), "Confidence level", value = 0.95, min = 0.5, max = 0.999, step = 0.01),
         selectInput(ns("method_rr"), "Method", choices = c("Koopman (recommended)" = "koopman", "Katz" = "katz"))
@@ -40,7 +40,7 @@ mod_ratio_ui <- function(id) {
         condition = design_is("odds_ratio"),
         numericInput(ns("p1_or"), "p1 (proportion with outcome, group 1)", value = 0.1, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("p2_or"), "p2 (proportion with outcome, group 2)", value = 0.15, min = 0.001, max = 0.999, step = 0.01),
-        numericInput(ns("r_or"), "Allocation ratio (r = n2/n1)", value = 1, min = 0.1, step = 0.1),
+        numericInput(ns("r_or"), with_tip("Allocation ratio (r = n2/n1)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1),
         numericInput(ns("conf_width_or"), "Desired CI width", value = 1.2, min = 0.01, step = 0.1),
         numericInput(ns("conf_level_or"), "Confidence level", value = 0.95, min = 0.5, max = 0.999, step = 0.01),
         selectInput(ns("method_or"), "Method", choices = c("indip_smooth (recommended)" = "indip_smooth", "Gart" = "gart", "Woolf" = "woolf"))
@@ -49,7 +49,7 @@ mod_ratio_ui <- function(id) {
         condition = design_is("rate_ratio"),
         numericInput(ns("rate1_rrt"), "Rate in exposed group", value = 0.5, min = 0.001, step = 0.1),
         numericInput(ns("rate2_rrt"), "Rate in unexposed group", value = 3, min = 0.001, step = 0.1),
-        numericInput(ns("r_rrt"), "Allocation ratio (r = n2/n1)", value = 1, min = 0.1, step = 0.1),
+        numericInput(ns("r_rrt"), with_tip("Allocation ratio (r = n2/n1)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1),
         numericInput(ns("prec_level_rrt"), "Desired precision level (CI upper/lower ratio)", value = 3.81, min = 1.01, step = 0.1),
         numericInput(ns("conf_level_rrt"), "Confidence level", value = 0.95, min = 0.5, max = 0.999, step = 0.01)
       ),

@@ -35,7 +35,7 @@ mod_noninferiority_ui <- function(id) {
         numericInput(ns("margin"), "Non-inferiority margin (> 0)", value = 0.05, min = 0.0001),
         numericInput(ns("alpha"), "Significance level, one-sided (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-        numericInput(ns("ratio"), "Allocation ratio (new : standard)", value = 1, min = 0.1, step = 0.1)
+        numericInput(ns("ratio"), with_tip("Allocation ratio (new : standard)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1)
       ),
       conditionalPanel(
         condition = design_is("proportions"),
@@ -44,7 +44,7 @@ mod_noninferiority_ui <- function(id) {
         numericInput(ns("margin_prop"), "Non-inferiority margin (0-1)", value = 0.10, min = 0.001, max = 0.99, step = 0.01),
         numericInput(ns("alpha_prop"), "Significance level, one-sided (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_prop"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-        numericInput(ns("ratio_prop"), "Allocation ratio (new : standard)", value = 1, min = 0.1, step = 0.1)
+        numericInput(ns("ratio_prop"), with_tip("Allocation ratio (new : standard)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1)
       ),
       conditionalPanel(
         condition = design_is("odds_ratio"),
@@ -53,7 +53,7 @@ mod_noninferiority_ui <- function(id) {
         numericInput(ns("pc_or"), "pc (probability of outcome, control/standard group)",
                      value = 0.25, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("margin_or"), "Non-inferiority margin (log-odds-ratio scale)", value = 0.2, step = 0.05),
-        numericInput(ns("k_or"), "Allocation ratio (k = n_test/n_control)", value = 1, min = 0.1, step = 0.1),
+        numericInput(ns("k_or"), with_tip("Allocation ratio (k = n_test/n_control)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1),
         numericInput(ns("alpha_or"), "Significance level, one-sided (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_or"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
       ),
