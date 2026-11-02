@@ -1299,6 +1299,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Cluster / Design Effect",
        module_input_id = "cluster-design", design_value = "deff"),
 
+  list(key = "cluster_deff_calc",
+       label = "Cluster designs -- calculate the design effect from the variance between clusters",
+       answers = paste(
+         "Answers: \"I know how much the outcome varies between clusters (variance components, the variance of cluster means or",
+         "proportions, or the variances under the design and under simple random sampling) -- what is the design effect and the ICC for my",
+         "cluster survey, cluster-randomised trial or community trial?\""
+       ),
+       outcome_type = "cluster", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Cluster / Design Effect",
+       module_input_id = "cluster-design", design_value = "deff_calc"),
+
   list(key = "cluster_deff_variable",
        label = "Cluster / multistage sampling -- design effect, variable cluster size",
        answers = paste(
@@ -2405,7 +2416,7 @@ study_design_families <- list(
                          "rmst_comparison")),
   list(id = "cluster_sampling", label = "Cluster / Multistage Sampling",
        hint = "Inflating an existing sample size for cluster-sampled surveys, or solving a full cluster survey design (WHO EPI-style) directly.",
-       catalog_keys = c("cluster_deff", "cluster_deff_variable", "cluster_survey", "cluster_pps_optimal")),
+       catalog_keys = c("cluster_deff", "cluster_deff_calc", "cluster_deff_variable", "cluster_survey", "cluster_pps_optimal")),
   list(id = "patient_units", label = "Several Measurements per Patient (eyes, lesions, patches)",
        hint = "Both eyes, several lesions or patches or teeth per patient: patients needed when a patient's units are correlated, treatment given to whole patients or to each patient's units (split-face), and how many units per patient are worth it.",
        catalog_keys = c("patient_units_between_continuous", "patient_units_between_binary", "patient_units_within_continuous")),

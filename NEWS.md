@@ -10,14 +10,18 @@
 * **Cohort / trial and two proportions:** give the exposed group's risk, or instead the **odds ratio**, the **risk ratio** or the **risk
   difference** ("fill in 1 of the following"); the others are shown. For 5% unexposed and an odds ratio of 2: 9.52%, 1.90, 4.52 points.
   Group 2 is the reference in the two-proportion design.
-* **Prevalence precision:** a **design effect** (DEFF) for cluster and multistage surveys, applied after the finite population correction
-  (N = 1000, 50%, +/- 5%, DEFF 1.5 gives 417). OpenEpi's form was not compared; no source for the order was checked.
+* **Cluster / Design Effect:** the design effect applies to **any cluster design** (a survey, a cluster-randomised trial, a quasi-experimental
+  community trial), and the module now says so. A new design, **Calculate the design effect from the variance between clusters**, gives the
+  design effect and the ICC from the between- and within-cluster variances, from the variance of the cluster means or proportions (with the
+  overall variance or proportion), or from the variances of the estimate under the cluster design and under simple random sampling; each is
+  checked by simulating clustered data. In the inflation design the design effect can be entered directly: 1.5 if nothing is known ("most
+  commonly taken as 1.5 or 2"; a common planning habit, no source checked). From R: `calc_cluster_deff_variance()` and
+  `calc_cluster_deff(deff =)`. The single-proportion calculator has no design-effect input; it points to this module for cluster surveys.
 * **Cohen's f** (Kruskal-Wallis, Friedman, repeated-measures ANOVA): enter f, or work it out from group means and SD or from eta-squared.
   **Cohen's d** (FDR and Dunnett designs): enter d, or a difference with an SD or a variance. **Log-rank:** the hazard ratio can also be
   calculated from median survival times.
 * From R: `calc_means_2s_indep()`, `calc_means_2s_unequal_n()` (`diff`, `variance`, `d`), `calc_means_welch()` (`diff`, `var1`, `var2`),
-  `calc_means_paired()` (`sd1`, `sd2`, `r`), `calc_cohort()` and `calc_proportion_2s()` (`OR`, `RR`, `RD`) and
-  `calc_proportion_precision()` (`deff`). Existing calls are unchanged. Each route is tested to give exactly the result of the plain one.
+  `calc_means_paired()` (`sd1`, `sd2`, `r`), `calc_cohort()` and `calc_proportion_2s()` (`OR`, `RR`, `RD`). Existing calls are unchanged. Each route is tested to give exactly the result of the plain one.
 * **Information tips** (i) on the labels of the matching terms: phi, odds ratio, ICC, design effect, sensitivity, specificity, prevalence,
   allocation ratio, rate ratio, hazard ratio, absolute and relative precision, non-response.
 

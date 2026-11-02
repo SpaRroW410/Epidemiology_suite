@@ -107,18 +107,13 @@ calc_proportion_2s <- function(p1 = NULL, p2, alpha = 0.05, power = 0.8,
 #' @param error "absolute" (default) or "relative"
 #' @param nonresponse Expected fraction not analyzable (non-response, refusal or loss to follow-up), in \[0, 1); the number to enrol
 #'   is n / (1 - nonresponse), rounded up
-#' @param deff Design effect of a complex (cluster or multistage) sample, > 0; 1 (default) for a simple random sample. The sample size
-#'   after the finite population correction is multiplied by it. OpenEpi's "Sample Size for % Frequency in a Population" form asks for
-#'   the same four things (population size, anticipated frequency, confidence limits, design effect); its formula was not compared,
-#'   and no source for the order (correction, then design effect) was checked.
 #' @return A named list of class `ss_result` with `n` (to analyze), `n_enrolled` (when `nonresponse` > 0), `n_unadjusted` (before the
 #'   finite population correction), `d_absolute`, `epsilon_relative`, `z`, `N`, `precision_notes` (warnings) and `inputs`.
 #' @examples
 #' calc_proportion_precision(p = 0.5, d = 0.05, conf_level = 0.95)
 #' calc_proportion_precision(p = 0.2, d = 0.1, error = "relative", nonresponse = 0.1)
 #' @export
-calc_proportion_precision <- function(p, d, conf_level = 0.95, N = NULL, error = c("absolute", "relative"), nonresponse = 0,
-                                      deff = 1) {
+calc_proportion_precision <- function(p, d, conf_level = 0.95, N = NULL, error = c("absolute", "relative"), nonresponse = 0) {
   error <- match.arg(error)
   .validate_unit_interval(p, "p")
   .validate_unit_interval(conf_level, "conf_level")
@@ -127,27 +122,23 @@ calc_proportion_precision <- function(p, d, conf_level = 0.95, N = NULL, error =
   }
   if (!is.null(N)) .validate_population(N)
   .validate_nonresponse(nonresponse)
-  if (!is.numeric(deff) || length(deff) != 1 || is.na(deff) || !is.finite(deff) || deff <= 0) {
-    stop("deff must be a single number greater than 0 (1 for a simple random sample).", call. = FALSE)
-  }
   chk <- .precision_checks_proportion(p, d, error, "p")
 
   z <- stats::qnorm(1 - (1 - conf_level) / 2)
   n0 <- (z^2 * p * (1 - p)) / chk$d^2
   n_adj <- if (is.null(N)) n0 else n0 / (1 + (n0 - 1) / N)
-  n_srs <- ceiling(n_adj)
-  n <- ceiling(round(n_adj * deff, 8))
+  n <- ceiling(n_adj)
 
   out <- list(n = n)
   if (nonresponse > 0) out$n_enrolled <- .inflate_nonresponse(n, nonresponse)
-  new_ss_result(c(out, if (deff != 1) list(n_simple_random = n_srs, deff = deff), list(
+  new_ss_result(c(out, list(
     n_unadjusted = ceiling(n0),
     d_absolute = chk$d,
     epsilon_relative = chk$epsilon,
     z = z,
     N = N,
     precision_notes = chk$notes,
-    inputs = list(p = p, d = d, error = error, conf_level = conf_level, N = N, deff = deff, nonresponse = nonresponse)
+    inputs = list(p = p, d = d, error = error, conf_level = conf_level, N = N, nonresponse = nonresponse)
   )))
 }
 

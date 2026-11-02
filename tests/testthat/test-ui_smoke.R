@@ -378,7 +378,7 @@ test_that("Effect Size: the converters give the published values, tips open on h
   expect_equal(ui_output_errors(app), 0)
 })
 
-test_that("OpenEpi-style inputs: means (difference, variances), cohort (odds ratio), design effect, Cohen's f from means", {
+test_that("OpenEpi-style inputs: means (difference, variances), cohort (odds ratio), Cohen's f from means", {
   skip_if_no_ui()
   app <- ui_driver()
   # OpenEpi's mean-difference form: the difference and the variances; its example inputs give 152 per group
@@ -407,14 +407,6 @@ test_that("OpenEpi-style inputs: means (difference, variances), cohort (odds rat
   expect_match(ui_output_text(app, "cohort-result"), "Total sample size: 1032")
   expect_match(ui_output_text(app, "cohort-result"), "odds ratio 2.000")
 
-  # design effect in the prevalence calculator
-  ui_open_module(app, "Proportions")
-  app$set_inputs(`proportion-p_precision` = 0.5, `proportion-error_precision` = "absolute", `proportion-d_precision` = 0.05, `proportion-deff_precision` = 2, wait_ = FALSE)
-  app$wait_for_idle(800, timeout = 60000)
-  expect_match(ui_output_text(app, "proportion-result"), "769")
-  expect_match(ui_output_text(app, "proportion-result"), "design effect 2: 385 for a simple random sample")
-  app$set_inputs(`proportion-deff_precision` = 1, wait_ = FALSE)
-
   # Cohen's f from group means and SD, in Kruskal-Wallis
   ui_open_module(app, "Nonparametric Tests")
   ui_choose_radio(app, "nonparametric-design", "kruskal_wallis")
@@ -422,6 +414,29 @@ test_that("OpenEpi-style inputs: means (difference, variances), cohort (odds rat
   ui_choose_radio(app, "nonparametric-f_kw_as", "means")
   app$wait_for_idle(800, timeout = 60000)
   expect_match(ui_output_text(app, "nonparametric-f_kw_equiv"), "Cohen's f = 0.342")
+  expect_equal(ui_output_errors(app), 0)
+})
+
+test_that("Cluster / Design Effect: the design effect from variances, and entered directly (1.5)", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Cluster / Design Effect")
+  expect_match(ui_output_text(app, "cluster-result"), "Design effect \\(DEFF\\).*: 1.450")
+  ui_choose_radio(app, "cluster-deff_route", "deff")
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "cluster-result"), "1.500")
+  expect_match(ui_output_text(app, "cluster-result"), "sample size: 300")
+  ui_choose_radio(app, "cluster-design", "deff_calc")
+  app$wait_for_idle(800, timeout = 60000)
+  st <- ui_output_text(app, "cluster-result")
+  expect_match(st, ": 1.450"); expect_match(st, "ICC.*: 0.0500"); expect_match(st, "variance components")
+  ui_choose_radio(app, "cluster-dc_from", "means")
+  app$set_inputs(`cluster-dc_m` = 20, `cluster-dc_vmeans` = 0.0125, `cluster-dc_p` = 0.3, wait_ = FALSE)
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "cluster-result"), ": 1.190")
+  ui_choose_radio(app, "cluster-dc_from", "design")
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "cluster-result"), ": 1.500")
   expect_equal(ui_output_errors(app), 0)
 })
 

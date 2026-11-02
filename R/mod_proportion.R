@@ -88,9 +88,7 @@ mod_proportion_ui <- function(id) {
           condition = design_is("precision"),
           numericInput(ns("N_precision"),
                        "Population size N (optional; leave blank for a large/community population)",
-                       value = NA, min = 1),
-          numericInput(ns("deff_precision"), with_tip("Design effect (DEFF) of a cluster or multistage survey; 1 for a random sample", "deff"),
-                       value = 1, min = 0.1, step = 0.1)
+                       value = NA, min = 1)
         ),
         conditionalPanel(
           condition = design_is("single", "two_sample"),
@@ -178,8 +176,7 @@ mod_proportion_server <- function(id) {
           list(ok = TRUE, value = calc_proportion_precision(
             p = input$p_precision, d = precision_value(),
             conf_level = input$conf_level, N = N, error = precision_error(),
-            nonresponse = .nonresponse_value(input$nonresponse_precision),
-            deff = if (is.null(.input_or_null(input$deff_precision))) 1 else input$deff_precision
+            nonresponse = .nonresponse_value(input$nonresponse_precision)
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -229,7 +226,6 @@ mod_proportion_server <- function(id) {
             p(sprintf("(before finite population correction: %d, for population N = %s)",
                       v$n_unadjusted, v$N))
           },
-          if (!is.null(v$deff)) p(sprintf("(design effect %s: %d for a simple random sample, times %s)", format(v$deff), v$n_simple_random, format(v$deff))),
           nonresponse_result_ui(v$n_enrolled, v$n, v$inputs$nonresponse),
           p(sprintf("Precision (%s): +/- %s on the 0-1 scale = +/- %s of p. Z = %.4f", v$inputs$error,
                     .prec_fmt(v$d_absolute), .prec_pct(v$epsilon_relative), v$z)),
@@ -298,8 +294,7 @@ mod_proportion_server <- function(id) {
         list(
           calc_fn = calc_proportion_precision,
           args = list(p = input$p_precision, d = precision_value(), conf_level = input$conf_level, N = N,
-                      error = precision_error(),
-                      deff = if (is.null(.input_or_null(input$deff_precision))) 1 else input$deff_precision),
+                      error = precision_error()),
           effect = list(param = "p", values = curve_range_proportion(),
                       label = "p (expected proportion)",
                       title = "Required n vs. expected proportion"),

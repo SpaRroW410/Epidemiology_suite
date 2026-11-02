@@ -80,10 +80,8 @@ proportion_content <- list(
       "test a hypothesis or require a power target -- there is no effect",
       "size and no comparison, only an estimation precision target.",
       "",
-      "**Design effect (optional, under Advanced options).** For a cluster or multistage survey enter the design effect (DEFF); the sample size",
- "after the finite population correction is multiplied by it. OpenEpi's \"Sample Size for % Frequency in a Population\" form asks for the same",
- "four things (population size, anticipated frequency, confidence limits, design effect), but its formula was not compared. With N = 1000,",
- "p = 50%, d = 5% and DEFF 1.5 this gives 417. No source for the order (correction first, then DEFF) was checked.",
+      "**Cluster or multistage surveys.** This is for a simple random sample. If people are sampled in clusters (villages, schools, wards),",
+      "multiply the result by the design effect: see the Cluster / Design Effect calculator, which also works the design effect out.",
       sep = "\n"
     ),
     worked_example = paste(

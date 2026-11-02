@@ -63,24 +63,6 @@ test_that("cohort and two proportions: any one of p1, OR, RR, RD gives the same 
   expect_equal(calc_proportion_2s(0.1, 0.3)$n_per_group, calc_proportion_2s(p1 = 0.1, p2 = 0.3)$n_per_group)
 })
 
-test_that("design effect in the prevalence calculator: multiplies the size after the finite population correction", {
-  base <- calc_proportion_precision(0.5, 0.05)
-  expect_equal(base$n, 385); expect_null(base$deff)
-  expect_equal(calc_proportion_precision(0.5, 0.05, deff = 2)$n, 769)                  # 384.16 x 2 = 768.3
-  # with a population size: the closed form of an OpenEpi-style layout, n = DEFF N p q / ((d^2 / z^2)(N - 1) + p q)
-  z <- qnorm(0.975)
-  f <- function(N, p, d, deff) deff * N * p * (1 - p) / ((d^2 / z^2) * (N - 1) + p * (1 - p))
-  for (case in list(c(1000, 0.5, 0.05, 1.5), c(20000, 0.2, 0.03, 2), c(5000, 0.1, 0.02, 1))) {
-    r <- calc_proportion_precision(case[2], case[3], N = case[1], deff = case[4])
-    expect_equal(r$n, ceiling(round(f(case[1], case[2], case[3], case[4]), 8)), info = paste(case, collapse = " "))
-  }
-  r <- calc_proportion_precision(0.5, 0.05, N = 1000, deff = 1.5)
-  expect_equal(c(r$n, r$n_simple_random), c(417, 278))
-  # the non-response inflation is applied after the design effect
-  expect_equal(calc_proportion_precision(0.5, 0.05, deff = 2, nonresponse = 0.1)$n_enrolled, ceiling(769 / 0.9))
-  expect_error(calc_proportion_precision(0.5, 0.05, deff = 0), "deff"); expect_error(calc_proportion_precision(0.5, 0.05, deff = -1), "deff")
-})
-
 test_that("log-rank, case-control: the hazard ratio from medians and p1 stay consistent with the converters", {
   expect_equal(calc_es_hazard_ratio(median_e = 18, median_c = 12)$hr, calc_logrank(pE = 0.3707, pC = 0.489, hr = 12 / 18)$hr)
 })
