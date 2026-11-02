@@ -67,7 +67,7 @@ effect_f_ui <- function(ns, id, default = 0.25) {
   tagList(
     radioButtons(ns(as), tagList("Effect size (Cohen's f)", info_tip("cohens_f")), inline = TRUE,
                  choices = c("Enter f" = "f", "From group means and SD" = "means", "From eta-squared" = "eta2")),
-    conditionalPanel(.sh_cond(ns, as, "f"), numericInput(ns(id), "Cohen's f effect size", value = default, min = 0.001, step = 0.01)),
+    conditionalPanel(.sh_cond(ns, as, "f"), numericInput(ns(id), "Cohen's f effect size", value = default, min = 0.001, step = 0.01), es_link_ui(ns, id)),
     conditionalPanel(.sh_cond(ns, as, "means"),
       textInput(ns(paste0(id, "_means")), "Group means (separated by commas)", value = "10, 12, 15"),
       numericInput(ns(paste0(id, "_sd")), tagList("Common SD within groups", info_tip("sd_variance")), value = 6, min = 0.0001)),
@@ -101,7 +101,7 @@ effect_d_ui <- function(ns, id, default = 0.5, label = "Cohen's d") {
   tagList(
     radioButtons(ns(as), tagList("Effect size (Cohen's d)", info_tip("cohens_d")), inline = TRUE,
                  choices = c("Enter d" = "d", "From a difference and an SD" = "sd", "From a difference and a variance" = "var")),
-    conditionalPanel(.sh_cond(ns, as, "d"), numericInput(ns(id), label, value = default, min = 0.001, step = 0.1)),
+    conditionalPanel(.sh_cond(ns, as, "d"), numericInput(ns(id), label, value = default, min = 0.001, step = 0.1), es_link_ui(ns, id)),
     conditionalPanel(.sh_cond(ns, as, "sd", "var"), numericInput(ns(paste0(id, "_diff")), "Difference between the means", value = 5)),
     conditionalPanel(.sh_cond(ns, as, "sd"), numericInput(ns(paste0(id, "_sd")), "Common SD", value = 10, min = 0.0001)),
     conditionalPanel(.sh_cond(ns, as, "var"), numericInput(ns(paste0(id, "_var")), tagList("Common variance", info_tip("sd_variance")), value = 100, min = 0.0001)),

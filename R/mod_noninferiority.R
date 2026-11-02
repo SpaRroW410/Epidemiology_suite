@@ -60,6 +60,7 @@ mod_noninferiority_ui <- function(id) {
       conditionalPanel(
         condition = design_is("hazard_ratio"),
         numericInput(ns("hr_val"), "Expected hazard ratio (treatment vs. control)", value = 2, min = 0.001, step = 0.1),
+        es_link_ui(ns, "hr_val"),
         numericInput(ns("margin_hr"), "Non-inferiority margin (log-hazard-ratio scale)", value = 0.5, step = 0.05),
         numericInput(ns("p1_hr"), "p1 (proportion allocated to treatment)", value = 0.5, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("d_hr"), "d (probability of observing an event)", value = 0.8, min = 0.001, max = 0.999, step = 0.01),
@@ -123,6 +124,7 @@ mod_noninferiority_ui <- function(id) {
 
 mod_noninferiority_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     result <- reactive({
       req(input$design)
 

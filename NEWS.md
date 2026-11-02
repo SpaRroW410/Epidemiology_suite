@@ -1,5 +1,13 @@
 # epidemiologysuite (development version)
 
+## Links from the calculators to the Effect Size converters
+
+* **Calculate this / Use this value:** 28 calculator inputs that ask for a number the Effect Size converters produce now have a "Calculate this"
+  link: Cohen's d (from a t statistic), Cohen's f and f-squared, r (from d), the hazard ratio, the odds ratio (from proportions), the SD (from a
+  median and interquartile range) and the SD of paired differences. The link opens the matching converter; once it has a result, "Use this value"
+  (pinned at the bottom of the window) puts the number into the calculator's input, switches the calculator to the way of entering it that shows that
+  input, and goes back. "Back without a value" leaves the input as it was. If the converter's result does not give the number, no button is offered.
+
 ## The effect, entered the way people know it (OpenEpi-style inputs)
 
 * **Means** (two independent means, unequal group sizes, unequal variances / Welch): give both means **or their difference**, and the SD

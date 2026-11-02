@@ -80,6 +80,7 @@ mod_rm_anova_ui <- function(id) {
 
 mod_rm_anova_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     effect_f_server(input, output, "f")
     result <- reactive({
       req(input$design, input$ng, input$nm, input$nscor, input$alpha, input$power)

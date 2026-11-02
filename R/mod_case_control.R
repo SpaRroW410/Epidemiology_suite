@@ -50,7 +50,8 @@ mod_case_control_ui <- function(id) {
       conditionalPanel(
         condition = sprintf("(%s) || ((%s) && input['%s'] != 'p1')", design_is("nested"), design_is("unmatched", "matched"),
                             ns("effect_as")),
-        numericInput(ns("OR"), with_tip("Expected odds ratio (OR)", "odds_ratio"), value = 2, min = 0.01, step = 0.1)
+        numericInput(ns("OR"), with_tip("Expected odds ratio (OR)", "odds_ratio"), value = 2, min = 0.01, step = 0.1),
+        es_link_ui(ns, "OR")
       ),
       conditionalPanel(
         condition = design_is("unmatched", "matched"),
@@ -116,7 +117,8 @@ mod_case_control_ui <- function(id) {
                      value = 0.03, min = 0.001, max = 0.999, step = 0.001),
         numericInput(ns("p1"), "Proportion of the cohort in exposure group 1 (p1)",
                      value = 0.25, min = 0.001, max = 0.999, step = 0.01),
-        numericInput(ns("hr"), "Hazard ratio to detect (HR)", value = 1.35, min = 0.01, step = 0.05)
+        numericInput(ns("hr"), "Hazard ratio to detect (HR)", value = 1.35, min = 0.01, step = 0.05),
+        es_link_ui(ns, "hr")
       ),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
@@ -177,6 +179,7 @@ mod_case_control_ui <- function(id) {
 
 mod_case_control_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     # the effect as calc_case_control_*() takes it: list(OR = ...) or list(p1 = ...)
     effect_args <- function() {
       if (identical(input$effect_as, "p1")) { req(input$p1_cases); list(p1 = input$p1_cases) } else { req(input$OR); list(OR = input$OR) }

@@ -59,6 +59,7 @@ mod_bayesian_ui <- function(id) {
       conditionalPanel(
         condition = design_is("bfda"),
         numericInput(ns("effect_size_bfda"), "Cohen's d effect size", value = 0.5, min = 0.01, step = 0.05),
+        es_link_ui(ns, "effect_size_bfda"),
         numericInput(ns("bf_threshold"), "Target Bayes factor (BF10) threshold", value = 10, min = 1.01, step = 1),
         numericInput(ns("nsim_bfda"), "Monte Carlo replicates per candidate n (nsim)",
                      value = 100, min = 50, max = 1000, step = 50),
@@ -105,6 +106,7 @@ mod_bayesian_ui <- function(id) {
 
 mod_bayesian_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     # the simulations run in a background R process on a server (background.R); `result` is the finished calculation
     bg <- background_calc()
     result <- bg$result(function() result_now())
