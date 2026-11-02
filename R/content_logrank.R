@@ -43,6 +43,9 @@ logrank_content <- list(
       "accrual and non-proportional-hazards designs, a more specialized",
       "method is needed (see docs/checklist_by_design.md's Survival",
       "section for further designs planned).",
+      "",
+      "**Hazard ratio from median survival.** If only median survival times are known, the hazard ratio can be calculated from them: with",
+      "exponential survival (a constant hazard) HR = median in the control arm / median in the experimental arm (18 and 12 months give 0.667).",
       sep = "\n"
     ),
     worked_example = paste(

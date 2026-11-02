@@ -36,9 +36,9 @@ mod_diagnostic_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("precision"),
-        numericInput(ns("sens"), "Expected sensitivity (Sn)", value = 0.90, min = 0, max = 1, step = 0.01),
-        numericInput(ns("spec"), "Expected specificity (Sp)", value = 0.85, min = 0, max = 1, step = 0.01),
-        numericInput(ns("prevalence"), "Expected prevalence of the target condition (P)",
+        numericInput(ns("sens"), with_tip("Expected sensitivity (Sn)", "sensitivity"), value = 0.90, min = 0, max = 1, step = 0.01),
+        numericInput(ns("spec"), with_tip("Expected specificity (Sp)", "specificity"), value = 0.85, min = 0, max = 1, step = 0.01),
+        numericInput(ns("prevalence"), with_tip("Expected prevalence of the target condition (P)", "prevalence"),
                      value = 0.10, min = 0, max = 1, step = 0.01),
         precision_type_input(ns("error_precision"),
                              absolute = "Absolute (+/- on the 0-1 scale, e.g. 0.05 = +/- 5 points)",
@@ -60,7 +60,7 @@ mod_diagnostic_ui <- function(id) {
         numericInput(ns("sens1"), "Sn1 (expected sensitivity of new test)", value = 0.95, min = 0, max = 1, step = 0.01),
         numericInput(ns("spec0"), "Sp0 (reference/null specificity)", value = 0.80, min = 0, max = 1, step = 0.01),
         numericInput(ns("spec1"), "Sp1 (expected specificity of new test)", value = 0.85, min = 0, max = 1, step = 0.01),
-        numericInput(ns("prevalence_ref"), "Expected prevalence of the target condition (P)",
+        numericInput(ns("prevalence_ref"), with_tip("Expected prevalence of the target condition (P)", "prevalence"),
                      value = 0.40, min = 0, max = 1, step = 0.01)
       ),
       conditionalPanel(
@@ -75,9 +75,9 @@ mod_diagnostic_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("ppv_npv"),
-        numericInput(ns("sens_ppv"), "Expected sensitivity (Sn)", value = 0.90, min = 0, max = 1, step = 0.01),
-        numericInput(ns("spec_ppv"), "Expected specificity (Sp)", value = 0.85, min = 0, max = 1, step = 0.01),
-        numericInput(ns("prevalence_ppv"), "Expected prevalence of the target condition (P)",
+        numericInput(ns("sens_ppv"), with_tip("Expected sensitivity (Sn)", "sensitivity"), value = 0.90, min = 0, max = 1, step = 0.01),
+        numericInput(ns("spec_ppv"), with_tip("Expected specificity (Sp)", "specificity"), value = 0.85, min = 0, max = 1, step = 0.01),
+        numericInput(ns("prevalence_ppv"), with_tip("Expected prevalence of the target condition (P)", "prevalence"),
                      value = 0.20, min = 0, max = 1, step = 0.01),
         numericInput(ns("prec_ppv"), "Desired precision for PPV (W_PPV)",
                      value = 0.05, min = 0.001, max = 0.5, step = 0.01),
@@ -88,9 +88,9 @@ mod_diagnostic_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("likelihood_ratio"),
-        numericInput(ns("sens_lr"), "Expected sensitivity (Sn)", value = 0.80, min = 0, max = 1, step = 0.01),
-        numericInput(ns("spec_lr"), "Expected specificity (Sp)", value = 0.73, min = 0, max = 1, step = 0.01),
-        numericInput(ns("prevalence_lr"), "Expected prevalence of the target condition (P)",
+        numericInput(ns("sens_lr"), with_tip("Expected sensitivity (Sn)", "sensitivity"), value = 0.80, min = 0, max = 1, step = 0.01),
+        numericInput(ns("spec_lr"), with_tip("Expected specificity (Sp)", "specificity"), value = 0.73, min = 0, max = 1, step = 0.01),
+        numericInput(ns("prevalence_lr"), with_tip("Expected prevalence of the target condition (P)", "prevalence"),
                      value = 0.50, min = 0, max = 1, step = 0.01),
         selectInput(ns("lr_type"), "Likelihood ratio type",
                     choices = c("Positive (LR+)" = "positive", "Negative (LR-)" = "negative")),
@@ -100,8 +100,8 @@ mod_diagnostic_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("odds_ratio"),
-        numericInput(ns("sens_dor"), "Expected sensitivity (Sn)", value = 0.80, min = 0, max = 1, step = 0.01),
-        numericInput(ns("spec_dor"), "Expected specificity (Sp)", value = 0.70, min = 0, max = 1, step = 0.01)
+        numericInput(ns("sens_dor"), with_tip("Expected sensitivity (Sn)", "sensitivity"), value = 0.80, min = 0, max = 1, step = 0.01),
+        numericInput(ns("spec_dor"), with_tip("Expected specificity (Sp)", "specificity"), value = 0.70, min = 0, max = 1, step = 0.01)
       ),
       conditionalPanel(
         condition = design_is("vs_reference", "two_indep", "two_paired", "odds_ratio"),

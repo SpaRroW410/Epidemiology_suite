@@ -34,7 +34,7 @@ mod_case_control_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("unmatched", "matched"),
-        numericInput(ns("p0"), "p0 (prevalence of exposure among controls)",
+        numericInput(ns("p0"), with_tip("p0 (prevalence of exposure among controls)", "p0_controls"),
                      value = 0.30, min = 0.001, max = 0.999, step = 0.01)
       ),
       conditionalPanel(
@@ -50,7 +50,7 @@ mod_case_control_ui <- function(id) {
       conditionalPanel(
         condition = sprintf("(%s) || ((%s) && input['%s'] != 'p1')", design_is("nested"), design_is("unmatched", "matched"),
                             ns("effect_as")),
-        numericInput(ns("OR"), "Expected odds ratio (OR)", value = 2, min = 0.01, step = 0.1)
+        numericInput(ns("OR"), with_tip("Expected odds ratio (OR)", "odds_ratio"), value = 2, min = 0.01, step = 0.1)
       ),
       conditionalPanel(
         condition = design_is("unmatched", "matched"),
@@ -58,12 +58,12 @@ mod_case_control_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("matched"),
-        radioButtons(ns("phi_as"), "Correlation of exposure within matched pairs (phi)",
+        radioButtons(ns("phi_as"), with_tip("Correlation of exposure within matched pairs (phi)", "phi"),
                      choices = c("Enter phi (0.2 if unknown)" = "value",
                                  "Calculate from a table of matched pairs (pilot or published)" = "table")),
         conditionalPanel(
           condition = sprintf("input['%s'] != 'table'", ns("phi_as")),
-          numericInput(ns("phi_coef"), "phi", value = 0.2, min = -0.99, max = 0.99, step = 0.01)
+          numericInput(ns("phi_coef"), with_tip("phi", "phi"), value = 0.2, min = -0.99, max = 0.99, step = 0.01)
         ),
         conditionalPanel(
           condition = sprintf("input['%s'] == 'table'", ns("phi_as")),

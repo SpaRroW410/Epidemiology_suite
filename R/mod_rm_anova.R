@@ -28,7 +28,7 @@ mod_rm_anova_ui <- function(id) {
       ),
       numericInput(ns("ng"), "Number of between-subjects groups (ng)", value = 3, min = 1, step = 1),
       numericInput(ns("nm"), "Number of repeated measurements (nm)", value = 4, min = 2, step = 1),
-      numericInput(ns("f"), "Cohen's f effect size", value = 0.36, min = 0.001, step = 0.01),
+      effect_f_ui(ns, "f", 0.36),
       numericInput(ns("nscor"), "Nonsphericity correction (epsilon, 1 = sphericity met)",
                    value = 0.7, min = 0.01, max = 1, step = 0.01),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
@@ -80,12 +80,13 @@ mod_rm_anova_ui <- function(id) {
 
 mod_rm_anova_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    effect_f_server(input, output, "f")
     result <- reactive({
-      req(input$design, input$ng, input$nm, input$f, input$nscor, input$alpha, input$power)
+      req(input$design, input$ng, input$nm, input$nscor, input$alpha, input$power)
 
       tryCatch(
         list(ok = TRUE, value = calc_rm_anova(
-          ng = input$ng, nm = input$nm, f = input$f, nscor = input$nscor,
+          ng = input$ng, nm = input$nm, f = effect_f_value(input, "f"), nscor = input$nscor,
           alpha = input$alpha, power = input$power, type = input$design
         )),
         error = function(e) list(ok = FALSE, message = conditionMessage(e))
@@ -108,12 +109,13 @@ mod_rm_anova_server <- function(id) {
     render_export_handlers(output, result, function() rm_anova_content[[input$design]])
 
     render_power_curves(output, function() {
-      req(input$ng, input$nm, input$f, input$nscor, input$alpha, input$power, input$design)
+      fv <- effect_f_value(input, "f")
+      req(input$ng, input$nm, fv, input$nscor, input$alpha, input$power, input$design)
       list(
         calc_fn = calc_rm_anova,
-        args = list(ng = input$ng, nm = input$nm, f = input$f, nscor = input$nscor,
+        args = list(ng = input$ng, nm = input$nm, f = fv, nscor = input$nscor,
                      alpha = input$alpha, power = input$power, type = input$design),
-        effect = list(param = "f", values = curve_range_multiplicative(input$f), label = "Cohen's f effect size"),
+        effect = list(param = "f", values = curve_range_multiplicative(fv), label = "Cohen's f effect size"),
         power = list(param = "power", values = curve_range_power())
       )
     })

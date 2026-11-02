@@ -5,15 +5,19 @@
 \title{Sample size for two independent proportions (equal allocation)}
 \usage{
 calc_proportion_2s(
-  p1,
+  p1 = NULL,
   p2,
   alpha = 0.05,
   power = 0.8,
-  alternative = c("two.sided", "less", "greater")
+  alternative = c("two.sided", "less", "greater"),
+  OR = NULL,
+  RR = NULL,
+  RD = NULL
 )
 }
 \arguments{
-\item{p1}{Proportion in group 1 (0,1)}
+\item{p1}{Proportion in group 1 (0,1). Instead of \code{p1} give ONE of \code{OR}, \code{RR} or \code{RD}: group 2 is then the reference and \code{p1} is
+calculated from \code{p2} (as in OpenEpi's "fill in 1 of the following").}
 
 \item{p2}{Proportion in group 2 (0,1)}
 
@@ -22,9 +26,15 @@ calc_proportion_2s(
 \item{power}{Desired power (0,1)}
 
 \item{alternative}{"two.sided", "less", or "greater"}
+
+\item{OR}{Odds ratio of group 1 versus group 2, instead of \code{p1}}
+
+\item{RR}{Risk ratio p1 / p2, instead of \code{p1}}
+
+\item{RD}{Risk difference p1 - p2, instead of \code{p1}}
 }
 \value{
-list(n_per_group, n_total, h, inputs)
+list(n_per_group, n_total, h, p1, odds_ratio, inputs)
 }
 \description{
 Wraps pwr::pwr.2p.test (Cohen's arcsine-transformed effect size h).

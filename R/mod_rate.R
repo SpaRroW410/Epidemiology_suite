@@ -60,7 +60,7 @@ mod_rate_ui <- function(id) {
                      choices = c("Rate ratio" = "ratio", "Exposed group's rate" = "rate"), inline = TRUE),
         conditionalPanel(
           condition = sprintf("input['%s'] != 'rate'", ns("ratio_as_comp")),
-          numericInput(ns("rate_ratio"), "Expected rate ratio (exposed / reference)", value = 0.8938, min = 0.0001)
+          numericInput(ns("rate_ratio"), with_tip("Expected rate ratio (exposed / reference)", "rate_ratio"), value = 0.8938, min = 0.0001)
         ),
         conditionalPanel(
           condition = sprintf("input['%s'] == 'rate'", ns("ratio_as_comp")),

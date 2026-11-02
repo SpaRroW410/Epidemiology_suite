@@ -1,5 +1,26 @@
 # epidemiologysuite (development version)
 
+## The effect, entered the way people know it (OpenEpi-style inputs)
+
+* **Means** (two independent means, unequal group sizes, unequal variances / Welch): give both means **or their difference**, and the SD
+  **or the variance** (each group's own in the Welch design, with the ratio of group sizes), as in OpenEpi's "Sample Size For Comparing Two
+  Means" form; the first two designs also take **Cohen's d** directly. A line under the inputs shows the difference and the Cohen's d they
+  give. OpenEpi's example inputs (means 132.86 and 127.44, SDs 15.34 and 18.23, 95% and 80%, equal groups) give 152 per group. Paired means:
+  the SD of the differences, or the two SDs and their correlation.
+* **Cohort / trial and two proportions:** give the exposed group's risk, or instead the **odds ratio**, the **risk ratio** or the **risk
+  difference** ("fill in 1 of the following"); the others are shown. For 5% unexposed and an odds ratio of 2: 9.52%, 1.90, 4.52 points.
+  Group 2 is the reference in the two-proportion design.
+* **Prevalence precision:** a **design effect** (DEFF) for cluster and multistage surveys, applied after the finite population correction
+  (N = 1000, 50%, +/- 5%, DEFF 1.5 gives 417). OpenEpi's form was not compared; no source for the order was checked.
+* **Cohen's f** (Kruskal-Wallis, Friedman, repeated-measures ANOVA): enter f, or work it out from group means and SD or from eta-squared.
+  **Cohen's d** (FDR and Dunnett designs): enter d, or a difference with an SD or a variance. **Log-rank:** the hazard ratio can also be
+  calculated from median survival times.
+* From R: `calc_means_2s_indep()`, `calc_means_2s_unequal_n()` (`diff`, `variance`, `d`), `calc_means_welch()` (`diff`, `var1`, `var2`),
+  `calc_means_paired()` (`sd1`, `sd2`, `r`), `calc_cohort()` and `calc_proportion_2s()` (`OR`, `RR`, `RD`) and
+  `calc_proportion_precision()` (`deff`). Existing calls are unchanged. Each route is tested to give exactly the result of the plain one.
+* **Information tips** (i) on the labels of the matching terms: phi, odds ratio, ICC, design effect, sensitivity, specificity, prevalence,
+  allocation ratio, rate ratio, hazard ratio, absolute and relative precision, non-response.
+
 ## Effect Size tab, glossary and information tips
 
 * **Effect Size** is a new calculator, the first group in the Plan: Sample Size list (Plan still opens on Proportions). It works out

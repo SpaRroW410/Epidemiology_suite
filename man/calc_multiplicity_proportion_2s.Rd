@@ -15,7 +15,8 @@ calc_multiplicity_proportion_2s(
 )
 }
 \arguments{
-\item{p1}{Proportion in group 1 (0,1)}
+\item{p1}{Proportion in group 1 (0,1). Instead of \code{p1} give ONE of \code{OR}, \code{RR} or \code{RD}: group 2 is then the reference and \code{p1} is
+calculated from \code{p2} (as in OpenEpi's "fill in 1 of the following").}
 
 \item{p2}{Proportion in group 2 (0,1)}
 

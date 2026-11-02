@@ -79,6 +79,11 @@ proportion_content <- list(
       "Unlike the *vs. known value* calculator above, this formula does not",
       "test a hypothesis or require a power target -- there is no effect",
       "size and no comparison, only an estimation precision target.",
+      "",
+      "**Design effect (optional, under Advanced options).** For a cluster or multistage survey enter the design effect (DEFF); the sample size",
+ "after the finite population correction is multiplied by it. OpenEpi's \"Sample Size for % Frequency in a Population\" form asks for the same",
+ "four things (population size, anticipated frequency, confidence limits, design effect), but its formula was not compared. With N = 1000,",
+ "p = 50%, d = 5% and DEFF 1.5 this gives 417. No source for the order (correction first, then DEFF) was checked.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -134,6 +139,10 @@ proportion_content <- list(
       "  (1 - Type II error rate), typically 0.8 or 0.9.",
       "",
       "Total sample size is twice the per-group value (n1 = n2).",
+      "",
+      "**Other ways to enter the effect.** Group 2 is the reference. Instead of group 1's proportion you can give the **odds ratio**, the",
+      "**risk (prevalence) ratio** or the **risk difference**; the proportion and the other measures are calculated and shown under the inputs",
+      "(as in OpenEpi's \"fill in 1 of the following\").",
       sep = "\n"
     ),
     worked_example = paste(

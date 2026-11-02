@@ -39,8 +39,14 @@ mod_logrank_ui <- function(id) {
                      value = 0.3707, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("pC"), "pC (cumulative event probability, control group)",
                      value = 0.4890, min = 0.001, max = 0.999, step = 0.01),
-        radioButtons(ns("hr_as_logrank"), "Hazard ratio",
-                     choices = c("Enter it" = "value", "Calculate from pE and pC (proportional hazards)" = "implied")),
+        radioButtons(ns("hr_as_logrank"), tagList("Hazard ratio", info_tip("hazard_ratio")),
+                     choices = c("Enter it" = "value", "Calculate from pE and pC (proportional hazards)" = "implied",
+                                 "Calculate from median survival (exponential survival)" = "medians")),
+        conditionalPanel(
+          condition = sprintf("input['%s'] == 'medians'", ns("hr_as_logrank")),
+          fluidRow(column(6, numericInput(ns("hr_median_e"), "Median survival, experimental arm", value = 18, min = 0.0001)),
+                   column(6, numericInput(ns("hr_median_c"), "Median survival, control arm", value = 12, min = 0.0001)))
+        ),
         conditionalPanel(
           condition = sprintf("input['%s'] != 'implied'", ns("hr_as_logrank")),
           numericInput(ns("hr_logrank"), "Postulated hazard ratio (HR)", value = 0.7, min = 0.01, step = 0.05)
@@ -192,7 +198,12 @@ mod_logrank_ui <- function(id) {
 mod_logrank_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     # the hazard ratio of the two-group design: as entered, or NULL so that calc_logrank() calculates it from pE and pC
-    logrank_hr <- function() if (identical(input$hr_as_logrank, "implied")) NULL else { req(input$hr_logrank); input$hr_logrank }
+    logrank_hr <- function() {
+      mode <- input$hr_as_logrank
+      if (identical(mode, "implied")) NULL
+      else if (identical(mode, "medians")) { req(input$hr_median_e, input$hr_median_c); calc_es_hazard_ratio(median_e = input$hr_median_e, median_c = input$hr_median_c)$hr }
+      else { req(input$hr_logrank); input$hr_logrank }
+    }
     output$hr_implied_logrank <- renderUI({
       pE <- input$pE; pC <- input$pC
       ok <- function(x) is.numeric(x) && length(x) == 1 && !is.na(x) && x > 0 && x < 1
@@ -320,7 +331,7 @@ mod_logrank_server <- function(id) {
           p(strong("Total sample size: "), v$n_total),
           p(sprintf("Experimental group: %d, Control group: %d", v$n_exp, v$n_control)),
           p(class = "text-muted small", sprintf("Hazard ratio used: %.3f%s", v$hr,
-                                                if (is.null(v$inputs$hr) || identical(input$hr_as_logrank, "implied")) " (from pE and pC)" else "")),
+                                                if (identical(input$hr_as_logrank, "implied")) " (from pE and pC)" else if (identical(input$hr_as_logrank, "medians")) " (from the median survival times)" else "")),
           lapply(v$notes, function(n) div(class = "text-warning", n))
         )
       } else if (input$design == "stratified") {

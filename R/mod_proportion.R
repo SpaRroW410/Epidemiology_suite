@@ -64,8 +64,9 @@ mod_proportion_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("two_sample"),
-        numericInput(ns("p1_two"), "p1 (group 1 proportion)", value = 0.10, min = 0, max = 1, step = 0.01),
-        numericInput(ns("p2_two"), "p2 (group 2 proportion)", value = 0.25, min = 0, max = 1, step = 0.01)
+        numericInput(ns("p2_two"), "p2 (group 2 / reference proportion)", value = 0.25, min = 0, max = 1, step = 0.01),
+        p(class = "text-muted small mb-1", "Fill in ONE of the following for group 1; the others are calculated."),
+        prop_given_ui(ns, "two", "p1_two", "p1 (group 1 proportion)", 0.10, ref_label = "group 2", min = 0)
       ),
       conditionalPanel(
         condition = design_is("posthoc_pairwise"),
@@ -87,7 +88,9 @@ mod_proportion_ui <- function(id) {
           condition = design_is("precision"),
           numericInput(ns("N_precision"),
                        "Population size N (optional; leave blank for a large/community population)",
-                       value = NA, min = 1)
+                       value = NA, min = 1),
+          numericInput(ns("deff_precision"), with_tip("Design effect (DEFF) of a cluster or multistage survey; 1 for a random sample", "deff"),
+                       value = 1, min = 0.1, step = 0.1)
         ),
         conditionalPanel(
           condition = design_is("single", "two_sample"),
@@ -154,6 +157,7 @@ mod_proportion_ui <- function(id) {
 
 mod_proportion_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    prop_given_server(input, output, "two", "p1_two", ref = function() input$p2_two, ref_name = "group 2")
     precision_error <- reactive(if (identical(input$error_precision, "relative")) "relative" else "absolute")
     precision_value <- reactive(if (precision_error() == "relative") input$eps_precision else input$d_precision)
     output$precision_equiv <- renderUI({
@@ -174,7 +178,8 @@ mod_proportion_server <- function(id) {
           list(ok = TRUE, value = calc_proportion_precision(
             p = input$p_precision, d = precision_value(),
             conf_level = input$conf_level, N = N, error = precision_error(),
-            nonresponse = .nonresponse_value(input$nonresponse_precision)
+            nonresponse = .nonresponse_value(input$nonresponse_precision),
+            deff = if (is.null(.input_or_null(input$deff_precision))) 1 else input$deff_precision
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -189,13 +194,13 @@ mod_proportion_server <- function(id) {
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
       } else if (input$design == "two_sample") {
-        req(input$p1_two, input$p2_two, input$alpha, input$power, input$alternative)
+        req(input$p2_two, input$alpha, input$power, input$alternative)
         tryCatch(
-          list(ok = TRUE, value = calc_proportion_2s(
-            p1 = input$p1_two, p2 = input$p2_two,
+          list(ok = TRUE, value = do.call(calc_proportion_2s, c(list(
+            p2 = input$p2_two,
             alpha = input$alpha, power = input$power,
             alternative = input$alternative
-          )),
+          ), prop_given_args(input, "two", "p1_two")))),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
       } else {
@@ -224,6 +229,7 @@ mod_proportion_server <- function(id) {
             p(sprintf("(before finite population correction: %d, for population N = %s)",
                       v$n_unadjusted, v$N))
           },
+          if (!is.null(v$deff)) p(sprintf("(design effect %s: %d for a simple random sample, times %s)", format(v$deff), v$n_simple_random, format(v$deff))),
           nonresponse_result_ui(v$n_enrolled, v$n, v$inputs$nonresponse),
           p(sprintf("Precision (%s): +/- %s on the 0-1 scale = +/- %s of p. Z = %.4f", v$inputs$error,
                     .prec_fmt(v$d_absolute), .prec_pct(v$epsilon_relative), v$z)),
@@ -265,10 +271,11 @@ mod_proportion_server <- function(id) {
           power = list(param = "power", values = curve_range_power())
         )
       } else if (input$design == "two_sample") {
-        req(input$p1_two, input$p2_two, input$alpha, input$power, input$alternative)
+        p1 <- prop_given_p1(input, "two", "p1_two", input$p2_two)
+        req(p1, input$p2_two, input$alpha, input$power, input$alternative)
         list(
           calc_fn = calc_proportion_2s,
-          args = list(p1 = input$p1_two, p2 = input$p2_two, alpha = input$alpha,
+          args = list(p1 = p1, p2 = input$p2_two, alpha = input$alpha,
                        power = input$power, alternative = input$alternative),
           effect = list(param = "p2", values = curve_range_proportion(), label = "p2 (group 2 proportion)"),
           power = list(param = "power", values = curve_range_power())
@@ -291,7 +298,8 @@ mod_proportion_server <- function(id) {
         list(
           calc_fn = calc_proportion_precision,
           args = list(p = input$p_precision, d = precision_value(), conf_level = input$conf_level, N = N,
-                      error = precision_error()),
+                      error = precision_error(),
+                      deff = if (is.null(.input_or_null(input$deff_precision))) 1 else input$deff_precision),
           effect = list(param = "p", values = curve_range_proportion(),
                       label = "p (expected proportion)",
                       title = "Required n vs. expected proportion"),

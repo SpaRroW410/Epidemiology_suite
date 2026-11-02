@@ -5,13 +5,16 @@
 \title{Sample size for two independent means with unequal group sizes}
 \usage{
 calc_means_2s_unequal_n(
-  mu1,
-  mu2,
-  sd,
+  mu1 = NULL,
+  mu2 = NULL,
+  sd = NULL,
   n1,
   alpha = 0.05,
   power = 0.8,
-  alternative = c("two.sided", "less", "greater")
+  alternative = c("two.sided", "less", "greater"),
+  diff = NULL,
+  variance = NULL,
+  d = NULL
 )
 }
 \arguments{
@@ -28,6 +31,12 @@ calc_means_2s_unequal_n(
 \item{power}{Desired power (0,1)}
 
 \item{alternative}{"two.sided", "less", or "greater"}
+
+\item{diff}{Difference between the means, instead of \code{mu1} and \code{mu2}}
+
+\item{variance}{Common variance, instead of \code{sd}}
+
+\item{d}{Cohen's d, instead of the means and the SD}
 }
 \value{
 list(n1, n2, n_total, d, inputs)

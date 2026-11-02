@@ -8,11 +8,11 @@ precision_type_input <- function(id, label = "Precision expressed as", selected 
                                  relative = "Relative (+/- a fraction of the estimate)") {
   choices <- c("absolute", "relative")
   names(choices) <- c(absolute, relative)
-  radioButtons(id, label, choices = choices, selected = selected)
+  radioButtons(id, tagList(label, info_tip("absolute_relative")), choices = choices, selected = selected)
 }
 
 nonresponse_input <- function(id, label = "Expected non-response / loss to follow-up (fraction; 0 = none, 0.1 = 10%)") {
-  numericInput(id, label, value = 0, min = 0, max = 0.95, step = 0.05)
+  numericInput(id, tagList(label, info_tip("nonresponse")), value = 0, min = 0, max = 0.95, step = 0.05)
 }
 
 # `kind`: "proportion", "mean", "cluster", "rate" or "diagnostic"

@@ -5,12 +5,15 @@
 \title{Sample size for two independent means (equal allocation, common SD)}
 \usage{
 calc_means_2s_indep(
-  mu1,
-  mu2,
-  sd,
+  mu1 = NULL,
+  mu2 = NULL,
+  sd = NULL,
   alpha = 0.05,
   power = 0.8,
-  alternative = c("two.sided", "less", "greater")
+  alternative = c("two.sided", "less", "greater"),
+  diff = NULL,
+  variance = NULL,
+  d = NULL
 )
 }
 \arguments{
@@ -25,6 +28,12 @@ calc_means_2s_indep(
 \item{power}{Desired power (0,1)}
 
 \item{alternative}{"two.sided", "less", or "greater"}
+
+\item{diff}{Difference between the means, instead of \code{mu1} and \code{mu2}}
+
+\item{variance}{Common variance, instead of \code{sd}}
+
+\item{d}{Cohen's d, instead of the means and the SD}
 }
 \value{
 list(n_per_group, n_total, d, inputs)
@@ -34,4 +43,5 @@ Sample size for two independent means (equal allocation, common SD)
 }
 \examples{
 calc_means_2s_indep(mu1 = 0.5, mu2 = 0, sd = 1, alpha = 0.05, power = 0.8)
+calc_means_2s_indep(diff = 0.5, variance = 1)
 }

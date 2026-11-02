@@ -52,7 +52,7 @@ mod_bayesian_ui <- function(id) {
           numericInput(ns("prior_upper"), "Prior upper bound (log odds ratio)", value = log(1.3), step = 0.05)
         ),
         numericInput(ns("delta_w"), "Minimally worthwhile log odds ratio (delta_w)", value = 0, step = 0.1),
-        numericInput(ns("n_ratio"), "Allocation ratio n2/n1", value = 1, min = 0.01, step = 0.1),
+        numericInput(ns("n_ratio"), with_tip("Allocation ratio n2/n1", "allocation_ratio"), value = 1, min = 0.01, step = 0.1),
         numericInput(ns("alpha_or"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_or"), "Target assurance", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
       ),

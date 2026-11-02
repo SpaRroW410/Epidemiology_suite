@@ -10,7 +10,8 @@ calc_proportion_precision(
   conf_level = 0.95,
   N = NULL,
   error = c("absolute", "relative"),
-  nonresponse = 0
+  nonresponse = 0,
+  deff = 1
 )
 }
 \arguments{
@@ -28,6 +29,11 @@ correction, i.e. an effectively infinite population.}
 
 \item{nonresponse}{Expected fraction not analyzable (non-response, refusal or loss to follow-up), in [0, 1); the number to enrol
 is n / (1 - nonresponse), rounded up}
+
+\item{deff}{Design effect of a complex (cluster or multistage) sample, > 0; 1 (default) for a simple random sample. The sample size
+after the finite population correction is multiplied by it. OpenEpi's "Sample Size for \% Frequency in a Population" form asks for
+the same four things (population size, anticipated frequency, confidence limits, design effect); its formula was not compared,
+and no source for the order (correction, then design effect) was checked.}
 }
 \value{
 A named list of class \code{ss_result} with \code{n} (to analyze), \code{n_enrolled} (when \code{nonresponse} > 0), \code{n_unadjusted} (before the

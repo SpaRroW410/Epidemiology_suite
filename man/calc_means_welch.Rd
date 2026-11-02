@@ -6,14 +6,17 @@
 t-test)}
 \usage{
 calc_means_welch(
-  mu1,
-  mu2,
-  sd1,
-  sd2,
+  mu1 = NULL,
+  mu2 = NULL,
+  sd1 = NULL,
+  sd2 = NULL,
   alpha = 0.05,
   power = 0.8,
   ratio = 1,
-  alternative = c("two.sided", "less", "greater")
+  alternative = c("two.sided", "less", "greater"),
+  diff = NULL,
+  var1 = NULL,
+  var2 = NULL
 )
 }
 \arguments{
@@ -32,6 +35,10 @@ calc_means_welch(
 \item{ratio}{Group 2 size divided by group 1 size (> 0)}
 
 \item{alternative}{"two.sided", "less", or "greater"}
+
+\item{diff}{Difference between the means, instead of \code{mu1} and \code{mu2}}
+
+\item{var1, var2}{Variances instead of standard deviations (as in OpenEpi's mean-difference form: "enter Std. Deviation OR Variance")}
 }
 \value{
 list(n1, n2, n_total, inputs)
