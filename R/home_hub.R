@@ -112,7 +112,7 @@ home_panel_ui <- function() {
       )
     ),
     # scrolls the page to the top when a Home button opens another tab (the new tab would otherwise open part-way down)
-    tags$script(HTML("if (window.Shiny && Shiny.addCustomMessageHandler) Shiny.addCustomMessageHandler('home_scroll_top', function () { window.scrollTo(0, 0); });"))
+    tags$script(HTML("if (window.Shiny && Shiny.addCustomMessageHandler) Shiny.addCustomMessageHandler('home_scroll_top', function (msg) { window.scrollTo(0, 0); });"))
   )
 }
 
