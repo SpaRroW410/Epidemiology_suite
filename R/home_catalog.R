@@ -25,6 +25,76 @@
 
 calculator_catalog <- list(
 
+  list(key = "effect_size_two_means",
+       label = "Effect size: Cohen's d and Hedges' g from two means (SDs or variances)",
+       answers = "Answers: \"I know the two means (or their difference) and the standard deviations or variances -- what is Cohen's d?\"",
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Effect Size",
+       module_input_id = "effect_size-design", design_value = "two_means"),
+
+  list(key = "effect_size_from_t",
+       label = "Effect size: Cohen's d from a t statistic",
+       answers = "Answers: \"A paper reports only a t statistic and the group sizes -- what is the standardized difference?\"",
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Effect Size",
+       module_input_id = "effect_size-design", design_value = "from_t"),
+
+  list(key = "effect_size_paired",
+       label = "Effect size: d for paired measurements (from the SDs and their correlation)",
+       answers = "Answers: \"I have before-after or matched measurements -- what is d for the differences?\"",
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Effect Size",
+       module_input_id = "effect_size-design", design_value = "paired_means"),
+
+  list(key = "effect_size_anova_f",
+       label = "Effect size: Cohen's f for several means (from means and SD, eta-squared or F)",
+       answers = "Answers: \"I have three or more group means -- what is Cohen's f for an ANOVA calculation?\"",
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Effect Size",
+       module_input_id = "effect_size-design", design_value = "anova_f"),
+
+  list(key = "effect_size_proportions",
+       label = "Effect size: odds ratio, risk ratio, risk difference and Cohen's h from two proportions (also case-control)",
+       answers = "Answers: \"I know the baseline proportion and an odds ratio, a risk ratio, a difference or the other proportion -- what are the others?\"",
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Effect Size",
+       module_input_id = "effect_size-design", design_value = "proportions"),
+
+  list(key = "effect_size_chisq_w",
+       label = "Effect size: Cohen's w and Cramer's V for a chi-square test",
+       answers = "Answers: \"I have a table of counts, a chi-square statistic or expected proportions -- what is Cohen's w?\"",
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Effect Size",
+       module_input_id = "effect_size-design", design_value = "chisq_w"),
+
+  list(key = "effect_size_hazard_ratio",
+       label = "Effect size: hazard ratio from median survival or survival probabilities",
+       answers = "Answers: \"I know the median survival in each arm -- what hazard ratio should I enter?\"",
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Effect Size",
+       module_input_id = "effect_size-design", design_value = "hazard_ratio"),
+
+  list(key = "effect_size_convert",
+       label = "Effect size: convert between d, r, odds ratio, R-squared and f-squared",
+       answers = "Answers: \"I have an effect size on one scale and a calculator wants another.\"",
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Effect Size",
+       module_input_id = "effect_size-design", design_value = "correlation"),
+
+  list(key = "effect_size_median_iqr",
+       label = "Effect size: mean and SD from a median and interquartile range",
+       answers = "Answers: \"My pilot data give a median and IQR -- what mean and SD can I plan with?\"",
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Effect Size",
+       module_input_id = "effect_size-design", design_value = "median_iqr"),
+
+  list(key = "effect_size_matched_pairs",
+       label = "Effect size: phi from a table of matched case-control pairs",
+       answers = "Answers: \"I need phi for a matched case-control calculation and have a table of matched pairs.\"",
+       outcome_type = "planning", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Effect Size",
+       module_input_id = "effect_size-design", design_value = "matched_pairs"),
+
   list(key = "plan_attrition_stages",
        label = "Inflate a sample size for attrition and non-response (one or several stages)",
        answers = paste(
@@ -2248,6 +2318,9 @@ calculator_catalog <- list(
 # calculator catalog table. "Proportions" is the only family with built
 # calculators right now; selecting it reveals its catalog entries above.
 study_design_families <- list(
+  list(id = "effect_sizes", label = "Effect sizes (the numbers the calculators ask for)",
+       hint = "Not a sample-size calculation: work out Cohen's d, f, h or w, an odds ratio, a hazard ratio, or a mean and SD from a median and IQR, from what you already know.",
+       catalog_keys = c("effect_size_two_means", "effect_size_from_t", "effect_size_paired", "effect_size_anova_f", "effect_size_proportions", "effect_size_chisq_w", "effect_size_hazard_ratio", "effect_size_convert", "effect_size_median_iqr", "effect_size_matched_pairs")),
   list(id = "planning_tools", label = "Study planning tools (randomization, attrition)",
        hint = "Not a sample-size calculation: reproducible randomization lists, and inflating a required sample size for attrition, non-response and non-compliance.",
        catalog_keys = c("plan_randomization_block", "plan_randomization_stratified", "plan_randomization_simple",
@@ -2441,6 +2514,9 @@ study_design_families <- list(
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
 test_families <- list(
+  list(id = "effect_size_tests", label = "Effect sizes (the numbers the calculators ask for)",
+       hint = "Not a sample-size calculation: work out Cohen's d, f, h or w, an odds ratio, a hazard ratio, or a mean and SD from a median and IQR, from what you already know.",
+       catalog_keys = c("effect_size_two_means", "effect_size_from_t", "effect_size_paired", "effect_size_anova_f", "effect_size_proportions", "effect_size_chisq_w", "effect_size_hazard_ratio", "effect_size_convert", "effect_size_median_iqr", "effect_size_matched_pairs")),
   list(id = "analyze_outbreak_tests", label = "Outbreak Measures",
        hint = "Attack rate, exposure-specific attack rates and risk ratios (which food?), secondary attack rate and case fatality, with confidence intervals, from counts.",
        catalog_keys = c("analyze_outbreak_attack", "analyze_outbreak_exposure", "analyze_outbreak_secondary", "analyze_outbreak_cfr")),
