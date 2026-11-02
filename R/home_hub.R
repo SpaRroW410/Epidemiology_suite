@@ -126,6 +126,7 @@ find_panel_ui <- function() {
     id = "home_helper",
     nav_panel("Guided questions", br(), design_wizard_body()),
     nav_panel("Browse all calculators", br(), home_finder_body()),
+    nav_panel("Glossary", br(), glossary_ui()),
     nav_panel("Formulas & LaTeX", br(), home_sandbox_ui())
   ))
 }

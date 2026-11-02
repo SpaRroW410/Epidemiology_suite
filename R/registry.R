@@ -132,6 +132,8 @@ module_registry <- function() {
          ui = mod_analyze_surveillance_ui, server = mod_analyze_surveillance_server),
     list(id = attrition_meta$id, title = attrition_meta$nav_title,
          ui = mod_attrition_ui, server = mod_attrition_server),
+    list(id = effect_size_meta$id, title = effect_size_meta$nav_title,
+         ui = mod_effect_size_ui, server = mod_effect_size_server),
     list(id = randomization_meta$id, title = randomization_meta$nav_title,
          ui = mod_randomization_ui, server = mod_randomization_server),
     list(id = survey_selection_meta$id, title = survey_selection_meta$nav_title,
@@ -162,8 +164,10 @@ module_registry <- function() {
 # via the Home hub's "Browse calculators" toggle (R/home_catalog.R's test_families),
 # which points at these same module ids.
 module_workbenches <- list(
-  list(id = "plan", title = "Plan: Sample Size", nav_id = "plan_nav",
+  list(id = "plan", title = "Plan: Sample Size", nav_id = "plan_nav", open_on = "proportion",
        groups = list(
+      list(title = "Effect Sizes",
+           module_ids = c("effect_size")),
       list(title = "Descriptive & Estimation",
            module_ids = c("proportion", "means", "rate", "ratio")),
       list(title = "Survey & Cross-Sectional",

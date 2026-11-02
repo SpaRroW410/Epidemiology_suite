@@ -1,5 +1,27 @@
 # epidemiologysuite (development version)
 
+## Effect Size tab, glossary and information tips
+
+* **Effect Size** is a new calculator, the first group in the Plan: Sample Size list (Plan still opens on Proportions). It works out
+  the number a sample-size calculator asks for from what is usually known; each result has the formula, a worked example and a source,
+  and a plain reading against Cohen's conventions:
+  two means (SDs **or variances**; means **or their difference**; Cohen's d, Hedges' g and an interval with the group sizes),
+  d from a t statistic, d for paired measurements (from the SD of the differences, or from the two SDs and their correlation, or the
+  correlation implied by all three), Cohen's f (from group means and SD, eta-squared, an F statistic or d), two proportions (give
+  **one** of p1, the odds ratio, the risk ratio or the risk difference, as in OpenEpi's cohort and case-control forms; also Cohen's h and
+  the number needed to treat), Cohen's w and Cramer's V (a table, a chi-square statistic, or expected proportions), a hazard ratio
+  (from median survival, assuming exponential survival, or from survival or event probabilities), conversions among d, r, an odds ratio,
+  R-squared and f-squared, a mean and SD from a median and IQR, and phi from a table of matched pairs.
+* From R: `calc_es_two_means()`, `calc_es_from_t()`, `calc_es_paired()`, `calc_es_f()`, `calc_es_proportions()`, `calc_es_chisq_w()`,
+  `calc_es_hazard_ratio()` and `calc_es_convert()`. Each is checked against a package or a defining identity (`pwr`, `cor()`,
+  `t.test()`, `aov()`, `chisq.test()`, the Analyze tool's d and g), by simulation, and by round trip.
+* **Sources:** Chinn 2000 (odds ratio to d, ln(OR) / 1.81 = d x pi / sqrt(3)) was read as an abstract only; Cohen 1988, Hedges 1981 and
+  Hedges & Olkin 1985 were not read, and the text says so (the formulas are checked numerically). The odds-ratio conversion is marked
+  approximate.
+* **Information tips:** a small (i) beside a term shows its meaning on hover, on keyboard focus and on a tap (phones). The same
+  definitions, about 35 terms, are on a new **Glossary** page under Find a calculator, with a filter box.
+* The guide has a new route, "An effect size to enter in a calculator", and recognises phrases such as "calculate the effect size".
+
 ## Finding a calculator, dark mode, the browser version
 
 * **Find a calculator** is now its own tab (guided questions, the list of every calculator by study design or by test, formulas).

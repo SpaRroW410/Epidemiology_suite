@@ -147,7 +147,25 @@ design_nodes <- list(
       list(label = "How many to enrol to allow for attrition, non-response or non-compliance", next_id = "planning_attr_type"),
       list(label = "Select the units of a survey sample from a list (random, systematic, PPS, WHO EPI 30 x 7 clusters)", next_id = "planning_sel_type"),
       list(label = "Survey weights: design weights, nonresponse adjustment, effective sample size", next_id = "planning_weight_type"),
-      list(label = "Infectious-disease models: herd immunity and vaccination coverage, an SIR / SEIR epidemic, R0", next_id = "planning_epi_type")
+      list(label = "Infectious-disease models: herd immunity and vaccination coverage, an SIR / SEIR epidemic, R0", next_id = "planning_epi_type"),
+      list(label = "An effect size to enter in a calculator: Cohen's d, f, h or w, an odds ratio, a hazard ratio, a mean and SD from a median", next_id = "effect_size_type")
+    )
+  ),
+
+  effect_size_type = list(
+    id = "effect_size_type", stage = 1,
+    question = "Which effect size do you need to work out?",
+    options = list(
+      list(label = "Cohen's d for two means, from means and SDs or variances", next_id = "term_es_two_means"),
+      list(label = "Cohen's d from a t statistic", next_id = "term_es_from_t"),
+      list(label = "d for paired (before-after) measurements", next_id = "term_es_paired"),
+      list(label = "Cohen's f for three or more means (ANOVA)", next_id = "term_es_anova_f"),
+      list(label = "An odds ratio, risk ratio, risk difference or Cohen's h from two proportions (also case-control)", next_id = "term_es_proportions"),
+      list(label = "Cohen's w for a chi-square test", next_id = "term_es_chisq_w"),
+      list(label = "A hazard ratio from median survival or survival probabilities", next_id = "term_es_hazard_ratio"),
+      list(label = "Convert between d, r, an odds ratio, R-squared and f-squared", next_id = "term_es_convert"),
+      list(label = "A mean and SD from a median and interquartile range", next_id = "term_es_median_iqr"),
+      list(label = "phi from a table of matched case-control pairs", next_id = "term_es_matched_pairs")
     )
   ),
 
@@ -864,6 +882,17 @@ design_nodes <- list(
   # ================================================================== #
   # Terminal nodes -- built (route via calculator_catalog)
   # ================================================================== #
+
+  term_es_two_means = .term("term_es_two_means", "Effect size: Cohen's d and Hedges' g from two means", "effect_size_two_means"),
+  term_es_from_t = .term("term_es_from_t", "Effect size: Cohen's d from a t statistic", "effect_size_from_t"),
+  term_es_paired = .term("term_es_paired", "Effect size: d for paired measurements", "effect_size_paired"),
+  term_es_anova_f = .term("term_es_anova_f", "Effect size: Cohen's f for several means", "effect_size_anova_f"),
+  term_es_proportions = .term("term_es_proportions", "Effect size: odds ratio, risk ratio, risk difference and h from two proportions", "effect_size_proportions"),
+  term_es_chisq_w = .term("term_es_chisq_w", "Effect size: Cohen's w for a chi-square test", "effect_size_chisq_w"),
+  term_es_hazard_ratio = .term("term_es_hazard_ratio", "Effect size: hazard ratio from median survival", "effect_size_hazard_ratio"),
+  term_es_convert = .term("term_es_convert", "Effect size: convert between d, r, odds ratio, R-squared, f-squared", "effect_size_convert"),
+  term_es_median_iqr = .term("term_es_median_iqr", "Effect size: mean and SD from a median and IQR", "effect_size_median_iqr"),
+  term_es_matched_pairs = .term("term_es_matched_pairs", "Effect size: phi from matched pairs", "effect_size_matched_pairs"),
 
   term_prop_precision = .term("term_prop_precision", "Single proportion, precision-based", "proportion_single_precision"),
   term_mean_precision = .term("term_mean_precision", "Single mean, precision-based", "means_single_precision"),

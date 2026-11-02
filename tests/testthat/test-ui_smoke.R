@@ -348,6 +348,36 @@ test_that("effect inputs: case-control p1 and phi from a pairs table, log-rank H
   expect_equal(ui_output_errors(app), 0)
 })
 
+test_that("Effect Size: the converters give the published values, tips open on hover and tap, and the Glossary lists the terms", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Effect Size")
+  expect_match(ui_output_text(app, "effect_size-result"), "Cohen's d: 0.322")
+  ui_choose_radio(app, "effect_size-design", "proportions")
+  app$wait_for_idle(800, timeout = 60000)
+  st <- ui_output_text(app, "effect_size-result")
+  expect_match(st, "Odds ratio: 2.000")
+  expect_match(st, "Risk \\(prevalence\\) ratio: 1.905")       # OpenEpi's cohort form for p0 = 5%, OR = 2
+  expect_match(st, "Risk difference: 0.045")
+  ui_choose_radio(app, "effect_size-design", "matched_pairs")
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "effect_size-result"), "phi: 0.328")
+  # an information tip opens its popover on keyboard focus and closes again
+  app$run_js("document.querySelector('#effect_size-result .info-tip').focus()")
+  app$wait_for_js("document.querySelectorAll('.popover.show').length === 1", timeout = 10000)
+  expect_match(app$get_js("document.querySelector('.popover.show').innerText"), "correlation between two yes/no variables")
+  app$run_js("document.activeElement.blur()")
+  app$wait_for_js("document.querySelectorAll('.popover.show').length === 0", timeout = 10000)
+  # the Glossary page lists every term and filters
+  ui_select_tab(app, "main_nav", "Find a calculator")
+  app$run_js("document.querySelector('#home_helper a[data-value=\"Glossary\"]').click()")
+  app$wait_for_js("document.querySelectorAll('.glossary-item').length > 25", timeout = 30000)
+  app$set_inputs(glossary_filter = "phi")
+  app$run_js("var e=document.getElementById('glossary_filter'); e.value='phi'; e.dispatchEvent(new Event('input', {bubbles: true}))")
+  app$wait_for_js("Array.from(document.querySelectorAll('.glossary-item')).filter(function(e){return e.style.display !== 'none'}).length < 6", timeout = 10000)
+  expect_equal(ui_output_errors(app), 0)
+})
+
 test_that("Randomization List: the same seed gives the same list; blocks balance; stratified lists per site", {
   skip_if_no_ui()
   app <- ui_driver()
@@ -495,8 +525,8 @@ test_that("start-up builds only the core calculators; lazy = FALSE builds all (s
   expect_equal(n_lazy, length(module_registry()) - length(lazy_core_modules))
   expect_equal(count_placeholders(epidemiologysuite_app(lazy = FALSE)), 0)
   expect_true(all(lazy_core_modules %in% vapply(module_registry(), `[[`, character(1), "id")))
-  # the first module of every workbench is a core module, so no workbench opens on a placeholder
-  firsts <- vapply(module_workbenches, function(wb) wb$groups[[1]]$module_ids[1], "")
+  # the module every workbench opens on (its first, or the one it names) is a core module, so none opens on a placeholder
+  firsts <- vapply(module_workbenches, function(wb) if (!is.null(wb$open_on)) wb$open_on else wb$groups[[1]]$module_ids[1], "")
   expect_true(all(firsts %in% lazy_core_modules))
 })
 
