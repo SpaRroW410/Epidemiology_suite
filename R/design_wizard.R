@@ -16,7 +16,7 @@ design_wizard_body <- function() {
       "check it. It only ever suggests; nothing is decided silently, and",
       "you can start over at any point if a question doesn't fit your study."
     )),
-    div(class = "card card-body bg-light mb-3",
+    div(class = "card card-body bg-body-tertiary mb-3",
       p(class = "small text-muted",
         paste("Optional: describe your study in a sentence or two and this",
               "will pre-fill as many answers below as it can confidently",
@@ -105,6 +105,10 @@ design_wizard_server <- function(input, output, session) {
   observeEvent(input$design_wizard_jump_deff, {
     .design_wizard_go(session, "cluster_deff")
   }, ignoreInit = TRUE)
+  observeEvent(input$design_wizard_jump_rank, {
+    node <- design_nodes[[state$node_id]]
+    .design_wizard_go(session, .rank_alternative(.terminal_catalog_key(node, state$flags)))
+  }, ignoreInit = TRUE)
   observeEvent(input$design_wizard_jump_glmm, {
     .design_wizard_go(session, if (identical(state$flags$outcome, "binary")) "glmm_binary" else "glmm_lmm_continuous")
   }, ignoreInit = TRUE)
@@ -146,6 +150,16 @@ design_wizard_server <- function(input, output, session) {
                          "cluster_pps_optimal", "stepped_wedge_normal",
                          "glmm_lmm_continuous", "glmm_binary", "multilevel_three_level")
 
+# The rank-based counterpart of a means design, offered when the outcome is summarised by a median and IQR.
+.rank_alternative <- function(key) {
+  if (is.null(key)) return(NULL)
+  switch(key,
+    means_two_indep = , means_two_indep_unequal_n = , means_welch = "wilcoxon_rank_sum",
+    means_two_dep = , means_single = "wilcoxon_signed_rank",
+    means_k = "kruskal_wallis",
+    NULL)
+}
+
 .render_design_terminal <- function(node, flags, can_back = FALSE) {
   key <- .terminal_catalog_key(node, flags)
   entry <- if (!is.null(key)) catalog_entry(key) else NULL
@@ -175,6 +189,12 @@ design_wizard_server <- function(input, output, session) {
       actionButton("design_wizard_jump_deff", "Go to: Cluster / Design Effect", class = "btn-light btn-sm"),
       " ",
       actionButton("design_wizard_jump_glmm", "Go to: Monte Carlo Mixed Models", class = "btn-light btn-sm")),
+    if (identical(flags$summary, "median") && !is.null(.rank_alternative(key))) div(class = "alert alert-info small",
+      p(strong("Your outcome is summarised by a median and IQR. "),
+        "Either estimate a mean and SD from them and use the calculator below (Wan et al. 2014: mean = (q1 + median + q3) / 3,",
+        "SD = IQR / 1.35 for a large sample; the Means calculator has a converter under its design list), or, for a clearly skewed",
+        "outcome, plan the rank-based test instead."),
+      actionButton("design_wizard_jump_rank", paste("Go to:", catalog_entry(.rank_alternative(key))$label), class = "btn-outline-primary btn-sm")),
     body,
     br(), br(),
     if (can_back) tagList(actionButton("design_wizard_back", "Back one question", class = "btn-outline-secondary btn-sm"), " "),

@@ -1,5 +1,31 @@
 # epidemiologysuite (development version)
 
+## Finding a calculator, dark mode, the browser version
+
+* **Find a calculator** is now its own tab (guided questions, the list of every calculator by study design or by test, formulas).
+  "Start the guide" and the new "Browse all calculators" button on Home open it at the top of the page; before, they opened a folded
+  section below the visible part of the page and seemed to do nothing. On a phone the tab is "Find".
+* **Browser version (GitHub Pages):** calculators are no longer loaded one by one in the background. R runs on the page's single
+  thread there, so a click waited behind the queue: "Start the guide" took 80 s and a Home button 72 s on the published site; now 5 s
+  and 1.5 s. A calculator loads when it is opened; the "Loading calculators" bar is not shown there.
+* **Dark mode:** the guide's "describe your study" box, the formula preview and a note in the attrition calculator kept a white
+  background with light text (contrast 1.3:1). They now use the theme's colours; a contrast check over every page found nothing else.
+* **The guide** asks how a continuous outcome is summarised: mean and SD, or median and IQR. Both lead to the paired / unpaired
+  mean-difference calculators; with a median and IQR the result explains how to estimate a mean and SD and offers the rank-based
+  test. The free-text box recognises "median", "IQR" and "interquartile".
+
+## Effect sizes from what people usually know
+
+* **Case-control (unmatched and matched):** the effect can be given as the proportion of cases exposed (p1) instead of the odds
+  ratio (`p1 =`); OR = p1 (1 - p0) / (p0 (1 - p1)), the relation the Dupont formula uses. Both are shown.
+* **Matched case-control:** phi can be calculated from a table of matched pairs (both exposed, case only, control only, neither):
+  `calc_matched_pairs_phi()`, the phi coefficient of the pairs table; checked against `cor()` and by simulation of Dupont's model.
+* **Log-rank:** the hazard ratio can be calculated from pE and pC (proportional hazards: HR = log(1 - pE) / log(1 - pC)); an entered
+  HR that differs from it by more than 10% gives a warning.
+* **Rates (two groups, negative binomial):** the rate ratio can be given as the second group's rate.
+* **Means:** `calc_mean_sd_from_median_iqr()` and a converter in the Means calculator estimate a mean and SD from a median and IQR
+  (Wan, Wang, Liu & Tong, BMC Med Res Methodol 2014;14:135, scenario C3; read through PubMed Central; checked by simulation).
+
 ## Absolute and relative precision, non-response
 
 * The five precision-based calculators (single proportion, single mean, cluster survey of a proportion, incidence rate, diagnostic

@@ -6,18 +6,19 @@
 \usage{
 calc_case_control_unmatched(
   p0,
-  OR,
+  OR = NULL,
   power = 0.8,
   ratio = 1,
   alpha = 0.05,
   alternative = c("two.sided", "less", "greater"),
-  N = NULL
+  N = NULL,
+  p1 = NULL
 )
 }
 \arguments{
 \item{p0}{Expected prevalence of exposure among controls (0,1)}
 
-\item{OR}{Expected odds ratio (> 0, != 1)}
+\item{OR}{Expected odds ratio (> 0, != 1). Give either \code{OR} or \code{p1}.}
 
 \item{power}{Desired power (0,1)}
 
@@ -31,9 +32,12 @@ direction, only one- vs two-sided)}
 
 \item{N}{Optional finite eligible-population size. NULL (default) =
 effectively infinite population.}
+
+\item{p1}{Expected proportion of cases exposed (0,1), instead of \code{OR}: the odds ratio is then p1 (1 - p0) / (p0 (1 - p1)).}
 }
 \value{
-list(n_total, n_case, n_control, inputs)
+A named list of class \code{ss_result} with \code{n_total}, \code{n_case}, \code{n_control}, \code{OR} and \code{p1} (both, whichever was given) and
+\code{inputs}.
 }
 \description{
 Wraps epiR::epi.sscc(method = "unmatched").

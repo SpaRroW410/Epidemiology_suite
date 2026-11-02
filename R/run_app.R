@@ -90,9 +90,9 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
         "font-size-base" = "0.95rem"
       ),
       header = tagList(browser_notice_ui(), tags$style(HTML(.workbench_css)), accessibility_script(), phone_shell_assets(),
-                       if (length(pending_titles)) lazy_sidebar_assets(pending_titles))
+                       if (length(pending_titles)) lazy_sidebar_assets(pending_titles, show_progress = .background_load_enabled()))
     ),
-    list(home_panel),
+    list(home_panel, nav_panel("Find a calculator", find_panel_ui())),
     workbench_panels,
     list(nav_panel("Cite", cite_ui())),
     # light / dark switch (starts from the viewer's operating-system setting)

@@ -22,7 +22,12 @@ lazy_placeholder <- function(id) {
 
 # Background loading can be switched off for tests and debugging: options(epidemiologysuite.background_load = FALSE)
 # or the environment variable EPIDEMIOLOGYSUITE_BACKGROUND_LOAD=false.
+# It is always off in the browser build. There R runs on the page's single thread and loading one calculator takes about a second,
+# so a click waited behind the queue: on the published site (2 Nov 2026) "Start the guide" took 80 s to show the guide and a Home
+# button took 72 s to open its calculator, while with background loading off they took 2 s and 1.2 s. A calculator is then
+# loaded when it is opened.
 .background_load_enabled <- function() {
+  if (identical(Sys.info()[["sysname"]], "Emscripten")) return(FALSE)
   env <- tolower(Sys.getenv("EPIDEMIOLOGYSUITE_BACKGROUND_LOAD", "true"))
   isTRUE(getOption("epidemiologysuite.background_load", TRUE)) && !identical(env, "false")
 }
@@ -98,7 +103,10 @@ lazy_module_loader <- function(session, registry, core_ids, background = .backgr
 # Styles and script for the loading indicator beside the calculator lists. `pending_titles` are the calculators that are not
 # loaded at start-up; they are drawn as "still to come" from the first paint, then the server's "lazy_progress" messages
 # mark each one ready. The same bar is put at the top of every workbench's list and disappears when everything is ready.
-lazy_sidebar_assets <- function(pending_titles) {
+# With `show_progress = FALSE` (no background loading) there is no bar and nothing is drawn faint, since nothing is loading; the
+# script still reports inserted calculators, so that each one's server starts when it is opened.
+lazy_sidebar_assets <- function(pending_titles, show_progress = TRUE) {
+  if (!show_progress) pending_titles <- character()
   css <- "
 .lazy-box { flex: 0 0 auto; list-style: none; margin: 0 0 .5rem 0; padding: .45rem .6rem .5rem; border-radius: .4rem;
   background: var(--bs-tertiary-bg, #f1f3f5); font-size: .78rem; position: sticky; top: 0; z-index: 2;
@@ -130,7 +138,7 @@ ul.nav-stacked a.lazy-flash::after { content: '\\2713'; position: absolute; righ
 "
   js <- sprintf("
 (function () {
-  var pending = %s, total = pending.length, done = 0, upcoming = null;
+  var pending = %s, total = pending.length, done = 0, upcoming = null, show = total > 0;
   function links(title) {
     return Array.prototype.filter.call(document.querySelectorAll('ul.nav-stacked a[data-value]'),
       function (a) { return a.getAttribute('data-value') === title; });
@@ -147,6 +155,7 @@ ul.nav-stacked a.lazy-flash::after { content: '\\2713'; position: absolute; righ
     if (upcoming) links(upcoming).forEach(function (a) { a.classList.add('lazy-next-up'); });
   }
   function setup() {
+    if (!total) return;
     pending.forEach(function (t) { links(t).forEach(function (a) { a.classList.add('lazy-pending'); }); });
     document.querySelectorAll('ul.nav-stacked').forEach(function (ul) {
       if (ul.querySelector('.lazy-box')) return;
@@ -169,6 +178,7 @@ ul.nav-stacked a.lazy-flash::after { content: '\\2713'; position: absolute; righ
       Shiny.setInputValue('lazy_bound', { ids: inserted.slice(), nonce: Math.random() }, { priority: 'event' });
     });
     Shiny.addCustomMessageHandler('lazy_progress', function (m) {
+      if (!show) return;
       done = m.done; total = m.total; upcoming = m.upcoming || null;
       links(m.ready).forEach(function (a) {
         a.classList.remove('lazy-pending', 'lazy-next-up'); a.classList.add('lazy-flash');
@@ -185,5 +195,6 @@ ul.nav-stacked a.lazy-flash::after { content: '\\2713'; position: absolute; righ
 .json_strings <- function(x) {
   esc <- gsub("\\\\", "\\\\\\\\", unname(x))
   esc <- gsub("\"", "\\\\\"", esc, fixed = FALSE)
+  if (!length(esc)) return("[]")
   paste0("[", paste0("\"", esc, "\"", collapse = ","), "]")
 }

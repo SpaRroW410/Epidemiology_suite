@@ -4,7 +4,7 @@
 \alias{calc_logrank}
 \title{Sample size for comparing two survival curves (log-rank test)}
 \usage{
-calc_logrank(pE, pC, hr, ratio = 1, alpha = 0.05, power = 0.8)
+calc_logrank(pE, pC, hr = NULL, ratio = 1, alpha = 0.05, power = 0.8)
 }
 \arguments{
 \item{pE}{Expected probability of the event in the experimental group,
@@ -13,7 +13,9 @@ over the maximum follow-up period (0,1)}
 \item{pC}{Expected probability of the event in the control group, over
 the same period (0,1)}
 
-\item{hr}{Postulated hazard ratio (experimental vs. control), > 0, != 1}
+\item{hr}{Postulated hazard ratio (experimental vs. control), > 0, != 1. NULL: calculated from \code{pE} and \code{pC} under
+proportional hazards, where the survival curves satisfy S_E(t) = S_C(t)^HR, so HR = log(1 - pE) / log(1 - pC) over the same
+follow-up.}
 
 \item{ratio}{Number of participants in the experimental group divided by
 the number in the control group (> 0)}
@@ -23,7 +25,8 @@ the number in the control group (> 0)}
 \item{power}{Desired power (0,1)}
 }
 \value{
-list(n_exp, n_control, n_total, inputs)
+A named list of class \code{ss_result} with \code{n_exp}, \code{n_control}, \code{n_total}, \code{hr} (the hazard ratio used), \code{hr_implied}
+(log(1 - pE) / log(1 - pC)), \code{notes} (a warning when a given \code{hr} differs from it by more than 10\%) and \code{inputs}.
 }
 \description{
 Wraps .cf_pse_ssize_ct(). Sizes a study to detect a given

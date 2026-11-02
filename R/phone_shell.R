@@ -1,5 +1,5 @@
 # The phone layout (narrow screens, up to 575 px wide): the same app, shaped for one hand and one column.
-#   * the navbar becomes a bar of large tabs fixed to the bottom of the screen (Home, Plan, Analyze, Cite), where a thumb reaches;
+#   * the navbar becomes a bar of large tabs fixed to the bottom of the screen (Home, Find, Plan, Analyze, Cite), where a thumb reaches;
 #   * the long calculator list becomes one drop-down ("Choose a calculator", grouped like the list);
 #   * form controls and buttons get a touch-sized height, and the pinned result sits above the bottom bar.
 # Wider screens are unchanged: the drop-down and the bottom bar only appear under the breakpoint. No second app, no second URL.
@@ -82,8 +82,9 @@ phone_shell_assets <- function() {
     document.querySelectorAll('nav.navbar .navbar-nav > li.nav-item > a.nav-link').forEach(function (a) {
       var full = a.getAttribute('data-full-label') || a.textContent.trim();
       a.setAttribute('data-full-label', full);
-      if (full === 'Plan: Sample Size') {
-        a.textContent = phone.matches ? 'Plan' : full;
+      var short = { 'Plan: Sample Size': 'Plan', 'Find a calculator': 'Find' }[full];
+      if (short) {
+        a.textContent = phone.matches ? short : full;
         a.setAttribute('aria-label', full);
       }
     });

@@ -302,6 +302,12 @@ not exact rank-test power).
 
 ### Continuous outcome
 
+Before the number of groups, the wizard asks how the outcome is summarised (node `cont_summary`, added 2 Nov 2026): **mean and SD**
+or **median and IQR**. Both lead to the same paired / unpaired calculators. With a median and IQR, the result page explains how to
+estimate a mean and SD from them (Wan X, Wang W, Liu J, Tong T. BMC Med Res Methodol 2014;14:135, scenario C3: mean = (q1 + m +
+q3) / 3, SD = (q3 - q1) / (2 qnorm((0.75n - 0.125) / (n + 0.25))); `calc_mean_sd_from_median_iqr()`, also as a converter in the
+Means calculator) and offers the rank-based alternative (Wilcoxon rank-sum, signed-rank or Kruskal-Wallis).
+
 | Groups | Structure | Test | Module | Backend |
 |---|---|---|---|---|
 | 1 | — | One-sample t | `mod_t_one_sample` | `pwr::pwr.t.test` |

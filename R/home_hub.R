@@ -1,8 +1,6 @@
-# Home tab: a short welcome, then a "Helper" area (one navset_card_tab) that
-# bundles the three ways to find/understand a calculator -- the dual-taxonomy
-# browser (home_finder.R), the guided wizard (design_wizard.R), and a formula/
-# LaTeX explainer + live sandbox (this file) -- so the top navbar only needs
-# one "Home" entry instead of separate crowding tabs for each. Composes
+# Home tab: a short welcome, the search box and task cards. The "Find a calculator" tab (find_panel_ui()) bundles the three
+# ways to find/understand a calculator -- the guided wizard (design_wizard.R), the dual-taxonomy browser (home_finder.R), and a
+# formula/LaTeX explainer + live sandbox (this file). Composes
 # home_finder.R's and design_wizard.R's UI-fragment/server functions rather
 # than rewriting them (both already expose exactly that shape); this file
 # just supplies the Welcome block, the wrapping navset, and the new sandbox.
@@ -107,26 +105,29 @@ home_panel_ui <- function() {
       bslib::card_body(
         fill = FALSE,
         div(h5(class = "mb-0", "Not sure which calculator?"),
-            p(class = "text-muted mb-0", "Answer a few questions or describe your study in a sentence.")),
-        actionButton("home_go_wizard", "Start the guide", class = "btn-primary ms-auto")
+            p(class = "text-muted mb-0", "Answer a few questions or describe your study in a sentence, or browse every calculator.")),
+        div(class = "ms-auto d-flex flex-wrap gap-2",
+            actionButton("home_go_wizard", "Start the guide", class = "btn-primary"),
+            actionButton("home_go_browse", "Browse all calculators", class = "btn-outline-primary"))
       )
     ),
-    # the long lists stay one click away instead of filling the page
-    bslib::accordion(
-      id = "home_more", open = FALSE, class = "mt-4",
-      bslib::accordion_panel(
-        "Browse all calculators, the guided wizard, formulas", value = "more",
-        # not a fill item: bslib's default makes the card as tall as the window and scrolls its content inside it, which left a
-        # small scroll window (and a cramped question box); here the card grows with its content and the page scrolls
-        bslib::remove_all_fill(navset_card_tab(
-          id = "home_helper",
-          nav_panel("Browse calculators", br(), home_finder_body()),
-          nav_panel("Which calculator? (guided wizard)", br(), design_wizard_body()),
-          nav_panel("Formulas & LaTeX", br(), home_sandbox_ui())
-        ))
-      )
-    )
+    # scrolls the page to the top when a Home button opens another tab (the new tab would otherwise open part-way down)
+    tags$script(HTML("if (window.Shiny && Shiny.addCustomMessageHandler) Shiny.addCustomMessageHandler('home_scroll_top', function (msg) { window.scrollTo(0, 0); });"))
   )
+}
+
+# "Find a calculator" tab: the guided questions, the list of every calculator (by study design or by test) and the formula
+# sandbox. They used to sit in a folded section at the bottom of Home, where "Start the guide" opened them below the visible part
+# of the page, so the button seemed to do nothing; a tab of their own opens at the top.
+find_panel_ui <- function() {
+  # not a fill item: bslib's default makes the card as tall as the window and scrolls its content inside it, which left a small
+  # scroll window (and a cramped question box); here the card grows with its content and the page scrolls
+  bslib::remove_all_fill(navset_card_tab(
+    id = "home_helper",
+    nav_panel("Guided questions", br(), design_wizard_body()),
+    nav_panel("Browse all calculators", br(), home_finder_body()),
+    nav_panel("Formulas & LaTeX", br(), home_sandbox_ui())
+  ))
 }
 
 home_server <- function(input, output, session) {
@@ -157,10 +158,13 @@ home_server <- function(input, output, session) {
   observeEvent(input$home_go_analyze, nav_select("main_nav", "Analyze", session = session), ignoreInit = TRUE)
   observeEvent(input$home_go_outbreak, jump_to_module(session, .home_module_title("analyze_outbreak")), ignoreInit = TRUE)
   observeEvent(input$home_go_survey, jump_to_module(session, .home_module_title("survey_selection")), ignoreInit = TRUE)
-  observeEvent(input$home_go_wizard, {
-    bslib::accordion_panel_open("home_more", "more", session = session)
-    nav_select("home_helper", "Which calculator? (guided wizard)", session = session)
-  }, ignoreInit = TRUE)
+  open_find <- function(tab) {
+    nav_select("main_nav", "Find a calculator", session = session)
+    nav_select("home_helper", tab, session = session)
+    session$sendCustomMessage("home_scroll_top", list())
+  }
+  observeEvent(input$home_go_wizard, open_find("Guided questions"), ignoreInit = TRUE)
+  observeEvent(input$home_go_browse, open_find("Browse all calculators"), ignoreInit = TRUE)
 
   latex_input <- debounce(reactive(input$home_latex_sandbox), 400)
 
@@ -168,7 +172,7 @@ home_server <- function(input, output, session) {
     raw <- latex_input()
     body <- gsub("\\${2}", "", if (is.null(raw)) "" else raw)
     tagList(
-      div(id = "home_latex_output", class = "border rounded p-3 bg-light",
+      div(id = "home_latex_output", class = "border rounded p-3 bg-body-tertiary",
           withMathJax(HTML(paste0("$$", body, "$$")))),
       tags$script(HTML(
         "if (window.MathJax && MathJax.Hub) {",

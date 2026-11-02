@@ -38,6 +38,23 @@ mod_means_ui <- function(id) {
         ),
         selected = "single"
       ),
+      tags$details(
+        class = "mb-3",
+        tags$summary("Only have a median and IQR? Estimate the mean and SD"),
+        div(class = "mt-2",
+          p(class = "small text-muted",
+            "Wan et al. (2014): mean = (q1 + median + q3) / 3, SD = (q3 - q1) / (2 x qnorm((0.75n - 0.125) / (n + 0.25))), about",
+            "IQR / 1.35 for a large n. Enter the results as the mean(s) and SD below. The estimates assume roughly normal data; for a",
+            "clearly skewed outcome a rank-based test (Wilcoxon / Mann-Whitney, in Non-Parametric Tests) is the alternative."),
+          div(class = "row g-2",
+            div(class = "col-6 col-md-3", numericInput(ns("iqr_median"), "Median", value = 45)),
+            div(class = "col-6 col-md-3", numericInput(ns("iqr_q1"), "First quartile (q1)", value = 38)),
+            div(class = "col-6 col-md-3", numericInput(ns("iqr_q3"), "Third quartile (q3)", value = 54)),
+            div(class = "col-6 col-md-3", numericInput(ns("iqr_n"), "Sample size (n)", value = 60, min = 2))
+          ),
+          uiOutput(ns("iqr_result"))
+        )
+      ),
       conditionalPanel(
         condition = design_is("single_precision"),
         numericInput(ns("mean_precision"), "Expected mean (must be non-zero)", value = 75),
@@ -251,6 +268,12 @@ mod_means_ui <- function(id) {
 
 mod_means_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    output$iqr_result <- renderUI({
+      r <- tryCatch(calc_mean_sd_from_median_iqr(input$iqr_median, input$iqr_q1, input$iqr_q3, input$iqr_n), error = function(e) e)
+      if (inherits(r, "error")) return(div(class = "text-danger small", conditionMessage(r)))
+      p(strong(sprintf("Estimated mean %s, SD %s", format(signif(r$mean, 4)), format(signif(r$sd, 4)))),
+        span(class = "text-muted small", sprintf(" (SD = IQR / %.3f)", r$divisor)))
+    })
     output$precision_equiv <- renderUI({
       precision_equivalents_ui(precision_equivalents_text(input$mean_precision, input$epsilon_precision, input$error_precision,
                                                           input$conf_level_precision, "mean"))
