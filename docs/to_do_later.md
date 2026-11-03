@@ -46,10 +46,10 @@ budget, a name). Items marked **[blocked]** wait on something outside the code (
 - [x] A real Shinylive build of the package -- done 21 Oct 2026 (`tools/pages/make_app.R`, `app` job of the `docs` workflow: export, boot in headless Chrome from `/app/`, pass/fail check; first passing run: UI visible after 77 s, first calculation 12 s, 64 MB transferred). It is assembled from the package's own `R/` directory (sourced, not a webR-compiled package: the package has no compiled code). Published to Pages under `/app/` beside the pkgdown site **only from `main`**.
 - [x] Pages is on and the browser build is published from `main` (done by the owner, 27 Oct 2026). Phones now go to the Connect Cloud version instead; **[owner]** still to try it on a real phone.
 - [ ] The browser build downloads about 64 MB on first visit; consider trimming (drop unused heavy packages once item 16 is finished) and measure on a real phone connection.
-- [ ] Trial Sequential Analysis (risk ratio) did not finish within 150 s in the last browser crawl (it did in earlier ones): measure and
-  speed up or gate it.
+- [x] Trial Sequential Analysis (risk ratio) did not finish within 150 s in the last browser crawl: done 31 Oct 2026 (it waited behind the
+  GLMM simulations, which now run only on Calculate in the browser build; see `PLAN.md` Phase 6).
 - [ ] Browser-build message for the designs that cannot load (TOST means, Fisher, Boschloo): done in the app as a plain message;
-  re-check after any dependency change.
+  re-check now: `Exact` and `PowerTOST` left the runtime on 31 Oct 2026, so these designs may load and the message may be out of date.
 - [ ] Measure the real first-load time on a phone connection, mobile memory use, and the TWA / Capacitor wrappers before
   promising an offline Android app. Re-run the spike against the newest webR. **Decision D5 stays open until then.**
 - [ ] The `shinylive-spike` workflow runs the whole crawl on every push that touches `tools/webr-spike/`; once the build is
@@ -185,7 +185,8 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 ## 5. Housekeeping
 
 - [ ] Section 1 of the roadmap ("Where the project stands") now has the module and import counts; its test counts, checklist
-  coverage and wizard figures (487 test blocks, 81/94, 49/49) are still the 28 September values.
+  coverage and wizard figures (81/94, 49/49) are still the 28 September values (the module, catalog, function and test-file counts were
+  updated on 3 Nov 2026).
 - [ ] Re-snapshot `renv.lock` if a dependency is added or removed (it still lists the removed runtime packages, which is
   intended: the tests use them as oracles).
 - [ ] Keep `docs/checklist_by_design.md` / `checklist_by_test.md` in step with the Analyze and planning modules (they predate them).
@@ -207,7 +208,7 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [x] Heavier ones: `PowerTOST` and `Exact` done 31 Oct 2026; `clinfun` and `lme4` kept (see the dependency section above).
 
 ### Three versions (28 Oct 2026, see docs/hosting.md)
-- [ ] **[owner]** Create the Posit Connect Cloud account, publish from the branch `connect`, then put its address in `tools/pages/mobile_url.txt` (PR).
+- [x] **[owner]** Posit Connect Cloud account created and the app published from the branch `connect` (fixed in #29, 2 Nov 2026).
 - [ ] Open the Connect version on a phone; if it works, the "lite" mobile webR build is not needed (dropped from the plan).
 - [ ] Check the Connect Cloud free-plan limits (apps, active hours, memory) and idle sleep; decide if a paid plan or the Docker image elsewhere is needed.
 - [ ] Mention in the app that the server version sends inputs to the server (the browser version does not); add to the Connect build's home text.
