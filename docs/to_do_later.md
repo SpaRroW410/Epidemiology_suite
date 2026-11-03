@@ -165,6 +165,26 @@ something outside the code (a paper, a package, an account). Work is collected o
 
 ---
 
+## 7. Added on 3 November 2026 (PRs #28-#33; built items are in `PLAN.md` Phase 4b and the end of `ROADMAP.md`)
+
+### Owner
+- [ ] Republish on Connect Cloud; try the new Find and Effect Size tabs, the "Calculate this" links and dark mode on a real phone.
+- [ ] Say whether OpenEpi outputs can be supplied (screenshots of results for given inputs): the layouts were copied from screenshots but its formulas were **not compared**.
+
+### Sources not yet read (flagged in the app's help text)
+- [ ] Kish 1965 (design effect), Killip et al. 2004 full text (intracluster correlation and design effect; only the abstract, PMID 15209195, was read), Chinn 2000 full text (ln OR = d pi / sqrt(3); abstract only). **[blocked]** paper access.
+- [ ] A source for "design effect 1.5 or 2 when nothing is known" (the owner's wording; no source checked).
+
+### Effect Size and links
+- [ ] Pre-fill the converter from the calculator's current values (for example the group means already typed in).
+- [ ] Links for inputs where a converter gives a different quantity (the Welch design's two SDs; the SD from a median and IQR gives one).
+- [ ] More glossary terms and information tips on request (35 terms; tips on the labels the glossary covers).
+- [ ] Odds-ratio inputs in the logistic designs ("per one-SD increase", ordinal odds ratio) have no link: no converter gives that quantity.
+
+### Tests and tools
+- [ ] Add the dark-mode contrast crawl and the live-site timing script used on these PRs to `tools/ui-audit/` (they were kept in a working folder).
+- [ ] Re-measure the live browser build (Pages) after #33; re-run the axe scan (`tools/ui-audit/a11y.R`) on the Find tab, the Effect Size tab and the pinned "Use this value" panel.
+- [ ] Browser tests run for several minutes: consider splitting `test-ui_smoke.R` by area so a failure points to one file.
 ## Done on 3 November 2026 (this list's last refresh)
 
 - ~~Author details for CRAN: ORCID added from forecastsuite~~
