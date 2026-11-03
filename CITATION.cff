@@ -10,6 +10,7 @@ version: 1.0.0
 authors:
   - family-names: Maheshwari
     given-names: Mukul
+    orcid: "https://orcid.org/0000-0002-1918-5100"
 license: GPL-3.0-or-later
 repository-code: "https://github.com/SpaRroW410/Epidemiology_suite"
 url: "https://sparrow410.github.io/Epidemiology_suite/"
@@ -20,7 +21,8 @@ keywords:
   - study design
   - R package
   - Shiny
-date-released: "2026-10-30"
+date-released: "2026-10-31"
 identifiers:
   - type: doi
-    value: 10.5281/zenodo.23793833
+    value: 10.5281/zenodo.23794230
+    description: Zenodo archive of release v1.0.0
