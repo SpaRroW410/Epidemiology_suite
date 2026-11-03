@@ -3,12 +3,30 @@
 # tests/testthat). Both wrap epiR::epi.sscc() (Dupont 1988) rather than
 # reimplementing the underlying math (project convention).
 
+# The effect of a case-control design given either as the odds ratio or as the proportion of cases exposed (p1). The two are tied
+# by the definition of the odds ratio, p1 = OR p0 / (1 - p0 + OR p0), which is the relation the Dupont (1988) formulas use
+# (.cf_sscc_unmatched / .cf_sscc_matched compute p1 this way from OR): OR = p1 (1 - p0) / (p0 (1 - p1)).
+.cc_effect <- function(p0, OR, p1) {
+  if (is.null(OR) == is.null(p1)) stop("Give either OR (the odds ratio) or p1 (the proportion of cases exposed), not both.")
+  if (!is.null(p1)) {
+    .validate_unit_interval(p1, "p1")
+    if (isTRUE(all.equal(p1, p0))) stop("p1 must differ from p0 (no effect to detect).")
+    OR <- p1 * (1 - p0) / (p0 * (1 - p1))
+    given <- "p1"
+  } else {
+    .validate_positive(OR, "OR")
+    if (isTRUE(all.equal(OR, 1))) stop("OR must differ from 1 (no effect to detect).")
+    given <- "OR"
+  }
+  list(OR = OR, p1 = OR * p0 / (1 - p0 + OR * p0), given = given)
+}
+
 #' Sample size for an unmatched case-control study
 #'
 #' Wraps epiR::epi.sscc(method = "unmatched").
 #'
 #' @param p0 Expected prevalence of exposure among controls (0,1)
-#' @param OR Expected odds ratio (> 0, != 1)
+#' @param OR Expected odds ratio (> 0, != 1). Give either `OR` or `p1`.
 #' @param power Desired power (0,1)
 #' @param ratio Number of controls per case (> 0)
 #' @param alpha Significance level (0,1)
@@ -17,19 +35,21 @@
 #'   direction, only one- vs two-sided)
 #' @param N Optional finite eligible-population size. NULL (default) =
 #'   effectively infinite population.
-#' @return list(n_total, n_case, n_control, inputs)
+#' @param p1 Expected proportion of cases exposed (0,1), instead of `OR`: the odds ratio is then p1 (1 - p0) / (p0 (1 - p1)).
+#' @return A named list of class `ss_result` with `n_total`, `n_case`, `n_control`, `OR` and `p1` (both, whichever was given) and
+#'   `inputs`.
 #' @examples
 #' calc_case_control_unmatched(p0 = 0.3, OR = 2, power = 0.9, ratio = 1, alpha = 0.05, 
 #'     alternative = "two.sided")
 #' @export
-calc_case_control_unmatched <- function(p0, OR, power = 0.8, ratio = 1,
+calc_case_control_unmatched <- function(p0, OR = NULL, power = 0.8, ratio = 1,
                                          alpha = 0.05,
                                          alternative = c("two.sided", "less", "greater"),
-                                         N = NULL) {
+                                         N = NULL, p1 = NULL) {
   alternative <- match.arg(alternative)
   .validate_unit_interval(p0, "p0")
-  .validate_positive(OR, "OR")
-  if (isTRUE(all.equal(OR, 1))) stop("OR must differ from 1 (no effect to detect).")
+  eff <- .cc_effect(p0, OR, p1)
+  OR <- eff$OR
   .validate_unit_interval(power, "power")
   .validate_positive(ratio, "ratio")
   .validate_unit_interval(alpha, "alpha")
@@ -44,7 +64,9 @@ calc_case_control_unmatched <- function(p0, OR, power = 0.8, ratio = 1,
     n_total = ceiling(res$n.total),
     n_case = ceiling(res$n.case),
     n_control = ceiling(res$n.control),
-    inputs = list(p0 = p0, OR = OR, power = power, ratio = ratio, alpha = alpha,
+    OR = eff$OR,
+    p1 = eff$p1,
+    inputs = list(p0 = p0, OR = if (eff$given == "OR") OR, p1 = p1, power = power, ratio = ratio, alpha = alpha,
                   alternative = alternative, N = N)
   ))
 }
@@ -54,28 +76,30 @@ calc_case_control_unmatched <- function(p0, OR, power = 0.8, ratio = 1,
 #' Wraps epiR::epi.sscc(method = "matched").
 #'
 #' @param p0 Expected prevalence of exposure among controls (0,1)
-#' @param OR Expected odds ratio (> 0, != 1)
+#' @param OR Expected odds ratio (> 0, != 1). Give either `OR` or `p1`.
 #' @param phi_coef Correlation between case and control exposures for
 #'   matched pairs (-1, 1); use ~0.2 (moderate) if no prior estimate is
-#'   available, per Dupont (1988)
+#'   available, per Dupont (1988). [calc_matched_pairs_phi()] calculates it from a table of matched pairs.
 #' @param power Desired power (0,1)
 #' @param ratio Number of controls per case (m in 1:m matching, >= 1)
 #' @param alpha Significance level (0,1)
 #' @param alternative "two.sided" or one-sided
 #' @param N Optional finite eligible-population size
-#' @return list(n_total, n_case, n_control, inputs)
+#' @param p1 Expected proportion of cases exposed (0,1), instead of `OR`: the odds ratio is then p1 (1 - p0) / (p0 (1 - p1)).
+#' @return A named list of class `ss_result` with `n_total`, `n_case`, `n_control`, `OR` and `p1` (both, whichever was given) and
+#'   `inputs`.
 #' @examples
 #' calc_case_control_matched(p0 = 0.6, OR = 3, phi_coef = 0.2, power = 0.8, ratio = 1, 
 #'     alpha = 0.05, alternative = "two.sided")
 #' @export
-calc_case_control_matched <- function(p0, OR, phi_coef = 0.2, power = 0.8, ratio = 1,
+calc_case_control_matched <- function(p0, OR = NULL, phi_coef = 0.2, power = 0.8, ratio = 1,
                                        alpha = 0.05,
                                        alternative = c("two.sided", "less", "greater"),
-                                       N = NULL) {
+                                       N = NULL, p1 = NULL) {
   alternative <- match.arg(alternative)
   .validate_unit_interval(p0, "p0")
-  .validate_positive(OR, "OR")
-  if (isTRUE(all.equal(OR, 1))) stop("OR must differ from 1 (no effect to detect).")
+  eff <- .cc_effect(p0, OR, p1)
+  OR <- eff$OR
   if (!is.numeric(phi_coef) || length(phi_coef) != 1 || is.na(phi_coef) ||
         phi_coef <= -1 || phi_coef >= 1) {
     stop("phi_coef must be a single number strictly between -1 and 1.")
@@ -95,8 +119,52 @@ calc_case_control_matched <- function(p0, OR, phi_coef = 0.2, power = 0.8, ratio
     n_total = ceiling(res$n.total),
     n_case = ceiling(res$n.case),
     n_control = ceiling(res$n.control),
-    inputs = list(p0 = p0, OR = OR, phi_coef = phi_coef, power = power,
+    OR = eff$OR,
+    p1 = eff$p1,
+    inputs = list(p0 = p0, OR = if (eff$given == "OR") OR, p1 = p1, phi_coef = phi_coef, power = power,
                   ratio = ratio, alpha = alpha, alternative = alternative, N = N)
+  ))
+}
+
+#' Correlation of exposure within matched case-control pairs (phi), from a table of pairs
+#'
+#' Dupont (1988) sizes a matched case-control study with phi, the correlation between the exposure of a case and the exposure of
+#' its matched control. For two yes/no variables this correlation is the phi coefficient of their 2 x 2 table, here the table of
+#' matched pairs from a pilot study or a published one:
+#' phi = (a d - b c) / sqrt((a + b)(c + d)(a + c)(b + d)), with a = pairs where both are exposed, b = only the case,
+#' c = only the control, d = neither. The same table gives the proportions exposed among the cases, p1 = (a + b) / n, and among
+#' the controls, p0 = (a + c) / n, the odds ratio between them, and the matched-pairs (McNemar) odds ratio b / c.
+#'
+#' @param both Pairs where both the case and the control were exposed (a)
+#' @param case_only Pairs where only the case was exposed (b)
+#' @param control_only Pairs where only the control was exposed (c)
+#' @param neither Pairs where neither was exposed (d)
+#' @return A named list of class `ss_result` with `phi`, `n_pairs`, `p0`, `p1`, `OR` (p1 (1 - p0) / (p0 (1 - p1))), `OR_matched`
+#'   (b / c; `Inf` when c = 0) and `inputs`.
+#' @examples
+#' calc_matched_pairs_phi(both = 30, case_only = 25, control_only = 10, neither = 35)
+#' @export
+calc_matched_pairs_phi <- function(both, case_only, control_only, neither) {
+  cnt <- c(both = both, case_only = case_only, control_only = control_only, neither = neither)
+  if (!is.numeric(cnt) || length(cnt) != 4 || anyNA(cnt) || any(cnt < 0) || any(cnt != round(cnt))) {
+    stop("The four counts of pairs must be whole numbers, 0 or more.")
+  }
+  a <- as.numeric(both); b <- as.numeric(case_only); c <- as.numeric(control_only); d <- as.numeric(neither)   # doubles: integer products overflow
+  n <- a + b + c + d
+  margins <- c(a + b, c + d, a + c, b + d)
+  if (any(margins == 0)) {
+    stop("phi is undefined when all cases, or all controls, have the same exposure (a row or column of the table is empty).")
+  }
+  p1 <- (a + b) / n
+  p0 <- (a + c) / n
+  new_ss_result(list(
+    phi = (a * d - b * c) / sqrt(prod(margins)),
+    n_pairs = n,
+    p0 = p0,
+    p1 = p1,
+    OR = p1 * (1 - p0) / (p0 * (1 - p1)),
+    OR_matched = if (c > 0) b / c else Inf,
+    inputs = list(both = both, case_only = case_only, control_only = control_only, neither = neither)
   ))
 }
 

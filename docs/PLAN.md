@@ -1,25 +1,27 @@
 # Epidemiological suite: the plan at a glance
 
-*Updated 29 October 2026. Struck-through items are done (the date in brackets is when). The reasoning, evidence and the full
+*Updated 3 November 2026. Struck-through items are done (the date in brackets is when). The reasoning, evidence and the full
 list of blocked sample-size items are in [`ROADMAP.md`](ROADMAP.md); the flat checklist of everything open is
 [`to_do_later.md`](to_do_later.md). The package is named `epidemiologysuite` (renamed from `epidemiologicasuite` on 30 Oct 2026, with the repository); the app and the suite are shown to people as
 **Epidemiological suite**.*
 
-**Where it stands:** 66 calculators (50 sample-size, 11 analysis, 2 planning, 2 survey, 1 infectious-disease models), 159 designs,
+**Where it stands:** 67 calculators (50 sample-size, 11 analysis, 2 planning, 2 survey, 1 infectious-disease models, 1 effect-size converters), 214 catalog entries (159 designs on 29 Oct, counted differently; +11 since: ten converters and the design-effect calculator),
 three versions live or ready (browser build on GitHub Pages, phone/server version on Posit Connect Cloud, R package), default test
-suite 940 blocks with 0 failures; 195 calculation functions exported with help pages.
+suite of 102 files with 0 failures; 206 calculation functions exported with help pages (210 exports in all).
 
 ---
 
 ## Waiting for you (owner decisions and steps)
 
-- [ ] Click **Republish** on Connect Cloud after the rename PR (#17) is merged; try the phone redirect on a real phone
+- [ ] Click **Republish** on Connect Cloud (the `connect` branch rebuilds itself; last merged change: #33, 3 Nov), then try the phone redirect and the new Find / Effect Size tabs on a real phone
 - ~~Version set to **1.0.0** (30 Oct; the tag of the release is `v1.0.0`)~~
-- [ ] Zenodo: the first record (wrong version tag) was removed; publish the `v1.0.0` release again and send the new **DOI**
-- [ ] Decide on a background-process package (`mirai` or `future`) for running slow simulations without blocking other users (also changes the browser build)
+- ~~Zenodo: release `v1.0.0` archived, DOI **10.5281/zenodo.23794230**~~ (31 Oct; in the Cite tab, `CITATION.cff` and `citation()`)
+- ~~Background-process package: `mirai`~~ (31 Oct; Phase 6)
 - [ ] Long-term hosting (Connect Cloud free-plan limits are not verified)
+- [ ] File the two upstream bug reports (`docs/upstream_reports.md`); r-universe, then CRAN
+- ~~A notice in the server version that inputs go to the server~~ (3 Nov, closable)
 - ~~Repository renamed to `Epidemiology_suite` (30 Oct); the package followed as `epidemiologysuite`~~ **Owner steps left:** check the new Pages address, rename `EPIDEMIOLOGICASUITE_OPEN` to `EPIDEMIOLOGYSUITE_OPEN` on Connect if it was set there, republish
-- [ ] The Pages build error text from 17 Oct, if it still happens
+- ~~The Pages build error of 17 Oct~~ (not happening; dropped 3 Nov)
 
 ## Phase 1 — Foundations  (all done)
 
@@ -68,29 +70,50 @@ suite 940 blocks with 0 failures; 195 calculation functions exported with help p
 - [ ] Re-run the layout and accessibility scans after each step (`tools/ui-audit/audit.R`, `a11y.R`)
 - [ ] Still to do for accessibility: a person's keyboard and screen-reader walk-through, dark-mode plots, text-resize checks, a layout pass on a real phone. ~~Text descriptions for the plots~~ done 29 Oct: the power / sensitivity curves, the surveillance chart and the epidemic-model chart carry an alt text with axes, ranges, trend and the current value, computed from the same numbers as the plot
 
+## Phase 4b — Finding a calculator, understanding the effect, entering it the way people know it  (1-3 Nov 2026, PRs #28-#33; all merged)
+
+- ~~**Absolute and relative precision, non-response, hard stops and warnings** in the five precision calculators (proportion, mean, cluster survey, incidence rate, diagnostic accuracy): n = z^2 p (1 - p) / d^2, or with d = eps p for relative precision; n / (1 - r) for expected non-response~~ (#28)
+- ~~Connect Cloud deployment fixed (every manifest package needs a CRAN / RSPM / Bioconductor source; a stricter check in CI)~~ (#29)
+- ~~**Find a calculator** tab (the guide and the browse lists moved out of Home), browser responsiveness (the live site took 80 s to show the guide and 72 s to open a calculator; now 5 s and 1.5 s: no background loading in the browser build), dark-mode fix for light boxes, matched case-control with phi or odds ratio or the two exposure proportions, hazard ratio from medians in the log-rank calculator, the wizard's continuous-outcome branch (mean and SD, or median and IQR, leading to paired / unpaired means)~~ (#30)
+- ~~**Effect Size tab:** ten converters (two means to Cohen's d and Hedges' g; d from t; paired d_z; f from means, eta-squared, F or d; odds ratio / risk ratio / risk difference / h from proportions; Cohen's w; hazard ratio from medians or survival; d, r, odds ratio, R-squared, f-squared conversions; mean and SD from median and IQR; phi from matched pairs), a glossary of 35 terms and an information tip on the labels people stumble on~~ (#31)
+- ~~**The effect as people know it** (OpenEpi-style): both means or their difference, SD or variance, Cohen's d; the exposed risk or the odds ratio, risk ratio or risk difference; Cohen's f from means or eta-squared; the paired SD from two SDs and a correlation.~~ (#32)
+- ~~**Design effect** only in the Cluster / Design Effect module (it applies to any cluster design, including community trials): a calculator from the between- and within-cluster variances, from the variance of cluster means, or from the two variances of the estimate; or enter it directly (default 1.5, "most commonly taken as 1.5 or 2")~~ (#32)
+- ~~**Calculate this / Use this value:** 28 calculator inputs link to the matching Effect Size converter and take the number back~~ (#33)
+- ~~Pre-fill the converter from the calculator (9 links)~~ (3 Nov). [ ] Links for inputs where a converter gives a different quantity (the Welch SDs); more glossary terms and tooltips on request.
+- ~~Dark-mode contrast crawl and live-site timing kept in `tools/ui-audit/` (`contrast.R`, `live_timing.js`)~~ (3 Nov)
+- ~~Live browser build re-measured after #33: 38.9 s until Home is usable, guide 2.4 s, quick link 0.4 s (desktop)~~ (3 Nov). [ ] Try the new tabs on a real phone.
+
+## Phase 4c — Studies: a working record of calculations, downloaded as a Word file  (planned 3 Nov 2026; decisions S1-S5 in ROADMAP §10)
+
+- [ ] **S-1 Storage, buttons and the Studies tab:** the record kept in the browser tab only (nothing kept on the server); "Add to [Study 1 v] Add" under every result (the shared export hook of 64 calculators); a Studies tab with one drop-down (Study 1, 2, 3, + New study, Recent calculations), an editable name, the entries (remove, move, note), a live preview, Clear and **Download (.docx)**; repeated use of the same calculator and design shown as one table; Recent calculations recorded automatically (last 20).
+- [ ] **S-2 Word file:** a small built-in .docx writer (no new runtime package); formulas as LaTeX ready for Word's Insert > Equation > LaTeX; references numbered without duplicates, plus the suite's own citation (version and DOI). Checked by reading the file back with `officer` in the tests only.
+- [ ] **S-3 Guide and wording:** "Add this design choice" at the end of the guide (the answers that led to the design); readable names for the inputs in the document (the results use short names such as `p1`, `sd`).
+- [ ] **S-4 Analyze tools and devices:** the Analyze results too; a check on a real phone on Connect Cloud (sleep, switch apps, reload) and in the browser build.
+
 ## Phase 5 — The R package for analysts
 
-- ~~Public function API for the calculations themselves: all 195 `calc_*()` functions are exported, each with a help page (every argument described, the value described, a worked example taken from a verified test); `tests/testthat/test-help_pages.R` keeps it so~~ (29 Oct; owner decision: export all). The names stay `calc_*` (the planned `ss_*()` family was dropped); a smaller friendlier set of wrappers (`ss_text()`, `ss_curve()`, `ss_export()`) is still possible
+- ~~Public function API for the calculations themselves: all 206 `calc_*()` functions are exported (195 on 29 Oct), each with a help page (every argument described, the value described, a worked example taken from a verified test); `tests/testthat/test-help_pages.R` keeps it so~~ (29 Oct; owner decision: export all). The names stay `calc_*` (the planned `ss_*()` family was dropped); a smaller friendlier set of wrappers (`ss_text()`, `ss_curve()`, `ss_export()`) is still possible
 - ~~RStudio / Positron addin "Find a sample size calculator", `ss_find()` search from the console, and `run_app(calculator = ...)` to open the app on one calculator~~ (29 Oct)
 - ~~Vignettes: Getting started, Sample sizes from R, Analysing summary data from R (built with the package; also on the documentation site under "Using it from R")~~ (30 Oct). More per-family vignettes can follow
 - ~~Bug found and fixed while writing them: `print()` of a result showed a raw list in an installed package (the S3 methods were not registered in `NAMESPACE`)~~ (30 Oct)
-- [ ] Release: r-universe (binaries, including WebAssembly), then CRAN (computation core split from the app, ASCII-only source, fast examples, clean `R CMD check`)
+- ~~CRAN groundwork: ASCII-only source, fast examples, browser tests skipped on CRAN, `R CMD check --as-cran` clean apart from check-machine notes, `cran-comments.md`~~ (30 Oct)
+- [ ] Release: r-universe (binaries, including WebAssembly), then CRAN submission by the owner (computation core split from the app is optional)
 - ~~Rename of the GitHub repository (30 Oct), first release number (1.0.0, 30 Oct) and `NEWS.md` (30 Oct)~~
-- [ ] **[owner]** Author details for CRAN
+- ~~Author details for CRAN: ORCID 0000-0002-1918-5100 (from forecastsuite) in `DESCRIPTION`, `CITATION.cff`, `inst/CITATION`~~ (3 Nov)
 
 ## Phase 6 — Engineering and speed
 
-- [ ] Background computation for the slow Monte Carlo designs (`ExtendedTask`), so one user's run does not block the others
-- [ ] `bindCache()` for repeated closed-form results
-- [ ] Dependencies: ~~tier 1 (17 Oct) and the easy / moderate packages (28 Oct) removed from the runtime: five packages (tier 1) and seven (stage 2) reimplemented and checked against the originals, two upstream bugs found and corrected~~; left: `PowerTOST`, `Exact`, `clinfun`, `kappaSize` (optional), `lme4` stays
-- [ ] Re-snapshot `renv.lock`; report the two upstream bugs (pmsampsize, presize)
-- [ ] Trial Sequential Analysis speed in the browser build
+- ~~Background computation~~ (31 Oct): background computation with `mirai` (owner's decision, 31 Oct 2026): on a server the 10 Monte Carlo calculators run in a separate R process through `shiny::ExtendedTask` (`R/background.R`), the Calculate button shows "Calculating...", and the results are identical to the in-session ones (same seed and random-number generator, checked by the tests). One worker by default; `EPIDEMIOLOGYSUITE_WORKERS` (or `options(epidemiologysuite.workers)`) sets the number, 0 turns it off. `mirai` is suggested, not required: without it, or in the browser build, the calculation runs in the session. In the browser build a simulation now runs only when Calculate is pressed
+- ~~Caching of repeated results~~ (30 Oct): result cache for the 10 Monte Carlo calculators (`R/memo_cache.R`, `memo_calc()`): a repeated identical calculation (same inputs and seed) is returned at once, shared by every session of the R process, at most 200 results kept, switch off with `options(epidemiologysuite.cache = FALSE)`. Closed-form results are not cached on purpose: they take microseconds, less than building the key, so `bindCache()` would add nothing there
+- ~~Dependencies~~: tier 1 (17 Oct), the easy / moderate packages (28 Oct) and, on 31 Oct, `Exact` and `PowerTOST` removed from the runtime (31 Oct 2026): Fisher and Boschloo exact power written from the tests' definitions (`R/calc_closed_forms_exact.R`; `Exact` is GPL-2 only, so its code was not copied), the TOST, bioequivalence and expected-power sample sizes transcribed from `PowerTOST` (GPL >= 2; `R/calc_closed_forms_tost.R`); both equal the packages exactly over grids of inputs and the three designs now run in the browser build. Kept on purpose: `clinfun` (Simon two-stage, group-sequential boundaries; compiled numerical code that works in the browser) and `kappaSize` (pure R, works in the browser, long polynomial tables) -- replacing them would add risk without a gain for users.
+- ~~`renv.lock` updated (shiny 1.14.0, bslib 0.12.0, promises 1.5.0, mirai 2.7.3 and their dependencies; 31 Oct); the two upstream bug reports drafted in `docs/upstream_reports.md`~~ **Owner step:** file them
+- ~~Trial Sequential Analysis in the browser build~~ (31 Oct): not slow itself (0.3 ms per calculation); in the crawl it waited behind the GLMM simulations that start when that calculator opens, which now run only on Calculate in the browser build. The crawl also showed RMST failing to load `survival`'s compiled code in the browser; `survival` is now loaded at start-up like `MASS` and `lme4`. To confirm in the next CI crawl
 
 ## Phase 7 — Bigger workbenches  (later, some need decisions)
 
 - [ ] Evidence synthesis from study summaries (fixed / random effects, forest plot), checked against `metafor`
 - [ ] Teaching mode: interactive power curves, sampling-distribution and CI-coverage demos
-- [ ] Raw-data workbench (Table 1, crude and adjusted estimates, Kaplan-Meier) and line-list epidemic curves, R0 / Rt: **deferred by decision D1**; needs a data-privacy policy first
+- [ ] Raw-data workbench (Table 1, crude and adjusted estimates, Kaplan-Meier) and line-list epidemic curves, R0 / Rt: **later, outside the browser app** (D1, 3 Nov 2026: too memory-heavy for the browser build; kept for a later full server app, merged with the owner's `Easy_analysis` application); needs a data-privacy policy first
 
 ## Always on: the sample-size catalog
 

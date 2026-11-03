@@ -54,10 +54,10 @@
 
   df <- data.frame(y = y, treat = treat, cid = factor(cluster_id))
   fit_full <- suppressMessages(suppressWarnings(
-    lme4::lmer(y ~ treat + (1 | cid), data = df, REML = FALSE)
+    .pkg_fn("lme4", "lmer")(y ~ treat + (1 | cid), data = df, REML = FALSE)
   ))
   fit_null <- suppressMessages(suppressWarnings(
-    lme4::lmer(y ~ 1 + (1 | cid), data = df, REML = FALSE)
+    .pkg_fn("lme4", "lmer")(y ~ 1 + (1 | cid), data = df, REML = FALSE)
   ))
   p_value <- suppressMessages(anova(fit_null, fit_full)$"Pr(>Chisq)"[2])
   isTRUE(p_value < alpha)
@@ -80,13 +80,13 @@
   df <- data.frame(y = y, treat = treat, cid = factor(cluster_id))
   fit_full <- tryCatch(
     suppressMessages(suppressWarnings(
-      lme4::glmer(y ~ treat + (1 | cid), data = df, family = binomial, nAGQ = 1)
+      .pkg_fn("lme4", "glmer")(y ~ treat + (1 | cid), data = df, family = binomial, nAGQ = 1)
     )),
     error = function(e) NULL, warning = function(w) NULL
   )
   fit_null <- tryCatch(
     suppressMessages(suppressWarnings(
-      lme4::glmer(y ~ 1 + (1 | cid), data = df, family = binomial, nAGQ = 1)
+      .pkg_fn("lme4", "glmer")(y ~ 1 + (1 | cid), data = df, family = binomial, nAGQ = 1)
     )),
     error = function(e) NULL, warning = function(w) NULL
   )
@@ -118,8 +118,9 @@
 #' @return list(n_clusters, n_total, achieved_power, inputs)
 #' @examples
 #' \donttest{
+#' # nsim is kept small so that the example runs quickly; use the default (or more) for a real calculation
 #' calc_glmm_lmm_power(cluster_size = 10, icc = 0.05, sigma_total = 1, delta = 0.8, 
-#'     power = 0.8, nsim = 30, seed = 1)
+#'     power = 0.8, nsim = 15, seed = 1)
 #' }
 #' @export
 calc_glmm_lmm_power <- function(cluster_size, icc, sigma_total, delta,
@@ -184,8 +185,9 @@ calc_glmm_lmm_power <- function(cluster_size, icc, sigma_total, delta,
 #' @return list(n_clusters, n_total, achieved_power, inputs)
 #' @examples
 #' \donttest{
+#' # nsim is kept small so that the example runs quickly; use the default (or more) for a real calculation
 #' calc_glmm_logistic_power(cluster_size = 20, sigma_u = 0.3, baseline_prob = 0.3, 
-#'     or = 4, power = 0.8, nsim = 20, seed = 42)
+#'     or = 4, power = 0.8, nsim = 10, seed = 42)
 #' }
 #' @export
 calc_glmm_logistic_power <- function(cluster_size, sigma_u, baseline_prob, or,
@@ -255,13 +257,13 @@ calc_glmm_logistic_power <- function(cluster_size, sigma_u, baseline_prob, or,
 
   fit_full <- tryCatch(
     suppressMessages(suppressWarnings(
-      lme4::lmer(y ~ time * group + (time | subject), data = df, REML = FALSE)
+      .pkg_fn("lme4", "lmer")(y ~ time * group + (time | subject), data = df, REML = FALSE)
     )),
     error = function(e) NULL, warning = function(w) NULL
   )
   fit_null <- tryCatch(
     suppressMessages(suppressWarnings(
-      lme4::lmer(y ~ time + group + (time | subject), data = df, REML = FALSE)
+      .pkg_fn("lme4", "lmer")(y ~ time + group + (time | subject), data = df, REML = FALSE)
     )),
     error = function(e) NULL, warning = function(w) NULL
   )

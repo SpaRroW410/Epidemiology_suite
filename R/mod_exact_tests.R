@@ -45,7 +45,7 @@ mod_exact_tests_ui <- function(id) {
         numericInput(ns("p2_fisher"), "p2 (group 2 proportion)", value = 0.60, min = 0, max = 1, step = 0.01),
         numericInput(ns("alpha_fisher"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_fisher"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-        numericInput(ns("ratio_fisher"), "Allocation ratio (group 2 : group 1)", value = 2, min = 0.1, step = 0.1),
+        numericInput(ns("ratio_fisher"), with_tip("Allocation ratio (group 2 : group 1)", "allocation_ratio"), value = 2, min = 0.1, step = 0.1),
         selectInput(
           ns("alternative_fisher"), "Alternative hypothesis",
           choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
@@ -57,7 +57,7 @@ mod_exact_tests_ui <- function(id) {
         numericInput(ns("p2_boschloo"), "p2 (group 2 proportion)", value = 0.60, min = 0, max = 1, step = 0.01),
         numericInput(ns("alpha_boschloo"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_boschloo"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-        numericInput(ns("ratio_boschloo"), "Allocation ratio (group 2 : group 1)", value = 1, min = 0.1, step = 0.1),
+        numericInput(ns("ratio_boschloo"), with_tip("Allocation ratio (group 2 : group 1)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1),
         selectInput(
           ns("alternative_boschloo"), "Alternative hypothesis",
           choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")

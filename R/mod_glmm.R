@@ -53,6 +53,7 @@ mod_glmm_ui <- function(id) {
         numericInput(ns("sigma_u"), "Random-intercept standard deviation (log-odds scale)", value = 0.3, min = 0.0001, step = 0.1),
         numericInput(ns("baseline_prob"), "Expected control-arm outcome probability", value = 0.3, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("or"), "Odds ratio (treatment vs. control) to detect", value = 2, min = 0.001, step = 0.1),
+        es_link_ui(ns, "or"),
         numericInput(ns("alpha_glmm"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_glmm"), "Desired power", value = 0.8, min = 0.5, max = 0.95, step = 0.01),
         numericInput(ns("nsim_glmm"), "Monte Carlo replicates per candidate n (nsim)", value = 30, min = 10, max = 300, step = 10),
@@ -119,10 +120,15 @@ mod_glmm_ui <- function(id) {
 
 mod_glmm_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
+    # the simulations run in a background R process on a server (background.R); `result` is the finished calculation
+    bg <- background_calc()
+    result <- bg$result(function() result_now())
+
     # Monte Carlo (ROADMAP F9/P1#7): recompute only when the design changes
     # or Calculate is clicked, not on every keystroke -- see
     # monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
-    result <- reactive({
+    result_now <- reactive({
       req(input$design)
       input$calculate
       isolate({
@@ -131,7 +137,7 @@ mod_glmm_server <- function(id) {
         req(input$cluster_size_lmm, input$icc, input$sigma_total, input$delta_lmm,
             input$alpha_lmm, input$power_lmm, input$nsim_lmm, input$seed_lmm)
         tryCatch(
-          list(ok = TRUE, value = calc_glmm_lmm_power(
+          list(ok = TRUE, value = bg$calc("calc_glmm_lmm_power",
             cluster_size = input$cluster_size_lmm, icc = input$icc, sigma_total = input$sigma_total,
             delta = input$delta_lmm, alpha = input$alpha_lmm, power = input$power_lmm,
             nsim = input$nsim_lmm, seed = input$seed_lmm
@@ -142,7 +148,7 @@ mod_glmm_server <- function(id) {
         req(input$cluster_size_glmm, input$sigma_u, input$baseline_prob, input$or,
             input$alpha_glmm, input$power_glmm, input$nsim_glmm, input$seed_glmm)
         tryCatch(
-          list(ok = TRUE, value = calc_glmm_logistic_power(
+          list(ok = TRUE, value = bg$calc("calc_glmm_logistic_power",
             cluster_size = input$cluster_size_glmm, sigma_u = input$sigma_u,
             baseline_prob = input$baseline_prob, or = input$or,
             alpha = input$alpha_glmm, power = input$power_glmm,
@@ -155,7 +161,7 @@ mod_glmm_server <- function(id) {
             input$cor_is_gc, input$sigma2_residual_gc, input$baseline_slope_gc,
             input$alpha_gc, input$power_gc, input$nsim_gc, input$seed_gc)
         tryCatch(
-          list(ok = TRUE, value = calc_growth_curve_power(
+          list(ok = TRUE, value = bg$calc("calc_growth_curve_power",
             ntimes = input$ntimes_gc, delta_slope = input$delta_slope_gc,
             sigma2_intercept = input$sigma2_intercept_gc, sigma2_slope = input$sigma2_slope_gc,
             cor_intercept_slope = input$cor_is_gc, sigma2_residual = input$sigma2_residual_gc,

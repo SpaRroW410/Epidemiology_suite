@@ -25,7 +25,8 @@ mod_anova_general_ui <- function(id) {
                    choices = c("Cohen's f-squared" = "f2", "Partial eta-squared" = "eta2")),
       conditionalPanel(
         condition = es_is("f2"),
-        numericInput(ns("f2"), "Cohen's f-squared", value = 0.0625, min = 0.0001, step = 0.01)
+        numericInput(ns("f2"), "Cohen's f-squared", value = 0.0625, min = 0.0001, step = 0.01),
+        es_link_ui(ns, "f2")
       ),
       conditionalPanel(
         condition = es_is("eta2"),
@@ -60,6 +61,7 @@ mod_anova_general_ui <- function(id) {
 
 mod_anova_general_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     result <- reactive({
       req(input$u, input$effect_size_type, input$alpha, input$power)
 

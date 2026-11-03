@@ -93,7 +93,7 @@ test_that("RCT superiority, individual allocation, 2 independent continuous grou
                  "I (the investigator) assign it",
                  "Individual subjects",
                  "Show one arm is better (superiority)",
-                 "Continuous (e.g. BP, Hb, BMI, a score)",
+                 "Continuous (e.g. BP, Hb, BMI, a score)", "Mean and standard deviation (roughly symmetric)",
                  "2 groups",
                  "Independent",
                  "No -- equal group sizes and similar variances (t-test)"))
@@ -155,7 +155,7 @@ test_that("observational, selected on exposure: the cohort's outcome decides the
             "Their exposure status (outcome measured/ascertained later)")
   expect_equal(.key(.walk(c(base, "Whether the disease/event occurred (a risk: relative risk)"))), "cohort_rr")
   # a measurement compared between exposed and unexposed is a difference in means, not a relative risk
-  cont <- c(base, "A measurement compared between exposed and unexposed (a difference in means, e.g. blood pressure, haemoglobin)")
+  cont <- c(base, "A measurement compared between exposed and unexposed (a difference in means, e.g. blood pressure, haemoglobin)", "Mean and standard deviation (roughly symmetric)")
   expect_equal(.key(.walk(c(cont, "No -- equal group sizes and similar variances (t-test)"))), "means_two_indep")
   expect_equal(.key(.walk(c(cont, "Unequal group sizes (e.g. 2:1 allocation)"))), "means_two_indep_unequal_n")
   expect_equal(.key(.walk(c(cont, "Clearly unequal variances (Welch's t-test)"))), "means_welch")
@@ -168,7 +168,7 @@ test_that("case-control: a yes/no exposure gives the odds-ratio calculators, a m
             "Their outcome/disease status (exposure ascertained backwards)")
   expect_equal(.key(.walk(c(base, "Exposed or not (yes/no): odds ratio", "No -- unmatched"))), "case_control_unmatched")
   expect_equal(.key(.walk(c(base, "Exposed or not (yes/no): odds ratio", "Yes -- individually matched 1:1 or 1:m"))), "case_control_matched")
-  cont <- c(base, "A measurement compared between cases and controls (a difference in mean levels, e.g. serum lead, vitamin D)")
+  cont <- c(base, "A measurement compared between cases and controls (a difference in mean levels, e.g. serum lead, vitamin D)", "Mean and standard deviation (roughly symmetric)")
   expect_equal(.key(.walk(c(cont, "No -- unmatched (two independent groups)", "No -- equal group sizes and similar variances (t-test)"))),
                "means_two_indep")
   expect_equal(.key(.walk(c(cont, "Yes -- individually matched (analysed as paired differences)"))), "means_two_dep")
@@ -283,13 +283,13 @@ test_that("3+ groups branches by question and outcome type", {
             "I (the investigator) assign it",
             "Individual subjects",
             "Show one arm is better (superiority)")
-  trend_cont <- .walk(c(base, "Continuous (e.g. BP, Hb, BMI, a score)", "3 or more groups",
+  trend_cont <- .walk(c(base, "Continuous (e.g. BP, Hb, BMI, a score)", "Mean and standard deviation (roughly symmetric)", "3 or more groups",
                         "Is there a trend across ordered groups? (dose-response)"))
   expect_equal(trend_cont$node$catalog_key(trend_cont$flags), "means_planned_contrast")
   trend_bin <- .walk(c(base, "Binary (e.g. cured/not, positive/negative)", "3 or more groups",
                        "Is there a trend across ordered groups? (dose-response)"))
   expect_equal(trend_bin$node$catalog_key(trend_bin$flags), "chisq_cochran_armitage")
-  ctrl <- .walk(c(base, "Continuous (e.g. BP, Hb, BMI, a score)", "3 or more groups",
+  ctrl <- .walk(c(base, "Continuous (e.g. BP, Hb, BMI, a score)", "Mean and standard deviation (roughly symmetric)", "3 or more groups",
                   "Does each group differ from one common control?"))
   expect_equal(ctrl$node$catalog_key(ctrl$flags), "multiplicity_dunnett")
 })
@@ -364,4 +364,29 @@ test_that("every complete click path through the wizard ends on a terminal with 
   expect_equal(bad, character(0))
   expect_gt(n_paths, 500)
   expect_lte(deepest, 10)
+})
+
+test_that("a continuous outcome summarised by median and IQR reaches the same paired / unpaired calculators, with the rank-based alternative", {
+  base <- c("Compare groups / test an association or hypothesis", "I (the investigator) assign it", "Individual subjects",
+            "Show one arm is better (superiority)", "Continuous (e.g. BP, Hb, BMI, a score)",
+            "Median and interquartile range (skewed)", "2 groups")
+  unpaired <- .walk(c(base, "Independent", "No -- equal group sizes and similar variances (t-test)"))
+  expect_equal(.key(unpaired), "means_two_indep")
+  expect_equal(unpaired$flags$summary, "median")
+  expect_equal(.rank_alternative(.key(unpaired)), "wilcoxon_rank_sum")
+  paired <- .walk(c(base, "Paired / dependent (before-after, matched pairs)"))
+  expect_equal(.key(paired), "means_two_dep")
+  expect_equal(.rank_alternative(.key(paired)), "wilcoxon_signed_rank")
+  cohort <- .walk(c("Compare groups / test an association or hypothesis", "I only observe what happened naturally",
+                    "Their exposure status (outcome measured/ascertained later)",
+                    "A measurement compared between exposed and unexposed (a difference in means, e.g. blood pressure, haemoglobin)",
+                    "Median and interquartile range (skewed)", "No -- equal group sizes and similar variances (t-test)"))
+  expect_equal(.key(cohort), "means_two_indep")
+  cc <- .walk(c("Compare groups / test an association or hypothesis", "I only observe what happened naturally",
+                "Their outcome/disease status (exposure ascertained backwards)",
+                "A measurement compared between cases and controls (a difference in mean levels, e.g. serum lead, vitamin D)",
+                "Median and interquartile range (skewed)", "Yes -- individually matched (analysed as paired differences)"))
+  expect_equal(.key(cc), "means_two_dep")
+  # the free-text parser answers the new question from the words used
+  expect_equal(walk_free_text("Cohort study, difference in median length of stay (IQR) between exposed and unexposed")$flags$summary, "median")
 })

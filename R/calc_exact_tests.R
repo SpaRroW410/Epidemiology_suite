@@ -14,7 +14,7 @@
 
 #' Sample size for Fisher's exact test (two independent proportions)
 #'
-#' Wraps Exact::power.exact.test(method = "fisher") -- searches n1 upward
+#' Exact power of Fisher's test (calc_closed_forms_exact.R, equal to Exact::power.exact.test(method = "fisher")) -- searches n1 upward
 #' (with n2 = ceiling(n1 * ratio)) for the smallest n1 where achieved power
 #' is at or above the target and stays there for a couple more steps.
 #'
@@ -40,12 +40,9 @@ calc_fisher_exact <- function(p1, p2, alpha = 0.05, power = 0.8, ratio = 1,
   .validate_unit_interval(power, "power")
   .validate_positive(ratio, "ratio")
 
-  .require_pkg("Exact", "The Fisher exact power calculation")
   power_at <- function(n1) {
     n2 <- ceiling(n1 * ratio)
-    Exact::power.exact.test(p1 = p1, p2 = p2, n1 = n1, n2 = n2,
-                             alternative = alternative, alpha = alpha,
-                             method = "fisher")$power
+    .exact_test_power(p1 = p1, p2 = p2, n1 = n1, n2 = n2, alternative = alternative, alpha = alpha, method = "fisher")
   }
 
   n1 <- 2
@@ -71,7 +68,7 @@ calc_fisher_exact <- function(p1, p2, alpha = 0.05, power = 0.8, ratio = 1,
 #' Sample size for Boschloo's exact test (two independent proportions,
 #' unconditional exact)
 #'
-#' Wraps Exact::power.exact.test(method = "boschloo") -- the same package
+#' Exact power of Boschloo's test (calc_closed_forms_exact.R, equal to Exact::power.exact.test(method = "boschloo")) -- the same
 #' and search strategy as calc_fisher_exact() above, just a different
 #' method argument. Boschloo's test is the classic "unconditional" exact
 #' test for two proportions (as opposed to Fisher's exact test, which
@@ -109,12 +106,9 @@ calc_boschloo_exact <- function(p1, p2, alpha = 0.05, power = 0.8, ratio = 1,
   .validate_unit_interval(power, "power")
   .validate_positive(ratio, "ratio")
 
-  .require_pkg("Exact", "The Boschloo exact power calculation")
   power_at <- function(n1) {
     n2 <- ceiling(n1 * ratio)
-    Exact::power.exact.test(p1 = p1, p2 = p2, n1 = n1, n2 = n2,
-                             alternative = alternative, alpha = alpha,
-                             method = "boschloo")$power
+    .exact_test_power(p1 = p1, p2 = p2, n1 = n1, n2 = n2, alternative = alternative, alpha = alpha, method = "boschloo")
   }
 
   n1 <- 2

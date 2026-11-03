@@ -29,6 +29,8 @@ free_text_rules <- list(
     # Planning logistics, named outright (a sample-size request that merely mentions dropouts is not matched).
     list(pattern = "randomi[sz]ation (list|schedule|sequence)|(generate|create|make) (a )?(random(i[sz]ation)? )?(allocation )?(list|sequence|schedule)|allocation (list|sequence|schedule)|block randomi[sz]ation|permuted.?block|(inflate|adjust|increase)\\w* (the )?sample size (for|to allow for) (attrition|dropouts?|drop.?out|non.?response|loss(es)? to follow.?up)",
          option_index = 11, confidence = "Medium"),
+    list(pattern = "(calculate|compute|work out|convert|find|get)( the| an| my)? (effect size|cohen'?s? ?[dfhw]\\b)|effect size (from|calculator|converter)|\\bd from a t.?statistic|hazard ratio from (the )?median",
+         option_index = 11, confidence = "Medium"),
     list(pattern = "probability proportional to size|\\bpps\\b|sampling frame|systematic sampl|\\bepi\\b.{0,20}(cluster|survey)|30\\s?(x|by|\\*)\\s?7|survey weights?|design weights?|sampling weights?|post.?stratif|inverse probability of selection|select(ion of)? (a |the )?(survey )?sample (from|of)",
          option_index = 11, confidence = "Medium"),
     list(pattern = "herd.?immunity|\\bseir\\b|\\bsir (model|epidemic)|\\br0\\b|basic reproduction number|epidemic model(l)?ing|coverage (is )?(needed|required) (to|for) (reach|achieve|stop|control)",
@@ -63,6 +65,8 @@ free_text_rules <- list(
   ),
 
   planning_type = list(
+    list(pattern = "effect size|cohen'?s? ?[dfhw]\\b|convert (an? )?(odds ratio|d|r)\\b|from a t.?statistic|standardi[sz]ed (mean )?difference|phi (from|coefficient)|hazard ratio from|median (survival )?to (hazard|mean)|mean and sd from",
+         option_index = 6, confidence = "High"),
     list(pattern = "herd.?immunity|\\bseir\\b|\\bsir\\b|\\br0\\b|reproduction number|epidemic|vaccination coverage|coverage (needed|required)", option_index = 5, confidence = "High"),
     list(pattern = "weight|post.?stratif|raking|calibrat|effective sample size|design effect of the weights", option_index = 4, confidence = "High"),
     list(pattern = "sampling frame|\\bpps\\b|proportional to size|systematic|\\bepi\\b|30\\s?(x|by|\\*)\\s?7|random sample|select(ion of)? (a |the )?(survey )?sample|cluster", option_index = 3, confidence = "High"),
@@ -253,14 +257,14 @@ free_text_rules <- list(
     list(pattern = "time to|survival|hazard|kaplan|log.?rank|\\bcox\\b",              option_index = 4, confidence = "High"),
     list(pattern = "per person|person.?(years|time|days)|incidence rate|rate ratio",   option_index = 3, confidence = "High"),
     list(pattern = "ordinal|likert|\\bgrade\\b|\\bstage\\b",                          option_index = 5, confidence = "High"),
-    list(pattern = "\\bmean\\b|average|continuous|blood pressure|\\bbp\\b|haemoglobin|hemoglobin|\\bhb\\b|\\bbmi\\b|weight|\\bscore\\b|concentration|\\blevels?\\b|difference in",
+    list(pattern = "\\bmean\\b|median|interquartile|\\biqr\\b|average|continuous|blood pressure|\\bbp\\b|haemoglobin|hemoglobin|\\bhb\\b|\\bbmi\\b|weight|\\bscore\\b|concentration|\\blevels?\\b|difference in",
          option_index = 2, confidence = "Medium"),
     list(pattern = "relative risk|risk ratio|\\brr\\b|incidence of|risk of|developed|occurrence|cumulative incidence|binary|proportion",
          option_index = 1, confidence = "Medium")
   ),
 
   cc_exposure_type = list(
-    list(pattern = "\\bmean\\b|average|continuous|concentration|\\bserum\\b|\\blevels?\\b|difference in|haemoglobin|hemoglobin|\\bbmi\\b|blood pressure|\\bscore\\b",
+    list(pattern = "\\bmean\\b|median|interquartile|\\biqr\\b|average|continuous|concentration|\\bserum\\b|\\blevels?\\b|difference in|haemoglobin|hemoglobin|\\bbmi\\b|blood pressure|\\bscore\\b",
          option_index = 2, confidence = "Medium"),
     list(pattern = "odds ratio|matched|unmatched|exposed|exposure|smok|\\buse\\b|history|yes.?no|binary|present|absent|\\bever\\b",
          option_index = 1, confidence = "Medium")
@@ -292,8 +296,13 @@ free_text_rules <- list(
          option_index = 2, confidence = "Medium"),
     list(pattern = "categorical|blood group|diagnosis categor",
          option_index = 3, confidence = "Medium"),
-    list(pattern = "continuous|\\bmean\\b|average|\\bscore\\b|\\bbp\\b|\\bhb\\b|\\bbmi\\b|blood pressure|haemoglobin|hemoglobin|weight|cholesterol|glucose|concentration|\\bfev1?\\b",
+    list(pattern = "continuous|\\bmean\\b|median|interquartile|\\biqr\\b|length of stay|average|\\bscore\\b|\\bbp\\b|\\bhb\\b|\\bbmi\\b|blood pressure|haemoglobin|hemoglobin|weight|cholesterol|glucose|concentration|\\bfev1?\\b",
          option_index = 1, confidence = "Medium")
+  ),
+
+  cont_summary = list(
+    list(pattern = "median|interquartile|\\biqr\\b|skewed|non.?normal",                                    option_index = 2, confidence = "High"),
+    list(pattern = "\\bmean\\b|average|standard deviation|\\bsd\\b|normally distributed",                  option_index = 1, confidence = "Medium")
   ),
 
   groups_count = list(

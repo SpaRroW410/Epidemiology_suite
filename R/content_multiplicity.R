@@ -118,6 +118,8 @@ multiplicity_content <- list(
       "at that (typically much smaller, hence larger-n-permitting)",
       "alpha* and the target power is found the same way this app's",
       "other means-comparison designs already do.",
+      "",
+      "**Other ways to enter the effect.** Cohen's d can be worked out from the difference between the means and an SD or a variance.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -265,6 +267,8 @@ multiplicity_content <- list(
       "  that one specific comparison, at the assumed common effect size,",
       "  clears the Dunnett-adjusted (rather than Bonferroni/Sidak-",
       "  adjusted) critical value.",
+      "",
+      "**Other ways to enter the effect.** Cohen's d can be worked out from the difference between the means and an SD or a variance.",
       sep = "\n"
     ),
     worked_example = paste(

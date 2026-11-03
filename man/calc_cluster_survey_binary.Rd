@@ -12,7 +12,8 @@ calc_cluster_survey_binary(
   error = c("relative", "absolute"),
   rho,
   N_psu = NULL,
-  conf_level = 0.95
+  conf_level = 0.95,
+  nonresponse = 0
 )
 }
 \arguments{
@@ -35,9 +36,14 @@ population, for a finite-population correction (NULL = effectively
 infinite, the usual case for a large community/region)}
 
 \item{conf_level}{Confidence level (0,1)}
+
+\item{nonresponse}{Expected fraction of the individuals selected in each cluster who are not analyzable (non-response,
+refusal), in [0, 1). The number of clusters is unchanged; each cluster selects b / (1 - nonresponse) individuals, rounded up.}
 }
 \value{
-list(n_psu, n_ssu, deff, inputs)
+A named list of class \code{ss_result} with \code{n_psu} (clusters), \code{n_ssu} (individuals to analyze), \code{deff}, and when
+\code{nonresponse} > 0 \code{b_enrolled} (individuals to select per cluster) and \code{n_ssu_enrolled} (n_psu x b_enrolled), then
+\code{d_absolute}, \code{epsilon_relative}, \code{precision_notes} and \code{inputs}.
 }
 \description{
 Wraps epiR::epi.ssclus2estb() rather than reimplementing the underlying
@@ -61,6 +67,10 @@ genuinely differ, in how a finite total-population size is applied).
 This calculator therefore covers both the one-stage and two-stage
 binary-outcome cases; \code{b} should be read as "individuals examined per
 cluster" either way.
+
+The calculation is refused when the interval p +/- d would pass 0 or 1 (d >= p or d >= 1 - p, d = epsilon x p for a
+relative precision) or a relative precision is 100\% or more; a relative precision above 20\%, and a proportion below 10\% (above
+90\%) with d above one-fourth of p (of 1 - p), give a warning in \code{precision_notes}.
 }
 \examples{
 calc_cluster_survey_binary(b = 75, p = 0.46, epsilon = 0.1, error = "relative", 

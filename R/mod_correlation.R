@@ -47,7 +47,8 @@ mod_correlation_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("point_biserial"),
-        numericInput(ns("r_pb"), "Expected point-biserial correlation (r)", value = 0.5, min = -0.99, max = 0.99, step = 0.01)
+        numericInput(ns("r_pb"), "Expected point-biserial correlation (r)", value = 0.5, min = -0.99, max = 0.99, step = 0.01),
+        es_link_ui(ns, "r_pb")
       ),
       conditionalPanel(
         condition = design_is("regression_slope"),
@@ -160,6 +161,7 @@ mod_correlation_ui <- function(id) {
 
 mod_correlation_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     result <- reactive({
       req(input$design, input$alpha, input$power, input$alternative)
 

@@ -6,10 +6,13 @@
 \usage{
 calc_means_paired(
   mean_diff,
-  sd_diff,
+  sd_diff = NULL,
   alpha = 0.05,
   power = 0.8,
-  alternative = c("two.sided", "less", "greater")
+  alternative = c("two.sided", "less", "greater"),
+  sd1 = NULL,
+  sd2 = NULL,
+  r = NULL
 )
 }
 \arguments{
@@ -22,6 +25,9 @@ calc_means_paired(
 \item{power}{Desired power (0,1)}
 
 \item{alternative}{"two.sided", "less", or "greater"}
+
+\item{sd1, sd2, r}{Instead of \code{sd_diff}: the SDs of the two measurements and their correlation; the SD of the differences is then
+sqrt(sd1^2 + sd2^2 - 2 r sd1 sd2)}
 }
 \value{
 list(n, d, inputs)

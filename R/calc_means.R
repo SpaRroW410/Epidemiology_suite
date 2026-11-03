@@ -42,6 +42,29 @@ calc_means_1s <- function(mu0, mu1, sd, alpha = 0.05, power = 0.8,
   ))
 }
 
+# Alternative ways to give the effect of a two-group means calculation (as OpenEpi's mean-difference form does): the two means or their
+# difference, and a standard deviation or a variance. Both return plain numbers and stop with a plain message.
+.means_delta <- function(mu1, mu2, diff) {
+  if (!is.null(diff)) {
+    if (!is.null(mu1) || !is.null(mu2)) stop("Give either the two means or their difference, not both.", call. = FALSE)
+    .validate_number(diff, "diff")
+    if (isTRUE(all.equal(diff, 0))) stop("The difference between the means must not be 0 (no effect to detect).", call. = FALSE)
+    return(diff)
+  }
+  if (is.null(mu1) || is.null(mu2)) stop("Give the two means, or their difference.", call. = FALSE)
+  .validate_number(mu1, "mu1")
+  .validate_number(mu2, "mu2")
+  if (isTRUE(all.equal(mu1, mu2))) stop("mu1 and mu2 must differ (no effect to detect).", call. = FALSE)
+  mu1 - mu2
+}
+.means_spread <- function(sd, variance, label) {
+  if (!is.null(sd) && !is.null(variance)) stop(sprintf("Give either the SD or the variance of %s, not both.", label), call. = FALSE)
+  if (!is.null(variance)) { .validate_positive(variance, paste("the variance of", label)); return(sqrt(variance)) }
+  if (is.null(sd)) stop(sprintf("Give the standard deviation (or the variance) of %s.", label), call. = FALSE)
+  .validate_positive(sd, paste("the SD of", label))
+  sd
+}
+
 #' Sample size for two independent means (equal allocation, common SD)
 #'
 #' @param mu1 Expected mean in group 1
@@ -50,24 +73,30 @@ calc_means_1s <- function(mu0, mu1, sd, alpha = 0.05, power = 0.8,
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
+#' @param diff Difference between the means, instead of `mu1` and `mu2`
+#' @param variance Common variance, instead of `sd`
+#' @param d Cohen's d, instead of the means and the SD
 #' @return list(n_per_group, n_total, d, inputs)
 #' @examples
 #' calc_means_2s_indep(mu1 = 0.5, mu2 = 0, sd = 1, alpha = 0.05, power = 0.8)
+#' calc_means_2s_indep(diff = 0.5, variance = 1)
 #' @export
-calc_means_2s_indep <- function(mu1, mu2, sd, alpha = 0.05, power = 0.8,
-                                 alternative = c("two.sided", "less", "greater")) {
+calc_means_2s_indep <- function(mu1 = NULL, mu2 = NULL, sd = NULL, alpha = 0.05, power = 0.8,
+                                 alternative = c("two.sided", "less", "greater"),
+                                 diff = NULL, variance = NULL, d = NULL) {
   alternative <- match.arg(alternative)
-
-  .validate_number(mu1, "mu1")
-  .validate_number(mu2, "mu2")
-  .validate_positive(sd, "sd")
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
-  if (isTRUE(all.equal(mu1, mu2))) {
-    stop("mu1 and mu2 must differ (no effect to detect).")
+  d_given <- d
+  if (!is.null(d)) {
+    if (!is.null(mu1) || !is.null(mu2) || !is.null(diff) || !is.null(sd) || !is.null(variance)) {
+      stop("Give either Cohen's d, or the means (or their difference) and the SD (or variance), not both.", call. = FALSE)
+    }
+    .validate_number(d, "d")
+    if (isTRUE(all.equal(d, 0))) stop("d must not be 0 (no effect to detect).", call. = FALSE)
+  } else {
+    d <- .means_delta(mu1, mu2, diff) / .means_spread(sd, variance, "the groups")
   }
-
-  d <- (mu1 - mu2) / sd
   fit <- .cf_pwr_t_test(d = d, sig.level = alpha, power = power,
                           type = "two.sample", alternative = alternative)
   n_per_group <- ceiling(fit$n)
@@ -76,7 +105,7 @@ calc_means_2s_indep <- function(mu1, mu2, sd, alpha = 0.05, power = 0.8,
     n_per_group = n_per_group,
     n_total = n_per_group * 2,
     d = d,
-    inputs = list(mu1 = mu1, mu2 = mu2, sd = sd, alpha = alpha, power = power,
+    inputs = list(mu1 = mu1, mu2 = mu2, diff = diff, sd = sd, variance = variance, d = d_given, alpha = alpha, power = power,
                   alternative = alternative)
   ))
 }
@@ -85,6 +114,8 @@ calc_means_2s_indep <- function(mu1, mu2, sd, alpha = 0.05, power = 0.8,
 #'
 #' @param mean_diff Expected mean of the paired differences
 #' @param sd_diff Standard deviation of the paired differences (> 0)
+#' @param sd1,sd2,r Instead of `sd_diff`: the SDs of the two measurements and their correlation; the SD of the differences is then
+#'   sqrt(sd1^2 + sd2^2 - 2 r sd1 sd2)
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
@@ -92,11 +123,18 @@ calc_means_2s_indep <- function(mu1, mu2, sd, alpha = 0.05, power = 0.8,
 #' @examples
 #' calc_means_paired(mean_diff = 0.5, sd_diff = 1, alpha = 0.05, power = 0.8)
 #' @export
-calc_means_paired <- function(mean_diff, sd_diff, alpha = 0.05, power = 0.8,
-                               alternative = c("two.sided", "less", "greater")) {
+calc_means_paired <- function(mean_diff, sd_diff = NULL, alpha = 0.05, power = 0.8,
+                               alternative = c("two.sided", "less", "greater"),
+                               sd1 = NULL, sd2 = NULL, r = NULL) {
   alternative <- match.arg(alternative)
 
   .validate_number(mean_diff, "mean_diff")
+  if (is.null(sd_diff)) {
+    if (is.null(sd1) || is.null(sd2) || is.null(r)) stop("Give the SD of the differences, or both SDs and their correlation.", call. = FALSE)
+    sd_diff <- calc_es_paired(mean_diff, sd1 = sd1, sd2 = sd2, r = r)$sd_diff
+  } else if (!is.null(sd1) || !is.null(sd2) || !is.null(r)) {
+    stop("Give either the SD of the differences, or both SDs and their correlation, not both.", call. = FALSE)
+  }
   .validate_positive(sd_diff, "sd_diff")
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
@@ -111,7 +149,8 @@ calc_means_paired <- function(mean_diff, sd_diff, alpha = 0.05, power = 0.8,
   new_ss_result(list(
     n = ceiling(fit$n),
     d = d,
-    inputs = list(mean_diff = mean_diff, sd_diff = sd_diff, alpha = alpha,
+    sd_diff = sd_diff,
+    inputs = list(mean_diff = mean_diff, sd_diff = sd_diff, sd1 = sd1, sd2 = sd2, r = r, alpha = alpha,
                   power = power, alternative = alternative)
   ))
 }
@@ -175,14 +214,19 @@ calc_means_anova <- function(group_means, sd, alpha = 0.05, power = 0.8) {
 #' @param conf_level Confidence level (0,1)
 #' @param N Optional finite eligible-population size. NULL (default) =
 #'   effectively infinite population.
-#' @return list(n, N, inputs)
+#' @param nonresponse Expected fraction not analyzable (non-response, refusal or loss to follow-up), in \[0, 1); the number to enrol
+#'   is n / (1 - nonresponse), rounded up
+#' @details A relative precision of 100% or more is refused (the interval would reach 0). A relative precision above 20%, and an
+#'   absolute precision at least as large as the mean, give a warning in `precision_notes`.
+#' @return A named list of class `ss_result` with `n` (to analyze), `n_enrolled` (when `nonresponse` > 0), `d_absolute`,
+#'   `epsilon_relative`, `N`, `precision_notes` (warnings) and `inputs`.
 #' @examples
 #' calc_means_single_precision(mean = 1500 * 0.05, sd = 300 * 0.05, epsilon = 0.2, 
 #'     error = "relative", conf_level = 0.95, N = 20)
 #' @export
 calc_means_single_precision <- function(mean, sd, epsilon,
                                          error = c("relative", "absolute"),
-                                         conf_level = 0.95, N = NULL) {
+                                         conf_level = 0.95, N = NULL, nonresponse = 0) {
   error <- match.arg(error)
   .validate_number(mean, "mean")
   if (isTRUE(all.equal(mean, 0))) {
@@ -192,6 +236,8 @@ calc_means_single_precision <- function(mean, sd, epsilon,
   .validate_positive(epsilon, "epsilon")
   .validate_unit_interval(conf_level, "conf_level")
   if (!is.null(N)) .validate_population(N)
+  .validate_nonresponse(nonresponse)
+  chk <- .precision_checks_mean(mean, epsilon, error)
 
   n <- .cf_sssimpleestc(
     N = if (is.null(N)) NA else N,
@@ -199,12 +245,16 @@ calc_means_single_precision <- function(mean, sd, epsilon,
     conf.level = conf_level
   )
 
-  new_ss_result(list(
-    n = n,
+  out <- list(n = n)
+  if (nonresponse > 0) out$n_enrolled <- .inflate_nonresponse(n, nonresponse)
+  new_ss_result(c(out, list(
+    d_absolute = chk$d,
+    epsilon_relative = chk$epsilon,
     N = N,
+    precision_notes = chk$notes,
     inputs = list(mean = mean, sd = sd, epsilon = epsilon, error = error,
-                  conf_level = conf_level, N = N)
-  ))
+                  conf_level = conf_level, N = N, nonresponse = nonresponse)
+  )))
 }
 
 #' Sample size for two independent means with unequal group sizes
@@ -220,28 +270,33 @@ calc_means_single_precision <- function(mean, sd, epsilon,
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @param alternative "two.sided", "less", or "greater"
+#' @param diff Difference between the means, instead of `mu1` and `mu2`
+#' @param variance Common variance, instead of `sd`
+#' @param d Cohen's d, instead of the means and the SD
 #' @return list(n1, n2, n_total, d, inputs)
 #' @examples
 #' calc_means_2s_unequal_n(mu1 = 10, mu2 = 9.4, sd = 1, n1 = 90, alpha = 0.05, power = 0.8, 
 #'     alternative = "two.sided")
 #' @export
-calc_means_2s_unequal_n <- function(mu1, mu2, sd, n1, alpha = 0.05, power = 0.8,
-                                     alternative = c("two.sided", "less", "greater")) {
+calc_means_2s_unequal_n <- function(mu1 = NULL, mu2 = NULL, sd = NULL, n1, alpha = 0.05, power = 0.8,
+                                     alternative = c("two.sided", "less", "greater"),
+                                     diff = NULL, variance = NULL, d = NULL) {
   alternative <- match.arg(alternative)
-
-  .validate_number(mu1, "mu1")
-  .validate_number(mu2, "mu2")
-  .validate_positive(sd, "sd")
   if (!is.numeric(n1) || length(n1) != 1 || is.na(n1) || n1 < 2 || n1 != round(n1)) {
     stop("n1 must be a single whole number >= 2.")
   }
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
-  if (isTRUE(all.equal(mu1, mu2))) {
-    stop("mu1 and mu2 must differ (no effect to detect).")
+  d_given <- d
+  if (!is.null(d)) {
+    if (!is.null(mu1) || !is.null(mu2) || !is.null(diff) || !is.null(sd) || !is.null(variance)) {
+      stop("Give either Cohen's d, or the means (or their difference) and the SD (or variance), not both.", call. = FALSE)
+    }
+    .validate_number(d, "d")
+    if (isTRUE(all.equal(d, 0))) stop("d must not be 0 (no effect to detect).", call. = FALSE)
+  } else {
+    d <- .means_delta(mu1, mu2, diff) / .means_spread(sd, variance, "the groups")
   }
-
-  d <- (mu1 - mu2) / sd
   fit <- .cf_pwr_t2n_test(n1 = n1, n2 = NULL, d = d, sig.level = alpha,
                             power = power, alternative = alternative)
   n2 <- ceiling(fit$n2)
@@ -251,7 +306,7 @@ calc_means_2s_unequal_n <- function(mu1, mu2, sd, n1, alpha = 0.05, power = 0.8,
     n2 = n2,
     n_total = n1 + n2,
     d = d,
-    inputs = list(mu1 = mu1, mu2 = mu2, sd = sd, n1 = n1, alpha = alpha,
+    inputs = list(mu1 = mu1, mu2 = mu2, diff = diff, sd = sd, variance = variance, d = d_given, n1 = n1, alpha = alpha,
                   power = power, alternative = alternative)
   ))
 }
@@ -404,6 +459,8 @@ calc_means_posthoc_pairwise <- function(tau, sigma, margin, alpha = 0.05, power 
 #' @param mu2 Expected mean in group 2
 #' @param sd1 Expected standard deviation in group 1 (> 0)
 #' @param sd2 Expected standard deviation in group 2 (> 0)
+#' @param diff Difference between the means, instead of `mu1` and `mu2`
+#' @param var1,var2 Variances instead of standard deviations (as in OpenEpi's mean-difference form: "enter Std. Deviation OR Variance")
 #' @param alpha Significance level (0,1)
 #' @param power Desired power (0,1)
 #' @param ratio Group 2 size divided by group 1 size (> 0)
@@ -413,33 +470,32 @@ calc_means_posthoc_pairwise <- function(tau, sigma, margin, alpha = 0.05, power 
 #' calc_means_welch(mu1 = 0.05, mu2 = 0.1, sd1 = 0.1, sd2 = 0.1, alpha = 0.05, power = 0.8, 
 #'     ratio = 1)
 #' @export
-calc_means_welch <- function(mu1, mu2, sd1, sd2, alpha = 0.05, power = 0.8,
+calc_means_welch <- function(mu1 = NULL, mu2 = NULL, sd1 = NULL, sd2 = NULL, alpha = 0.05, power = 0.8,
                               ratio = 1,
-                              alternative = c("two.sided", "less", "greater")) {
+                              alternative = c("two.sided", "less", "greater"),
+                              diff = NULL, var1 = NULL, var2 = NULL) {
   alternative <- match.arg(alternative)
-  .validate_number(mu1, "mu1")
-  .validate_number(mu2, "mu2")
-  .validate_positive(sd1, "sd1")
-  .validate_positive(sd2, "sd2")
+  delta <- .means_delta(mu1, mu2, diff)
+  s1 <- .means_spread(sd1, var1, "group 1")
+  s2 <- .means_spread(sd2, var2, "group 2")
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
   .validate_positive(ratio, "ratio")
-  if (isTRUE(all.equal(mu1, mu2))) {
-    stop("mu1 and mu2 must differ (no effect to detect).")
-  }
 
   za <- if (identical(alternative, "two.sided")) stats::qnorm(1 - alpha / 2) else stats::qnorm(1 - alpha)
   zb <- stats::qnorm(power)
-  delta <- mu1 - mu2
 
-  n1 <- ceiling((za + zb)^2 * (sd1^2 + sd2^2 / ratio) / delta^2)
+  n1 <- ceiling((za + zb)^2 * (s1^2 + s2^2 / ratio) / delta^2)
   n2 <- ceiling(ratio * n1)
 
   new_ss_result(list(
     n1 = n1,
     n2 = n2,
     n_total = n1 + n2,
-    inputs = list(mu1 = mu1, mu2 = mu2, sd1 = sd1, sd2 = sd2, alpha = alpha,
+    delta = delta,
+    sd1 = s1,
+    sd2 = s2,
+    inputs = list(mu1 = mu1, mu2 = mu2, diff = diff, sd1 = sd1, sd2 = sd2, var1 = var1, var2 = var2, alpha = alpha,
                   power = power, ratio = ratio, alternative = alternative)
   ))
 }

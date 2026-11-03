@@ -9,11 +9,10 @@ test_that("calc_fisher_exact finds the first stable n1 crossing the target power
   expect_gte(res$achieved_power, 0.8)
 })
 
-test_that("Exact::power.exact.test backend reproduces the package's own documented example exactly", {
+test_that("the Fisher power reproduces the Exact package's own documented example exactly", {
   # Exact's own doc example: p1=0.15, p2=0.60, n1=15, n2=30, method="fisher"
-  # -> power = 0.8049468.
-  fit <- Exact::power.exact.test(p1 = 0.15, p2 = 0.60, n1 = 15, n2 = 30, method = "fisher")
-  expect_equal(round(fit$power, 7), 0.8049468)
+  # -> power = 0.8049468 (computed here without the package, calc_closed_forms_exact.R).
+  expect_equal(round(.exact_test_power(0.15, 0.60, 15, 30, "two.sided", 0.05, "fisher"), 7), 0.8049468)
 })
 
 test_that("calc_fisher_exact rejects invalid inputs", {

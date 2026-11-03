@@ -1,3 +1,114 @@
+# epidemiologysuite (development version)
+
+## Links from the calculators to the Effect Size converters
+
+* **Pre-filled converters:** nine "Calculate this" links copy what the calculator already holds into the converter (group means and SD,
+  eta-squared, median survival or event probabilities, the controls' exposure, the paired SDs and their correlation, Cohen's d) and open it on
+  the route the calculator was using, so the same numbers are not typed twice.
+* **Server version notice:** the Posit Connect version says, in a closable line at the top, that what is typed is sent to the server and is
+  not saved to disk (the browser version already says that everything stays on the device).
+* **Author:** ORCID added to `DESCRIPTION`, `CITATION.cff` and `citation()`.
+* **Tools:** `tools/ui-audit/contrast.R` (colour-contrast crawl, dark or light mode) and `tools/ui-audit/live_timing.js` (times a published
+  version as a person meets it).
+* **Calculate this / Use this value:** 28 calculator inputs that ask for a number the Effect Size converters produce now have a "Calculate this"
+  link: Cohen's d (from a t statistic), Cohen's f and f-squared, r (from d), the hazard ratio, the odds ratio (from proportions), the SD (from a
+  median and interquartile range) and the SD of paired differences. The link opens the matching converter; once it has a result, "Use this value"
+  (pinned at the bottom of the window) puts the number into the calculator's input, switches the calculator to the way of entering it that shows that
+  input, and goes back. "Back without a value" leaves the input as it was. If the converter's result does not give the number, no button is offered.
+
+## The effect, entered the way people know it (OpenEpi-style inputs)
+
+* **Means** (two independent means, unequal group sizes, unequal variances / Welch): give both means **or their difference**, and the SD
+  **or the variance** (each group's own in the Welch design, with the ratio of group sizes), as in OpenEpi's "Sample Size For Comparing Two
+  Means" form; the first two designs also take **Cohen's d** directly. A line under the inputs shows the difference and the Cohen's d they
+  give. OpenEpi's example inputs (means 132.86 and 127.44, SDs 15.34 and 18.23, 95% and 80%, equal groups) give 152 per group. Paired means:
+  the SD of the differences, or the two SDs and their correlation.
+* **Cohort / trial and two proportions:** give the exposed group's risk, or instead the **odds ratio**, the **risk ratio** or the **risk
+  difference** ("fill in 1 of the following"); the others are shown. For 5% unexposed and an odds ratio of 2: 9.52%, 1.90, 4.52 points.
+  Group 2 is the reference in the two-proportion design.
+* **Cluster / Design Effect:** the design effect applies to **any cluster design** (a survey, a cluster-randomised trial, a quasi-experimental
+  community trial), and the module now says so. A new design, **Calculate the design effect from the variance between clusters**, gives the
+  design effect and the ICC from the between- and within-cluster variances, from the variance of the cluster means or proportions (with the
+  overall variance or proportion), or from the variances of the estimate under the cluster design and under simple random sampling; each is
+  checked by simulating clustered data. In the inflation design the design effect can be entered directly: 1.5 if nothing is known ("most
+  commonly taken as 1.5 or 2"; a common planning habit, no source checked). From R: `calc_cluster_deff_variance()` and
+  `calc_cluster_deff(deff =)`. The single-proportion calculator has no design-effect input; it points to this module for cluster surveys.
+* **Cohen's f** (Kruskal-Wallis, Friedman, repeated-measures ANOVA): enter f, or work it out from group means and SD or from eta-squared.
+  **Cohen's d** (FDR and Dunnett designs): enter d, or a difference with an SD or a variance. **Log-rank:** the hazard ratio can also be
+  calculated from median survival times.
+* From R: `calc_means_2s_indep()`, `calc_means_2s_unequal_n()` (`diff`, `variance`, `d`), `calc_means_welch()` (`diff`, `var1`, `var2`),
+  `calc_means_paired()` (`sd1`, `sd2`, `r`), `calc_cohort()` and `calc_proportion_2s()` (`OR`, `RR`, `RD`). Existing calls are unchanged. Each route is tested to give exactly the result of the plain one.
+* **Information tips** (i) on the labels of the matching terms: phi, odds ratio, ICC, design effect, sensitivity, specificity, prevalence,
+  allocation ratio, rate ratio, hazard ratio, absolute and relative precision, non-response.
+
+## Effect Size tab, glossary and information tips
+
+* **Effect Size** is a new calculator, the first group in the Plan: Sample Size list (Plan still opens on Proportions). It works out
+  the number a sample-size calculator asks for from what is usually known; each result has the formula, a worked example and a source,
+  and a plain reading against Cohen's conventions:
+  two means (SDs **or variances**; means **or their difference**; Cohen's d, Hedges' g and an interval with the group sizes),
+  d from a t statistic, d for paired measurements (from the SD of the differences, or from the two SDs and their correlation, or the
+  correlation implied by all three), Cohen's f (from group means and SD, eta-squared, an F statistic or d), two proportions (give
+  **one** of p1, the odds ratio, the risk ratio or the risk difference, as in OpenEpi's cohort and case-control forms; also Cohen's h and
+  the number needed to treat), Cohen's w and Cramer's V (a table, a chi-square statistic, or expected proportions), a hazard ratio
+  (from median survival, assuming exponential survival, or from survival or event probabilities), conversions among d, r, an odds ratio,
+  R-squared and f-squared, a mean and SD from a median and IQR, and phi from a table of matched pairs.
+* From R: `calc_es_two_means()`, `calc_es_from_t()`, `calc_es_paired()`, `calc_es_f()`, `calc_es_proportions()`, `calc_es_chisq_w()`,
+  `calc_es_hazard_ratio()` and `calc_es_convert()`. Each is checked against a package or a defining identity (`pwr`, `cor()`,
+  `t.test()`, `aov()`, `chisq.test()`, the Analyze tool's d and g), by simulation, and by round trip.
+* **Sources:** Chinn 2000 (odds ratio to d, ln(OR) / 1.81 = d x pi / sqrt(3)) was read as an abstract only; Cohen 1988, Hedges 1981 and
+  Hedges & Olkin 1985 were not read, and the text says so (the formulas are checked numerically). The odds-ratio conversion is marked
+  approximate.
+* **Information tips:** a small (i) beside a term shows its meaning on hover, on keyboard focus and on a tap (phones). The same
+  definitions, about 35 terms, are on a new **Glossary** page under Find a calculator, with a filter box.
+* The guide has a new route, "An effect size to enter in a calculator", and recognises phrases such as "calculate the effect size".
+
+## Finding a calculator, dark mode, the browser version
+
+* **Find a calculator** is now its own tab (guided questions, the list of every calculator by study design or by test, formulas).
+  "Start the guide" and the new "Browse all calculators" button on Home open it at the top of the page; before, they opened a folded
+  section below the visible part of the page and seemed to do nothing. On a phone the tab is "Find".
+* **Browser version (GitHub Pages):** calculators are no longer loaded one by one in the background. R runs on the page's single
+  thread there, so a click waited behind the queue: "Start the guide" took 80 s and a Home button 72 s on the published site; now 5 s
+  and 1.5 s. A calculator loads when it is opened; the "Loading calculators" bar is not shown there.
+* **Dark mode:** the guide's "describe your study" box, the formula preview and a note in the attrition calculator kept a white
+  background with light text (contrast 1.3:1). They now use the theme's colours; a contrast check over every page found nothing else.
+* **The guide** asks how a continuous outcome is summarised: mean and SD, or median and IQR. Both lead to the paired / unpaired
+  mean-difference calculators; with a median and IQR the result explains how to estimate a mean and SD and offers the rank-based
+  test. The free-text box recognises "median", "IQR" and "interquartile".
+
+## Effect sizes from what people usually know
+
+* **Case-control (unmatched and matched):** the effect can be given as the proportion of cases exposed (p1) instead of the odds
+  ratio (`p1 =`); OR = p1 (1 - p0) / (p0 (1 - p1)), the relation the Dupont formula uses. Both are shown.
+* **Matched case-control:** phi can be calculated from a table of matched pairs (both exposed, case only, control only, neither):
+  `calc_matched_pairs_phi()`, the phi coefficient of the pairs table; checked against `cor()` and by simulation of Dupont's model.
+* **Log-rank:** the hazard ratio can be calculated from pE and pC (proportional hazards: HR = log(1 - pE) / log(1 - pC)); an entered
+  HR that differs from it by more than 10% gives a warning.
+* **Rates (two groups, negative binomial):** the rate ratio can be given as the second group's rate.
+* **Means:** `calc_mean_sd_from_median_iqr()` and a converter in the Means calculator estimate a mean and SD from a median and IQR
+  (Wan, Wang, Liu & Tong, BMC Med Res Methodol 2014;14:135, scenario C3; read through PubMed Central; checked by simulation).
+
+## Absolute and relative precision, non-response
+
+* The five precision-based calculators (single proportion, single mean, cluster survey of a proportion, incidence rate, diagnostic
+  accuracy) take the precision as **absolute** (+/- d on the scale of the estimate) or **relative** (+/- a fraction of it, d = epsilon x
+  estimate). Single proportion, incidence rate (`epsilon =`) and diagnostic accuracy (`error = "relative"`) gain the relative form; means
+  and the cluster survey already had it.
+* **Refused:** a precision whose interval would pass 0 or 1 (d >= p or d >= 1 - p for a proportion, sensitivity or specificity) and a
+  relative precision of 100% or more.
+* **Warned, not refused:** a relative precision above 20% (a common rule of thumb; no published source checked, and the text says so); a
+  proportion below 10% with d above one-fourth of it (Pourhoseingholi, Vahedi & Rahimzadeh, Gastroenterol Hepatol Bed Bench
+  2013;6:14-17), applied by the app to 1 - p above 90%; for a mean, an absolute precision as large as the mean. The warnings are in the
+  result's `precision_notes`.
+* **Non-response / loss to follow-up** (`nonresponse =`): the number to enrol is n / (1 - r), rounded up (`n_enrolled`); for the cluster
+  survey each cluster selects b / (1 - r) and the number of clusters is unchanged; for a rate the person-time to plan is divided by
+  1 - r.
+* Each calculator shows its precision both ways under the inputs and has a "When should I use absolute or relative precision?" panel.
+  The protocol paragraph, CSV and JSON state the precision type and the inflation.
+* Verified against Pourhoseingholi et al.'s Table 1 (8 of 9 cells; the ninth, p = 0.05 with d = 0.1, is now refused) and against
+  `epiR::epi.sssimpleestb()` for relative and absolute precision.
+
 # epidemiologysuite 1.0.0
 
 First release (tag `v1.0.0`). The package was called `epidemiologicasuite` until 30 October 2026, when it followed the renaming of the
@@ -18,7 +129,7 @@ GitHub repository to `Epidemiology_suite`; the app is shown to people as **Epide
 * **Design wizard and plain-language search.** Describe a study in words, or answer a few questions, and the app suggests calculators.
   In R, `ss_find()` does the same (also as an RStudio add-in).
 * **Cite tab.** The citation in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX and RIS, and a sentence for a Methods section, with
-  copy and download buttons; `citation("epidemiologysuite")` and `CITATION.cff` too. No DOI is set yet.
+  copy and download buttons; `citation("epidemiologysuite")` and `CITATION.cff` too. Archived on Zenodo: doi:10.5281/zenodo.23794230.
 
 ## From R
 

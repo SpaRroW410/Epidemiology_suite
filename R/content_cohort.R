@@ -33,6 +33,10 @@ cohort_content <- list(
       "exposed/unexposed and outcome/no-outcome), as opposed to person-time",
       "data -- appropriate for a fixed follow-up period rather than",
       "variable-length observation.",
+      "",
+      "**Other ways to enter the effect.** Give the exposed group's risk (p1), or instead the **odds ratio**, the **risk ratio** or the **risk",
+      "difference**; the others are calculated and shown under the inputs, as in OpenEpi's cohort / randomised-trial form (\"fill in 1 of the",
+      "following\"). For p0 = 5% and an odds ratio of 2, p1 = 9.52%, RR = 1.90 and RD = 4.52 points.",
       sep = "\n"
     ),
     worked_example = paste(

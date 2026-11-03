@@ -36,16 +36,23 @@ mod_diagnostic_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("precision"),
-        numericInput(ns("sens"), "Expected sensitivity (Sn)", value = 0.90, min = 0, max = 1, step = 0.01),
-        numericInput(ns("spec"), "Expected specificity (Sp)", value = 0.85, min = 0, max = 1, step = 0.01),
-        numericInput(ns("prevalence"), "Expected prevalence of the target condition (P)",
+        numericInput(ns("sens"), with_tip("Expected sensitivity (Sn)", "sensitivity"), value = 0.90, min = 0, max = 1, step = 0.01),
+        numericInput(ns("spec"), with_tip("Expected specificity (Sp)", "specificity"), value = 0.85, min = 0, max = 1, step = 0.01),
+        numericInput(ns("prevalence"), with_tip("Expected prevalence of the target condition (P)", "prevalence"),
                      value = 0.10, min = 0, max = 1, step = 0.01),
+        precision_type_input(ns("error_precision"),
+                             absolute = "Absolute (+/- on the 0-1 scale, e.g. 0.05 = +/- 5 points)",
+                             relative = "Relative (+/- a fraction of the sensitivity / specificity)"),
         numericInput(ns("prec_sens"), "Desired precision for sensitivity (W_Sn)",
                      value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("prec_spec"), "Desired precision for specificity (W_Sp)",
                      value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("conf_level"), "Confidence level",
-                     value = 0.95, min = 0.5, max = 0.999, step = 0.01)
+                     value = 0.95, min = 0.5, max = 0.999, step = 0.01),
+        nonresponse_input(ns("nonresponse_precision"),
+                          "Expected non-response / loss (no reference-standard result; fraction, 0.1 = 10%)"),
+        uiOutput(ns("precision_equiv")),
+        precision_guidance_ui("diagnostic")
       ),
       conditionalPanel(
         condition = design_is("vs_reference"),
@@ -53,7 +60,7 @@ mod_diagnostic_ui <- function(id) {
         numericInput(ns("sens1"), "Sn1 (expected sensitivity of new test)", value = 0.95, min = 0, max = 1, step = 0.01),
         numericInput(ns("spec0"), "Sp0 (reference/null specificity)", value = 0.80, min = 0, max = 1, step = 0.01),
         numericInput(ns("spec1"), "Sp1 (expected specificity of new test)", value = 0.85, min = 0, max = 1, step = 0.01),
-        numericInput(ns("prevalence_ref"), "Expected prevalence of the target condition (P)",
+        numericInput(ns("prevalence_ref"), with_tip("Expected prevalence of the target condition (P)", "prevalence"),
                      value = 0.40, min = 0, max = 1, step = 0.01)
       ),
       conditionalPanel(
@@ -68,9 +75,9 @@ mod_diagnostic_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("ppv_npv"),
-        numericInput(ns("sens_ppv"), "Expected sensitivity (Sn)", value = 0.90, min = 0, max = 1, step = 0.01),
-        numericInput(ns("spec_ppv"), "Expected specificity (Sp)", value = 0.85, min = 0, max = 1, step = 0.01),
-        numericInput(ns("prevalence_ppv"), "Expected prevalence of the target condition (P)",
+        numericInput(ns("sens_ppv"), with_tip("Expected sensitivity (Sn)", "sensitivity"), value = 0.90, min = 0, max = 1, step = 0.01),
+        numericInput(ns("spec_ppv"), with_tip("Expected specificity (Sp)", "specificity"), value = 0.85, min = 0, max = 1, step = 0.01),
+        numericInput(ns("prevalence_ppv"), with_tip("Expected prevalence of the target condition (P)", "prevalence"),
                      value = 0.20, min = 0, max = 1, step = 0.01),
         numericInput(ns("prec_ppv"), "Desired precision for PPV (W_PPV)",
                      value = 0.05, min = 0.001, max = 0.5, step = 0.01),
@@ -81,9 +88,9 @@ mod_diagnostic_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("likelihood_ratio"),
-        numericInput(ns("sens_lr"), "Expected sensitivity (Sn)", value = 0.80, min = 0, max = 1, step = 0.01),
-        numericInput(ns("spec_lr"), "Expected specificity (Sp)", value = 0.73, min = 0, max = 1, step = 0.01),
-        numericInput(ns("prevalence_lr"), "Expected prevalence of the target condition (P)",
+        numericInput(ns("sens_lr"), with_tip("Expected sensitivity (Sn)", "sensitivity"), value = 0.80, min = 0, max = 1, step = 0.01),
+        numericInput(ns("spec_lr"), with_tip("Expected specificity (Sp)", "specificity"), value = 0.73, min = 0, max = 1, step = 0.01),
+        numericInput(ns("prevalence_lr"), with_tip("Expected prevalence of the target condition (P)", "prevalence"),
                      value = 0.50, min = 0, max = 1, step = 0.01),
         selectInput(ns("lr_type"), "Likelihood ratio type",
                     choices = c("Positive (LR+)" = "positive", "Negative (LR-)" = "negative")),
@@ -93,8 +100,8 @@ mod_diagnostic_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("odds_ratio"),
-        numericInput(ns("sens_dor"), "Expected sensitivity (Sn)", value = 0.80, min = 0, max = 1, step = 0.01),
-        numericInput(ns("spec_dor"), "Expected specificity (Sp)", value = 0.70, min = 0, max = 1, step = 0.01)
+        numericInput(ns("sens_dor"), with_tip("Expected sensitivity (Sn)", "sensitivity"), value = 0.80, min = 0, max = 1, step = 0.01),
+        numericInput(ns("spec_dor"), with_tip("Expected specificity (Sp)", "specificity"), value = 0.70, min = 0, max = 1, step = 0.01)
       ),
       conditionalPanel(
         condition = design_is("vs_reference", "two_indep", "two_paired", "odds_ratio"),
@@ -204,6 +211,13 @@ mod_diagnostic_ui <- function(id) {
 
 mod_diagnostic_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    dx_error <- reactive(if (identical(input$error_precision, "relative")) "relative" else "absolute")
+    output$precision_equiv <- renderUI({
+      a <- precision_equivalents_text(input$sens, input$prec_sens, dx_error(), input$conf_level, "proportion", "sensitivity")
+      b <- precision_equivalents_text(input$spec, input$prec_spec, dx_error(), input$conf_level, "proportion", "specificity")
+      tagList(precision_equivalents_ui(a), precision_equivalents_ui(b))
+    })
+
     result <- reactive({
       req(input$design)
 
@@ -214,7 +228,8 @@ mod_diagnostic_server <- function(id) {
           list(ok = TRUE, value = calc_diagnostic_accuracy(
             sens = input$sens, spec = input$spec, prevalence = input$prevalence,
             prec_sens = input$prec_sens, prec_spec = input$prec_spec,
-            conf_level = input$conf_level
+            conf_level = input$conf_level, error = dx_error(),
+            nonresponse = .nonresponse_value(input$nonresponse_precision)
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
@@ -293,7 +308,15 @@ mod_diagnostic_server <- function(id) {
             sprintf(" (%s binds)", v$binding)),
           p(sprintf("Sensitivity requires n = %d; specificity requires n = %d", v$n_sens, v$n_spec)),
           p(sprintf("At this prevalence, that's ~%d diseased and ~%d non-diseased subjects",
-                    v$n_diseased, v$n_healthy))
+                    v$n_diseased, v$n_healthy)),
+          if (input$design == "precision") {
+            tagList(
+              nonresponse_result_ui(v$n_enrolled, v$n, v$inputs$nonresponse),
+              p(sprintf("Precision (%s): sensitivity +/- %s, specificity +/- %s on the 0-1 scale.", v$inputs$error,
+                        .prec_fmt(v$prec_sens_absolute), .prec_fmt(v$prec_spec_absolute))),
+              precision_notes_ui(v$precision_notes)
+            )
+          }
         )
       } else if (input$design == "two_indep") {
         tagList(
@@ -378,15 +401,16 @@ mod_diagnostic_server <- function(id) {
         )
       } else if (input$design == "precision") {
         req(input$sens, input$spec, input$prevalence, input$prec_sens, input$prec_spec, input$conf_level)
-        acc_by_scale <- function(sens, spec, prevalence, scale, prec_sens, prec_spec, conf_level) {
+        acc_by_scale <- function(sens, spec, prevalence, scale, prec_sens, prec_spec, conf_level, error) {
           calc_diagnostic_accuracy(sens = sens, spec = spec, prevalence = prevalence,
                                    prec_sens = prec_sens * scale, prec_spec = prec_spec * scale,
-                                   conf_level = conf_level)
+                                   conf_level = conf_level, error = error)
         }
         list(
           calc_fn = acc_by_scale,
           args = list(sens = input$sens, spec = input$spec, prevalence = input$prevalence, scale = 1,
-                       prec_sens = input$prec_sens, prec_spec = input$prec_spec, conf_level = input$conf_level),
+                       prec_sens = input$prec_sens, prec_spec = input$prec_spec, conf_level = input$conf_level,
+                       error = dx_error()),
           effect = list(param = "prevalence", values = curve_range_proportion(),
                       label = "Expected prevalence",
                       title = "Required n vs. expected prevalence"),

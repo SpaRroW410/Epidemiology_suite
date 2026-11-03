@@ -65,6 +65,10 @@ means_content <- list(
       "  (1 - Type II error rate), typically 0.8 or 0.9.",
       "",
       "Total sample size is twice the per-group value (n1 = n2).",
+      "",
+      "**Other ways to enter the effect.** Instead of the two means you can enter their **difference**, or Cohen's d directly; the SD can be",
+      "entered as a **variance** (SD = square root of the variance). A line under the inputs shows the Cohen's d these give. The Effect Size",
+      "calculator works out d from means and SDs, a t statistic and more.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -104,6 +108,10 @@ means_content <- list(
       "- **alpha** - the significance level (Type I error rate), typically 0.05.",
       "- **power** - the desired probability of detecting a true difference",
       "  (1 - Type II error rate), typically 0.8 or 0.9.",
+      "",
+      "**Other ways to enter the spread.** If the SD of the differences is not reported, enter the two SDs and the correlation between the two",
+      "measurements: SD of the differences = sqrt(sd1^2 + sd2^2 - 2 r sd1 sd2). The Effect Size calculator also finds the correlation implied by",
+      "all three.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -229,7 +237,8 @@ means_content <- list(
     title = "Single Mean, Precision-Based (No Reference Value)",
     formula_latex = paste0(
       "$$V^2 = \\sigma^2/\\bar{x}^2, \\quad ",
-      "n = \\frac{Z_{1-\\alpha/2}^2 \\, V^2}{Z_{1-\\alpha/2}^2 \\, V^2 / N_\\infty + \\epsilon_r^2}$$"
+      "n = \\frac{Z_{1-\\alpha/2}^2 \\, V^2}{Z_{1-\\alpha/2}^2 \\, V^2 / N_\\infty + \\epsilon_r^2}, \\quad ",
+      "\\epsilon_r = \\epsilon / \\bar{x} \\text{ (absolute)}, \\quad n_{\\text{enrol}} = \\left\\lceil \\frac{n}{1-r} \\right\\rceil$$"
     ),
     explanation = paste(
       "This calculator finds the sample size needed to estimate a mean to a",
@@ -249,6 +258,13 @@ means_content <- list(
       "- **N** - optional finite population size; leave blank for an",
       "  effectively infinite population (a finite population correction is",
       "  applied automatically when supplied).",
+      "- **Non-response / loss to follow-up r** - optional; the number to enrol",
+      "  is n / (1 - r), rounded up.",
+      "",
+      "A relative precision of 100% or more is refused (the interval would reach",
+      "0); above 20%, and an absolute precision as large as the mean, give a",
+      "warning. See \"When should I use absolute or relative precision?\" under",
+      "the inputs.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -288,6 +304,8 @@ means_content <- list(
       "If both groups can be freely sized, use \"Two independent means\"",
       "(equal allocation) instead -- it needs a smaller total n for the",
       "same power.",
+      "",
+      "**Other ways to enter the effect.** The two means can be replaced by their **difference**, or by Cohen's d; the SD can be a **variance**.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -399,6 +417,11 @@ means_content <- list(
       "how Welch's t-test itself treats them. When sigma1 = sigma2, this",
       "formula reduces algebraically to exactly the pooled-variance",
       "formula.",
+      "",
+      "**Other ways to enter the effect.** The two means can be replaced by their **difference**, and each group's SD by its **variance**, laid out as in",
+      "OpenEpi's \"Sample Size For Comparing Two Means\" form (means OR difference; standard deviation OR variance of each group; ratio of sample",
+      "sizes). The formula is the large-sample normal approximation n1 = (z(1-alpha/2) + z(power))^2 (sd1^2 + sd2^2 / ratio) / difference^2. With means 132.86 and 127.44, SDs",
+      "15.34 and 18.23, 95% confidence, 80% power and equal groups it gives 152 per group.",
       sep = "\n"
     ),
     worked_example = paste(

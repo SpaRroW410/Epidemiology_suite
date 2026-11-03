@@ -52,13 +52,14 @@ mod_bayesian_ui <- function(id) {
           numericInput(ns("prior_upper"), "Prior upper bound (log odds ratio)", value = log(1.3), step = 0.05)
         ),
         numericInput(ns("delta_w"), "Minimally worthwhile log odds ratio (delta_w)", value = 0, step = 0.1),
-        numericInput(ns("n_ratio"), "Allocation ratio n2/n1", value = 1, min = 0.01, step = 0.1),
+        numericInput(ns("n_ratio"), with_tip("Allocation ratio n2/n1", "allocation_ratio"), value = 1, min = 0.01, step = 0.1),
         numericInput(ns("alpha_or"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_or"), "Target assurance", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
       ),
       conditionalPanel(
         condition = design_is("bfda"),
         numericInput(ns("effect_size_bfda"), "Cohen's d effect size", value = 0.5, min = 0.01, step = 0.05),
+        es_link_ui(ns, "effect_size_bfda"),
         numericInput(ns("bf_threshold"), "Target Bayes factor (BF10) threshold", value = 10, min = 1.01, step = 1),
         numericInput(ns("nsim_bfda"), "Monte Carlo replicates per candidate n (nsim)",
                      value = 100, min = 50, max = 1000, step = 50),
@@ -105,12 +106,17 @@ mod_bayesian_ui <- function(id) {
 
 mod_bayesian_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
+    # the simulations run in a background R process on a server (background.R); `result` is the finished calculation
+    bg <- background_calc()
+    result <- bg$result(function() result_now())
+
     # bfda is Monte Carlo (ROADMAP F9/P1#7): once that design is selected,
     # recompute only on Calculate, not on every keystroke -- see
     # monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
     SLOW_DESIGNS <- "bfda"
 
-    result <- reactive({
+    result_now <- reactive({
       req(input$design)
       is_slow <- input$design %in% SLOW_DESIGNS
       if (is_slow) input$calculate
@@ -147,7 +153,7 @@ mod_bayesian_server <- function(id) {
         req(input$effect_size_bfda, input$bf_threshold, input$nsim_bfda,
             input$alpha_bfda, input$power_bfda)
         tryCatch(
-          list(ok = TRUE, design = "bfda", value = calc_bfda_ttest(
+          list(ok = TRUE, design = "bfda", value = bg$calc("calc_bfda_ttest",
             effect_size = input$effect_size_bfda, bf_threshold = input$bf_threshold,
             alpha = input$alpha_bfda, power = input$power_bfda, nsim = input$nsim_bfda
           )),

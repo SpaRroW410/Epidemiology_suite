@@ -39,7 +39,20 @@ mod_logrank_ui <- function(id) {
                      value = 0.3707, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("pC"), "pC (cumulative event probability, control group)",
                      value = 0.4890, min = 0.001, max = 0.999, step = 0.01),
-        numericInput(ns("hr_logrank"), "Postulated hazard ratio (HR)", value = 0.7, min = 0.01, step = 0.05),
+        radioButtons(ns("hr_as_logrank"), tagList("Hazard ratio", info_tip("hazard_ratio")),
+                     choices = c("Enter it" = "value", "Calculate from pE and pC (proportional hazards)" = "implied",
+                                 "Calculate from median survival (exponential survival)" = "medians")),
+        conditionalPanel(
+          condition = sprintf("input['%s'] == 'medians'", ns("hr_as_logrank")),
+          fluidRow(column(6, numericInput(ns("hr_median_e"), "Median survival, experimental arm", value = 18, min = 0.0001)),
+                   column(6, numericInput(ns("hr_median_c"), "Median survival, control arm", value = 12, min = 0.0001)))
+        ),
+        conditionalPanel(
+          condition = sprintf("input['%s'] != 'implied'", ns("hr_as_logrank")),
+          numericInput(ns("hr_logrank"), "Postulated hazard ratio (HR)", value = 0.7, min = 0.01, step = 0.05),
+          es_link_ui(ns, "hr_logrank")
+        ),
+        uiOutput(ns("hr_implied_logrank")),
         numericInput(ns("ratio"), "Experimental:control allocation ratio", value = 1, min = 0.1, step = 0.5),
         numericInput(ns("alpha_logrank"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_logrank"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
@@ -73,6 +86,7 @@ mod_logrank_ui <- function(id) {
         condition = design_is("stratified"),
         numericInput(ns("timeUnit"), "Total study length (accrual + follow-up)", value = 1.25, min = 0.0001, step = 0.1),
         numericInput(ns("hr_strat"), "Postulated hazard ratio (HR)", value = 1 / 1.91, min = 0.01, step = 0.05),
+        es_link_ui(ns, "hr_strat"),
         selectInput(ns("m_strata"), "Number of strata", choices = 2:6, selected = 2),
         uiOutput(ns("strata_ui")),
         numericInput(ns("alpha_strat"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
@@ -95,6 +109,7 @@ mod_logrank_ui <- function(id) {
         condition = design_is("weighted_logrank"),
         numericInput(ns("hazard0_wlr"), "Baseline (control-arm) hazard", value = 0.15, min = 0.0001, step = 0.01),
         numericInput(ns("hr_wlr"), "Treatment-arm hazard ratio during the effect period", value = 0.5, min = 0.01, step = 0.05),
+        es_link_ui(ns, "hr_wlr"),
         numericInput(ns("change_time_wlr"), "Time the hazard ratio switches on/off", value = 4, min = 0.01, step = 0.5),
         radioButtons(ns("effect_timing_wlr"), "Non-PH shape",
                      choices = c("Delayed effect (curves separate later)" = "delayed",
@@ -185,6 +200,26 @@ mod_logrank_ui <- function(id) {
 
 mod_logrank_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
+    # the hazard ratio of the two-group design: as entered, or NULL so that calc_logrank() calculates it from pE and pC
+    logrank_hr <- function() {
+      mode <- input$hr_as_logrank
+      if (identical(mode, "implied")) NULL
+      else if (identical(mode, "medians")) { req(input$hr_median_e, input$hr_median_c); calc_es_hazard_ratio(median_e = input$hr_median_e, median_c = input$hr_median_c)$hr }
+      else { req(input$hr_logrank); input$hr_logrank }
+    }
+    output$hr_implied_logrank <- renderUI({
+      pE <- input$pE; pC <- input$pC
+      ok <- function(x) is.numeric(x) && length(x) == 1 && !is.na(x) && x > 0 && x < 1
+      if (!ok(pE) || !ok(pC)) return(NULL)
+      div(class = "text-muted small mb-2", sprintf(
+        "With proportional hazards, pE = %s and pC = %s imply a hazard ratio of %.3f (log(1 - pE) / log(1 - pC)).",
+        format(pE), format(pC), log(1 - pE) / log(1 - pC)))
+    })
+    # the simulations run in a background R process on a server (background.R); `result` is the finished calculation
+    bg <- background_calc()
+    result <- bg$result(function() result_now())
+
     output$strata_ui <- renderUI({
       req(input$m_strata)
       m <- as.integer(input$m_strata)
@@ -205,17 +240,17 @@ mod_logrank_server <- function(id) {
     # monte_carlo_calculate_ui()'s comment in mod_shared_ui.R.
     SLOW_DESIGNS <- "weighted_logrank"
 
-    result <- reactive({
+    result_now <- reactive({
       req(input$design)
       is_slow <- input$design %in% SLOW_DESIGNS
       if (is_slow) input$calculate
 
       compute <- function() {
       if (input$design == "logrank") {
-        req(input$pE, input$pC, input$hr_logrank, input$ratio, input$alpha_logrank, input$power_logrank)
+        req(input$pE, input$pC, input$ratio, input$alpha_logrank, input$power_logrank)
         tryCatch(
           list(ok = TRUE, value = calc_logrank(
-            pE = input$pE, pC = input$pC, hr = input$hr_logrank, ratio = input$ratio,
+            pE = input$pE, pC = input$pC, hr = logrank_hr(), ratio = input$ratio,
             alpha = input$alpha_logrank, power = input$power_logrank
           )),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
@@ -274,7 +309,7 @@ mod_logrank_server <- function(id) {
             input$accrual_wlr, input$tot_time_wlr, input$rho_wlr, input$allocation1_wlr,
             input$alpha_wlr, input$power_wlr)
         tryCatch(
-          list(ok = TRUE, value = calc_weighted_logrank(
+          list(ok = TRUE, value = bg$calc("calc_weighted_logrank",
             hazard0 = input$hazard0_wlr, hr = input$hr_wlr, change_time = input$change_time_wlr,
             effect_timing = input$effect_timing_wlr, accrual = input$accrual_wlr,
             tot_time = input$tot_time_wlr, rho = input$rho_wlr, allocation1 = input$allocation1_wlr,
@@ -298,7 +333,10 @@ mod_logrank_server <- function(id) {
       if (input$design == "logrank") {
         tagList(
           p(strong("Total sample size: "), v$n_total),
-          p(sprintf("Experimental group: %d, Control group: %d", v$n_exp, v$n_control))
+          p(sprintf("Experimental group: %d, Control group: %d", v$n_exp, v$n_control)),
+          p(class = "text-muted small", sprintf("Hazard ratio used: %.3f%s", v$hr,
+                                                if (identical(input$hr_as_logrank, "implied")) " (from pE and pC)" else if (identical(input$hr_as_logrank, "medians")) " (from the median survival times)" else "")),
+          lapply(v$notes, function(n) div(class = "text-warning", n))
         )
       } else if (input$design == "stratified") {
         tagList(
@@ -332,10 +370,10 @@ mod_logrank_server <- function(id) {
     # "weighted_logrank" (Monte Carlo).
     render_power_curves(output, function() {
       if (input$design == "logrank") {
-        req(input$pE, input$pC, input$hr_logrank, input$ratio, input$alpha_logrank, input$power_logrank)
+        req(input$pE, input$pC, input$ratio, input$alpha_logrank, input$power_logrank)
         list(
           calc_fn = calc_logrank,
-          args = list(pE = input$pE, pC = input$pC, hr = input$hr_logrank, ratio = input$ratio,
+          args = list(pE = input$pE, pC = input$pC, hr = logrank_hr(), ratio = input$ratio,
                        alpha = input$alpha_logrank, power = input$power_logrank),
           effect = list(param = "hr", values = curve_range_ratio(n = 20), label = "Hazard ratio (HR)"),
           power = list(param = "power", values = curve_range_power(n = 20))

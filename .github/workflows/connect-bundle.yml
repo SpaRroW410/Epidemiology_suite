@@ -33,8 +33,10 @@ jobs:
           dependencies: '"hard"'
           extra-packages: any::rsconnect, any::jsonlite, any::shinytest2, any::chromote
           needs: connect
-      - name: Install RcppEigen with install.packages so the manifest records a normal source
-        run: Rscript -e 'install.packages("RcppEigen")'
+      # A package installed by setup-r-dependencies as any::pkg is recorded in manifest.json with Source "any" and Repository "RSPM",
+      # which Connect Cloud cannot download from ("Download of the mirai package has failed"); install.packages() records the mirror.
+      - name: Install RcppEigen, mirai and pkgload with install.packages so the manifest records a normal source
+        run: Rscript -e 'install.packages(c("RcppEigen", "mirai", "pkgload"))'
       - name: Build the bundle and manifest.json
         run: Rscript tools/connect/make_manifest.R connect_bundle
       - name: Start the bundle as a plain Shiny app and open it in Chrome

@@ -59,8 +59,7 @@ mod_multiplicity_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("fdr_means_2s"),
-        numericInput(ns("d_fdr"), "Cohen's d (effect size for the truly non-null tests)",
-                     value = 1, min = 0.001, step = 0.1),
+        effect_d_ui(ns, "d_fdr", 1, label = "Cohen's d (effect size for the truly non-null tests)"),
         numericInput(ns("pi1_fdr"), "pi1 (assumed proportion of the m tests that are truly non-null)",
                      value = 0.25, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("fdr_level"), "Target false discovery rate (FDR)",
@@ -84,8 +83,7 @@ mod_multiplicity_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("dunnett"),
-        numericInput(ns("d_dunnett"), "Cohen's d (same for every active arm vs. control)",
-                     value = 0.5, min = 0.001, step = 0.1),
+        effect_d_ui(ns, "d_dunnett", 0.5, label = "Cohen's d (same for every active arm vs. control)"),
         numericInput(ns("k_dunnett"), "Number of active (non-control) arms, k", value = 3, min = 2, step = 1)
       ),
       hr(),
@@ -174,6 +172,9 @@ mod_multiplicity_ui <- function(id) {
 
 mod_multiplicity_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
+    effect_d_server(input, output, "d_fdr")
+    effect_d_server(input, output, "d_dunnett")
     result <- reactive({
       req(input$design, input$m, input$power)
       tryCatch(
@@ -210,9 +211,9 @@ mod_multiplicity_server <- function(id) {
             )
           },
           fdr_means_2s = {
-            req(input$d_fdr, input$pi1_fdr, input$fdr_level)
+            req(input$pi1_fdr, input$fdr_level)
             calc_multiplicity_fdr_means(
-              d = input$d_fdr, m = input$m, pi1 = input$pi1_fdr,
+              d = effect_d_value(input, "d_fdr"), m = input$m, pi1 = input$pi1_fdr,
               fdr_level = input$fdr_level, power = input$power
             )
           },
@@ -227,9 +228,9 @@ mod_multiplicity_server <- function(id) {
             )
           },
           dunnett = {
-            req(input$d_dunnett, input$k_dunnett, input$alpha)
+            req(input$k_dunnett, input$alpha)
             calc_multiplicity_dunnett(
-              d = input$d_dunnett, k = as.integer(input$k_dunnett),
+              d = effect_d_value(input, "d_dunnett"), k = as.integer(input$k_dunnett),
               alpha = input$alpha, power = input$power
             )
           }
@@ -339,12 +340,13 @@ mod_multiplicity_server <- function(id) {
           power = list(param = "power", values = curve_range_power())
         )
       } else if (input$design == "fdr_means_2s") {
-        req(input$d_fdr, input$pi1_fdr, input$fdr_level, input$m, input$power)
+        dv <- effect_d_value(input, "d_fdr")
+        req(dv, input$pi1_fdr, input$fdr_level, input$m, input$power)
         list(
           calc_fn = calc_multiplicity_fdr_means,
-          args = list(d = input$d_fdr, m = input$m, pi1 = input$pi1_fdr,
+          args = list(d = dv, m = input$m, pi1 = input$pi1_fdr,
                        fdr_level = input$fdr_level, power = input$power),
-          effect = list(param = "d", values = curve_range_multiplicative(input$d_fdr), label = "Cohen's d"),
+          effect = list(param = "d", values = curve_range_multiplicative(dv), label = "Cohen's d"),
           power = list(param = "power", values = curve_range_power())
         )
       } else if (input$design == "fdr_microarray") {
@@ -361,12 +363,13 @@ mod_multiplicity_server <- function(id) {
           power = list(param = "power", values = curve_range_power())
         )
       } else if (input$design == "dunnett") {
-        req(input$d_dunnett, input$k_dunnett, input$alpha, input$power)
+        dv <- effect_d_value(input, "d_dunnett")
+        req(dv, input$k_dunnett, input$alpha, input$power)
         list(
           calc_fn = calc_multiplicity_dunnett,
-          args = list(d = input$d_dunnett, k = as.integer(input$k_dunnett),
+          args = list(d = dv, k = as.integer(input$k_dunnett),
                        alpha = input$alpha, power = input$power),
-          effect = list(param = "d", values = curve_range_multiplicative(input$d_dunnett, n = 8),
+          effect = list(param = "d", values = curve_range_multiplicative(dv, n = 8),
                         label = "Cohen's d"),
           power = list(param = "power", values = curve_range_power(n = 8)),
           gated = list(note = "Each point needs a multivariate-t quantile search (~1.4 s), so these 16 points take about 20-25 seconds.")

@@ -88,3 +88,48 @@ test_that("calc_case_control_case_cohort rejects invalid inputs", {
   expect_error(calc_case_control_case_cohort(n = 0, pD = 0.03, p1 = 0.25, hr = 1.35), "positive integer")
   expect_error(calc_case_control_case_cohort(n = 15792, pD = 1.5, p1 = 0.25, hr = 1.35), "between 0 and 1")
 })
+
+test_that("case-control: the effect given as p1 (proportion of cases exposed) equals the odds ratio it implies", {
+  for (p0 in c(0.1, 0.3, 0.6)) for (or in c(0.5, 1.5, 2, 3)) {
+    p1 <- or * p0 / (1 - p0 + or * p0)
+    a <- calc_case_control_unmatched(p0 = p0, OR = or, power = 0.8)
+    b <- calc_case_control_unmatched(p0 = p0, p1 = p1, power = 0.8)
+    expect_equal(b$n_total, a$n_total)
+    expect_equal(b$OR, or)
+    expect_equal(a$p1, p1)
+    m1 <- calc_case_control_matched(p0 = p0, OR = or, phi_coef = 0.2, ratio = 2)
+    m2 <- calc_case_control_matched(p0 = p0, p1 = p1, phi_coef = 0.2, ratio = 2)
+    expect_equal(m2$n_total, m1$n_total)
+  }
+  # epiR (the oracle) with the odds ratio computed from p1
+  skip_if_not_installed("epiR")
+  p0 <- 0.3; p1 <- 0.45
+  or <- p1 * (1 - p0) / (p0 * (1 - p1))
+  ref <- epiR::epi.sscc(N = NA, OR = or, p1 = NA, p0 = p0, n = NA, power = 0.8, r = 1, phi.coef = 0.2, design = 1,
+                        sided.test = 2, nfractional = FALSE, conf.level = 0.95, method = "matched", fleiss = FALSE)
+  expect_equal(calc_case_control_matched(p0 = p0, p1 = p1, phi_coef = 0.2)$n_total, ref$n.total)
+  expect_error(calc_case_control_unmatched(p0 = 0.3, OR = 2, p1 = 0.4), "either")
+  expect_error(calc_case_control_unmatched(p0 = 0.3), "either")
+  expect_error(calc_case_control_matched(p0 = 0.3, p1 = 0.3), "must differ")
+})
+
+test_that("phi from a table of matched pairs is the correlation of the case and control exposures", {
+  t <- calc_matched_pairs_phi(both = 30, case_only = 25, control_only = 10, neither = 35)
+  case <- rep(c(1, 1, 0, 0), c(30, 25, 10, 35))
+  control <- rep(c(1, 0, 1, 0), c(30, 25, 10, 35))
+  expect_equal(t$phi, stats::cor(case, control))
+  expect_equal(t$p1, mean(case))
+  expect_equal(t$p0, mean(control))
+  expect_equal(t$OR_matched, 25 / 10)
+  # pairs simulated from Dupont's model (the exposure of the control given the case's, as in the sample-size formula) recover phi
+  set.seed(1)
+  p0 <- 0.4; p1 <- 0.55; phi <- 0.25; n <- 2e5
+  pq <- p1 * (1 - p1) * p0 * (1 - p0)
+  case <- stats::rbinom(n, 1, p1)
+  control <- stats::rbinom(n, 1, ifelse(case == 1, (p1 * p0 + phi * sqrt(pq)) / p1, (p0 * (1 - p1) - phi * sqrt(pq)) / (1 - p1)))
+  tab <- calc_matched_pairs_phi(sum(case & control), sum(case & !control), sum(!case & control), sum(!case & !control))
+  expect_lt(abs(tab$phi - phi), 0.01)   # standard error about 0.002
+  expect_lt(abs(tab$p0 - p0), 0.01)
+  expect_error(calc_matched_pairs_phi(10, 0, 0, 0), "undefined")
+  expect_error(calc_matched_pairs_phi(10, 2.5, 3, 4), "whole numbers")
+})

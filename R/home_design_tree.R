@@ -147,7 +147,25 @@ design_nodes <- list(
       list(label = "How many to enrol to allow for attrition, non-response or non-compliance", next_id = "planning_attr_type"),
       list(label = "Select the units of a survey sample from a list (random, systematic, PPS, WHO EPI 30 x 7 clusters)", next_id = "planning_sel_type"),
       list(label = "Survey weights: design weights, nonresponse adjustment, effective sample size", next_id = "planning_weight_type"),
-      list(label = "Infectious-disease models: herd immunity and vaccination coverage, an SIR / SEIR epidemic, R0", next_id = "planning_epi_type")
+      list(label = "Infectious-disease models: herd immunity and vaccination coverage, an SIR / SEIR epidemic, R0", next_id = "planning_epi_type"),
+      list(label = "An effect size to enter in a calculator: Cohen's d, f, h or w, an odds ratio, a hazard ratio, a mean and SD from a median", next_id = "effect_size_type")
+    )
+  ),
+
+  effect_size_type = list(
+    id = "effect_size_type", stage = 1,
+    question = "Which effect size do you need to work out?",
+    options = list(
+      list(label = "Cohen's d for two means, from means and SDs or variances", next_id = "term_es_two_means"),
+      list(label = "Cohen's d from a t statistic", next_id = "term_es_from_t"),
+      list(label = "d for paired (before-after) measurements", next_id = "term_es_paired"),
+      list(label = "Cohen's f for three or more means (ANOVA)", next_id = "term_es_anova_f"),
+      list(label = "An odds ratio, risk ratio, risk difference or Cohen's h from two proportions (also case-control)", next_id = "term_es_proportions"),
+      list(label = "Cohen's w for a chi-square test", next_id = "term_es_chisq_w"),
+      list(label = "A hazard ratio from median survival or survival probabilities", next_id = "term_es_hazard_ratio"),
+      list(label = "Convert between d, r, an odds ratio, R-squared and f-squared", next_id = "term_es_convert"),
+      list(label = "A mean and SD from a median and interquartile range", next_id = "term_es_median_iqr"),
+      list(label = "phi from a table of matched case-control pairs", next_id = "term_es_matched_pairs")
     )
   ),
 
@@ -445,6 +463,7 @@ design_nodes <- list(
       list(label = "Simple random sampling of individuals", next_id = "term_prop_precision"),
       list(label = "Cluster / multistage sampling, equal cluster sizes (design effect)", next_id = "term_cluster_deff"),
       list(label = "Cluster / multistage sampling, unequal cluster sizes", next_id = "term_cluster_deff_var"),
+      list(label = "Cluster sampling, and I want to calculate the design effect from the variance between clusters", next_id = "term_cluster_deff_calc"),
       list(label = "WHO EPI-style cluster survey (e.g. 30 x 7)", next_id = "term_cluster_survey"),
       list(label = "Two-stage PPS sampling -- how many per cluster (optimal allocation)", next_id = "term_cluster_pps"),
       list(label = "Stratified sampling (allocate across strata)", next_id = "term_stratified"),
@@ -668,7 +687,7 @@ design_nodes <- list(
     options = list(
       list(label = "Whether the disease/event occurred (a risk: relative risk)", next_id = "term_cohort_rr"),
       list(label = "A measurement compared between exposed and unexposed (a difference in means, e.g. blood pressure, haemoglobin)",
-           next_id = "indep_cont", set = list(outcome = "continuous")),
+           next_id = "cont_summary", set = list(outcome = "continuous", cont_next = "indep_cont")),
       list(label = "An incidence rate per person-time (rate ratio)", next_id = "term_count_rate"),
       list(label = "Time to an event (survival, hazard ratio)", next_id = "surv_type"),
       list(label = "An ordinal outcome (e.g. a grade or stage)", next_id = "term_ordinal")
@@ -685,7 +704,7 @@ design_nodes <- list(
     options = list(
       list(label = "Exposed or not (yes/no): odds ratio", next_id = "cc_matching"),
       list(label = "A measurement compared between cases and controls (a difference in mean levels, e.g. serum lead, vitamin D)",
-           next_id = "cc_cont_matching", set = list(outcome = "continuous"))
+           next_id = "cont_summary", set = list(outcome = "continuous", cont_next = "cc_cont_matching"))
     )
   ),
 
@@ -710,12 +729,29 @@ design_nodes <- list(
     )
   ),
 
+  # A continuous outcome is planned from a mean and SD; when the pilot data or the literature give a median and IQR instead
+  # (a skewed outcome), the path is the same -- paired or unpaired groups -- and the calculator page then explains how to estimate
+  # a mean and SD from them (Wan et al. 2014) or offers the rank-based test. `cont_next` (set by the option that led here) says
+  # which question follows.
+  cont_summary = list(
+    id = "cont_summary", stage = 3,
+    question = "How is the outcome summarised in your pilot data or in the literature?",
+    help = "Symmetric measurements are usually reported as mean and SD; skewed ones (length of stay, costs, many biomarkers) as median and IQR.",
+    options = list(
+      list(label = "Mean and standard deviation (roughly symmetric)", set = list(summary = "mean"),
+           next_id = function(flags) if (is.null(flags$cont_next)) "groups_count" else flags$cont_next),
+      list(label = "Median and interquartile range (skewed)", set = list(summary = "median"),
+           next_id = function(flags) if (is.null(flags$cont_next)) "groups_count" else flags$cont_next)
+    )
+  ),
+
   # ---------------------------------------------------------- Stage 3 ----
   outcome_type = list(
     id = "outcome_type", stage = 3,
     question = "What type is the outcome (dependent) variable?",
     options = list(
-      list(label = "Continuous (e.g. BP, Hb, BMI, a score)", next_id = "groups_count", set = list(outcome = "continuous")),
+      list(label = "Continuous (e.g. BP, Hb, BMI, a score)", next_id = "cont_summary",
+           set = list(outcome = "continuous", cont_next = "groups_count")),
       list(label = "Binary (e.g. cured/not, positive/negative)", next_id = "groups_count", set = list(outcome = "binary")),
       list(label = "Categorical, 3+ unordered categories", next_id = "term_chisq_independence_direct"),
       list(label = "Ordinal (e.g. Likert, stage, grade)", next_id = "term_ordinal"),
@@ -848,6 +884,17 @@ design_nodes <- list(
   # Terminal nodes -- built (route via calculator_catalog)
   # ================================================================== #
 
+  term_es_two_means = .term("term_es_two_means", "Effect size: Cohen's d and Hedges' g from two means", "effect_size_two_means"),
+  term_es_from_t = .term("term_es_from_t", "Effect size: Cohen's d from a t statistic", "effect_size_from_t"),
+  term_es_paired = .term("term_es_paired", "Effect size: d for paired measurements", "effect_size_paired"),
+  term_es_anova_f = .term("term_es_anova_f", "Effect size: Cohen's f for several means", "effect_size_anova_f"),
+  term_es_proportions = .term("term_es_proportions", "Effect size: odds ratio, risk ratio, risk difference and h from two proportions", "effect_size_proportions"),
+  term_es_chisq_w = .term("term_es_chisq_w", "Effect size: Cohen's w for a chi-square test", "effect_size_chisq_w"),
+  term_es_hazard_ratio = .term("term_es_hazard_ratio", "Effect size: hazard ratio from median survival", "effect_size_hazard_ratio"),
+  term_es_convert = .term("term_es_convert", "Effect size: convert between d, r, odds ratio, R-squared, f-squared", "effect_size_convert"),
+  term_es_median_iqr = .term("term_es_median_iqr", "Effect size: mean and SD from a median and IQR", "effect_size_median_iqr"),
+  term_es_matched_pairs = .term("term_es_matched_pairs", "Effect size: phi from matched pairs", "effect_size_matched_pairs"),
+
   term_prop_precision = .term("term_prop_precision", "Single proportion, precision-based", "proportion_single_precision"),
   term_mean_precision = .term("term_mean_precision", "Single mean, precision-based", "means_single_precision"),
   term_rate_precision = .term("term_rate_precision", "Incidence rate, precision-based", "incidence_rate_precision"),
@@ -909,6 +956,7 @@ design_nodes <- list(
   term_pu_between_bin = .term("term_pu_between_bin", "Several units per patient, same treatment in all of a patient's units (two proportions)", "patient_units_between_binary"),
   term_pu_within = .term("term_pu_within", "Both treatments in every patient (split-face, one eye per arm)", "patient_units_within_continuous"),
   term_cluster_deff = .term("term_cluster_deff", "Cluster / multistage sampling, design effect", "cluster_deff"),
+  term_cluster_deff_calc = .term("term_cluster_deff_calc", "Cluster designs, design effect from the variance between clusters", "cluster_deff_calc"),
   term_cluster_deff_var = .term("term_cluster_deff_var", "Cluster sampling, variable cluster size", "cluster_deff_variable"),
   term_cluster_survey = .term("term_cluster_survey", "WHO EPI-style cluster survey", "cluster_survey"),
   term_cluster_pps = .term("term_cluster_pps", "Two-stage PPS sampling, optimal take per cluster", "cluster_pps_optimal"),
@@ -1184,7 +1232,7 @@ design_nodes <- list(
   nodes$bytest_family <- list(
     id = "bytest_family", stage = 3,
     question = "Which family of statistical test?",
-    help = "The same grouping as the \"Browse calculators\" tab's test-family view.",
+    help = "The same grouping as the \"Browse all calculators\" tab's test-family view.",
     options = fam_opts
   )
   nodes
@@ -1197,6 +1245,7 @@ design_nodes <- c(design_nodes, .bytest_nodes())
 design_reachable_keys <- function(nodes = design_nodes) {
   flag_sets <- c(
     list(list(outcome = "continuous"), list(outcome = "binary")),
+    lapply(c("groups_count", "indep_cont", "cc_cont_matching"), function(n) list(outcome = "continuous", cont_next = n)),
     lapply(c("RR", "OR", "RD", "MD"), function(t) list(tsa_outcome = t))
   )
   resolve <- function(x, flags) if (is.function(x)) x(flags) else x

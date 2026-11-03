@@ -80,7 +80,7 @@ test_that("workbench ids, titles and navigation ids are unique and do not collid
   wb_titles <- vapply(module_workbenches, `[[`, character(1), "title")
   expect_false(anyDuplicated(wb_titles) > 0)
   expect_false(anyDuplicated(vapply(module_workbenches, `[[`, character(1), "nav_id")) > 0)
-  expect_equal(intersect(c("Home", wb_titles), .titles), character(0))
+  expect_equal(intersect(c("Home", "Find a calculator", wb_titles), .titles), character(0))
 })
 
 test_that("every built catalog entry's target module resolves to a workbench", {

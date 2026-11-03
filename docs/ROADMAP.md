@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Status** | Active — authoritative forward plan |
-| **Last reviewed** | 29 October 2026 (status refreshed after items 15-22; the 28 September review findings in §2 stand, with their fixes noted) |
+| **Last reviewed** | 3 November 2026 (status refreshed after PRs #28-#33, see "Summary of the 1-3 November 2026 work" at the end; the 28 September review findings in §2 stand, with their fixes noted) |
 | **Owner** | Dr. Mukul Maheshwari |
 | **Name** | **Epidemiological suite** as shown in the app; the R package is `epidemiologysuite` (decision D3) |
 | **Licence** | GPL-3 (decision D2) |
@@ -30,15 +30,15 @@
 
 | Measure | Value |
 |---|---|
-| Calculator modules | **66** (50 sample-size calculators, 11 Analyze tools, 2 planning tools, 2 survey tools, 1 infectious-disease model tool), in 17 groups in the Plan workbench and 2 in Analyze |
-| Individual designs | **159**, all in the Browse catalog (F2 fixed) |
+| Calculator modules | **67** (50 sample-size calculators, 11 Analyze tools, 2 planning tools, 2 survey tools, 1 infectious-disease model tool, 1 Effect Size tool), in 19 groups in the Plan workbench and 2 in Analyze |
+| Individual designs | **159** on 29 October, all in the Browse catalog (F2 fixed); the catalog now has **214** entries (203 on 29 October; +10 Effect Size converters, +1 design-effect calculator) |
 | Checklist coverage | By design: **81 / 94** done (13 open) · By test: **69 / 74** done (5 open) |
-| Unit tests | **942** test blocks in the default run (0 failures, 103 skipped as slow) across 89 test files, plus browser (shinytest2) tests, every design checked against a published worked example, a real package (oracle), or simulation |
+| Unit tests | **102** test files in the default run (0 failures; the slow Monte Carlo tests skipped as before; 942 blocks in 89 files on 29 October), plus browser (shinytest2) tests, every design checked against a published worked example, a real package (oracle), or simulation |
 | Runtime packages | `DESCRIPTION` `Imports`: `shiny`, `bslib`, `clinfun`, `PowerTOST`, `Exact`, `kappaSize`, `mvtnorm`, `lme4`, plus `survival`, `stats`, `graphics`, `utils` (was 19; twelve removed in items 16 and the stage 2 that followed, each reimplemented and checked against the original) |
 | Verification-only packages | ~30 more (installed from the `github.com/cran` mirror, used only to check reimplementations — never shipped) |
 | Wizard coverage | "Which calculator?" reaches every built calculator and all 159 catalog designs, enforced by tests (F1 fixed); 101 plain-language descriptions and 636 click paths are checked |
 | Distribution | Three versions from one code base: browser build on GitHub Pages (desktop), phone / server version on Posit Connect Cloud (deployed from the auto-built `connect` branch; phones and tablets are redirected to it), and the R package (`remotes::install_github()` + `run_app()`; a Docker image too). CI on GitHub Actions; versions locked in `renv.lock`. See [`hosting.md`](hosting.md) |
-| R functions | All **195** `calc_*()` functions exported, each with a help page (every argument and the value described, a worked example); `ss_find()`, `run_app(calculator = ...)` and an RStudio / Positron addin; `R CMD check --as-cran` passes all package checks (the remaining warning and note come from the development sandbox) |
+| R functions | All **206** `calc_*()` functions exported (195 on 29 October), each with a help page (every argument and the value described, a worked example); `ss_find()`, `run_app(calculator = ...)` and an RStudio / Positron addin; `R CMD check --as-cran` passes all package checks (the remaining warning and note come from the development sandbox) |
 | Interface | Task-first Home with search (also in the navbar), folded Advanced options / export / curves, a pinned result, a phone layout, light / dark mode, text descriptions of plots, a Cite tab; axe-core scan clean at desktop and phone width in light and dark |
 
 The sample-size catalog is now effectively complete within the project's own rules
@@ -61,7 +61,7 @@ cannot reach — see §4.
 | F6 | **Fixed (14 Oct 2026, item 12).** ~~No automated UI tests in the repo.~~ `tests/testthat/test-ui_smoke.R` drives every module in headless Chrome via `shinytest2` | `tests/testthat/test-ui_smoke.R`, `helper-ui.R` | Done |
 | F7 | **Fixed (14 Oct 2026, item 11).** ~~Not yet package-shaped.~~ `R/` is flat, `DESCRIPTION`/`NAMESPACE` exist, `global.R` and `pacman::p_load()` are gone, tests no longer `source()` files. The installed package passes `R CMD check`'s test step | repo layout, `DESCRIPTION`, `NAMESPACE`, `R/run_app.R`, `R/registry.R` | Done |
 | F8 | **Resolved by relicensing to GPL-3 (D2, 28 Sep 2026).** Background: the project was MIT, but several modules were built by reading and transcribing source from GPL-licensed packages (e.g. `PracTools` GPL-3, `ssize.fdr` GPL-3, `voi` GPL-3, `clusterPower` GPL≥2, `semTools` GPL≥2, `simr` GPL≥2, `metapower` GPL-2, `WebPower` GPL≥3, `rpact` LGPL-3). Mathematical formulas aren't copyrightable, but closely transcribed code may count as a derivative work. *Not legal advice.* GPL-3 is compatible with all of these (GPL-2-only `metapower` is the one to watch: it was a verification reference, not a code source to ship) | package `DESCRIPTION` licenses; module header comments | Resolved; keep module header comments naming each source |
-| F9 | **Partly addressed (28 Sep 2026).** Shiny runs one R process per app instance; a 5–25 s simulation (Monte Carlo Mixed Models, RMST, weighted log-rank, BFDA, KS/runs/animal-rank) used to recompute on every input change — fixed, see P1 item 7. Still true: one user's simulation blocks every other user on the same app instance while it runs — needs `ExtendedTask` (P1 item 7, second half) | observed during browser verification | Was Medium (High once hosted); recompute-storm risk resolved, cross-user blocking remains |
+| F9 | **Resolved (31 Oct 2026): the simulations run in background workers (`mirai` + `ExtendedTask`, `R/background.R`).** Earlier: partly addressed (28 Sep 2026). Shiny runs one R process per app instance; a 5–25 s simulation (Monte Carlo Mixed Models, RMST, weighted log-rank, BFDA, KS/runs/animal-rank) used to recompute on every input change — fixed, see P1 item 7. Still true: one user's simulation blocks every other user on the same app instance while it runs — needs `ExtendedTask` (P1 item 7, second half) | observed during browser verification | Was Medium (High once hosted); recompute-storm risk resolved, cross-user blocking remains |
 | F10 | **Resolved (28 Sep 2026).** Every module (except the two guidance-only ones) now offers CSV/JSON/BibTeX/RIS download and a justification paragraph — see P1 item 9 | download handlers exist for all 47 calculator modules | Was Medium; resolved |
 | F11 | **Largely addressed (28 Oct 2026, item 22).** ~~Accessibility and mobile layout never audited.~~ Layout was audited earlier (`tools/ui-audit/audit.R`); an axe-core accessibility scan (WCAG 2.0/2.1 A and AA rules) of every calculator at desktop and phone width found five kinds of problem on all or most pages, now fixed (see item 22 below). Not done: a screen-reader and keyboard walk-through by a person, which a machine scan cannot replace. Translations are not planned (English only, D5) | `tools/ui-audit/a11y.R` | Low |
 | F12 | **Fixed (17 Oct 2026).** ~~Open (found by the item 15 spike).~~ The theme uses `bslib::font_google("Source Serif 4")`, which downloads the font file when the page is first rendered. Without internet at that moment (a Shinylive build, an air-gapped server, `R CMD check` on a locked-down machine) the page fails to render at all | `R/run_app.R` (theme) | Medium; fix by shipping the font or using a system font stack; needed for any offline route |
@@ -113,7 +113,7 @@ blocked sample-size items (§4) run in parallel whenever their unblock condition
    every keystroke — the reactive depends only on the design radio and the
    button (`isolate()`-wrapped otherwise), a no-new-deps pattern that doesn't
    need `bindEvent()`. Fast, closed-form designs in the same modules stay live.
-   Still open: `shiny::ExtendedTask` with a background process, so one user's
+   Done 31 Oct 2026 (`R/background.R`, `mirai`): `shiny::ExtendedTask` with a background process, so one user's
    still-running simulation doesn't block others on the same app instance —
    the button alone doesn't fix that; it only stops *unwanted* recomputes.
 8. **Standard result object — done for every `calc_*.R` file (28 Sep 2026).**
@@ -1240,7 +1240,7 @@ Phase 8 dependency reduction matters beyond tidiness.
 | UI tests | `shinytest2`, one smoke test per module | P1 |
 | Async compute | Calculate button, then `ExtendedTask` for Monte Carlo modules | P1 |
 | Result object | Common S3 class across all `calc_*()` | P1 |
-| Caching | `bindCache()` for pure closed-form results | P2 |
+| Caching | Done 30 Oct 2026: `memo_calc()` caches the Monte Carlo results (closed-form ones are too fast to gain from it) | P2 |
 | Accessibility / mobile | WCAG AA audit, small-screen layout pass | P3 |
 
 ---
@@ -1270,12 +1270,17 @@ Recorded 28 September 2026.
 
 | # | Question | Decision | Consequences |
 |---|---|---|---|
-| D1 | Suite scope: summary-data calculators only, or also a raw-data analysis workbench? | **Summary-data calculators only, for now** | B1–B5 and B7 (from summaries) stay in scope; B6 and the line-list parts of B4 are deferred, not dropped |
+| D1 | Suite scope: summary-data calculators only, or also a raw-data analysis workbench? | **Summary-data calculators only, for now**; confirmed 3 Nov 2026: raw data and line lists are too memory-heavy for the browser build and are kept for a later full (server) app, to be merged with the owner's `Easy_analysis` application | B1–B5 and B7 (from summaries) stay in scope; B6 and the line-list parts of B4 are deferred, not dropped |
 | D2 | Licence: keep MIT or relicense to GPL-3? | **GPL-3** | `LICENSE` replaced with the GPL-3 text; resolves F8. The package `DESCRIPTION` will say `License: GPL-3` |
 | D3 | Suite and package name | **`epidemiologysuite`** (was `sample2result`; `epidemiologica_suite` is not a legal package name) | Used for the package (C1), the app title and the suite; single package until CRAN, then consider a core + app split (C3) |
 | D4 | Primary distribution target: hosted web, or offline/APK first? | **Offline / APK later** | Hosted web + R package first (D1, D2); the Shinylive spike (D3) and APK (D5a) stay at P2/P3 |
 | D5 | Languages | **English only** | No translation layer; F11 narrows to accessibility and mobile layout |
 | D6 | When to reopen the two paused items (A.2) | *Open* | Suggested: once paper access is available |
+| S1 | Studies: how long the record lasts | **This browser tab only** (`sessionStorage`) (3 Nov 2026) | Survives a refresh and a phone going to sleep (the page reloads and restores it); lost when the tab is closed; nothing kept on the server |
+| S2 | Studies: file format | **A built-in .docx writer** (3 Nov 2026) | No new runtime package; `officer` only as a test oracle (Suggests) |
+| S3 | Studies: recent calculations recorded automatically | **Yes** (3 Nov 2026) | Last 20, in the same tab-only storage; can be added to a study later |
+| S4 | Studies: how many | **Three to start, more on request** (3 Nov 2026) | "+ New study"; a soft limit (suggested 10 studies) only to keep the page light; the browser's storage (about 5 MB) holds hundreds of entries |
+| S5 | Studies: content of an entry | **Full** (3 Nov 2026): inputs, result, warnings, formula (LaTeX, for Word's Insert > Equation), justification paragraph, citation | One drop-down for the studies and Recent calculations, not a tab per study |
 
 ## 11. Suggested milestones
 
@@ -1426,3 +1431,90 @@ Connect Cloud** for phones, redirecting phones automatically. `docs/hosting.md` 
 - **Not verified:** the Connect Cloud deployment itself (needs the owner's account), the free-plan limits, and any real phone. Posit
   announced that shinyapps.io takes no new apps after the end of 2026 and migrates accounts to Connect Cloud from January 2027
   (Posit's migration page; sources disagree on some dates), which is why Connect Cloud, not shinyapps.io, is the target.
+
+### Summary of the 1-3 November 2026 work (PRs #28-#33, all merged)
+
+What changed, for readers arriving later. Each calculation keeps its rule: a citable source and a numerical check (a published value,
+a real package or a simulation), and nothing is claimed that was not read.
+
+- **Precision calculators (#28).** Absolute precision n = z^2 p (1 - p) / d^2; relative precision d = eps p, so n = z^2 (1 - p) / (eps^2 p);
+  the finite population correction; non-response n / (1 - r). The five precision calculators (proportion, mean, cluster survey,
+  incidence rate, diagnostic accuracy) refuse impossible inputs with a plain message and warn (kept in `precision_notes`, shown under the result) when the answer should be read with care.
+- **Connect Cloud (#29).** The deployment manifest needs a CRAN, RSPM or Bioconductor source for every package (`mirai` and `pkgload` had
+  "any"); fixed, with a stricter check in CI.
+- **Find, browser speed, dark mode, wizard (#30).** The "Find a calculator" tab holds the guide, the browse lists and the glossary. On the published
+  browser build the guide took 80 s and a Home button 72 s because calculators loaded one by one on the page's single thread; with background loading
+  off in the browser build they take 5 s and 1.5 s (measured with Playwright on the live site). Dark mode: instructions on light boxes were unreadable
+  (a contrast crawl of every module, the Find tab, the glossary, tooltips and 94 radio states finds nothing below 3:1). The matched case-control design takes the
+  exposure proportions, the odds ratio or phi; the unmatched design takes the cases' exposure proportion or the odds ratio; the log-rank calculator takes a hazard
+  ratio from medians. The wizard has a continuous-outcome branch (mean and SD, or median and IQR) ending in paired or unpaired means.
+- **Effect Size (#31).** `R/calc_effect_size.R` (eight functions) with `calc_median_iqr.R` and `calc_matched_pairs_phi()`: Cohen's d
+  (pooled SD; Hedges' g with J = exp(lgamma(df/2) - lgamma((df - 1)/2)) / sqrt(df/2); the large-sample interval for d), d from t, paired d_z,
+  f = sigma_means / sigma, f^2 = eta^2 / (1 - eta^2), Cohen's h, Cohen's w, the odds ratio, risk ratio and risk difference from one another, the hazard ratio from
+  medians (exponential survival: median ratio) or survival probabilities (ln S_e / ln S_c), d and r (exactly through t, r = t / sqrt(t^2 + df)), the odds ratio
+  from d (ln OR = d pi / sqrt(3); Chinn 2000, **abstract only read**). Glossary of 35 terms; information tips on the labels. Every function is checked
+  against its identity or a worked example in `test-calc_effect_size.R`.
+- **OpenEpi-style inputs (#32).** Layouts of OpenEpi's two-means, cohort and unmatched case-control forms come from screenshots supplied by the owner; OpenEpi's pages
+  are script-rendered and could not be read, so **its formulas and outputs were not compared**. Every alternative route (difference, variance, d, odds ratio, risk ratio,
+  risk difference, two SDs and a correlation) is tested to give exactly the result of the plain input. The Welch design already used the large-sample normal
+  approximation n1 = (z_(1-alpha/2) + z_(power))^2 (sd1^2 + sd2^2 / ratio) / difference^2; with means 132.86 and 127.44, SDs 15.34 and 18.23, 95%, 80% and
+  equal groups it gives 152 per group.
+- **Design effect (#32).** It is in the Cluster / Design Effect module only, as it applies to any cluster design (survey, cluster-randomised trial, quasi-experimental community
+  trial); the single-proportion calculator no longer has it. DEFF = 1 + (m - 1) rho, rho = sigma_b^2 / (sigma_b^2 + sigma_w^2); DEFF = m x var(cluster means) / total variance (total
+  variance p (1 - p) for a proportion); DEFF = variance under the design / variance under simple random sampling. Each route is checked by simulating clustered continuous and beta-binomial data
+  (`test-cluster_deff_variance.R`). Sources: Kish 1965 (**not read**), Killip 2004 (**abstract only**, PMID 15209195). The default of 1.5 and the note "most commonly taken as 1.5 or 2"
+  are the owner's wording; **no source was checked for it**, and the help text says so.
+- **Calculate this / Use this value (#33).** 28 calculator inputs (`R/mod_shared_link.R`, one list of entries) open the matching converter; the converter returns the number, to four significant figures,
+  and switches the calculator to the way of entering it that shows that input. A static test checks every entry against the pages and the converters' results; a browser test goes round the loop.
+- **Open from this work:** see `to_do_later.md` section 7.
+
+### Studies: a working record of calculations (planned 3 November 2026; decisions S1-S5 in §10)
+
+**What it is.** While working, the user adds results to a study (Study 1, 2, 3, more on request) and downloads each study as a Word file:
+the protocol's sample-size section, with the inputs, results, formulas, justification paragraphs and references. Nothing is calculated again
+to build it: the results are recorded as they are produced.
+
+**Where it appears.**
+- *Under every result:* "Add to [Study 1 v] Add". The drop-down remembers the last study used; a short message confirms ("Added to Study 1:
+  Proportions, n = 385") with Undo. It goes in the shared export hook (`render_export_handlers()` / `export_controls_ui()`, used by 64 of the
+  67 calculators), so it is added once, not per calculator; the other three are checked separately.
+- *At the end of the guide:* "Add this design choice to [Study 1 v]", recording the answers that led to the design.
+- *A Studies tab* (next to Cite; also in the phone's bottom bar) with one drop-down: Study 1, Study 2, Study 3, "+ New study", and Recent
+  calculations. For the chosen study: an editable name, the entries (remove, move up / down, a note), a live preview, Clear and
+  **Download (.docx)**. Recent calculations lists the last 20 results with "Add to study".
+
+**The document.** Title and date; how the design was chosen (if the guide was used); one section per calculator and design, in the order
+added. Used once: inputs, result, warnings, formula, justification paragraph. Used several times with the same calculator and design: one
+table, a row per calculation, columns for the inputs that changed and the results, the inputs that stayed the same listed once above it, the
+method and citation once. References numbered without duplicates, and the suite's own citation (version, DOI). Formulas are written as LaTeX,
+as the app already shows them, ready to paste into Word's Insert > Equation > LaTeX (Word for Microsoft 365); a plain-text version is kept
+beside it for programs without LaTeX input (Google Docs, LibreOffice, Word on phones -- to check).
+
+**Where the data lives (S1).** In the browser tab (`sessionStorage`), which is the single copy: the server adds a result to it by sending a
+message, the page stores it and sends the whole record back so R can show the preview and build the file. On reload, or when a phone wakes
+and Connect has dropped the connection, the page sends the stored record to the new session. The file is put together in R and downloaded by
+the browser (a Blob), so no file is written on the server. The calculation itself still runs on the server in the Connect version, as today;
+the browser build keeps everything on the device. The Studies tab says: "Kept only in this browser tab. Download before closing it."
+
+**Recent calculations (S3) need a rule.** The calculators recompute while an input is being typed, so recording every result would fill the
+list with half-typed values. Proposed rule: record a result once it has stayed the same for about 3 s, skip it if it equals the last one recorded
+for that calculator and design, keep the last 20.
+
+**The .docx writer (S2).** A .docx is a zip of a few XML files. Written in base R: the XML parts (document, styles, numbering for references, a
+table style), and a zip without compression (stored entries with a CRC-32), so no `zip` program or package is needed (it also has to work in the
+browser build). Checked in the tests by unzipping with `utils::unzip()`, parsing the XML, and reading the file back with `officer` (Suggests
+only); opened once in Word and LibreOffice by hand.
+
+**What each entry stores.** Calculator, design, the `ss_result` (inputs, headline results), the warnings (`precision_notes` and the like), the
+design's formula (LaTeX), justification paragraph, citation and backend, the seed and number of simulations for Monte Carlo designs, the time and
+the app version. About 2-5 KB as JSON.
+
+**Phases.** S-1 storage, buttons, Studies tab, tables, Recent calculations; S-2 the .docx writer and the download; S-3 the guide's design choice,
+notes, reordering, readable input names (a label list: the results use short names such as `p1`, `sd`); S-4 the Analyze tools and a real-phone check.
+
+**Tests.** The table grouping (which inputs vary); the .docx writer (unzips, valid XML, read back by `officer`, a table with the right rows);
+the Recent-calculations rule; a browser test that adds two results of one calculator and one of another, reloads the page, finds them still
+there, and downloads a file with one table and one single-entry section.
+
+**Open questions to settle while building.** Whether Word on phones and Google Docs keep the table styles; how a very long study is shown on a
+phone; whether the Analyze results (several estimates each) need their own table layout.

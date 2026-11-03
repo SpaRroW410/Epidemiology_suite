@@ -35,7 +35,7 @@ mod_noninferiority_ui <- function(id) {
         numericInput(ns("margin"), "Non-inferiority margin (> 0)", value = 0.05, min = 0.0001),
         numericInput(ns("alpha"), "Significance level, one-sided (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-        numericInput(ns("ratio"), "Allocation ratio (new : standard)", value = 1, min = 0.1, step = 0.1)
+        numericInput(ns("ratio"), with_tip("Allocation ratio (new : standard)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1)
       ),
       conditionalPanel(
         condition = design_is("proportions"),
@@ -44,7 +44,7 @@ mod_noninferiority_ui <- function(id) {
         numericInput(ns("margin_prop"), "Non-inferiority margin (0-1)", value = 0.10, min = 0.001, max = 0.99, step = 0.01),
         numericInput(ns("alpha_prop"), "Significance level, one-sided (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_prop"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-        numericInput(ns("ratio_prop"), "Allocation ratio (new : standard)", value = 1, min = 0.1, step = 0.1)
+        numericInput(ns("ratio_prop"), with_tip("Allocation ratio (new : standard)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1)
       ),
       conditionalPanel(
         condition = design_is("odds_ratio"),
@@ -53,13 +53,14 @@ mod_noninferiority_ui <- function(id) {
         numericInput(ns("pc_or"), "pc (probability of outcome, control/standard group)",
                      value = 0.25, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("margin_or"), "Non-inferiority margin (log-odds-ratio scale)", value = 0.2, step = 0.05),
-        numericInput(ns("k_or"), "Allocation ratio (k = n_test/n_control)", value = 1, min = 0.1, step = 0.1),
+        numericInput(ns("k_or"), with_tip("Allocation ratio (k = n_test/n_control)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1),
         numericInput(ns("alpha_or"), "Significance level, one-sided (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_or"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
       ),
       conditionalPanel(
         condition = design_is("hazard_ratio"),
         numericInput(ns("hr_val"), "Expected hazard ratio (treatment vs. control)", value = 2, min = 0.001, step = 0.1),
+        es_link_ui(ns, "hr_val"),
         numericInput(ns("margin_hr"), "Non-inferiority margin (log-hazard-ratio scale)", value = 0.5, step = 0.05),
         numericInput(ns("p1_hr"), "p1 (proportion allocated to treatment)", value = 0.5, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("d_hr"), "d (probability of observing an event)", value = 0.8, min = 0.001, max = 0.999, step = 0.01),
@@ -123,6 +124,7 @@ mod_noninferiority_ui <- function(id) {
 
 mod_noninferiority_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     result <- reactive({
       req(input$design)
 

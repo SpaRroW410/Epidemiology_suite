@@ -46,7 +46,8 @@ mod_group_sequential_ui <- function(id) {
       conditionalPanel(
         condition = design_is("survival"),
         numericInput(ns("hr_survival"), "Assumed hazard ratio (experimental vs. control)",
-                     value = 0.5, min = 0.001, step = 0.01)
+                     value = 0.5, min = 0.001, step = 0.01),
+        es_link_ui(ns, "hr_survival")
       ),
       conditionalPanel(
         condition = design_is("lan_demets_normal"),
@@ -69,7 +70,7 @@ mod_group_sequential_ui <- function(id) {
         selectInput(ns("alternative"), "Alternative hypothesis",
                     choices = c("Two-sided" = "two.sided", "One-sided" = "one.sided"))
       ),
-      numericInput(ns("r"), "Allocation ratio, experimental:control (r)", value = 1, min = 0.01, step = 0.1),
+      numericInput(ns("r"), with_tip("Allocation ratio, experimental:control (r)", "allocation_ratio"), value = 1, min = 0.01, step = 0.1),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
       hr(),
@@ -152,6 +153,7 @@ mod_group_sequential_ui <- function(id) {
 
 mod_group_sequential_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     result <- reactive({
       req(input$design, input$r, input$alpha, input$power)
 

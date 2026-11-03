@@ -44,8 +44,8 @@ proportion_content <- list(
   precision = list(
     title = "Single Proportion -- Precision-Based (No Reference Value)",
     formula_latex = paste0(
-      "$$n_0 = \\frac{Z_{1-\\alpha/2}^2 \\, p(1-p)}{d^2}$$",
-      "$$n = \\frac{n_0}{1 + \\dfrac{n_0 - 1}{N}} \\quad \\text{(finite population correction, if } N \\text{ known)}$$"
+      "$$n_0 = \\frac{Z_{1-\\alpha/2}^2 \\, p(1-p)}{d^2}, \\qquad d = \\epsilon\\,p \\;\\text{(relative)} \\;\\Rightarrow\\; n_0 = \\frac{Z_{1-\\alpha/2}^2 \\,(1-p)}{\\epsilon^2 p}$$",
+      "$$n = \\frac{n_0}{1 + \\dfrac{n_0 - 1}{N}} \\quad \\text{(finite population correction, if } N \\text{ known)}, \\qquad n_{\\text{enrol}} = \\left\\lceil \\frac{n}{1-r} \\right\\rceil$$"
     ),
     explanation = paste(
       "This calculator finds the sample size needed to estimate a single",
@@ -58,8 +58,13 @@ proportion_content <- list(
       "- **p** - the expected proportion. If you have no prior estimate,",
       "  use 0.5 -- it maximizes p(1-p) and so gives the largest, safest",
       "  sample size.",
-      "- **d** - the desired absolute precision (margin of error), e.g. 0.05",
-      "  for a result reported as \"prevalence +/- 5 percentage points\".",
+      "- **Precision** - either **absolute**, d on the 0-1 scale of p (e.g. 0.05",
+      "  for a result reported as \"prevalence +/- 5 percentage points\"), or",
+      "  **relative**, epsilon as a fraction of p (e.g. 0.10 for \"within 10% of the",
+      "  true prevalence\", so d = 0.1 p). d must be smaller than p and than 1 - p,",
+      "  or the interval would pass 0 or 1: the calculator refuses it. A relative",
+      "  precision above 20% gives a warning, and 100% or more is refused; see",
+      "  \"When should I use absolute or relative precision?\" under the inputs.",
       "- **Confidence level** - typically 0.95 (95%), giving Z = 1.96.",
       "- **N (optional)** - the total size of the finite population you are",
       "  sampling from (e.g. total students in one college, total",
@@ -68,10 +73,15 @@ proportion_content <- list(
       "  a larger fraction of a small population yields proportionally more",
       "  information. Leave blank for a community-level survey where the",
       "  population is effectively unlimited relative to the sample.",
+      "- **Non-response / loss to follow-up r (optional)** - the fraction expected",
+      "  not to give analyzable data; the number to enrol is n / (1 - r), rounded up.",
       "",
       "Unlike the *vs. known value* calculator above, this formula does not",
       "test a hypothesis or require a power target -- there is no effect",
       "size and no comparison, only an estimation precision target.",
+      "",
+      "**Cluster or multistage surveys.** This is for a simple random sample. If people are sampled in clusters (villages, schools, wards),",
+      "multiply the result by the design effect: see the Cluster / Design Effect calculator, which also works the design effect out.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -85,6 +95,16 @@ proportion_content <- list(
       "to the same n0 = 385 gives an adjusted n = 278 -- fewer subjects",
       "needed, because 385 would already have been over a third of the",
       "entire population.",
+      "",
+      "Pourhoseingholi et al. (2013), Table 1 (95% confidence): p = 0.05 with",
+      "d = 0.01 needs 1825, p = 0.2 with d = 0.04 needs 384 and p = 0.6 with",
+      "d = 0.1 needs 92. This calculator gives 1825, 385 and 93: it rounds up, the",
+      "table rounds to the nearest whole number. The table's p = 0.05 with",
+      "d = 0.1 (18) is refused here, since 0.05 +/- 0.1 would go below 0.",
+      "",
+      "Relative precision: p = 0.2 within 10% of itself (d = 0.02) needs n = 1537,",
+      "as epiR::epi.sssimpleestb gives; with 10% non-response, enrol",
+      "1537 / 0.9 = 1708.",
       sep = "\n"
     ),
     citation = paste(
@@ -92,9 +112,11 @@ proportion_content <- list(
       "1977. (original formula and finite population correction);",
       "Naing L, Winn T, Rusli BN. Practical issues in calculating the",
       "sample size for prevalence studies. Arch Orofac Sci. 2006;1:9-14.",
-      "(applied to health prevalence studies)."
+      "(applied to health prevalence studies);",
+      .precision_citation_pourhoseingholi,
+      "(choice of precision; Table 1)."
     ),
-    backend = "Closed-form (Cochran's formula); no external package required"
+    backend = "Closed-form (Cochran's formula); relative precision checked against epiR::epi.sssimpleestb() in the tests; no external package required"
   ),
   two_sample = list(
     title = "Two Independent Proportions",
@@ -115,6 +137,10 @@ proportion_content <- list(
       "  (1 - Type II error rate), typically 0.8 or 0.9.",
       "",
       "Total sample size is twice the per-group value (n1 = n2).",
+      "",
+      "**Other ways to enter the effect.** Group 2 is the reference. Instead of group 1's proportion you can give the **odds ratio**, the",
+      "**risk (prevalence) ratio** or the **risk difference**; the proportion and the other measures are calculated and shown under the inputs",
+      "(as in OpenEpi's \"fill in 1 of the following\").",
       sep = "\n"
     ),
     worked_example = paste(

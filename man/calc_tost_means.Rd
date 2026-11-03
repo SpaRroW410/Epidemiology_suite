@@ -22,7 +22,7 @@ within (-margin, +margin) to conclude equivalence}
 list(n_total, n_per_group, achieved_power, inputs)
 }
 \description{
-Wraps PowerTOST::sampleN.TOST() on the \emph{original} (untransformed) scale
+PowerTOST's sampleN.TOST() (transcribed, calc_closed_forms_tost.R) on the \emph{original} (untransformed) scale
 (logscale = FALSE) with a parallel-groups design -- i.e. raw units, not
 the log-ratio/CV framing used for pharmacokinetic bioequivalence
 (PowerTOST's more common use case, and still available via this same

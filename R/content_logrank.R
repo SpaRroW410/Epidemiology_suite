@@ -23,7 +23,12 @@ logrank_content <- list(
       "- **pC** - the same, for the control group.",
       "- **HR (hazard ratio)** - the postulated hazard ratio, experimental",
       "  vs. control (< 1 means the experimental group has a lower",
-      "  event/hazard rate).",
+      "  event/hazard rate). It can instead be calculated from pE and pC:",
+      "  with proportional hazards the survival curves satisfy",
+      "  S_E(t) = S_C(t)^HR, so over the same follow-up",
+      "  HR = log(1 - pE) / log(1 - pC) (for the example below,",
+      "  log(0.6293) / log(0.511) = 0.690). The calculator shows this value",
+      "  and warns when an entered HR differs from it by more than 10%.",
       "- **ratio** - the number of participants in the experimental group",
       "  divided by the number in the control group.",
       "- **alpha, power** - as elsewhere (two-sided test).",
@@ -38,6 +43,9 @@ logrank_content <- list(
       "accrual and non-proportional-hazards designs, a more specialized",
       "method is needed (see docs/checklist_by_design.md's Survival",
       "section for further designs planned).",
+      "",
+      "**Hazard ratio from median survival.** If only median survival times are known, the hazard ratio can be calculated from them: with",
+      "exponential survival (a constant hazard) HR = median in the control arm / median in the experimental arm (18 and 12 months give 0.667).",
       sep = "\n"
     ),
     worked_example = paste(

@@ -13,7 +13,9 @@ cluster_content <- list(
     explanation = paste(
       "Use this whenever subjects are sampled in **clusters** (villages,",
       "schools, health facilities, households) rather than as a simple",
-      "random sample of individuals -- e.g. a two-stage cluster survey.",
+      "random sample of individuals -- e.g. a two-stage cluster survey. It",
+      "applies to **any cluster design**: a survey, a cluster-randomised",
+      "trial, or a quasi-experimental community trial.",
       "Subjects within the same cluster tend to be more similar to each",
       "other than to subjects in a different cluster, which reduces the",
       "effective information per subject relative to a true simple random",
@@ -37,6 +39,12 @@ cluster_content <- list(
       "a wholly separate cluster-sampling formula) is the standard,",
       "widely-used shortcut (Kish 1965) -- an approximation that ignores",
       "variation in cluster size, which is adequate for planning purposes.",
+      "",
+      "**If the ICC is not known**, enter the design effect itself. When",
+      "nothing is known it is most commonly taken as 1.5 or 2 (a common",
+      "planning habit; no source for these values was checked), and the",
+      "calculator below works it out from the variance between clusters",
+      "when that is known.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -61,7 +69,7 @@ cluster_content <- list(
     title = "Cluster Survey Precision (WHO EPI-Style)",
     formula_latex = paste0(
       "$$n_{ssu} = \\frac{z^2 \\, p(1-p) \\, D}{\\epsilon_a^2}, \\quad ",
-      "D = 1 + (b-1)\\rho, \\quad n_{psu} = n_{ssu}/b$$"
+      "D = 1 + (b-1)\\rho, \\quad n_{psu} = n_{ssu}/b, \\quad b_{\\text{enrol}} = \\left\\lceil \\frac{b}{1-r} \\right\\rceil$$"
     ),
     explanation = paste(
       "Solves the full two-stage (or one-stage) cluster survey design in",
@@ -92,6 +100,16 @@ cluster_content <- list(
       "- **Total clusters (N, optional)** - the total number of clusters",
       "  in the source population, if known and not effectively",
       "  unlimited, for a finite-population correction.",
+      "- **Non-response r (optional)** - the fraction of the people selected",
+      "  in a cluster who will not give a usable answer. The number of",
+      "  clusters stays the same; each cluster selects b / (1 - r), rounded",
+      "  up, so that b are analyzable.",
+      "",
+      "The absolute precision (epsilon, or epsilon x p if relative) must be",
+      "smaller than p and than 1 - p, and a relative precision of 100% or more",
+      "is refused; a relative precision above 20%, and p below 10% with a",
+      "precision above p/4, give a warning. See \"When should I use absolute or",
+      "relative precision?\" under the inputs.",
       "",
       "**A package quirk worth knowing:** epiR provides two same-",
       "sounding functions here, `epi.ssclus1estb()` (\"one-stage\", every",
@@ -131,6 +149,47 @@ cluster_content <- list(
       "1982;60(2):253-260."
     ),
     backend = "closed form; identical to epiR::epi.ssclus2estb(), which it is tested against"
+  ),
+
+  deff_calc = list(
+    title = "Design Effect from the Variance Between Clusters",
+    formula_latex = paste0(
+      "$$\\rho = \\frac{\\sigma_b^2}{\\sigma_b^2 + \\sigma_w^2},\\qquad DEFF = 1 + (m-1)\\rho$$",
+      "$$DEFF = \\frac{m\\, s_{\\bar x}^2}{\\sigma^2_{total}}\\;\\left(\\sigma^2_{total} = p(1-p)\\text{ for a proportion}\\right),\\qquad DEFF = \\frac{Var_{design}}{Var_{SRS}}$$"
+    ),
+    explanation = paste(
+      "Works out the design effect (and the ICC) of a **cluster design** -- a survey of villages, schools or wards, a cluster-randomised trial,",
+      "or a quasi-experimental community trial -- when you know how much the outcome varies between clusters, for example from a pilot,",
+      "a previous survey or a published study. Give **one** of:",
+      "",
+      "- **The between-cluster and within-cluster variances** (the variance components of a random-effects or ANOVA model): the ICC is the",
+      "  share of the total variance that is between clusters, and DEFF = 1 + (m - 1) x ICC for an average cluster size m.",
+      "- **The variance of the cluster means** (or, for a yes/no outcome, of the cluster proportions) together with the overall variance of",
+      "  the outcome among individuals (for a proportion, p(1 - p)), for clusters of about equal size: the variance of a cluster mean is",
+      "  total variance x (1 + (m - 1) ICC) / m, so DEFF = m x variance of cluster means / total variance.",
+      "- **The variance of the estimate** under the cluster design and under simple random sampling of the same total size: DEFF is their ratio",
+      "  (this is the definition of the design effect).",
+      "",
+      "Give a base sample size to see it inflated. With few clusters the variance between them is itself uncertain, so the result is rough; a",
+      "design effect below 1 can occur by chance and is usually taken as 1. If none of this is known, enter a design effect of 1.5 (most",
+      "commonly 1.5 or 2) in the inflation design above.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Between-cluster variance 2 and within-cluster variance 38, 10 per cluster: ICC = 2 / 40 = 0.05 and DEFF = 1 + 9 x 0.05 = 1.45 (the",
+      "example of the inflation design above; a base n of 200 becomes 290). Cluster proportions with variance 0.0125, an overall",
+      "proportion of 0.3 and 20 per cluster: DEFF = 20 x 0.0125 / 0.21 = 1.19 (ICC 0.010). A variance of 0.0021 under the cluster design",
+      "against 0.0014 under simple random sampling: DEFF = 1.5.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Kish L. Survey Sampling. New York: John Wiley & Sons; 1965 (the design effect; not read in this session);",
+      "Killip S, Mahfoud Z, Pearce K. What is an intracluster correlation coefficient? Crucial concepts for primary care researchers. Ann Fam Med",
+      "2004;2(3):204-208 (PMID 15209195; only the abstract was read: the ICC \"compares the within-group variance with the between-group variance\").",
+      "The relations used are the standard variance components of a one-way random-effects model; they are checked here by simulation of",
+      "clustered data (continuous and binary)."
+    ),
+    backend = "closed forms; verified by simulating clustered data and comparing the variance of the estimate with simple random sampling"
   ),
 
   deff_variable = list(

@@ -54,10 +54,13 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
         nav_panel(title = m$title, if (m$id %in% core_ids) m$ui(m$id) else lazy_placeholder(m$id))
       }))
     }), recursive = FALSE)
+    # a workbench opens on its first module unless it names another (Plan lists Effect Sizes first and opens on Proportions)
+    opens_on <- if (!is.null(wb$open_on)) list(selected = registry_by_id[[wb$open_on]]$title)
     nav_panel(
       title = wb$title,
       do.call(navset_pill_list, c(
         list(id = wb$nav_id, widths = c(3, 9), well = FALSE),
+        opens_on,
         items
       ))
     )
@@ -89,10 +92,10 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
         heading_font = font_collection("Source Serif 4", "Georgia", "Cambria", "Times New Roman", "serif"),
         "font-size-base" = "0.95rem"
       ),
-      header = tagList(browser_notice_ui(), tags$style(HTML(.workbench_css)), accessibility_script(), phone_shell_assets(),
-                       if (length(pending_titles)) lazy_sidebar_assets(pending_titles))
+      header = tagList(browser_notice_ui(), server_notice_ui(), tags$style(HTML(.workbench_css)), accessibility_script(), phone_shell_assets(),
+                       if (length(pending_titles)) lazy_sidebar_assets(pending_titles, show_progress = .background_load_enabled()))
     ),
-    list(home_panel),
+    list(home_panel, nav_panel("Find a calculator", find_panel_ui())),
     workbench_panels,
     list(nav_panel("Cite", cite_ui())),
     # light / dark switch (starts from the viewer's operating-system setting)
@@ -138,7 +141,7 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
 # headers are small caps labels (navset_pill_list renders them as .navbar-brand
 # items, which are far too large for a list heading). On phones the list stacks
 # above the calculator, so its height is capped.
-.workbench_css <- "
+.workbench_css <- paste0(info_tip_css, "
 /* litera's navbar is painted light with a fixed background; in dark mode its light-coloured links would be unreadable on it */
 html[data-bs-theme='dark'] nav.navbar.navbar-default { background-color: var(--bs-tertiary-bg) !important; }
 html[data-bs-theme='dark'] nav.navbar .navbar-brand, html[data-bs-theme='dark'] nav.navbar .nav-link { color: var(--bs-body-color) !important; }
@@ -172,4 +175,4 @@ html[data-bs-theme='dark'] .text-warning { color: #ffda6a !important; }
 @media (max-width: 575.98px) {
   .tab-pane > .row > .col-sm-3 > ul.nav-stacked { position: static; max-height: 40vh; }
 }
-"
+")

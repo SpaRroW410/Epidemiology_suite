@@ -14,19 +14,33 @@
 #'   over the maximum follow-up period (0,1)
 #' @param pC Expected probability of the event in the control group, over
 #'   the same period (0,1)
-#' @param hr Postulated hazard ratio (experimental vs. control), > 0, != 1
+#' @param hr Postulated hazard ratio (experimental vs. control), > 0, != 1. NULL: calculated from `pE` and `pC` under
+#'   proportional hazards, where the survival curves satisfy S_E(t) = S_C(t)^HR, so HR = log(1 - pE) / log(1 - pC) over the same
+#'   follow-up.
 #' @param ratio Number of participants in the experimental group divided by
 #'   the number in the control group (> 0)
 #' @param alpha Significance level, two-sided (0,1)
 #' @param power Desired power (0,1)
-#' @return list(n_exp, n_control, n_total, inputs)
+#' @return A named list of class `ss_result` with `n_exp`, `n_control`, `n_total`, `hr` (the hazard ratio used), `hr_implied`
+#'   (log(1 - pE) / log(1 - pC)), `notes` (a warning when a given `hr` differs from it by more than 10%) and `inputs`.
 #' @examples
 #' calc_logrank(pE = 0.3707, pC = 0.489, hr = 0.7, ratio = 1, alpha = 0.05, power = 0.8)
 #' @export
-calc_logrank <- function(pE, pC, hr, ratio = 1, alpha = 0.05, power = 0.8) {
+calc_logrank <- function(pE, pC, hr = NULL, ratio = 1, alpha = 0.05, power = 0.8) {
   .validate_unit_interval(pE, "pE")
   .validate_unit_interval(pC, "pC")
-  .validate_positive(hr, "hr")
+  hr_implied <- log(1 - pE) / log(1 - pC)
+  notes <- character()
+  if (is.null(hr)) {
+    hr <- hr_implied
+  } else {
+    .validate_positive(hr, "hr")
+    if (abs(log(hr / hr_implied)) > log(1.1)) {
+      notes <- sprintf(paste("The hazard ratio %s does not match pE and pC: with proportional hazards they imply %.3f",
+                             "(log(1 - pE) / log(1 - pC)). Check that pE, pC and the hazard ratio describe the same follow-up."),
+                       format(hr), hr_implied)
+    }
+  }
   if (isTRUE(all.equal(hr, 1))) stop("hr must differ from 1 (no effect to detect).")
   .validate_positive(ratio, "ratio")
   .validate_unit_interval(alpha, "alpha")
@@ -42,6 +56,9 @@ calc_logrank <- function(pE, pC, hr, ratio = 1, alpha = 0.05, power = 0.8) {
     n_exp = n_exp,
     n_control = n_control,
     n_total = n_exp + n_control,
+    hr = hr,
+    hr_implied = hr_implied,
+    notes = notes,
     inputs = list(pE = pE, pC = pC, hr = hr, ratio = ratio, alpha = alpha, power = power)
   ))
 }
@@ -236,11 +253,13 @@ calc_survival_stratified <- function(power, timeUnit, gVec, pVec, hr, lambda0Vec
 .wlr_empirical_power <- function(n0, n1, hazard0, hr, change_time, effect_timing,
                                   accrual, tot_time, rho, alpha, reps, seed) {
   set.seed(seed)
+  survdiff <- .pkg_fn("survival", "survdiff")
+  Surv <- .pkg_fn("survival", "Surv")   # found by the formula below, whose environment is this function's
   rejections <- replicate(reps, {
     d <- .simulate_wlr_trial(n0, n1, hazard0, hr, change_time, effect_timing, accrual, tot_time)
     d <- d[d$time > 0, ]
     sd <- tryCatch(
-      survival::survdiff(survival::Surv(time, status) ~ arm, data = d, rho = rho),
+      survdiff(Surv(time, status) ~ arm, data = d, rho = rho),
       error = function(e) NULL
     )
     if (is.null(sd)) return(FALSE)
@@ -288,8 +307,9 @@ calc_survival_stratified <- function(power, timeUnit, gVec, pVec, hr, lambda0Vec
 #' @return list(n0, n1, n_total, achieved_power, inputs)
 #' @examples
 #' \donttest{
+#' # nsim is kept small so that the example runs quickly; use the default (or more) for a real calculation
 #' calc_weighted_logrank(hazard0 = 0.15, hr = 0.5, change_time = 4, effect_timing = "delayed", 
-#'     accrual = 12, tot_time = 30, rho = 0, power = 0.8)
+#'     accrual = 12, tot_time = 30, rho = 0, power = 0.8, nsim = 100)
 #' }
 #' @export
 calc_weighted_logrank <- function(hazard0, hr, change_time, effect_timing = "delayed",

@@ -6,12 +6,12 @@ epidemiology and clinical research. Every calculator comes with its formula
 example, the original methodological citation, and the name of the package or
 formula that implements it.
 
-**Current state (29 October 2026):** 66 calculators (50 sample-size, 11 *Analyze* tools, 2 planning tools,
-2 survey tools, 1 infectious-disease model tool) covering 159 designs, each with its formula, a worked example and a
+**Current state (3 November 2026):** 67 calculators (50 sample-size, 11 *Analyze* tools, 2 planning tools,
+2 survey tools, 1 infectious-disease model tool, 1 *Effect Size* tool) covering 159 designs (counted on 29 October; ten Effect Size converters and a design-effect calculator have been added since), each with its formula, a worked example and a
 citable source, checked against a published value, a real package or a simulation. The app is called **Epidemiological
 suite**; the R package is `epidemiologysuite`. There are three ways to use it (see below): the browser build on GitHub Pages,
 the phone / server version on Posit Connect Cloud, and the R package, in which **every calculation is an exported function
-with its own help page**. 942 unit-test blocks plus browser-driven UI tests, an accessibility scan (axe-core, WCAG A/AA, light and
+with its own help page**. 102 test files plus browser-driven UI tests, an accessibility scan (axe-core, WCAG A/AA, light and
 dark mode, desktop and phone width) and `R CMD check --as-cran` back it. What is done and what is next:
 [`docs/PLAN.md`](docs/PLAN.md); the reasoning and evidence: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
@@ -230,6 +230,10 @@ calc_cluster_deff(n_base = 200, icc = 0.05, cluster_size = 10)   # design effect
 In RStudio or Positron, *Addins > Find a sample size calculator* does the same from a search window. Setting the
 environment variable `EPIDEMIOLOGYSUITE_OPEN` to a design key makes a deployment open on that calculator.
 
+On a server, the Monte Carlo calculators run in a background R process (package `mirai`, suggested), so one user's
+simulation does not hold up the others. `EPIDEMIOLOGYSUITE_WORKERS` sets the number of background processes (default 1,
+0 = calculate in the session); each one is a full R process with its own memory.
+
 From a clone (development), the root `app.R` loads the package with
 `pkgload::load_all()`, so `shiny::runApp()` or `Rscript -e 'shiny::runApp()'` from
 the repository root still works.
@@ -238,8 +242,12 @@ the repository root still works.
 
 The app has a **Cite** tab with the citation in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX and RIS, a ready-made sentence
 for a Methods section, and copy and download buttons. In R: `citation("epidemiologysuite")`. GitHub's "Cite this repository" reads
-`CITATION.cff`. There is no DOI yet: after the first release is archived on Zenodo, put the DOI in three places (see
-`docs/hosting.md`, "Adding the Zenodo DOI"): `.citation_doi` in `R/citation_info.R`, `CITATION.cff` and `inst/CITATION`.
+`CITATION.cff`. Release v1.0.0 is archived on Zenodo, DOI [10.5281/zenodo.23794230](https://doi.org/10.5281/zenodo.23794230):
+
+> Maheshwari, M. (2026). Epidemiological suite (Version 1.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.23794230
+
+The DOI is set in three places (`docs/hosting.md`, "Adding the Zenodo DOI"): `.citation_doi` in `R/citation_info.R`,
+`CITATION.cff` and `inst/CITATION`.
 
 ## Running in Docker
 
@@ -271,7 +279,7 @@ testthat::test_local()   # loads the package from the working directory first
 The tests call internal functions, so they must run inside the package namespace:
 use `test_local()` (or `devtools::test()`), not `test_dir()` on its own.
 
-The default run (about 940 test blocks in 89 files) skips the slowest tests (Monte Carlo simulations, ≥ 5 s
+The default run (102 files) skips the slowest tests (Monte Carlo simulations, ≥ 5 s
 each) and takes about ten minutes with the browser tests, about a minute without them. To run everything (~13 minutes more, mostly `test-calc_glmm.R`):
 
 ```sh
@@ -309,7 +317,7 @@ request, and the full suite weekly or on demand from the Actions tab.
 
 ```
 DESCRIPTION, NAMESPACE package metadata (NAMESPACE is hand-written; roxygen2 builds only the help pages, roclets = "rd")
-CITATION.cff           citation for GitHub and Zenodo (the DOI goes here once issued, see docs/hosting.md)
+CITATION.cff           citation for GitHub and Zenodo (carries the Zenodo DOI, see docs/hosting.md)
 app.R                  development entry point: pkgload::load_all() + epidemiologysuite_app()
 R/                     the package (flat, as R requires; grouped by file-name prefix):
 ├── run_app.R          run_app() / epidemiologysuite_app(): grouped navbar, theme, Home hub, Cite tab

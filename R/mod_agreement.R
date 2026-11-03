@@ -41,7 +41,7 @@ mod_agreement_ui <- function(id) {
       ),
       conditionalPanel(
         condition = design_is("icc"),
-        numericInput(ns("rho"), "Expected ICC (rho)", value = 0.75, min = 0, max = 1, step = 0.01),
+        numericInput(ns("rho"), with_tip("Expected ICC (rho)", "icc"), value = 0.75, min = 0, max = 1, step = 0.01),
         numericInput(ns("k_icc"), "Number of raters/measurements per subject",
                      value = 2, min = 2, max = 20, step = 1),
         numericInput(ns("conf_width_icc"), "Desired CI width", value = 0.2, min = 0.01, max = 1.99, step = 0.01),

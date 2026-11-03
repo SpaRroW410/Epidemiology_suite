@@ -52,7 +52,7 @@ exact_tests_content <- list(
   fisher = list(
     title = "Fisher's Exact Test, Two Independent Proportions",
     formula_latex = paste0(
-      "$$\\text{power computed by enumerating all } (n_1+1)(n_2+1) \\text{ tables (Exact package)}$$"
+      "$$\\text{power computed by enumerating all } (n_1+1)(n_2+1) \\text{ tables}$$"
     ),
     explanation = paste(
       "The exact-test counterpart of the Proportions module's \"two",
@@ -89,14 +89,14 @@ exact_tests_content <- list(
       "MR, Liu CY. The Saw-Toothed Behavior of Power versus Sample Size",
       "and Software Solutions. Am Stat. 2002;56(2):149-155."
     ),
-    backend = "Exact::power.exact.test(method = \"fisher\") (search over n1)"
+    backend = "exact power over every 2x2 table, written from the definition of Fisher's test (equal to Exact::power.exact.test(method = \"fisher\"), checked over grids); search over n1; no package needed"
   ),
 
   boschloo = list(
     title = "Boschloo's Exact Test, Two Independent Proportions (Unconditional)",
     formula_latex = paste0(
       "$$\\text{power computed by maximizing the p-value over the unknown ",
-      "nuisance parameter (Exact package)}$$"
+      "nuisance parameter}$$"
     ),
     explanation = paste(
       "Boschloo's test is the classic \"unconditional\" exact test for two",
@@ -114,8 +114,8 @@ exact_tests_content <- list(
       "",
       "Same search strategy as Fisher's exact test above (searching",
       "upward over n1 with a stability check for the sawtooth effect),",
-      "just a different method argument to the same `Exact` package",
-      "already used for Fisher's exact test. Boschloo's own p-value",
+      "computed here in the same way as Fisher's (every 2x2 table,",
+      "checked against the `Exact` package). Boschloo's own p-value",
       "calculation searches over a grid of nuisance-parameter values",
       "internally, so this design can take a few seconds to compute --",
       "noticeably slower than Fisher's exact test above, but still exact.",
@@ -137,7 +137,7 @@ exact_tests_content <- list(
       "2x2-table when Testing the Equality of Two Probabilities. Statist",
       "Neerlandica. 1970;24(1):1-35."
     ),
-    backend = "Exact::power.exact.test(method = \"boschloo\") (search over n1)"
+    backend = "exact power over every 2x2 table, written from the definition of Boschloo's test (equal to Exact::power.exact.test(method = \"boschloo\"), checked over grids); search over n1; no package needed"
   ),
 
   poisson = list(

@@ -42,7 +42,7 @@ mod_tost_ui <- function(id) {
         numericInput(ns("margin_prop"), "Equivalence margin (+/-, on the proportion scale)", value = 0.20, min = 0.001, max = 0.99, step = 0.01),
         numericInput(ns("alpha_prop"), "Significance level, one-sided (alpha)", value = 0.10, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_prop"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-        numericInput(ns("ratio_prop"), "Allocation ratio (new : standard)", value = 1, min = 0.1, step = 0.1)
+        numericInput(ns("ratio_prop"), with_tip("Allocation ratio (new : standard)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1)
       ),
       conditionalPanel(
         condition = design_is("bioequivalence"),

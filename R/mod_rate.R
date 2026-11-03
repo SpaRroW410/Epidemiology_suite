@@ -30,18 +30,43 @@ mod_rate_ui <- function(id) {
       conditionalPanel(
         condition = design_is("precision"),
         numericInput(ns("rate"), "Expected rate (events per unit person-time)", value = 2.5, min = 0.0001),
-        numericInput(ns("conf_width"), "Desired confidence interval width (same units as rate)", value = 2.243, min = 0.0001),
+        precision_type_input(ns("error_rate"),
+                             absolute = "Absolute (the full width of the interval, in the units of the rate)",
+                             relative = "Relative (+/- a fraction of the rate)"),
+        conditionalPanel(
+          condition = sprintf("input['%s'] != 'relative'", ns("error_rate")),
+          numericInput(ns("conf_width"), "Desired confidence interval width (same units as rate)", value = 2.243, min = 0.0001)
+        ),
+        conditionalPanel(
+          condition = sprintf("input['%s'] == 'relative'", ns("error_rate")),
+          numericInput(ns("epsilon_rate"), "Relative margin of error (fraction of the rate, e.g. 0.20 = +/- 20%)",
+                       value = 0.20, min = 0.001, max = 0.99, step = 0.01)
+        ),
         numericInput(ns("conf_level"), "Confidence level", value = 0.95, min = 0.5, max = 0.999, step = 0.01),
         selectInput(ns("method"), "Method",
                     choices = c("Score (general-purpose default)" = "score",
                                 "Exact (recommended if < 5 events expected)" = "exact",
                                 "Variance-stabilizing" = "vs",
-                                "Wald" = "wald"))
+                                "Wald" = "wald")),
+        nonresponse_input(ns("nonresponse_rate"),
+                          "Expected loss of person-time to follow-up (fraction; 0 = none, 0.1 = 10%)"),
+        uiOutput(ns("precision_equiv")),
+        precision_guidance_ui("rate")
       ),
       conditionalPanel(
         condition = design_is("comparison"),
         numericInput(ns("rate_ref"), "Reference (unexposed) group rate (events per unit person-time)", value = 2.798, min = 0.0001),
-        numericInput(ns("rate_ratio"), "Expected rate ratio (exposed / reference)", value = 0.8938, min = 0.0001),
+        radioButtons(ns("ratio_as_comp"), "Effect to detect, given as",
+                     choices = c("Rate ratio" = "ratio", "Exposed group's rate" = "rate"), inline = TRUE),
+        conditionalPanel(
+          condition = sprintf("input['%s'] != 'rate'", ns("ratio_as_comp")),
+          numericInput(ns("rate_ratio"), with_tip("Expected rate ratio (exposed / reference)", "rate_ratio"), value = 0.8938, min = 0.0001)
+        ),
+        conditionalPanel(
+          condition = sprintf("input['%s'] == 'rate'", ns("ratio_as_comp")),
+          numericInput(ns("rate_exp"), "Exposed group rate (same units)", value = 2.501, min = 0.0001)
+        ),
+        uiOutput(ns("ratio_equiv_comp")),
         numericInput(ns("prop_exposed"), "Proportion of the sample in the exposed group", value = 0.53, min = 0.01, max = 0.99, step = 0.01),
         numericInput(ns("alpha_comp"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_comp"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
@@ -64,7 +89,17 @@ mod_rate_ui <- function(id) {
       conditionalPanel(
         condition = design_is("negative_binomial"),
         numericInput(ns("mu0_nb"), "Control-group event rate per time unit (mu0)", value = 10, min = 0.0001, step = 0.5),
-        numericInput(ns("rr_nb"), "Rate ratio to detect (treatment / control)", value = 1.5, min = 0.0001, step = 0.05),
+        radioButtons(ns("ratio_as_nb"), "Effect to detect, given as",
+                     choices = c("Rate ratio" = "ratio", "Treatment group's rate" = "rate"), inline = TRUE),
+        conditionalPanel(
+          condition = sprintf("input['%s'] != 'rate'", ns("ratio_as_nb")),
+          numericInput(ns("rr_nb"), "Rate ratio to detect (treatment / control)", value = 1.5, min = 0.0001, step = 0.05)
+        ),
+        conditionalPanel(
+          condition = sprintf("input['%s'] == 'rate'", ns("ratio_as_nb")),
+          numericInput(ns("mu1_nb"), "Treatment-group event rate per time unit", value = 15, min = 0.0001, step = 0.5)
+        ),
+        uiOutput(ns("ratio_equiv_nb")),
         numericInput(ns("theta_nb"), "Dispersion parameter (theta, MASS::rnegbin parameterization)", value = 0.2, min = 0.0001, step = 0.05),
         numericInput(ns("duration_nb"), "Average treatment/follow-up duration", value = 1, min = 0.0001, step = 0.1),
         numericInput(ns("ratio_nb"), "Treatment:control sample size ratio", value = 1.5, min = 0.01, step = 0.1),
@@ -133,24 +168,53 @@ mod_rate_ui <- function(id) {
 
 mod_rate_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # rate ratios given directly, or as the second group's rate (ratio = that rate / the reference rate)
+    ratio_from <- function(as, ratio, rate, ref) {
+      if (identical(as, "rate")) {
+        if (is.null(rate) || is.null(ref) || is.na(rate) || is.na(ref) || ref <= 0) return(NULL)
+        rate / ref
+      } else ratio
+    }
+    comp_ratio <- reactive(ratio_from(input$ratio_as_comp, input$rate_ratio, input$rate_exp, input$rate_ref))
+    nb_ratio <- reactive(ratio_from(input$ratio_as_nb, input$rr_nb, input$mu1_nb, input$mu0_nb))
+    ratio_line <- function(r, a, b, what) {
+      if (is.null(r) || is.na(r) || is.null(a) || is.null(b) || is.na(a) || is.na(b)) return(NULL)
+      div(class = "text-muted small mb-2", sprintf("Rate ratio %.4f: %s rate %s vs %s.", r, what, format(signif(b * r, 4)), format(b)))
+    }
+    output$ratio_equiv_comp <- renderUI(ratio_line(comp_ratio(), input$rate_ratio, input$rate_ref, "exposed"))
+    output$ratio_equiv_nb <- renderUI(ratio_line(nb_ratio(), input$rr_nb, input$mu0_nb, "treatment"))
+
+    rate_relative <- reactive(identical(input$error_rate, "relative"))
+    rate_precision <- reactive(if (rate_relative()) input$epsilon_rate else input$conf_width)
+    # conf_width (absolute) or epsilon (relative), as calc_rate_precision() takes them
+    rate_precision_args <- function() {
+      if (rate_relative()) list(conf_width = NULL, epsilon = input$epsilon_rate) else list(conf_width = input$conf_width, epsilon = NULL)
+    }
+    output$precision_equiv <- renderUI({
+      precision_equivalents_ui(precision_equivalents_text(input$rate, rate_precision(),
+                                                          if (rate_relative()) "relative" else "absolute",
+                                                          input$conf_level, "rate"))
+    })
+
     result <- reactive({
       req(input$design)
 
       if (input$design == "precision") {
-        req(input$rate, input$conf_width, input$conf_level, input$method)
+        req(input$rate, rate_precision(), input$conf_level, input$method)
         tryCatch(
-          list(ok = TRUE, value = calc_rate_precision(
-            rate = input$rate, conf_width = input$conf_width,
-            conf_level = input$conf_level, method = input$method
-          )),
+          list(ok = TRUE, value = do.call(calc_rate_precision, c(
+            list(rate = input$rate, conf_level = input$conf_level, method = input$method,
+                 nonresponse = .nonresponse_value(input$nonresponse_rate)),
+            rate_precision_args()
+          ))),
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
       } else if (input$design == "comparison") {
-        req(input$rate_ref, input$rate_ratio, input$prop_exposed,
+        req(input$rate_ref, comp_ratio(), input$prop_exposed,
             input$alpha_comp, input$power_comp, input$alternative_comp)
         tryCatch(
           list(ok = TRUE, value = calc_rate_comparison(
-            rate_ref = input$rate_ref, rate_ratio = input$rate_ratio,
+            rate_ref = input$rate_ref, rate_ratio = comp_ratio(),
             prop_exposed = input$prop_exposed, alpha = input$alpha_comp,
             power = input$power_comp, alternative = input$alternative_comp
           )),
@@ -168,11 +232,11 @@ mod_rate_server <- function(id) {
           error = function(e) list(ok = FALSE, message = conditionMessage(e))
         )
       } else {
-        req(input$mu0_nb, input$rr_nb, input$theta_nb, input$duration_nb, input$ratio_nb,
+        req(input$mu0_nb, nb_ratio(), input$theta_nb, input$duration_nb, input$ratio_nb,
             input$approach_nb, input$alternative_nb, input$alpha_nb, input$power_nb)
         tryCatch(
           list(ok = TRUE, value = calc_negative_binomial_rates(
-            mu0 = input$mu0_nb, RR = input$rr_nb, theta = input$theta_nb,
+            mu0 = input$mu0_nb, RR = nb_ratio(), theta = input$theta_nb,
             duration = input$duration_nb, ssize_ratio = input$ratio_nb,
             alpha = input$alpha_nb, power = input$power_nb,
             alternative = input$alternative_nb, approach = as.numeric(input$approach_nb)
@@ -193,7 +257,15 @@ mod_rate_server <- function(id) {
         tagList(
           p(strong("Required number of events: "), v$n_events),
           p(strong("Required person-time: "), sprintf("%.2f", v$person_time)),
-          p(sprintf("Achieved CI width at this n: %.4f", v$achieved_conf_width))
+          if (!is.null(v$person_time_planned)) {
+            p(strong(sprintf("Person-time to plan, allowing for %s loss to follow-up: ", .prec_pct(v$inputs$nonresponse))),
+              sprintf("%.2f", v$person_time_planned),
+              span(class = "text-muted", sprintf(" (%.2f / (1 - %s))", v$person_time, format(v$inputs$nonresponse, trim = TRUE))))
+          },
+          p(sprintf("Achieved CI width at this n: %.4f", v$achieved_conf_width)),
+          p(sprintf("Precision (%s): interval width %s (+/- %s) = +/- %s of the rate.", v$inputs$error,
+                    .prec_fmt(2 * v$d_absolute), .prec_fmt(v$d_absolute), .prec_pct(v$epsilon_relative))),
+          precision_notes_ui(v$precision_notes)
         )
       } else if (input$design == "comparison") {
         tagList(
@@ -218,11 +290,11 @@ mod_rate_server <- function(id) {
     # a power argument. "precision" has none (it isn't a hypothesis test).
     render_power_curves(output, function() {
       if (input$design == "comparison") {
-        req(input$rate_ref, input$rate_ratio, input$prop_exposed,
+        req(input$rate_ref, comp_ratio(), input$prop_exposed,
             input$alpha_comp, input$power_comp, input$alternative_comp)
         list(
           calc_fn = calc_rate_comparison,
-          args = list(rate_ref = input$rate_ref, rate_ratio = input$rate_ratio,
+          args = list(rate_ref = input$rate_ref, rate_ratio = comp_ratio(),
                        prop_exposed = input$prop_exposed, alpha = input$alpha_comp,
                        power = input$power_comp, alternative = input$alternative_comp),
           effect = list(param = "rate_ratio", values = curve_range_ratio(), label = "Rate ratio (exposed / reference)"),
@@ -241,11 +313,11 @@ mod_rate_server <- function(id) {
           power = list(param = "power", values = curve_range_power())
         )
       } else if (input$design == "negative_binomial") {
-        req(input$mu0_nb, input$rr_nb, input$theta_nb, input$duration_nb, input$ratio_nb,
+        req(input$mu0_nb, nb_ratio(), input$theta_nb, input$duration_nb, input$ratio_nb,
             input$approach_nb, input$alternative_nb, input$alpha_nb, input$power_nb)
         list(
           calc_fn = calc_negative_binomial_rates,
-          args = list(mu0 = input$mu0_nb, RR = input$rr_nb, theta = input$theta_nb,
+          args = list(mu0 = input$mu0_nb, RR = nb_ratio(), theta = input$theta_nb,
                        duration = input$duration_nb, ssize_ratio = input$ratio_nb,
                        alpha = input$alpha_nb, power = input$power_nb,
                        alternative = input$alternative_nb, approach = as.numeric(input$approach_nb)),
@@ -253,17 +325,24 @@ mod_rate_server <- function(id) {
           power = list(param = "power", values = curve_range_power())
         )
       } else if (input$design == "precision") {
-        req(input$rate, input$conf_width, input$conf_level, input$method)
+        req(input$rate, rate_precision(), input$conf_level, input$method)
+        rel <- rate_relative()
         list(
           calc_fn = calc_rate_precision,
-          args = list(rate = input$rate, conf_width = input$conf_width,
-                       conf_level = input$conf_level, method = input$method),
+          args = c(list(rate = input$rate, conf_level = input$conf_level, method = input$method),
+                   if (rel) list(epsilon = input$epsilon_rate) else list(conf_width = input$conf_width)),
           effect = list(param = "rate", values = curve_range_multiplicative(input$rate),
                       label = "Expected rate",
                       title = "Required events vs. expected rate"),
-          power = list(param = "conf_width", values = curve_range_multiplicative(input$conf_width, 0.3, 3),
-                      label = "Desired confidence interval width",
-                      title = "Required events vs. precision (CI width)")
+          power = if (rel) {
+            list(param = "epsilon", values = curve_range_multiplicative(input$epsilon_rate, 0.3, 3),
+                 label = "Relative margin of error (fraction of the rate)",
+                 title = "Required events vs. relative precision")
+          } else {
+            list(param = "conf_width", values = curve_range_multiplicative(input$conf_width, 0.3, 3),
+                 label = "Desired confidence interval width",
+                 title = "Required events vs. precision (CI width)")
+          }
         )
       } else {
         NULL
