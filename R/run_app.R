@@ -92,12 +92,12 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
         heading_font = font_collection("Source Serif 4", "Georgia", "Cambria", "Times New Roman", "serif"),
         "font-size-base" = "0.95rem"
       ),
-      header = tagList(browser_notice_ui(), tags$style(HTML(.workbench_css)), accessibility_script(), phone_shell_assets(),
+      header = tagList(browser_notice_ui(), server_notice_ui(), studies_assets(), tags$style(HTML(.workbench_css)), accessibility_script(), phone_shell_assets(),
                        if (length(pending_titles)) lazy_sidebar_assets(pending_titles, show_progress = .background_load_enabled()))
     ),
     list(home_panel, nav_panel("Find a calculator", find_panel_ui())),
     workbench_panels,
-    list(nav_panel("Cite", cite_ui())),
+    list(nav_panel("Studies", studies_ui()), nav_panel("Cite", cite_ui())),
     # light / dark switch (starts from the viewer's operating-system setting)
     list(bslib::nav_item(nav_search_ui()), bslib::nav_item(bslib::input_dark_mode(id = "dark_mode")))
   ))
@@ -105,6 +105,7 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
   server <- function(input, output, session) {
     home_server(input, output, session)
     cite_server(input, output, session)
+    studies_server(input, output, session)
     # opened from run_app(calculator = ...): go to that calculator once the page is connected (the navbar's value arrives first)
     if (!is.null(start_key)) observeEvent(input$main_nav, {
       entry <- catalog_entry(start_key)
@@ -159,6 +160,7 @@ html { scroll-padding-bottom: 7rem; }   /* a focused input is scrolled clear of 
 /* the darker light-mode colours above (secondary, danger, warning) are too dark for the dark background */
 html[data-bs-theme='dark'] .btn-outline-secondary { --bs-btn-color: #adb5bd; --bs-btn-border-color: #adb5bd; --bs-btn-hover-bg: #adb5bd; --bs-btn-hover-border-color: #adb5bd; --bs-btn-hover-color: #212529; --bs-btn-active-bg: #adb5bd; --bs-btn-active-color: #212529; --bs-btn-disabled-color: #adb5bd; --bs-btn-disabled-border-color: #adb5bd; }
 html[data-bs-theme='dark'] .btn-outline-primary { --bs-btn-color: #6ea8fe; --bs-btn-border-color: #6ea8fe; --bs-btn-hover-bg: #2a66cf; --bs-btn-hover-border-color: #2a66cf; --bs-btn-hover-color: #fff; --bs-btn-disabled-color: #6ea8fe; --bs-btn-disabled-border-color: #6ea8fe; }
+html[data-bs-theme='dark'] .btn-outline-danger { --bs-btn-color: #ea868f; --bs-btn-border-color: #ea868f; --bs-btn-hover-bg: #c62828; --bs-btn-hover-border-color: #c62828; --bs-btn-hover-color: #fff; }
 html[data-bs-theme='dark'] .text-danger { color: #ea868f !important; }
 html[data-bs-theme='dark'] .text-warning { color: #ffda6a !important; }
 .tab-pane > .row > .col-sm-3 > ul.nav-stacked {

@@ -20,8 +20,7 @@ keywords:
   - study design
   - R package
   - Shiny
-date-released: "2026-10-31"
+date-released: "2026-10-30"
 identifiers:
   - type: doi
-    value: 10.5281/zenodo.23794230
-    description: Zenodo archive of release v1.0.0
+    value: 10.5281/zenodo.23793833

@@ -16,10 +16,12 @@ suite of 102 files with 0 failures; 206 calculation functions exported with help
 - [ ] Click **Republish** on Connect Cloud (the `connect` branch rebuilds itself; last merged change: #33, 3 Nov), then try the phone redirect and the new Find / Effect Size tabs on a real phone
 - ~~Version set to **1.0.0** (30 Oct; the tag of the release is `v1.0.0`)~~
 - ~~Zenodo: release `v1.0.0` archived, DOI **10.5281/zenodo.23794230**~~ (31 Oct; in the Cite tab, `CITATION.cff` and `citation()`)
-- [ ] Decide on a background-process package (`mirai` or `future`) for running slow simulations without blocking other users (also changes the browser build)
+- ~~Background-process package: `mirai`~~ (31 Oct; Phase 6)
 - [ ] Long-term hosting (Connect Cloud free-plan limits are not verified)
+- [ ] File the two upstream bug reports (`docs/upstream_reports.md`); r-universe, then CRAN
+- ~~A notice in the server version that inputs go to the server~~ (3 Nov, closable)
 - ~~Repository renamed to `Epidemiology_suite` (30 Oct); the package followed as `epidemiologysuite`~~ **Owner steps left:** check the new Pages address, rename `EPIDEMIOLOGICASUITE_OPEN` to `EPIDEMIOLOGYSUITE_OPEN` on Connect if it was set there, republish
-- [ ] The Pages build error text from 17 Oct, if it still happens
+- ~~The Pages build error of 17 Oct~~ (not happening; dropped 3 Nov)
 
 ## Phase 1 — Foundations  (all done)
 
@@ -58,6 +60,7 @@ suite of 102 files with 0 failures; 206 calculation functions exported with help
 - [ ] Hosting decision for the long term (Connect Cloud free-plan limits not verified; shinyapps.io is closing to new apps)
 - [ ] Home-screen icon (PWA), then an Android wrapper (TWA); iOS stays PWA only; desktop wrapper not recommended
 - [ ] Multi-user scaling (Phase 6, background computation)
+- [ ] About the three versions: a table in the app comparing the phone / server version, the browser version and the R package (where it runs, whether inputs leave the device, internet, start-up, simulation speed, devices, Studies storage, how to open or install, how to cite)
 
 ## Phase 4 — Interface  (first part done 29 Oct; mock-ups approved in principle, no icons before headings)
 
@@ -77,9 +80,16 @@ suite of 102 files with 0 failures; 206 calculation functions exported with help
 - ~~**The effect as people know it** (OpenEpi-style): both means or their difference, SD or variance, Cohen's d; the exposed risk or the odds ratio, risk ratio or risk difference; Cohen's f from means or eta-squared; the paired SD from two SDs and a correlation.~~ (#32)
 - ~~**Design effect** only in the Cluster / Design Effect module (it applies to any cluster design, including community trials): a calculator from the between- and within-cluster variances, from the variance of cluster means, or from the two variances of the estimate; or enter it directly (default 1.5, "most commonly taken as 1.5 or 2")~~ (#32)
 - ~~**Calculate this / Use this value:** 28 calculator inputs link to the matching Effect Size converter and take the number back~~ (#33)
-- [ ] Pre-fill a converter from the calculator's current values; links for inputs where a converter gives a different quantity (the Welch SDs); more glossary terms and tooltips on request.
-- [ ] Put the dark-mode contrast crawl used on these PRs into `tools/ui-audit/` (it now lives only in a working folder).
-- [ ] Re-measure the live browser build (Pages) after #33, and try the new tabs on a real phone.
+- ~~Pre-fill the converter from the calculator (9 links)~~ (3 Nov). [ ] Links for inputs where a converter gives a different quantity (the Welch SDs); more glossary terms and tooltips on request.
+- ~~Dark-mode contrast crawl and live-site timing kept in `tools/ui-audit/` (`contrast.R`, `live_timing.js`)~~ (3 Nov)
+- ~~Live browser build re-measured after #33: 38.9 s until Home is usable, guide 2.4 s, quick link 0.4 s (desktop)~~ (3 Nov). [ ] Try the new tabs on a real phone.
+
+## Phase 4c — Studies: a working record of calculations, downloaded as a Word file  (planned 3 Nov 2026; decisions S1-S5 in ROADMAP §10)
+
+- ~~**S-1 Storage, buttons and the Studies tab**~~ (3 Nov; moving entries and notes come with S-3, the download with S-2): the record kept in the browser tab only (nothing kept on the server); "Add to [Study 1 v] Add" under every result (the shared export hook of 64 calculators); a Studies tab with one drop-down (Study 1, 2, 3, + New study, Recent calculations), an editable name, the entries (remove, move, note), a live preview, Clear and **Download (.docx)**; repeated use of the same calculator and design shown as one table; Recent calculations recorded automatically (last 20).
+- [ ] **S-2 Word file:** a small built-in .docx writer (no new runtime package); formulas as LaTeX ready for Word's Insert > Equation > LaTeX; references numbered without duplicates, plus the suite's own citation (version and DOI). Checked by reading the file back with `officer` in the tests only.
+- [ ] **S-3 Guide and wording:** "Add this design choice" at the end of the guide (the answers that led to the design); readable names for the inputs in the document (the results use short names such as `p1`, `sd`).
+- [ ] **S-4 Analyze tools and devices:** the Analyze results too; a check on a real phone on Connect Cloud (sleep, switch apps, reload) and in the browser build.
 
 ## Phase 5 — The R package for analysts
 
@@ -90,7 +100,7 @@ suite of 102 files with 0 failures; 206 calculation functions exported with help
 - ~~CRAN groundwork: ASCII-only source, fast examples, browser tests skipped on CRAN, `R CMD check --as-cran` clean apart from check-machine notes, `cran-comments.md`~~ (30 Oct)
 - [ ] Release: r-universe (binaries, including WebAssembly), then CRAN submission by the owner (computation core split from the app is optional)
 - ~~Rename of the GitHub repository (30 Oct), first release number (1.0.0, 30 Oct) and `NEWS.md` (30 Oct)~~
-- [ ] **[owner]** Author details for CRAN
+- ~~Author details for CRAN: ORCID 0000-0002-1918-5100 (from forecastsuite) in `DESCRIPTION`, `CITATION.cff`, `inst/CITATION`~~ (3 Nov)
 
 ## Phase 6 — Engineering and speed
 
@@ -104,7 +114,7 @@ suite of 102 files with 0 failures; 206 calculation functions exported with help
 
 - [ ] Evidence synthesis from study summaries (fixed / random effects, forest plot), checked against `metafor`
 - [ ] Teaching mode: interactive power curves, sampling-distribution and CI-coverage demos
-- [ ] Raw-data workbench (Table 1, crude and adjusted estimates, Kaplan-Meier) and line-list epidemic curves, R0 / Rt: **deferred by decision D1**; needs a data-privacy policy first
+- [ ] Raw-data workbench (Table 1, crude and adjusted estimates, Kaplan-Meier) and line-list epidemic curves, R0 / Rt: **later, outside the browser app** (D1, 3 Nov 2026: too memory-heavy for the browser build; kept for a later full server app, merged with the owner's `Easy_analysis` application); needs a data-privacy policy first
 
 ## Always on: the sample-size catalog
 

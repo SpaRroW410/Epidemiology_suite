@@ -11,6 +11,10 @@
 #   keys     fields of that design's result that can be sent (the first one present is used)
 #   set_es   radios of the Effect Size page to preset (named list: input id -> value)
 #   set_calc radios of the calculator to switch, so the filled input is the one in use (named list: input id -> value)
+#   prefill  converter inputs filled from what the calculator already holds (named list: converter input id -> calculator input id),
+#            so the user does not type the same numbers twice; a calculator input that is empty is skipped
+#   set_es may also give a function of the calculator's `input` instead of a value (e.g. open the converter on the route the
+#   calculator was using)
 # test-effect_links.R checks every entry against the calculators' pages and the converters' results.
 
 .es_link_specs <- list(
@@ -24,24 +28,34 @@
   list(module = "nonparametric", input = "effect_size_ks", label = "the standardized shift (d)", design = "from_t", keys = "d"),
   list(module = "nonparametric", input = "effect_size_runs", label = "the standardized shift (d)", design = "from_t", keys = "d"),
   # Cohen's f and f-squared
-  list(module = "nonparametric", input = "f_kw", label = "Cohen's f", design = "anova_f", keys = "f", set_calc = list(f_kw_as = "f")),
-  list(module = "nonparametric", input = "f_fr", label = "Cohen's f", design = "anova_f", keys = "f", set_calc = list(f_fr_as = "f")),
-  list(module = "rm_anova", input = "f", label = "Cohen's f", design = "anova_f", keys = "f", set_calc = list(f_as = "f")),
-  list(module = "anova_general", input = "f2", label = "f-squared", design = "anova_f", keys = "f2", set_calc = list(effect_size_type = "f2")),
+  list(module = "nonparametric", input = "f_kw", label = "Cohen's f", design = "anova_f", keys = "f", set_calc = list(f_kw_as = "f"),
+       set_es = list(f_from = function(input) if (identical(input[["f_kw_as"]], "eta2")) "eta2" else "means"),
+       prefill = list(f_means = "f_kw_means", f_sd = "f_kw_sd", f_eta2 = "f_kw_eta2")),
+  list(module = "nonparametric", input = "f_fr", label = "Cohen's f", design = "anova_f", keys = "f", set_calc = list(f_fr_as = "f"),
+       set_es = list(f_from = function(input) if (identical(input[["f_fr_as"]], "eta2")) "eta2" else "means"),
+       prefill = list(f_means = "f_fr_means", f_sd = "f_fr_sd", f_eta2 = "f_fr_eta2")),
+  list(module = "rm_anova", input = "f", label = "Cohen's f", design = "anova_f", keys = "f", set_calc = list(f_as = "f"),
+       set_es = list(f_from = function(input) if (identical(input[["f_as"]], "eta2")) "eta2" else "means"),
+       prefill = list(f_means = "f_means", f_sd = "f_sd", f_eta2 = "f_eta2")),
+  list(module = "anova_general", input = "f2", label = "f-squared", design = "anova_f", keys = "f2", set_calc = list(effect_size_type = "f2"),
+       set_es = list(f_from = "eta2"), prefill = list(f_eta2 = "eta2")),
   # correlation, from Cohen's d
   list(module = "correlation", input = "r_pb", label = "r", design = "correlation", keys = "r", set_es = list(cv_from = "d")),
   list(module = "meta_power", input = "r_effect", label = "r", design = "correlation", keys = "r", set_es = list(cv_from = "d"),
-       set_calc = list(es_type = "r")),
+       set_calc = list(es_type = "r"), prefill = list(cv_d = "d_effect")),
   # hazard ratio
-  list(module = "logrank", input = "hr_logrank", label = "the hazard ratio", design = "hazard_ratio", keys = "hr", set_calc = list(hr_as_logrank = "value")),
+  list(module = "logrank", input = "hr_logrank", label = "the hazard ratio", design = "hazard_ratio", keys = "hr", set_calc = list(hr_as_logrank = "value"),
+       set_es = list(hr_from = function(input) if (identical(input[["hr_as_logrank"]], "implied")) "p" else "median"),
+       prefill = list(hr_me = "hr_median_e", hr_mc = "hr_median_c", hr_pe = "pE", hr_pc = "pC")),
   list(module = "logrank", input = "hr_strat", label = "the hazard ratio", design = "hazard_ratio", keys = "hr"),
   list(module = "logrank", input = "hr_wlr", label = "the hazard ratio", design = "hazard_ratio", keys = "hr"),
   list(module = "group_sequential", input = "hr_survival", label = "the hazard ratio", design = "hazard_ratio", keys = "hr"),
   list(module = "noninferiority", input = "hr_val", label = "the hazard ratio", design = "hazard_ratio", keys = "hr"),
   list(module = "case_control", input = "hr", label = "the hazard ratio", design = "hazard_ratio", keys = "hr"),
   # odds ratio, from proportions
-  list(module = "case_control", input = "OR", label = "the odds ratio", design = "proportions", keys = "OR", set_calc = list(effect_as = "or")),
-  list(module = "glmm", input = "or", label = "the odds ratio", design = "proportions", keys = "OR"),
+  list(module = "case_control", input = "OR", label = "the odds ratio", design = "proportions", keys = "OR", set_calc = list(effect_as = "or"),
+       prefill = list(p0 = "p0")),
+  list(module = "glmm", input = "or", label = "the odds ratio", design = "proportions", keys = "OR", prefill = list(p0 = "baseline_prob")),
   # standard deviation, from a median and interquartile range; SD of paired differences
   list(module = "means", input = "sd_precision", label = "the SD", design = "median_iqr", keys = "sd"),
   list(module = "means", input = "sd_single", label = "the SD", design = "median_iqr", keys = "sd"),
@@ -49,7 +63,8 @@
   list(module = "means", input = "sd_two", label = "the SD", design = "median_iqr", keys = "sd", set_calc = list(spread_as_two = "sd")),
   list(module = "means", input = "sd_unequal", label = "the SD", design = "median_iqr", keys = "sd", set_calc = list(spread_as_unequal = "sd")),
   list(module = "means", input = "sd_diff", label = "the SD of the differences", design = "paired_means", keys = "sd_diff",
-       set_calc = list(paired_sd_as = "sd_diff"))
+       set_calc = list(paired_sd_as = "sd_diff"), set_es = list(pd_as = "sds_r"),
+       prefill = list(pd_mean = "mean_diff", pd_sd1 = "paired_sd1", pd_sd2 = "paired_sd2", pd_r = "paired_r"))
 )
 
 .es_link_spec <- function(module, input) {
@@ -57,6 +72,8 @@
   NULL
 }
 .es_link_id <- function(input) paste0("es_", input)
+# a set_es entry: a fixed value, or a function of the calculator's input
+.es_set_value <- function(x, input) if (is.function(x)) x(input) else x
 
 # The link under a calculator input. `ns` is the module's ns(); the module is taken from it ("means-" -> "means").
 es_link_ui <- function(ns, input) {
@@ -89,7 +106,13 @@ es_links_server <- function(input, session) {
       es_link_state(root)(list(spec = spec, title = title))
       jump_to_module(root, effect_size_meta$nav_title)
       updateRadioButtons(root, paste0(effect_size_meta$id, "-design"), selected = spec$design)
-      for (n in names(spec$set_es)) updateRadioButtons(root, paste0(effect_size_meta$id, "-", n), selected = spec$set_es[[n]])
+      for (n in names(spec$set_es)) updateRadioButtons(root, paste0(effect_size_meta$id, "-", n), selected = .es_set_value(spec$set_es[[n]], input))
+      for (n in names(spec$prefill)) {
+        v <- input[[spec$prefill[[n]]]]
+        if (is.null(v) || length(v) != 1 || (!is.character(v) && is.na(v))) next
+        id <- paste0(effect_size_meta$id, "-", n)
+        if (is.character(v)) updateTextInput(root, id, value = v) else updateNumericInput(root, id, value = v)
+      }
     }, ignoreInit = TRUE)
   })
   invisible(NULL)
