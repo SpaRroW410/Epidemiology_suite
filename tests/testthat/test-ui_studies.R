@@ -156,3 +156,15 @@ test_that("the guide's design choice, notes, moves and readable names reach the 
   expect_equal(app$get_js("window.esStudiesLastFile.head"), "PK")
   expect_equal(ui_output_errors(app), 0)
 })
+
+test_that("the randomization list can be added to a study", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  ui_open_module(app, "Randomization List")
+  app$wait_for_idle(800, timeout = 60000)
+  ui_study_add(app, "randomization", "s1")
+  expect_match(app$get_js("document.getElementById('study_toast').innerText"), "Added to Study 1: Randomization")
+  ui_open_studies(app, "s1")
+  expect_match(ui_studies_text(app), "Randomization")
+  expect_equal(ui_output_errors(app), 0)
+})

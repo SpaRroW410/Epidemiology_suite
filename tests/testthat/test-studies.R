@@ -173,3 +173,26 @@ test_that("the guide's last step offers Add this design choice", {
   expect_match(html, 'id="design_wizard_study_target"', fixed = TRUE)
   expect_match(html, "esStudies.request(&#39;design_wizard_study_add&#39;", fixed = TRUE)
 })
+
+test_that("the randomization list and survey selection offer Add to study, with their own methods paragraph", {
+  for (m in c("randomization", "survey_selection")) {
+    html <- as.character(get(paste0("mod_", m, "_ui"))(m))
+    expect_match(html, sprintf('id="%s-study_target"', m), fixed = TRUE)
+  }
+  v <- calc_randomization_list(20, c("A", "B"), c(1, 1), "block", 4, NULL, seed = 1)
+  e <- study_entry("randomization", "Randomization List", v, randomization_content[["block"]])
+  expect_equal(e$inputs$seed, "1")
+  expect_true(nzchar(randomization_methods_text(v)))
+})
+
+test_that("the guide says when nothing in a description could be matched, and clears it on the next answer", {
+  shiny::testServer(function(input, output, session) design_wizard_server(input, output, session), {
+    session$setInputs(design_wizard_freetext = "Sexual and reproductive determinants in youth of a city")
+    session$setInputs(design_wizard_parse = 1)
+    expect_match(as.character(output$design_wizard_trace$html), "Nothing in this description could be matched")
+    session$setInputs(design_wizard_freetext = "Prevalence of anaemia among adolescent girls in a district")
+    session$setInputs(design_wizard_parse = 2)
+    expect_false(grepl("Nothing in this description", as.character(output$design_wizard_trace$html)))
+    expect_match(as.character(output$design_wizard_trace$html), "A proportion / prevalence")
+  })
+})

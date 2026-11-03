@@ -20,7 +20,7 @@ something outside the code (a paper, a package, an account). Work is collected o
   `DESCRIPTION`, `CITATION.cff`, `inst/CITATION`). `R CMD check --as-cran` gives 0 errors; its warnings and notes come from the check machine.
 - [ ] **[owner]** D6: when to reopen the paused items (section I).
 
-## B. Studies: a working record of calculations (planned; decisions S1-S5 in `ROADMAP.md` §10)
+## B. Studies: a working record of calculations (built 3 Nov 2026; decisions S1-S5 in `ROADMAP.md` §10)
 
 - [x] S-1 Storage in the browser tab only (`sessionStorage`), restored after a reload or a dropped connection; "Add this result to [Study v]
   Add" under every result through the shared export hook (64 calculators), with Undo; the Studies tab with one drop-down (studies, "+ New
@@ -28,8 +28,8 @@ something outside the code (a paper, a package, an account). Work is collected o
 - [x] S-1 Tables for repeated use of one calculator and design (the inputs that vary as columns, the constant ones listed once) (3 Nov 2026).
 - [x] S-1 Recent calculations: last 20, recorded once a result has been stable for 3 s after the user has changed something in that
   calculator (loading a calculator records nothing), without duplicates (3 Nov 2026).
-- [ ] S-1 left: the four tools without the shared export hook (ecological and qualitative guidance, randomization list, survey
-  selection) have no Add button (with S-4).
+- [x] Add to study for the randomization list and survey selection too, with their own methods paragraph (the list itself stays in the
+  CSV download); the ecological and qualitative pages are guidance only and calculate nothing (3 Nov 2026).
 - [ ] Readable names for more calculators (only names with one meaning are labelled; the rest keep their short name).
 - [x] S-2 Built-in .docx writer (no new runtime package; `R/docx_writer.R`): XML parts, stored zip with CRC-32, headings, tables with a
   repeated header row; each formula in LaTeX for Word's Insert > Equation, with a plain-text form where every command is known (222 of the app's
@@ -41,7 +41,8 @@ something outside the code (a paper, a package, an account). Work is collected o
   the Word file); a note on each result (a Comment line, or a Comment column in a table) and on the study (under the title); move a result up
   or down within its table and a section up or down; readable names ("Significance level (alpha)") for names that mean one thing in every
   calculator, and per calculator for those that do not (d, p1, r, ...); others keep their short name (3 Nov 2026).
-- [ ] S-4 Analyze results; real-phone check on Connect Cloud (sleep, switch apps, reload) and the browser build.
+- [x] S-4 Analyze results: the 11 Analyze tools use the shared export hook, so they have Add to study (3 Nov 2026).
+- [ ] S-4 **[owner]** real-phone check on Connect Cloud (sleep, switch apps, reload) and the browser build.
 - [ ] Check: Word on phones, Google Docs and LibreOffice (whether pasted LaTeX can be turned into an equation there; table styles); a long study on a phone.
 
 ## C. Small items
@@ -62,6 +63,19 @@ something outside the code (a paper, a package, an account). Work is collected o
 - [ ] Optional: re-derive `kappaSize`'s kappa tables (2-6 raters, 2-5 categories) and drop that package.
 - [ ] Optional: wrappers `ss_text()`, `ss_curve()`, `ss_export()` around the `ss_result` object; decide the public naming (C2) and add
   per-family vignettes (survival, trials, diagnostic accuracy, surveillance).
+
+## C2. Guide: research questions (plan at the end of `ROADMAP.md`)
+
+- [x] When nothing in a description is recognised, say so and how to rephrase (it showed nothing before) (3 Nov 2026).
+- [ ] **[owner]** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the reader against.
+- [ ] A test battery of those questions with the route each should take; measure the hit rate before and after each change.
+- [ ] Rules for topic phrasings: "determinants / factors associated / risk factors / predictors of X among Y" (analytic cross-sectional:
+  prevalence plus association), "KAP / knowledge, attitude and practice / awareness", "among Y in a city / district / schools"
+  (population survey, cluster sampling), "effect / effectiveness / impact of" (trial or quasi-experimental), "association between"
+  (ask which design), "incidence / follow-up", "survival / time to", "accuracy / screening", "correlation", "levels / score / mean".
+- [ ] Ask instead of guessing when a phrase fits several designs (offer two or three starting points).
+- [ ] Several objectives: let the guide end with more than one calculator (e.g. prevalence and its determinants), each with Add to study.
+- [ ] A language-model reader only by a separate decision (no API, nothing sent anywhere in the browser version).
 
 ## D. Interface and accessibility
 

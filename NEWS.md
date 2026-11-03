@@ -6,6 +6,9 @@
   the questions and answers; it comes first in the Studies tab and in the Word file ("How the design was chosen").
 * **Notes and order:** a note on each result (a Comment line in the Word file, or a Comment column in a table) and on the whole study
   (under the title); move a result up or down within its table, and a section up or down.
+* **Also under the randomization list and survey selection** (with their own methods paragraph; the list itself stays in the CSV), and
+  under the Analyze tools: every page that calculates something can add its result to a study.
+* **The guide** now says when nothing in a description could be matched to a design, with how to rephrase it (it showed nothing before).
 * **Readable names:** inputs and results show as "Significance level (alpha)", "Sample size (n)"; names whose meaning differs between
   calculators (d, p1, r, ...) are labelled only for the calculators where the meaning is known, otherwise kept as they are.
 

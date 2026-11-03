@@ -325,7 +325,8 @@ study_add_ui <- function(ns) {
 
 # Called from render_export_handlers(): "Add" sends the shown result to the page; results that stay the same for a few seconds after the
 # user has changed something in this calculator are recorded as recent calculations.
-study_capture_server <- function(result, content_fn, value_fn, session = shiny::getDefaultReactiveDomain()) {
+study_capture_server <- function(result, content_fn, value_fn = function(res) res$value, justification_fn = NULL,
+                                 session = shiny::getDefaultReactiveDomain()) {
   if (is.null(session)) return(invisible(NULL))
   module_id <- sub("-$", "", session$ns(""))
   if (!nzchar(module_id)) return(invisible(NULL))
@@ -334,7 +335,10 @@ study_capture_server <- function(result, content_fn, value_fn, session = shiny::
     res <- tryCatch(result(), error = function(e) NULL)
     if (is.null(res) || !isTRUE(res$ok)) return(NULL)
     if (is.null(title)) title <<- .module_title(module_id)
-    tryCatch(study_entry(module_id, title, value_fn(res), content_fn()), error = function(e) NULL)
+    e <- tryCatch(study_entry(module_id, title, value_fn(res), content_fn()), error = function(e) NULL)
+    # a tool with its own methods paragraph (randomization list, survey selection) uses it instead of the generic one
+    if (!is.null(e) && is.function(justification_fn)) e$justification <- tryCatch(justification_fn(res), error = function(err) e$justification)
+    e
   }
   input <- session$input
   observeEvent(input$study_add, {

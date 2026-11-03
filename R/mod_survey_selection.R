@@ -67,6 +67,7 @@ mod_survey_selection_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
+      study_add_ui(ns),   # Studies (R/mod_studies.R): the list itself stays in the CSV download
       hr(),
       h5("Download and methods text"),
       downloadButton(ns("download_list"), "Download the selected units (CSV)", class = "btn-sm btn-outline-secondary"),
@@ -146,6 +147,8 @@ mod_survey_selection_server <- function(id) {
         if (nrow(s) > 60) p(class = "text-muted small", sprintf("Showing the first 60 of %d; download the CSV for all of them.", nrow(s)))
       )
     })
+
+    study_capture_server(result, function() survey_selection_content[[input$design]], justification_fn = function(res) survey_selection_methods_text(res$value))
 
     output$methods_text <- renderText({ res <- result(); req(res$ok); survey_selection_methods_text(res$value) })
 

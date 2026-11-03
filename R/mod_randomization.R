@@ -60,6 +60,7 @@ mod_randomization_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
+      study_add_ui(ns),   # Studies (R/mod_studies.R): the list itself stays in the CSV download
       hr(),
       h5("Download and methods text"),
       downloadButton(ns("download_list"), "Download the full list (CSV)", class = "btn-sm btn-outline-secondary"),
@@ -162,6 +163,8 @@ mod_randomization_server <- function(id) {
         )
       )
     })
+
+    study_capture_server(result, function() randomization_content[[input$design]], justification_fn = function(res) randomization_methods_text(res$value))
 
     output$methods_text <- renderText({
       res <- result()

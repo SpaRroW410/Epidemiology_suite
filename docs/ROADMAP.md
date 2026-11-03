@@ -1468,7 +1468,12 @@ a real package or a simulation), and nothing is claimed that was not read.
   and switches the calculator to the way of entering it that shows that input. A static test checks every entry against the pages and the converters' results; a browser test goes round the loop.
 - **Open from this work:** see `to_do_later.md` section 7.
 
-### Studies: a working record of calculations (planned 3 November 2026; decisions S1-S5 in §10)
+### Studies: a working record of calculations (planned and built 3 November 2026; decisions S1-S5 in §10)
+
+*Built as planned in four steps (PRs #36, #38, #39): storage, Add to study and the Studies tab; the Word file; the guide's design choice,
+notes, ordering and readable names; the randomization list, survey selection and Analyze tools. Differences from the plan below: a formula
+gets a plain-text form only when every LaTeX command in it is known (222 of the 396 formula blocks), otherwise only the LaTeX is given;
+readable names are given only to names with one meaning (others keep their short name). Left: a real-phone check and opening a file in Word.*
 
 **What it is.** While working, the user adds results to a study (Study 1, 2, 3, more on request) and downloads each study as a Word file:
 the protocol's sample-size section, with the inputs, results, formulas, justification paragraphs and references. Nothing is calculated again
@@ -1518,3 +1523,42 @@ there, and downloads a file with one table and one single-entry section.
 
 **Open questions to settle while building.** Whether Word on phones and Google Docs keep the table styles; how a very long study is shown on a
 phone; whether the Analyze results (several estimates each) need their own table layout.
+
+### Expanding the guide's free-text reader: research questions (planned 3 November 2026)
+
+**The problem.** The guide's free-text reader (`R/design_free_text.R`, keyword rules) looks for words about the *design* and the *outcome*.
+Research questions are usually phrased by *topic*, and then nothing matches. Checked on 3 Nov 2026 with `walk_free_text()`:
+
+| Description | Result |
+|---|---|
+| "Sexual and reproductive determinants in youth of a city" (the owner's question) | nothing recognised |
+| "Factors associated with tobacco use among college students" | nothing recognised |
+| "Knowledge attitude and practice of contraception among married women" | nothing recognised |
+| "Prevalence of anaemia among adolescent girls in a district" | recognised: precision of a single proportion |
+
+Until 3 Nov the guide then showed nothing at all, so it looked broken; it now says that nothing could be matched and how to rephrase
+(done on the Studies branch). The rules themselves are not changed yet.
+
+**Plan.**
+1. *A battery of real research questions first.* Collect about 50-100 thesis and project titles in community medicine and public health
+   (the owner's department; MD / MPH dissertations), write down the route each should take, and keep them as a test (like
+   `test-design_free_text.R`). Measure how many are recognised before and after each change.
+2. *Topic phrasings that imply a design* (rules, each with tests):
+   - "determinants / factors associated / risk factors / predictors / correlates of X among (in) Y", with no follow-up or comparison
+     words: an **analytic cross-sectional survey**. Two objectives are usual: how common X is (precision of a proportion) and what is
+     associated with it (two proportions, exposed vs unexposed; or logistic regression, events per variable). The guide should offer both.
+   - "prevalence / proportion / magnitude / burden / pattern of X": a **descriptive cross-sectional survey** (already recognised).
+   - "knowledge, attitude(s) and practice(s)", "KAP", "awareness", "perception(s)": a **cross-sectional survey of proportions**
+     (often p = 0.5 when nothing is known).
+   - "among Y in <city / district / block / village / community / schools / colleges>": a **population survey**; ask about multistage /
+     cluster sampling and point to the design effect.
+   - "effect / effectiveness / impact of <intervention>": a **trial or a quasi-experimental study**; ask about randomisation, groups and
+     before-after measurement.
+   - "association between X and Y", "role of X in Y": ask which design (cohort, case-control, cross-sectional) rather than guess.
+   - "incidence", "follow-up", "over N years": cohort / rate; "survival", "time to": survival; "accuracy", "sensitivity", "screening
+     tool": diagnostic accuracy; "correlation between": correlation; "levels", "score", "mean": a continuous outcome.
+3. *Ask, do not guess, when a phrase fits several designs.* Offer two or three starting points ("It sounds like a survey of a population:
+   (a) how common something is, (b) what is associated with it, (c) comparing groups") instead of jumping to one.
+4. *Several objectives.* A research question often has a descriptive and an analytic objective. The guide should be able to end with more
+   than one calculator, each with "Add to study", so the study's Word file holds the sample size for each objective (and the larger is used).
+5. *A language-model reader* stays a separate decision (the app has no API key and sends nothing anywhere in the browser version).
