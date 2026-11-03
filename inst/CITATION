@@ -3,7 +3,7 @@
 bibentry(
   "Manual",
   title = "Epidemiological suite: Sample Size, Power and Analysis Tools for Epidemiology",
-  author = person("Mukul", "Maheshwari"),
+  author = person("Mukul", "Maheshwari", comment = c(ORCID = "0000-0002-1918-5100")),
   year = "2026",
   note = "R package version 1.0.0",
   doi = "10.5281/zenodo.23794230",

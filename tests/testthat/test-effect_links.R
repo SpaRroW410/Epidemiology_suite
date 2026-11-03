@@ -59,7 +59,19 @@ test_that("the radios a link presets exist, on the converter page and on the cal
   ui <- registry_ui()
   has_choice <- function(html, ns_id, value) grepl(sprintf('name="%s" value="%s"', ns_id, value), html, fixed = TRUE)
   for (s in .es_link_specs) {
-    for (n in names(s$set_es)) expect_true(has_choice(es_html, paste0("effect_size-", n), s$set_es[[n]]), info = paste("converter", s$input, n))
+    for (n in names(s$set_es)) {
+      # a preset may be a function of the calculator's input: check what it gives with nothing set and with each choice of the
+      # calculator's own radios
+      vals <- if (is.function(s$set_es[[n]])) {
+        radios <- unique(sub('^name="[^-]+-([^"]+)" value=.*$', "\\1",
+                             regmatches(ui[[s$module]], gregexpr('name="[^"]+" value="[^"]*"', ui[[s$module]]))[[1]]))
+        unique(c(.es_set_value(s$set_es[[n]], list()), unlist(lapply(radios, function(r) {
+          ch <- sub('^.*value="([^"]*)"$', "\\1", regmatches(ui[[s$module]], gregexpr(sprintf('name="%s-%s" value="[^"]*"', s$module, r), ui[[s$module]]))[[1]])
+          vapply(ch, function(v) .es_set_value(s$set_es[[n]], setNames(list(v), r)), character(1))
+        }))))
+      } else s$set_es[[n]]
+      for (v in vals) expect_true(has_choice(es_html, paste0("effect_size-", n), v), info = paste("converter", s$input, n, v))
+    }
     for (n in names(s$set_calc)) expect_true(has_choice(ui[[s$module]], paste0(s$module, "-", n), s$set_calc[[n]]), info = paste("calculator", s$input, n))
   }
 })
@@ -92,4 +104,26 @@ test_that("es_link_ui refuses an input with no entry, and the panel offers the b
   expect_false(grepl("use_value", without))
   expect_match(without, "does not give")
   expect_null(es_link_panel(NS("effect_size"), NULL, list(ok = TRUE, value = list())))
+})
+
+test_that("every pre-fill copies an input the calculator has into an input the converter has", {
+  es_html <- as.character(mod_effect_size_ui("effect_size"))
+  ui <- registry_ui()
+  n <- 0
+  for (s in .es_link_specs) for (to in names(s$prefill)) {
+    n <- n + 1
+    expect_true(grepl(sprintf('id="effect_size-%s"', to), es_html, fixed = TRUE), info = paste("converter input", to))
+    expect_true(grepl(sprintf('id="%s-%s"', s$module, s$prefill[[to]]), ui[[s$module]], fixed = TRUE), info = paste("calculator input", s$module, s$prefill[[to]]))
+  }
+  expect_gt(n, 15)
+})
+
+test_that("a preset given as a function follows the calculator's route", {
+  hr <- .es_link_spec("logrank", "hr_logrank")$set_es$hr_from
+  expect_equal(.es_set_value(hr, list(hr_as_logrank = "implied")), "p")
+  expect_equal(.es_set_value(hr, list(hr_as_logrank = "medians")), "median")
+  f <- .es_link_spec("nonparametric", "f_kw")$set_es$f_from
+  expect_equal(.es_set_value(f, list(f_kw_as = "eta2")), "eta2")
+  expect_equal(.es_set_value(f, list(f_kw_as = "f")), "means")
+  expect_equal(.es_set_value("x", list()), "x")
 })
