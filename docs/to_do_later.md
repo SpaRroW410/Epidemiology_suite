@@ -6,7 +6,7 @@ Everything that is **not finished yet**, in one list, in roadmap order (start to
 without reading the whole [`ROADMAP.md`](ROADMAP.md). The roadmap stays the source of truth for the reasoning and the
 evidence; this file is the checklist. Tick an item here when it is done *and* record it in the roadmap.
 
-*Compiled 21 October 2026 and brought up to date on 29 October 2026 (items 1-22 built or started; Connect Cloud version, phone layout, task-first Home, exported functions with help pages, Cite tab and accessibility done; the new open items are in section 6).
+*Compiled 21 October 2026, brought up to date on 29 October 2026 and again on 3 November 2026 (section 7 has what the PRs of 1-3 November added) (items 1-22 built or started; Connect Cloud version, phone layout, task-first Home, exported functions with help pages, Cite tab and accessibility done; the new open items are in section 6).
 Items marked **[owner]** need a decision or an action only the repository owner can take (an account, a setting, a
 budget, a name). Items marked **[blocked]** wait on something outside the code (a paper, a package, an account).*
 
@@ -194,6 +194,7 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [x] Lazy loading in the browser build on CI: UI visible 77 s -> 27 s, first calculation 12 s -> 5.4 s. [ ] Still to measure on a real phone.
 - [ ] The 64 MB package download of the browser build is the remaining start-up cost; trimming needs the item-16 dependency work.
 - [ ] Background loading order and the four start-up calculators are a guess at what people use first: revisit with real usage.
+- [x] Wizard: a continuous outcome (mean and SD, or median and IQR) now leads to paired or unpaired means (3 Nov 2026, #30).
 - [ ] Wizard: a cohort with a *continuous exposure* (dose-response) and a case-control with a *categorical* exposure still go to the
   yes/no routes; a case-control with several controls per case and a measured exposure uses the paired test (1:m is approximate).
 - [ ] The keyword parser is deliberately conservative; a language-model option would need an API decision (the app has none).
@@ -238,3 +239,27 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [x] The checklists now list the Analyze, planning, survey, outbreak, epidemic-model and eyes / lesions tools (`checklist_by_design.md` §18, `checklist_by_test.md`, 29 Oct 2026).
 - [ ] `renv.lock` still lists packages that were removed from the runtime (intended: the tests use them as oracles) and not the packages added for the tests (`shinytest2`, `chromote`, ...); re-snapshot when convenient.
 - [ ] The sandbox's `R CMD check` ends with a locale warning and a clock note that are not the package's; confirm on a normal machine or in CI.
+
+---
+
+## 7. Added on 3 November 2026 (PRs #28-#33; built items are in `PLAN.md` Phase 4b and the end of `ROADMAP.md`)
+
+### Owner
+- [ ] Republish on Connect Cloud; try the new Find and Effect Size tabs, the "Calculate this" links and dark mode on a real phone.
+- [ ] Delete the merged branches on GitHub (`claude/relative-precision`, `claude/connect-mirai-source`, `claude/home-wizard-casecontrol`, `claude/effect-size`, `claude/dual-inputs`, `claude/calc-links`).
+- [ ] Say whether OpenEpi outputs can be supplied (screenshots of results for given inputs): the layouts were copied from screenshots but its formulas were **not compared**.
+
+### Sources not yet read (flagged in the app's help text)
+- [ ] Kish 1965 (design effect), Killip et al. 2004 full text (intracluster correlation and design effect; only the abstract, PMID 15209195, was read), Chinn 2000 full text (ln OR = d pi / sqrt(3); abstract only). **[blocked]** paper access.
+- [ ] A source for "design effect 1.5 or 2 when nothing is known" (the owner's wording; no source checked).
+
+### Effect Size and links
+- [ ] Pre-fill the converter from the calculator's current values (for example the group means already typed in).
+- [ ] Links for inputs where a converter gives a different quantity (the Welch design's two SDs; the SD from a median and IQR gives one).
+- [ ] More glossary terms and information tips on request (35 terms; tips on the labels the glossary covers).
+- [ ] Odds-ratio inputs in the logistic designs ("per one-SD increase", ordinal odds ratio) have no link: no converter gives that quantity.
+
+### Tests and tools
+- [ ] Add the dark-mode contrast crawl and the live-site timing script used on these PRs to `tools/ui-audit/` (they were kept in a working folder).
+- [ ] Re-measure the live browser build (Pages) after #33; re-run the axe scan (`tools/ui-audit/a11y.R`) on the Find tab, the Effect Size tab and the pinned "Use this value" panel.
+- [ ] Browser tests run for several minutes: consider splitting `test-ui_smoke.R` by area so a failure points to one file.

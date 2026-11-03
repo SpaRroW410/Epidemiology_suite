@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Status** | Active — authoritative forward plan |
-| **Last reviewed** | 29 October 2026 (status refreshed after items 15-22; the 28 September review findings in §2 stand, with their fixes noted) |
+| **Last reviewed** | 3 November 2026 (status refreshed after PRs #28-#33, see "Summary of the 1-3 November 2026 work" at the end; the 28 September review findings in §2 stand, with their fixes noted) |
 | **Owner** | Dr. Mukul Maheshwari |
 | **Name** | **Epidemiological suite** as shown in the app; the R package is `epidemiologysuite` (decision D3) |
 | **Licence** | GPL-3 (decision D2) |
@@ -30,15 +30,15 @@
 
 | Measure | Value |
 |---|---|
-| Calculator modules | **66** (50 sample-size calculators, 11 Analyze tools, 2 planning tools, 2 survey tools, 1 infectious-disease model tool), in 17 groups in the Plan workbench and 2 in Analyze |
-| Individual designs | **159**, all in the Browse catalog (F2 fixed) |
+| Calculator modules | **67** (50 sample-size calculators, 11 Analyze tools, 2 planning tools, 2 survey tools, 1 infectious-disease model tool, 1 Effect Size tool), in 19 groups in the Plan workbench and 2 in Analyze |
+| Individual designs | **159** on 29 October, all in the Browse catalog (F2 fixed); the catalog now has **214** entries (203 on 29 October; +10 Effect Size converters, +1 design-effect calculator) |
 | Checklist coverage | By design: **81 / 94** done (13 open) · By test: **69 / 74** done (5 open) |
-| Unit tests | **942** test blocks in the default run (0 failures, 103 skipped as slow) across 89 test files, plus browser (shinytest2) tests, every design checked against a published worked example, a real package (oracle), or simulation |
+| Unit tests | **102** test files in the default run (0 failures; the slow Monte Carlo tests skipped as before; 942 blocks in 89 files on 29 October), plus browser (shinytest2) tests, every design checked against a published worked example, a real package (oracle), or simulation |
 | Runtime packages | `DESCRIPTION` `Imports`: `shiny`, `bslib`, `clinfun`, `PowerTOST`, `Exact`, `kappaSize`, `mvtnorm`, `lme4`, plus `survival`, `stats`, `graphics`, `utils` (was 19; twelve removed in items 16 and the stage 2 that followed, each reimplemented and checked against the original) |
 | Verification-only packages | ~30 more (installed from the `github.com/cran` mirror, used only to check reimplementations — never shipped) |
 | Wizard coverage | "Which calculator?" reaches every built calculator and all 159 catalog designs, enforced by tests (F1 fixed); 101 plain-language descriptions and 636 click paths are checked |
 | Distribution | Three versions from one code base: browser build on GitHub Pages (desktop), phone / server version on Posit Connect Cloud (deployed from the auto-built `connect` branch; phones and tablets are redirected to it), and the R package (`remotes::install_github()` + `run_app()`; a Docker image too). CI on GitHub Actions; versions locked in `renv.lock`. See [`hosting.md`](hosting.md) |
-| R functions | All **195** `calc_*()` functions exported, each with a help page (every argument and the value described, a worked example); `ss_find()`, `run_app(calculator = ...)` and an RStudio / Positron addin; `R CMD check --as-cran` passes all package checks (the remaining warning and note come from the development sandbox) |
+| R functions | All **206** `calc_*()` functions exported (195 on 29 October), each with a help page (every argument and the value described, a worked example); `ss_find()`, `run_app(calculator = ...)` and an RStudio / Positron addin; `R CMD check --as-cran` passes all package checks (the remaining warning and note come from the development sandbox) |
 | Interface | Task-first Home with search (also in the navbar), folded Advanced options / export / curves, a pinned result, a phone layout, light / dark mode, text descriptions of plots, a Cite tab; axe-core scan clean at desktop and phone width in light and dark |
 
 The sample-size catalog is now effectively complete within the project's own rules
@@ -1426,3 +1426,39 @@ Connect Cloud** for phones, redirecting phones automatically. `docs/hosting.md` 
 - **Not verified:** the Connect Cloud deployment itself (needs the owner's account), the free-plan limits, and any real phone. Posit
   announced that shinyapps.io takes no new apps after the end of 2026 and migrates accounts to Connect Cloud from January 2027
   (Posit's migration page; sources disagree on some dates), which is why Connect Cloud, not shinyapps.io, is the target.
+
+### Summary of the 1-3 November 2026 work (PRs #28-#33, all merged)
+
+What changed, for readers arriving later. Each calculation keeps its rule: a citable source and a numerical check (a published value,
+a real package or a simulation), and nothing is claimed that was not read.
+
+- **Precision calculators (#28).** Absolute precision n = z^2 p (1 - p) / d^2; relative precision d = eps p, so n = z^2 (1 - p) / (eps^2 p);
+  the finite population correction; non-response n / (1 - r). The five precision calculators (proportion, mean, cluster survey,
+  incidence rate, diagnostic accuracy) refuse impossible inputs with a plain message and warn (kept in `precision_notes`, shown under the result) when the answer should be read with care.
+- **Connect Cloud (#29).** The deployment manifest needs a CRAN, RSPM or Bioconductor source for every package (`mirai` and `pkgload` had
+  "any"); fixed, with a stricter check in CI.
+- **Find, browser speed, dark mode, wizard (#30).** The "Find a calculator" tab holds the guide, the browse lists and the glossary. On the published
+  browser build the guide took 80 s and a Home button 72 s because calculators loaded one by one on the page's single thread; with background loading
+  off in the browser build they take 5 s and 1.5 s (measured with Playwright on the live site). Dark mode: instructions on light boxes were unreadable
+  (a contrast crawl of every module, the Find tab, the glossary, tooltips and 94 radio states finds nothing below 3:1). The matched case-control design takes the
+  exposure proportions, the odds ratio or phi; the unmatched design takes the cases' exposure proportion or the odds ratio; the log-rank calculator takes a hazard
+  ratio from medians. The wizard has a continuous-outcome branch (mean and SD, or median and IQR) ending in paired or unpaired means.
+- **Effect Size (#31).** `R/calc_effect_size.R` (eight functions) with `calc_median_iqr.R` and `calc_matched_pairs_phi()`: Cohen's d
+  (pooled SD; Hedges' g with J = exp(lgamma(df/2) - lgamma((df - 1)/2)) / sqrt(df/2); the large-sample interval for d), d from t, paired d_z,
+  f = sigma_means / sigma, f^2 = eta^2 / (1 - eta^2), Cohen's h, Cohen's w, the odds ratio, risk ratio and risk difference from one another, the hazard ratio from
+  medians (exponential survival: median ratio) or survival probabilities (ln S_e / ln S_c), d and r (exactly through t, r = t / sqrt(t^2 + df)), the odds ratio
+  from d (ln OR = d pi / sqrt(3); Chinn 2000, **abstract only read**). Glossary of 35 terms; information tips on the labels. Every function is checked
+  against its identity or a worked example in `test-calc_effect_size.R`.
+- **OpenEpi-style inputs (#32).** Layouts of OpenEpi's two-means, cohort and unmatched case-control forms come from screenshots supplied by the owner; OpenEpi's pages
+  are script-rendered and could not be read, so **its formulas and outputs were not compared**. Every alternative route (difference, variance, d, odds ratio, risk ratio,
+  risk difference, two SDs and a correlation) is tested to give exactly the result of the plain input. The Welch design already used the large-sample normal
+  approximation n1 = (z_(1-alpha/2) + z_(power))^2 (sd1^2 + sd2^2 / ratio) / difference^2; with means 132.86 and 127.44, SDs 15.34 and 18.23, 95%, 80% and
+  equal groups it gives 152 per group.
+- **Design effect (#32).** It is in the Cluster / Design Effect module only, as it applies to any cluster design (survey, cluster-randomised trial, quasi-experimental community
+  trial); the single-proportion calculator no longer has it. DEFF = 1 + (m - 1) rho, rho = sigma_b^2 / (sigma_b^2 + sigma_w^2); DEFF = m x var(cluster means) / total variance (total
+  variance p (1 - p) for a proportion); DEFF = variance under the design / variance under simple random sampling. Each route is checked by simulating clustered continuous and beta-binomial data
+  (`test-cluster_deff_variance.R`). Sources: Kish 1965 (**not read**), Killip 2004 (**abstract only**, PMID 15209195). The default of 1.5 and the note "most commonly taken as 1.5 or 2"
+  are the owner's wording; **no source was checked for it**, and the help text says so.
+- **Calculate this / Use this value (#33).** 28 calculator inputs (`R/mod_shared_link.R`, one list of entries) open the matching converter; the converter returns the number, to four significant figures,
+  and switches the calculator to the way of entering it that shows that input. A static test checks every entry against the pages and the converters' results; a browser test goes round the loop.
+- **Open from this work:** see `to_do_later.md` section 7.
