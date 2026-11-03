@@ -14,7 +14,6 @@ suite of 102 files with 0 failures; 206 calculation functions exported with help
 ## Waiting for you (owner decisions and steps)
 
 - [ ] Click **Republish** on Connect Cloud (the `connect` branch rebuilds itself; last merged change: #33, 3 Nov), then try the phone redirect and the new Find / Effect Size tabs on a real phone
-- [ ] Delete the merged branches on GitHub (the sandbox cannot: `claude/relative-precision`, `claude/connect-mirai-source`, `claude/home-wizard-casecontrol`, `claude/effect-size`, `claude/dual-inputs`, `claude/calc-links`)
 - ~~Version set to **1.0.0** (30 Oct; the tag of the release is `v1.0.0`)~~
 - ~~Zenodo: release `v1.0.0` archived, DOI **10.5281/zenodo.23794230**~~ (31 Oct; in the Cite tab, `CITATION.cff` and `citation()`)
 - [ ] Decide on a background-process package (`mirai` or `future`) for running slow simulations without blocking other users (also changes the browser build)
