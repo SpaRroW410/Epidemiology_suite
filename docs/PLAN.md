@@ -1,19 +1,20 @@
 # Epidemiological suite: the plan at a glance
 
-*Updated 29 October 2026. Struck-through items are done (the date in brackets is when). The reasoning, evidence and the full
+*Updated 3 November 2026. Struck-through items are done (the date in brackets is when). The reasoning, evidence and the full
 list of blocked sample-size items are in [`ROADMAP.md`](ROADMAP.md); the flat checklist of everything open is
 [`to_do_later.md`](to_do_later.md). The package is named `epidemiologysuite` (renamed from `epidemiologicasuite` on 30 Oct 2026, with the repository); the app and the suite are shown to people as
 **Epidemiological suite**.*
 
-**Where it stands:** 66 calculators (50 sample-size, 11 analysis, 2 planning, 2 survey, 1 infectious-disease models), 159 designs,
+**Where it stands:** 67 calculators (50 sample-size, 11 analysis, 2 planning, 2 survey, 1 infectious-disease models, 1 effect-size converters), 214 catalog entries (159 designs on 29 Oct, counted differently; +11 since: ten converters and the design-effect calculator),
 three versions live or ready (browser build on GitHub Pages, phone/server version on Posit Connect Cloud, R package), default test
-suite 940 blocks with 0 failures; 195 calculation functions exported with help pages.
+suite of 102 files with 0 failures; 206 calculation functions exported with help pages (210 exports in all).
 
 ---
 
 ## Waiting for you (owner decisions and steps)
 
-- [ ] Click **Republish** on Connect Cloud after the rename PR (#17) is merged; try the phone redirect on a real phone
+- [ ] Click **Republish** on Connect Cloud (the `connect` branch rebuilds itself; last merged change: #33, 3 Nov), then try the phone redirect and the new Find / Effect Size tabs on a real phone
+- [ ] Delete the merged branches on GitHub (the sandbox cannot: `claude/relative-precision`, `claude/connect-mirai-source`, `claude/home-wizard-casecontrol`, `claude/effect-size`, `claude/dual-inputs`, `claude/calc-links`)
 - ~~Version set to **1.0.0** (30 Oct; the tag of the release is `v1.0.0`)~~
 - ~~Zenodo: release `v1.0.0` archived, DOI **10.5281/zenodo.23794230**~~ (31 Oct; in the Cite tab, `CITATION.cff` and `citation()`)
 - [ ] Decide on a background-process package (`mirai` or `future`) for running slow simulations without blocking other users (also changes the browser build)
@@ -68,9 +69,22 @@ suite 940 blocks with 0 failures; 195 calculation functions exported with help p
 - [ ] Re-run the layout and accessibility scans after each step (`tools/ui-audit/audit.R`, `a11y.R`)
 - [ ] Still to do for accessibility: a person's keyboard and screen-reader walk-through, dark-mode plots, text-resize checks, a layout pass on a real phone. ~~Text descriptions for the plots~~ done 29 Oct: the power / sensitivity curves, the surveillance chart and the epidemic-model chart carry an alt text with axes, ranges, trend and the current value, computed from the same numbers as the plot
 
+## Phase 4b — Finding a calculator, understanding the effect, entering it the way people know it  (1-3 Nov 2026, PRs #28-#33; all merged)
+
+- ~~**Absolute and relative precision, non-response, hard stops and warnings** in the five precision calculators (proportion, mean, cluster survey, incidence rate, diagnostic accuracy): n = z^2 p (1 - p) / d^2, or with d = eps p for relative precision; n / (1 - r) for expected non-response~~ (#28)
+- ~~Connect Cloud deployment fixed (every manifest package needs a CRAN / RSPM / Bioconductor source; a stricter check in CI)~~ (#29)
+- ~~**Find a calculator** tab (the guide and the browse lists moved out of Home), browser responsiveness (the live site took 80 s to show the guide and 72 s to open a calculator; now 5 s and 1.5 s: no background loading in the browser build), dark-mode fix for light boxes, matched case-control with phi or odds ratio or the two exposure proportions, hazard ratio from medians in the log-rank calculator, the wizard's continuous-outcome branch (mean and SD, or median and IQR, leading to paired / unpaired means)~~ (#30)
+- ~~**Effect Size tab:** ten converters (two means to Cohen's d and Hedges' g; d from t; paired d_z; f from means, eta-squared, F or d; odds ratio / risk ratio / risk difference / h from proportions; Cohen's w; hazard ratio from medians or survival; d, r, odds ratio, R-squared, f-squared conversions; mean and SD from median and IQR; phi from matched pairs), a glossary of 35 terms and an information tip on the labels people stumble on~~ (#31)
+- ~~**The effect as people know it** (OpenEpi-style): both means or their difference, SD or variance, Cohen's d; the exposed risk or the odds ratio, risk ratio or risk difference; Cohen's f from means or eta-squared; the paired SD from two SDs and a correlation.~~ (#32)
+- ~~**Design effect** only in the Cluster / Design Effect module (it applies to any cluster design, including community trials): a calculator from the between- and within-cluster variances, from the variance of cluster means, or from the two variances of the estimate; or enter it directly (default 1.5, "most commonly taken as 1.5 or 2")~~ (#32)
+- ~~**Calculate this / Use this value:** 28 calculator inputs link to the matching Effect Size converter and take the number back~~ (#33)
+- [ ] Pre-fill a converter from the calculator's current values; links for inputs where a converter gives a different quantity (the Welch SDs); more glossary terms and tooltips on request.
+- [ ] Put the dark-mode contrast crawl used on these PRs into `tools/ui-audit/` (it now lives only in a working folder).
+- [ ] Re-measure the live browser build (Pages) after #33, and try the new tabs on a real phone.
+
 ## Phase 5 — The R package for analysts
 
-- ~~Public function API for the calculations themselves: all 195 `calc_*()` functions are exported, each with a help page (every argument described, the value described, a worked example taken from a verified test); `tests/testthat/test-help_pages.R` keeps it so~~ (29 Oct; owner decision: export all). The names stay `calc_*` (the planned `ss_*()` family was dropped); a smaller friendlier set of wrappers (`ss_text()`, `ss_curve()`, `ss_export()`) is still possible
+- ~~Public function API for the calculations themselves: all 206 `calc_*()` functions are exported (195 on 29 Oct), each with a help page (every argument described, the value described, a worked example taken from a verified test); `tests/testthat/test-help_pages.R` keeps it so~~ (29 Oct; owner decision: export all). The names stay `calc_*` (the planned `ss_*()` family was dropped); a smaller friendlier set of wrappers (`ss_text()`, `ss_curve()`, `ss_export()`) is still possible
 - ~~RStudio / Positron addin "Find a sample size calculator", `ss_find()` search from the console, and `run_app(calculator = ...)` to open the app on one calculator~~ (29 Oct)
 - ~~Vignettes: Getting started, Sample sizes from R, Analysing summary data from R (built with the package; also on the documentation site under "Using it from R")~~ (30 Oct). More per-family vignettes can follow
 - ~~Bug found and fixed while writing them: `print()` of a result showed a raw list in an installed package (the S3 methods were not registered in `NAMESPACE`)~~ (30 Oct)

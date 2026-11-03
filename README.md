@@ -6,12 +6,12 @@ epidemiology and clinical research. Every calculator comes with its formula
 example, the original methodological citation, and the name of the package or
 formula that implements it.
 
-**Current state (29 October 2026):** 66 calculators (50 sample-size, 11 *Analyze* tools, 2 planning tools,
-2 survey tools, 1 infectious-disease model tool) covering 159 designs, each with its formula, a worked example and a
+**Current state (3 November 2026):** 67 calculators (50 sample-size, 11 *Analyze* tools, 2 planning tools,
+2 survey tools, 1 infectious-disease model tool, 1 *Effect Size* tool) covering 159 designs (counted on 29 October; ten Effect Size converters and a design-effect calculator have been added since), each with its formula, a worked example and a
 citable source, checked against a published value, a real package or a simulation. The app is called **Epidemiological
 suite**; the R package is `epidemiologysuite`. There are three ways to use it (see below): the browser build on GitHub Pages,
 the phone / server version on Posit Connect Cloud, and the R package, in which **every calculation is an exported function
-with its own help page**. 942 unit-test blocks plus browser-driven UI tests, an accessibility scan (axe-core, WCAG A/AA, light and
+with its own help page**. 102 test files plus browser-driven UI tests, an accessibility scan (axe-core, WCAG A/AA, light and
 dark mode, desktop and phone width) and `R CMD check --as-cran` back it. What is done and what is next:
 [`docs/PLAN.md`](docs/PLAN.md); the reasoning and evidence: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
@@ -279,7 +279,7 @@ testthat::test_local()   # loads the package from the working directory first
 The tests call internal functions, so they must run inside the package namespace:
 use `test_local()` (or `devtools::test()`), not `test_dir()` on its own.
 
-The default run (about 940 test blocks in 89 files) skips the slowest tests (Monte Carlo simulations, ≥ 5 s
+The default run (102 files) skips the slowest tests (Monte Carlo simulations, ≥ 5 s
 each) and takes about ten minutes with the browser tests, about a minute without them. To run everything (~13 minutes more, mostly `test-calc_glmm.R`):
 
 ```sh
