@@ -442,14 +442,21 @@ test_that("Calculate this / Use this value: a number goes from the converter bac
   # the panel is gone once the value is used
   expect_false(nzchar(ui_output_text(app, "effect_size-link_panel")))
 
-  # the hazard ratio in the log-rank calculator, from median survival (18 and 12 months -> 0.6667)
+  # the hazard ratio in the log-rank calculator, from median survival; the medians typed in the calculator are carried over (20 and 10 -> 0.5)
   ui_open_module(app, "Log-Rank / Survival")
+  ui_choose_radio(app, "logrank-hr_as_logrank", "medians")
+  app$set_inputs(`logrank-hr_median_e` = 20, `logrank-hr_median_c` = 10, wait_ = FALSE)
+  app$wait_for_idle(800, timeout = 60000)
   app$click("logrank-es_hr_logrank")
   app$wait_for_idle(1500, timeout = 120000)
   expect_equal(app$get_value(input = "effect_size-design"), "hazard_ratio")
+  expect_equal(app$get_value(input = "effect_size-hr_from"), "median")
+  expect_equal(app$get_value(input = "effect_size-hr_me"), 20)
+  expect_equal(app$get_value(input = "effect_size-hr_mc"), 10)
   app$click("effect_size-use_value")
   app$wait_for_idle(1500, timeout = 120000)
-  expect_equal(app$get_value(input = "logrank-hr_logrank"), 0.6667)
+  expect_equal(app$get_value(input = "logrank-hr_logrank"), 0.5)
+  expect_equal(app$get_value(input = "logrank-hr_as_logrank"), "value")
 
   # a result that does not give the number offers no button; going back leaves the input as it was
   ui_open_module(app, "Means")

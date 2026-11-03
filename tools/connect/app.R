@@ -7,6 +7,8 @@ suppressPackageStartupMessages({
 })
 files <- normalizePath(sort(list.files("R", pattern = "[.]R$", full.names = TRUE)))
 # the background workers that run the Monte Carlo calculators (R/background.R) load the same files
+# and the page says that this version sends what is typed to the server (R/browser_build.R, server_notice_ui())
+options(epidemiologysuite.server_version = TRUE)
 options(epidemiologysuite.source_files = files)
 for (f in files) source(f, local = FALSE)
 # for the manifest's package scan (never executed): the workers need mirai, which R/background.R looks up by name, and the

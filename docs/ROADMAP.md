@@ -1270,7 +1270,7 @@ Recorded 28 September 2026.
 
 | # | Question | Decision | Consequences |
 |---|---|---|---|
-| D1 | Suite scope: summary-data calculators only, or also a raw-data analysis workbench? | **Summary-data calculators only, for now** | B1–B5 and B7 (from summaries) stay in scope; B6 and the line-list parts of B4 are deferred, not dropped |
+| D1 | Suite scope: summary-data calculators only, or also a raw-data analysis workbench? | **Summary-data calculators only, for now**; confirmed 3 Nov 2026: raw data and line lists are too memory-heavy for the browser build and are kept for a later full (server) app, to be merged with the owner's `Easy_analysis` application | B1–B5 and B7 (from summaries) stay in scope; B6 and the line-list parts of B4 are deferred, not dropped |
 | D2 | Licence: keep MIT or relicense to GPL-3? | **GPL-3** | `LICENSE` replaced with the GPL-3 text; resolves F8. The package `DESCRIPTION` will say `License: GPL-3` |
 | D3 | Suite and package name | **`epidemiologysuite`** (was `sample2result`; `epidemiologica_suite` is not a legal package name) | Used for the package (C1), the app title and the suite; single package until CRAN, then consider a core + app split (C3) |
 | D4 | Primary distribution target: hosted web, or offline/APK first? | **Offline / APK later** | Hosted web + R package first (D1, D2); the Shinylive spike (D3) and APK (D5a) stay at P2/P3 |

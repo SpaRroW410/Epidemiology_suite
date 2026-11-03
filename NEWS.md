@@ -2,6 +2,14 @@
 
 ## Links from the calculators to the Effect Size converters
 
+* **Pre-filled converters:** nine "Calculate this" links copy what the calculator already holds into the converter (group means and SD,
+  eta-squared, median survival or event probabilities, the controls' exposure, the paired SDs and their correlation, Cohen's d) and open it on
+  the route the calculator was using, so the same numbers are not typed twice.
+* **Server version notice:** the Posit Connect version says, in a closable line at the top, that what is typed is sent to the server and is
+  not saved to disk (the browser version already says that everything stays on the device).
+* **Author:** ORCID added to `DESCRIPTION`, `CITATION.cff` and `citation()`.
+* **Tools:** `tools/ui-audit/contrast.R` (colour-contrast crawl, dark or light mode) and `tools/ui-audit/live_timing.js` (times a published
+  version as a person meets it).
 * **Calculate this / Use this value:** 28 calculator inputs that ask for a number the Effect Size converters produce now have a "Calculate this"
   link: Cohen's d (from a t statistic), Cohen's f and f-squared, r (from d), the hazard ratio, the odds ratio (from proportions), the SD (from a
   median and interquartile range) and the SD of paired differences. The link opens the matching converter; once it has a result, "Use this value"

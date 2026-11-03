@@ -24,6 +24,24 @@ browser_notice_ui <- function() {
   )
 }
 
+# TRUE in the server version deployed to Posit Connect Cloud (tools/connect/app.R sets the option); the phones use this one.
+is_server_version <- function() isTRUE(getOption("epidemiologysuite.server_version", FALSE))
+
+# A one-line notice in the server version only (NULL elsewhere): unlike the browser version, what is typed is sent to the server.
+# It can be closed; it stays closed for the rest of the visit in that tab.
+server_notice_ui <- function() {
+  if (!is_server_version()) return(NULL)
+  div(
+    id = "server_notice", class = "alert alert-info alert-dismissible py-1 px-3 mb-0 rounded-0 small", role = "note",
+    strong("Server version. "),
+    "What you type is sent to the server to calculate the results. The app does not ask who you are and does not save your inputs ",
+    "to disk; they are held in memory while needed (a few simulation results are kept for a while so a repeat is instant).",
+    tags$button(type = "button", class = "btn-close py-1", `aria-label` = "Close", `data-bs-dismiss` = "alert",
+                onclick = "try { sessionStorage.setItem('es_server_notice_closed', '1'); } catch (e) {}"),
+    tags$script(HTML("try { if (sessionStorage.getItem('es_server_notice_closed') === '1') { var n = document.getElementById('server_notice'); if (n) n.remove(); } } catch (e) {}"))
+  )
+}
+
 # A function of a large package that only a few calculators use (lme4 for the mixed-model simulations, survival for RMST and the
 # weighted log-rank test), looked up by name. Written this way, shinylive does not bundle the package with the browser build's first
 # download (it bundles every package written as pkg::fn), and the browser build does not load it at start-up: the first calculation

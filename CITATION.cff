@@ -10,6 +10,7 @@ version: 1.0.0
 authors:
   - family-names: Maheshwari
     given-names: Mukul
+    orcid: "https://orcid.org/0000-0002-1918-5100"
 license: GPL-3.0-or-later
 repository-code: "https://github.com/SpaRroW410/Epidemiology_suite"
 url: "https://sparrow410.github.io/Epidemiology_suite/"
