@@ -246,7 +246,6 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 
 ### Owner
 - [ ] Republish on Connect Cloud; try the new Find and Effect Size tabs, the "Calculate this" links and dark mode on a real phone.
-- [ ] Delete the merged branches on GitHub (`claude/relative-precision`, `claude/connect-mirai-source`, `claude/home-wizard-casecontrol`, `claude/effect-size`, `claude/dual-inputs`, `claude/calc-links`).
 - [ ] Say whether OpenEpi outputs can be supplied (screenshots of results for given inputs): the layouts were copied from screenshots but its formulas were **not compared**.
 
 ### Sources not yet read (flagged in the app's help text)
