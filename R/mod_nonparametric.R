@@ -73,6 +73,7 @@ mod_nonparametric_ui <- function(id) {
         condition = design_is("ks"),
         numericInput(ns("effect_size_ks"), "Standardized mean shift (comparable to Cohen's d)",
                      value = 0.5, min = 0.01, step = 0.05),
+        es_link_ui(ns, "effect_size_ks"),
         numericInput(ns("nsim_ks"), "Monte Carlo replicates per candidate n (nsim)",
                      value = 500, min = 100, max = 5000, step = 100),
         p(class = "text-muted",
@@ -82,6 +83,7 @@ mod_nonparametric_ui <- function(id) {
         condition = design_is("runs"),
         numericInput(ns("effect_size_runs"), "Standardized mean shift (comparable to Cohen's d)",
                      value = 0.8, min = 0.01, step = 0.05),
+        es_link_ui(ns, "effect_size_runs"),
         numericInput(ns("nsim_runs"), "Monte Carlo replicates per candidate n (nsim)",
                      value = 500, min = 100, max = 5000, step = 100),
         p(class = "text-muted",
@@ -220,6 +222,7 @@ mod_nonparametric_ui <- function(id) {
 
 mod_nonparametric_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     effect_f_server(input, output, "f_kw")
     effect_f_server(input, output, "f_fr")
     # the simulations run in a background R process on a server (background.R); `result` is the finished calculation

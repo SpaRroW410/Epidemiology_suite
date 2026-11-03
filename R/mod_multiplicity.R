@@ -172,6 +172,7 @@ mod_multiplicity_ui <- function(id) {
 
 mod_multiplicity_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     effect_d_server(input, output, "d_fdr")
     effect_d_server(input, output, "d_dunnett")
     result <- reactive({

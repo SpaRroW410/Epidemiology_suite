@@ -49,7 +49,8 @@ mod_effect_size_ui <- function(id) {
       "Calculate",
       br(),
       p(class = "text-muted",
-        "Work out the effect size a sample-size calculator asks for from what you already know, then enter it there."),
+        "Work out the effect size a sample-size calculator asks for from what you already know, then enter it there. ",
+        "A calculator input with a \"Calculate this\" link opens the matching converter here, and \"Use this value\" sends the number back."),
       radioButtons(ns("design"), "What do you have, and what do you need?", choices = .es_designs, selected = "two_means"),
 
       # ---- two means
@@ -178,6 +179,7 @@ mod_effect_size_ui <- function(id) {
       hr(),
       h5("Result"),
       uiOutput(ns("result")),
+      uiOutput(ns("link_panel")),
       export_controls_ui(ns)
     ),
     tabPanel(
@@ -284,6 +286,10 @@ mod_effect_size_server <- function(id) {
       if (!res$ok) return(div(class = "text-danger", res$message))
       .es_render(res$design, res$value)
     })
+
+    # opened from a calculator's "Calculate this" link (mod_shared_link.R): offer to send the number back
+    link <- es_link_back_server(input, session, result)$link
+    output$link_panel <- renderUI(es_link_panel(session$ns, link(), result()))
 
     render_export_handlers(output, result, function() effect_size_content[[input$design]])
   })

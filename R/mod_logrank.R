@@ -49,7 +49,8 @@ mod_logrank_ui <- function(id) {
         ),
         conditionalPanel(
           condition = sprintf("input['%s'] != 'implied'", ns("hr_as_logrank")),
-          numericInput(ns("hr_logrank"), "Postulated hazard ratio (HR)", value = 0.7, min = 0.01, step = 0.05)
+          numericInput(ns("hr_logrank"), "Postulated hazard ratio (HR)", value = 0.7, min = 0.01, step = 0.05),
+          es_link_ui(ns, "hr_logrank")
         ),
         uiOutput(ns("hr_implied_logrank")),
         numericInput(ns("ratio"), "Experimental:control allocation ratio", value = 1, min = 0.1, step = 0.5),
@@ -85,6 +86,7 @@ mod_logrank_ui <- function(id) {
         condition = design_is("stratified"),
         numericInput(ns("timeUnit"), "Total study length (accrual + follow-up)", value = 1.25, min = 0.0001, step = 0.1),
         numericInput(ns("hr_strat"), "Postulated hazard ratio (HR)", value = 1 / 1.91, min = 0.01, step = 0.05),
+        es_link_ui(ns, "hr_strat"),
         selectInput(ns("m_strata"), "Number of strata", choices = 2:6, selected = 2),
         uiOutput(ns("strata_ui")),
         numericInput(ns("alpha_strat"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
@@ -107,6 +109,7 @@ mod_logrank_ui <- function(id) {
         condition = design_is("weighted_logrank"),
         numericInput(ns("hazard0_wlr"), "Baseline (control-arm) hazard", value = 0.15, min = 0.0001, step = 0.01),
         numericInput(ns("hr_wlr"), "Treatment-arm hazard ratio during the effect period", value = 0.5, min = 0.01, step = 0.05),
+        es_link_ui(ns, "hr_wlr"),
         numericInput(ns("change_time_wlr"), "Time the hazard ratio switches on/off", value = 4, min = 0.01, step = 0.5),
         radioButtons(ns("effect_timing_wlr"), "Non-PH shape",
                      choices = c("Delayed effect (curves separate later)" = "delayed",
@@ -197,6 +200,7 @@ mod_logrank_ui <- function(id) {
 
 mod_logrank_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     # the hazard ratio of the two-group design: as entered, or NULL so that calc_logrank() calculates it from pE and pC
     logrank_hr <- function() {
       mode <- input$hr_as_logrank

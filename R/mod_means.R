@@ -24,7 +24,8 @@ means_meta <- list(
       numericInput(id("mu1"), "mu1 (group 1 mean)", value = mu1),
       numericInput(id("mu2"), "mu2 (group 2 mean)", value = mu2)),
     conditionalPanel(.sh_cond(ns, eff, "diff"), numericInput(id("diff"), "Difference between the means (group 1 minus group 2)", value = mu1 - mu2)),
-    if (allow_d) conditionalPanel(.sh_cond(ns, eff, "d"), numericInput(id("d"), tagList("Cohen's d", info_tip("cohens_d")), value = 0.5, step = 0.1)),
+    if (allow_d) conditionalPanel(.sh_cond(ns, eff, "d"), numericInput(id("d"), tagList("Cohen's d", info_tip("cohens_d")), value = 0.5, step = 0.1),
+      es_link_ui(ns, paste0("d_", sfx))),
     conditionalPanel(if (allow_d) paste0("input['", ns(eff), "'] != 'd'") else "true",
       radioButtons(ns(spr), tagList("Spread", info_tip("sd_variance")), inline = TRUE,
                    choices = c("Standard deviation" = "sd", "Variance" = "var")),
@@ -36,7 +37,8 @@ means_meta <- list(
           numericInput(id("var1"), "Variance, group 1", value = sd1^2, min = 0.0001),
           numericInput(id("var2"), "Variance, group 2", value = sd2^2, min = 0.0001)))
       else tagList(
-        conditionalPanel(.sh_cond(ns, spr, "sd"), numericInput(id("sd"), "sd (common/pooled standard deviation)", value = sd, min = 0.0001)),
+        conditionalPanel(.sh_cond(ns, spr, "sd"), numericInput(id("sd"), "sd (common/pooled standard deviation)", value = sd, min = 0.0001),
+          es_link_ui(ns, paste0("sd_", sfx))),
         conditionalPanel(.sh_cond(ns, spr, "var"), numericInput(id("var"), "Variance (common/pooled)", value = sd^2, min = 0.0001)))
     ),
     uiOutput(ns(paste0("effect_equiv_", sfx)))
@@ -142,6 +144,7 @@ mod_means_ui <- function(id) {
         numericInput(ns("mean_precision"), "Expected mean (must be non-zero)", value = 75),
         numericInput(ns("sd_precision"), "Expected standard deviation",
                      value = 15, min = 0.0001),
+        es_link_ui(ns, "sd_precision"),
         numericInput(ns("epsilon_precision"), "Desired precision (epsilon)",
                      value = 0.20, min = 0.0001),
         selectInput(ns("error_precision"), "Precision expressed as",
@@ -158,7 +161,8 @@ mod_means_ui <- function(id) {
         numericInput(ns("mu0"), "mu0 (reference mean)", value = 120),
         numericInput(ns("mu1_single"), "mu1 (expected mean)", value = 125),
         numericInput(ns("sd_single"), "sd (expected standard deviation)",
-                     value = 15, min = 0.0001)
+                     value = 15, min = 0.0001),
+        es_link_ui(ns, "sd_single")
       ),
       conditionalPanel(
         condition = design_is("two_sample"),
@@ -182,7 +186,8 @@ mod_means_ui <- function(id) {
         radioButtons(ns("paired_sd_as"), tagList("Spread of the differences", info_tip("paired_dz")), inline = TRUE,
                      choices = c("SD of the differences" = "sd_diff", "Two SDs and their correlation" = "sds_r")),
         conditionalPanel(.sh_cond(ns, "paired_sd_as", "sd_diff"),
-          numericInput(ns("sd_diff"), "SD of the paired differences", value = 5, min = 0.0001)),
+          numericInput(ns("sd_diff"), "SD of the paired differences", value = 5, min = 0.0001),
+          es_link_ui(ns, "sd_diff")),
         conditionalPanel(.sh_cond(ns, "paired_sd_as", "sds_r"),
           fluidRow(column(6, numericInput(ns("paired_sd1"), "SD, first measurement", value = 4, min = 0.0001)),
                    column(6, numericInput(ns("paired_sd2"), "SD, second measurement", value = 4, min = 0.0001))),
@@ -197,7 +202,8 @@ mod_means_ui <- function(id) {
         # for the same pattern.
         uiOutput(ns("group_means_ui")),
         numericInput(ns("sd_anova"), "Common/pooled standard deviation",
-                     value = 4, min = 0.0001)
+                     value = 4, min = 0.0001),
+        es_link_ui(ns, "sd_anova")
       ),
       conditionalPanel(
         condition = design_is("planned_contrast"),
@@ -346,6 +352,7 @@ mod_means_ui <- function(id) {
 
 mod_means_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     .means_effect_server(input, output, "two")
     .means_effect_server(input, output, "unequal")
     .means_effect_server(input, output, "welch", separate = TRUE)

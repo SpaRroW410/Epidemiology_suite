@@ -53,6 +53,7 @@ mod_glmm_ui <- function(id) {
         numericInput(ns("sigma_u"), "Random-intercept standard deviation (log-odds scale)", value = 0.3, min = 0.0001, step = 0.1),
         numericInput(ns("baseline_prob"), "Expected control-arm outcome probability", value = 0.3, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("or"), "Odds ratio (treatment vs. control) to detect", value = 2, min = 0.001, step = 0.1),
+        es_link_ui(ns, "or"),
         numericInput(ns("alpha_glmm"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_glmm"), "Desired power", value = 0.8, min = 0.5, max = 0.95, step = 0.01),
         numericInput(ns("nsim_glmm"), "Monte Carlo replicates per candidate n (nsim)", value = 30, min = 10, max = 300, step = 10),
@@ -119,6 +120,7 @@ mod_glmm_ui <- function(id) {
 
 mod_glmm_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     # the simulations run in a background R process on a server (background.R); `result` is the finished calculation
     bg <- background_calc()
     result <- bg$result(function() result_now())

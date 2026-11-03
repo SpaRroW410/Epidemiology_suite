@@ -28,11 +28,13 @@ mod_meta_power_ui <- function(id) {
       ),
       conditionalPanel(
         condition = es_is("d"),
-        numericInput(ns("d_effect"), "Assumed true effect size (Cohen's d)", value = 0.3, step = 0.05)
+        numericInput(ns("d_effect"), "Assumed true effect size (Cohen's d)", value = 0.3, step = 0.05),
+        es_link_ui(ns, "d_effect")
       ),
       conditionalPanel(
         condition = es_is("r"),
-        numericInput(ns("r_effect"), "Assumed true correlation (r)", value = 0.3, min = -0.999, max = 0.999, step = 0.05)
+        numericInput(ns("r_effect"), "Assumed true correlation (r)", value = 0.3, min = -0.999, max = 0.999, step = 0.05),
+        es_link_ui(ns, "r_effect")
       ),
       conditionalPanel(
         condition = es_is("or"),
@@ -79,6 +81,7 @@ mod_meta_power_ui <- function(id) {
 
 mod_meta_power_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    es_links_server(input, session)
     result <- reactive({
       req(input$es_type, input$study_size, input$i2, input$test_type,
           input$alpha, input$power, input$model)
