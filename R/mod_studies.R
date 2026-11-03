@@ -1,4 +1,4 @@
-# Studies (decisions S1-S5 of 3 Nov 2026, ROADMAP §10): a working record of calculations, kept in the browser tab only.
+# Studies (decisions S1-S5 of 3 Nov 2026, ROADMAP section 10): a working record of calculations, kept in the browser tab only.
 #
 # While working, the user adds results to a study ("Add to [Study 1 v] Add" under every result); the Studies tab shows each study
 # with repeated uses of one calculator and design as one table, and a list of recent calculations recorded automatically. Nothing is
@@ -10,7 +10,8 @@
 # page sends the stored record to the new session. Closing the tab loses it. Nothing is written on the server.
 #
 # This file: the entry builder, the grouping into tables, the Studies tab (UI and server), the "Add to study" row used by
-# export_controls_ui(), and the page script (studies_assets()). Phase S-2 adds the Word file.
+# export_controls_ui(), the page script (studies_assets()), and (phase S-2) the Word file of a study, made with R/docx_writer.R and saved
+# by the browser.
 
 .study_max <- 10L      # studies (S4: three to start, more on request; a soft limit keeps the page light)
 .recent_max <- 20L     # recent calculations kept (S3)
@@ -149,6 +150,10 @@ study_view_ui <- function(study) {
     div(tags$label(class = "form-label", `for` = "studies_name", "Name of this study"),
         tags$input(id = "studies_name", class = "form-control", type = "text", value = study$name, maxlength = "120",
                    onchange = sprintf("esStudies.rename(%s, this.value);", .study_js_str(study$id)))),
+    tags$button(type = "button", class = "btn btn-primary mb-0", id = "studies_download",
+                disabled = if (length(entries) == 0) NA else NULL,
+                onclick = sprintf("Shiny.setInputValue('studies_download', { id: %s, nonce: Math.random() }, { priority: 'event' });", .study_js_str(study$id)),
+                "Download (.docx)"),
     tags$button(type = "button", class = "btn btn-outline-danger mb-0",
                 onclick = sprintf("esStudies.clear(%s);", .study_js_str(study$id)), "Clear this study"))
   if (length(entries) == 0) {
@@ -220,6 +225,18 @@ studies_server <- function(input, output, session) {
   })
   # a new study opens at once
   observeEvent(input$studies_opened, updateSelectInput(session, "studies_pick", selected = input$studies_opened$id), ignoreInit = TRUE)
+  # the Word file is made here and handed to the browser, which saves it (no file is written on the server)
+  observeEvent(input$studies_download, {
+    st <- state(); id <- input$studies_download$id
+    s <- Filter(function(s) identical(s$id, id), st$studies)
+    if (length(s) == 0) return()
+    raw <- tryCatch(study_docx(s[[1]]), error = function(e) e)
+    if (inherits(raw, "error")) {
+      session$sendCustomMessage("study_note", list(text = paste("The Word file could not be made:", conditionMessage(raw))))
+      return()
+    }
+    session$sendCustomMessage("study_file", list(name = .study_file_name(s[[1]]$name), b64 = .base64(raw)))
+  }, ignoreInit = TRUE)
   output$studies_view <- renderUI({
     st <- state()
     pick <- input$studies_pick
@@ -353,6 +370,16 @@ studies_assets <- function() {
   if (window.Shiny && Shiny.addCustomMessageHandler) {
     Shiny.addCustomMessageHandler('study_add', function (m) { add(m.study, m.entry, m.summary); });
     Shiny.addCustomMessageHandler('study_note', function (m) { toast(m.text); });
+    Shiny.addCustomMessageHandler('study_file', function (m) {
+      var bin = atob(m.b64), bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      var url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = m.name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+      window.esStudiesLastFile = { name: m.name, size: bytes.length, head: bin.slice(0, 2) };   // read by the browser test
+      toast('Saved ' + m.name + ' (' + Math.round(bytes.length / 1024) + ' KB). It is the copy to keep: the study stays only in this tab.');
+    });
     Shiny.addCustomMessageHandler('study_recent', function (m) {
       var e = m.entry; if (!e) return;
       if (state.recent.length && state.recent[0].key === e.key) return;
@@ -365,4 +392,159 @@ studies_assets <- function() {
 })();
 ", .study_max, .recent_max)))
   )
+}
+
+# --- the Word file (phase S-2; the writer is R/docx_writer.R) -------------------------------------------------------------------
+
+# A readable plain-text form of a formula's LaTeX, for programs that cannot turn LaTeX into an equation (Google Docs, LibreOffice, Word on
+# phones). Conservative: fractions, roots, sub- and superscripts, Greek letters and common symbols are rewritten; if anything else is left
+# (a backslash command it does not know), NA is returned and the document shows only the LaTeX.
+latex_plain <- function(latex) {
+  x <- gsub("^\\s+|\\s+$", "", latex)
+  if (!nzchar(x)) return(NA_character_)
+  # the argument of a command starting at position `i` (the "{"): list(text, end)
+  group_at <- function(s, i) {
+    depth <- 0L; chars <- strsplit(s, "")[[1]]
+    for (j in i:length(chars)) {
+      if (chars[j] == "{") depth <- depth + 1L
+      if (chars[j] == "}") { depth <- depth - 1L; if (depth == 0L) return(list(text = substr(s, i + 1L, j - 1L), end = j)) }
+    }
+    NULL
+  }
+  # TRUE when the whole of `t` is one bracketed group: "(a+c)" yes, "(a+c)(c+d)" no
+  one_group <- function(t) {
+    ch <- strsplit(t, "")[[1]]
+    if (length(ch) < 2 || ch[1] != "(" || ch[length(ch)] != ")") return(FALSE)
+    depth <- 0L
+    for (j in seq_along(ch)) {
+      if (ch[j] == "(") depth <- depth + 1L
+      if (ch[j] == ")") { depth <- depth - 1L; if (depth == 0L && j < length(ch)) return(FALSE) }
+    }
+    TRUE
+  }
+  wrap <- function(t) { t <- trimws(t); if (grepl("^[A-Za-z0-9.]+$", t) || one_group(t)) t else paste0("(", t, ")") }
+  rewrite <- function(s, cmd, nargs, f) {
+    repeat {
+      m <- regexpr(paste0("\\\\", cmd, "\\s*\\{"), s, perl = TRUE)
+      if (m < 0) return(s)
+      start <- m; i <- m + attr(m, "match.length") - 1L
+      args <- character(); ok <- TRUE
+      for (k in seq_len(nargs)) {
+        g <- group_at(s, i)
+        if (is.null(g)) { ok <- FALSE; break }
+        args <- c(args, g$text); i <- g$end + 1L
+        while (i <= nchar(s) && substr(s, i, i) == " ") i <- i + 1L
+      }
+      if (!ok) return(s)
+      before <- substr(s, 1L, start - 1L); after <- substr(s, i, nchar(s))
+      # keep products readable: "t\\sqrt{n}" -> "t sqrt(n)", "\\frac{a}{b}\\sum" -> "(a)/(b) sum"
+      sep_l <- if (grepl("[A-Za-z0-9)]$", before)) " " else ""
+      sep_r <- if (grepl("^[A-Za-z0-9(\\\\]", after)) " " else ""
+      s <- paste0(before, sep_l, f(args), sep_r, after)
+    }
+  }
+  for (cmd in c("text", "textrm", "mathrm", "mathit", "operatorname")) x <- rewrite(x, cmd, 1, function(a) a[1])
+  for (cmd in c("dfrac", "tfrac", "frac")) x <- rewrite(x, cmd, 2, function(a) paste0(wrap(a[1]), "/", wrap(a[2])))
+  x <- rewrite(x, "sqrt", 1, function(a) paste0("sqrt(", a[1], ")"))
+  x <- gsub("\\\\(left|right|big|Big|bigg|Bigg)\\s*", "", x)
+  x <- gsub("\\\\(,|;|:|!|quad|qquad)", " ", x)
+  sym <- c(times = "\u00d7", cdot = "\u00b7", pm = "\u00b1", leq = "\u2264", le = "\u2264", geq = "\u2265", ge = "\u2265", neq = "\u2260",
+           approx = "\u2248", Rightarrow = "\u21d2", rightarrow = "\u2192", to = "\u2192", lceil = "\u2308", rceil = "\u2309",
+           lfloor = "\u230a", rfloor = "\u230b", infty = "\u221e", sum = "\u03a3", prod = "\u03a0",
+           alpha = "\u03b1", beta = "\u03b2", gamma = "\u03b3", delta = "\u03b4", epsilon = "\u03b5", varepsilon = "\u03b5",
+           zeta = "\u03b6", eta = "\u03b7", theta = "\u03b8", kappa = "\u03ba", lambda = "\u03bb", mu = "\u03bc", nu = "\u03bd",
+           pi = "\u03c0", rho = "\u03c1", sigma = "\u03c3", tau = "\u03c4", phi = "\u03c6", varphi = "\u03c6", chi = "\u03c7",
+           psi = "\u03c8", omega = "\u03c9", Gamma = "\u0393", Delta = "\u0394", Theta = "\u0398", Lambda = "\u039b",
+           Sigma = "\u03a3", Phi = "\u03a6", Psi = "\u03a8", Omega = "\u03a9",
+           log = "log", ln = "ln", exp = "exp", arcsin = "arcsin", sin = "sin", cos = "cos", max = "max", min = "min")
+  for (nm in names(sym)) {
+    word <- grepl("^[a-z]{2,}$", sym[[nm]])   # log, exp, max ...: a space before them when they follow a letter or digit
+    x <- gsub(paste0(if (word) "(?<=[A-Za-z0-9)])" else "", "\\\\", nm, "(?![A-Za-z])"), paste0(if (word) " " else "", sym[[nm]]), x, perl = TRUE)
+    if (word) x <- gsub(paste0("\\\\", nm, "(?![A-Za-z])"), sym[[nm]], x, perl = TRUE)
+  }
+  x <- gsub("\\\\\\{", "{", x); x <- gsub("\\\\\\}", "}", x)
+  # sub- and superscripts: x_{1-a} -> x_(1-a), x^{2} -> x^2
+  repeat {
+    m <- regexpr("[_^]\\{[^{}]*\\}", x, perl = TRUE)
+    if (m < 0) break
+    tok <- regmatches(x, m); inner <- substr(tok, 3, nchar(tok) - 1)
+    regmatches(x, m) <- paste0(substr(tok, 1, 1), if (nchar(inner) == 1 || grepl("^[A-Za-z0-9.]+$", inner)) inner else paste0("(", inner, ")"))
+  }
+  x <- gsub("[{}]", "", x)
+  x <- gsub("\\s+", " ", trimws(x))
+  x <- gsub("\\(\\s+", "(", gsub("\\s+\\)", ")", x))
+  if (grepl("\\", x, fixed = TRUE)) NA_character_ else x
+}
+
+# The formula's display blocks ($$ ... $$) as separate LaTeX strings
+.latex_blocks <- function(latex) {
+  if (is.null(latex) || !nzchar(latex)) return(character())
+  b <- trimws(strsplit(latex, "$$", fixed = TRUE)[[1]])
+  b[nzchar(b)]
+}
+
+.study_file_name <- function(name, date = Sys.Date()) {
+  stem <- gsub("_+", "_", gsub("[^A-Za-z0-9_-]", "_", name))
+  stem <- gsub("^_|_$", "", stem)
+  paste0(if (nzchar(stem)) stem else "study", "_", format(date, "%Y-%m-%d"), ".docx")
+}
+
+.study_kv_table <- function(x, head = c("Quantity", "Value")) {
+  if (length(x) == 0) return(character())
+  df <- data.frame(names(x), vapply(x, as.character, character(1)), stringsAsFactors = FALSE)
+  names(df) <- head
+  docx_table(df)
+}
+
+#' The Word file of one study (raw bytes)
+#' @param study list(id, name, entries) as in the Studies tab.
+#' @noRd
+study_docx <- function(study, time = Sys.time()) {
+  entries <- study$entries
+  groups <- study_groups(entries)
+  refs <- unique(Filter(nzchar, vapply(entries, function(e) if (is.character(e$citation)) e$citation else "", character(1))))
+  ref_no <- function(cit) match(cit, refs)
+  body <- c(
+    docx_p(study$name, style = "Title"),
+    docx_p(sprintf("Sample size and power calculations: %d result(s) from %d calculator design(s). Prepared with Epidemiological suite %s on %s.",
+                   length(entries), length(groups), .release_label, format(as.Date(time), "%d %B %Y")), style = "Small"),
+    docx_p("Formulas are given in LaTeX: in Word for Microsoft 365, choose Insert > Equation, switch the equation to LaTeX, paste, then Convert. A plain-text form follows where one could be made.", style = "Small")
+  )
+  if (length(entries) == 0) body <- c(body, docx_p("No results have been added to this study yet."))
+  for (k in seq_along(groups)) {
+    g <- groups[[k]]; first <- g[[1]]
+    body <- c(body, docx_p(sprintf("%d. %s: %s", k, first$module_title, first$design), style = "Heading1"))
+    if (length(g) == 1) {
+      res <- first$results; h <- intersect(unlist(first$headline), names(res))
+      body <- c(body, docx_p("Result", style = "Heading2"), .study_kv_table(res[c(h, setdiff(names(res), h))]),
+                docx_p("Inputs", style = "Heading2"), .study_kv_table(first$inputs, c("Input", "Value")))
+      notes <- unlist(first$notes)
+      if (length(notes)) body <- c(body, vapply(notes, function(n) docx_p(docx_run("Note: ", bold = TRUE), n), character(1)))
+      if (is.character(first$justification) && nzchar(first$justification)) {
+        body <- c(body, docx_p("Justification", style = "Heading2"), docx_p(first$justification))
+      }
+    } else {
+      tb <- study_table(g)
+      if (length(tb$constant)) body <- c(body, docx_p("Same in every row", style = "Heading2"), .study_kv_table(as.list(tb$constant), c("Input", "Value")))
+      body <- c(body, docx_p(sprintf("%d calculations", length(g)), style = "Heading2"), docx_table(tb$table))
+      notes <- unique(unlist(lapply(g, function(e) unlist(e$notes))))
+      if (length(notes)) body <- c(body, vapply(notes, function(n) docx_p(docx_run("Note: ", bold = TRUE), n), character(1)))
+    }
+    blocks <- .latex_blocks(first$formula_latex)
+    if (length(blocks)) {
+      body <- c(body, docx_p("Formula", style = "Heading2"))
+      for (b in blocks) {
+        body <- c(body, docx_p(docx_run(b, mono = TRUE)))
+        plain <- latex_plain(b)
+        if (!is.na(plain)) body <- c(body, docx_p(docx_run("Plain text: ", italic = TRUE), plain, style = "Small"))
+      }
+    }
+    if (is.character(first$citation) && nzchar(first$citation)) {
+      body <- c(body, docx_p(docx_run("Source: ", bold = TRUE), sprintf("%s [%d]", first$citation, ref_no(first$citation))))
+    }
+  }
+  body <- c(body, docx_p("References", style = "Heading1"),
+            vapply(seq_along(refs), function(i) docx_p(sprintf("%d. %s", i, refs[i])), character(1)),
+            docx_p(sprintf("%d. %s", length(refs) + 1, citation_text("vancouver"))))
+  docx_document(body, title = study$name, time = time)
 }

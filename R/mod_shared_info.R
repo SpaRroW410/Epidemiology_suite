@@ -9,7 +9,7 @@
 info_tip <- function(term) {
   g <- glossary_entry(term)
   bslib::popover(
-    tags$button(type = "button", class = "btn btn-link p-0 ms-1 info-tip", `aria-label` = paste0("What is ", g$label, "?"), "ⓘ"),
+    tags$button(type = "button", class = "btn btn-link p-0 ms-1 info-tip", `aria-label` = paste0("What is ", g$label, "?"), "\u24d8"),
     tags$p(class = "mb-1", g$short),
     if (!is.null(g$formula)) tags$p(class = "mb-0 small text-muted", tags$code(g$formula)),
     title = g$label, placement = "auto", options = list(trigger = "hover focus")

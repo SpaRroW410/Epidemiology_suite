@@ -85,5 +85,14 @@ test_that("a new study can be named, and recent calculations are recorded after 
   app$wait_for_idle(800, timeout = 60000)
   ui_open_studies(app, "s4")
   expect_match(ui_studies_text(app), "1 result\\(s\\) from 1 calculator design\\(s\\)")
+
+  # Download (.docx): the file is made in R and saved by the browser
+  app$run_js("document.getElementById('studies_download').click();")
+  app$wait_for_js("!!window.esStudiesLastFile", timeout = 60000)
+  f <- app$get_js("window.esStudiesLastFile")
+  expect_match(f$name, "^Anaemia_survey_[0-9]{4}-[0-9]{2}-[0-9]{2}[.]docx$")
+  expect_gt(f$size, 5000)
+  expect_equal(f$head, "PK")   # a zip archive, as a .docx is
+  expect_match(app$get_js("document.getElementById('study_toast').innerText"), "Saved Anaemia_survey_")
   expect_equal(ui_output_errors(app), 0)
 })
