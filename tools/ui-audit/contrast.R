@@ -39,6 +39,8 @@ if (!length(only)) {
     check(paste("Find:", t))
   }
   ui_select_tab(app, "main_nav", "Cite"); app$wait_for_idle(800); check("Cite")
+  ui_select_tab(app, "main_nav", "Studies"); app$wait_for_idle(800); check("Studies")
+  app$set_inputs(studies_pick = "recent", wait_ = FALSE); app$wait_for_idle(800); check("Studies: recent")
 }
 mods <- module_registry()
 if (length(only)) mods <- Filter(function(m) m$id %in% only, mods)

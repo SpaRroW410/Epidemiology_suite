@@ -80,8 +80,9 @@ advanced_options_ui <- function(ns, ..., condition = NULL, title = "Advanced opt
 # (`export_controls_ui()`) and one server call (`render_export_handlers()`)
 # per module; add both once, not per design.
 export_controls_ui <- function(ns) {
+  # "Add this result to [Study v] Add" (Studies, R/mod_studies.R), then the export panel,
   # folded by default: most visits only want the number, and a closed panel is not rendered until it is opened
-  bslib::accordion(
+  tagList(study_add_ui(ns), bslib::accordion(
     id = ns("export_acc"), open = FALSE, class = "mt-3",
     bslib::accordion_panel(
       "Export this result: protocol paragraph, CSV, JSON, citation", value = "export",
@@ -109,7 +110,7 @@ export_controls_ui <- function(ns) {
         downloadButton(ns("download_ris"), "Citation (RIS)", class = "btn-sm btn-outline-secondary")
       )
     )
-  )
+  ))
 }
 
 #' Wire the export_controls_ui() outputs into a module's server
@@ -142,6 +143,8 @@ render_export_handlers <- function(output, result, content_fn, value_fn = functi
   # files are named after it (e.g. "epidemiologysuite_two_independent_
   # proportions.csv") instead of a generic name every design would collide on.
   slug <- function() .citation_key(content_fn()$title)
+  # Studies: "Add to study" and the recent calculations (R/mod_studies.R)
+  study_capture_server(result, content_fn, value_fn)
 
   output$justification_text <- renderText({
     build(function(v, entry) format_justification(entry$title, v, entry$citation, entry$backend))

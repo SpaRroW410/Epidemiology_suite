@@ -22,11 +22,14 @@ something outside the code (a paper, a package, an account). Work is collected o
 
 ## B. Studies: a working record of calculations (planned; decisions S1-S5 in `ROADMAP.md` §10)
 
-- [ ] S-1 Storage in the browser tab only (`sessionStorage`), restored after a reload or a dropped connection; "Add to [Study v] Add" under
-  every result through the shared export hook; the Studies tab with one drop-down (studies, "+ New study", Recent calculations), name, entries,
-  preview, Clear, Download.
-- [ ] S-1 Tables for repeated use of one calculator and design (the inputs that vary as columns, the constant ones listed once).
-- [ ] S-1 Recent calculations: last 20, recorded once a result has been stable for about 3 s, without duplicates.
+- [x] S-1 Storage in the browser tab only (`sessionStorage`), restored after a reload or a dropped connection; "Add this result to [Study v]
+  Add" under every result through the shared export hook (64 calculators), with Undo; the Studies tab with one drop-down (studies, "+ New
+  study" up to 10, Recent calculations), name, entries, remove, Clear (3 Nov 2026, `R/mod_studies.R`). The Download button comes with S-2.
+- [x] S-1 Tables for repeated use of one calculator and design (the inputs that vary as columns, the constant ones listed once) (3 Nov 2026).
+- [x] S-1 Recent calculations: last 20, recorded once a result has been stable for 3 s after the user has changed something in that
+  calculator (loading a calculator records nothing), without duplicates (3 Nov 2026).
+- [ ] S-1 left: moving entries and notes (S-3); the four tools without the shared export hook (ecological and qualitative guidance,
+  randomization list, survey selection) have no Add button.
 - [ ] S-2 Built-in .docx writer (no new runtime package): XML parts, stored zip with CRC-32, references, table style; formulas as LaTeX for
   Word's Insert > Equation, with a plain-text version beside it.
 - [ ] S-2 Tests: unzip, XML parse, read back with `officer` (Suggests); open once in Word and LibreOffice by hand.
@@ -36,6 +39,9 @@ something outside the code (a paper, a package, an account). Work is collected o
 
 ## C. Small items
 
+- [ ] **About the three versions:** an information panel (Home or Cite) with a table comparing the phone / server version (Posit Connect
+  Cloud), the browser version (GitHub Pages) and the R package: where it runs, whether inputs leave the device, internet needed, start-up
+  time, speed of the simulations (background workers), devices it suits, Studies storage, how to install or open it, how to cite it.
 - [ ] Links for inputs where a converter gives a different quantity (the Welch design's two SDs; the SD from a median and IQR gives one); the
   logistic designs' odds ratios ("per one-SD increase", ordinal) have no converter.
 - [ ] More glossary terms and information tips on request (35 terms now).
