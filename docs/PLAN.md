@@ -82,6 +82,13 @@ suite of 102 files with 0 failures; 206 calculation functions exported with help
 - [ ] Put the dark-mode contrast crawl used on these PRs into `tools/ui-audit/` (it now lives only in a working folder).
 - [ ] Re-measure the live browser build (Pages) after #33, and try the new tabs on a real phone.
 
+## Phase 4c — Studies: a working record of calculations, downloaded as a Word file  (planned 3 Nov 2026; decisions S1-S5 in ROADMAP §10)
+
+- [ ] **S-1 Storage, buttons and the Studies tab:** the record kept in the browser tab only (nothing kept on the server); "Add to [Study 1 v] Add" under every result (the shared export hook of 64 calculators); a Studies tab with one drop-down (Study 1, 2, 3, + New study, Recent calculations), an editable name, the entries (remove, move, note), a live preview, Clear and **Download (.docx)**; repeated use of the same calculator and design shown as one table; Recent calculations recorded automatically (last 20).
+- [ ] **S-2 Word file:** a small built-in .docx writer (no new runtime package); formulas as LaTeX ready for Word's Insert > Equation > LaTeX; references numbered without duplicates, plus the suite's own citation (version and DOI). Checked by reading the file back with `officer` in the tests only.
+- [ ] **S-3 Guide and wording:** "Add this design choice" at the end of the guide (the answers that led to the design); readable names for the inputs in the document (the results use short names such as `p1`, `sd`).
+- [ ] **S-4 Analyze tools and devices:** the Analyze results too; a check on a real phone on Connect Cloud (sleep, switch apps, reload) and in the browser build.
+
 ## Phase 5 — The R package for analysts
 
 - ~~Public function API for the calculations themselves: all 206 `calc_*()` functions are exported (195 on 29 Oct), each with a help page (every argument described, the value described, a worked example taken from a verified test); `tests/testthat/test-help_pages.R` keeps it so~~ (29 Oct; owner decision: export all). The names stay `calc_*` (the planned `ss_*()` family was dropped); a smaller friendlier set of wrappers (`ss_text()`, `ss_curve()`, `ss_export()`) is still possible

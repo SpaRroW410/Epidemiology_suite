@@ -263,3 +263,19 @@ the full wording and the checklists (`docs/checklist_by_design.md`, `docs/checkl
 - [ ] Add the dark-mode contrast crawl and the live-site timing script used on these PRs to `tools/ui-audit/` (they were kept in a working folder).
 - [ ] Re-measure the live browser build (Pages) after #33; re-run the axe scan (`tools/ui-audit/a11y.R`) on the Find tab, the Effect Size tab and the pinned "Use this value" panel.
 - [ ] Browser tests run for several minutes: consider splitting `test-ui_smoke.R` by area so a failure points to one file.
+
+---
+
+## 8. Studies: a working record of calculations (planned 3 November 2026; see the end of `ROADMAP.md`, decisions S1-S5)
+
+- [ ] S-1 Storage in the browser tab only (`sessionStorage`), restored after a reload or a dropped connection; "Add to [Study v] Add" under
+  every result through the shared export hook; the Studies tab with one drop-down (studies, "+ New study", Recent calculations), name, entries,
+  preview, Clear, Download.
+- [ ] S-1 Tables for repeated use of one calculator and design (the inputs that vary as columns, the constant ones listed once).
+- [ ] S-1 Recent calculations: last 20, recorded once a result has been stable for about 3 s, without duplicates.
+- [ ] S-2 Built-in .docx writer (no new runtime package): XML parts, stored zip with CRC-32, references, table style; formulas as LaTeX for
+  Word's Insert > Equation, with a plain-text version beside it.
+- [ ] S-2 Tests: unzip, XML parse, read back with `officer` (Suggests); open once in Word and LibreOffice by hand.
+- [ ] S-3 "Add this design choice" at the end of the guide; notes and reordering; readable input names in the document.
+- [ ] S-4 Analyze results; real-phone check on Connect Cloud (sleep, switch apps, reload) and the browser build.
+- [ ] Check: Word on phones, Google Docs and LibreOffice (whether pasted LaTeX can be turned into an equation there; table styles); a long study on a phone.

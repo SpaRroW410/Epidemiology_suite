@@ -1276,6 +1276,11 @@ Recorded 28 September 2026.
 | D4 | Primary distribution target: hosted web, or offline/APK first? | **Offline / APK later** | Hosted web + R package first (D1, D2); the Shinylive spike (D3) and APK (D5a) stay at P2/P3 |
 | D5 | Languages | **English only** | No translation layer; F11 narrows to accessibility and mobile layout |
 | D6 | When to reopen the two paused items (A.2) | *Open* | Suggested: once paper access is available |
+| S1 | Studies: how long the record lasts | **This browser tab only** (`sessionStorage`) (3 Nov 2026) | Survives a refresh and a phone going to sleep (the page reloads and restores it); lost when the tab is closed; nothing kept on the server |
+| S2 | Studies: file format | **A built-in .docx writer** (3 Nov 2026) | No new runtime package; `officer` only as a test oracle (Suggests) |
+| S3 | Studies: recent calculations recorded automatically | **Yes** (3 Nov 2026) | Last 20, in the same tab-only storage; can be added to a study later |
+| S4 | Studies: how many | **Three to start, more on request** (3 Nov 2026) | "+ New study"; a soft limit (suggested 10 studies) only to keep the page light; the browser's storage (about 5 MB) holds hundreds of entries |
+| S5 | Studies: content of an entry | **Full** (3 Nov 2026): inputs, result, warnings, formula (LaTeX, for Word's Insert > Equation), justification paragraph, citation | One drop-down for the studies and Recent calculations, not a tab per study |
 
 ## 11. Suggested milestones
 
@@ -1462,3 +1467,54 @@ a real package or a simulation), and nothing is claimed that was not read.
 - **Calculate this / Use this value (#33).** 28 calculator inputs (`R/mod_shared_link.R`, one list of entries) open the matching converter; the converter returns the number, to four significant figures,
   and switches the calculator to the way of entering it that shows that input. A static test checks every entry against the pages and the converters' results; a browser test goes round the loop.
 - **Open from this work:** see `to_do_later.md` section 7.
+
+### Studies: a working record of calculations (planned 3 November 2026; decisions S1-S5 in §10)
+
+**What it is.** While working, the user adds results to a study (Study 1, 2, 3, more on request) and downloads each study as a Word file:
+the protocol's sample-size section, with the inputs, results, formulas, justification paragraphs and references. Nothing is calculated again
+to build it: the results are recorded as they are produced.
+
+**Where it appears.**
+- *Under every result:* "Add to [Study 1 v] Add". The drop-down remembers the last study used; a short message confirms ("Added to Study 1:
+  Proportions, n = 385") with Undo. It goes in the shared export hook (`render_export_handlers()` / `export_controls_ui()`, used by 64 of the
+  67 calculators), so it is added once, not per calculator; the other three are checked separately.
+- *At the end of the guide:* "Add this design choice to [Study 1 v]", recording the answers that led to the design.
+- *A Studies tab* (next to Cite; also in the phone's bottom bar) with one drop-down: Study 1, Study 2, Study 3, "+ New study", and Recent
+  calculations. For the chosen study: an editable name, the entries (remove, move up / down, a note), a live preview, Clear and
+  **Download (.docx)**. Recent calculations lists the last 20 results with "Add to study".
+
+**The document.** Title and date; how the design was chosen (if the guide was used); one section per calculator and design, in the order
+added. Used once: inputs, result, warnings, formula, justification paragraph. Used several times with the same calculator and design: one
+table, a row per calculation, columns for the inputs that changed and the results, the inputs that stayed the same listed once above it, the
+method and citation once. References numbered without duplicates, and the suite's own citation (version, DOI). Formulas are written as LaTeX,
+as the app already shows them, ready to paste into Word's Insert > Equation > LaTeX (Word for Microsoft 365); a plain-text version is kept
+beside it for programs without LaTeX input (Google Docs, LibreOffice, Word on phones -- to check).
+
+**Where the data lives (S1).** In the browser tab (`sessionStorage`), which is the single copy: the server adds a result to it by sending a
+message, the page stores it and sends the whole record back so R can show the preview and build the file. On reload, or when a phone wakes
+and Connect has dropped the connection, the page sends the stored record to the new session. The file is put together in R and downloaded by
+the browser (a Blob), so no file is written on the server. The calculation itself still runs on the server in the Connect version, as today;
+the browser build keeps everything on the device. The Studies tab says: "Kept only in this browser tab. Download before closing it."
+
+**Recent calculations (S3) need a rule.** The calculators recompute while an input is being typed, so recording every result would fill the
+list with half-typed values. Proposed rule: record a result once it has stayed the same for about 3 s, skip it if it equals the last one recorded
+for that calculator and design, keep the last 20.
+
+**The .docx writer (S2).** A .docx is a zip of a few XML files. Written in base R: the XML parts (document, styles, numbering for references, a
+table style), and a zip without compression (stored entries with a CRC-32), so no `zip` program or package is needed (it also has to work in the
+browser build). Checked in the tests by unzipping with `utils::unzip()`, parsing the XML, and reading the file back with `officer` (Suggests
+only); opened once in Word and LibreOffice by hand.
+
+**What each entry stores.** Calculator, design, the `ss_result` (inputs, headline results), the warnings (`precision_notes` and the like), the
+design's formula (LaTeX), justification paragraph, citation and backend, the seed and number of simulations for Monte Carlo designs, the time and
+the app version. About 2-5 KB as JSON.
+
+**Phases.** S-1 storage, buttons, Studies tab, tables, Recent calculations; S-2 the .docx writer and the download; S-3 the guide's design choice,
+notes, reordering, readable input names (a label list: the results use short names such as `p1`, `sd`); S-4 the Analyze tools and a real-phone check.
+
+**Tests.** The table grouping (which inputs vary); the .docx writer (unzips, valid XML, read back by `officer`, a table with the right rows);
+the Recent-calculations rule; a browser test that adds two results of one calculator and one of another, reloads the page, finds them still
+there, and downloads a file with one table and one single-entry section.
+
+**Open questions to settle while building.** Whether Word on phones and Google Docs keep the table styles; how a very long study is shown on a
+phone; whether the Analyze results (several estimates each) need their own table layout.
