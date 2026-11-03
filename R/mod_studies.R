@@ -58,8 +58,25 @@ study_entry <- function(module_id, module_title, value, content) {
        justification = justification, time = format(Sys.time(), "%Y-%m-%d %H:%M"), version = .release_label, key = key)
 }
 
+#' The design chosen with the guide, as a study entry (phase S-3): the design, the calculator it leads to, and the questions and answers
+#' @param design The design's name (the guide's last step).
+#' @param trace The guide's trail: list(list(question, answer, confidence)).
+#' @param calculator The calculator it points to (a catalog label), or NULL when that design is not built.
+#' @noRd
+study_design_entry <- function(design, trace, calculator = NULL) {
+  trail <- lapply(trace, function(t) list(question = as.character(t$question), answer = as.character(t$answer),
+                                          auto = !is.null(t$confidence)))
+  key <- paste("design", design, paste(vapply(trail, function(t) t$answer, character(1)), collapse = ";"), sep = "|")
+  list(kind = "design", module = "design_choice", module_title = "Design chosen with the guide", design = as.character(design),
+       calculator = if (is.null(calculator)) "" else as.character(calculator), trail = trail,
+       inputs = list(), results = list(), headline = list(), notes = list(), formula_latex = "", citation = "", backend = "",
+       justification = "", time = format(Sys.time(), "%Y-%m-%d %H:%M"), version = .release_label, key = key)
+}
+.study_is_design <- function(e) identical(e$kind, "design")
+
 # A short line for messages and lists: "Proportions -- Single proportion: n = 323"
 study_entry_summary <- function(e) {
+  if (.study_is_design(e)) return(paste0("Design chosen with the guide: ", e$design))
   h <- unlist(e$headline)
   res <- if (length(h)) paste(sprintf("%s = %s", h, unlist(e$results[h])), collapse = ", ") else ""
   paste0(e$module_title, " -- ", e$design, if (nzchar(res)) paste0(": ", res) else "")
@@ -79,6 +96,7 @@ studies_normalize <- function(state) {
   }
   studies <- Filter(function(s) is.list(s) && .study_id_ok(s$id), state$studies)
   studies <- lapply(studies, function(s) list(id = s$id, name = if (is.character(s$name) && length(s$name) == 1) s$name else s$id,
+                                              note = if (is.character(s$note) && length(s$note) == 1) s$note else "",
                                               entries = fix_entries(s$entries)))
   if (length(studies) == 0) studies <- blank$studies
   list(studies = studies, recent = fix_entries(state$recent))
@@ -88,6 +106,7 @@ studies_normalize <- function(state) {
 
 # Entries grouped by calculator and design, in the order each group was first added.
 study_groups <- function(entries) {
+  entries <- Filter(Negate(.study_is_design), entries)
   if (length(entries) == 0) return(list())
   keys <- vapply(entries, function(e) paste(e$module, e$design, sep = "\r"), character(1))
   lapply(unique(keys), function(k) entries[keys == k])
@@ -105,7 +124,7 @@ study_table <- function(group) {
   cols <- list(`#` = as.character(seq_along(group)))
   for (nm in all_inputs[varies]) cols[[nm]] <- vapply(ins, val, character(1), nm = nm)
   for (nm in heads) cols[[nm]] <- vapply(group, function(e) val(unlist(e$results), nm), character(1))
-  list(constant = constant, table = as.data.frame(cols, check.names = FALSE, stringsAsFactors = FALSE))
+  list(constant = constant, table = as.data.frame(cols, check.names = FALSE, stringsAsFactors = FALSE), inputs = all_inputs[varies], results = heads)
 }
 
 # --- the Studies tab ---------------------------------------------------------------------------------------------------------
@@ -129,69 +148,117 @@ studies_ui <- function() {
 
 # a JavaScript string literal (JSON-style quoting) without a package dependency
 .study_js_str <- function(x) {
-  x <- gsub("\\\\", "\\\\\\\\", x); x <- gsub("\"", "\\\\\"", x); x <- gsub("\n", "\\\\n", x); x <- gsub("<", "\\\\u003c", x)
+  x <- gsub("\\\\", "\\\\\\\\", x); x <- gsub("\"", "\\\\\"", x); x <- gsub("\n", "\\\\n", x); x <- gsub("\r", "\\\\r", x); x <- gsub("<", "\\\\u003c", x)
   paste0("\"", x, "\"")
 }
 
 .study_kv <- function(x) {
   if (length(x) == 0) return(NULL)
-  tags$ul(class = "list-unstyled small mb-2", lapply(names(x), function(nm) tags$li(tags$code(nm), " = ", as.character(x[[nm]]))))
+  tags$ul(class = "list-unstyled small mb-2", lapply(names(x), function(nm) tags$li(strong(nm), " = ", as.character(x[[nm]]))))
 }
 
+.study_btn <- function(label, js, aria = label, cls = "btn btn-link btn-sm p-0") {
+  tags$button(type = "button", class = cls, onclick = js, `aria-label` = aria, label)
+}
 .study_remove_btn <- function(study_id, entry_id) {
-  tags$button(type = "button", class = "btn btn-link btn-sm p-0 text-danger",
-              onclick = sprintf("esStudies.remove(%s, %s);", .study_js_str(study_id), .study_js_str(entry_id)),
-              `aria-label` = "Remove this entry", "Remove")
+  .study_btn("Remove", sprintf("esStudies.remove(%s, %s);", .study_js_str(study_id), .study_js_str(entry_id)), "Remove this entry",
+             "btn btn-link btn-sm p-0 text-danger")
+}
+.study_row_moves <- function(study_id, entry_id, first, last) {
+  tagList(
+    if (!first) .study_btn("Up", sprintf("esStudies.moveRow(%s, %s, -1);", .study_js_str(study_id), .study_js_str(entry_id)), "Move this result up"),
+    if (!last) .study_btn("Down", sprintf("esStudies.moveRow(%s, %s, 1);", .study_js_str(study_id), .study_js_str(entry_id)), "Move this result down"))
+}
+.study_note_input <- function(study_id, e, rows = 2) {
+  tags$textarea(class = "form-control form-control-sm", rows = rows, maxlength = "2000", placeholder = "Your note (goes into the Word file)",
+                `aria-label` = "Note on this result",
+                onchange = sprintf("esStudies.note(%s, %s, this.value);", .study_js_str(study_id), .study_js_str(e$id)),
+                if (is.character(e$note)) e$note else "")
 }
 
 study_view_ui <- function(study) {
   entries <- study$entries
-  head <- div(class = "d-flex flex-wrap gap-2 align-items-end mb-3",
-    div(tags$label(class = "form-label", `for` = "studies_name", "Name of this study"),
-        tags$input(id = "studies_name", class = "form-control", type = "text", value = study$name, maxlength = "120",
-                   onchange = sprintf("esStudies.rename(%s, this.value);", .study_js_str(study$id)))),
-    tags$button(type = "button", class = "btn btn-primary mb-0", id = "studies_download",
-                disabled = if (length(entries) == 0) NA else NULL,
-                onclick = sprintf("Shiny.setInputValue('studies_download', { id: %s, nonce: Math.random() }, { priority: 'event' });", .study_js_str(study$id)),
-                "Download (.docx)"),
-    tags$button(type = "button", class = "btn btn-outline-danger mb-0",
-                onclick = sprintf("esStudies.clear(%s);", .study_js_str(study$id)), "Clear this study"))
+  designs <- Filter(.study_is_design, entries)
+  calcs <- Filter(Negate(.study_is_design), entries)
+  head <- tagList(
+    div(class = "d-flex flex-wrap gap-2 align-items-end mb-2",
+      div(tags$label(class = "form-label", `for` = "studies_name", "Name of this study"),
+          tags$input(id = "studies_name", class = "form-control", type = "text", value = study$name, maxlength = "120",
+                     onchange = sprintf("esStudies.rename(%s, this.value);", .study_js_str(study$id)))),
+      tags$button(type = "button", class = "btn btn-primary mb-0", id = "studies_download",
+                  disabled = if (length(entries) == 0) NA else NULL,
+                  onclick = sprintf("Shiny.setInputValue('studies_download', { id: %s, nonce: Math.random() }, { priority: 'event' });", .study_js_str(study$id)),
+                  "Download (.docx)"),
+      tags$button(type = "button", class = "btn btn-outline-danger mb-0",
+                  onclick = sprintf("esStudies.clear(%s);", .study_js_str(study$id)), "Clear this study")),
+    div(class = "mb-3",
+      tags$label(class = "form-label small", `for` = "studies_note", "Notes for this study (go into the Word file, under the title)"),
+      tags$textarea(id = "studies_note", class = "form-control form-control-sm", rows = 2, maxlength = "4000",
+                    onchange = sprintf("esStudies.studyNote(%s, this.value);", .study_js_str(study$id)),
+                    if (is.character(study$note)) study$note else ""))
+  )
   if (length(entries) == 0) {
-    return(tagList(head, p(class = "text-muted", "Nothing added yet. Under a result, choose this study and press Add.")))
+    return(tagList(head, p(class = "text-muted", "Nothing added yet. Under a result, or at the end of the guide, choose this study and press Add.")))
   }
-  groups <- study_groups(entries)
-  refs <- unique(Filter(nzchar, vapply(entries, function(e) if (is.character(e$citation)) e$citation else "", character(1))))
+  groups <- study_groups(calcs)
+  refs <- unique(Filter(nzchar, vapply(calcs, function(e) if (is.character(e$citation)) e$citation else "", character(1))))
+  design_card <- if (length(designs)) div(class = "card mb-3",
+    div(class = "card-header", strong("How the design was chosen")),
+    div(class = "card-body", lapply(seq_along(designs), function(i) {
+      e <- designs[[i]]
+      div(class = if (i < length(designs)) "mb-3 pb-3 border-bottom" else "",
+        div(class = "d-flex flex-wrap justify-content-between gap-2",
+            strong(e$design),
+            span(class = "d-flex gap-2", .study_row_moves(study$id, e$id, i == 1, i == length(designs)), .study_remove_btn(study$id, e$id))),
+        if (nzchar(e$calculator)) p(class = "small mb-1", "Calculator: ", e$calculator),
+        tags$ol(class = "small mb-2", lapply(e$trail, function(t) tags$li(t$question, " ", tags$em(t$answer),
+                                                                          if (isTRUE(t$auto)) span(class = "text-muted", " (suggested from the description)")))),
+        .study_note_input(study$id, e))
+    })))
   tagList(
     head,
-    p(class = "small text-muted", sprintf("%d result(s) from %d calculator design(s).", length(entries), length(groups))),
-    lapply(groups, function(g) {
-      first <- g[[1]]
+    p(class = "small text-muted", sprintf("%d result(s) from %d calculator design(s).", length(calcs), length(groups)),
+      if (length(designs)) sprintf(" %d design choice(s) from the guide.", length(designs))),
+    design_card,
+    lapply(seq_along(groups), function(k) {
+      g <- groups[[k]]; first <- g[[1]]
+      key <- paste(first$module, first$design, sep = "\r")
+      section_moves <- span(class = "d-flex gap-2 small",
+        if (k > 1) .study_btn("Move section up", sprintf("esStudies.moveSection(%s, %s, -1);", .study_js_str(study$id), .study_js_str(key))),
+        if (k < length(groups)) .study_btn("Move section down", sprintf("esStudies.moveSection(%s, %s, 1);", .study_js_str(study$id), .study_js_str(key))))
       body <- if (length(g) == 1) {
         tagList(
           div(class = "d-flex justify-content-between", span(class = "small text-muted", first$time), .study_remove_btn(study$id, first$id)),
-          h6("Result"), .study_kv(first$results),
-          h6("Inputs"), .study_kv(first$inputs),
-          if (length(first$notes)) div(class = "small text-warning", lapply(unlist(first$notes), p))
+          h6("Result"), .study_kv(.study_relabel(first$results, first$module, "result")),
+          h6("Inputs"), .study_kv(.study_relabel(first$inputs, first$module, "input")),
+          if (length(first$notes)) div(class = "small text-warning", lapply(unlist(first$notes), p)),
+          .study_note_input(study$id, first)
         )
       } else {
         tb <- study_table(g)
+        heads <- vapply(names(tb$table), function(nm) {
+          if (nm == "#") nm else if (nm %in% tb$results) .study_label(nm, first$module, "result") else .study_label(nm, first$module, "input")
+        }, character(1))
         tagList(
-          if (length(tb$constant)) tagList(h6("Same in every row"), .study_kv(as.list(tb$constant))),
+          if (length(tb$constant)) tagList(h6("Same in every row"), .study_kv(.study_relabel(as.list(tb$constant), first$module, "input"))),
           div(class = "table-responsive",
             tags$table(class = "table table-sm table-striped align-middle",
-              tags$thead(tags$tr(lapply(names(tb$table), tags$th), tags$th(""))),
+              tags$thead(tags$tr(lapply(heads, tags$th), tags$th("Note"), tags$th(""))),
               tags$tbody(lapply(seq_len(nrow(tb$table)), function(i) {
-                tags$tr(lapply(tb$table[i, ], function(v) tags$td(as.character(v))), tags$td(.study_remove_btn(study$id, g[[i]]$id)))
+                tags$tr(lapply(tb$table[i, ], function(v) tags$td(as.character(v))),
+                        tags$td(style = "min-width: 12rem;", .study_note_input(study$id, g[[i]], rows = 1)),
+                        tags$td(class = "text-nowrap", .study_row_moves(study$id, g[[i]]$id, i == 1, i == nrow(tb$table)), " ",
+                                .study_remove_btn(study$id, g[[i]]$id)))
               }))))
         )
       }
       div(class = "card mb-3",
-        div(class = "card-header", strong(first$module_title), " -- ", first$design),
+        div(class = "card-header d-flex flex-wrap justify-content-between gap-2", span(strong(first$module_title), " -- ", first$design), section_moves),
         div(class = "card-body",
           body,
-          if (nzchar(first$formula_latex)) tags$details(class = "small", tags$summary("Formula (LaTeX, for Word's Insert > Equation)"),
+          if (nzchar(first$formula_latex)) tags$details(class = "small mt-2", tags$summary("Formula (LaTeX, for Word's Insert > Equation)"),
                                                        tags$pre(class = "mb-1", first$formula_latex)),
-          if (nzchar(first$citation)) p(class = "small mb-0", strong("Source: "), first$citation)))
+          if (nzchar(first$citation)) p(class = "small mb-0 mt-2", strong("Source: "), first$citation)))
     }),
     if (length(refs)) tagList(h5("References"), tags$ol(class = "small", lapply(refs, tags$li)))
   )
@@ -343,9 +410,33 @@ studies_assets <- function() {
     toast('Added to ' + s.name + ': ' + (summary || e.module_title), function () { remove(s.id, e.id); });
   }
   function remove(studyId, entryId) { var s = find(studyId); if (!s) return; s.entries = s.entries.filter(function (e) { return e.id !== entryId; }); save(); }
+  function gkey(e) { return e.kind === 'design' ? 'design' : e.module + '\\r' + e.design; }
+  function entry(s, entryId) { return s.entries.filter(function (e) { return e.id === entryId; })[0]; }
   window.esStudies = {
     request: function (inputId, studyId) { if (window.Shiny) Shiny.setInputValue(inputId, { study: studyId, nonce: Math.random() }, { priority: 'event' }); },
     remove: remove,
+    // move a result up or down among the results of the same calculator and design (the rows of its table)
+    moveRow: function (studyId, entryId, dir) {
+      var s = find(studyId); if (!s) return; var e = entry(s, entryId); if (!e) return;
+      var k = gkey(e), idx = [];
+      s.entries.forEach(function (x, i) { if (gkey(x) === k) idx.push(i); });
+      var pos = idx.indexOf(s.entries.indexOf(e)), to = pos + dir;
+      if (to < 0 || to >= idx.length) return;
+      var a = idx[pos], b = idx[to], t = s.entries[a]; s.entries[a] = s.entries[b]; s.entries[b] = t; save();
+    },
+    // move a whole calculator section up or down (design choices stay first)
+    moveSection: function (studyId, key, dir) {
+      var s = find(studyId); if (!s) return; var keys = [];
+      s.entries.forEach(function (x) { var k = gkey(x); if (k !== 'design' && keys.indexOf(k) < 0) keys.push(k); });
+      var i = keys.indexOf(key), j = i + dir;
+      if (i < 0 || j < 0 || j >= keys.length) return;
+      var t = keys[i]; keys[i] = keys[j]; keys[j] = t;
+      var out = s.entries.filter(function (x) { return gkey(x) === 'design'; });
+      keys.forEach(function (k) { s.entries.forEach(function (x) { if (gkey(x) === k) out.push(x); }); });
+      s.entries = out; save();
+    },
+    note: function (studyId, entryId, text) { var s = find(studyId); if (!s) return; var e = entry(s, entryId); if (!e) return; e.note = String(text || '').slice(0, 2000); save(); },
+    studyNote: function (studyId, text) { var s = find(studyId); if (!s) return; s.note = String(text || '').slice(0, 4000); save(); },
     rename: function (studyId, name) { var s = find(studyId); if (!s) return; name = String(name || '').trim().slice(0, 120); s.name = name || s.id; save(); },
     clear: function (studyId) { var s = find(studyId); if (!s || !s.entries.length) return; if (!window.confirm('Remove every result from ' + s.name + '?')) return; s.entries = []; save(); },
     addStudy: function () {
@@ -489,7 +580,8 @@ latex_plain <- function(latex) {
   paste0(if (nzchar(stem)) stem else "study", "_", format(date, "%Y-%m-%d"), ".docx")
 }
 
-.study_kv_table <- function(x, head = c("Quantity", "Value")) {
+.study_kv_table <- function(x, head = c("Quantity", "Value"), module = NULL, kind = "result") {
+  x <- .study_relabel(x, module, kind)
   if (length(x) == 0) return(character())
   df <- data.frame(names(x), vapply(x, as.character, character(1)), stringsAsFactors = FALSE)
   names(df) <- head
@@ -501,23 +593,38 @@ latex_plain <- function(latex) {
 #' @noRd
 study_docx <- function(study, time = Sys.time()) {
   entries <- study$entries
-  groups <- study_groups(entries)
-  refs <- unique(Filter(nzchar, vapply(entries, function(e) if (is.character(e$citation)) e$citation else "", character(1))))
+  designs <- Filter(.study_is_design, entries)
+  calcs <- Filter(Negate(.study_is_design), entries)
+  groups <- study_groups(calcs)
+  refs <- unique(Filter(nzchar, vapply(calcs, function(e) if (is.character(e$citation)) e$citation else "", character(1))))
+  comment <- function(e) if (is.character(e$note) && nzchar(trimws(e$note))) docx_p(docx_run("Comment: ", bold = TRUE), trimws(e$note))
   ref_no <- function(cit) match(cit, refs)
   body <- c(
     docx_p(study$name, style = "Title"),
     docx_p(sprintf("Sample size and power calculations: %d result(s) from %d calculator design(s). Prepared with Epidemiological suite %s on %s.",
-                   length(entries), length(groups), .release_label, format(as.Date(time), "%d %B %Y")), style = "Small"),
+                   length(calcs), length(groups), .release_label, format(as.Date(time), "%d %B %Y")), style = "Small"),
     docx_p("Formulas are given in LaTeX: in Word for Microsoft 365, choose Insert > Equation, switch the equation to LaTeX, paste, then Convert. A plain-text form follows where one could be made.", style = "Small")
   )
+  if (is.character(study$note) && nzchar(trimws(study$note))) body <- c(body, docx_p(docx_run("Notes: ", bold = TRUE), trimws(study$note)))
   if (length(entries) == 0) body <- c(body, docx_p("No results have been added to this study yet."))
+  if (length(designs)) {
+    body <- c(body, docx_p("How the design was chosen", style = "Heading1"))
+    for (e in designs) {
+      body <- c(body, docx_p(docx_run(e$design, bold = TRUE)),
+                if (nzchar(e$calculator)) docx_p("Calculator: ", e$calculator),
+                vapply(e$trail, function(t) docx_p(paste0(t$question, " "), docx_run(t$answer, italic = TRUE),
+                                                  if (isTRUE(t$auto)) " (suggested from the description)" else ""), character(1)),
+                comment(e))
+    }
+  }
   for (k in seq_along(groups)) {
     g <- groups[[k]]; first <- g[[1]]
     body <- c(body, docx_p(sprintf("%d. %s: %s", k, first$module_title, first$design), style = "Heading1"))
     if (length(g) == 1) {
       res <- first$results; h <- intersect(unlist(first$headline), names(res))
-      body <- c(body, docx_p("Result", style = "Heading2"), .study_kv_table(res[c(h, setdiff(names(res), h))]),
-                docx_p("Inputs", style = "Heading2"), .study_kv_table(first$inputs, c("Input", "Value")))
+      body <- c(body, docx_p("Result", style = "Heading2"), .study_kv_table(res[c(h, setdiff(names(res), h))], module = first$module),
+                docx_p("Inputs", style = "Heading2"), .study_kv_table(first$inputs, c("Input", "Value"), module = first$module, kind = "input"),
+                comment(first))
       notes <- unlist(first$notes)
       if (length(notes)) body <- c(body, vapply(notes, function(n) docx_p(docx_run("Note: ", bold = TRUE), n), character(1)))
       if (is.character(first$justification) && nzchar(first$justification)) {
@@ -525,8 +632,14 @@ study_docx <- function(study, time = Sys.time()) {
       }
     } else {
       tb <- study_table(g)
-      if (length(tb$constant)) body <- c(body, docx_p("Same in every row", style = "Heading2"), .study_kv_table(as.list(tb$constant), c("Input", "Value")))
-      body <- c(body, docx_p(sprintf("%d calculations", length(g)), style = "Heading2"), docx_table(tb$table))
+      if (length(tb$constant)) body <- c(body, docx_p("Same in every row", style = "Heading2"),
+                                         .study_kv_table(as.list(tb$constant), c("Input", "Value"), module = first$module, kind = "input"))
+      tab <- tb$table
+      names(tab) <- vapply(names(tab), function(nm) if (nm == "#") nm else if (nm %in% tb$results) .study_label(nm, first$module, "result")
+                           else .study_label(nm, first$module, "input"), character(1))
+      cm <- vapply(g, function(e) if (is.character(e$note)) trimws(e$note) else "", character(1))
+      if (any(nzchar(cm))) tab$Comment <- cm
+      body <- c(body, docx_p(sprintf("%d calculations", length(g)), style = "Heading2"), docx_table(tab))
       notes <- unique(unlist(lapply(g, function(e) unlist(e$notes))))
       if (length(notes)) body <- c(body, vapply(notes, function(n) docx_p(docx_run("Note: ", bold = TRUE), n), character(1)))
     }

@@ -95,6 +95,16 @@ design_wizard_server <- function(input, output, session) {
     updateTextAreaInput(session, "design_wizard_freetext", value = "")
   }, ignoreInit = TRUE)
 
+  observeEvent(input$design_wizard_study_add, {
+    node <- design_nodes[[state$node_id]]
+    req(isTRUE(node$terminal))
+    key <- .terminal_catalog_key(node, state$flags)
+    entry <- if (!is.null(key)) catalog_entry(key) else NULL
+    calc <- if (!is.null(entry) && isTRUE(entry$built)) paste0(entry$nav_target, ": ", entry$label) else NULL
+    e <- study_design_entry(node$design, state$trace, calc)
+    session$sendCustomMessage("study_add", list(study = input$design_wizard_study_add$study, entry = e, summary = study_entry_summary(e)))
+  }, ignoreInit = TRUE)
+
   observeEvent(input$design_wizard_jump, {
     node <- design_nodes[[state$node_id]]
     .design_wizard_go(session, .terminal_catalog_key(node, state$flags))
@@ -196,7 +206,13 @@ design_wizard_server <- function(input, output, session) {
         "outcome, plan the rank-based test instead."),
       actionButton("design_wizard_jump_rank", paste("Go to:", catalog_entry(.rank_alternative(key))$label), class = "btn-outline-primary btn-sm")),
     body,
-    br(), br(),
+    # Studies (R/mod_studies.R): keep this design choice, with the answers that led to it, in a study
+    div(class = "study-add d-flex flex-wrap gap-2 align-items-center mt-3",
+      tags$label(class = "small mb-0", `for` = "design_wizard_study_target", "Add this design choice to"),
+      tags$select(id = "design_wizard_study_target", class = "form-select form-select-sm study-target w-auto"),
+      tags$button(type = "button", class = "btn btn-sm btn-outline-primary",
+                  onclick = "esStudies.request('design_wizard_study_add', this.previousElementSibling.value);", "Add")),
+    br(),
     if (can_back) tagList(actionButton("design_wizard_back", "Back one question", class = "btn-outline-secondary btn-sm"), " "),
     actionButton("design_wizard_restart", "Start over / this isn't my design", class = "btn-link")
   )

@@ -88,7 +88,7 @@ suite of 102 files with 0 failures; 206 calculation functions exported with help
 
 - ~~**S-1 Storage, buttons and the Studies tab**~~ (3 Nov; moving entries and notes come with S-3, the download with S-2): the record kept in the browser tab only (nothing kept on the server); "Add to [Study 1 v] Add" under every result (the shared export hook of 64 calculators); a Studies tab with one drop-down (Study 1, 2, 3, + New study, Recent calculations), an editable name, the entries (remove, move, note), a live preview, Clear and **Download (.docx)**; repeated use of the same calculator and design shown as one table; Recent calculations recorded automatically (last 20).
 - ~~**S-2 Word file**~~ (3 Nov; to open once in Word by the owner): a small built-in .docx writer (no new runtime package); formulas as LaTeX ready for Word's Insert > Equation > LaTeX; references numbered without duplicates, plus the suite's own citation (version and DOI). Checked by reading the file back with `officer` in the tests only.
-- [ ] **S-3 Guide and wording:** "Add this design choice" at the end of the guide (the answers that led to the design); readable names for the inputs in the document (the results use short names such as `p1`, `sd`).
+- ~~**S-3 Guide and wording**~~ (3 Nov): "Add this design choice" at the end of the guide (the answers that led to the design); readable names for the inputs in the document (the results use short names such as `p1`, `sd`).
 - [ ] **S-4 Analyze tools and devices:** the Analyze results too; a check on a real phone on Connect Cloud (sleep, switch apps, reload) and in the browser build.
 
 ## Phase 5 — The R package for analysts
