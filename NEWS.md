@@ -1,5 +1,17 @@
 # epidemiologysuite (development version)
 
+## Studies: a working record of calculations (phase 1)
+
+* **Add this result to [Study v] Add** under every result (the 64 calculators with the export panel): the result is recorded as shown, with its
+  inputs, warnings, formula (LaTeX), justification paragraph and citation; a short message confirms it, with Undo.
+* **Studies tab:** one drop-down for Study 1, 2, 3 ("+ New study", up to 10) and Recent calculations; a name for each study; repeated use of one
+  calculator and design shown as one table (the inputs that changed as columns, the others listed once); remove an entry or clear a study;
+  references without duplicates.
+* **Recent calculations:** the last 20 results, recorded once a result has stayed the same for 3 seconds after you changed something in that
+  calculator; each can be added to a study later.
+* **Kept only in this browser tab** (`sessionStorage`): a reload, or a phone waking after the server version dropped the connection, keeps it;
+  closing the tab loses it. Nothing is saved on a server. The Word download follows in phase 2.
+
 ## Links from the calculators to the Effect Size converters
 
 * **Pre-filled converters:** nine "Calculate this" links copy what the calculator already holds into the converter (group means and SD,

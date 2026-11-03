@@ -60,6 +60,7 @@ suite of 102 files with 0 failures; 206 calculation functions exported with help
 - [ ] Hosting decision for the long term (Connect Cloud free-plan limits not verified; shinyapps.io is closing to new apps)
 - [ ] Home-screen icon (PWA), then an Android wrapper (TWA); iOS stays PWA only; desktop wrapper not recommended
 - [ ] Multi-user scaling (Phase 6, background computation)
+- [ ] About the three versions: a table in the app comparing the phone / server version, the browser version and the R package (where it runs, whether inputs leave the device, internet, start-up, simulation speed, devices, Studies storage, how to open or install, how to cite)
 
 ## Phase 4 — Interface  (first part done 29 Oct; mock-ups approved in principle, no icons before headings)
 
@@ -85,7 +86,7 @@ suite of 102 files with 0 failures; 206 calculation functions exported with help
 
 ## Phase 4c — Studies: a working record of calculations, downloaded as a Word file  (planned 3 Nov 2026; decisions S1-S5 in ROADMAP §10)
 
-- [ ] **S-1 Storage, buttons and the Studies tab:** the record kept in the browser tab only (nothing kept on the server); "Add to [Study 1 v] Add" under every result (the shared export hook of 64 calculators); a Studies tab with one drop-down (Study 1, 2, 3, + New study, Recent calculations), an editable name, the entries (remove, move, note), a live preview, Clear and **Download (.docx)**; repeated use of the same calculator and design shown as one table; Recent calculations recorded automatically (last 20).
+- ~~**S-1 Storage, buttons and the Studies tab**~~ (3 Nov; moving entries and notes come with S-3, the download with S-2): the record kept in the browser tab only (nothing kept on the server); "Add to [Study 1 v] Add" under every result (the shared export hook of 64 calculators); a Studies tab with one drop-down (Study 1, 2, 3, + New study, Recent calculations), an editable name, the entries (remove, move, note), a live preview, Clear and **Download (.docx)**; repeated use of the same calculator and design shown as one table; Recent calculations recorded automatically (last 20).
 - [ ] **S-2 Word file:** a small built-in .docx writer (no new runtime package); formulas as LaTeX ready for Word's Insert > Equation > LaTeX; references numbered without duplicates, plus the suite's own citation (version and DOI). Checked by reading the file back with `officer` in the tests only.
 - [ ] **S-3 Guide and wording:** "Add this design choice" at the end of the guide (the answers that led to the design); readable names for the inputs in the document (the results use short names such as `p1`, `sd`).
 - [ ] **S-4 Analyze tools and devices:** the Analyze results too; a check on a real phone on Connect Cloud (sleep, switch apps, reload) and in the browser build.
