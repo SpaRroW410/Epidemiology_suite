@@ -6,7 +6,7 @@ test_that("every citation format names the author, title, version, year and the 
     if (f != "methods") expect_match(txt, "Maheshwari", fixed = TRUE, info = f)   # the Methods sentence names the software, not its author
     expect_match(txt, "Epidemiological suite", fixed = TRUE, info = f)
     expect_match(txt, info$version, fixed = TRUE, info = f)
-    expect_match(txt, info$url, fixed = TRUE, info = f)
+    expect_match(txt, if (is.na(info$doi)) info$url else info$doi, fixed = TRUE, info = f)   # the DOI when there is one, else the web address
     if (f != "methods") expect_match(txt, info$year, fixed = TRUE, info = f)
   }
 })
@@ -56,7 +56,7 @@ test_that("the Cite tab is in the page and its files exist", {
   for (p in c("../../CITATION.cff", "../../inst/CITATION")) if (file.exists(p)) expect_true(TRUE)
 })
 
-test_that("the Cite tab shows the chosen format and says the DOI is pending (browser test)", {
+test_that("the Cite tab shows the chosen format and the DOI (browser test)", {
   skip_if_no_ui()
   app <- ui_fresh_driver(background_load = FALSE, name = "cite")
   withr::defer(app$stop())
@@ -65,5 +65,5 @@ test_that("the Cite tab shows the chosen format and says the DOI is pending (bro
   expect_match(ui_output_text(app, "cite_text"), "^Maheshwari, M\\. \\(2026\\)")
   app$set_inputs(cite_format = "bibtex"); app$wait_for_idle(800)
   expect_match(ui_output_text(app, "cite_text"), "^@misc\\{")
-  expect_match(app$get_js("document.querySelector('#cite_doi_note').innerText"), "DOI")
+  expect_match(app$get_js("document.querySelector('#cite_doi_note').innerText"), "10.5281/zenodo.23793833", fixed = TRUE)
 })
