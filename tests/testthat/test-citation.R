@@ -65,5 +65,5 @@ test_that("the Cite tab shows the chosen format and the DOI (browser test)", {
   expect_match(ui_output_text(app, "cite_text"), "^Maheshwari, M\\. \\(2026\\)")
   app$set_inputs(cite_format = "bibtex"); app$wait_for_idle(800)
   expect_match(ui_output_text(app, "cite_text"), "^@misc\\{")
-  expect_match(app$get_js("document.querySelector('#cite_doi_note').innerText"), "10.5281/zenodo.23793833", fixed = TRUE)
+  expect_match(app$get_js("document.querySelector('#cite_doi_note').innerText"), "10.5281/zenodo.23794230", fixed = TRUE)
 })

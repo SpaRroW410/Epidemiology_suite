@@ -30,9 +30,12 @@ something outside the code (a paper, a package, an account). Work is collected o
   calculator (loading a calculator records nothing), without duplicates (3 Nov 2026).
 - [ ] S-1 left: moving entries and notes (S-3); the four tools without the shared export hook (ecological and qualitative guidance,
   randomization list, survey selection) have no Add button.
-- [ ] S-2 Built-in .docx writer (no new runtime package): XML parts, stored zip with CRC-32, references, table style; formulas as LaTeX for
-  Word's Insert > Equation, with a plain-text version beside it.
-- [ ] S-2 Tests: unzip, XML parse, read back with `officer` (Suggests); open once in Word and LibreOffice by hand.
+- [x] S-2 Built-in .docx writer (no new runtime package; `R/docx_writer.R`): XML parts, stored zip with CRC-32, headings, tables with a
+  repeated header row; each formula in LaTeX for Word's Insert > Equation, with a plain-text form where every command is known (222 of the app's
+  396 formula blocks); numbered references with the suite's own citation; made in R and saved by the browser (3 Nov 2026).
+- [x] S-2 Tests: CRC-32 check value and `digest`, base64 against `jsonlite`, `unzip -t`, every part parsed by `xml2`, read back by `officer`,
+  converted by LibreOffice; browser test of the download (3 Nov 2026).
+- [ ] S-2 left: **[owner]** open one downloaded file in Word (desktop and phone) and try Insert > Equation > LaTeX on a formula.
 - [ ] S-3 "Add this design choice" at the end of the guide; notes and reordering; readable input names in the document.
 - [ ] S-4 Analyze results; real-phone check on Connect Cloud (sleep, switch apps, reload) and the browser build.
 - [ ] Check: Word on phones, Google Docs and LibreOffice (whether pasted LaTeX can be turned into an equation there; table styles); a long study on a phone.

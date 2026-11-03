@@ -1,6 +1,13 @@
 # epidemiologysuite (development version)
 
-## Studies: a working record of calculations (phase 1)
+## Studies: a working record of calculations (phases 1 and 2)
+
+* **Download (.docx)** for each study: title, a summary line, one section per calculator and design (a result table and an inputs table,
+  or one table for repeated use), notes, the justification paragraph, each formula in LaTeX ready for Word's Insert > Equation (with a
+  plain-text form where it can be made), the source, and numbered references ending with the suite's own citation. The file is written by a
+  small built-in .docx writer (no new package; it also works in the browser version) and saved by the browser, so nothing is written on a server.
+* **Fixed:** the DOI on the Cite tab, in `CITATION.cff` and in `R/citation_info.R` is again 10.5281/zenodo.23794230 (an old branch merged into
+  main had put back a deleted Zenodo record); the ORCID is back in `CITATION.cff`.
 
 * **Add this result to [Study v] Add** under every result (the 64 calculators with the export panel): the result is recorded as shown, with its
   inputs, warnings, formula (LaTeX), justification paragraph and citation; a short message confirms it, with Undo.
@@ -10,7 +17,7 @@
 * **Recent calculations:** the last 20 results, recorded once a result has stayed the same for 3 seconds after you changed something in that
   calculator; each can be added to a study later.
 * **Kept only in this browser tab** (`sessionStorage`): a reload, or a phone waking after the server version dropped the connection, keeps it;
-  closing the tab loses it. Nothing is saved on a server. The Word download follows in phase 2.
+  closing the tab loses it. Nothing is saved on a server.
 
 ## Links from the calculators to the Effect Size converters
 
