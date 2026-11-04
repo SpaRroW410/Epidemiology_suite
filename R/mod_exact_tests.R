@@ -34,10 +34,11 @@ mod_exact_tests_ui <- function(id) {
         numericInput(ns("p1_bin"), "p1 (expected proportion)", value = 0.30, min = 0, max = 1, step = 0.01),
         numericInput(ns("alpha_bin"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_bin"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-        selectInput(
-          ns("alternative_bin"), "Alternative hypothesis",
-          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
-        )
+        advanced_options_ui(ns, id = "adv_bin",
+          selectInput(
+            ns("alternative_bin"), "Alternative hypothesis",
+            choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+          ))
       ),
       conditionalPanel(
         condition = design_is("fisher"),
@@ -46,10 +47,11 @@ mod_exact_tests_ui <- function(id) {
         numericInput(ns("alpha_fisher"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_fisher"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
         numericInput(ns("ratio_fisher"), with_tip("Allocation ratio (group 2 : group 1)", "allocation_ratio"), value = 2, min = 0.1, step = 0.1),
-        selectInput(
-          ns("alternative_fisher"), "Alternative hypothesis",
-          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
-        )
+        advanced_options_ui(ns, id = "adv_fisher",
+          selectInput(
+            ns("alternative_fisher"), "Alternative hypothesis",
+            choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+          ))
       ),
       conditionalPanel(
         condition = design_is("boschloo"),
@@ -58,10 +60,11 @@ mod_exact_tests_ui <- function(id) {
         numericInput(ns("alpha_boschloo"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_boschloo"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
         numericInput(ns("ratio_boschloo"), with_tip("Allocation ratio (group 2 : group 1)", "allocation_ratio"), value = 1, min = 0.1, step = 0.1),
-        selectInput(
-          ns("alternative_boschloo"), "Alternative hypothesis",
-          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
-        )
+        advanced_options_ui(ns, id = "adv_boschloo",
+          selectInput(
+            ns("alternative_boschloo"), "Alternative hypothesis",
+            choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+          ))
       ),
       conditionalPanel(
         condition = design_is("poisson"),
@@ -69,10 +72,11 @@ mod_exact_tests_ui <- function(id) {
         numericInput(ns("rate1_poisson"), "rate1 (expected/anticipated true rate)", value = 10, min = 0.0001, step = 0.1),
         numericInput(ns("alpha_poisson"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_poisson"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-        selectInput(
-          ns("alternative_poisson"), "Alternative hypothesis",
-          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
-        )
+        advanced_options_ui(ns, id = "adv_poisson",
+          selectInput(
+            ns("alternative_poisson"), "Alternative hypothesis",
+            choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+          ))
       ),
       conditionalPanel(
         condition = design_is("sign"),
@@ -80,10 +84,11 @@ mod_exact_tests_ui <- function(id) {
                      value = 0.7, min = 0.001, max = 0.999, step = 0.01),
         numericInput(ns("alpha_sign"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_sign"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-        selectInput(
-          ns("alternative_sign"), "Alternative hypothesis",
-          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
-        )
+        advanced_options_ui(ns, id = "adv_sign",
+          selectInput(
+            ns("alternative_sign"), "Alternative hypothesis",
+            choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+          ))
       ),
       hr(),
       h5("Result"),

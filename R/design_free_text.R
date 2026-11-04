@@ -19,6 +19,30 @@
 # these as cleanly as a keyword table can capture, and a wrong high-
 # confidence guess there is worse than stopping one question early.
 
+# Research questions phrased by topic (ROADMAP "Expanding the guide's free-text reader"):
+# - descriptive topics (knowledge-attitude-practice, awareness, utilization, pattern of ...) are surveys of a population: routed to an estimate;
+# - "determinants / factors associated / risk factors / predictors / correlates of X" are NOT routed: docs/design_identification_algorithm.md
+#   (section 0.3 and "Never collapse ... at Low confidence") says they are ambiguous between a cross-sectional survey, a case-control study,
+#   a cohort and a prediction model, and the guide must show the candidates and let the user choose. walk_free_text() flags them
+#   (flags$ambiguous = "determinants") and the guide offers the four routes (.rq_routes, R/design_wizard.R).
+.free_text_topic_pattern <- paste0(
+  "knowledge,? attitudes?|\\bkap\\b|\\bkabp?\\b|awareness (of|about|regarding)|perceptions? (of|about|regarding)|",
+  "practices? (of|about|regarding|related)|utili[sz]ation of|uptake of|coverage of|pattern of")
+.free_text_determinants_pattern <- paste0(
+  "determinants?|factors? (associated|related|influencing|affecting|contributing|responsible)|associated factors|risk factors?|",
+  "predictors? (of|for)|correlates of")
+
+# Flags read from the whole description, whatever path the rules take (used by the guide's last step):
+#   determinants  the question asks what is associated with the outcome, so the association needs its own sample size too
+#   population    a population named by place or setting (city, district, village, schools ...), so cluster sampling is likely
+.free_text_flags <- function(text) {
+  list(
+    determinants = grepl(.free_text_determinants_pattern, text, ignore.case = TRUE, perl = TRUE),
+    population = grepl("\\b(city|cities|town|district|block|villages?|communit(y|ies)|slums?|urban|rural|wards?|schools?|colleges?|universit(y|ies)|households?|state|province|region)\\b",
+                       text, ignore.case = TRUE, perl = TRUE)
+  )
+}
+
 free_text_rules <- list(
 
   # Analysis of counts the user already has. Checked first, but only on phrases that
@@ -56,10 +80,14 @@ free_text_rules <- list(
          option_index = 7, confidence = "High"),
     list(pattern = "\\blqas\\b|lot quality|\\bpilot\\b|feasibility|rare events?|\\banimal|\\bmice\\b|\\brats\\b|preclinical|psychometric|factor analysis|questionnaire development|\\bgwas\\b|genetic|genomic|genome.?wide|value of information|\\bevpi\\b",
          option_index = 9, confidence = "Medium"),
-    list(pattern = "(?<!intracluster )(?<!intra-cluster )(?<!intraclass )(?<!intra-class )correlat|\\bregression\\b|\\bancova\\b|linear model",
+    list(pattern = "(?<!intracluster )(?<!intra-cluster )(?<!intraclass )(?<!intra-class )correlat(?!es\\s+of)|\\bregression\\b|\\bancova\\b|linear model",
          option_index = 8, confidence = "High"),
     list(pattern = "compar(e|ed|es|ing|ison)|dose.?finding|phase (i|ii|iii|1|2|3)\\b|multiplicity|multiple (primary )?(endpoints|comparisons)|interim analys|group.?sequential|bayesian|non.?inferior|equivalen|stepped.?wedge|cross.?over|case.?crossover|self.?controlled|\\bsccs\\b|nested case|case.?cohort|ecological study|case.?control|cases and controls|\\bcohorts?\\b|exposed (and|versus|vs\\.?) unexposed|\\bt-?tests?\\b|\\banova\\b|chi.?square|mann.?whitney|wilcoxon|\\blog.?rank|\\bhazard ratio|survival analysis|difference (in|of|between)|\\bversus\\b|\\bvs\\.?\\b|association between|effect of|efficacy of|impact of|randomi[sz]ed|allocated|\\btrial\\b|\\barm\\b|followed up|incidence of|developed over|cases and controls|case-control|non-inferior|equivalent|bioequivalence|between (two|2|three|3) (groups|arms)",
          option_index = 2, confidence = "Medium"),
+    # Descriptive research questions phrased by topic (knowledge-attitude-practice, awareness, utilization, pattern of ...) name no design;
+    # with no comparison or follow-up words (the rule above wins when there are) they are surveys of a population. Determinants questions
+    # are deliberately not routed here (see .free_text_determinants_pattern).
+    list(pattern = .free_text_topic_pattern, option_index = 1, confidence = "Medium"),
     list(pattern = "prevalence of|estimate the|proportion of|magnitude of|assess the burden|mean level of|to determine the level|incidence rate of",
          option_index = 1, confidence = "High")
   ),
@@ -185,7 +213,10 @@ free_text_rules <- list(
     list(pattern = "proportion|prevalence",  option_index = 1, confidence = "High"),
     list(pattern = "\\bmean\\b|average",      option_index = 2, confidence = "High"),
     list(pattern = "incidence rate|rate of",  option_index = 3, confidence = "High"),
-    list(pattern = "risk ratio|odds ratio|rate ratio", option_index = 4, confidence = "Medium")
+    list(pattern = "risk ratio|odds ratio|rate ratio", option_index = 4, confidence = "Medium"),
+    # a topic question: a measured outcome ("levels", "score") is a mean; otherwise (smoking, use of, knowledge, practice ...) a proportion
+    list(pattern = "\\blevels?\\b|\\bscores?\\b|\\bconcentrations?\\b", option_index = 2, confidence = "Medium"),
+    list(pattern = .free_text_topic_pattern, option_index = 1, confidence = "Medium")
   ),
 
   ratio_type = list(
@@ -255,6 +286,11 @@ free_text_rules <- list(
 
   cohort_outcome = list(
     list(pattern = "time to|survival|hazard|kaplan|log.?rank|\\bcox\\b",              option_index = 4, confidence = "High"),
+    # dose-response (4 Nov 2026): ordered levels of exposure, or exposure measured on a scale
+    list(pattern = "dose.?response|trend (in|across)|ordered (levels|categories|groups)|graded exposure|levels of exposure|tertiles?|quartiles?|quintiles?",
+         option_index = 6, confidence = "Medium"),
+    list(pattern = "per unit (of|increase)|per (1|one|10|ten)[- ]?(unit|mg|year|point)|continuous exposure|exposure measured",
+         option_index = 7, confidence = "Medium"),
     list(pattern = "per person|person.?(years|time|days)|incidence rate|rate ratio",   option_index = 3, confidence = "High"),
     list(pattern = "ordinal|likert|\\bgrade\\b|\\bstage\\b",                          option_index = 5, confidence = "High"),
     list(pattern = "\\bmean\\b|median|interquartile|\\biqr\\b|average|continuous|blood pressure|\\bbp\\b|haemoglobin|hemoglobin|\\bhb\\b|\\bbmi\\b|weight|\\bscore\\b|concentration|\\blevels?\\b|difference in",
@@ -264,6 +300,11 @@ free_text_rules <- list(
   ),
 
   cc_exposure_type = list(
+    # ordered or categorical exposure (4 Nov 2026), before the measurement and yes/no cues
+    list(pattern = "dose.?response|trend (in|across)|ordered (levels|categories|groups)|never.{0,12}former.{0,12}current|pack.?years? (groups|categories)|tertiles?|quartiles?|quintiles?",
+         option_index = 4, confidence = "Medium"),
+    list(pattern = "(three|3|four|4|several) (or more )?(unordered )?(categories|types|groups) of exposure|categories of exposure|type of (occupation|exposure)",
+         option_index = 3, confidence = "Medium"),
     list(pattern = "\\bmean\\b|median|interquartile|\\biqr\\b|average|continuous|concentration|\\bserum\\b|\\blevels?\\b|difference in|haemoglobin|hemoglobin|\\bbmi\\b|blood pressure|\\bscore\\b",
          option_index = 2, confidence = "Medium"),
     list(pattern = "odds ratio|matched|unmatched|exposed|exposure|smok|\\buse\\b|history|yes.?no|binary|present|absent|\\bever\\b",
@@ -330,6 +371,21 @@ free_text_rules <- list(
 #' matches -- an honest "couldn't infer further, please continue manually"
 #' degrade, never a guess.
 #' @noRd
+# The guide's state after a fixed sequence of answers from the root (option indices), as if they had been clicked: used for the routes a
+# user picks for an ambiguous research question. `flags` are kept (e.g. determinants, population).
+.walk_answers <- function(answers, flags = list(), nodes = design_nodes) {
+  node_id <- "root"; trace <- list()
+  for (idx in answers) {
+    node <- nodes[[node_id]]
+    if (isTRUE(node$terminal)) break
+    opt <- node$options[[idx]]
+    if (!is.null(opt$set)) for (nm in names(opt$set)) flags[[nm]] <- opt$set[[nm]]
+    trace <- c(trace, list(list(question = node$question, answer = opt$label)))
+    node_id <- if (is.function(opt$next_id)) opt$next_id(flags) else opt$next_id
+  }
+  list(node_id = node_id, trace = trace, flags = flags)
+}
+
 walk_free_text <- function(text, nodes = design_nodes) {
   node_id <- "root"
   trace <- list()
@@ -363,6 +419,10 @@ walk_free_text <- function(text, nodes = design_nodes) {
     node_id <- if (is.function(opt$next_id)) opt$next_id(flags) else opt$next_id
   }
 
+  # flags read from the whole text (they never override a flag the answers set)
+  for (nm in names(tf <- .free_text_flags(text))) if (isTRUE(tf[[nm]]) && is.null(flags[[nm]])) flags[[nm]] <- TRUE
+  # a determinants question that named no design: the guide shows the candidate designs instead of choosing one
+  if (length(trace) == 0 && isTRUE(flags$determinants)) flags$ambiguous <- "determinants"
   list(node_id = node_id, trace = trace, flags = flags,
        reached_terminal = isTRUE(nodes[[node_id]]$terminal))
 }

@@ -75,11 +75,30 @@ test_that("ICC, Cronbach's alpha and limits-of-agreement precision equal presize
   }
 })
 
-test_that("kappa sample size equals presize::prec_kappa (kappaSize is still used underneath)", {
-  skip_if_not_installed("kappaSize")
+test_that("kappa sample size equals presize::prec_kappa", {
+  skip_if_not_installed("presize")
   for (nc in 2:4) for (raters in c(2, 3)) for (cw in c(0.15, 0.25)) {
     props <- switch(nc - 1, c(0.4, 0.6), c(0.3, 0.3, 0.4), c(0.2, 0.3, 0.3, 0.2))
     a <- .cf_prec_kappa(0.7, raters, nc, props, cw); b <- presize::prec_kappa(kappa = 0.7, conf.width = cw, raters = raters, n_category = nc, props = props)
     near(c(a$n, a$lwr, a$upr), c(b$n, b$lwr, b$upr), paste("kappa", nc, raters, cw))
   }
+})
+
+test_that("the re-derived kappa cell probabilities give kappaSize's sample size for 2-5 categories and 2-6 raters", {
+  skip_if_not_installed("kappaSize")
+  fun <- list(kappaSize::CIBinary, kappaSize::CI3Cats, kappaSize::CI4Cats, kappaSize::CI5Cats)
+  set.seed(4)
+  for (nc in 2:5) for (raters in 2:6) for (rep in 1:3) {
+    props <- if (nc == 2) stats::runif(1, 0.05, 0.95) else { x <- stats::runif(nc, 0.1, 1); x / sum(x) }
+    k0 <- stats::runif(1, 0.25, 0.8); w <- stats::runif(1, 0.08, 0.3)
+    one_sided <- rep == 3
+    al <- c(0.025, 0.05, 0.1)[rep]
+    a <- fun[[nc - 1]](kappa0 = k0, kappaL = k0 - w / 2, kappaU = if (one_sided) NA else k0 + w / 2, props = props, raters = raters, alpha = al)$n
+    b <- .kappa_ci_n(k0, k0 - w / 2, if (one_sided) NA else k0 + w / 2, props, raters, al)
+    expect_equal(b, a, info = paste("categories", nc, "raters", raters, "rep", rep))
+  }
+  # the pieces: two raters, the two cell models agree; the Dirichlet-multinomial unanimous cells sum below 1
+  u <- .kappa_unanimous_dm(0.6, c(0.2, 0.3, 0.5), 3)
+  expect_true(sum(u) < 1 && all(u > 0))
+  expect_equal(.kappa_unanimous_dm(0.6, c(0.2, 0.3, 0.5), 2), c(0.2, 0.3, 0.5) * (c(0.2, 0.3, 0.5) + 0.6 * (1 - c(0.2, 0.3, 0.5))))
 })

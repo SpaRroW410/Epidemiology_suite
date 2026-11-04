@@ -48,10 +48,13 @@ design_wizard_server <- function(input, output, session) {
     state$flags <- res$flags
     # nothing recognised: say so, instead of leaving the guide as it was (a research question such as "determinants of ... among
     # youth" names no design; ROADMAP: expanding the free-text reader)
-    state$parse_note <- if (length(res$trace) == 0 && !is.null(input$design_wizard_freetext) && nzchar(trimws(input$design_wizard_freetext))) "none" else NULL
+    state$parse_note <- if (identical(res$flags$ambiguous, "determinants")) "choose"
+                        else if (length(res$trace) == 0 && !is.null(input$design_wizard_freetext) && nzchar(trimws(input$design_wizard_freetext))) "none"
+                        else NULL
   }, ignoreInit = TRUE)
 
   output$design_wizard_trace <- renderUI({
+    if (identical(state$parse_note, "choose")) return(.render_rq_choices())
     if (identical(state$parse_note, "none")) {
       return(div(class = "alert alert-warning small", role = "status",
         p(class = "mb-1", strong("Nothing in this description could be matched to a study design yet.")),
@@ -133,6 +136,24 @@ design_wizard_server <- function(input, output, session) {
     node <- design_nodes[[state$node_id]]
     .design_wizard_go(session, .rank_alternative(.terminal_catalog_key(node, state$flags)))
   }, ignoreInit = TRUE)
+  # a determinants question: the user picks the design (.rq_routes); the guide continues from there
+  for (r in names(.rq_routes)) local({
+    route <- r
+    observeEvent(input[[paste0("design_wizard_rq_", route)]], {
+      remember()
+      answers <- .rq_routes[[route]]$answers
+      if (route == "survey" && grepl("\\blevels?\\b|\\bscores?\\b|\\bconcentrations?\\b|\\bmean\\b|average", if (is.null(input$design_wizard_freetext)) "" else input$design_wizard_freetext, ignore.case = TRUE)) answers <- c(1, 2)
+      w <- .walk_answers(answers, state$flags[intersect(names(state$flags), c("determinants", "population"))])
+      state$node_id <- w$node_id; state$trace <- w$trace; state$flags <- w$flags
+      state$parse_note <- NULL
+    }, ignoreInit = TRUE)
+  })
+
+  # research questions: the association part, and the design effect for a population named by place (.render_research_question_notes())
+  rq_key <- function() .terminal_catalog_key(design_nodes[[state$node_id]], state$flags)
+  observeEvent(input$design_wizard_jump_assoc_two, .design_wizard_go(session, .rq_assoc_keys(rq_key())[["two"]]), ignoreInit = TRUE)
+  observeEvent(input$design_wizard_jump_assoc_reg, .design_wizard_go(session, .rq_assoc_keys(rq_key())[["reg"]]), ignoreInit = TRUE)
+  observeEvent(input$design_wizard_jump_pop_deff, .design_wizard_go(session, "cluster_deff"), ignoreInit = TRUE)
   observeEvent(input$design_wizard_jump_glmm, {
     .design_wizard_go(session, if (identical(state$flags$outcome, "binary")) "glmm_binary" else "glmm_lmm_continuous")
   }, ignoreInit = TRUE)
@@ -184,6 +205,60 @@ design_wizard_server <- function(input, output, session) {
     NULL)
 }
 
+# The designs a determinants question can mean (docs/design_identification_algorithm.md: show them, let the user choose), with the guide's
+# answers from the root that lead to each.
+.rq_routes <- list(
+  survey = list(label = "A survey of a population now (cross-sectional)",
+                when = "You will study a sample of the population once, measuring the outcome and the possible factors together. The usual design for \"determinants of ... in the youth of a city\".",
+                answers = c(1, 1)),
+  case_control = list(label = "Cases compared with people without the condition (case-control)",
+                      when = "You start from people who have the outcome and people who do not, and look back at their exposures. Good for rare outcomes.",
+                      answers = c(2, 2, 2)),
+  cohort = list(label = "People followed over time (cohort)",
+                when = "You start from people with and without the exposures and follow them until the outcome appears.",
+                answers = c(2, 2, 1)),
+  prediction = list(label = "A model to predict who will have the outcome (prediction model)",
+                    when = "The aim is a score or model that predicts the outcome for an individual, not the role of each factor.",
+                    answers = c(3))
+)
+.render_rq_choices <- function() {
+  div(class = "card card-body mb-3", role = "group", `aria-label` = "Which design is your study?",
+    p(class = "mb-2", strong("Your question asks about determinants or risk factors. "), info_tip("determinants"), " ",
+      "That can mean different designs, and the sample size depends on which. Choose the one you plan:"),
+    lapply(names(.rq_routes), function(r) {
+      x <- .rq_routes[[r]]
+      div(class = "mb-2",
+          actionButton(paste0("design_wizard_rq_", r), x$label, class = "btn-outline-primary btn-sm text-start"),
+          div(class = "small text-muted mt-1", x$when))
+    }))
+}
+
+# A survey reached from a research question (R/design_free_text.R, .free_text_flags()): the estimate is only part of the answer.
+.rq_estimate_keys <- c("proportion_single_precision", "means_single_precision", "cluster_survey")
+.rq_assoc_keys <- function(key) {
+  if (identical(key, "means_single_precision")) c(two = "means_two_indep", reg = "regression_r2")
+  else c(two = "proportion_two_indep", reg = "logistic_binary_adjusted")
+}
+.render_research_question_notes <- function(key, flags) {
+  if (is.null(key) || !key %in% .rq_estimate_keys) return(NULL)
+  assoc <- .rq_assoc_keys(key)
+  tagList(
+    if (isTRUE(flags$determinants)) div(class = "alert alert-info small",
+      p(strong("Your question also asks what is associated with the outcome (its determinants or risk factors). "),
+        "The calculator below gives the sample size for how common the outcome is (or its average). The associations need a sample size ",
+        "of their own: for one factor at a time, a comparison of two groups (for example users and non-users); for several factors together, ",
+        "a multiple regression", info_tip("logistic_regression"), ". Plan each, use the largest, and add each to your study."),
+      actionButton("design_wizard_jump_assoc_two", paste("Go to:", catalog_entry(assoc[["two"]])$label), class = "btn-light btn-sm"), " ",
+      actionButton("design_wizard_jump_assoc_reg", paste("Go to:", catalog_entry(assoc[["reg"]])$label), class = "btn-light btn-sm")),
+    if (isTRUE(flags$population) && !identical(key, "cluster_survey")) div(class = "alert alert-info small",
+      p(strong("The population is named by a place or setting. "), info_tip("cluster_sampling"), " ",
+        "If you will select clusters (wards, villages, schools, colleges ...) and then people within them, rather than people from one list, ",
+        "multiply the sample size by the design effect (most commonly taken as 1.5 or 2 when nothing is known), or calculate the design ",
+        "effect from the variance between clusters."),
+      actionButton("design_wizard_jump_pop_deff", "Go to: Cluster / Design Effect", class = "btn-light btn-sm"))
+  )
+}
+
 .render_design_terminal <- function(node, flags, can_back = FALSE) {
   key <- .terminal_catalog_key(node, flags)
   entry <- if (!is.null(key)) catalog_entry(key) else NULL
@@ -219,6 +294,7 @@ design_wizard_server <- function(input, output, session) {
         "SD = IQR / 1.35 for a large sample; the Means calculator has a converter under its design list), or, for a clearly skewed",
         "outcome, plan the rank-based test instead."),
       actionButton("design_wizard_jump_rank", paste("Go to:", catalog_entry(.rank_alternative(key))$label), class = "btn-outline-primary btn-sm")),
+    .render_research_question_notes(key, flags),
     body,
     # Studies (R/mod_studies.R): keep this design choice, with the answers that led to it, in a study
     div(class = "study-add d-flex flex-wrap gap-2 align-items-center mt-3",

@@ -93,3 +93,16 @@ calc_patient_units_within_continuous(delta = 0.5, sd = 1, icc = 0.3, units_per_a
 ## Allowing for loss to follow-up
 
 Inflate a sample size for expected loss with the attrition functions (`?calc_attrition_stages`, `?calc_attrition_arms`).
+
+## The paragraph, the export and the curve
+
+The app's export panel and power curves are available from R too. `ss_text()` writes the protocol paragraph (it needs the source of the
+formula, which each calculator's Reference tab gives), `ss_export()` the CSV or JSON, and `ss_curve()` the sample size across a range of
+one input, the others held:
+
+```{r helpers}
+r <- calc_proportion_precision(p = 0.3, d = 0.05)
+ss_text(r, "Single proportion, precision-based", "Cochran WG. Sampling Techniques. 3rd ed. New York: Wiley; 1977.")
+cat(ss_export(r, "csv"))
+ss_curve(calc_proportion_precision, list(p = 0.3, d = 0.05), "d", c(0.03, 0.04, 0.05, 0.06))
+```

@@ -32,9 +32,10 @@ must equal n_category and sum to 1}
 list(n, inputs)
 }
 \description{
-Wraps presize::prec_kappa(), which itself wraps the kappaSize package's
+The method of presize::prec_kappa() and the kappaSize package's
 CI-width-based functions (Donner & Eliasziw 1987 for the 2-category case;
-Rotondi & Donner 2012 for multi-category/multi-rater). Precision-based: no
+Rotondi & Donner 2012 for multi-category/multi-rater), written out in the
+package (no runtime dependency) and tested equal to both. Precision-based: no
 hypothesis test, no power target -- just an expected kappa, a desired
 confidence-interval width, and how the categories are expected to split.
 }

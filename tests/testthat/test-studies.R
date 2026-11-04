@@ -187,7 +187,7 @@ test_that("the randomization list and survey selection offer Add to study, with 
 
 test_that("the guide says when nothing in a description could be matched, and clears it on the next answer", {
   shiny::testServer(function(input, output, session) design_wizard_server(input, output, session), {
-    session$setInputs(design_wizard_freetext = "Sexual and reproductive determinants in youth of a city")
+    session$setInputs(design_wizard_freetext = "My research is about young people in our town")
     session$setInputs(design_wizard_parse = 1)
     expect_match(as.character(output$design_wizard_trace$html), "Nothing in this description could be matched")
     session$setInputs(design_wizard_freetext = "Prevalence of anaemia among adolescent girls in a district")

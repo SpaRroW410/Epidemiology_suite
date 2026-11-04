@@ -426,7 +426,7 @@ standard output and unaffected.
   Oracle comparisons are recorded in test comments and checklist notes.
 - **Monte Carlo designs** additionally test type-I-error control, monotonicity (more
   effect → smaller n), and reproducibility under a fixed seed.
-- **Browser tests** (`shinytest2`, headless Chrome): `test-ui_smoke.R` opens every module and
+- **Browser tests** (`shinytest2`, headless Chrome): `test-ui_smoke.R` opens every module (the other areas are in `test-ui_*.R`, split on 4 Nov 2026) and
   checks no output errors; further tests cover the lazy loading, the wizard, Home search, the Cite tab, the phone layout, the
   plot descriptions and `run_app(calculator = ...)`. They skip themselves without Chrome or with `S2R_SKIP_UI=true`.
 - **Accessibility and layout scans** (not part of the suite): `tools/ui-audit/audit.R` (layout) and `tools/ui-audit/a11y.R`
@@ -469,7 +469,7 @@ The forward plan is [`ROADMAP.md`](ROADMAP.md). The build stages used so far:
 | 5 — wizard, free-text half | Keyword parser pre-filling the wizard | **Done** (RCT-internals rules open) |
 | 6 — remaining backlog | Everything else in the checklists | **Effectively complete** — 8 batches plus a closing audit; remaining items blocked with documented reasons (ROADMAP §4) |
 | 7 — suite expansion | Analyze workbench, planning and survey tools, outbreak / surveillance tools, infectious-disease models, Eyes / Lesions per Patient | **Done** (summary-data only; raw-data workbench deferred, D1) |
-| 8 — dependency reduction | Shrink runtime package list where reimplementation is safe | **Done** — 14 packages replaced by checked reimplementations (two upstream bugs found), `PowerTOST` and `Exact` the last (31 Oct 2026); `clinfun`, `kappaSize` and `lme4` kept on purpose (they work in the browser; replacing them adds risk without a gain) |
+| 8 — dependency reduction | Shrink runtime package list where reimplementation is safe | **Done** — 14 packages replaced by checked reimplementations (two upstream bugs found), `PowerTOST` and `Exact` the last (31 Oct 2026); `kappaSize` replaced on 4 Nov 2026 (its cell probabilities written out, equal to the package in the tests); `clinfun` and `lme4` kept on purpose (they work in the browser; replacing them adds risk without a gain) |
 | 9 — devices and interface | Browser build, phone / server version, phone layout, lazy loading, task-first Home, search, accessibility, dark mode | **Done** (a real-phone check is open) |
 | 10 — package API | Every calculation exported with help pages, `ss_find()`, addin, Cite tab | **Done**; vignettes, r-universe and CRAN open |
 
@@ -512,9 +512,9 @@ enforced by consistency tests rather than habit.
 
 ## Appendix: Dependencies
 
-**Runtime** (`DESCRIPTION` `Imports`): `shiny` (>= 1.8.1), `bslib` (>= 0.7.0), `promises`, `clinfun`, `kappaSize`, `mvtnorm`, `lme4`;
-plus `survival`, `graphics`, `stats` and `utils` from base R. (Fourteen earlier imports, among them `pwr`, `presize`, `epiR`,
-`pROC`, `powerMediation`, `pmsampsize`, `powerSurvEpi`, `TrialSize`, `PowerTOST` and `Exact`, were replaced by reimplementations that are tested against
+**Runtime** (`DESCRIPTION` `Imports`): `shiny` (>= 1.8.1), `bslib` (>= 0.7.0), `promises`, `clinfun`, `mvtnorm`, `lme4`;
+plus `survival`, `graphics`, `stats` and `utils` from base R. (Fifteen earlier imports, among them `pwr`, `presize`, `epiR`,
+`pROC`, `powerMediation`, `pmsampsize`, `powerSurvEpi`, `TrialSize`, `PowerTOST`, `Exact` and `kappaSize`, were replaced by reimplementations that are tested against
 the originals.)
 
 **Testing and verification** (`Suggests`): `testthat`, `withr`, `shinytest2`, `chromote`, `jsonlite`, `htmltools`, and the packages used

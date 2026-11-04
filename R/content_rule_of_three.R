@@ -119,6 +119,12 @@ rule_of_three_content <- list(
       "population, per MacDiarmid 1988) -- always at least as large as,",
       "and typically close to, the simpler binomial/rule-of-three answer",
       "when N is large relative to n.",
+      "",
+      "Compared with epiR 3.0.0 (checked on 4 Nov 2026, 180 combinations of N, prevalence, sensitivity and confidence): the",
+      "sample size is the same whenever N x prev is a whole number. Otherwise this app rounds the number of affected units up",
+      "(as epiR 2.0.67 did) and epiR 3.0.0 does not, so 3.0.0 asks for a few more units (for example 38 instead of 34 for",
+      "N = 50, 5%, Se 0.8, 90%). When even testing every unit would not reach the confidence asked for, this app says so, while",
+      "epiR 3.0.0 returns N. epiR 3.0.0 also has a two-stage version (clusters, then units within them), which this app does not.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -147,6 +153,6 @@ rule_of_three_content <- list(
       "herds. N Z Vet J. 1988;36(1):39-42. Dohoo I, Martin W, Stryhn H.",
       "Veterinary Epidemiologic Research. 2nd ed. AVC Inc; 2009, p. 54."
     ),
-    backend = "closed form (MacDiarmid 1988; Cannon 2001); identical to epiR 2.0.67 epi.ssdetect(), which it is tested against"
+    backend = "closed form (MacDiarmid 1988; Cannon 2001); identical to epiR 2.0.67 epi.ssdetect(), which it is tested against; compared with epiR 3.0.0 on 4 Nov 2026 (see the text)"
   )
 )

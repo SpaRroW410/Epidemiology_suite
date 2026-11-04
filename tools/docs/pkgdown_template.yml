@@ -49,3 +49,10 @@ reference:
       `ss_result` and has a worked example taken from the tests (checked against a published value, a package or a simulation).
     contents:
       - starts_with("calc_")
+  - title: Work with a result
+    desc: >
+      The justification paragraph, the result as CSV or JSON, and a sample-size curve over one input.
+    contents:
+      - ss_text
+      - ss_export
+      - ss_curve

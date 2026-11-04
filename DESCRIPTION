@@ -24,7 +24,6 @@ Imports:
     bslib (>= 0.7.0),
     promises,
     clinfun,
-    kappaSize,
     mvtnorm,
     lme4,
     survival,
@@ -60,6 +59,7 @@ Suggests:
     pmsampsize,
     pROC,
     presize,
+    kappaSize,
     powerSurvEpi,
     TrialSize
 VignetteBuilder: knitr

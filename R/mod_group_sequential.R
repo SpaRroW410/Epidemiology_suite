@@ -67,8 +67,9 @@ mod_group_sequential_ui <- function(id) {
         sliderInput(ns("boundary_shape"), "Boundary shape (0 = Pocock, 0.5 = O'Brien-Fleming)",
                     value = 0.5, min = 0, max = 0.5, step = 0.05),
         checkboxInput(ns("futility"), "Include a (non-binding) futility boundary", value = TRUE),
-        selectInput(ns("alternative"), "Alternative hypothesis",
-                    choices = c("Two-sided" = "two.sided", "One-sided" = "one.sided"))
+        advanced_options_ui(ns, id = "adv_gs",
+          selectInput(ns("alternative"), "Alternative hypothesis",
+                      choices = c("Two-sided" = "two.sided", "One-sided" = "one.sided")))
       ),
       numericInput(ns("r"), with_tip("Allocation ratio, experimental:control (r)", "allocation_ratio"), value = 1, min = 0.01, step = 0.1),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),

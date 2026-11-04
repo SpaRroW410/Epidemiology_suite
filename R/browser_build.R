@@ -25,7 +25,9 @@ browser_notice_ui <- function() {
 }
 
 # TRUE in the server version deployed to Posit Connect Cloud (tools/connect/app.R sets the option); the phones use this one.
-is_server_version <- function() isTRUE(getOption("epidemiologysuite.server_version", FALSE))
+# EPIDEMIOLOGYSUITE_SERVER_VERSION=true does the same for a local run (used by tools/ui-audit/a11y.R to check the notice).
+is_server_version <- function() isTRUE(getOption("epidemiologysuite.server_version", FALSE)) ||
+  identical(tolower(Sys.getenv("EPIDEMIOLOGYSUITE_SERVER_VERSION")), "true")
 
 # A one-line notice in the server version only (NULL elsewhere): unlike the browser version, what is typed is sent to the server.
 # It can be closed; it stays closed for the rest of the visit in that tab.

@@ -145,3 +145,12 @@ test_that("JZS Bayes factor for the two-sample t test equals BayesFactor::ttestB
   x <- rnorm(30); y <- rnorm(30, 0.5)
   expect_equal(.cf_ttest_bf10(x, y, rscale = 1), exp(as.vector(BayesFactor::ttestBF(x = x, y = y, rscale = 1)@bayesFactor$bf)), tolerance = 1e-5)
 })
+
+test_that("detecting a case: agreement with epiR 3.0.0's epi.ssdetect() where the conventions agree (values from its source, 4 Nov 2026)", {
+  # epiR 3.0.0 is not installed here; these are its results, computed from its source (R/epi.ssdetect.R of the 3.0.0 release) for the
+  # single-stage design. N x prev is a whole number in the first three, so both give the same n.
+  v3 <- list(list(1000, 0.05, 0.9, 0.95, 65), list(200, 0.2, 1, 0.95, 15), list(5000, 0.02, 0.95, 0.99, 237))
+  for (x in v3) expect_equal(.cf_ssdetect(x[[1]], x[[2]], x[[3]], 1, "series", x[[4]])$sample.size[["hypergeo"]], x[[5]])
+  # N x prev = 2.5: this app rounds the 2.5 affected units up to 3 (as epiR 2.0.67), epiR 3.0.0 does not and gives 38
+  expect_equal(.cf_ssdetect(50, 0.05, 0.8, 1, "series", 0.90)$sample.size[["hypergeo"]], 34)
+})

@@ -111,6 +111,7 @@ home_panel_ui <- function() {
             actionButton("home_go_browse", "Browse all calculators", class = "btn-outline-primary"))
       )
     ),
+    versions_details_ui(),
     # scrolls the page to the top when a Home button opens another tab (the new tab would otherwise open part-way down)
     tags$script(HTML("if (window.Shiny && Shiny.addCustomMessageHandler) Shiny.addCustomMessageHandler('home_scroll_top', function (msg) { window.scrollTo(0, 0); });"))
   )

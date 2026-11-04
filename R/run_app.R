@@ -84,7 +84,7 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
         primary = .theme_colours[["primary"]],
         # the same limit for litera's grey buttons (#adb5bd, 2.1:1) and its white-on-teal / white-on-amber alerts (3.0:1, 2.0:1)
         secondary = .theme_colours[["secondary"]], info = .theme_colours[["info"]],
-        warning = .theme_colours[["warning"]], danger = .theme_colours[["danger"]],
+        warning = .theme_colours[["warning"]], danger = .theme_colours[["danger"]], success = .theme_colours[["success"]],
         # A local font stack, not bslib::font_google(): that downloads the font when the first page is
         # rendered, so the app could not start without internet (a Shinylive/offline build, a locked-down
         # server). "Source Serif 4" is used if it is installed on the viewer's machine.
@@ -136,7 +136,7 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
 }
 
 # Theme colours that replace litera's: each reaches the WCAG AA contrast of 4.5:1 against white (checked in test-accessibility.R)
-.theme_colours <- c(primary = "#2a66cf", secondary = "#5d6770", info = "#0b7285", warning = "#8a5300", danger = "#c62828")
+.theme_colours <- c(primary = "#2a66cf", secondary = "#5d6770", info = "#0b7285", warning = "#8a5300", danger = "#c62828", success = "#157347")
 
 # Styling for the workbench sidebars: a scrollable, sticky module list whose group
 # headers are small caps labels (navset_pill_list renders them as .navbar-brand
@@ -147,8 +147,8 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
 html[data-bs-theme='dark'] nav.navbar.navbar-default { background-color: var(--bs-tertiary-bg) !important; }
 html[data-bs-theme='dark'] nav.navbar .navbar-brand, html[data-bs-theme='dark'] nav.navbar .nav-link { color: var(--bs-body-color) !important; }
 html[data-bs-theme='dark'] nav.navbar .nav-link.active { color: var(--bs-primary-text-emphasis) !important; }
-#main_nav > li.bslib-nav-item:nth-last-child(2) { margin-left: auto; }   /* the search box and the dark-mode switch sit at the right end */
-#main_nav > li.bslib-nav-item .form-group { margin-bottom: 0; }
+.navbar-extras { display: flex; align-items: center; gap: .5rem; margin-left: auto; }   /* the search box and the dark-mode switch, at the right end */
+.navbar-extras .form-group { margin-bottom: 0; }
 .navbar .selectize-input { padding: .2rem .6rem; min-height: 0; font-size: .85rem; border-radius: 1rem; }
 .navbar .selectize-input, .navbar .selectize-input input, .navbar .selectize-dropdown { color: var(--bs-body-color) !important; }
 .navbar .selectize-input input::placeholder { color: var(--bs-secondary-color); }

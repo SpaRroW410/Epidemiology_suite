@@ -64,9 +64,9 @@ monte_carlo_calculate_ui <- function(ns, note = "can take a few seconds. Set the
 # size, an allocation ratio). Closed by default. `condition` is the JavaScript condition under which the section exists at all, so a
 # design with nothing advanced to show does not get an empty section; inputs inside keep their own conditionalPanel()s. A collapsed
 # section still holds live inputs: their values are bound and used whether or not it is open.
-advanced_options_ui <- function(ns, ..., condition = NULL, title = "Advanced options") {
+advanced_options_ui <- function(ns, ..., condition = NULL, title = "Advanced options", id = "adv_acc") {
   panel <- bslib::accordion(
-    id = ns("adv_acc"), open = FALSE, class = "mb-3",
+    id = ns(id), open = FALSE, class = "mb-3",
     bslib::accordion_panel(title, value = "advanced", ...)
   )
   if (is.null(condition)) panel else conditionalPanel(condition = condition, panel)

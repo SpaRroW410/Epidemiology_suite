@@ -62,6 +62,9 @@
   list(module = "means", input = "sd_anova", label = "the SD", design = "median_iqr", keys = "sd"),
   list(module = "means", input = "sd_two", label = "the SD", design = "median_iqr", keys = "sd", set_calc = list(spread_as_two = "sd")),
   list(module = "means", input = "sd_unequal", label = "the SD", design = "median_iqr", keys = "sd", set_calc = list(spread_as_unequal = "sd")),
+  # Welch: each group's own SD, from that group's median and IQR
+  list(module = "means", input = "sd1_welch", label = "the SD of group 1", design = "median_iqr", keys = "sd", set_calc = list(spread_as_welch = "sd")),
+  list(module = "means", input = "sd2_welch", label = "the SD of group 2", design = "median_iqr", keys = "sd", set_calc = list(spread_as_welch = "sd")),
   list(module = "means", input = "sd_diff", label = "the SD of the differences", design = "paired_means", keys = "sd_diff",
        set_calc = list(paired_sd_as = "sd_diff"), set_es = list(pd_as = "sds_r"),
        prefill = list(pd_mean = "mean_diff", pd_sd1 = "paired_sd1", pd_sd2 = "paired_sd2", pd_r = "paired_r"))
