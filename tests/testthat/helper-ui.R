@@ -26,7 +26,8 @@ ui_chrome_path <- function() {
 # (~20 s), switching tabs is about a second.
 ui_driver <- local({
   app <- NULL
-  function() {
+  start <- NULL
+  function(start_state = FALSE) {
     if (is.null(app)) {
       Sys.setenv(CHROMOTE_CHROME = ui_chrome_path())
       args <- c("--disable-gpu", "--disable-dev-shm-usage")
@@ -41,7 +42,11 @@ ui_driver <- local({
       app <<- shinytest2::AppDriver$new(ui_app_dir(), name = "smoke", load_timeout = 90000,
                                         timeout = 30000, view = FALSE)
       withr::defer(app$stop(), envir = testthat::teardown_env())
+      # the state right after start-up, before any test moves the app on (the files share this app and run in name order)
+      app$wait_for_idle(800, timeout = 120000)
+      start <<- list(main_nav = app$get_value(input = "main_nav"))
     }
+    if (start_state) return(start)
     # Another app opened by a test (ui_fresh_driver()) takes the browser's focus, and when it closes this page stays "hidden";
     # since shiny 1.11 a hidden page defers its output updates, so the tests after it would read stale outputs.
     try(app$get_chromote_session()$Page$bringToFront(), silent = TRUE)

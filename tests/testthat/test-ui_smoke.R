@@ -13,7 +13,8 @@ test_that("the app starts on the Home hub with no console errors", {
   app$wait_for_idle(800, timeout = 120000)
   expect_equal(ui_output_errors(app), 0)
   expect_equal(app$get_js("document.querySelector('.navbar-brand, .navbar .navbar-title') !== null"), TRUE)
-  expect_equal(app$get_value(input = "main_nav"), "Home")
+  # recorded when the shared app started: another test file may have opened it and moved on first
+  expect_equal(ui_driver(start_state = TRUE)$main_nav, "Home")
   expect_equal(ui_console_errors(app), character())
 })
 

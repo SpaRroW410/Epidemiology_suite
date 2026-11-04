@@ -120,6 +120,9 @@ test_that("the guide's design choice, notes, moves and readable names reach the 
   ui_open_module(app, "Proportions")
   ui_choose_radio(app, "proportion-design", "precision")
   app$wait_for_idle(800, timeout = 60000)
+  # the shared app may come from another test file with the relative margin of error chosen; the rows below vary d
+  ui_choose_radio(app, "proportion-error_precision", "absolute")
+  app$wait_for_idle(800, timeout = 60000)
   for (d in c(0.05, 0.04)) {
     app$set_inputs(`proportion-d_precision` = d, wait_ = FALSE); app$wait_for_idle(800, timeout = 60000)
     ui_study_add(app, "proportion", sid)
