@@ -69,12 +69,18 @@ something outside the code (a paper, a package, an account). Work is collected o
 - [x] When nothing in a description is recognised, say so and how to rephrase (it showed nothing before) (3 Nov 2026).
 - [ ] **[owner]** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the reader against.
 - [ ] A test battery of those questions with the route each should take; measure the hit rate before and after each change.
-- [ ] Rules for topic phrasings: "determinants / factors associated / risk factors / predictors of X among Y" (analytic cross-sectional:
-  prevalence plus association), "KAP / knowledge, attitude and practice / awareness", "among Y in a city / district / schools"
-  (population survey, cluster sampling), "effect / effectiveness / impact of" (trial or quasi-experimental), "association between"
-  (ask which design), "incidence / follow-up", "survival / time to", "accuracy / screening", "correlation", "levels / score / mean".
+- [x] Rules for topic phrasings (4 Nov 2026): knowledge-attitude-practice, awareness, utilization and pattern questions reach a survey
+  estimate. "Determinants / factors associated / risk factors / predictors / correlates of X" are ambiguous (the algorithm doc, section 0.3:
+  never collapse them to one design), so the guide shows four candidates with a line on when each applies (a survey now, case-control,
+  cohort, prediction model) and continues from the one chosen; an explicit design word (case-control, trial, cohort, correlation) still
+  wins. After the survey route, the last step points to the association's own sample size (two groups, or multiple logistic / linear
+  regression; a mean for "levels" or "scores"), and a population named by place gets a box about cluster sampling and the design effect.
+  14 questions in `test-research_questions.R` (written for the test, not real titles).
+- [ ] More phrasings once the owner's list is in: "effect / effectiveness / impact of" without a design word (trial or quasi-experimental:
+  ask), "association between" (ask which design), "incidence / follow-up", "survival / time to", "accuracy / screening".
 - [ ] Ask instead of guessing when a phrase fits several designs (offer two or three starting points).
-- [ ] Several objectives: let the guide end with more than one calculator (e.g. prevalence and its determinants), each with Add to study.
+- [x] Several objectives, first step: a determinants question ends with the estimate plus buttons to the association calculators, each
+  with Add to study (4 Nov 2026). [ ] A guide that asks for each objective in turn.
 - [ ] A language-model reader only by a separate decision (no API, nothing sent anywhere in the browser version).
 
 ## D. Interface and accessibility

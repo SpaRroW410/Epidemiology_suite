@@ -1,5 +1,15 @@
 # epidemiologysuite (development version)
 
+## The guide understands research questions
+
+* Questions phrased by topic now get an answer; before, they matched nothing. "Knowledge, attitude and practice of ...", "awareness of",
+  "utilization of", "pattern of" lead to a survey estimate.
+* "Determinants of smoking in youth", "factors associated with ...", "risk factors of ..." can mean several designs, so the guide shows four,
+  each with a line on when it applies (a survey of a population now, case-control, cohort, prediction model), and continues from the one
+  you choose.
+* After the survey route, the last step also points to the sample size for the associations (two groups for one factor, multiple logistic or
+  linear regression for several), and, for a population named by place (a city, district, villages, schools), to the design effect.
+
 ## Studies: a working record of calculations (phases 1 to 3)
 
 * **Design choice from the guide:** at its last step, "Add this design choice to [Study v]" keeps the design, the calculator it leads to and

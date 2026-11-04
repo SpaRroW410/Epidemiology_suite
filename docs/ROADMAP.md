@@ -1536,8 +1536,17 @@ Research questions are usually phrased by *topic*, and then nothing matches. Che
 | "Knowledge attitude and practice of contraception among married women" | nothing recognised |
 | "Prevalence of anaemia among adolescent girls in a district" | recognised: precision of a single proportion |
 
-Until 3 Nov the guide then showed nothing at all, so it looked broken; it now says that nothing could be matched and how to rephrase
-(done on the Studies branch). The rules themselves are not changed yet.
+Until 3 Nov the guide then showed nothing at all, so it looked broken; it now says that nothing could be matched and how to rephrase.
+
+**Done on 4 Nov 2026 (points 2, 3 and 4 below, first step).** Descriptive topic questions (knowledge-attitude-practice, awareness,
+utilization, pattern) reach a survey estimate. Determinants questions ("determinants / factors associated / risk factors / predictors /
+correlates of X") are not routed to one design, as `design_identification_algorithm.md` (section 0.3) requires: the guide shows four
+candidates, each with a line on when it applies (a survey of a population now; cases and non-cases, case-control; people followed over
+time, cohort; a prediction model), and continues from the one chosen. After the survey route the last step adds a box for the association
+(its own sample size: two groups for one factor, multiple logistic or linear regression for several; use the largest) and, for a
+population named by place, a box about cluster sampling and the design effect. An explicit design word still wins (case-control, trial,
+cohort, correlation); "correlates of" no longer goes to correlation. All four questions in the table above now get an answer; 14 written
+questions are in `test-research_questions.R`. The owner's list of real titles (point 1) is still to come.
 
 **Plan.**
 1. *A battery of real research questions first.* Collect about 50-100 thesis and project titles in community medicine and public health
