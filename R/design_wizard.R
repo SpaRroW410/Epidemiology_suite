@@ -46,9 +46,21 @@ design_wizard_server <- function(input, output, session) {
     state$node_id <- res$node_id
     state$trace <- res$trace
     state$flags <- res$flags
+    # nothing recognised: say so, instead of leaving the guide as it was (a research question such as "determinants of ... among
+    # youth" names no design; ROADMAP: expanding the free-text reader)
+    state$parse_note <- if (length(res$trace) == 0 && !is.null(input$design_wizard_freetext) && nzchar(trimws(input$design_wizard_freetext))) "none" else NULL
   }, ignoreInit = TRUE)
 
   output$design_wizard_trace <- renderUI({
+    if (identical(state$parse_note, "none")) {
+      return(div(class = "alert alert-warning small", role = "status",
+        p(class = "mb-1", strong("Nothing in this description could be matched to a study design yet.")),
+        p(class = "mb-1", "The reader looks for words about the design (survey, prevalence, cohort, case-control, trial, compare, ",
+          "before and after, ...) and the outcome (a proportion, a mean, time to an event). A research question that names only the topic, ",
+          "such as \"determinants of ... among ...\", does not say which design you plan."),
+        p(class = "mb-0", "Answer the questions below instead, or add a few words, for example: \"cross-sectional survey of the prevalence of ... ",
+          "and the factors associated with it\".")))
+    }
     if (length(state$trace) == 0) return(NULL)
     tags$ul(class = "text-muted small",
       lapply(state$trace, function(t) tags$li(paste0(
@@ -73,6 +85,7 @@ design_wizard_server <- function(input, output, session) {
       for (nm in names(opt$set)) state$flags[[nm]] <- opt$set[[nm]]
     }
     remember()
+    state$parse_note <- NULL
     state$trace <- c(state$trace, list(list(question = node$question, answer = opt$label)))
     state$node_id <- if (is.function(opt$next_id)) opt$next_id(state$flags) else opt$next_id
   }, ignoreInit = TRUE)
@@ -88,11 +101,22 @@ design_wizard_server <- function(input, output, session) {
   }, ignoreInit = TRUE)
 
   observeEvent(input$design_wizard_restart, {
+    state$parse_note <- NULL
     state$node_id <- "root"
     state$trace <- list()
     state$flags <- list()
     state$history <- list()
     updateTextAreaInput(session, "design_wizard_freetext", value = "")
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$design_wizard_study_add, {
+    node <- design_nodes[[state$node_id]]
+    req(isTRUE(node$terminal))
+    key <- .terminal_catalog_key(node, state$flags)
+    entry <- if (!is.null(key)) catalog_entry(key) else NULL
+    calc <- if (!is.null(entry) && isTRUE(entry$built)) paste0(entry$nav_target, ": ", entry$label) else NULL
+    e <- study_design_entry(node$design, state$trace, calc)
+    session$sendCustomMessage("study_add", list(study = input$design_wizard_study_add$study, entry = e, summary = study_entry_summary(e)))
   }, ignoreInit = TRUE)
 
   observeEvent(input$design_wizard_jump, {
@@ -196,7 +220,13 @@ design_wizard_server <- function(input, output, session) {
         "outcome, plan the rank-based test instead."),
       actionButton("design_wizard_jump_rank", paste("Go to:", catalog_entry(.rank_alternative(key))$label), class = "btn-outline-primary btn-sm")),
     body,
-    br(), br(),
+    # Studies (R/mod_studies.R): keep this design choice, with the answers that led to it, in a study
+    div(class = "study-add d-flex flex-wrap gap-2 align-items-center mt-3",
+      tags$label(class = "small mb-0", `for` = "design_wizard_study_target", "Add this design choice to"),
+      tags$select(id = "design_wizard_study_target", class = "form-select form-select-sm study-target w-auto"),
+      tags$button(type = "button", class = "btn btn-sm btn-outline-primary",
+                  onclick = "esStudies.request('design_wizard_study_add', this.previousElementSibling.value);", "Add")),
+    br(),
     if (can_back) tagList(actionButton("design_wizard_back", "Back one question", class = "btn-outline-secondary btn-sm"), " "),
     actionButton("design_wizard_restart", "Start over / this isn't my design", class = "btn-link")
   )

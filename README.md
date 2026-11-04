@@ -156,7 +156,12 @@ Positron addin, *Find a sample size calculator*, wraps both.
 - **Export** (folded): a ready-to-paste justification paragraph for a protocol, CSV, JSON, and the citation of the formula's source
   (BibTeX, RIS). **Power / sensitivity curves** (folded; drawn only when opened) have a text description for screen readers.
 - **Light / dark** switch in the navbar (starts from the system setting).
-- **On a phone** (screens up to 575 px wide) the navbar becomes a bottom tab bar (Home, Plan, Analyze, Cite), the long list of
+- **Studies:** under every result, "Add this result to [Study 1 v] Add" (also at the end of the guide, for the design choice). The
+  Studies tab collects the results of each study (repeated use of one calculator becomes a table), keeps notes and the order you choose,
+  lists the recent calculations, and downloads the study as a Word file: the sample-size section of a protocol, with inputs, results,
+  formulas (LaTeX for Word's equation editor), justification paragraphs and references. The record is kept only in the browser tab (a reload
+  keeps it, closing the tab loses it); nothing is saved on a server.
+- **On a phone** (screens up to 575 px wide) the navbar becomes a bottom tab bar (Home, Find, Plan, Analyze, Studies, Cite), the long list of
   calculators becomes one drop-down, and controls get touch-sized heights. It is the same app and the same address.
 - **Cite** tab: how to cite the software in APA, Vancouver, Harvard, IEEE, MLA, Chicago, BibTeX, RIS or as a sentence for a Methods
   section, with copy and download buttons.
@@ -328,6 +333,7 @@ R/                     the package (flat, as R requires; grouped by file-name pr
 ├── home_*.R, design_*.R   Home hub (home_hub.R search, cards), catalog, browse finder, wizard, free-text parser
 ├── ss_find.R          ss_find() and the RStudio / Positron addin
 ├── home_cite.R, citation_info.R   the Cite tab and the facts behind every citation format (author, version, DOI)
+├── mod_studies.R, docx_writer.R, content_input_labels.R   Studies: Add to study, the Studies tab, the Word file (built-in writer), readable names
 ├── accessibility.R    names and keyboard access for generated controls, the pinned result
 ├── phone_shell.R      the phone layout (bottom tab bar, calculator drop-down)
 └── lazy_modules.R, browser_build.R   lazy loading with progress; notice and checks for the browser build

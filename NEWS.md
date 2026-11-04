@@ -1,6 +1,16 @@
 # epidemiologysuite (development version)
 
-## Studies: a working record of calculations (phases 1 and 2)
+## Studies: a working record of calculations (phases 1 to 3)
+
+* **Design choice from the guide:** at its last step, "Add this design choice to [Study v]" keeps the design, the calculator it leads to and
+  the questions and answers; it comes first in the Studies tab and in the Word file ("How the design was chosen").
+* **Notes and order:** a note on each result (a Comment line in the Word file, or a Comment column in a table) and on the whole study
+  (under the title); move a result up or down within its table, and a section up or down.
+* **Also under the randomization list and survey selection** (with their own methods paragraph; the list itself stays in the CSV), and
+  under the Analyze tools: every page that calculates something can add its result to a study.
+* **The guide** now says when nothing in a description could be matched to a design, with how to rephrase it (it showed nothing before).
+* **Readable names:** inputs and results show as "Significance level (alpha)", "Sample size (n)"; names whose meaning differs between
+  calculators (d, p1, r, ...) are labelled only for the calculators where the meaning is known, otherwise kept as they are.
 
 * **Download (.docx)** for each study: title, a summary line, one section per calculator and design (a result table and an inputs table,
   or one table for repeated use), notes, the justification paragraph, each formula in LaTeX ready for Word's Insert > Equation (with a

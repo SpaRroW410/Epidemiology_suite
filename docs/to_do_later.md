@@ -20,7 +20,7 @@ something outside the code (a paper, a package, an account). Work is collected o
   `DESCRIPTION`, `CITATION.cff`, `inst/CITATION`). `R CMD check --as-cran` gives 0 errors; its warnings and notes come from the check machine.
 - [ ] **[owner]** D6: when to reopen the paused items (section I).
 
-## B. Studies: a working record of calculations (planned; decisions S1-S5 in `ROADMAP.md` §10)
+## B. Studies: a working record of calculations (built 3 Nov 2026; decisions S1-S5 in `ROADMAP.md` §10)
 
 - [x] S-1 Storage in the browser tab only (`sessionStorage`), restored after a reload or a dropped connection; "Add this result to [Study v]
   Add" under every result through the shared export hook (64 calculators), with Undo; the Studies tab with one drop-down (studies, "+ New
@@ -28,16 +28,21 @@ something outside the code (a paper, a package, an account). Work is collected o
 - [x] S-1 Tables for repeated use of one calculator and design (the inputs that vary as columns, the constant ones listed once) (3 Nov 2026).
 - [x] S-1 Recent calculations: last 20, recorded once a result has been stable for 3 s after the user has changed something in that
   calculator (loading a calculator records nothing), without duplicates (3 Nov 2026).
-- [ ] S-1 left: moving entries and notes (S-3); the four tools without the shared export hook (ecological and qualitative guidance,
-  randomization list, survey selection) have no Add button.
+- [x] Add to study for the randomization list and survey selection too, with their own methods paragraph (the list itself stays in the
+  CSV download); the ecological and qualitative pages are guidance only and calculate nothing (3 Nov 2026).
+- [ ] Readable names for more calculators (only names with one meaning are labelled; the rest keep their short name).
 - [x] S-2 Built-in .docx writer (no new runtime package; `R/docx_writer.R`): XML parts, stored zip with CRC-32, headings, tables with a
   repeated header row; each formula in LaTeX for Word's Insert > Equation, with a plain-text form where every command is known (222 of the app's
   396 formula blocks); numbered references with the suite's own citation; made in R and saved by the browser (3 Nov 2026).
 - [x] S-2 Tests: CRC-32 check value and `digest`, base64 against `jsonlite`, `unzip -t`, every part parsed by `xml2`, read back by `officer`,
   converted by LibreOffice; browser test of the download (3 Nov 2026).
 - [ ] S-2 left: **[owner]** open one downloaded file in Word (desktop and phone) and try Insert > Equation > LaTeX on a formula.
-- [ ] S-3 "Add this design choice" at the end of the guide; notes and reordering; readable input names in the document.
-- [ ] S-4 Analyze results; real-phone check on Connect Cloud (sleep, switch apps, reload) and the browser build.
+- [x] S-3 "Add this design choice" at the end of the guide (the design, the calculator, the questions and answers; first in the tab and
+  the Word file); a note on each result (a Comment line, or a Comment column in a table) and on the study (under the title); move a result up
+  or down within its table and a section up or down; readable names ("Significance level (alpha)") for names that mean one thing in every
+  calculator, and per calculator for those that do not (d, p1, r, ...); others keep their short name (3 Nov 2026).
+- [x] S-4 Analyze results: the 11 Analyze tools use the shared export hook, so they have Add to study (3 Nov 2026).
+- [ ] S-4 **[owner]** real-phone check on Connect Cloud (sleep, switch apps, reload) and the browser build.
 - [ ] Check: Word on phones, Google Docs and LibreOffice (whether pasted LaTeX can be turned into an equation there; table styles); a long study on a phone.
 
 ## C. Small items
@@ -58,6 +63,19 @@ something outside the code (a paper, a package, an account). Work is collected o
 - [ ] Optional: re-derive `kappaSize`'s kappa tables (2-6 raters, 2-5 categories) and drop that package.
 - [ ] Optional: wrappers `ss_text()`, `ss_curve()`, `ss_export()` around the `ss_result` object; decide the public naming (C2) and add
   per-family vignettes (survival, trials, diagnostic accuracy, surveillance).
+
+## C2. Guide: research questions (plan at the end of `ROADMAP.md`)
+
+- [x] When nothing in a description is recognised, say so and how to rephrase (it showed nothing before) (3 Nov 2026).
+- [ ] **[owner]** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the reader against.
+- [ ] A test battery of those questions with the route each should take; measure the hit rate before and after each change.
+- [ ] Rules for topic phrasings: "determinants / factors associated / risk factors / predictors of X among Y" (analytic cross-sectional:
+  prevalence plus association), "KAP / knowledge, attitude and practice / awareness", "among Y in a city / district / schools"
+  (population survey, cluster sampling), "effect / effectiveness / impact of" (trial or quasi-experimental), "association between"
+  (ask which design), "incidence / follow-up", "survival / time to", "accuracy / screening", "correlation", "levels / score / mean".
+- [ ] Ask instead of guessing when a phrase fits several designs (offer two or three starting points).
+- [ ] Several objectives: let the guide end with more than one calculator (e.g. prevalence and its determinants), each with Add to study.
+- [ ] A language-model reader only by a separate decision (no API, nothing sent anywhere in the browser version).
 
 ## D. Interface and accessibility
 
@@ -168,26 +186,6 @@ something outside the code (a paper, a package, an account). Work is collected o
 
 ---
 
-## 7. Added on 3 November 2026 (PRs #28-#33; built items are in `PLAN.md` Phase 4b and the end of `ROADMAP.md`)
-
-### Owner
-- [ ] Republish on Connect Cloud; try the new Find and Effect Size tabs, the "Calculate this" links and dark mode on a real phone.
-- [ ] Say whether OpenEpi outputs can be supplied (screenshots of results for given inputs): the layouts were copied from screenshots but its formulas were **not compared**.
-
-### Sources not yet read (flagged in the app's help text)
-- [ ] Kish 1965 (design effect), Killip et al. 2004 full text (intracluster correlation and design effect; only the abstract, PMID 15209195, was read), Chinn 2000 full text (ln OR = d pi / sqrt(3); abstract only). **[blocked]** paper access.
-- [ ] A source for "design effect 1.5 or 2 when nothing is known" (the owner's wording; no source checked).
-
-### Effect Size and links
-- [ ] Pre-fill the converter from the calculator's current values (for example the group means already typed in).
-- [ ] Links for inputs where a converter gives a different quantity (the Welch design's two SDs; the SD from a median and IQR gives one).
-- [ ] More glossary terms and information tips on request (35 terms; tips on the labels the glossary covers).
-- [ ] Odds-ratio inputs in the logistic designs ("per one-SD increase", ordinal odds ratio) have no link: no converter gives that quantity.
-
-### Tests and tools
-- [ ] Add the dark-mode contrast crawl and the live-site timing script used on these PRs to `tools/ui-audit/` (they were kept in a working folder).
-- [ ] Re-measure the live browser build (Pages) after #33; re-run the axe scan (`tools/ui-audit/a11y.R`) on the Find tab, the Effect Size tab and the pinned "Use this value" panel.
-- [ ] Browser tests run for several minutes: consider splitting `test-ui_smoke.R` by area so a failure points to one file.
 ## Done on 3 November 2026 (this list's last refresh)
 
 - ~~Author details for CRAN: ORCID added from forecastsuite~~
@@ -199,3 +197,4 @@ something outside the code (a paper, a package, an account). Work is collected o
 - ~~Browser-build message for TOST, Fisher and Boschloo~~: no longer needed (they were rewritten in R on 31 Oct; no design is blocked in the browser)
 - ~~A notice in the server (Connect) version that inputs are sent to the server~~ (closable)
 - Dropped from the list: OpenEpi screenshots (not needed), the 17 October Pages error (not happening), branch deletion (automatic now).
+- The old section 7 of 3 November (brought back by #37) is removed again: each of its items is in sections A, C and H above, or done.

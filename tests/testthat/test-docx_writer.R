@@ -68,7 +68,7 @@ test_that("a study's Word file has the study name, a table for repeated use, the
   expect_match(h1[1], "^1\\. Proportions: ")
   expect_true("2 calculations" %in% txt)
   cells <- txt[s$content_type == "table cell"]
-  expect_true(all(c("d", "0.03", "0.02", "n") %in% cells))
+  expect_true(all(c("Margin of error (absolute) (d)", "0.03", "0.02", "Sample size (n)") %in% cells))   # readable names, short name kept
   expect_true(any(grepl("\\frac", txt, fixed = TRUE)))                       # the LaTeX of the formula
   expect_true(any(grepl("^Plain text: ", txt)))
   expect_true(any(grepl("^Source: .*\\[1\\]$", txt)))
@@ -92,7 +92,7 @@ test_that("LibreOffice opens the study file (when installed)", {
   f <- file.path(d, "s.docx"); writeBin(study_docx(list(id = "s1", name = "Survey", entries = list(e))), f)
   # R's own LD_LIBRARY_PATH can stop LibreOffice from finding its libraries; a separate profile avoids clashing with a running copy
   system2(soffice, c(paste0("-env:UserInstallation=file://", d, "/profile"), "--headless", "--convert-to", "txt:Text", "--outdir", shQuote(d), shQuote(f)),
-          stdout = FALSE, stderr = FALSE, env = "LD_LIBRARY_PATH=")
+          stdout = FALSE, stderr = FALSE, env = "LD_LIBRARY_PATH=", timeout = 120)
   out <- file.path(d, "s.txt")
   expect_true(file.exists(out))
   expect_true(any(grepl("Survey", readLines(out, warn = FALSE))))
