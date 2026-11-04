@@ -8,8 +8,8 @@
 # Two differences from the package, both corrections:
 #  * presize::prec_pos_lr() and prec_neg_lr() accept `conf.level` but do not pass it on to prec_lr(), so the confidence level was
 #    silently always 95%. Here it is used (the app's likelihood-ratio design therefore changes for any level other than 95%).
-#  * Cohen's kappa still uses the `kappaSize` package (its own cell-probability tables for 2-6 raters and 2-5 categories are
-#    not re-derived here); only the thin presize wrapper around it is replaced.
+#  * Cohen's kappa: the `kappaSize` package's cell probabilities are re-derived below (4 Nov 2026), so kappaSize is only a test
+#    oracle now (Suggests).
 
 .cf_cw_error <- function(conf.width, ref) if (conf.width < ref) "'conf.width' too small" else "'conf.width' too wide"
 
@@ -187,15 +187,62 @@
   list(n = n, conf.width = conf.width, conf.level = conf.level)
 }
 
-# --- Cohen's kappa: n for a confidence-interval width, from kappaSize's CI functions ----------------------------------------
+# --- Cohen's kappa: n for a confidence-interval width (the kappaSize CI functions, re-derived; 4 Nov 2026) -------------------
+# kappaSize::CIBinary / CI3Cats / CI4Cats / CI5Cats write out, for 2-6 raters, the cell probabilities of a goodness-of-fit approach.
+# Expanded, they follow two patterns (checked against the package for every number of categories and raters):
+# - two categories: every split x = (x_1, x_2) of the k raters is a cell, with the common-correlation model: with probability kappa all
+#   raters give the same category, otherwise they rate independently:
+#     P(x) = (1 - kappa) * binomial(x; k, p) + kappa * p_j * [all k ratings in category j];
+# - three or more categories: one cell for "all k raters chose category j" (j = 1..c), with the Dirichlet-multinomial probability
+#     P_j = prod_{i=0}^{k-1} (p_j + i * kappa * (1 - p_j)) / (1 + (i - 1) * kappa) [the i = 0 and i = 1 denominators are 1],
+#   that is prod (alpha p_j + i) / (alpha + i) with alpha = (1 - kappa) / kappa, and one cell for everything else (1 - sum P_j).
+# For two raters both patterns give the same answer.
+# The sample size is the smallest n (from 11, as kappaSize) at which the chi-square distance between the cell counts expected under
+# kappa0 and under each bound, n * sum((P0 - P1)^2 / P1), reaches the critical value plus 0.001 (kappaSize's own stopping rule).
+# test-calc_closed_forms_presize.R checks it against kappaSize (now only a test oracle) for 2-5 categories and 2-6 raters.
+.kappa_splits <- function(raters, n_cat) {
+  if (n_cat == 1) return(matrix(raters, 1, 1))
+  do.call(rbind, lapply(raters:0, function(x1) cbind(x1, .kappa_splits(raters - x1, n_cat - 1))))
+}
+.kappa_cell_probs <- function(kappa, props, splits) {
+  raters <- sum(splits[1, ])
+  indep <- apply(splits, 1, function(x) stats::dmultinom(x, prob = props))
+  agree <- apply(splits, 1, function(x) if (max(x) == raters) props[which.max(x)] else 0)
+  (1 - kappa) * indep + kappa * agree
+}
+# all k raters in category j, Dirichlet-multinomial with intraclass correlation kappa: prod_{i=0}^{k-1} (alpha p_j + i) / (alpha + i)
+.kappa_unanimous_dm <- function(kappa, props, raters) {
+  vapply(props, function(p) prod(vapply(0:(raters - 1), function(i) (p * (1 - kappa) + i * kappa) / ((1 - kappa) + i * kappa), numeric(1))), numeric(1))
+}
+.kappa_ci_n <- function(kappa0, kappaL, kappaU = NA, props, raters = 2, alpha = 0.05) {
+  if (!raters %in% 2:6) stop("this design is for 2 to 6 raters")
+  if (length(props) == 1) props <- c(props, 1 - props)
+  if (abs(sum(props) - 1) >= 0.001 || any(props <= 0) || any(props >= 1)) stop("the category proportions must each lie in (0, 1) and sum to 1")
+  crit <- if (is.na(kappaU)) stats::qchisq(1 - 2 * alpha, 1) else stats::qchisq(1 - alpha, 1)
+  cells <- if (length(props) == 2) {
+    splits <- .kappa_splits(raters, 2)
+    function(k) .kappa_cell_probs(k, props, splits)
+  } else {
+    function(k) { u <- .kappa_unanimous_dm(k, props, raters); c(1 - sum(u), u) }
+  }
+  P0 <- cells(kappa0)
+  dist <- function(k1) {
+    P1 <- cells(k1)
+    d <- (P0 - P1)^2 / P1
+    sum(d[is.finite(d)])
+  }
+  D <- c(dist(kappaL), if (!is.na(kappaU)) dist(kappaU))
+  if (any(D <= 0)) stop("'conf.width' too wide", call. = FALSE)
+  n <- 11
+  repeat { if (all(n * D >= crit + 0.001)) break; n <- max(n + 1, ceiling((crit + 0.001) / min(D)) - 1) }
+  n
+}
 .cf_prec_kappa <- function(kappa, raters = 2, n_category = 2, props, conf.width, conf.level = 0.95) {
   if (n_category < 2) stop("there must be at least 2 outcome categories")
   if (n_category > 5) stop("more than 5 outcome categories is not supported")
-  .require_pkg("kappaSize", "The sample size for Cohen's kappa")
   alpha <- 1 - conf.level
-  fun <- switch(n_category - 1, kappaSize::CIBinary, kappaSize::CI3Cats, kappaSize::CI4Cats, kappaSize::CI5Cats)
   kL <- kappa - conf.width / 2; kU <- kappa + conf.width / 2
-  f <- tryCatch(fun(kappa0 = kappa, kappaL = kL, kappaU = kU, props = props, raters = raters, alpha = alpha * 2),
-                error = function(e) stop("'conf.width' too wide", call. = FALSE))
-  list(kappa = kappa, n = f$n, lwr = kL, upr = kU, conf.width = conf.width, conf.level = conf.level)
+  if (kL <= 0 || kU >= 1) stop("'conf.width' too wide", call. = FALSE)
+  n <- .kappa_ci_n(kappa0 = kappa, kappaL = kL, kappaU = kU, props = props, raters = raters, alpha = alpha * 2)
+  list(kappa = kappa, n = n, lwr = kL, upr = kU, conf.width = conf.width, conf.level = conf.level)
 }

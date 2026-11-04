@@ -45,24 +45,35 @@ something outside the code (a paper, a package, an account). Work is collected o
 - [ ] S-4 **[owner]** real-phone check on Connect Cloud (sleep, switch apps, reload) and the browser build.
 - [ ] Check: Word on phones, Google Docs and LibreOffice (whether pasted LaTeX can be turned into an equation there; table styles); a long study on a phone.
 
-## C. Small items
+## C. Small items (cleared on 4 Nov 2026 unless marked open)
 
-- [ ] **About the three versions:** an information panel (Home or Cite) with a table comparing the phone / server version (Posit Connect
-  Cloud), the browser version (GitHub Pages) and the R package: where it runs, whether inputs leave the device, internet needed, start-up
-  time, speed of the simulations (background workers), devices it suits, Studies storage, how to install or open it, how to cite it.
-- [ ] Links for inputs where a converter gives a different quantity (the Welch design's two SDs; the SD from a median and IQR gives one); the
-  logistic designs' odds ratios ("per one-SD increase", ordinal) have no converter.
-- [ ] More glossary terms and information tips on request (35 terms now).
-- [ ] Re-run the axe scan (`tools/ui-audit/a11y.R`) on the Find tab, the Effect Size tab, the pinned "Use this value" panel and the server notice.
-- [ ] Split `test-ui_smoke.R` by area, so a failure points to one file.
-- [ ] "Advanced options" folded inside the remaining ~60 calculators (done for Proportions, Means, Case-Control, Cohort, Correlation, Diagnostic
-  Accuracy, Variance Tests, Multiplicity): decide per calculator which inputs are optional.
-- [ ] Wizard: a cohort with a *continuous exposure* (dose-response) and a case-control with a *categorical* exposure still go to the yes/no
-  routes; a case-control with several controls per case and a measured exposure uses the paired test (1:m is approximate).
-- [ ] Re-check `epi.ssdetect()` against epiR 3.0.0 (different interface; the app follows 2.0.67 semantics).
-- [ ] Optional: re-derive `kappaSize`'s kappa tables (2-6 raters, 2-5 categories) and drop that package.
-- [ ] Optional: wrappers `ss_text()`, `ss_curve()`, `ss_export()` around the `ss_result` object; decide the public naming (C2) and add
-  per-family vignettes (survival, trials, diagnostic accuracy, surveillance).
+- [x] **About the three versions:** a table comparing the phone / server version, the browser version and the R package (where it runs,
+  what you type, internet, start-up, simulations, devices, Studies, how to open it, how to cite it), folded on Home and on the Cite tab,
+  with the version in use marked (`R/home_versions.R`).
+- [x] Links for the Welch design's two SDs (each from its group's median and IQR): 30 links now. Not possible: the logistic designs' odds
+  ratios ("per one-SD increase", ordinal) -- no converter gives that quantity.
+- [x] Glossary: 8 more terms (cross-sectional, case-control, cohort, prediction model, determinants, logistic regression, KAP, cluster
+  sampling): 43. More on request.
+- [x] axe scan of the screens that are not calculators (`tools/ui-audit/a11y.R ... extras`: Find, the guide's choices and last step,
+  Studies, Cite, Effect Size with the Use this value panel, the server notice). It found the navbar's search box and dark-mode switch
+  inside the tab list (since 29 Oct, on every page); they are moved beside it (`R/accessibility.R`). The calculator lists' group headers
+  ("Descriptive & Estimation", ...) were list items inside the tab list too; they are marked as presentation. 0 violations now.
+- [x] `test-ui_smoke.R` split by area: `ui_smoke` (every module opens), `ui_analyze`, `ui_calculators`, `ui_planning`, `ui_studies`,
+  `ui_wizard`, `ui_lazy`, `ui_every_design`.
+- [x] "Advanced options": the alternative hypothesis and the simulation settings (replicates, seed) folded in 7 more calculators (Exact
+  tests, Group sequential, Nonparametric, Rates, Trial sequential analysis, Mixed models, Bayesian). The others have no optional input
+  beyond alpha and power, or (Longitudinal) were left as they are on 30 Oct.
+- [x] Wizard: a cohort with the exposure in ordered levels (trend, Cochran-Armitage) or on a scale (logistic regression), and a
+  case-control with the exposure in unordered categories (chi-square) or ordered levels (trend; approximate, the help says why).
+- [ ] Open: a case-control with several controls per case and a measured exposure still uses the paired test (1:m is approximate).
+- [x] `epi.ssdetect()` against epiR 3.0.0 (its source): the same n whenever N x prevalence is a whole number (148 of 153); otherwise 3.0.0
+  does not round the number of affected units up and asks for a few more; where even testing everyone falls short, this app says so and
+  3.0.0 returns N. Kept as it was (epiR 2.0.67), the difference written in the help; 3.0.0's two-stage version is not in the app.
+- [x] `kappaSize` re-derived and dropped from the runtime (equal to the package in 200 random cases; now only a test oracle).
+- [x] `ss_text()`, `ss_export()`, `ss_curve()` exported (the paragraph, the CSV / JSON, the curve), with help pages and a section in the
+  "Sample sizes from R" vignette. The naming: `calc_*()` compute, `ss_*()` work with results. [ ] Open, optional: per-family vignettes
+  (survival, trials, diagnostic accuracy, surveillance).
+- [x] The justification paragraph no longer shows inputs that were not given ("N = NULL").
 
 ## C2. Guide: research questions (plan at the end of `ROADMAP.md`)
 

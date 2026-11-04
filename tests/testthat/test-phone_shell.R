@@ -9,6 +9,8 @@ test_that("on a phone the navbar is a bottom tab bar and the calculators are one
   expect_equal(app$get_js(sprintf("Math.round(%s.getBoundingClientRect().bottom) === window.innerHeight", bar)), TRUE)
   tabs <- unlist(app$get_js("Array.from(document.querySelectorAll('nav.navbar .navbar-nav > li.nav-item > a')).map(function(a){return a.textContent.trim()})"))
   expect_equal(tabs, c("Home", "Find", "Plan", "Analyze", "Studies", "Cite"))
+  # the dark-mode switch is in the bar too, inside the window (it is outside the tab list: R/accessibility.R)
+  expect_true(app$get_js("(function () { var e = document.querySelector('.navbar-extras bslib-input-dark-mode'); if (!e) return false; var r = e.getBoundingClientRect(); return r.width > 0 && r.left >= 0 && r.right <= window.innerWidth + 1; })()"))
   # six tabs still fit: the bar does not scroll sideways and every tab is inside the window
   expect_true(app$get_js(sprintf("(function (b) { var u = b.querySelector('.navbar-nav'); return u.scrollWidth <= u.clientWidth + 1 && Array.from(u.querySelectorAll('li.nav-item > a')).every(function (a) { var r = a.getBoundingClientRect(); return r.left >= 0 && r.right <= window.innerWidth + 1; }); })(%s)", bar)))
   ui_select_tab(app, "main_nav", "Plan: Sample Size")

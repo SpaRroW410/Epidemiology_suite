@@ -286,6 +286,11 @@ free_text_rules <- list(
 
   cohort_outcome = list(
     list(pattern = "time to|survival|hazard|kaplan|log.?rank|\\bcox\\b",              option_index = 4, confidence = "High"),
+    # dose-response (4 Nov 2026): ordered levels of exposure, or exposure measured on a scale
+    list(pattern = "dose.?response|trend (in|across)|ordered (levels|categories|groups)|graded exposure|levels of exposure|tertiles?|quartiles?|quintiles?",
+         option_index = 6, confidence = "Medium"),
+    list(pattern = "per unit (of|increase)|per (1|one|10|ten)[- ]?(unit|mg|year|point)|continuous exposure|exposure measured",
+         option_index = 7, confidence = "Medium"),
     list(pattern = "per person|person.?(years|time|days)|incidence rate|rate ratio",   option_index = 3, confidence = "High"),
     list(pattern = "ordinal|likert|\\bgrade\\b|\\bstage\\b",                          option_index = 5, confidence = "High"),
     list(pattern = "\\bmean\\b|median|interquartile|\\biqr\\b|average|continuous|blood pressure|\\bbp\\b|haemoglobin|hemoglobin|\\bhb\\b|\\bbmi\\b|weight|\\bscore\\b|concentration|\\blevels?\\b|difference in",
@@ -295,6 +300,11 @@ free_text_rules <- list(
   ),
 
   cc_exposure_type = list(
+    # ordered or categorical exposure (4 Nov 2026), before the measurement and yes/no cues
+    list(pattern = "dose.?response|trend (in|across)|ordered (levels|categories|groups)|never.{0,12}former.{0,12}current|pack.?years? (groups|categories)|tertiles?|quartiles?|quintiles?",
+         option_index = 4, confidence = "Medium"),
+    list(pattern = "(three|3|four|4|several) (or more )?(unordered )?(categories|types|groups) of exposure|categories of exposure|type of (occupation|exposure)",
+         option_index = 3, confidence = "Medium"),
     list(pattern = "\\bmean\\b|median|interquartile|\\biqr\\b|average|continuous|concentration|\\bserum\\b|\\blevels?\\b|difference in|haemoglobin|hemoglobin|\\bbmi\\b|blood pressure|\\bscore\\b",
          option_index = 2, confidence = "Medium"),
     list(pattern = "odds ratio|matched|unmatched|exposed|exposure|smok|\\buse\\b|history|yes.?no|binary|present|absent|\\bever\\b",

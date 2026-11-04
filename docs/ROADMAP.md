@@ -34,7 +34,7 @@
 | Individual designs | **159** on 29 October, all in the Browse catalog (F2 fixed); the catalog now has **214** entries (203 on 29 October; +10 Effect Size converters, +1 design-effect calculator) |
 | Checklist coverage | By design: **81 / 94** done (13 open) · By test: **69 / 74** done (5 open) |
 | Unit tests | **102** test files in the default run (0 failures; the slow Monte Carlo tests skipped as before; 942 blocks in 89 files on 29 October), plus browser (shinytest2) tests, every design checked against a published worked example, a real package (oracle), or simulation |
-| Runtime packages | `DESCRIPTION` `Imports`: `shiny`, `bslib`, `clinfun`, `PowerTOST`, `Exact`, `kappaSize`, `mvtnorm`, `lme4`, plus `survival`, `stats`, `graphics`, `utils` (was 19; twelve removed in items 16 and the stage 2 that followed, each reimplemented and checked against the original) |
+| Runtime packages | `DESCRIPTION` `Imports` (4 Nov 2026): `shiny`, `bslib`, `promises`, `clinfun`, `mvtnorm`, `lme4`, plus `survival`, `stats`, `graphics`, `utils` (was 19; twelve removed in items 16 and the stage 2 that followed, each reimplemented and checked against the original) |
 | Verification-only packages | ~30 more (installed from the `github.com/cran` mirror, used only to check reimplementations — never shipped) |
 | Wizard coverage | "Which calculator?" reaches every built calculator and all 159 catalog designs, enforced by tests (F1 fixed); 101 plain-language descriptions and 636 click paths are checked |
 | Distribution | Three versions from one code base: browser build on GitHub Pages (desktop), phone / server version on Posit Connect Cloud (deployed from the auto-built `connect` branch; phones and tablets are redirected to it), and the R package (`remotes::install_github()` + `run_app()`; a Docker image too). CI on GitHub Actions; versions locked in `renv.lock`. See [`hosting.md`](hosting.md) |
@@ -1407,9 +1407,11 @@ sample sizes identical, power functions and intervals to 1e-10 or better).
      defined and tested against its definition; when it does not bind, results equal the package.
   2. `presize::prec_pos_lr()` / `prec_neg_lr()` accept `conf.level` but do not pass it to `prec_lr()`, so the likelihood-ratio design
      always used 95%. Now the level is used (tested against `prec_lr()`); results change for any level other than 95%.
-- **Not replaced: `kappaSize`.** Cohen's kappa sample size needs kappaSize's cell-probability tables for 2-6 raters and 2-5 categories
-  (eight functions of 240-390 lines each); the thin `presize::prec_kappa()` wrapper around it is written out and `kappaSize` is now a
-  direct import. Re-deriving the tables is possible but large and was not done.
+- **`kappaSize`, replaced on 4 Nov 2026.** Its cell probabilities (four CI functions of 280-390 lines each, 2-6 raters, 2-5 categories)
+  follow two patterns: for two categories, every split of the raters with the common-correlation model ((1 - kappa) x binomial + kappa x
+  "all agree"); for three or more, the Dirichlet-multinomial probability that all raters choose category j, plus one pooled cell for
+  everything else. Written out in `R/calc_closed_forms_presize.R` with kappaSize's own search for n; equal to kappaSize in 200 random
+  cases (2-5 categories, 2-6 raters, one- and two-sided, three alphas) and in the tests. kappaSize is now only a test oracle (Suggests).
 - **Verified how:** each function against its package (identical sample sizes), plus the independent definition for the corrected
   criterion. The papers behind the formulas were not read (citations are those in the package documentation and the module content
   files); the Reference tab of each calculator now says "closed form written out in the app, equal to <package function> (compared

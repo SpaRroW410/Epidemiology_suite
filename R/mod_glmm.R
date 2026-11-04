@@ -44,8 +44,9 @@ mod_glmm_ui <- function(id) {
         numericInput(ns("delta_lmm"), "Treatment-control mean difference to detect", value = 0.5, step = 0.1),
         numericInput(ns("alpha_lmm"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_lmm"), "Desired power", value = 0.8, min = 0.5, max = 0.95, step = 0.01),
-        numericInput(ns("nsim_lmm"), "Monte Carlo replicates per candidate n (nsim)", value = 50, min = 10, max = 500, step = 10),
-        numericInput(ns("seed_lmm"), "Random seed", value = 12345, step = 1)
+        advanced_options_ui(ns, id = "adv_lmm", title = "Simulation settings",
+          numericInput(ns("nsim_lmm"), "Monte Carlo replicates per candidate n (nsim)", value = 50, min = 10, max = 500, step = 10),
+          numericInput(ns("seed_lmm"), "Random seed", value = 12345, step = 1))
       ),
       conditionalPanel(
         condition = design_is("glmm_binary"),
@@ -56,8 +57,9 @@ mod_glmm_ui <- function(id) {
         es_link_ui(ns, "or"),
         numericInput(ns("alpha_glmm"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_glmm"), "Desired power", value = 0.8, min = 0.5, max = 0.95, step = 0.01),
-        numericInput(ns("nsim_glmm"), "Monte Carlo replicates per candidate n (nsim)", value = 30, min = 10, max = 300, step = 10),
-        numericInput(ns("seed_glmm"), "Random seed", value = 12345, step = 1)
+        advanced_options_ui(ns, id = "adv_glmm", title = "Simulation settings",
+          numericInput(ns("nsim_glmm"), "Monte Carlo replicates per candidate n (nsim)", value = 30, min = 10, max = 300, step = 10),
+          numericInput(ns("seed_glmm"), "Random seed", value = 12345, step = 1))
       ),
       conditionalPanel(
         condition = design_is("growth_curve"),
@@ -70,8 +72,9 @@ mod_glmm_ui <- function(id) {
         numericInput(ns("baseline_slope_gc"), "Common (control-arm) slope", value = 0, step = 0.05),
         numericInput(ns("alpha_gc"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_gc"), "Desired power", value = 0.8, min = 0.5, max = 0.95, step = 0.01),
-        numericInput(ns("nsim_gc"), "Monte Carlo replicates per candidate n (nsim)", value = 50, min = 10, max = 500, step = 10),
-        numericInput(ns("seed_gc"), "Random seed", value = 12345, step = 1)
+        advanced_options_ui(ns, id = "adv_gc", title = "Simulation settings",
+          numericInput(ns("nsim_gc"), "Monte Carlo replicates per candidate n (nsim)", value = 50, min = 10, max = 500, step = 10),
+          numericInput(ns("seed_gc"), "Random seed", value = 12345, step = 1))
       ),
       monte_carlo_calculate_ui(ns),
       hr(),

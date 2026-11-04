@@ -193,14 +193,14 @@ available, otherwise the `github.com/cran` mirror).
 One codebase, built into three forms by CI (details and the owner's setup steps: [`docs/hosting.md`](docs/hosting.md)):
 
 1. **In the browser, nothing to install** -- GitHub Pages, `https://sparrow410.github.io/Epidemiology_suite/app/`. The same code compiled to
-   WebAssembly runs on your own device and nothing you type is sent to a server. The first visit downloads about 60 MB and needs
-   about 1 GB of memory, so it suits desktop browsers; a few designs that need compiled packages are not available there.
+   WebAssembly runs on your own device and nothing you type is sent to a server. The first visit downloads about 64 MB and needs
+   about 1 GB of memory, so it suits desktop browsers. Every design is available there (since 31 Oct 2026); simulations run in the page.
 2. **Phone / server version** -- the same app running on Posit Connect Cloud, so a phone only receives a web page (set up by the
    repository owner; phones are redirected to it automatically once its address is configured). What you type is sent to that server.
 3. **As an R package, everything** -- works offline, with every design and the fastest simulations (below).
 
 The browser build and the server bundle are made from the package's own `R/` directory by the `docs` and `connect-bundle` workflows,
-so the three cannot drift apart.
+so the three cannot drift apart. The app compares them in a table ("Three versions: which one should I use?" on Home and on the Cite tab).
 
 ## Installing and running the app
 
@@ -291,7 +291,7 @@ each) and takes about ten minutes with the browser tests, about a minute without
 S2R_SLOW_TESTS=true Rscript -e 'testthat::test_local()'
 ```
 
-**UI smoke tests** (`tests/testthat/test-ui_smoke.R`, ~2 minutes) start the whole app
+**UI tests** (`tests/testthat/test-ui_*.R`, split by area: `ui_smoke` opens every module, then `ui_analyze`, `ui_calculators`, `ui_planning`, `ui_studies`, `ui_wizard`, `ui_lazy`, `ui_every_design`) start the whole app
 in headless Chrome with [`shinytest2`](https://rstudio.github.io/shinytest2/) and open
 every module, checking that its pane shows, no output is in an error state, its
 `result` output is non-empty and no JavaScript error was logged. With

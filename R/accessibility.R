@@ -14,9 +14,31 @@
 accessibility_script <- function() {
   shiny::tags$script(shiny::HTML("
 (function () {
+  // The navbar's search box and dark-mode switch are bslib nav items, so they sit inside the tab list (#main_nav, role tablist), where
+  // only tabs belong (axe: aria-required-children, listitem; 4 Nov 2026). They are moved into a container of their own beside it.
+  function navbarExtras() {
+    var ul = document.getElementById('main_nav');
+    if (!ul || ul.parentElement.querySelector(':scope > .navbar-extras')) return;
+    var items = ul.querySelectorAll(':scope > li.bslib-nav-item');
+    if (!items.length) return;
+    var box = document.createElement('div');
+    box.className = 'navbar-extras';
+    items.forEach(function (li) {
+      var cell = document.createElement('div');
+      cell.className = 'navbar-extra' + (li.querySelector('#nav_search') ? ' navbar-extra-search' : '');
+      while (li.firstChild) cell.appendChild(li.firstChild);
+      box.appendChild(cell);
+      li.remove();
+    });
+    ul.parentElement.insertBefore(box, ul.nextSibling);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', navbarExtras); else navbarExtras();
   var queued = false;
   function repair() {
     queued = false;
+    // the group headers of a calculator list (navset_pill_list renders them as li.navbar-brand inside the ul role=tablist) are
+    // not tabs: presentation keeps them out of the tablist's required children and out of the list-item check
+    document.querySelectorAll('ul[role=\"tablist\"] > li.navbar-brand:not([role])').forEach(function (li) { li.setAttribute('role', 'presentation'); });
     document.querySelectorAll('.selectize-control input[role=\"combobox\"]').forEach(function (inp) {
       if (inp.getAttribute('aria-labelledby') || inp.getAttribute('aria-label')) return;
       var ctrl = inp.closest('.selectize-control'), sel = ctrl && ctrl.parentElement.querySelector('select');

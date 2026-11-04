@@ -107,3 +107,17 @@ test_that("in the app, the owner's question offers the designs, and the survey r
   app$wait_for_js("Shiny.shinyapp.$inputValues['logistic-design'] !== undefined", timeout = 60000)
   expect_equal(ui_output_errors(app), 0)
 })
+
+test_that("dose-response and categorical exposures have their own routes (cohort and case-control)", {
+  ch <- function(node, i) design_nodes[[node]]$options[[i]]$next_id
+  expect_equal(ch("cohort_outcome", 6), "term_cohort_trend")
+  expect_equal(ch("cohort_outcome", 7), "term_logit_cont")
+  expect_equal(ch("cc_exposure_type", 3), "term_chisq_independence_direct")
+  expect_equal(ch("cc_exposure_type", 4), "term_cc_trend")
+  expect_equal(design_nodes$term_cohort_trend$catalog_key, "chisq_cochran_armitage")
+  expect_match(design_nodes$term_cc_trend$note, "approximate")
+  # and the free-text reader finds them
+  expect_equal(walk_free_text("Cohort study of the dose-response between pack-years of smoking and lung disease")$node_id, "term_cohort_trend")
+  expect_equal(walk_free_text("Case-control study of smoking status (never, former, current) and tuberculosis")$node_id, "term_cc_trend")
+  expect_equal(walk_free_text("Case-control study with three or more categories of exposure (occupation) and asthma")$node_id, "term_chisq_independence_direct")
+})

@@ -264,6 +264,9 @@ format_justification <- function(design_title, result, citation, backend = NULL)
   }, character(1))
 
   input_txt <- character(0)
+  # inputs that were not given (NULL, or NA such as an empty population size) are left out of the sentence, not shown as "N = NULL"
+  given <- Filter(function(v) !is.null(v) && !(length(v) == 1 && is.atomic(v) && is.na(v)), result$inputs)
+  if (length(given) > 0) result$inputs <- given else result$inputs <- NULL
   if (!is.null(result$inputs) && is.list(result$inputs) && length(result$inputs) > 0) {
     input_txt <- vapply(names(result$inputs), function(nm) {
       sprintf("%s = %s", nm, .ss_result_fmt_value(result$inputs[[nm]]))

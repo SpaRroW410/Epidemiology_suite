@@ -223,7 +223,7 @@ design_wizard_server <- function(input, output, session) {
 )
 .render_rq_choices <- function() {
   div(class = "card card-body mb-3", role = "group", `aria-label` = "Which design is your study?",
-    p(class = "mb-2", strong("Your question asks about determinants or risk factors. "),
+    p(class = "mb-2", strong("Your question asks about determinants or risk factors. "), info_tip("determinants"), " ",
       "That can mean different designs, and the sample size depends on which. Choose the one you plan:"),
     lapply(names(.rq_routes), function(r) {
       x <- .rq_routes[[r]]
@@ -247,11 +247,11 @@ design_wizard_server <- function(input, output, session) {
       p(strong("Your question also asks what is associated with the outcome (its determinants or risk factors). "),
         "The calculator below gives the sample size for how common the outcome is (or its average). The associations need a sample size ",
         "of their own: for one factor at a time, a comparison of two groups (for example users and non-users); for several factors together, ",
-        "a multiple regression. Plan each, use the largest, and add each to your study."),
+        "a multiple regression", info_tip("logistic_regression"), ". Plan each, use the largest, and add each to your study."),
       actionButton("design_wizard_jump_assoc_two", paste("Go to:", catalog_entry(assoc[["two"]])$label), class = "btn-light btn-sm"), " ",
       actionButton("design_wizard_jump_assoc_reg", paste("Go to:", catalog_entry(assoc[["reg"]])$label), class = "btn-light btn-sm")),
     if (isTRUE(flags$population) && !identical(key, "cluster_survey")) div(class = "alert alert-info small",
-      p(strong("The population is named by a place or setting. "),
+      p(strong("The population is named by a place or setting. "), info_tip("cluster_sampling"), " ",
         "If you will select clusters (wards, villages, schools, colleges ...) and then people within them, rather than people from one list, ",
         "multiply the sample size by the design effect (most commonly taken as 1.5 or 2 when nothing is known), or calculate the design ",
         "effect from the variance between clusters."),

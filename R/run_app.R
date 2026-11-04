@@ -147,8 +147,8 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
 html[data-bs-theme='dark'] nav.navbar.navbar-default { background-color: var(--bs-tertiary-bg) !important; }
 html[data-bs-theme='dark'] nav.navbar .navbar-brand, html[data-bs-theme='dark'] nav.navbar .nav-link { color: var(--bs-body-color) !important; }
 html[data-bs-theme='dark'] nav.navbar .nav-link.active { color: var(--bs-primary-text-emphasis) !important; }
-#main_nav > li.bslib-nav-item:nth-last-child(2) { margin-left: auto; }   /* the search box and the dark-mode switch sit at the right end */
-#main_nav > li.bslib-nav-item .form-group { margin-bottom: 0; }
+.navbar-extras { display: flex; align-items: center; gap: .5rem; margin-left: auto; }   /* the search box and the dark-mode switch, at the right end */
+.navbar-extras .form-group { margin-bottom: 0; }
 .navbar .selectize-input { padding: .2rem .6rem; min-height: 0; font-size: .85rem; border-radius: 1rem; }
 .navbar .selectize-input, .navbar .selectize-input input, .navbar .selectize-dropdown { color: var(--bs-body-color) !important; }
 .navbar .selectize-input input::placeholder { color: var(--bs-secondary-color); }

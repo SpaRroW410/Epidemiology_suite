@@ -1,4 +1,4 @@
-# Helpers for the browser-driven UI smoke tests (test-ui_smoke.R, ROADMAP item 12).
+# Helpers for the browser-driven UI tests (test-ui_*.R, split by area on 4 Nov 2026; ROADMAP item 12).
 # They need shinytest2, a Chrome/Chromium and the repository checkout (the root
 # app.R is the app under test), so every test using them skips when any is
 # missing -- including under R CMD check, where the installed package has no app.R.
@@ -34,7 +34,7 @@ ui_driver <- local({
       if (identical(unname(Sys.info()[["effective_user"]]), "root")) args <- c(args, "--no-sandbox")
       chromote::set_chrome_args(args)
       # Calculators are loaded when opened (lazy_modules.R); the background loading that normally follows the first
-      # screen is off here so that "idle" is a stable signal. It has its own test (test-ui_smoke.R).
+      # screen is off here so that "idle" is a stable signal. It has its own test (test-ui_lazy.R).
       Sys.setenv(EPIDEMIOLOGYSUITE_BACKGROUND_LOAD = "false")
       # Monte Carlo results are computed in the session here, so that "idle" means "done"; background computation has its own test.
       Sys.setenv(EPIDEMIOLOGYSUITE_WORKERS = "0")

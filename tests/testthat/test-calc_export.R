@@ -129,3 +129,10 @@ test_that("format_citation_bibtex and format_citation_ris are pure ASCII even gi
   expect_true(.is_ascii_only(bib))
   expect_true(.is_ascii_only(ris))
 })
+
+test_that("the justification paragraph leaves out inputs that were not given (no 'N = NULL')", {
+  r <- calc_proportion_precision(p = 0.3, d = 0.05)
+  txt <- format_justification("Single proportion", r, "Cochran 1977")
+  expect_false(grepl("NULL", txt, fixed = TRUE))
+  expect_match(txt, "p = 0.3, d = 0.05")
+})

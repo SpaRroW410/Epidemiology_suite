@@ -11,7 +11,7 @@ invisible(file.copy(list.files("R", full.names = TRUE), file.path(out, "R")))
 invisible(file.copy("tools/connect/app.R", file.path(out, "app.R")))
 rsconnect::writeManifest(appDir = out, appPrimaryDoc = "app.R", appMode = "shiny", dependencyResolution = "library", quiet = TRUE)
 m <- jsonlite::fromJSON(file.path(out, "manifest.json"), simplifyVector = FALSE)
-need <- c("shiny", "bslib", "lme4", "clinfun", "kappaSize", "mvtnorm", "survival", "mirai")
+need <- c("shiny", "bslib", "lme4", "clinfun", "mvtnorm", "survival", "mirai")
 missing <- setdiff(need, names(m$packages))
 if (length(missing)) stop("manifest.json lacks packages the app uses: ", paste(missing, collapse = ", "))
 # Connect can install only from CRAN or a mirror of it: the source must say so ("CRAN", "RSPM") and the repository must be a URL. A

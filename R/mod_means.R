@@ -32,7 +32,9 @@ means_meta <- list(
       if (separate) tagList(
         conditionalPanel(.sh_cond(ns, spr, "sd"),
           numericInput(id("sd1"), "sd1 (group 1 standard deviation)", value = sd1, min = 0.0001),
-          numericInput(id("sd2"), "sd2 (group 2 standard deviation)", value = sd2, min = 0.0001)),
+          es_link_ui(ns, paste0("sd1_", sfx)),
+          numericInput(id("sd2"), "sd2 (group 2 standard deviation)", value = sd2, min = 0.0001),
+          es_link_ui(ns, paste0("sd2_", sfx))),
         conditionalPanel(.sh_cond(ns, spr, "var"),
           numericInput(id("var1"), "Variance, group 1", value = sd1^2, min = 0.0001),
           numericInput(id("var2"), "Variance, group 2", value = sd2^2, min = 0.0001)))

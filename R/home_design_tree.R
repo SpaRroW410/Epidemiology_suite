@@ -690,7 +690,10 @@ design_nodes <- list(
            next_id = "cont_summary", set = list(outcome = "continuous", cont_next = "indep_cont")),
       list(label = "An incidence rate per person-time (rate ratio)", next_id = "term_count_rate"),
       list(label = "Time to an event (survival, hazard ratio)", next_id = "surv_type"),
-      list(label = "An ordinal outcome (e.g. a grade or stage)", next_id = "term_ordinal")
+      list(label = "An ordinal outcome (e.g. a grade or stage)", next_id = "term_ordinal"),
+      # dose-response (4 Nov 2026): the exposure in ordered levels, or measured on a scale
+      list(label = "Whether the event occurred, with the exposure in three or more ordered levels or doses (a trend in risk)", next_id = "term_cohort_trend"),
+      list(label = "Whether the event occurred, with the exposure measured on a scale (risk per unit of exposure)", next_id = "term_logit_cont")
     )
   ),
 
@@ -704,7 +707,10 @@ design_nodes <- list(
     options = list(
       list(label = "Exposed or not (yes/no): odds ratio", next_id = "cc_matching"),
       list(label = "A measurement compared between cases and controls (a difference in mean levels, e.g. serum lead, vitamin D)",
-           next_id = "cont_summary", set = list(outcome = "continuous", cont_next = "cc_cont_matching"))
+           next_id = "cont_summary", set = list(outcome = "continuous", cont_next = "cc_cont_matching")),
+      # categorical exposure (4 Nov 2026)
+      list(label = "In three or more unordered categories (e.g. occupation): a chi-square test", next_id = "term_chisq_independence_direct"),
+      list(label = "In three or more ordered levels or doses (e.g. never / former / current smoker): a trend across the levels", next_id = "term_cc_trend")
     )
   ),
 
@@ -944,6 +950,12 @@ design_nodes <- list(
   term_reg_r2 = .term("term_reg_r2", "Multiple regression, R-squared", "regression_r2"),
   term_reg_r2_increase = .term("term_reg_r2_increase", "Hierarchical regression, R-squared increase", "regression_r2_increase"),
   term_anova_general = .term("term_anova_general", "Factorial ANOVA / ANCOVA", "anova_general"),
+  term_cohort_trend = .term("term_cohort_trend", "Trend in risk across ordered exposure levels (Cochran-Armitage)", "chisq_cochran_armitage",
+    note = "In the calculator, the groups are the exposure levels (with their doses or scores), each with its expected risk and its share of the cohort."),
+  term_cc_trend = .term("term_cc_trend", "Trend in exposure across ordered levels, case-control (Cochran-Armitage)", "chisq_cochran_armitage",
+    note = paste("The trend test is the same for a case-control table, but the calculator assumes that the number of people at each exposure",
+                 "level is fixed, whereas a case-control study fixes the numbers of cases and controls, so the sample size is approximate. Enter,",
+                 "for each exposure level, the expected proportion of cases among the people at that level and that level's share of all subjects.")),
   term_logit_bin = .term("term_logit_bin", "Logistic regression, binary predictor", "logistic_binary"),
   term_logit_cont = .term("term_logit_cont", "Logistic regression, continuous predictor", "logistic_continuous"),
   term_logit_bin_adj = .term("term_logit_bin_adj", "Multiple logistic regression, binary predictor (adjusted)", "logistic_binary_adjusted"),

@@ -1,5 +1,5 @@
 # "Calculate this" links from the calculators to the Effect Size converters, and "Use this value" back (R/mod_shared_link.R).
-# The browser round trip is in test-ui_smoke.R; here every entry of the list is checked against the pages and the converters' results.
+# The browser round trip is in test-ui_calculators.R; here every entry of the list is checked against the pages and the converters' results.
 
 registry_ui <- local({
   cache <- NULL

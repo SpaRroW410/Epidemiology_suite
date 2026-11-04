@@ -47,7 +47,7 @@ jobs:
 
       - uses: r-lib/actions/setup-renv@v2
 
-      # Browser-driven UI smoke tests (tests/testthat/test-ui_smoke.R). shinytest2 is
+      # Browser-driven UI tests (tests/testthat/test-ui_*.R, split by area). shinytest2 is
       # not in renv.lock: its current release needs a newer rlang than the lock pins,
       # so the last release that works with the locked packages is installed here.
       # Chrome is preinstalled on GitHub's ubuntu runners; the tests skip when

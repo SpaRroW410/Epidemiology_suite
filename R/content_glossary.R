@@ -183,7 +183,48 @@ glossary <- list(
   matched_pairs = list(
     label = "Matched pairs",
     short = "Each case is matched to one or more controls on factors such as age and sex, and the analysis uses the pairs.",
-    long = "Matching removes the effect of the matching factors but needs a matched analysis; the sample-size calculation needs phi.")
+    long = "Matching removes the effect of the matching factors but needs a matched analysis; the sample-size calculation needs phi."),
+  # study designs and survey terms used by the guide (4 Nov 2026)
+  cross_sectional = list(
+    label = "Cross-sectional study (survey)",
+    short = "A sample of a population studied once: the outcome and the possible factors are measured at the same time.",
+    long = paste("It estimates how common something is (prevalence) and which factors go with it, but cannot show which came first.",
+                 "Sample size: the precision of the prevalence, and, for the associations, a comparison of groups or a regression.")),
+  case_control = list(
+    label = "Case-control study",
+    short = "People with the outcome (cases) are compared with people without it (controls) for their past exposures.",
+    long = paste("Efficient for rare outcomes and long latent periods. The result is an odds ratio; the sample size depends on how common",
+                 "the exposure is among the controls and on the odds ratio to detect.")),
+  cohort = list(
+    label = "Cohort study",
+    short = "People with and without an exposure are followed over time and the new cases of the outcome are counted.",
+    long = paste("It shows which came first and gives the incidence and the risk ratio; it needs time and is inefficient for rare",
+                 "outcomes. The sample size depends on the risk in the unexposed and the risk ratio to detect.")),
+  prediction_model = list(
+    label = "Prediction model",
+    short = "A score or model that estimates an individual's risk of an outcome from several characteristics.",
+    long = paste("The aim is accurate prediction for a person, not the effect of each factor. Its sample size is set by the number of events",
+                 "and of candidate predictors, so that the model is not over-fitted.")),
+  determinants = list(
+    label = "Determinants (risk factors)",
+    short = "Factors associated with an outcome. A question about them can be answered by a survey, a case-control study or a cohort.",
+    long = paste("Which design to use depends on how common the outcome is, whether the time order matters, and what can be done:",
+                 "a survey measures the outcome and the factors at once; a case-control study starts from the outcome; a cohort from",
+                 "the exposure. Each needs its own sample size for the associations, in addition to any prevalence.")),
+  logistic_regression = list(
+    label = "Logistic regression",
+    short = "A regression for a yes / no outcome that estimates the odds ratio of each factor, adjusted for the others.",
+    long = paste("Used to study several determinants together. The sample size depends on the factor of interest, how it relates to the",
+                 "other factors (R-squared with the other covariates) and the overall proportion with the outcome.")),
+  kap = list(
+    label = "Knowledge, attitude and practice (KAP) study",
+    short = "A survey of what a population knows, believes and does about a health topic, usually reported as proportions.",
+    long = "The sample size is usually that for estimating a proportion with a chosen precision (p = 0.5 when nothing is known)."),
+  cluster_sampling = list(
+    label = "Cluster (multistage) sampling",
+    short = "Groups such as villages, wards or schools are chosen first, then people within them.",
+    long = paste("Cheaper in the field than a random sample of individuals, but people in one cluster tend to be alike, so more of them",
+                 "are needed: the sample size is multiplied by the design effect."))
 )
 
 # The entry for a term; stops for a term that is not defined, so a typo in a calculator fails a test rather than shows nothing.

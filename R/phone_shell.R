@@ -22,9 +22,10 @@ phone_shell_assets <- function() {
   nav.navbar .navbar-nav > li.nav-item > .nav-link { padding: .9rem .25rem !important; font-size: .9rem; font-weight: 600; min-height: 3rem; color: var(--bs-body-color) !important; }
   nav.navbar .navbar-nav > li.nav-item > .nav-link.active { color: var(--bs-primary) !important; box-shadow: inset 0 3px 0 var(--bs-primary); }
   html[data-bs-theme='dark'] nav.navbar .navbar-nav > li.nav-item > .nav-link.active { color: var(--bs-primary-text-emphasis) !important; }
-  nav.navbar .navbar-nav > li.bslib-nav-item { flex: 0 0 auto; margin-left: 0 !important; display: flex; align-items: center; }
-  nav.navbar .navbar-nav > li.bslib-nav-item bslib-input-dark-mode, nav.navbar .navbar-nav > li.bslib-nav-item .btn { color: var(--bs-body-color) !important; }
-  nav.navbar .navbar-nav > li.bslib-nav-item:has(#nav_search) { display: none; }   /* the search box on Home does that job on a phone */
+  nav.navbar .navbar-collapse > ul.navbar-nav { flex: 1 1 auto; min-width: 0; width: auto !important; }   /* the tabs share the bar with the dark-mode switch */
+  nav.navbar .navbar-extras { flex: 0 0 auto; margin-left: 0 !important; display: flex; align-items: center; padding: 0 .25rem; }
+  nav.navbar .navbar-extras bslib-input-dark-mode, nav.navbar .navbar-extras .btn { color: var(--bs-body-color) !important; }
+  nav.navbar .navbar-extra-search { display: none; }   /* the search box on Home does that job on a phone */
   body { padding-bottom: 4rem; }
   .pin-result { bottom: 3.2rem; }
   html { scroll-padding-bottom: 10rem; }

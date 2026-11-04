@@ -60,7 +60,7 @@ agreement_content <- list(
       "2012;65(7):778-784. (extension to 3-6 raters and up to 5",
       "categories, as implemented in the kappaSize package)."
     ),
-    backend = "Cohen's kappa: the presize::prec_kappa() logic written out; the cell-probability tables are kappaSize::CIBinary / CI3Cats / CI4Cats / CI5Cats (equal to presize::prec_kappa(), tested)"
+    backend = "Cohen's kappa: the presize::prec_kappa() logic written out, with kappaSize's cell probabilities (CIBinary, CI3Cats, CI4Cats, CI5Cats) re-derived in closed form (4 Nov 2026); equal to kappaSize and presize::prec_kappa() in the tests"
   ),
 
   icc = list(

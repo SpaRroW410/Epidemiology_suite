@@ -70,10 +70,11 @@ mod_rate_ui <- function(id) {
         numericInput(ns("prop_exposed"), "Proportion of the sample in the exposed group", value = 0.53, min = 0.01, max = 0.99, step = 0.01),
         numericInput(ns("alpha_comp"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_comp"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01),
-        selectInput(
-          ns("alternative_comp"), "Alternative hypothesis",
-          choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
-        )
+        advanced_options_ui(ns, id = "adv_comp",
+          selectInput(
+            ns("alternative_comp"), "Alternative hypothesis",
+            choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+          ))
       ),
       conditionalPanel(
         condition = design_is("poisson_regression"),
@@ -106,8 +107,9 @@ mod_rate_ui <- function(id) {
         selectInput(ns("approach_nb"), "Variance-estimator approach (Zhu & Lakkis 2014)",
                     choices = c("Approach 3 (recommended)" = 3, "Approach 2 (recommended)" = 2,
                                 "Approach 1" = 1)),
-        selectInput(ns("alternative_nb"), "Alternative hypothesis",
-                    choices = c("Two-sided" = "two.sided", "One-sided" = "one.sided")),
+        advanced_options_ui(ns, id = "adv_nb",
+          selectInput(ns("alternative_nb"), "Alternative hypothesis",
+                      choices = c("Two-sided" = "two.sided", "One-sided" = "one.sided"))),
         numericInput(ns("alpha_nb"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
         numericInput(ns("power_nb"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
       ),

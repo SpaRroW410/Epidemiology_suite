@@ -74,8 +74,9 @@ mod_nonparametric_ui <- function(id) {
         numericInput(ns("effect_size_ks"), "Standardized mean shift (comparable to Cohen's d)",
                      value = 0.5, min = 0.01, step = 0.05),
         es_link_ui(ns, "effect_size_ks"),
-        numericInput(ns("nsim_ks"), "Monte Carlo replicates per candidate n (nsim)",
-                     value = 500, min = 100, max = 5000, step = 100),
+        advanced_options_ui(ns, id = "adv_ks", title = "Simulation settings",
+          numericInput(ns("nsim_ks"), "Monte Carlo replicates per candidate n (nsim)",
+                       value = 500, min = 100, max = 5000, step = 100)),
         p(class = "text-muted",
           "This design searches by simulation and may take several seconds.")
       ),
@@ -84,8 +85,9 @@ mod_nonparametric_ui <- function(id) {
         numericInput(ns("effect_size_runs"), "Standardized mean shift (comparable to Cohen's d)",
                      value = 0.8, min = 0.01, step = 0.05),
         es_link_ui(ns, "effect_size_runs"),
-        numericInput(ns("nsim_runs"), "Monte Carlo replicates per candidate n (nsim)",
-                     value = 500, min = 100, max = 5000, step = 100),
+        advanced_options_ui(ns, id = "adv_runs", title = "Simulation settings",
+          numericInput(ns("nsim_runs"), "Monte Carlo replicates per candidate n (nsim)",
+                       value = 500, min = 100, max = 5000, step = 100)),
         p(class = "text-muted",
           "This design searches by simulation and may take several seconds.")
       ),
@@ -100,12 +102,14 @@ mod_nonparametric_ui <- function(id) {
                      selected = "Kruskal-Wallis"),
         conditionalPanel(
           condition = sprintf("input['%s'] == 'Jonckheere-Terpstra'", ns("statistic_animal")),
-          radioButtons(ns("alternative_animal"), "Alternative",
-                       choices = c("Two-sided" = "two.sided", "One-sided" = "one.sided"),
-                       selected = "two.sided")
+          advanced_options_ui(ns, id = "adv_animal_alt",
+            radioButtons(ns("alternative_animal"), "Alternative",
+                         choices = c("Two-sided" = "two.sided", "One-sided" = "one.sided"),
+                         selected = "two.sided"))
         ),
-        numericInput(ns("nrep_animal"), "Monte Carlo replicates per candidate n (nrep)",
-                     value = 100000, min = 1000, max = 1000000, step = 1000),
+        advanced_options_ui(ns, id = "adv_animal_sim", title = "Simulation settings",
+          numericInput(ns("nrep_animal"), "Monte Carlo replicates per candidate n (nrep)",
+                       value = 100000, min = 1000, max = 1000000, step = 1000)),
         p(class = "text-muted",
           "This design searches by simulation and may take several seconds. Kruskal-Wallis allows only a two-sided alternative.")
       ),

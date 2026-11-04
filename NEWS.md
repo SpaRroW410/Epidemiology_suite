@@ -1,5 +1,20 @@
 # epidemiologysuite (development version)
 
+## Small items cleared (4 Nov 2026)
+
+* **Three versions** compared in a table (folded on Home, and on the Cite tab), with the one in use marked.
+* **Guide:** a cohort with the exposure in ordered levels or on a scale, and a case-control with the exposure in categories or ordered
+  levels, now have their own routes (trend test, logistic regression, chi-square).
+* **Calculate this** for the Welch design's two SDs; **8 more glossary terms**.
+* **Advanced options** (folded) for the alternative hypothesis and the simulation settings in 7 more calculators.
+* **Accessibility:** the navbar's search box and dark-mode switch were inside the tab list (screen readers expect only tabs there); moved
+  beside it. The group headers of the calculator lists were list items in a tab list too; now marked as presentation.
+  The axe scan now covers the Find, Studies and Cite tabs, the guide's new steps and the Use this value panel: 0 violations.
+* **No `kappaSize` at run time:** the kappa sample size is written out and equal to the package.
+* **From R:** `ss_text()`, `ss_export()`, `ss_curve()`.
+* **Fixed:** the protocol paragraph showed "N = NULL" for inputs that were not given.
+* **Checked:** the detection sample size against epiR 3.0.0 (same when N x prevalence is whole; the difference is in the help).
+
 ## The guide understands research questions
 
 * Questions phrased by topic now get an answer; before, they matched nothing. "Knowledge, attitude and practice of ...", "awareness of",
