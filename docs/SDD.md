@@ -229,7 +229,7 @@ a within-patient (split-face) comparison of two means, and units per patient nee
 | Cluster / Design Effect | DEFF; DEFF with variable cluster size; WHO EPI cluster survey; two-stage PPS optimal allocation | closed form (Kish 1965); CV-adjusted DEFF verified vs. `clusterPower`; closed form `.cf_ssclus2estb()` (verified vs. `epiR::epi.ssclus2estb()`); Hansen-Hurwitz-Madow verified vs. `PracTools::clusOpt2()` | Live |
 | LQAS | Classification decision rule | closed-form binomial search (Robertson & Valadez 2006) | Live |
 | Capture-Recapture | Chapman-Petersen, precision-based | closed form (Chapman 1951; Seber 1982), Monte Carlo verified | Live |
-| Case-Control | Unmatched; matched 1:m; case-crossover; nested; case-cohort | closed forms `.cf_sscc_unmatched()` / `.cf_sscc_matched()` (verified vs. `epiR::epi.sscc()`); `powerSurvEpi::powerConLogistic.bin()`/`.con()`; closed form (Cai & Zeng 2004) | Live |
+| Case-Control | Unmatched; matched 1:m; case-crossover; nested; case-cohort | closed forms `.cf_sscc_unmatched()` / `.cf_sscc_matched()` (verified vs. `epiR::epi.sscc()`); conditional logistic score test (Lachin 2008; information per set nD nH / (nD + nH), equal to `powerSurvEpi::powerConLogistic.bin()`, and to `.con()` for one case per set); closed form (Cai & Zeng 2004) | Live |
 | Cohort / RR | Cohort / cross-sectional RR | closed form `.cf_sscohortc()` (verified vs. `epiR::epi.sscohortc()`) | Live |
 | Self-Controlled Case Series | SCCS with optional age effects | reimplemented `SCCS::samplesize()` (Musonda et al. 2006) | Live |
 | Ecological Study Guidance | Guidance panel, no formula | Morgenstern 1995; Robinson 1950 | Live |

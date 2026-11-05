@@ -1,0 +1,106 @@
+---
+title: "Clinical trials from R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Clinical trials from R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(epidemiologysuite)
+```
+
+Sample sizes for trials that are not a plain comparison of two groups: showing that a new treatment is not worse, or equivalent;
+crossover designs; interim analyses; and a meta-analysis that is still growing. The numbers are computed when this page is built;
+the examples are those the package's tests check against the published answers or the reference package. In the app: **Plan:
+Sample Size > Clinical Trials**. A superiority trial comparing two means or two proportions is in `vignette("sample-size-from-r")`.
+
+## Non-inferiority
+
+The new treatment may be a little worse than the standard, by no more than the **margin**, and still be accepted. The margin is a
+clinical decision made before the trial, and it drives the sample size more than anything else.
+
+Means (Chow, Shao & Wang, Sample Size Calculations in Clinical Research, 2nd ed., 2008, pp. 61-62): both treatments with a mean of
+0.20, SD 0.10, margin 0.05, one-sided 5%, 80% power.
+
+```{r ni-means}
+ni <- calc_noninferiority_means(mean_new = 0.20, mean_standard = 0.20, sd = 0.10, margin = 0.05, alpha = 0.05, power = 0.80)
+c(new = ni$n_new, standard = ni$n_standard, total = ni$n_total)
+```
+
+Proportions (the same book, p. 90): 85% success with the new treatment, 65% with the standard, margin 10 percentage points.
+
+```{r ni-props}
+calc_noninferiority_proportions(p_new = 0.85, p_standard = 0.65, margin = 0.10, alpha = 0.05, power = 0.80)$n_total
+```
+
+The book's answers are 50 per group and 25 per group. Odds ratios and hazard ratios have their own functions,
+`calc_noninferiority_or()` and `calc_noninferiority_hr()`.
+
+## Equivalence and bioequivalence
+
+Two one-sided tests (TOST): the ratio of the two formulations must lie between 0.80 and 1.25. The example of
+`PowerTOST::sampleN.TOST()`: a within-subject coefficient of variation of 30%, a true ratio of 0.95, a 2x2 crossover.
+
+```{r tost}
+tost <- calc_tost_bioequivalence(cv = 0.3, design = "2x2")
+c(total = tost$n_total, power = round(tost$achieved_power, 4))
+```
+
+40 subjects, with an achieved power of 0.8158, as in that package. The replicate designs (`design = "2x2x4"` or `"2x3x3"`) need fewer.
+
+## Crossover
+
+Each patient receives both treatments in turn, so the comparison is within patients: a difference of 0.2 with a within-patient SD of
+0.4 (the formula of `TrialSize::TwoSampleCrossOver.Equality()`, Chow, Shao & Wang 2003).
+
+```{r crossover}
+co <- calc_crossover_2x2(delta = 0.2, sigma = 0.4, alpha = 0.05, power = 0.8)
+c(per_sequence = co$n_per_sequence, total = co$n_total)
+```
+
+## Interim analyses (group sequential)
+
+Looking at the data before the end, with the option to stop early, costs a few more patients. A difference of a quarter of an SD,
+analysed once at the end and with four equally spaced looks (O'Brien-Fleming-type boundaries, `clinfun::gsdesign.normal()`):
+
+```{r gs}
+fixed <- calc_group_sequential_normal(delta = 0.25, sd = 1, n_looks = 1, alpha = 0.05, power = 0.8)
+four <- calc_group_sequential_normal(delta = 0.25, sd = 1, n_looks = 4, alpha = 0.05, power = 0.8, futility = TRUE)
+c(one_look = fixed$n_total, four_looks = four$n_total)
+four$ifrac
+```
+
+`calc_group_sequential_binary()` and `calc_group_sequential_survival()` do the same for proportions and for events.
+
+## Trial sequential analysis
+
+The information size a meta-analysis needs before its result can be trusted (as `RTSA::ris()`): a relative risk of 0.8 with a
+control-group risk of 12%, two-sided 5%, 90% power.
+
+```{r tsa}
+calc_tsa_information_size(outcome = "RR", mc = 0.8, pC = 0.12, alpha = 0.05, beta = 0.1, side = 2)$n_total
+```
+
+## Losing patients
+
+Every number above is the number to **analyse**. If some will drop out, enrol more:
+
+```{r attrition}
+calc_attrition_stages(100, 0.2)
+```
+
+`calc_attrition_arms()` allows a different loss in each arm, and `calc_attrition_noncompliance()` allows for patients who do not
+take the treatment they were given.
+
+## Other designs
+
+- `calc_stepped_wedge_normal()`: clusters switch from control to intervention at random times (Hooper et al. 2016, with the
+  correlation within a cluster decaying over time).
+- `calc_simon()`: Simon's two-stage design for a phase II trial; `calc_pilot_sd_precision()`: how little a small pilot says
+  about the SD.
+- `calc_subgroup_interaction()`: how much larger a trial must be to detect a difference in effect between subgroups.
+
+Each help page gives the source of its formula and an example.

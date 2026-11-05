@@ -174,25 +174,27 @@ calc_matched_pairs_phi <- function(both, case_only, control_only, neither) {
   }
 }
 
-#' Sample size for a nested case-control study, binary exposure
+#' Sample size for matched sets (nested or matched case-control), binary exposure
 #'
-#' Wraps powerSurvEpi::powerConLogistic.bin() (conditional logistic
-#' regression for a matched/nested case-control set), rather than
-#' reimplementing the underlying math (project convention -- powerSurvEpi
-#' is already a project dependency, so this adds zero new packages).
+#' Number of matched sets, each of nD cases and nH controls, for the score test of a binary exposure in a conditional logistic
+#' regression (Lachin 2008, eq. 25 and 35, with the information per set nD * nH / (nD + nH); see the comment above
+#' `.cf_pse_conlogistic_bin()`). Applies to a nested case-control study and to any individually matched case-control study, 1:1 or
+#' 1:m. Written out in the app; equal to powerSurvEpi::powerConLogistic.bin().
 #'
-#' @param OR Expected odds ratio per unit change in the binary exposure (> 0, != 1)
-#' @param pE Prevalence of exposure among the matched set (0,1)
+#' @param OR Expected odds ratio, exposed vs unexposed (> 0, != 1)
+#' @param pE Probability of exposure under the null hypothesis (0,1)
 #' @param nD Number of cases per matched set (>= 1)
 #' @param nH Number of controls per matched set (>= 1)
 #' @param R2 Proportion of variation in exposure explained by other covariates
 #'   in the conditional logistic model (0,1); 0 = no adjustment covariates
-#' @param alpha Significance level (0,1)
+#' @param alpha Significance level (0,1), two-sided
 #' @param power Desired power (0,1)
-#' @return list(n, inputs) where n is the number of matched sets required
-#'   (each set = nD cases + nH controls)
+#' @return list(n_sets, n_cases, n_controls, n_total, inputs)
+#' @references Lachin JM. Sample size evaluation for a multiply matched case-control study using the score test from a conditional
+#'   logistic (discrete Cox PH) regression model. Stat Med 2008;27(14):2509-2523. doi:10.1002/sim.3057. Erratum: Stat Med
+#'   2018;37(10):1765-1766. doi:10.1002/sim.7598.
 #' @examples
-#' calc_case_control_nested_binary(OR = 3.5, pE = 0.15, nD = 1, nH = 2, R2 = 0, alpha = 0.05, 
+#' calc_case_control_nested_binary(OR = 3.5, pE = 0.15, nD = 1, nH = 2, R2 = 0, alpha = 0.05,
 #'     power = 0.8)
 #' @export
 calc_case_control_nested_binary <- function(OR, pE, nD, nH, R2 = 0, alpha = 0.05,
@@ -202,59 +204,90 @@ calc_case_control_nested_binary <- function(OR, pE, nD, nH, R2 = 0, alpha = 0.05
   .validate_unit_interval(pE, "pE")
   .validate_positive_integer(nD, "nD")
   .validate_positive_integer(nH, "nH")
-  if (!is.numeric(R2) || length(R2) != 1 || is.na(R2) || R2 < 0 || R2 >= 1) {
-    stop("R2 must be a single number in [0, 1).")
-  }
+  .validate_r2(R2)
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
 
-  n <- .cf_pse_conlogistic_bin(power = power, OR = OR, pE = pE,
-                                           nD = nD, nH = nH, R2 = R2, alpha = alpha)
-
+  n <- ceiling(.cf_pse_conlogistic_bin(power = power, OR = OR, pE = pE,
+                                       nD = nD, nH = nH, R2 = R2, alpha = alpha))
   new_ss_result(list(
-    n_sets = ceiling(n),
-    n_total = ceiling(n) * (nD + nH),
+    n_sets = n, n_cases = n * nD, n_controls = n * nH,
+    n_total = n * (nD + nH),
     inputs = list(OR = OR, pE = pE, nD = nD, nH = nH, R2 = R2, alpha = alpha, power = power)
   ))
 }
 
-#' Sample size for a nested case-control study, continuous exposure
-#'
-#' Wraps powerSurvEpi::powerConLogistic.con().
-#'
-#' @param OR Expected odds ratio per one-unit (one-SD, if standardized) change
-#'   in the continuous exposure (> 0, != 1)
-#' @param sigma Standard deviation of the exposure (> 0)
-#' @param nD Number of cases per matched set (>= 1)
-#' @param nH Number of controls per matched set (>= 1)
-#' @param R2 Proportion of variation in exposure explained by other covariates (0,1)
-#' @param alpha Significance level (0,1)
-#' @param power Desired power (0,1)
-#' @return list(n_sets, n_total, inputs)
-#' @examples
-#' calc_case_control_nested_continuous(OR = 1.39, sigma = 1, nD = 1, nH = 2, R2 = 0, 
-#'     alpha = 0.05, power = 0.85)
-#' @export
-calc_case_control_nested_continuous <- function(OR, sigma, nD, nH, R2 = 0, alpha = 0.05,
-                                                 power = 0.8) {
-  .validate_positive(OR, "OR")
-  if (isTRUE(all.equal(OR, 1))) stop("OR must differ from 1 (no effect to detect).")
-  .validate_positive(sigma, "sigma")
-  .validate_positive_integer(nD, "nD")
-  .validate_positive_integer(nH, "nH")
+.validate_r2 <- function(R2) {
   if (!is.numeric(R2) || length(R2) != 1 || is.na(R2) || R2 < 0 || R2 >= 1) {
     stop("R2 must be a single number in [0, 1).")
   }
+}
+
+#' Sample size for matched sets (nested or matched case-control), measured exposure
+#'
+#' Number of matched sets, each of nD cases and nH controls, for the score test of a measured (continuous) exposure in a
+#' conditional logistic regression (Lachin 2008, eq. 25; eq. 27 and 34 for one case per set). Applies to a nested case-control study
+#' and to any individually matched case-control study, 1:1 or 1:m: with one control per case it gives the z-test version of the paired
+#' comparison of means, since the SD of the case-control differences is sigma * sqrt(2). For two or more cases per set the
+#' information per set is nD * nH / (nD + nH), not the paper's nD * [1 - 1 / choose(nD + nH, nD)] (which powerSurvEpi's
+#' powerConLogistic.con() uses): see the comment above `.cf_pse_conlogistic_bin()`.
+#'
+#' The effect is given in one of three ways (exactly one):
+#' \itemize{
+#'   \item `OR`, the odds ratio per one unit of the exposure (Lachin's O; theta = log(OR));
+#'   \item `OR_sd`, the odds ratio per one standard deviation (theta = log(OR_sd) / sigma);
+#'   \item `mean_diff`, the difference between the mean exposure of the cases and of their matched controls (theta =
+#'     mean_diff / sigma^2, eq. 32; for several cases per set the paper's eq. 28-30 add a constant that comes from its information
+#'     factor and is 1 with the factor used here).
+#' }
+#'
+#' @param OR Odds ratio per one unit of the exposure (> 0, != 1), or NULL
+#' @param sigma Standard deviation of the exposure within matched sets (> 0); without strong matching on factors related to the
+#'   exposure, the SD among controls is a usual (slightly conservative) choice
+#' @param nD Number of cases per matched set (>= 1)
+#' @param nH Number of controls per matched set (>= 1)
+#' @param R2 Proportion of variation in exposure explained by other covariates (0,1)
+#' @param alpha Significance level (0,1), two-sided
+#' @param power Desired power (0,1)
+#' @param OR_sd Odds ratio per one standard deviation of the exposure, or NULL
+#' @param mean_diff Mean exposure of cases minus that of their matched controls (!= 0), or NULL
+#' @return list(n_sets, n_cases, n_controls, n_total, OR (per unit), OR_sd, theta, inputs)
+#' @references Lachin JM. Stat Med 2008;27(14):2509-2523. doi:10.1002/sim.3057 (sec. 3.2, 4.1). Erratum: Stat Med
+#'   2018;37(10):1765-1766. doi:10.1002/sim.7598.
+#' @examples
+#' # Lachin (2008), sec. 4.1: OR 1.39 per SD, 2 controls per case, 85% power -> 125 cases
+#' calc_case_control_nested_continuous(OR_sd = 1.39, sigma = 8.41, nD = 1, nH = 2, power = 0.85)
+#' # the same, from the means: cases 2.77 above their controls on a biomarker with SD 8.41
+#' calc_case_control_nested_continuous(mean_diff = 2.77, sigma = 8.41, nD = 1, nH = 2, power = 0.85)
+#' @export
+calc_case_control_nested_continuous <- function(OR = NULL, sigma, nD, nH, R2 = 0, alpha = 0.05,
+                                                 power = 0.8, OR_sd = NULL, mean_diff = NULL) {
+  given <- !vapply(list(OR, OR_sd, mean_diff), is.null, logical(1))
+  if (sum(given) != 1) stop("Give the effect one way: OR (per unit), OR_sd (per SD) or mean_diff.")
+  .validate_positive(sigma, "sigma")
+  .validate_positive_integer(nD, "nD")
+  .validate_positive_integer(nH, "nH")
+  .validate_r2(R2)
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(power, "power")
+  theta <- if (given[1]) {
+    .validate_positive(OR, "OR"); log(OR)
+  } else if (given[2]) {
+    .validate_positive(OR_sd, "OR_sd"); log(OR_sd) / sigma
+  } else {
+    if (!is.numeric(mean_diff) || length(mean_diff) != 1 || !is.finite(mean_diff)) stop("mean_diff must be a single number.")
+    mean_diff / sigma^2
+  }
+  if (abs(theta) < 1e-12) stop("The effect must differ from no effect (OR 1, mean difference 0).")
 
-  n <- .cf_pse_conlogistic_con(power = power, OR = OR, sigma = sigma,
-                                           nD = nD, nH = nH, R2 = R2, alpha = alpha)
-
+  n <- ceiling(.cf_pse_conlogistic_con(power = power, OR = exp(theta), sigma = sigma,
+                                       nD = nD, nH = nH, R2 = R2, alpha = alpha))
   new_ss_result(list(
-    n_sets = ceiling(n),
-    n_total = ceiling(n) * (nD + nH),
-    inputs = list(OR = OR, sigma = sigma, nD = nD, nH = nH, R2 = R2, alpha = alpha, power = power)
+    n_sets = n, n_cases = n * nD, n_controls = n * nH,
+    n_total = n * (nD + nH),
+    OR = exp(theta), OR_sd = exp(theta * sigma), theta = theta,
+    inputs = list(OR = OR, OR_sd = OR_sd, mean_diff = mean_diff, sigma = sigma, nD = nD, nH = nH, R2 = R2,
+                  alpha = alpha, power = power)
   ))
 }
 

@@ -260,3 +260,26 @@ test_that("Cluster / Design Effect: the design effect from variances, and entere
   expect_match(ui_output_text(app, "cluster-result"), ": 1.500")
   expect_equal(ui_output_errors(app), 0)
 })
+
+test_that("matched case-control with a measured exposure: the search opens it preset, and Lachin's example comes out", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  # the navbar search box sends the catalog key; the entry presets the design and the exposure type (also_set)
+  app$run_js("Shiny.setInputValue('nav_search', 'case_control_matched_measured', {priority: 'event'});")
+  app$wait_for_idle(1500, timeout = 60000)
+  expect_equal(app$get_value(input = "case_control-design"), "nested")
+  expect_equal(app$get_value(input = "case_control-exposure_type"), "continuous")
+  # Lachin (2008) sec. 4.1: cases 2.77 above their 2 controls on a biomarker with SD 8.41, 85% power -> 125 cases
+  app$set_inputs(`case_control-mean_cases` = 27.77, `case_control-mean_controls` = 25, `case_control-sigma` = 8.41,
+                 `case_control-nD` = 1, `case_control-nH` = 2, `case_control-power` = 0.85)
+  app$wait_for_idle(800, timeout = 60000)
+  st <- ui_output_text(app, "case_control-result")
+  expect_match(st, "Matched sets required: 125")
+  expect_match(st, "Cases: 125, Controls: 250")
+  expect_match(st, "1.390 per SD")
+  ui_choose_radio(app, "case_control-cont_effect_as", "or_sd")
+  app$set_inputs(`case_control-OR_sd` = 1.39)
+  app$wait_for_idle(800, timeout = 60000)
+  expect_match(ui_output_text(app, "case_control-result"), "Matched sets required: 125")
+  expect_equal(ui_output_errors(app), 0)
+})

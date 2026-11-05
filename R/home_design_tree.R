@@ -719,8 +719,9 @@ design_nodes <- list(
     question = "Are cases and controls matched?",
     options = list(
       list(label = "No -- unmatched (two independent groups)", next_id = "indep_cont"),
-      list(label = "Yes -- individually matched (analysed as paired differences)", next_id = "term_two_groups_paired_cont"),
-      list(label = "Frequency-matched (analysed as two independent groups, adjusting for the matching factors)", next_id = "indep_cont")
+      list(label = "Yes -- individually matched, one control per case (analysed as paired differences)", next_id = "term_two_groups_paired_cont"),
+      list(label = "Frequency-matched (analysed as two independent groups, adjusting for the matching factors)", next_id = "indep_cont"),
+      list(label = "Yes -- individually matched, two or more controls per case (conditional logistic regression)", next_id = "term_cc_matched_measured")
     )
   ),
 
@@ -1076,6 +1077,11 @@ design_nodes <- list(
   term_cc_freq_matched = .term("term_cc_freq_matched", "Frequency-matched case-control study", "case_control_unmatched",
     note = "Frequency matching is analysed like an unmatched design (stratified), not the individually-matched formula -- use the unmatched calculator."),
   term_cc_matched = .term("term_cc_matched", "Individually matched case-control study", "case_control_matched"),
+  term_cc_matched_measured = .term("term_cc_matched_measured", "Matched case-control study, measured exposure (1:m)",
+    "case_control_matched_measured",
+    note = paste("The calculator opens on matched sets with a measured exposure (Lachin 2008): give the mean exposure in cases",
+                 "and in their controls and the SD within matched sets, and the number of controls per case. With one control",
+                 "per case it gives the same number as the paired comparison, so either route can be used for 1:1.")),
   term_nested_cc = .term("term_nested_cc", "Nested case-control study", "case_control_nested"),
   term_case_cohort = .term("term_case_cohort", "Case-cohort study", "case_control_case_cohort"),
   term_case_crossover = .term("term_case_crossover", "Case-crossover study", "case_crossover",

@@ -87,6 +87,9 @@
 # the Cox-model covariate sizes, Palta & Amini 1985 for stratification, and the matched case-control power formulas of Dupont 1988.
 # None of the originals was read here; the formulas are checked against the package, not against the papers.
 # Tests compare each with the package (ssizeCT, ssizeEpi, ssizeEpiCont, ssize.stratify, powerConLogistic.bin / .con) over grids of inputs.
+# Exception, the matched-set (conditional logistic) formulas: their source, Lachin 2008 (Stat Med 27:2509-2523, PMC3626499, with the
+# erratum Stat Med 2018;37:1765-1766), was read (5 Nov 2026); they follow it for one case per set and differ from it (and from
+# powerConLogistic.con) for two or more cases per set (see below).
 
 # Two groups, log-rank, equal follow-up: k = nE / nC; pE, pC = event probabilities; RR = hazard ratio.
 .cf_pse_ssize_ct <- function(power, k, pE, pC, RR, alpha = 0.05) {
@@ -112,15 +115,25 @@
   mu <- log(HR) * sqrt(sum(gVec * PVec * (1 - PVec) * Vs, na.rm = TRUE))
   ceiling((stats::qnorm(1 - alpha) + stats::qnorm(power))^2 / mu^2)
 }
-# Matched case-control (nD cases and nH controls per set): number of sets N for a binary exposure with prevalence pE.
+# Matched sets with nD cases and nH controls each, analysed by conditional logistic regression (score test), after Lachin 2008:
+# N = (z_a + z_b)^2 / (theta^2 * sigma^2 * f * (1 - R2)) (eq. 25), sigma^2 the variance of the exposure within sets (for a binary
+# exposure the Bernoulli variance pE (1 - pE), eq. 35), f the information per set per unit of sigma^2.
+# f = nD * nH / (nD + nH). Under H0 the cases are a random nD-subset of the set, so the null variance of the cases' sum is
+# nD * nH / (n - 1) * v (sampling without replacement, v the set's variance with divisor n), whose mean is nD * nH / n * sigma^2.
+# The paper writes f = nD * [1 - 1 / choose(n, nD)] (eq. 22-23, 35): the same for one case per set (nH / (nH + 1), eq. 26-27, 38,
+# and the paper's examples, sec. 4.1), larger for two or more cases per set. Simulated conditional logistic data (5 Nov 2026, 1500 data
+# sets each, nD = 2 or 3) give the planned 80% power with nD * nH / (nD + nH), and 51-66% with the paper's factor; with this factor
+# the paper's constant relating theta to the mean difference (eq. 28-30) becomes 1 for any nD (theta = delta / sigma^2).
+# powerSurvEpi::powerConLogistic.bin() uses nD * nH / (nD + nH); powerConLogistic.con() uses the paper's factor.
+.clogit_set_factor <- function(nD, nH) nD * nH / (nD + nH)
 .cf_pse_conlogistic_bin <- function(power = 0.8, OR, pE, nD, nH, R2 = 0, alpha = 0.05, nTests = 1) {
   za <- stats::qnorm(1 - (alpha / 2) / nTests)
-  core <- log(OR)^2 * pE * (1 - pE) * (1 - R2) * nD * nH / (nD + nH)
+  core <- log(OR)^2 * pE * (1 - pE) * (1 - R2) * .clogit_set_factor(nD, nH)
   (stats::qnorm(power) + za)^2 / core
 }
-# ... and for a continuous exposure with standard deviation sigma.
+# ... and for a continuous exposure with standard deviation sigma within sets.
 .cf_pse_conlogistic_con <- function(power = 0.8, OR, sigma, nD, nH, R2 = 0, alpha = 0.05, nTests = 1) {
   za <- stats::qnorm(1 - (alpha / 2) / nTests)
-  core <- log(OR)^2 * sigma^2 * nD * (1 - 1 / choose(nD + nH, nD)) * (1 - R2)
+  core <- log(OR)^2 * sigma^2 * .clogit_set_factor(nD, nH) * (1 - R2)
   (stats::qnorm(power) + za)^2 / core
 }

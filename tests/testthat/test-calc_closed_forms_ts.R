@@ -54,7 +54,13 @@ test_that("survival and matched case-control formulas equal powerSurvEpi", {
     near(.cf_pse_ssize_stratify(pw, 3, g, P, 0.7, l0, al), powerSurvEpi::ssize.stratify(pw, 3, g, P, 0.7, l0, al, verbose = FALSE))
     for (OR in c(1.8, 3)) for (nD in c(1, 2)) for (nH in c(1, 3)) for (R2 in c(0, 0.2)) {
       near(.cf_pse_conlogistic_bin(pw, OR, 0.3, nD, nH, R2, al), powerSurvEpi::powerConLogistic.bin(N = NULL, power = pw, OR = OR, pE = 0.3, nD = nD, nH = nH, R2 = R2, alpha = al))
-      near(.cf_pse_conlogistic_con(pw, OR, 1.2, nD, nH, R2, al), powerSurvEpi::powerConLogistic.con(N = NULL, power = pw, OR = OR, sigma = 1.2, nD = nD, nH = nH, R2 = R2, alpha = al))
+      # the continuous exposure: equal to the package for one case per set; for two or more the information per set is
+      # nD nH / (nD + nH), as for the binary exposure, not the package's (and Lachin's) nD [1 - 1 / choose(nD + nH, nD)]
+      pse_con <- powerSurvEpi::powerConLogistic.con(N = NULL, power = pw, OR = OR, sigma = 1.2, nD = nD, nH = nH, R2 = R2, alpha = al)
+      if (nD == 1) near(.cf_pse_conlogistic_con(pw, OR, 1.2, nD, nH, R2, al), pse_con)
+      else expect_gt(.cf_pse_conlogistic_con(pw, OR, 1.2, nD, nH, R2, al), pse_con)
+      near(.cf_pse_conlogistic_con(pw, OR, 1.2, nD, nH, R2, al),
+           (stats::qnorm(pw) + stats::qnorm(1 - al / 2))^2 / (log(OR)^2 * 1.44 * nD * nH / (nD + nH) * (1 - R2)))
     }
   }
 })

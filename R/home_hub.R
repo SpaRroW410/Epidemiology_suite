@@ -145,8 +145,7 @@ home_server <- function(input, output, session) {
       key <- input[[box]]
       if (is.null(key) || !nzchar(key)) return()
       entry <- catalog_entry(key)
-      jump_to_module(session, entry$nav_target)
-      if (!is.na(entry$module_input_id)) updateRadioButtons(session, entry$module_input_id, selected = entry$design_value)
+      catalog_open(session, entry)
       updateSelectizeInput(session, box, selected = "")
     }, ignoreInit = TRUE)
   })

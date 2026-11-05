@@ -26,8 +26,8 @@ mod_case_control_ui <- function(id) {
         ns("design"), "Design",
         choices = c(
           "Unmatched case-control" = "unmatched",
-          "Matched case-control (1:1 or 1:m)" = "matched",
-          "Nested case-control" = "nested",
+          "Matched case-control, exposed or not (1:1 or 1:m)" = "matched",
+          "Matched sets, conditional logistic regression (nested case-control, or a measured exposure 1:1 or 1:m)" = "nested",
           "Case-cohort" = "case_cohort"
         ),
         selected = "unmatched"
@@ -48,8 +48,8 @@ mod_case_control_ui <- function(id) {
                      value = 0.46, min = 0.001, max = 0.999, step = 0.01)
       ),
       conditionalPanel(
-        condition = sprintf("(%s) || ((%s) && input['%s'] != 'p1')", design_is("nested"), design_is("unmatched", "matched"),
-                            ns("effect_as")),
+        condition = sprintf("((%s) && (%s || input['%s'] == 'or')) || ((%s) && input['%s'] != 'p1')", design_is("nested"),
+                            exposure_is("binary"), ns("cont_effect_as"), design_is("unmatched", "matched"), ns("effect_as")),
         numericInput(ns("OR"), with_tip("Expected odds ratio (OR)", "odds_ratio"), value = 2, min = 0.01, step = 0.1),
         es_link_ui(ns, "OR")
       ),
@@ -97,16 +97,32 @@ mod_case_control_ui <- function(id) {
                      choices = c("Binary exposure" = "binary", "Continuous exposure" = "continuous")),
         conditionalPanel(
           condition = exposure_is("binary"),
-          numericInput(ns("pE"), "Prevalence of exposure among matched sets (pE)",
+          numericInput(ns("pE"), "Probability of exposure (pE; among controls, or overall)",
                        value = 0.15, min = 0.001, max = 0.999, step = 0.01)
         ),
         conditionalPanel(
           condition = exposure_is("continuous"),
-          numericInput(ns("sigma"), "Standard deviation of exposure (sigma)",
-                       value = 1, min = 0.001, step = 0.1)
+          radioButtons(ns("cont_effect_as"), "The effect to detect, as",
+                       choices = c("The mean exposure in cases and in their matched controls" = "means",
+                                   "An odds ratio per one SD of the exposure" = "or_sd",
+                                   "An odds ratio per one unit of the exposure" = "or")),
+          conditionalPanel(
+            condition = sprintf("input['%s'] == 'means'", ns("cont_effect_as")),
+            div(class = "row g-2",
+              div(class = "col-6", numericInput(ns("mean_cases"), "Mean exposure, cases", value = 27.8, step = 0.1)),
+              div(class = "col-6", numericInput(ns("mean_controls"), "Mean exposure, controls", value = 25, step = 0.1)))
+          ),
+          conditionalPanel(
+            condition = sprintf("input['%s'] == 'or_sd'", ns("cont_effect_as")),
+            numericInput(ns("OR_sd"), with_tip("Odds ratio per one SD of the exposure", "odds_ratio"), value = 1.39, min = 0.01, step = 0.05)
+          ),
+          numericInput(ns("sigma"), "Standard deviation of the exposure within matched sets (sigma)",
+                       value = 8.41, min = 0.001, step = 0.1),
+          p(class = "small text-muted", "If the matching factors are only weakly related to the exposure, the SD among controls",
+            "(or in the population) will do; strong matching on a correlate of the exposure makes the SD within sets smaller.")
         ),
         numericInput(ns("nD"), "Cases per matched set (nD)", value = 1, min = 1, step = 1),
-        numericInput(ns("nH"), "Controls per matched set (nH)", value = 2, min = 1, step = 1),
+        numericInput(ns("nH"), "Controls per matched set (nH; e.g. 1 for pairs, 4 for 1:4)", value = 2, min = 1, step = 1),
         numericInput(ns("R2"), "R-squared explained by other covariates (0 if none)",
                      value = 0, min = 0, max = 0.999, step = 0.01)
       ),
@@ -213,6 +229,20 @@ mod_case_control_server <- function(id) {
                   t$phi, t$n_pairs, 100 * t$p0, 100 * t$p1, t$OR, if (is.finite(t$OR_matched)) sprintf("%.2f", t$OR_matched) else "not finite"))
     })
 
+    # the measured exposure's effect, as given (calc_case_control_nested_continuous takes exactly one)
+    cont_effect_args <- reactive({
+      as <- input$cont_effect_as
+      req(as)
+      if (as == "means") {
+        req(is.numeric(input$mean_cases), is.numeric(input$mean_controls))
+        list(mean_diff = input$mean_cases - input$mean_controls)
+      } else if (as == "or_sd") {
+        req(input$OR_sd); list(OR_sd = input$OR_sd)
+      } else {
+        req(input$OR); list(OR = input$OR)
+      }
+    })
+
     result <- reactive({
       req(input$design, input$alpha, input$power)
 
@@ -235,19 +265,19 @@ mod_case_control_server <- function(id) {
             alternative = input$alternative, N = N
           ), effect_args()))
         } else if (input$design == "nested") {
-          req(input$exposure_type, input$OR, input$nD, input$nH, input$R2)
+          req(input$exposure_type, input$nD, input$nH, input$R2)
           if (input$exposure_type == "binary") {
-            req(input$pE)
+            req(input$pE, input$OR)
             calc_case_control_nested_binary(
               OR = input$OR, pE = input$pE, nD = input$nD, nH = input$nH,
               R2 = input$R2, alpha = input$alpha, power = input$power
             )
           } else {
             req(input$sigma)
-            calc_case_control_nested_continuous(
-              OR = input$OR, sigma = input$sigma, nD = input$nD, nH = input$nH,
+            do.call(calc_case_control_nested_continuous, c(list(
+              sigma = input$sigma, nD = input$nD, nH = input$nH,
               R2 = input$R2, alpha = input$alpha, power = input$power
-            )
+            ), cont_effect_args()))
           }
         } else {
           req(input$n_full, input$pD, input$p1, input$hr)
@@ -278,7 +308,10 @@ mod_case_control_server <- function(id) {
       } else if (res$design == "nested") {
         tagList(
           p(strong("Matched sets required: "), v$n_sets),
-          p(sprintf("Total subjects: %d", v$n_total))
+          p(sprintf("Cases: %d, Controls: %d (total %d)", v$n_cases, v$n_controls, v$n_total)),
+          if (!is.null(v$OR_sd)) p(class = "text-muted small", sprintf(
+            "Odds ratio %.4g per unit and %.3f per SD (sigma %s); mean difference between cases and controls %.4g.",
+            v$OR, v$OR_sd, format(v$inputs$sigma), v$theta * v$inputs$sigma^2))
         )
       } else {
         tagList(
@@ -327,9 +360,9 @@ mod_case_control_server <- function(id) {
           power = list(param = "power", values = curve_range_power())
         )
       } else if (input$design == "nested") {
-        req(input$exposure_type, input$OR, input$nD, input$nH, input$R2, input$alpha, input$power)
+        req(input$exposure_type, input$nD, input$nH, input$R2, input$alpha, input$power)
         if (input$exposure_type == "binary") {
-          req(input$pE)
+          req(input$pE, input$OR)
           list(
             calc_fn = calc_case_control_nested_binary,
             args = list(OR = input$OR, pE = input$pE, nD = input$nD, nH = input$nH,
@@ -338,12 +371,12 @@ mod_case_control_server <- function(id) {
             power = list(param = "power", values = curve_range_power())
           )
         } else {
-          req(input$sigma)
+          req(input$sigma, isTRUE(result()$ok))
           list(
             calc_fn = calc_case_control_nested_continuous,
-            args = list(OR = input$OR, sigma = input$sigma, nD = input$nD, nH = input$nH,
+            args = list(OR_sd = result()$value$OR_sd, sigma = input$sigma, nD = input$nD, nH = input$nH,
                          R2 = input$R2, alpha = input$alpha, power = input$power),
-            effect = list(param = "OR", values = curve_range_ratio(), label = "Odds ratio (OR)"),
+            effect = list(param = "OR_sd", values = curve_range_ratio(), label = "Odds ratio per SD"),
             power = list(param = "power", values = curve_range_power())
           )
         }

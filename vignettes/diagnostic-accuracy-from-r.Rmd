@@ -1,0 +1,95 @@
+---
+title: "Diagnostic accuracy studies from R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Diagnostic accuracy studies from R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(epidemiologysuite)
+```
+
+Sample sizes for studies of a test's accuracy: estimating its sensitivity and specificity, showing it is better than a reference,
+comparing two tests, and the area under the ROC curve. The numbers are computed when this page is built; the examples are those the
+package's tests check against the published answers (`tests/testthat/test-calc_diagnostic.R`, `test-calc_roc.R`). Most come from
+Akoglu, *User's guide to sample size estimation in diagnostic accuracy studies*, Turk J Emerg Med 2022;22(4):177-185. In the app:
+**Plan: Sample Size > Diagnostic & Screening**.
+
+## The prevalence decides the number
+
+Sensitivity is estimated in the people **with** the condition and specificity in those **without** it. When the study enrols
+consecutive patients, the number needed is the number of diseased (or non-diseased) people required, divided by the prevalence (or
+by 1 minus the prevalence). A rare condition therefore makes sensitivity expensive.
+
+## Estimating sensitivity and specificity
+
+Akoglu's example (Table 3B): an expected sensitivity of 90% and specificity of 85%, a prevalence of 10%, each estimated to within 5
+percentage points with 95% confidence (Buderer's method).
+
+```{r buderer}
+acc <- calc_diagnostic_accuracy(sens = 0.90, spec = 0.85, prevalence = 0.10, prec_sens = 0.05, prec_spec = 0.05, conf_level = 0.95)
+c(for_sensitivity = acc$n_sens, for_specificity = acc$n_spec)
+```
+
+1383 for the sensitivity, as in the article. The study needs the larger of the two numbers.
+
+## Better than a reference value
+
+The appendicitis CT example of the same article: sensitivity from 90% to 95%, specificity from 80% to 85%, prevalence 40%,
+two-sided 5%, 90% power.
+
+```{r vs-reference}
+ref <- calc_diagnostic_vs_reference(sens0 = 0.90, sens1 = 0.95, spec0 = 0.80, spec1 = 0.85, prevalence = 0.40,
+                                    alpha = 0.05, power = 0.90, alternative = "two.sided")
+c(for_sensitivity = ref$n_sens, for_specificity = ref$n_spec, needed = ref$n)
+ref$binding
+```
+
+The article gives 849 and 1093; it rounds intermediate values, and the unrounded calculation here is one higher.
+
+## Two tests in the same patients
+
+When every patient has both tests, the number depends on how often the two tests disagree, which is rarely known in advance; the
+function gives the range from the smallest to the largest possible disagreement. Akoglu's paired example, 70% against 80%,
+one-sided:
+
+```{r paired}
+pr <- calc_diagnostic_two_paired(p1 = 0.70, p2 = 0.80, alpha = 0.05, power = 0.80, alternative = "greater")
+c(fewest = pr$n_min, most = pr$n_max)
+```
+
+The article's range is 78 to 252 (again one lower, from rounding). Two tests in different patients: `calc_diagnostic_two_indep()`.
+
+## The area under the ROC curve
+
+Showing that an AUC of 0.73 differs from 0.5, with 1.7 controls per case, two-sided 5%, 95% power (the S100B example of
+`pROC::power.roc.test()`):
+
+```{r roc}
+roc <- calc_roc_auc(auc = 0.73, alpha = 0.05, power = 0.95, kappa = 1.7)
+c(cases = roc$n_cases, controls = roc$n_controls)
+```
+
+Two AUCs, here partial AUCs over false-positive rates from 0 to 0.2 (Obuchowski & McClish 1997, Example 2, binormal parameters
+A = 2.6 and 1.9, B = 1, correlation 0.6):
+
+```{r two-aucs}
+two <- calc_compare_two_aucs(A1 = 2.6, B1 = 1, A2 = 1.9, B2 = 1, rn = 0.6, ra = 0.6, delta = 0.037, alpha = 0.05, power = 0.8,
+                             fpr11 = 0, fpr12 = 0.2, fpr21 = 0, fpr22 = 0.2)
+c(cases = two$n_cases, controls = two$n_controls)
+```
+
+The raw value is 107.02 per group; this package always rounds up, to 108.
+
+## Other functions
+
+- `calc_diagnostic_ppv_npv()`: precision of the predictive values, which depend on the prevalence.
+- `calc_diagnostic_likelihood_ratio()`: precision of a likelihood ratio (Simel, Samsa & Matchar 1991).
+- `calc_diagnostic_odds_ratio()`: testing that the diagnostic odds ratio differs from 1.
+- Agreement between two raters or two methods is in **Agreement & Reliability**: `calc_kappa()`, `calc_icc()`,
+  `calc_agreement_bland_altman()`, `calc_agreement_ccc()`, `calc_agreement_cronbach()`.
+
+Each help page gives the source of its formula and an example.

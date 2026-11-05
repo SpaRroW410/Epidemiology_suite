@@ -1,5 +1,23 @@
 # epidemiologysuite (development version)
 
+## Matched case-control with a measured exposure; vignettes by topic (5 Nov 2026)
+
+* **Matched sets, measured exposure:** the case-control design for matched sets (conditional logistic regression, Lachin 2008) now
+  takes the effect as the mean exposure in cases and in their matched controls, as an odds ratio per SD, or per unit
+  (`calc_case_control_nested_continuous(mean_diff =, OR_sd =, OR =)`), and shows cases and controls separately. The guide asks
+  whether each case has one control or several: 1:1 goes to the paired comparison as before, 1:m to this design (it was sent to the
+  paired test, an approximation). Lachin's examples (sec. 4.1) are reproduced: 125 cases with 2 controls each for an odds ratio of
+  1.39 per SD at 85% power.
+* **Correction, two or more cases per set:** the information per set is now nD nH / (nD + nH). Lachin's paper, and
+  `powerSurvEpi::powerConLogistic.con()`, use nD [1 - 1/C(nD + nH, nD)], which is the same for one case per set but larger for two or
+  more. Simulated matched data analysed with `survival::clogit` (1500 data sets per design, 80% planned) gave 79-82% power with the
+  new factor and 51-66% with the paper's (for 2 cases and 3 controls per set, 41 sets against 28). Designs with one case per set --
+  every 1:1 and 1:m matched case-control study -- are unchanged. The binary exposure already used the new factor (as
+  `powerConLogistic.bin()` does).
+* **Vignettes by topic:** survival, clinical trials, diagnostic accuracy and surveillance, each with the examples the tests check
+  against the published answers.
+* Opening a calculator from Find, the guide or the search box can now preset more than its design (`also_set` in the catalog).
+
 ## Small items cleared (4 Nov 2026)
 
 * **Three versions** compared in a table (folded on Home, and on the Cite tab), with the one in use marked.

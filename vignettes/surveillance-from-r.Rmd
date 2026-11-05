@@ -1,0 +1,93 @@
+---
+title: "Surveillance from R"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Surveillance from R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(epidemiologysuite)
+```
+
+Surveillance asks different questions from a trial: how many people to examine to be fairly sure an infection is absent, how many
+to sample to classify an area as above or below a coverage target, and when a weekly count is high enough to call an alarm. The
+numbers are computed when this page is built; the examples are those the package's tests check against the published answers or
+the reference package (`tests/testthat/test-calc_rule_of_three.R`, `test-calc_lqas.R`, `test-calc_analyze_surveillance.R`). In
+the app: **Plan: Sample Size > Surveillance** and **Survey & Cross-Sectional**, and **Analyze > Outbreaks and surveillance**.
+
+## No events seen: the rule of three
+
+If none of n people has the event, the upper 95% confidence limit for its frequency is about 3/n (Hanley & Lippman-Hand 1983).
+With 30 people:
+
+```{r r3-bound}
+b <- calc_rule_of_three_bound(n = 30, conf_level = 0.95)
+c(approximate = round(b$approx_bound, 4), exact = round(b$exact_bound, 4))
+```
+
+Turned round: how many people must be seen without an event to be 95% sure that its frequency is below 1%?
+
+```{r r3-n}
+r3 <- calc_rule_of_three_n(p = 0.01, conf_level = 0.95)
+c(exact = r3$n_exact, rule_of_three = r3$n_approx)
+```
+
+## Showing that an infection is absent
+
+How many animals (or people, or farms) to test so that, if the infection were present at a given prevalence, at least one positive
+would be found with 95% confidence, allowing for a test that misses some cases. The dairy-herd example of `epiR::epi.ssdetect()`
+(Cannon 2001): 1000 animals, a design prevalence of 5%, a test with 90% sensitivity and 100% specificity.
+
+```{r detect}
+calc_detect_event_imperfect_test(N = 1000, prev = 0.05, se = 0.90, sp = 1.00, conf_level = 0.95)$n_hypergeometric
+```
+
+The function follows epiR 2.0.67; epiR 3.0.0 differs in a few cases, which the help page and the app explain.
+
+## Above or below a target: LQAS
+
+Lot quality assurance sampling classifies an area from a small sample: here coverage of 80% is acceptable and 50% is not, with at
+most a 10% chance of each misclassification. The answer is a sample size and a decision rule.
+
+```{r lqas}
+lq <- calc_lqas(p_upper = 0.80, p_lower = 0.50, alpha = 0.10, beta = 0.10)
+c(sample = lq$n, pass_if_at_least = lq$d)
+round(c(alpha = lq$alpha_achieved, beta = lq$beta_achieved), 4)
+```
+
+This is the widely used rule of 19 with a decision value of 13.
+
+## Alarms on a weekly count
+
+The EARS methods (C1, C2, C3) compare each week with the weeks just before it; the CUSUM adds up small excesses until they pass a
+threshold. A made-up series of 40 weeks of counts around 5, with a rise in the last weeks:
+
+```{r series}
+set.seed(1)
+counts <- c(rpois(36, 5), 9, 12, 14, 15)
+```
+
+```{r ears}
+ears <- calc_surveillance_ears(counts, method = "C2")
+c(weeks_checked = ears$n_monitored, alarms = ears$n_alarms, first_alarm = ears$first_alarm)
+```
+
+```{r cusum}
+cu <- calc_surveillance_cusum(counts, type = "poisson", baseline = 14, shift_ratio = 2)
+c(weeks_checked = cu$n_monitored, alarms = cu$n_alarms, first_alarm = cu$first_alarm)
+```
+
+`first_alarm` is the week of the series in which the method first signals. The rise starts in week 37, so any alarm before it is a
+false one: here C2 first signals in week `r ears$first_alarm` and the CUSUM in week `r cu$first_alarm`. The threshold sets the
+trade-off between false alarms in quiet weeks and a late signal in a real outbreak: lower it and alarms come earlier, but more often
+for nothing.
+
+## Outbreak investigation
+
+Attack rates, a food-specific attack-rate table, secondary attack rates and the case fatality rate, from counts you already have:
+`calc_analyze_attack_rate()`, `calc_analyze_exposure_table()`, `calc_analyze_secondary_attack()`, `calc_analyze_case_fatality()`.
+
+Each help page gives the source of its formula and an example.
