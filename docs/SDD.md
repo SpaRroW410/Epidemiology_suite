@@ -504,6 +504,10 @@ Owner decisions, recorded 28 September 2026 unless dated (moved here from the ar
 | S5 | Studies: content of an entry | **Full**: inputs, result, warnings, formula (LaTeX), justification paragraph, citation | |
 | W1 | Way of working (November 2026) | One branch per task, tested once at the end, one pull request, merged only on the owner's word after CI is green; branches deleted after merge | |
 | W2 | Project documents (6 Nov 2026) | SDD (design, decisions), CHECKLIST (everything, with status), PENDING (generated), NEWS (history); the old files archived | Section 18 |
+| F1 | Find: how the research question is read (6 Nov 2026) | **Deterministic only**: the routing tree, study state and one-question gate drafted by the owner with Gemini are built on the existing keyword reader | Nothing is sent anywhere; a language-model reader stays optional (CHECKLIST FIND-14) |
+| F2 | Find: the owner's 37-design tree and the guide | **Merged into the guide**: its first question stays, the new branches go inside it | Every end point leads to a calculator or names its open item (FIND-16) |
+| F3 | Find: the design cards (fallback, threats, reporting guideline, effect measure, workflow) | **The drafted text, edited**; a claim is cited where a source is found, otherwise marked with a warning sign whose hover says it is a suggestion with no confirmed source | FIND-21, SRC-06 |
+| F4 | Find: search terms and codes | **Checkable sources only**: MeSH checked against NLM and published validated design filters; no Emtree / CINAHL / PsycINFO terms, no clinical codes for now | FIND-22, FIND-23; codes optional (FIND-24) |
 
 ## 18. How the project documents are kept
 
@@ -515,6 +519,7 @@ Owner decisions, recorded 28 September 2026 unless dated (moved here from the ar
 | `docs/PENDING.md` | The open items, owner steps first | Generated: `Rscript tools/docs/build_pending.R`; `test-docs_pending.R` fails when it is out of date |
 | `NEWS.md` | What was done, by date | One entry per finished piece of work |
 | `docs/design_identification_algorithm.md`, `hosting.md`, `upstream_reports.md` | The guide's specification; the owner's hosting steps; bug-report drafts | Kept with the work they describe |
+| `docs/find_routing/` | The owner's routing material for Find (drafted with Gemini, 6 Nov 2026) and its review | Source material, not edited; what is built goes into the algorithm document |
 | `docs/archive/` | ROADMAP, PLAN, to-do list, the first two checklists, brief, mock-ups, frozen on 6 Nov 2026 | Not edited; code comments that cite "ROADMAP item N" refer to it |
 
 When a piece of work is finished: tick its items in CHECKLIST (adding any new open item it leaves), run the PENDING script, add the

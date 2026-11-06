@@ -1,5 +1,15 @@
 # epidemiologysuite (development version)
 
+## Find: the owner's routing material reviewed and planned (6 Nov 2026)
+
+* The routing design the owner drafted with Gemini (a 37-design tree, guardrails, design cards, search terms) is stored in
+  `docs/find_routing/` with a review. Its 46 MeSH headings were checked against the NLM vocabulary: 4 do not exist or are misnamed.
+  The tree has no branch for diagnostic accuracy, agreement, prediction or estimation, reaches quasi-experiments only when the
+  investigator assigns, and its ethical guardrail overwrites a stated answer.
+* Decisions F1-F4 (`docs/SDD.md`): a deterministic reader; the new branches merged into the guide; design cards from the drafted text,
+  cited where a source is found and otherwise marked as a suggestion; search terms only from checkable sources. The work is listed as
+  FIND-16 to FIND-24, OBS-12 to OBS-15 and SRC-06.
+
 ## Project documents reorganised (6 Nov 2026)
 
 * **One list for everything:** `docs/CHECKLIST.md` holds every item, done or open, grouped as the app groups its calculators (and

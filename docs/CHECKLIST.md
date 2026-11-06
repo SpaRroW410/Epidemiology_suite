@@ -95,6 +95,13 @@ The guide's end points for designs not built yet are tested to be listed here (`
   efficiency depends on each data set's overlap. *Unblock:* a published planning heuristic with a worked example.
 - [ ] **OBS-11** **[blocked]** Time-varying exposure (OPTITXS; Basagana & Spiegelman 2010, 2011): not on CRAN, papers not reachable.
   *Unblock:* paper access or the OPTITXS source.
+- [ ] **OBS-12** Interrupted time series (segmented regression), reached by FIND-16: sample size or power. Candidate source, not read:
+  Zhang, Wagner & Ross-Degnan 2011 (simulation-based power).
+- [ ] **OBS-13** Controlled before-after / difference-in-differences, reached by FIND-16: sample size. No source found yet.
+- [ ] **OBS-14** Regression discontinuity, reached by FIND-16: sample size. Candidate sources, not read: Schochet 2009; Cattaneo,
+  Titiunik & Vazquez-Bare 2019.
+- [ ] **OBS-15** Mendelian randomisation, reached by FIND-16: power. Candidate sources, not read: Brion, Shakhbazov & Visscher 2013;
+  Burgess 2014.
 ### Plan: Diagnostic & Screening (DX)
 
 - [x] **DX-01** Sensitivity & specificity -- precision-based (no reference value) -- Buderer 1996
@@ -406,8 +413,7 @@ The guide's end points for designs not built yet are tested to be listed here (`
   a matched case-control with a measured exposure, 1:1 or 1:m (5 Nov 2026).
 - [x] **FIND-08** Glossary of 43 terms with info tips in the guide (4 Nov 2026).
 - [ ] **FIND-09** **[owner]** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the
-  reader
-  against.
+  reader against.
 - [ ] **FIND-10** A test battery of those questions with the route each should take; the hit rate before and after each change.
 - [ ] **FIND-11** More phrasings once the list is in: "effect / effectiveness / impact of" without a design word (trial or
   quasi-experimental: ask), "association between" (ask which design), "incidence / follow-up", "survival / time to", "accuracy / screening".
@@ -415,7 +421,38 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [ ] **FIND-13** A guide that asks for each objective of a study in turn (the first step, buttons to the association calculators after a
   determinants question, is done).
 - [ ] **FIND-14** **[optional]** A language-model reader, only by a separate decision (no API, nothing sent anywhere in the browser
-  version).
+  version). Not now: decision F1 (6 Nov 2026) keeps the reader deterministic.
+- [x] **FIND-15** The owner's routing material (drafted with Gemini, shared from Google Drive) stored in `docs/find_routing/` with a
+  review: the tree and guardrails summarised, the problems found, its 46 MeSH headings checked against NLM (4 do not exist or are
+  misnamed); decisions F1-F4 (6 Nov 2026).
+- [ ] **FIND-16** New branches merged into the guide (F2): literature reviews (with and without meta-analysis, scoping, network,
+  umbrella, qualitative evidence synthesis), mixed methods (explanatory, exploratory, convergent, embedded), the five qualitative
+  approaches, quasi-experiments (controlled before-after / difference-in-differences, interrupted time series, regression discontinuity,
+  single-arm pre-post), ecological snapshot or time trend, case report and case series, Mendelian randomisation. Every end point opens a
+  calculator or names its open item; `test-design_tree.R` covers them.
+- [ ] **FIND-17** Who assigned the intervention: the study team (trial or quasi-experiment), or someone else such as a programme or a
+  policy (a natural experiment, studied from routine data by interrupted time series, difference-in-differences or regression
+  discontinuity). The source tree reaches quasi-experiments only when the team assigns.
+- [ ] **FIND-18** A study state asked one question at a time: each answer known or missing, with the words that set it; the guide asks the
+  first missing question that blocks the route; a later answer that contradicts an earlier one is shown and asked about, never replaced
+  silently.
+- [ ] **FIND-19** Warnings that ask, never silent changes: a harmful exposure proposed for assignment (suggest an observational design);
+  group-level data with an individual-level question (ecological fallacy, with the two ways out: individual data or a group-level
+  question); a rare outcome or long latency (case-control, nested case-control); existing records with a prospective design.
+- [ ] **FIND-20** The keyword reader fills the new questions (F1): existing records, registries or national surveys (secondary data);
+  review, qualitative and mixed-methods words; "we will assign / randomise"; group-level data; Mendelian randomisation only from
+  "Mendelian randomi[sz]ation" or "genetic instrument" (not "variant"). Each rule gets cases in the FIND-10 battery.
+- [ ] **FIND-21** A design card at every end point of the guide (F3): fallback design and what it costs, three threats to validity with
+  mitigations, reporting guideline, effect measure, workflow. From the registry text, edited (row 18 completed, row 21 rewritten);
+  each claim cited (SRC-06) or marked with a warning sign whose hover reads "Suggestion only -- no confirmed source". Cards also for
+  the guide's end points the registry lacks (diagnostic accuracy, agreement, prediction, estimation, SCCS, case-cohort, ...).
+- [ ] **FIND-22** A PubMed search builder (F4): the design's filter from a published validated filter where one exists (for example the
+  Cochrane highly sensitive search strategy for randomised trials), otherwise marked "simple filter, not validated"; the user's concepts
+  as `[tiab]` terms plus the MeSH headings they choose; the four wrong headings of the source corrected.
+- [ ] **FIND-23** A test that every MeSH heading the app prints is in a stored list checked against NLM (with the MeSH year), and a
+  `tools/` script that refreshes the list.
+- [ ] **FIND-24** **[optional]** Clinical codes for record-based studies (WHO ICD-10, ICD-10-CM, SNOMED CT, LOINC, RxNorm), taken only
+  from the official code lists and never generated; needs a decision on which lists and their licence terms.
 
 ## 4. Studies: a working record of calculations (STUDY)
 
@@ -527,6 +564,12 @@ help text says so.
 - [ ] **SRC-03** A source for "design effect 1.5 or 2 when nothing is known" (the owner's wording; no source checked).
 - [ ] **SRC-04** Regidor et al. 1993 (epiR's source for the Byar SMR interval) could not be found; not cited.
 - [ ] **SRC-05** **[blocked]** Tang Y. Comments on Lachin (2008). Stat Med 2009;28:175-177, and the author's reply.
+- [ ] **SRC-06** Sources for the design-card claims (FIND-21): an interaction needs about four times the sample size (factorial);
+  washout longer than five half-lives (crossover); 8-12 time points before and after (interrupted time series); the prevalence ratio
+  when the prevalence is above 10%; a non-inferiority margin preserving at least half the control effect; F < 10 and p < 5e-8
+  (Mendelian randomisation); the corrected covered area and Jadad's algorithm (umbrella reviews); and the citation of each reporting
+  guideline named (PRISMA and its extensions, PRIOR, ENTREQ, eMERGe, COREQ, SRQR, GRAMMS, CONSORT and its extensions, TREND, STROBE,
+  RECORD, CARE, PROCESS, STROBE-MR).
 
 ## 10. Bigger workbenches and extensions (WB)
 
