@@ -519,6 +519,7 @@ Owner decisions, recorded 28 September 2026 unless dated (moved here from the ar
 | `docs/PENDING.md` | The open items, owner steps first | Generated: `Rscript tools/docs/build_pending.R`; `test-docs_pending.R` fails when it is out of date |
 | `NEWS.md` | What was done, by date | One entry per finished piece of work |
 | `docs/design_identification_algorithm.md`, `hosting.md`, `upstream_reports.md` | The guide's specification; the owner's hosting steps; bug-report drafts | Kept with the work they describe |
+| `docs/release.md` | How the tarball is built and how a release reaches GitHub, r-universe and CRAN | Updated when the release workflow changes |
 | `docs/find_routing/` | The owner's routing material for Find (drafted with Gemini, 6 Nov 2026) and its review | Source material, not edited; what is built goes into the algorithm document |
 | `docs/archive/` | ROADMAP, PLAN, to-do list, the first two checklists, brief, mock-ups, frozen on 6 Nov 2026 | Not edited; code comments that cite "ROADMAP item N" refer to it |
 

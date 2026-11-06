@@ -1,5 +1,16 @@
 # epidemiologysuite (development version)
 
+## Package release workflow (6 Nov 2026)
+
+* **The tarball from GitHub:** a new workflow (`.github/workflows/package.yml`) builds `epidemiologysuite_<version>.tar.gz` once and
+  runs `R CMD check --as-cran` on that file on Linux (R release and devel), Windows and macOS, on every pull request that touches the
+  package and on demand; on a version tag it attaches the tarball to the GitHub release. An informational job installs it on Windows on
+  ARM. Nothing has to be built on the owner's own computer.
+* `docs/release.md`: the steps from version number to GitHub release, r-universe and CRAN, and a note on Windows on ARM.
+* Bug-report drafts (`docs/upstream_reports.md`): presize takes reports as GitHub issues (no existing issue on this bug); pmsampsize
+  has no tracker, so by e-mail to its maintainer; both bugs still present in the current CRAN versions.
+* The name `epidemiologysuite` is confirmed free on CRAN, Bioconductor and GitHub.
+
 ## Find: the owner's routing material reviewed and planned (6 Nov 2026)
 
 * The routing design the owner drafted with Gemini (a 37-design tree, guardrails, design cards, search terms) is stored in

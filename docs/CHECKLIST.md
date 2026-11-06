@@ -503,12 +503,18 @@ Decisions S1-S5 are in `SDD.md`, section 17.
   (30 Oct, 5 Nov 2026).
 - [x] **PKG-05** CRAN groundwork: ASCII-only source, fast examples, browser tests skipped on CRAN, `R CMD check --as-cran` clean apart from
   check-machine notes; version 1.0.0, `NEWS.md`, Zenodo DOI 10.5281/zenodo.23794230, ORCID in `DESCRIPTION` (30 Oct - 3 Nov 2026).
-- [ ] **PKG-06** **[owner]** Release on r-universe, then submit to CRAN.
-- [ ] **PKG-07** **[owner]** File the two upstream bug reports drafted in `docs/upstream_reports.md` (pmsampsize, presize).
+- [ ] **PKG-06** **[owner]** Release on r-universe, then submit to CRAN: the steps are in `docs/release.md` (a new version number first;
+  `v1.0.0` is the release Zenodo archived on 31 Oct 2026).
+- [ ] **PKG-07** **[owner]** File the two upstream bug reports drafted in `docs/upstream_reports.md`: presize as an issue on its GitHub
+  tracker, pmsampsize by e-mail to its maintainer (it has no tracker); both still unfixed on CRAN on 6 Nov 2026.
 - [ ] **PKG-08** **[optional]** Tell powerSurvEpi's maintainer that `powerConLogistic.con()` uses Lachin's information factor, which is too
   large for two or more cases per set (NEWS, 5 Nov 2026); Tang's 2009 comment (Stat Med 28:175-177) was not read and may say the same.
 - [ ] **PKG-09** **[optional]** Split a computation-only core package from the app (CRAN).
-- [ ] **PKG-10** Confirm the name with `available::available("epidemiologysuite")` before the first public release.
+- [x] **PKG-10** Name confirmed with `available::available("epidemiologysuite")`: valid, free on CRAN, Bioconductor and GitHub
+  (owner, 6 Nov 2026).
+- [ ] **PKG-11** A GitHub Action for the tarball (`.github/workflows/package.yml`): `R CMD build` once, `R CMD check --as-cran` of that
+  file on Linux (R release and devel), Windows and macOS, an informational Windows-on-ARM install, and the tarball attached to the
+  release on a version tag (6 Nov 2026).
 
 ## 7. Versions, hosting and distribution (DIST)
 

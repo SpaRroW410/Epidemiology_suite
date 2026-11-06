@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**97 open** of 356 items (259 done).
+**97 open** of 357 items (260 done).
 
 ## Waiting for the owner
 
@@ -11,8 +11,8 @@
 - **FIND-09** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the reader against.
 - **STUDY-06** Open one downloaded file in Word (desktop and phone) and try Insert > Equation > LaTeX on a formula.
 - **STUDY-07** Real-phone check on Connect Cloud and the browser build: sleep, switch apps, reload.
-- **PKG-06** Release on r-universe, then submit to CRAN.
-- **PKG-07** File the two upstream bug reports drafted in `docs/upstream_reports.md` (pmsampsize, presize).
+- **PKG-06** Release on r-universe, then submit to CRAN: the steps are in `docs/release.md` (a new version number first; `v1.0.0` is the release Zenodo archived on 31 Oct 2026).
+- **PKG-07** File the two upstream bug reports drafted in `docs/upstream_reports.md`: presize as an issue on its GitHub tracker, pmsampsize by e-mail to its maintainer (it has no tracker); both still unfixed on CRAN on 6 Nov 2026.
 - **DIST-06** Republish on Connect Cloud after each merge; try the redirect, Find, Effect Size, the links, the server notice and dark mode on a real phone (Android and iPhone / Safari).
 - **DIST-07** Long-term hosting: check the Connect Cloud free-plan limits (apps, active hours, memory, idle sleep); decide whether a paid plan or the Docker image elsewhere is needed.
 - **DIST-08** After the repository rename: check the Pages address; rename `EPIDEMIOLOGICASUITE_OPEN` to `EPIDEMIOLOGYSUITE_OPEN` on Connect if it was set there.
@@ -178,12 +178,16 @@
 
 ## 6. The R package (PKG) -- 5 open
 
-- [ ] **PKG-06** **[owner]** Release on r-universe, then submit to CRAN.
-- [ ] **PKG-07** **[owner]** File the two upstream bug reports drafted in `docs/upstream_reports.md` (pmsampsize, presize).
+- [ ] **PKG-06** **[owner]** Release on r-universe, then submit to CRAN: the steps are in `docs/release.md` (a new version number first;
+  `v1.0.0` is the release Zenodo archived on 31 Oct 2026).
+- [ ] **PKG-07** **[owner]** File the two upstream bug reports drafted in `docs/upstream_reports.md`: presize as an issue on its GitHub
+  tracker, pmsampsize by e-mail to its maintainer (it has no tracker); both still unfixed on CRAN on 6 Nov 2026.
 - [ ] **PKG-08** **[optional]** Tell powerSurvEpi's maintainer that `powerConLogistic.con()` uses Lachin's information factor, which is too
   large for two or more cases per set (NEWS, 5 Nov 2026); Tang's 2009 comment (Stat Med 28:175-177) was not read and may say the same.
 - [ ] **PKG-09** **[optional]** Split a computation-only core package from the app (CRAN).
-- [ ] **PKG-10** Confirm the name with `available::available("epidemiologysuite")` before the first public release.
+- [ ] **PKG-11** A GitHub Action for the tarball (`.github/workflows/package.yml`): `R CMD build` once, `R CMD check --as-cran` of that
+  file on Linux (R release and devel), Windows and macOS, an informational Windows-on-ARM install, and the tarball attached to the
+  release on a version tag (6 Nov 2026).
 
 ## 7. Versions, hosting and distribution (DIST) -- 10 open
 
