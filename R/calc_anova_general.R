@@ -8,7 +8,7 @@
 # Chapter 9) as the same "F tests" family sharing one noncentral-F-based
 # formula, differing only in what the numerator/denominator degrees of
 # freedom represent. G*Power organizes its own "F tests" family the same
-# way (docs/checklist_by_design.md's own scope-framing note).
+# way (docs/archive/checklist_by_design.md's own scope-framing note).
 
 #' Sample size for a factorial ANOVA effect (main effect or interaction)
 #' or an ANCOVA effect, via the general linear model F-test

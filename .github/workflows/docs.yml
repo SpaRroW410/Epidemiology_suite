@@ -1,4 +1,4 @@
-# The GitHub Pages site (docs/ROADMAP.md items 15 and 17): the pkgdown documentation, with one page per
+# The GitHub Pages site (docs/archive/ROADMAP.md items 15 and 17): the pkgdown documentation, with one page per
 # calculator generated from the package's own content objects (tools/docs/build_site_sources.R), and the app
 # itself as a Shinylive (WebAssembly) build under /app/, assembled from the package's R/ directory
 # (tools/pages/make_app.R), so neither can drift from the package. Every push builds both and keeps the site

@@ -1,5 +1,29 @@
 # epidemiologysuite (development version)
 
+## Find: the owner's routing material reviewed and planned (6 Nov 2026)
+
+* The routing design the owner drafted with Gemini (a 37-design tree, guardrails, design cards, search terms) is stored in
+  `docs/find_routing/` with a review. Its 46 MeSH headings were checked against the NLM vocabulary: 4 do not exist or are misnamed.
+  The tree has no branch for diagnostic accuracy, agreement, prediction or estimation, reaches quasi-experiments only when the
+  investigator assigns, and its ethical guardrail overwrites a stated answer.
+* Decisions F1-F4 (`docs/SDD.md`): a deterministic reader; the new branches merged into the guide; design cards from the drafted text,
+  cited where a source is found and otherwise marked as a suggestion; search terms only from checkable sources. The work is listed as
+  FIND-16 to FIND-24, OBS-12 to OBS-15 and SRC-06.
+
+## Project documents reorganised (6 Nov 2026)
+
+* **One list for everything:** `docs/CHECKLIST.md` holds every item, done or open, grouped as the app groups its calculators (and
+  then the guide, Studies, interface, package, hosting, engineering, sources, workbenches), each with a stable ID such as `SURV-03`;
+  every calculator line names its source and the package it is checked against. It is the only place where status is kept.
+* **`docs/PENDING.md`** is generated from it (`Rscript tools/docs/build_pending.R`), owner steps first; a test fails when it is out
+  of date, and another when the app cites an ID that is not an open item.
+* **`docs/SDD.md`** gains the decisions log (D1-D6, hosting, Studies S1-S5, way of working), a section on how the documents are kept,
+  and the developer notes from the README (adding a module, Shiny patterns); its catalog table now points to the checklist.
+* **README** shortened to a summary; the roadmap, plan, to-do list, the two first checklists, the brief and the mock-ups moved to
+  `docs/archive/`, frozen. The website shows "What is open" and the checklist instead of the roadmap.
+* Found on the way: the log-rank help still called staggered accrual and non-proportional hazards "planned" (both are built), and
+  the stepped-wedge note in the guide credited Hussey & Hughes for a calculator that follows Hooper et al. 2016; both corrected.
+
 ## Matched case-control with a measured exposure; vignettes by topic (5 Nov 2026)
 
 * **Matched sets, measured exposure:** the case-control design for matched sets (conditional logistic regression, Lachin 2008) now

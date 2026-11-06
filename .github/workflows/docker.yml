@@ -1,4 +1,4 @@
-# Container image (docs/ROADMAP.md item 18). Every relevant push builds the image, starts it and drives it in
+# Container image (docs/archive/ROADMAP.md item 18). Every relevant push builds the image, starts it and drives it in
 # headless Chrome (open a calculator, read a result). Pushes to `main` and version tags also publish it to GHCR
 # (ghcr.io/<owner>/epidemiologysuite); that needs no setup beyond the default GITHUB_TOKEN.
 name: docker

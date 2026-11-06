@@ -4,13 +4,13 @@
 | | |
 |---|---|
 | **Status** | v1.0.0 — the release (R package `epidemiologysuite` 1.0.0): catalog essentially complete; Analyze, planning, survey and outbreak tools built; three versions (browser, phone / server, R package); accessibility audited |
-| **Date** | 30 October 2026 (v0.3: 29 October 2026; v0.2: 28 September 2026; v0.1: 18 August 2026) |
+| **Date** | 6 November 2026: project documents reorganised (v1.0: 30 October 2026; v0.3: 29 October; v0.2: 28 September; v0.1: 18 August) |
 | **Author** | Mukul |
 | **Type** | R Shiny web application |
 
-Forward planning (priorities, the epidemiology-suite expansion, R package, deployment
-and every open/blocked item) lives in [`ROADMAP.md`](ROADMAP.md). This document
-describes the design as built.
+This document describes the design as built and records the decisions behind it (section 17). What is done and what
+is open is kept in one place, [`CHECKLIST.md`](CHECKLIST.md), with the open items generated into
+[`PENDING.md`](PENDING.md); what changed when is in [`NEWS.md`](../NEWS.md). How the documents are kept: section 18.
 
 ---
 
@@ -41,20 +41,12 @@ contributors.
 ### 1.3 Out of scope for the sample-size app — and where each now stands
 | Item | Status |
 |---|---|
-| User accounts, saved calculation history | Still out of scope |
-| Results / report export (PDF, DOCX, methods text) | Methods paragraph, CSV, JSON, BibTeX, RIS done; PDF / Word still open (ROADMAP Track B2) |
-| Study-design consulting (randomization, protocol text) | Randomization lists and attrition built; protocol text partly (the justification paragraph) |
-| Meta-analysis pooling | Meta-analysis *power* is built; pooling planned — ROADMAP B7 |
-| Mobile app | Phone layout of the same app done (bottom tab bar, one drop-down); PWA home-screen icon and Android wrapper planned — ROADMAP Track D |
-| Analysis of collected data | Summary-data *Analyze* workbench built; raw-data analysis deferred (decision D1) |
-
----|---|
-| User accounts, saved calculation history | Still out of scope |
-| Results / report export (PDF, DOCX, methods text) | Planned — ROADMAP P1 |
-| Study-design consulting (randomization, protocol text) | Partly planned — ROADMAP Track B2 |
-| Meta-analysis pooling | Meta-analysis *power* is built; pooling planned — ROADMAP B7 |
-| Mobile-native app | Planned via PWA / Android TWA — ROADMAP Track D |
-| Analysis of collected data | Planned as the "Analyze" workbench — ROADMAP Track B1/B6 |
+| User accounts, saved calculation history | No accounts; the Studies tab keeps a record in the browser tab only (decision S1) |
+| Results / report export (PDF, DOCX, methods text) | Methods paragraph, CSV, JSON, BibTeX, RIS; Word file of a study (Studies, 3 Nov 2026) |
+| Study-design consulting (randomization, protocol text) | Randomization lists and attrition built; protocol text partly (the justification paragraph, Studies) |
+| Meta-analysis pooling | Meta-analysis *power* is built; pooling open (CHECKLIST WB-01) |
+| Mobile app | Phone layout of the same app done (bottom tab bar, one drop-down); PWA icon and Android wrapper open (CHECKLIST DIST-14) |
+| Analysis of collected data | Summary-data *Analyze* workbench built; raw-data analysis deferred (decision D1, CHECKLIST WB-09) |
 
 ---
 
@@ -133,7 +125,7 @@ The public R API is the `calc_*()` functions (exported, each documented), `ss_fi
   per-module list rendered generically.
 - **Verify before shipping.** A design ships only after a numeric check against a
   published example, a package oracle, or a simulation of the real test; otherwise it
-  stays open (see ROADMAP §4).
+  stays open (an open item of `CHECKLIST.md`, with what would unblock it).
 - **Vendoring rule.** Wrap a package when it is already a runtime dependency.
   Packages found during development are used only as verification oracles; the shipped
   app reimplements the verified formula rather than adding a runtime dependency.
@@ -150,12 +142,12 @@ The public R API is the `calc_*()` functions (exported, each documented), `ss_fi
 | UI theme/layout | `bslib::page_navbar()` + `navset_pill_list()`, Bootswatch "litera", Source Serif 4 | workbenches with grouped sidebars |
 | Formula rendering | MathJax via `withMathJax()`, wrapped by `render_formula_block()` | adds a copyable LaTeX view |
 | Modularity | Shiny modules (`NS()`, `moduleServer()`) | |
-| Runtime stats packages | `pwr`, `presize`, `clinfun`, `powerSurvEpi`, `pmsampsize`, `pROC`, `TrialSize`, `powerMediation`, `mvtnorm`, `lme4` (+ `survival`, `stats`); `epiR`, `rstatix`, `Hmisc`, `tseries` and `BayesFactor` were removed from the runtime in item 16 | 14 imports in `DESCRIPTION` incl. `shiny`/`bslib` |
+| Runtime stats packages | `clinfun`, `mvtnorm`, `lme4`, `survival` (+ `stats`); every other calculation is written out in the app and tested against the package it reproduces (Appendix) | `Imports` in `DESCRIPTION`: these, `shiny`, `bslib`, `promises` and base R |
 | Verification-only packages | e.g. `longpower`, `powerlmm`, `RTSA`, `rpact`, `clusterPower`, `ssize.fdr`, `metapower`, `semTools`, `simr`, `voi`, `PracTools`, `WebPower` | installed from `github.com/cran/<pkg>` during development; never loaded by the app |
-| Testing | `testthat` unit tests (fast/slow split), GitHub Actions CI; manual browser checks with Playwright | `shinytest2` planned (ROADMAP P1) |
+| Testing | `testthat` unit tests (fast/slow split), `shinytest2` browser tests by area, axe-core accessibility and contrast audits (`tools/ui-audit/`), GitHub Actions CI | section 12 |
 | Dev environment | `.claude/hooks/session-start.sh` rebuilds R + packages on a fresh container; `renv.lock` records the versions (CI restores from it) | — |
 | Version control | Git / GitHub | |
-| Deployment | Installable R package (`remotes::install_github()` + `run_app()`) | hosted, package, Shinylive/PWA/APK options in ROADMAP Track D |
+| Deployment | Browser build, phone / server version, R package, Docker image | section 13; open steps in `CHECKLIST.md` section 7 |
 
 ---
 
@@ -176,105 +168,36 @@ Epidemiology_suite/
 │   │                      # home_design_tree.R, design_wizard.R, design_free_text.R
 │   ├── ss_find.R, citation_info.R, accessibility.R, phone_shell.R, lazy_modules.R, browser_build.R, memo_cache.R (result cache of the Monte Carlo calculators), background.R (background workers)
 ├── man/                   # 199 help pages (built with roxygen2, roclets = "rd")
-├── vignettes/             # three package vignettes; articles/ (generated, git-ignored) holds the site's per-calculator pages
+├── vignettes/             # seven package vignettes; articles/ (generated, git-ignored) holds the site's per-calculator pages
 ├── inst/                  # CITATION, rstudio/addins.dcf
 ├── tests/testthat/        # test-calc_*.R, wizard, catalog, help pages, citation, phone layout, UI smoke, ...
 ├── docs/
-│   ├── PLAN.md            # the plan at a glance (what is done, what is next, owner decisions)
-│   ├── ROADMAP.md         # forward plan with reasoning and evidence
-│   ├── SDD.md             # this document
+│   ├── SDD.md             # this document: design as built, decisions
+│   ├── CHECKLIST.md       # every item, done or open (the only place status is kept)
+│   ├── PENDING.md         # the open items, generated from CHECKLIST.md (tools/docs/build_pending.R)
+│   ├── design_identification_algorithm.md   # the guide's specification
 │   ├── hosting.md         # the three versions, Connect Cloud steps, adding the Zenodo DOI
-│   ├── to_do_later.md     # everything still open, as a checklist
-│   ├── checklist_by_design.md, checklist_by_test.md
-│   ├── design_identification_algorithm.md, design-mockups/
-│   └── project-brief.md   # original brief (historical)
+│   ├── upstream_reports.md   # bug-report drafts for upstream packages
+│   └── archive/           # frozen 6 Nov 2026: ROADMAP, PLAN, to-do, the two first checklists, brief, mock-ups
 ├── tools/                 # docs/ (site and help-page tools), pages/ (browser build, phone redirect),
 │                          # connect/ (Posit Connect Cloud bundle), ui-audit/ (layout and accessibility scans), webr-spike/
 ├── .claude/               # SessionStart hook + settings
 ├── .github/workflows/     # tests.yml, docs.yml (site + browser build), connect-bundle.yml, docker.yml, ...
 ├── renv.lock              # locked package versions
 ├── README.md
-└── LICENSE                # GPL-3 (relicensed from MIT, ROADMAP D2)
+└── LICENSE                # GPL-3 (relicensed from MIT, decision D2)
 ```
 
 ---
 
 ## 7. Functional Design — Calculator Catalog
 
-The detailed backlog lives in two checklists, which are the source of truth for build
-status and verification evidence:
-
-- **[`checklist_by_design.md`](checklist_by_design.md)** — by study design (81 of 94
-  items done).
-- **[`checklist_by_test.md`](checklist_by_test.md)** — by statistical test family,
-  cross-referenced to G*Power (69 of 74 items done).
-
-Every calculator should be reachable from both files, from the Home hub's Browse
-catalog, and — where the decision tree has a branch — from the wizard.
-
-The table below is a snapshot of the sample-size modules as of 28 Sep 2026. Since then the app gained: the *Analyze* workbench (11 tools),
-planning tools (randomization list, attrition), survey tools (sample selection, survey weights), an infectious-disease model tool
-(herd immunity, SIR / SEIR, R0), outbreak and surveillance tools (attack rates, EARS / CUSUM) and the **Eyes / Lesions per Patient**
-module (several correlated measurements per patient: patients needed for a between-patient comparison of two means or proportions,
-a within-patient (split-face) comparison of two means, and units per patient needed for a fixed number of patients; verified against
-`clusterPower`, `pwr` and simulation). The module list in `R/registry.R` is authoritative.
-
-| Family (module) | Designs | Backend | Status |
-|---|---|---|---|
-| Proportions | Precision (Cochran, +FPC); vs. known value; two independent; Bonferroni post-hoc pairwise | closed form (Cochran); `pwr::pwr.p.test`, `pwr.2p.test`; `TrialSize::OneWayANOVA.PairwiseComparison()` | Live |
-| Means | Precision; one-sample; two-sample (equal/unequal n); Welch; paired; one-way ANOVA; planned linear contrast; Bonferroni post-hoc pairwise | `epiR::epi.sssimpleestc()`; `pwr::pwr.t.test`, `pwr.t2n.test`, `pwr.anova.test`; closed form (Julious 2004) for Welch; `TrialSize::Dose.Response.Linear()`, `OneWayANOVA.pairwise()` | Live |
-| Incidence Rate | Precision; two rates; Poisson regression (continuous predictor); two negative-binomial rates | `presize::prec_rate()`; closed form (Demidenko 2007); `powerMediation::sizePoisson()`; reimplemented `MKpower::power.nb.test()` (Zhu & Lakkis 2014) | Live |
-| Ratio Estimation | Precision-based RR, OR, rate ratio | `presize::prec_riskratio()`, `prec_or()`, `prec_rateratio()` | Live |
-| Stratified Sampling | Total n + proportional/Neyman allocation | closed form (Cochran 1977) | Live |
-| Cluster / Design Effect | DEFF; DEFF with variable cluster size; WHO EPI cluster survey; two-stage PPS optimal allocation | closed form (Kish 1965); CV-adjusted DEFF verified vs. `clusterPower`; closed form `.cf_ssclus2estb()` (verified vs. `epiR::epi.ssclus2estb()`); Hansen-Hurwitz-Madow verified vs. `PracTools::clusOpt2()` | Live |
-| LQAS | Classification decision rule | closed-form binomial search (Robertson & Valadez 2006) | Live |
-| Capture-Recapture | Chapman-Petersen, precision-based | closed form (Chapman 1951; Seber 1982), Monte Carlo verified | Live |
-| Case-Control | Unmatched; matched 1:m; case-crossover; nested; case-cohort | closed forms `.cf_sscc_unmatched()` / `.cf_sscc_matched()` (verified vs. `epiR::epi.sscc()`); conditional logistic score test (Lachin 2008; information per set nD nH / (nD + nH), equal to `powerSurvEpi::powerConLogistic.bin()`, and to `.con()` for one case per set); closed form (Cai & Zeng 2004) | Live |
-| Cohort / RR | Cohort / cross-sectional RR | closed form `.cf_sscohortc()` (verified vs. `epiR::epi.sscohortc()`) | Live |
-| Self-Controlled Case Series | SCCS with optional age effects | reimplemented `SCCS::samplesize()` (Musonda et al. 2006) | Live |
-| Ecological Study Guidance | Guidance panel, no formula | Morgenstern 1995; Robinson 1950 | Live |
-| Diagnostic Accuracy | Se/Sp precision; vs. reference; two tests unpaired/paired; PPV/NPV; LR+/LR−; DOR | closed form (Buderer; Casagrande-Pike; Connor; Altman & Bland); `presize::prec_pos_lr()`/`prec_neg_lr()` | Live |
-| ROC / AUC | Single AUC vs. 0.5; two correlated AUCs | `pROC::power.roc.test()` | Live |
-| Agreement / Reliability | Kappa; ICC; Cronbach's alpha; Bland-Altman; Lin's CCC | `presize::prec_kappa()`, `prec_icc()`, `prec_cronb()`, `prec_lim_agree()`; closed form (Lin 1989/2000) | Live |
-| Pilot / Feasibility | 12/arm rule; precision of a pilot SD | Julious 2005; chi-square CI theory | Live |
-| Simon Two-Stage | Minimax and optimal designs | `clinfun::ph2simon()` | Live |
-| Equivalence (TOST) | Means; proportions; PK bioequivalence (2×2, 2×2×4, 2×3×3); expected-power bioequivalence | `PowerTOST`'s `sampleN.TOST()` / `expsampleN.TOST()` logic, transcribed (`calc_closed_forms_tost.R`); `epiR::epi.ssequb()` | Live |
-| Non-Inferiority | Means; proportions; OR; HR | closed forms `.cf_ssninfc()`, `.cf_ssninfb()` (verified vs. `epiR::epi.ssninfc()`, `epi.ssninfb()`); `TrialSize::RelativeRisk.NIS()`, `Cox.NIS()` | Live |
-| Crossover Trial (2×2) | Continuous, difference | `TrialSize::TwoSampleCrossOver.Equality()` | Live |
-| Group Sequential Design | Continuous/binary/survival boundaries; Lan-DeMets spending (2 looks) + conditional power and sample-size re-estimation | `clinfun::gsdesign.*()`; spending functions verified vs. `rpact`; inverse-normal combination (Lehmacher & Wassmer 1999) | Live |
-| Subgroup / Interaction Testing | "4× rule" inflation | closed form (Brookes et al. 2004) | Live |
-| Monte Carlo Mixed Models | CRT continuous (LMM); CRT binary (GLMM); growth-curve slope difference | direct simulation + LRT via `lme4::lmer()`/`glmer()`; growth-curve LRT verified vs. `simr::doTest()` | Live |
-| Trial Sequential Analysis | Required information size: RR, OR, RD, MD | reimplemented, verified vs. `RTSA::ris()` | Live |
-| Stepped-Wedge CRT | Continuous outcome | Hooper et al. (2016) design effect, verified vs. `clusterPower::cpa.sw.normal()` | Live |
-| Log-Rank / Survival | Log-rank; Cox PH (binary/continuous); stratified; accrual + noncompliance (`.cf_cpower()`, verified vs. `Hmisc::cpower()`); weighted log-rank (non-PH) | `powerSurvEpi::ssizeCT()`, `ssizeEpi()`, `ssizeEpiCont()`, `ssize.stratify()`; `Hmisc::cpower()`; simulation of `survival::survdiff(rho=)` | Live |
-| Competing Risks | Joint cause-specific / any-cause hazard test | reimplemented `powerCompRisk` (Yang, Fung & Li 2017) with `mvtnorm::pmvnorm()` | Live |
-| RMST Comparison | Superiority / non-inferiority | simulation reimplementing `SSRMST` + `survRM2` with `survival::survfit()` (Uno et al.) | Live |
-| Prediction Model | Development (binary, continuous, survival); external validation (binary) | `pmsampsize::pmsampsize()`; reimplemented `pmvalsampsize` (Riley et al. 2021) | Live |
-| Rule of Three | Upper bound; n to detect ≥ 1 event; disease freedom, imperfect test | closed form (Hanley & Lippman-Hand 1983); closed form `.cf_ssdetect()` (verified vs. `epiR::epi.ssdetect()` 2.0.67) | Live |
-| Resource Equation | Recommend / check E = N − T | Mead 1988; Charan & Kantharia 2013 | Live |
-| Qualitative Sample Size Guidance | Guidance panel, no formula | Guest et al. 2006; Malterud et al. 2016; Patton; Glaser & Strauss | Live |
-| Psychometrics Sample Size Guidance | EFA/CFA subjects-per-item; CFA/SEM RMSEA test of close fit; IRT calibration by model | Costello & Osborne 2005 / Comrey & Lee 1992; MacCallum, Browne & Sugawara 1996 verified vs. `semTools`; Linacre 1994, Hulin et al. 1982, Reise & Yu 1990 | Live |
-| Value of Information | EVPI; EVSI + ENBS-optimal n | closed-form normal VOI, verified vs. `voi::evpi()`/`evsi()` | Live |
-| Correlation | Pearson; two independent r; two dependent r; point-biserial; regression slope; partial; Spearman | `pwr::pwr.r.test()`; closed form (Cohen 1988; Steiger 1980); ARE inflation for Spearman | Live |
-| Chi-Square Tests | GoF; R×C independence; McNemar; Mantel-Haenszel; Cochran-Armitage; Cochran's Q | `pwr::pwr.chisq.test()`; `TrialSize::McNemar.Test()`, `Propensity.Score.strata()`, `Cochran.Armitage.Trend()`; simulation using the closed-form `.cf_cochran_q()` (verified vs. `rstatix::cochran_qtest()`) | Live |
-| Multiple Regression | R² vs. zero; R² increase | `pwr::pwr.f2.test()` | Live |
-| Factorial ANOVA / ANCOVA | General F-test | `pwr::pwr.f2.test()` | Live |
-| Logistic Regression | Binary/continuous predictor, simple or covariate-adjusted; ordinal | `powerMediation::SSizeLogisticBin()`/`Con()`; 1/(1−R²) inflation; closed form `.cf_posamsize()` (verified vs. `Hmisc::posamsize()`) | Live |
-| Exact Tests | Binomial; Fisher; Boschloo; exact Poisson; sign test | `stats::binom.test()`, `poisson.test()` searches; exact power over every 2x2 table (`calc_closed_forms_exact.R`, equal to `Exact::power.exact.test()`) | Live |
-| RM-ANOVA / Mixed ANOVA | Between; within; interaction | reimplemented `WebPower::wp.rmanova()` | Live |
-| Nonparametric Tests | Wilcoxon ×2; Kendall's tau; Kruskal-Wallis; Jonckheere-Terpstra; Friedman; KS; runs test (`.cf_runs_test_p()`, verified vs. `tseries::runs.test()`); animal K-sample rank test | `TrialSize::Nonpara.*()`; ARE inflation; simulation of `ks.test()`/`tseries::runs.test()`; `clinfun::power.ladesign()` | Live |
-| Variance Tests | One variance; two variances; SD precision | closed form (chi-square / F) | Live |
-| Multiplicity Adjustment | Bonferroni/Šidák (proportions, means); FDR (BH) means; exact microarray FDR; Dunnett | wraps this app's own formulas; FDR closed form (simulation-verified); Liu & Hwang 2007 verified vs. `ssize.fdr`; `mvtnorm::qmvt()` | Live |
-| MANOVA / Hotelling's T² | Two-group Hotelling's T² | closed-form noncentral F (Rencher 2002) | Live |
-| Bayesian Design Analysis | Assurance; Bayes factor design analysis | closed form `.cf_gbayes2()` (verified vs. `Hmisc::gbayes2()`); simulation of the closed-form JZS Bayes factor `.cf_ttest_bf10()` (verified vs. `BayesFactor::ttestBF()`) | Live |
-| Longitudinal / MMRM | Slope difference: Liu & Liang, Diggle, Ard & Edland, Hu et al.; MMRM with dropout, AR(1) | reimplemented `longpower` functions | Live |
-| Multilevel / Hierarchical Model | Two- and three-level slope difference | reimplemented `powerlmm` (no-dropout case) | Live |
-| Meta-Analysis Power | Number of studies, fixed/random effects | Hedges & Pigott 2004 / Jackson & Turner 2017, verified vs. `metapower` | Live |
-| Precision-based (generic CI width) | Risk difference/ratio CI width | covered across Proportions, Means, Rate, Ratio, Variance precision designs | Covered |
-| MANOVA (global, k > 2 groups) | Global and special-effect tests | Vonesh & Schork (1986) — not yet implemented | Open (ROADMAP A.3) |
-
-Open, blocked and partially covered items are listed in ROADMAP §4 — none have been
-removed.
+Every design of the catalog, with its source and the package it is tested against, is listed by group in
+[`CHECKLIST.md`](CHECKLIST.md) section 2 (215 designs built on 6 Nov 2026), together with the designs not built yet and the open halves
+of built ones, each with what would unblock it. The module list in `R/registry.R` and the catalog in `R/home_catalog.R` are
+authoritative; every built design is reachable from the Find tab's browse lists, the search box and, where the decision tree has a
+branch, from the guide (consistency tests: section 12). The two checklists the catalog was first built from (by study design; by
+statistical test, mirroring G*Power) are in `docs/archive/`.
 
 **Navigation (workbenches).** The top navbar has one item per workbench -- Home, *Plan:
 Sample Size* (the 49 sample-size and power calculators) and *Analyze* (calculators that
@@ -316,12 +239,12 @@ load time, so `home_design_tree.R` is named to load after `home_catalog.R` (pack
 load alphabetically).
 Terminals are built with `.term(id, design, key)` (key may be `.by_outcome(cont,
 bin)`) or `.term_open(id, design, would_use, citation)`; the open ones are exactly the
-not-built items in ROADMAP §4. Cluster-randomised paths show a design-effect note
+not-built items of `CHECKLIST.md` section 2. Cluster-randomised paths show a design-effect note
 with jump buttons to Cluster / Design Effect and Monte Carlo Mixed Models.
 
 Enforced by tests: every node and every built catalog entry is reachable from root;
-every terminal resolves to a built entry, guidance, or an open item listed in the
-ROADMAP; `test-catalog_consistency.R` checks navbar ↔ catalog ↔ module `design`
+every terminal resolves to a built entry, guidance, or an open item of
+`CHECKLIST.md`; `test-catalog_consistency.R` checks navbar ↔ catalog ↔ module `design`
 radio values in both directions. Option order matters where free-text rules exist
 (rules refer to options by position), so options are only appended there. The
 RCT-internals branch still has no free-text rules.
@@ -346,7 +269,7 @@ proportion_content <- list(
 
 **Calculation function** — pure R, no Shiny; validates with the shared helpers in
 `calc_utils.R`, returns its result wrapped in `new_ss_result()` (`calc_result.R`,
-ROADMAP P1 item 8) — a named list (inputs echoed back) with class `ss_result`
+archived ROADMAP item 8) — a named list (inputs echoed back) with class `ss_result`
 added on top, so every field (`n`, `n_total`, whatever that design calls its own
 headline number, `inputs`, ...) is exactly what the function would have returned
 anyway; the class only adds a generic `print()`/`format()`. Monte Carlo designs use
@@ -363,16 +286,71 @@ calc_proportion_1s <- function(p0, p1, alpha = 0.05, power = 0.8, alternative = 
 `mod_<name>_server(id)` (calls the calc function in `reactive()` + `tryCatch()`), and
 `<name>_meta <- list(id, nav_title)`.
 
-**Wiring** — a `module_registry()` entry and a `module_groups` placement in `R/registry.R`;
+**Wiring** — a `module_registry()` entry and a group of `module_workbenches` in `R/registry.R`;
 one `calculator_catalog` entry per design plus family-index keys in
-`home_catalog.R`; a wizard route in `design_tree.R` (the tests require one); tests; and a
-tick in both checklists. `run_app.R` never changes.
+`home_catalog.R`; a guide route in `home_design_tree.R` (the tests require one); tests; and a
+line in `CHECKLIST.md`. `run_app.R` never changes.
 
 **Documentation of the calculation function** — every `calc_*()` function is exported and documented: a roxygen block with a title,
 one `@param` per argument, `@return` (the components of the `ss_result`), `@examples` (a real worked example with literal values;
 long-running ones inside `\donttest{}`) and `@export`; `export(calc_<name>)` in `NAMESPACE`; help pages built with
 `roxygen2::roxygenise(roclets = "rd")`. Interval notation in plain-text comments is escaped (`\[0, 1)`) because roxygen reads
 markdown. `tests/testthat/test-help_pages.R` enforces all of it. Internal helpers carry `@noRd`.
+
+### 8.1 Adding a module
+
+1. Copy the three files of a similar module and adapt them.
+2. Add a `module_registry()` entry and put its id in the right group of `module_workbenches`
+   (`R/registry.R`). `R/run_app.R` does not change. If the new file calls a package
+   with `pkg::`, add that package to `DESCRIPTION` `Imports`.
+3. Add one `calculator_catalog` entry per design in `R/home_catalog.R`
+   (`built = TRUE`, `nav_target`, `module_input_id`, `design_value`) and list the
+   keys in a `study_design_families` and a `test_families` entry.
+4. Route to it from the wizard (`R/home_design_tree.R`): add an option and a
+   `.term()` terminal where a study-design branch fits. The "browse by test" branch
+   picks up new `test_families` keys automatically. `test-design_tree.R` fails if
+   any built catalog entry is unreachable, and `test-catalog_consistency.R` fails if
+   the catalog, the navbar and the module's `design` radio values disagree.
+5. Add `tests/testthat/test-calc_<name>.R` with a published worked example, and, where a package computes the same thing, a
+   comparison with it (guarded by `skip_if_not_installed()`).
+6. Document the `calc_*` function for users: a roxygen block with a title, one `@param` per argument, `@return`, `@examples`
+   (a real worked example, literal values) and `@export`; add `export(calc_<name>)` to `NAMESPACE`; rebuild the help pages with
+   `roxygen2::roxygenise(roclets = "rd")`. `tests/testthat/test-help_pages.R` fails if any of that is missing. Plain-text roxygen
+   comments use markdown: write interval notation as `\[0, 1)`.
+7. Check the new page with `tools/ui-audit/audit.R` and `tools/ui-audit/a11y.R` (no horizontal scroll, no accessibility rule violations).
+8. Add the design to `docs/CHECKLIST.md` (its group, the next free ID, its source and reference package), regenerate
+   `docs/PENDING.md` and add a line to `NEWS.md` (section 18).
+
+### 8.2 Shiny patterns that are not plain R
+
+- **`conditionalPanel()` conditions are JavaScript**, evaluated in the browser.
+  Because modules namespace input ids (`proportion-design`, not `design`), the
+  condition string is built with `ns("design")` so it stays correct under any
+  module id.
+- **`do.call()` builds the navbar.** `epidemiologysuite_app()` creates one navbar item per
+  `module_workbenches` entry (a `navset_pill_list()` sidebar of grouped modules inside it) and
+  passes the variable-length list to `page_navbar()` via `do.call()`, which calls a function with
+  an argument list assembled at runtime. `jump_to_module()` selects the workbench and then the module.
+- **`moduleServer()` / `NS()`** give each module an isolated input/output namespace.
+- **Dependencies are declared, not installed at runtime.** The app used to call
+  `pacman::p_load()` from `global.R`; as a package it declares them in
+  `DESCRIPTION` `Imports` and calls them with `pkg::`, which is what makes
+  `remotes::install_github()` install everything it needs.
+- **Load order.** Package files load alphabetically, so nothing may use another
+  file's objects at load time. `module_registry()` is therefore a function, and
+  `home_design_tree.R` is named to sort after `home_catalog.R`, whose
+  `test_families` it reads when it loads.
+- **Updating a module's input from outside it.** The Home hub runs at the top level
+  and calls `updateRadioButtons(session, "proportion-design", ...)` with the
+  already-namespaced id; `ns()` is only needed *inside* a module.
+- **`bslib::nav_select("main_nav", <title>)`** switches tabs programmatically; it
+  works whether the panel sits on the navbar or inside a nested list; use `jump_to_module()`
+  (registry.R), which selects the workbench first and then the module.
+- **`numericInput(..., value = NA)`** renders an empty optional field; the server
+  treats `NULL`/`NA` as "not supplied".
+- **`session$ns()` for inputs created in `renderUI()`** — the server-side equivalent
+  of the UI's `ns()` closure (used where the number of inputs is itself a user
+  choice, e.g. kappa categories).
 
 ---
 
@@ -412,8 +390,8 @@ standard output and unaffected.
 | Mobile | Phone layout of the same app: bottom tab bar, one calculator drop-down, touch-sized controls (`R/phone_shell.R`); phone / server version on Posit Connect Cloud | Checked in an emulated iPhone; not on a real phone |
 | Citability | Cite tab (nine formats), `CITATION.cff`, `citation()`; every calculator cites its formula's source | Met; Zenodo DOI 10.5281/zenodo.23794230 (release v1.0.0) |
 | Browser support | Modern evergreen browsers | Met |
-| Portability | Deployable to shinyapps.io as-is. Shinylive (WebAssembly) depends on every runtime package having a webR binary — compiled packages (`lme4`, `BayesFactor`, `Hmisc`, `mvtnorm`) are the risk | Spike planned (ROADMAP D3) |
-| Reproducibility | Same inputs → same output, including Monte Carlo designs (fixed seeds) | Met in code; package versions not locked (ROADMAP P0) |
+| Portability | Three versions: browser build (Shinylive / WebAssembly), phone / server version (Posit Connect Cloud), R package | Met: every calculator runs in the browser build (3 Nov 2026) |
+| Reproducibility | Same inputs → same output, including Monte Carlo designs (fixed seeds) | Met; package versions locked in `renv.lock` |
 
 ---
 
@@ -451,31 +429,27 @@ One code base, three ways to use it (details and owner steps in [`hosting.md`](h
 - **Phone / server version** on Posit Connect Cloud: a bundle (`app.R`, `R/`, `manifest.json`) built and run in CI and published
   to the branch `connect` on every push to `main`; Connect Cloud deploys from that branch. Same app, narrow-screen layout.
 - **R package** (`remotes::install_github()`, then `run_app()`); a Docker image (`docker.yml`) for institutions.
-- **Planned** (ROADMAP Track D): PWA home-screen icon, Android wrapper, r-universe and CRAN releases, desktop wrapper.
+- **Open** (`CHECKLIST.md` sections 6-7): PWA home-screen icon, Android wrapper, r-universe and CRAN releases, desktop wrapper.
 
 ---
 
 ## 14. Development Roadmap
 
-The forward plan is [`ROADMAP.md`](ROADMAP.md). The build stages used so far:
+What is open is [`PENDING.md`](PENDING.md) (generated from [`CHECKLIST.md`](CHECKLIST.md)); what was done when is
+[`NEWS.md`](../NEWS.md). The build stages so far:
 
 | Stage | Scope | Status |
 |---|---|---|
-| 1 — v1 CORE | Proportions, means, case-control, cohort, ANOVA, correlation, chi-square, diagnostic Se/Sp, ICC, kappa, log-rank, Simon, pilot, TOST | **Done** |
-| 1.5 — wizard, guided tree | "Which calculator?" Q&A | **Done** — full coverage since 28 Sep 2026 (ROADMAP F1) |
-| 2 — analytical depth | F-family, correlation/regression suite, matched case-control, ROC, Bland-Altman/CCC/Cronbach, prediction models | **Done** (open halves in ROADMAP A.3: MANOVA k>2, non-common-index dependent r, multinomial) |
-| 3 — advanced trial designs | Cluster-randomized, stepped-wedge, group-sequential/adaptive, survival extensions, bioequivalence replicates, longitudinal/MMRM | **Done** (open halves: stepped-wedge binary, Lan-DeMets 3+ looks, multilevel with dropout) |
-| 4 — niche/simulation & guidance | `simr`-style simulation, SEM, TSA, qualitative/animal guidance, genetics | **Done except genetics** (GWAS / G×E open — ROADMAP A.1) |
-| 5 — wizard, free-text half | Keyword parser pre-filling the wizard | **Done** (RCT-internals rules open) |
-| 6 — remaining backlog | Everything else in the checklists | **Effectively complete** — 8 batches plus a closing audit; remaining items blocked with documented reasons (ROADMAP §4) |
-| 7 — suite expansion | Analyze workbench, planning and survey tools, outbreak / surveillance tools, infectious-disease models, Eyes / Lesions per Patient | **Done** (summary-data only; raw-data workbench deferred, D1) |
-| 8 — dependency reduction | Shrink runtime package list where reimplementation is safe | **Done** — 14 packages replaced by checked reimplementations (two upstream bugs found), `PowerTOST` and `Exact` the last (31 Oct 2026); `kappaSize` replaced on 4 Nov 2026 (its cell probabilities written out, equal to the package in the tests); `clinfun` and `lme4` kept on purpose (they work in the browser; replacing them adds risk without a gain) |
-| 9 — devices and interface | Browser build, phone / server version, phone layout, lazy loading, task-first Home, search, accessibility, dark mode | **Done** (a real-phone check is open) |
-| 10 — package API | Every calculation exported with help pages, `ss_find()`, addin, Cite tab | **Done**; vignettes, r-universe and CRAN open |
-
-Items still open, blocked, or paused by the owner are kept in ROADMAP §4 with their
-unblock conditions. The two owner-paused items are external validation for
-time-to-event models and model updating/recalibration.
+| 1 -- v1 core | Proportions, means, case-control, cohort, ANOVA, correlation, chi-square, diagnostic Se/Sp, ICC, kappa, log-rank, Simon, pilot, TOST | Done |
+| 2 -- analytical depth | F-family, correlation / regression suite, matched case-control, ROC, Bland-Altman / CCC / Cronbach, prediction models | Done; open halves in CHECKLIST |
+| 3 -- advanced trial designs | Cluster-randomised, stepped-wedge, group-sequential, survival extensions, bioequivalence replicates, longitudinal / MMRM | Done; open halves in CHECKLIST |
+| 4 -- simulation and guidance | Simulation designs, SEM, TSA, qualitative / animal guidance | Done; genetics open (GEN) |
+| 5 -- the guide | Decision tree, free-text reader, research questions | Done; more phrasings wait on real questions (FIND) |
+| 6 -- remaining backlog | The rest of the first checklists | Done or blocked with documented reasons |
+| 7 -- suite expansion | Analyze workbench, planning and survey tools, outbreak / surveillance tools, infectious-disease models, several units per patient | Done (summary data only, decision D1) |
+| 8 -- dependency reduction | Reimplement where safe, test against the original | Done: runtime is `clinfun`, `mvtnorm`, `lme4`, `survival` (two upstream bugs and one published-formula error found on the way) |
+| 9 -- devices and interface | Browser build, phone / server version, phone layout, task-first Home, search, accessibility, dark mode, Studies | Done; real-phone checks open (owner) |
+| 10 -- package | Exported functions with help pages, `ss_find()`, addin, vignettes, Cite tab | Done; r-universe and CRAN open (owner) |
 
 ---
 
@@ -485,18 +459,18 @@ time-to-event models and model updating/recalibration.
 |---|---|
 | Formula errors silently produce wrong sample sizes | Mandatory numeric verification before shipping (§12) |
 | Package updates change results | Versions locked in `renv.lock`; CI runs against them |
-| Docs and navigation drift from the code | Consistency tests (ROADMAP P0); ROADMAP as the single forward-looking doc |
+| Docs and navigation drift from the code | Consistency tests (section 12); status kept only in CHECKLIST.md, PENDING.md generated from it and tested |
 | Development environment lost on container reset | SessionStart hook rebuilds it; `renv.lock` records the exact versions |
 | Development sandbox cannot reach CRAN or journal sites | `github.com/cran` mirror + apt for packages; web search for citations; items needing paper access stay open rather than guessed |
 | Monte Carlo designs block other users on a shared server | Resolved 31 Oct 2026: background workers (`mirai`); each worker is a full R process, so its memory counts against the host's limit |
-| Licence of reimplementations transcribed from GPL packages | Resolved: project relicensed to GPL-3 (ROADMAP F8 / D2); module headers keep naming each source package |
-| Scope creep as the project grows into a suite | Workbench-by-workbench milestones with exit criteria (ROADMAP §11) |
+| Licence of reimplementations transcribed from GPL packages | Resolved: project relicensed to GPL-3 (decision D2); module headers keep naming each source package |
+| Scope creep as the project grows into a suite | Scope decision D1 (summary data only); one workbench at a time |
 
 ---
 
 ## 16. Open Questions
 - **Suite decisions** — scope, licence, name, distribution target, languages, and when
-  to reopen paused items: see ROADMAP §10 (D1–D6).
+  to reopen paused items: section 17 (D1–D6; D6 still open).
 - **Backend reconciliation:** Proportions' precision design uses the Cochran formula
   and Diagnostic Accuracy's precision design uses Buderer's formula, where the
   checklists name `presize::prec_prop`/`epiR::epi.sssimpleestb` and
@@ -505,8 +479,52 @@ time-to-event models and model updating/recalibration.
 - **Reference links:** link citations to DOIs where available? (Useful for the
   planned citation export.)
 
-Resolved since v0.1: `renv` — yes, `renv.lock` added. Checklist maintenance — to be
-enforced by consistency tests rather than habit.
+Resolved since v0.1: `renv` — yes, `renv.lock` added. Checklist maintenance — enforced by tests (section 18).
+
+---
+
+## 17. Decisions
+
+Owner decisions, recorded 28 September 2026 unless dated (moved here from the archived ROADMAP, section 10).
+
+| # | Question | Decision | Consequences |
+|---|---|---|---|
+| D1 | Scope: summary-data calculators only, or also raw-data analysis? | **Summary data only, for now**; confirmed 3 Nov 2026: raw data and line lists are too memory-heavy for the browser build and go to a later full (server) app, merged with the owner's `Easy_analysis` application | Raw-data workbench, line lists, epidemic curves and R0 / Rt wait (CHECKLIST WB-09) |
+| D2 | Licence | **GPL-3** | `LICENSE` and `DESCRIPTION`; allows transcribing formulas from GPL packages |
+| D3 | Name | **`epidemiologysuite`** (renamed with the repository on 30 Oct 2026; earlier `sample2result`, `epidemiologicasuite`); shown to people as "Epidemiological suite" | One package until a CRAN split is wanted |
+| D4 | First distribution target | **Hosted web and the R package first**; offline / APK later | Browser build, phone / server version and package done; PWA / APK open |
+| D5 | Languages | **English only** | No translation layer |
+| D6 | When to reopen the two paused prediction items | *Open* | CHECKLIST OWN-04 |
+| H1 | Hosting (21 Oct, 28 Oct 2026) | Browser build on GitHub Pages; the phone / server version on Posit Connect Cloud, phones redirected to it | Long-term hosting open (CHECKLIST DIST-07) |
+| H2 | Background computation (31 Oct 2026) | **`mirai`** with `shiny::ExtendedTask` | Monte Carlo calculators run outside the session on a server |
+| S1 | Studies: how long the record lasts (3 Nov 2026) | **This browser tab only** (`sessionStorage`) | Survives a reload; lost when the tab is closed; nothing kept on the server |
+| S2 | Studies: file format | **A built-in .docx writer** | No new runtime package; `officer` only as a test reference |
+| S3 | Studies: recent calculations recorded automatically | **Yes**, the last 20 | Can be added to a study later |
+| S4 | Studies: how many | **Three to start, more on request** (soft limit 10) | One drop-down for the studies and Recent calculations |
+| S5 | Studies: content of an entry | **Full**: inputs, result, warnings, formula (LaTeX), justification paragraph, citation | |
+| W1 | Way of working (November 2026) | One branch per task, tested once at the end, one pull request, merged only on the owner's word after CI is green; branches deleted after merge | |
+| W2 | Project documents (6 Nov 2026) | SDD (design, decisions), CHECKLIST (everything, with status), PENDING (generated), NEWS (history); the old files archived | Section 18 |
+| F1 | Find: how the research question is read (6 Nov 2026) | **Deterministic only**: the routing tree, study state and one-question gate drafted by the owner with Gemini are built on the existing keyword reader | Nothing is sent anywhere; a language-model reader stays optional (CHECKLIST FIND-14) |
+| F2 | Find: the owner's 37-design tree and the guide | **Merged into the guide**: its first question stays, the new branches go inside it | Every end point leads to a calculator or names its open item (FIND-16) |
+| F3 | Find: the design cards (fallback, threats, reporting guideline, effect measure, workflow) | **The drafted text, edited**; a claim is cited where a source is found, otherwise marked with a warning sign whose hover says it is a suggestion with no confirmed source | FIND-21, SRC-06 |
+| F4 | Find: search terms and codes | **Checkable sources only**: MeSH checked against NLM and published validated design filters; no Emtree / CINAHL / PsycINFO terms, no clinical codes for now | FIND-22, FIND-23; codes optional (FIND-24) |
+
+## 18. How the project documents are kept
+
+| File | Holds | Rule |
+|---|---|---|
+| `README.md` | What the suite is, the three versions, installing, running, citing | Changes rarely |
+| `docs/SDD.md` | The design as built and the decisions | A new design or decision is added here |
+| `docs/CHECKLIST.md` | Every item, done or open, by section, each with a stable ID (`SURV-03`); for calculators the source and the reference package | **The only place where status is kept**: tick when done, add new items with the next free ID, never reuse an ID |
+| `docs/PENDING.md` | The open items, owner steps first | Generated: `Rscript tools/docs/build_pending.R`; `test-docs_pending.R` fails when it is out of date |
+| `NEWS.md` | What was done, by date | One entry per finished piece of work |
+| `docs/design_identification_algorithm.md`, `hosting.md`, `upstream_reports.md` | The guide's specification; the owner's hosting steps; bug-report drafts | Kept with the work they describe |
+| `docs/find_routing/` | The owner's routing material for Find (drafted with Gemini, 6 Nov 2026) and its review | Source material, not edited; what is built goes into the algorithm document |
+| `docs/archive/` | ROADMAP, PLAN, to-do list, the first two checklists, brief, mock-ups, frozen on 6 Nov 2026 | Not edited; code comments that cite "ROADMAP item N" refer to it |
+
+When a piece of work is finished: tick its items in CHECKLIST (adding any new open item it leaves), run the PENDING script, add the
+NEWS entry, and update this document if the design or a decision changed. The website publishes CHECKLIST, PENDING, this document and
+the algorithm.
 
 ---
 

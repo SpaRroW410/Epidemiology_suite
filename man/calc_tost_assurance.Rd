@@ -51,7 +51,7 @@ happening to be exactly right. This design instead computes the
 SAMPLE SIZE NEEDED FOR THE EXPECTED (assurance) POWER, averaging over
 the uncertainty in the CV estimate given how many subjects it was
 estimated from (prior_n) -- the "probability of trial success"
-concept named in checklist_by_test.md's "Assurance / expected power"
+concept named in docs/archive/checklist_by_test.md's "Assurance / expected power"
 item. PowerTOST's expsampleN.TOST() with prior.type = "CV" (transcribed, calc_closed_forms_tost.R) --
 PowerTOST is already a project dependency (used by
 calc_tost_means()/calc_tost_bioequivalence() above), and this is

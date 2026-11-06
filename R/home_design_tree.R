@@ -1,7 +1,7 @@
 # Flat-registry decision tree for the "Which calculator?" wizard
 # (docs/design_identification_algorithm.md). Routes a guided Q&A session to
 # either a built catalog entry (see home_catalog.R) or an honest "not yet
-# built" terminal naming what is missing and why (docs/ROADMAP.md sec. 4) --
+# built" terminal naming what is missing and why (an open item of docs/CHECKLIST.md) --
 # never a silent guess and never a broken link.
 #
 # Node shape:
@@ -996,7 +996,7 @@ design_nodes <- list(
 
   term_crossover = .term("term_crossover", "Crossover trial (2x2, continuous)", "crossover_2x2"),
   term_stepped_wedge = .term("term_stepped_wedge", "Stepped-wedge cluster-randomised trial", "stepped_wedge_normal",
-    note = "Continuous outcome (Hussey & Hughes). The binary-outcome version is still open -- see docs/ROADMAP.md, section 4."),
+    note = "Continuous outcome (Hooper et al. 2016). The binary-outcome version is still open (docs/PENDING.md, TRIAL-28)."),
   term_glmm_cont = .term("term_glmm_cont", "Cluster-randomised trial, continuous outcome (Monte Carlo LMM)", "glmm_lmm_continuous"),
   term_glmm_binary = .term("term_glmm_binary", "Cluster-randomised trial, binary outcome (Monte Carlo GLMM)", "glmm_binary"),
 
@@ -1122,7 +1122,7 @@ design_nodes <- list(
   term_cochran_q = .term("term_cochran_q", "Cochran's Q test", "cochran_q"),
   term_friedman = .term("term_friedman", "Friedman test", "friedman"),
   term_manova = .term("term_manova", "Two-group Hotelling's T-squared (MANOVA)", "manova_hotelling",
-    note = "Two groups only; the k > 2 group global test is still open (docs/ROADMAP.md, section 4)."),
+    note = "Two groups only; the k > 2 group global test is still open (docs/PENDING.md, GEN-73)."),
   term_wilcoxon_rs = .term("term_wilcoxon_rs", "Wilcoxon rank-sum (Mann-Whitney) test", "wilcoxon_rank_sum"),
   term_wilcoxon_sr = .term("term_wilcoxon_sr", "Wilcoxon signed-rank test", "wilcoxon_signed_rank"),
   term_sign_test = .term("term_sign_test", "Sign test", "sign_test"),
@@ -1157,7 +1157,7 @@ design_nodes <- list(
 
   # ================================================================== #
   # Terminal nodes -- not yet built (honest placeholder, no catalog_key).
-  # Every one of these is listed in docs/ROADMAP.md sec. 4 with what would
+  # Every one of these is an open item of docs/CHECKLIST.md (section 2) with what would
   # unblock it.
   # ================================================================== #
 

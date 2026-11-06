@@ -131,7 +131,7 @@ calc_lan_demets_normal <- function(delta, sd, timing = 0.5, r = 1, alpha = 0.05,
 
 # Interim conditional power and sample-size re-estimation (SSR), continuous
 # outcome, building on a calc_lan_demets_normal() design. Closes the
-# remaining (conditional power / SSR) half of docs/checklist_by_test.md's
+# remaining (conditional power / SSR) half of docs/archive/checklist_by_test.md's
 # "Conditional power; futility boundaries; SSR" item -- the futility-
 # boundary half was already covered by the power-family Group Sequential
 # Design; true interim conditional power and SSR had no genuine source in

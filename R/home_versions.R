@@ -1,5 +1,5 @@
 # "Three versions: which one should I use?" -- a table comparing the phone / server version, the browser version and the R package
-# (to_do_later.md C, 3 Nov 2026). Shown folded on Home and on the Cite tab; the column of the version being used is marked. Facts and their
+# (docs/archive/to_do_later.md C, 3 Nov 2026). Shown folded on Home and on the Cite tab; the column of the version being used is marked. Facts and their
 # sources: docs/hosting.md (where each runs, privacy), R/background.R (simulations), tools/ui-audit/live_timing.js (browser start-up,
 # measured 3 Nov 2026 on a desktop: 38.9 s until Home is usable), R/mod_studies.R (Studies storage).
 

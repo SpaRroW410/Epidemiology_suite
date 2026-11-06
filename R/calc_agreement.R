@@ -4,7 +4,7 @@
 # raters or methods *agree* with each other.
 #
 # Both functions wrap validated presize:: functions rather than reimplementing
-# the underlying math (project convention -- see docs/project-brief.md), so
+# the underlying math (project convention -- see docs/archive/project-brief.md), so
 # there is no local re-derivation of the confidence-interval formulas here.
 
 #' Sample size for Cohen's kappa (categorical agreement, no gold standard)

@@ -324,11 +324,15 @@ test_that("every node is reachable from root (no orphaned questions or terminals
   expect_equal(setdiff(names(design_nodes), reached), character(0))
 })
 
-test_that("every not-built terminal is tracked in docs/ROADMAP.md", {
-  roadmap_path <- file.path("..", "..", "docs", "ROADMAP.md")
-  skip_if_not(file.exists(roadmap_path), "docs/ are not part of the installed package")
-  roadmap <- paste(readLines(roadmap_path, warn = FALSE, encoding = "UTF-8"), collapse = "\n")
-  # One distinctive ROADMAP phrase per open terminal; update both together.
+test_that("every not-built terminal is an open item of docs/CHECKLIST.md", {
+  root <- file.path("..", "..")
+  skip_if_not(file.exists(file.path(root, "docs", "CHECKLIST.md")) && file.exists(file.path(root, "tools", "docs", "build_pending.R")),
+              "docs/ are not part of the installed package")
+  env <- new.env()
+  sys.source(file.path(root, "tools", "docs", "build_pending.R"), envir = env)
+  items <- env$checklist_items(readLines(file.path(root, "docs", "CHECKLIST.md"), warn = FALSE, encoding = "UTF-8"))
+  open_text <- vapply(Filter(function(it) it$open, items), env$item_text, character(1))
+  # One distinctive phrase per open terminal; update both together (and tick the item when the terminal gets a calculator).
   tracked <- c(term_n_of_1 = "N-of-1", term_auc_unpaired = "Unpaired AUCs", term_mrmc = "MRMC",
                term_deming = "Deming / Passing-Bablok", term_pred_extval_tte = "time-to-event (Riley et al. 2022)",
                term_pred_updating = "Model updating", term_nma = "Network meta-analysis",
@@ -339,7 +343,7 @@ test_that("every not-built terminal is tracked in docs/ROADMAP.md", {
   open_terms <- names(Filter(function(n) isTRUE(n$terminal) && is.null(n$catalog_key) && !isTRUE(n$guidance), design_nodes))
   expect_setequal(open_terms, names(tracked))
   for (id in names(tracked)) {
-    expect_true(grepl(tracked[[id]], roadmap, fixed = TRUE), info = paste(id, "->", tracked[[id]]))
+    expect_true(any(grepl(tracked[[id]], open_text, fixed = TRUE)), info = paste(id, "->", tracked[[id]]))
   }
 })
 

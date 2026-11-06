@@ -156,7 +156,7 @@ module_registry <- function() {
 # Adding a calculator = add its entry to module_registry() above and its id to a
 # group below; adding a workbench = add an entry here (run_app.R builds the rest).
 #
-# The sample-size groups mirror docs/checklist_by_design.md's own Part-1
+# The sample-size groups mirror docs/archive/checklist_by_design.md's own Part-1
 # study-design section numbers (already simple -> difficult) so the navigation does
 # not invent a second taxonomy on top of the checklist's. Modules with no single
 # natural study-design home (general G*Power-style test families) are grouped

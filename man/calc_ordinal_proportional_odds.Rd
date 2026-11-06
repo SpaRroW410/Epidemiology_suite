@@ -35,7 +35,7 @@ or more ordered categories (e.g. none/mild/moderate/severe), comparing
 two groups via the proportional-odds model. Wraps
 Hmisc::posamsize() (already installed; no new dependency), which
 directly implements Whitehead (1993)'s formula -- exactly the method
-checklist_by_test.md names for this item -- and is the same engine
+docs/archive/checklist_by_test.md names for this item -- and is the same engine
 this app would need for the "multinomial regression" half of that same
 checklist item's title, except no closed-form/installed-package
 formula was found for a genuinely unordered (nominal) multinomial

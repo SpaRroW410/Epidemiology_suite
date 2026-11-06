@@ -1,4 +1,4 @@
-# Shinylive / webR feasibility spike (docs/ROADMAP.md item 15, Track D3).
+# Shinylive / webR feasibility spike (docs/archive/ROADMAP.md item 15, Track D3).
 # Runs on GitHub's runners because the development sandbox cannot reach
 # repo.r-wasm.org. Triggered by changes to the spike itself, or by hand.
 name: shinylive-spike

@@ -13,7 +13,7 @@
 # computes that adjusted alpha and reuses this app's own already-verified
 # one-proportion/two-proportion/one-mean/two-mean formulas with it plugged
 # in -- literally "wrap any calculator with alpha/m", the general approach
-# checklist_by_test.md names for this item. Bonferroni (alpha/m) is the
+# docs/archive/checklist_by_test.md names for this item. Bonferroni (alpha/m) is the
 # classic bound, always valid regardless of the tests' dependence
 # structure; Sidak (1 - (1-alpha)^(1/m)) is the exact FWER-controlling
 # correction when the m tests are independent, and is slightly less

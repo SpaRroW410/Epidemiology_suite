@@ -24,8 +24,10 @@ navbar:
     project:
       text: Project
       menu:
-        - text: Roadmap and decisions
-          href: articles/roadmap.html
+        - text: What is open
+          href: articles/pending.html
+        - text: Checklist (everything, with sources)
+          href: articles/checklist.html
         - text: Software design
           href: articles/design.html
         - text: Study-design algorithm
