@@ -1,0 +1,163 @@
+# The package tarball (CHECKLIST PKG-11).
+# - Builds epidemiologysuite_<version>.tar.gz once with R CMD build (vignettes included) and keeps it as a download on the run's page.
+# - Checks that same tarball with R CMD check --as-cran on Linux (R release and R devel), Windows and macOS: the platforms CRAN
+#   checks on. A warning or an error fails the job; notes are listed on the run's summary page.
+# - Windows on ARM (Snapdragon / Qualcomm machines): an informational job that installs the tarball and its dependencies with the
+#   native ARM build of R and runs the examples. On demand and on tags only, and allowed to fail: it shows whether the dependencies
+#   install there.
+# - On a tag v<version> (for example v1.0.0, matching DESCRIPTION) the tarball is attached to a GitHub release, ready for
+#   r-universe and the CRAN web form (PKG-06).
+# Runs on pull requests that touch the package, on demand from the Actions tab, and on version tags.
+name: package
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths: ["DESCRIPTION", "NAMESPACE", "R/**", "man/**", "inst/**", "tests/**", "vignettes/**", ".Rbuildignore",
+            ".github/workflows/package.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      tarball: ${{ steps.build.outputs.tarball }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      # Imports plus what the vignettes need (knitr, rmarkdown); the tests are not run here.
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          extra-packages: |
+            any::knitr
+            any::rmarkdown
+      - name: Check that a version tag matches DESCRIPTION
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          v=$(Rscript -e 'cat(read.dcf("DESCRIPTION", "Version")[1, 1])')
+          if [ "v$v" != "${GITHUB_REF_NAME}" ]; then echo "::error::Tag ${GITHUB_REF_NAME} but DESCRIPTION says $v"; exit 1; fi
+      - name: R CMD build
+        id: build
+        run: |
+          mkdir -p dist && cd dist && R CMD build ..
+          f=$(ls *.tar.gz)
+          echo "tarball=$f" >> "$GITHUB_OUTPUT"
+          echo "Built **$f** ($(du -h "$f" | cut -f1); CRAN's limit is 5 MB)." >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tarball
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  check:
+    needs: build
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 75
+    name: check (${{ matrix.os }}, R ${{ matrix.r }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-24.04, r: release}
+          - {os: ubuntu-24.04, r: devel}
+          - {os: windows-latest, r: release}
+          - {os: macos-latest, r: release}
+    env:
+      _R_CHECK_CRAN_INCOMING_REMOTE_: false
+      _R_CHECK_FORCE_SUGGESTS_: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.r }}
+          use-public-rspm: true
+      # Everything in Imports and Suggests, as on CRAN's machines; a suggested package that cannot be installed on one platform is
+      # skipped by the tests that need it.
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"all"'
+          extra-packages: any::rcmdcheck
+      # --as-cran warns when qpdf (used for its PDF size checks) is missing; Rtools brings it on Windows.
+      - name: Install qpdf (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends qpdf
+      - name: Install qpdf (macOS)
+        if: runner.os == 'macOS'
+        run: brew install qpdf
+      - uses: actions/download-artifact@v4
+        with:
+          name: tarball
+          path: dist
+      - name: R CMD check --as-cran on the built tarball
+        shell: Rscript {0}
+        run: |
+          tb <- file.path("dist", "${{ needs.build.outputs.tarball }}")
+          res <- rcmdcheck::rcmdcheck(tb, args = c("--as-cran", "--no-manual"), check_dir = "check", error_on = "never")
+          out <- c(sprintf("### %s, R %s", "${{ matrix.os }}", getRversion()),
+                   sprintf("%d errors, %d warnings, %d notes", length(res$errors), length(res$warnings), length(res$notes)),
+                   if (length(c(res$errors, res$warnings, res$notes))) c("```", res$errors, res$warnings, res$notes, "```"))
+          cat(out, sep = "\n", file = Sys.getenv("GITHUB_STEP_SUMMARY"), append = TRUE)
+          if (length(res$errors) || length(res$warnings)) stop("R CMD check found errors or warnings (see above)")
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: check-${{ matrix.os }}-${{ matrix.r }}
+          path: check
+
+  windows-arm:
+    needs: build
+    # Not on pull requests: informational only, so it can never turn a pull request red.
+    if: github.event_name != 'pull_request'
+    runs-on: windows-11-arm
+    timeout-minutes: 60
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+      - uses: actions/download-artifact@v4
+        with:
+          name: tarball
+          path: dist
+      - name: Install the tarball and its dependencies, then run every example
+        shell: Rscript {0}
+        run: |
+          cat("R", as.character(getRversion()), R.version$arch, "\n")
+          install.packages(c("shiny", "bslib", "promises", "clinfun", "mvtnorm", "lme4"), repos = "https://cloud.r-project.org")
+          install.packages(file.path("dist", "${{ needs.build.outputs.tarball }}"), repos = NULL, type = "source")
+          library(epidemiologysuite)
+          fns <- grep("^calc_", getNamespaceExports("epidemiologysuite"), value = TRUE)
+          for (f in fns) utils::example(f, package = "epidemiologysuite", character.only = TRUE, echo = FALSE)
+          msg <- sprintf("Windows on ARM (R %s, %s): installed, %d examples ran.", getRversion(), R.version$arch, length(fns))
+          cat(msg, "\n"); cat(msg, "\n", file = Sys.getenv("GITHUB_STEP_SUMMARY"), append = TRUE)
+
+  release:
+    needs: [build, check]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: tarball
+          path: dist
+      - name: Attach the tarball to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
+            || gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "epidemiologysuite ${GITHUB_REF_NAME#v}" \
+                 --notes "Source package. Install in R with install.packages(\"<path to the file>\", repos = NULL, type = \"source\")."
+          gh release upload "$GITHUB_REF_NAME" dist/*.tar.gz --repo "$GITHUB_REPOSITORY" --clobber

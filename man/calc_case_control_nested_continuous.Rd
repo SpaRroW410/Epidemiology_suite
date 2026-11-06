@@ -44,7 +44,7 @@ Number of matched sets, each of nD cases and nH controls, for the score test of 
 conditional logistic regression (Lachin 2008, eq. 25; eq. 27 and 34 for one case per set). Applies to a nested case-control study
 and to any individually matched case-control study, 1:1 or 1:m: with one control per case it gives the z-test version of the paired
 comparison of means, since the SD of the case-control differences is sigma * sqrt(2). For two or more cases per set the
-information per set is nD * nH / (nD + nH), not the paper's nD * \link{1 - 1 / choose(nD + nH, nD)} (which powerSurvEpi's
+information per set is nD * nH / (nD + nH), not the paper's nD * (1 - 1 / choose(nD + nH, nD)) (which powerSurvEpi's
 powerConLogistic.con() uses): see the comment above \code{.cf_pse_conlogistic_bin()}.
 }
 \details{

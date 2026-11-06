@@ -1,5 +1,31 @@
 # epidemiologysuite (development version)
 
+## Package release workflow (6 Nov 2026)
+
+* **The tarball from GitHub:** a new workflow (`.github/workflows/package.yml`) builds `epidemiologysuite_<version>.tar.gz` once and
+  runs `R CMD check --as-cran` on that file on Linux (R release and devel), Windows and macOS, on every pull request that touches the
+  package and on demand; on a version tag it attaches the tarball to the GitHub release. An informational job installs it on Windows on
+  ARM. Nothing has to be built on the owner's own computer.
+* `docs/release.md`: the steps from version number to GitHub release, r-universe and CRAN, and a note on Windows on ARM.
+* Bug-report drafts (`docs/upstream_reports.md`): presize takes reports as GitHub issues (no existing issue on this bug); pmsampsize
+  has no tracker, so by e-mail to its maintainer; both bugs still present in the current CRAN versions.
+* The name `epidemiologysuite` is confirmed free on CRAN, Bioconductor and GitHub.
+* `R CMD check --as-cran` findings fixed: a stray empty file `--version` at the top of the repository (committed by accident on
+  4 Nov) removed; the names mirai binds in the background workers (`lib`, `pkg`, `rng_kind`) declared for the code check; four example
+  comments shortened below 100 characters; a formula in a help page that R read as a link rewritten; `digest`, `later`, `officer`
+  and `xml2`, used by the tests, added to Suggests.
+* **Checked against the current CRAN versions** (the new workflow installs them; the test workflow uses the older versions in
+  `renv.lock`), which broke 51 tests on Windows and macOS:
+  * officer 0.7 requires a `word/settings.xml` part: the Word writer now includes one (it also marks the file as current Word format,
+    so Word does not open it in compatibility mode).
+  * epiR 3.0.0 changed two conventions: the finite population correction (n / (1 + n/N) instead of n N / (n + N - 1)) and the rounding
+    of controls in the matched case-control design; and for a single 2 x 2 table it now reports other intervals for the attributable
+    fractions. The app keeps its methods (the correction epiR used before, Rothman-Greenland-Lash for the exposed fraction, Jewell 2004
+    for the population fraction); the tests now compare epiR where both versions agree (unrounded, no population size, point
+    estimates) and check the rest against the published formulas, so they pass with epiR 2.0.67 and 3.0.0.
+  * lme4 2.1-0 (a new major version, imported by the app): the mixed-model calculators give the same results, slow Monte Carlo tests
+    included.
+
 ## Find: the owner's routing material reviewed and planned (6 Nov 2026)
 
 * The routing design the owner drafted with Gemini (a 37-design tree, guardrails, design cards, search terms) is stored in

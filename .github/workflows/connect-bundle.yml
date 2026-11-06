@@ -43,6 +43,8 @@ jobs:
         run: |
           Rscript -e '
             chromote::set_chrome_args(c("--no-sandbox", "--disable-gpu"))
+            # chromote waits 10 s for Chrome to open its debugging port; a cold runner sometimes needs longer (failed 6 Nov 2026 twice)
+            options(chromote.timeout = 60)
             app <- shinytest2::AppDriver$new("connect_bundle", load_timeout = 120000, timeout = 60000, view = FALSE)
             app$wait_for_idle(800)
             app$run_js("document.querySelector(\"a[data-value=\x27Plan: Sample Size\x27]\").click()")

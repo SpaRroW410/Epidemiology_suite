@@ -102,7 +102,7 @@ calc_analyze_2x2 <- function(a, b, c, d, design = c("cohort", "cross_sectional",
     af <- function(x) (x - 1) / x
     af_e <- af(rr); af_ci <- af(rr_ci)
 
-    # Population attributable fraction (Jewell 2004; as in epiR)
+    # Population attributable fraction (Jewell 2004; as epiR up to 2.0.67, whose 3.0.0 reports another interval for one table)
     paf <- (a * d - b * c) / (m1 * n0)
     paf_var <- if (c > 0) (b + paf * (a + d)) / (n * c) else NA_real_
     paf_ci <- 1 - exp(log(1 - paf) + c(1, -1) * z * sqrt(paf_var))
@@ -127,7 +127,7 @@ calc_analyze_2x2 <- function(a, b, c, d, design = c("cohort", "cross_sectional",
   } else {
     # Case-control: (OR - 1)/OR is the exposed attributable fraction for a rare
     # outcome; the population fraction uses the exposure prevalence among cases
-    # (Jewell 2004; as in epiR's case.control method).
+    # (Jewell 2004; as epiR's case.control method up to 2.0.67).
     af <- function(x) (x - 1) / x
     paf <- (a * d - b * c) / (d * m1)
     paf_var <- if (c > 0 && d > 0) a / (c * m1) + b / (d * m0) else NA_real_

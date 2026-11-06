@@ -61,7 +61,11 @@ Suggests:
     presize,
     kappaSize,
     powerSurvEpi,
-    TrialSize
+    TrialSize,
+    digest,
+    later,
+    officer,
+    xml2
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://sparrow410.github.io/Epidemiology_suite/,

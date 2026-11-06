@@ -35,9 +35,11 @@ test_that("single proportion matches epiR::epi.sssimpleestb() for relative and a
       expect_equal(calc_proportion_precision(p, d)$n, ref, info = sprintf("p %s d %s", p, d))
     }
   }
-  # with a finite population (epiR applies the same correction)
-  ref <- epiR::epi.sssimpleestb(N = 2000, Py = 0.2, epsilon = 0.1, error = "relative", se = 1, sp = 1, conf.level = 0.95)
-  expect_equal(calc_proportion_precision(0.2, 0.1, N = 2000, error = "relative")$n, ref)
+  # with a finite population: n0 / (1 + (n0 - 1)/N), the correction epiR applied up to 2.0.67 (from 2.0.93 it uses n0 / (1 + n0/N), which
+  # gives 869 instead of 870 here), applied to epiR's unrounded n0
+  n0 <- epiR::epi.sssimpleestb(N = NA, Py = 0.2, epsilon = 0.1, error = "relative", se = 1, sp = 1, nfractional = TRUE, conf.level = 0.95)
+  expect_equal(calc_proportion_precision(0.2, 0.1, N = 2000, error = "relative")$n, ceiling(n0 / (1 + (n0 - 1) / 2000)))
+  expect_equal(calc_proportion_precision(0.2, 0.1, N = 2000, error = "relative")$n, 870)
 })
 
 test_that("relative precision is the absolute precision epsilon x p", {

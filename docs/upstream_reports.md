@@ -2,14 +2,20 @@
 
 Two packages that this app used to depend on, and still uses as checks in its tests, have bugs that were found while replacing them
 (ROADMAP item 16, dependency reduction). The app computes both cases correctly (see the files named below). These are drafts; they
-have **not** been posted. Re-checked on 31 Oct 2026 with the versions shown.
+have **not** been posted. Re-checked on 31 Oct 2026 with the versions shown; on 6 Nov 2026 CRAN still had the same versions
+(pmsampsize 1.1.3, presize 0.3.11).
+
+**Issue or e-mail?** A package's `BugReports` field (in its DESCRIPTION, shown on its CRAN page) says where its maintainer wants
+reports. If it names an issue tracker, an issue there *is* the bug report: there is no separate form. If it is empty, write to the
+maintainer (`maintainer("<package>")`, also on the CRAN page). Do not open issues on `github.com/cran/<package>`: those are
+read-only mirrors that the maintainers do not watch.
 
 ---
 
 ## 1. pmsampsize 1.1.3: continuous outcome, criterion 4 (precision of the intercept) stops after one step
 
-**Where to file:** the issue tracker given by `utils::packageDescription("pmsampsize")$BugReports`, or the maintainer's e-mail
-(`maintainer("pmsampsize")`).
+**Where to file:** by e-mail to the maintainer, Joie Ensor (address: `maintainer("pmsampsize")` or the CRAN page). pmsampsize
+1.1.3 has no `BugReports` and no `URL` field, so there is no issue tracker to use. Subject: the title below.
 
 **Title:** `type = "c"`: criterion 4 (mmoe) loop uses a negative t quantile, so the interval limits swap and n is far too small
 
@@ -41,7 +47,9 @@ against its definition.
 
 ## 2. presize 0.3.11: `prec_pos_lr()` and `prec_neg_lr()` ignore `conf.level`
 
-**Where to file:** the issue tracker given by `utils::packageDescription("presize")$BugReports`.
+**Where to file:** a new issue at <https://github.com/dcr-unibe-ch/presize/issues> (presize's `BugReports` field; maintainer
+Alan G. Haynes). Searched on 6 Nov 2026: no issue about `conf.level` in the likelihood-ratio functions yet. Paste the title and body
+below; the body is already in GitHub's Markdown.
 
 **Title:** `prec_pos_lr()` / `prec_neg_lr()` accept `conf.level` but always use 95%
 

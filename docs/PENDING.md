@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**97 open** of 356 items (259 done).
+**98 open** of 359 items (261 done).
 
 ## Waiting for the owner
 
@@ -11,8 +11,8 @@
 - **FIND-09** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the reader against.
 - **STUDY-06** Open one downloaded file in Word (desktop and phone) and try Insert > Equation > LaTeX on a formula.
 - **STUDY-07** Real-phone check on Connect Cloud and the browser build: sleep, switch apps, reload.
-- **PKG-06** Release on r-universe, then submit to CRAN.
-- **PKG-07** File the two upstream bug reports drafted in `docs/upstream_reports.md` (pmsampsize, presize).
+- **PKG-06** Release on r-universe, then submit to CRAN: the steps are in `docs/release.md` (a new version number first; `v1.0.0` is the release Zenodo archived on 31 Oct 2026).
+- **PKG-07** File the two upstream bug reports drafted in `docs/upstream_reports.md`: presize as an issue on its GitHub tracker, pmsampsize by e-mail to its maintainer (it has no tracker); both still unfixed on CRAN on 6 Nov 2026.
 - **DIST-06** Republish on Connect Cloud after each merge; try the redirect, Find, Effect Size, the links, the server notice and dark mode on a real phone (Android and iPhone / Safari).
 - **DIST-07** Long-term hosting: check the Connect Cloud free-plan limits (apps, active hours, memory, idle sleep); decide whether a paid plan or the Docker image elsewhere is needed.
 - **DIST-08** After the repository rename: check the Pages address; rename `EPIDEMIOLOGICASUITE_OPEN` to `EPIDEMIOLOGYSUITE_OPEN` on Connect if it was set there.
@@ -178,12 +178,15 @@
 
 ## 6. The R package (PKG) -- 5 open
 
-- [ ] **PKG-06** **[owner]** Release on r-universe, then submit to CRAN.
-- [ ] **PKG-07** **[owner]** File the two upstream bug reports drafted in `docs/upstream_reports.md` (pmsampsize, presize).
+- [ ] **PKG-06** **[owner]** Release on r-universe, then submit to CRAN: the steps are in `docs/release.md` (a new version number first;
+  `v1.0.0` is the release Zenodo archived on 31 Oct 2026).
+- [ ] **PKG-07** **[owner]** File the two upstream bug reports drafted in `docs/upstream_reports.md`: presize as an issue on its GitHub
+  tracker, pmsampsize by e-mail to its maintainer (it has no tracker); both still unfixed on CRAN on 6 Nov 2026.
 - [ ] **PKG-08** **[optional]** Tell powerSurvEpi's maintainer that `powerConLogistic.con()` uses Lachin's information factor, which is too
   large for two or more cases per set (NEWS, 5 Nov 2026); Tang's 2009 comment (Stat Med 28:175-177) was not read and may say the same.
 - [ ] **PKG-09** **[optional]** Split a computation-only core package from the app (CRAN).
-- [ ] **PKG-10** Confirm the name with `available::available("epidemiologysuite")` before the first public release.
+- [ ] **PKG-12** **[optional]** Ask epiR's maintainer about 3.0.0's population attributable fraction interval for a single 2 x 2 table:
+  it is built from the limits of the two risks' intervals, where 2.0.67 reported Jewell's (2004) interval (this app keeps Jewell's).
 
 ## 7. Versions, hosting and distribution (DIST) -- 10 open
 
@@ -203,11 +206,13 @@
 - [ ] **DIST-14** HTTPS and a domain; then the installable web app (PWA), the Android wrapper (TWA), iOS via the PWA, a desktop wrapper.
 - [ ] **DIST-15** **[optional]** Test a real shinyapps.io deploy, if still wanted.
 
-## 8. Engineering and quality (ENG) -- 2 open
+## 8. Engineering and quality (ENG) -- 3 open
 
 - [ ] **ENG-07** Re-snapshot `renv.lock` when convenient (it lists packages removed from the runtime and not the test-only ones).
 - [ ] **ENG-08** The sandbox's `R CMD check` ends with a locale warning and a clock note that are not the package's; confirm on a normal
   machine or in CI.
+- [ ] **ENG-10** Bring `renv.lock` up to the current CRAN versions (lme4 2.1-0, mvtnorm 1.4-2, epiR 3.0.0, officer 0.7.7, ...): the suite
+  passes with them (6 Nov 2026, PKG-11); the test workflow, the server version and the browser build still use the locked ones.
 
 ## 9. Sources not yet read (SRC) -- 6 open
 
