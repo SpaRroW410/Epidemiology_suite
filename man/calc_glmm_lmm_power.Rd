@@ -48,7 +48,7 @@ achieving the target power. No closed-form formula is used --
 }
 \examples{
 \donttest{
-# nsim is kept small so that the example runs quickly; use the default (or more) for a real calculation
+# nsim is small so the example runs quickly; use the default (or more) in real use
 calc_glmm_lmm_power(cluster_size = 10, icc = 0.05, sigma_total = 1, delta = 0.8, 
     power = 0.8, nsim = 15, seed = 1)
 }

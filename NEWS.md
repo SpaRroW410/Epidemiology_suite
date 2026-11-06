@@ -10,6 +10,10 @@
 * Bug-report drafts (`docs/upstream_reports.md`): presize takes reports as GitHub issues (no existing issue on this bug); pmsampsize
   has no tracker, so by e-mail to its maintainer; both bugs still present in the current CRAN versions.
 * The name `epidemiologysuite` is confirmed free on CRAN, Bioconductor and GitHub.
+* `R CMD check --as-cran` findings fixed: a stray empty file `--version` at the top of the repository (committed by accident on
+  4 Nov) removed; the names mirai binds in the background workers (`lib`, `pkg`, `rng_kind`) declared for the code check; four example
+  comments shortened below 100 characters; a formula in a help page that R read as a link rewritten; `digest`, `later`, `officer`
+  and `xml2`, used by the tests, added to Suggests.
 
 ## Find: the owner's routing material reviewed and planned (6 Nov 2026)
 
