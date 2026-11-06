@@ -24,7 +24,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # installing R alone took 19-23 minutes on GitHub's runners on 6 Nov 2026 (normally under one)
+    timeout-minutes: 60
     outputs:
       tarball: ${{ steps.build.outputs.tarball }}
     steps:
@@ -61,7 +62,7 @@ jobs:
   check:
     needs: build
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 75
+    timeout-minutes: 100
     name: check (${{ matrix.os }}, R ${{ matrix.r }})
     strategy:
       fail-fast: false
@@ -119,7 +120,7 @@ jobs:
     # Not on pull requests: informational only, so it can never turn a pull request red.
     if: github.event_name != 'pull_request'
     runs-on: windows-11-arm
-    timeout-minutes: 60
+    timeout-minutes: 90
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
