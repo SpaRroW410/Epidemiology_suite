@@ -512,9 +512,9 @@ Decisions S1-S5 are in `SDD.md`, section 17.
 - [ ] **PKG-09** **[optional]** Split a computation-only core package from the app (CRAN).
 - [x] **PKG-10** Name confirmed with `available::available("epidemiologysuite")`: valid, free on CRAN, Bioconductor and GitHub
   (owner, 6 Nov 2026).
-- [ ] **PKG-11** A GitHub Action for the tarball (`.github/workflows/package.yml`): `R CMD build` once, `R CMD check --as-cran` of that
+- [x] **PKG-11** A GitHub Action for the tarball (`.github/workflows/package.yml`): `R CMD build` once, `R CMD check --as-cran` of that
   file on Linux (R release and devel), Windows and macOS, an informational Windows-on-ARM install, and the tarball attached to the
-  release on a version tag (6 Nov 2026).
+  release on a version tag; green on all four with the current CRAN versions, R-devel 4.7.0 "Status: OK" (6 Nov 2026).
 - [ ] **PKG-12** **[optional]** Ask epiR's maintainer about 3.0.0's population attributable fraction interval for a single 2 x 2 table:
   it is built from the limits of the two risks' intervals, where 2.0.67 reported Jewell's (2004) interval (this app keeps Jewell's).
 

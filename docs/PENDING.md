@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**99 open** of 359 items (260 done).
+**98 open** of 359 items (261 done).
 
 ## Waiting for the owner
 
@@ -176,7 +176,7 @@
 - [ ] **UI-14** **[optional]** Two-column layout on wide screens (inputs left, result right).
 - [ ] **UI-15** Revisit with real usage: Home quick links and cards, the background loading order and the four start-up calculators.
 
-## 6. The R package (PKG) -- 6 open
+## 6. The R package (PKG) -- 5 open
 
 - [ ] **PKG-06** **[owner]** Release on r-universe, then submit to CRAN: the steps are in `docs/release.md` (a new version number first;
   `v1.0.0` is the release Zenodo archived on 31 Oct 2026).
@@ -185,9 +185,6 @@
 - [ ] **PKG-08** **[optional]** Tell powerSurvEpi's maintainer that `powerConLogistic.con()` uses Lachin's information factor, which is too
   large for two or more cases per set (NEWS, 5 Nov 2026); Tang's 2009 comment (Stat Med 28:175-177) was not read and may say the same.
 - [ ] **PKG-09** **[optional]** Split a computation-only core package from the app (CRAN).
-- [ ] **PKG-11** A GitHub Action for the tarball (`.github/workflows/package.yml`): `R CMD build` once, `R CMD check --as-cran` of that
-  file on Linux (R release and devel), Windows and macOS, an informational Windows-on-ARM install, and the tarball attached to the
-  release on a version tag (6 Nov 2026).
 - [ ] **PKG-12** **[optional]** Ask epiR's maintainer about 3.0.0's population attributable fraction interval for a single 2 x 2 table:
   it is built from the limits of the two risks' intervals, where 2.0.67 reported Jewell's (2004) interval (this app keeps Jewell's).
 
