@@ -515,4 +515,4 @@ validate_tree <- function(nodes = design_nodes) {
 ---
 
 **Document version:** 0.1 (draft)
-**Companion files:** `checklist_by_design.md`, `checklist_by_test.md`, `SDD.md`
+**Companion files:** `CHECKLIST.md` (every design, built or open), `SDD.md`; the first checklists the tree was built from are in `archive/`

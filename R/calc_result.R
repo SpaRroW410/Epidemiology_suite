@@ -11,7 +11,7 @@
 # instead of guessing each function's field names.
 #
 # Adoption is per calc_*() function, one batch at a time like every other
-# incremental item in this project (see docs/ROADMAP.md #8 for progress):
+# incremental item in this project (see docs/archive/ROADMAP.md #8 for progress):
 # wrap the function's final `list(...)` return in `new_ss_result(list(...))`.
 # Nothing else about the function changes.
 

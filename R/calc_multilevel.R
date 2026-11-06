@@ -8,7 +8,7 @@
 # (`get_se_classic()` and `var_T()` in R/power.R, and the var_ratio/icc_slope
 # variance-component solving in R/setup.R) -- installed in this sandbox via
 # the github.com/cran/powerlmm mirror (see the Trial Sequential Analysis
-# entry in docs/checklist_by_design.md's Phase 6 batch 4 for how that route
+# entry in docs/archive/checklist_by_design.md's Phase 6 batch 4 for how that route
 # was found), then used purely as a verification oracle per this project's
 # vendoring policy: no new runtime dependency is added.
 #

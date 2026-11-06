@@ -270,7 +270,7 @@ design_wizard_server <- function(input, output, session) {
         p(strong("Not yet built in this app.")),
         if (!is.null(node$would_use)) p("What it needs: ", code(node$would_use)),
         if (!is.null(node$citation) && !identical(node$citation, "-")) p(class = "text-muted small", node$citation),
-        p("This item is tracked, with what would unblock it, in ", code("docs/ROADMAP.md"), " (section 4)."))
+        p("This item is tracked, with what would unblock it, in the project's list of open items (", code("docs/PENDING.md"), ")."))
   }
 
   tagList(

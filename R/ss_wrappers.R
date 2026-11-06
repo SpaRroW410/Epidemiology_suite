@@ -1,4 +1,4 @@
-# Helpers for working with a result from R (to_do_later.md C, 4 Nov 2026). The naming is: calc_*() functions compute a sample size or a
+# Helpers for working with a result from R (docs/archive/to_do_later.md C, 4 Nov 2026). The naming is: calc_*() functions compute a sample size or a
 # power and return an `ss_result`; ss_*() functions work with those results (ss_find() finds a calculator, ss_text() writes the protocol
 # paragraph, ss_export() writes CSV or JSON, ss_curve() varies one input). They reuse what the app's export panel and curves use.
 

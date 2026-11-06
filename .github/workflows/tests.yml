@@ -1,4 +1,4 @@
-# Unit tests (docs/ROADMAP.md, P0 items 4-6).
+# Unit tests (docs/archive/ROADMAP.md, P0 items 4-6).
 # - Every push / pull request: the fast suite (slow Monte Carlo tests skipped).
 # - Weekly, or on demand from the Actions tab: the full suite, S2R_SLOW_TESTS=true.
 # Packages are restored from renv.lock so CI runs the same versions as the

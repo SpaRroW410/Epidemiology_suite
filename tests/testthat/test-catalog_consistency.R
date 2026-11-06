@@ -1,7 +1,7 @@
 # Cross-checks between the navbar (registry.R's module_registry()), the Home
 # hub's calculator_catalog and the guided wizard (design_tree.R), so a new
 # module or design option can't silently go missing from discovery again
-# (docs/ROADMAP.md finding F1/F2).
+# (docs/archive/ROADMAP.md finding F1/F2).
 
 .registry <- module_registry()
 

@@ -2,7 +2,7 @@
 #   vignettes/articles/<module>.Rmd   one page per calculator, built from its <module>_content object
 #                                     (title, formula, explanation, worked example, citation, "implemented via")
 #   vignettes/articles/calculators.Rmd   the overview by workbench and group
-#   vignettes/articles/{roadmap,design,algorithm}.Rmd   the docs/*.md files with a header
+#   vignettes/articles/{checklist,pending,design,algorithm}.Rmd   the docs/*.md files with a header
 #   _pkgdown.yml                      tools/docs/pkgdown_template.yml plus the generated article menu
 # Nothing generated is committed (see .gitignore): the pages are rebuilt from the source of truth on every
 # build, so the site cannot drift from the app. Run from the repository root:
@@ -76,7 +76,8 @@ doc_page <- function(src, name, title, description) {
   if (length(txt) && grepl("^# ", txt[1])) txt <- txt[-1]      # the page title replaces the first level-1 heading
   write_rmd(name, title, description, txt)
 }
-doc_page("docs/ROADMAP.md", "roadmap", "Roadmap and decisions", "What is built, what is next, and the findings log")
+doc_page("docs/CHECKLIST.md", "checklist", "Checklist", "Every item of the project, done or open, with its source")
+doc_page("docs/PENDING.md", "pending", "Pending", "What is still open, generated from the checklist")
 doc_page("docs/SDD.md", "design", "Software design", "Architecture, module contract and verification approach")
 doc_page("docs/design_identification_algorithm.md", "algorithm", "Study-design identification algorithm", "How the guided wizard routes a question to a calculator")
 
@@ -88,9 +89,10 @@ art <- c("articles:",
          "  - title: Using it from R", "    contents:", "      - getting-started", "      - sample-size-from-r", "      - analyze-from-r",
          "  - title: Using it from R, by topic", "    contents:", "      - survival-from-r", "      - trials-from-r",
          "      - diagnostic-accuracy-from-r", "      - surveillance-from-r",
-         "  - title: Project", "    contents:", "      - articles/roadmap", "      - articles/design", "      - articles/algorithm")
+         "  - title: Project", "    contents:", "      - articles/pending", "      - articles/checklist", "      - articles/design",
+         "      - articles/algorithm")
 for (wb in module_workbenches) for (g in wb$groups) {
   art <- c(art, paste0("  - title: ", yq(paste0(wb$title, ": ", g$title))), "    contents:", pages(g$module_ids))
 }
 writeLines(c(tpl, "", art), "_pkgdown.yml")
-cat(sprintf("Wrote %d calculator pages, the overview, 3 project pages and _pkgdown.yml\n", n_pages))
+cat(sprintf("Wrote %d calculator pages, the overview, 4 project pages and _pkgdown.yml\n", n_pages))

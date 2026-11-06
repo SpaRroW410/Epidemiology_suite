@@ -2530,7 +2530,7 @@ study_design_families <- list(
 # Second index over the SAME calculator_catalog entries, grouped by
 # statistical-test family instead of study design -- mirrors "Part 2 -- By
 # Statistical Test" of the project's scope-review checklist (the source
-# document docs/checklist_by_design.md and checklist_by_test.md were built
+# document docs/archive/checklist_by_design.md and docs/archive/checklist_by_test.md were built
 # from), the same way G*Power organizes its own test catalog. This is purely
 # a second browsing lens for the Home hub's "Browse calculators" toggle: it
 # points at the same built catalog_keys as study_design_families above, never

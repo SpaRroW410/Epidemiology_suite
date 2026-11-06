@@ -6,106 +6,43 @@ epidemiology and clinical research. Every calculator comes with its formula
 example, the original methodological citation, and the name of the package or
 formula that implements it.
 
-**Current state (3 November 2026):** 67 calculators (50 sample-size, 11 *Analyze* tools, 2 planning tools,
-2 survey tools, 1 infectious-disease model tool, 1 *Effect Size* tool) covering 159 designs (counted on 29 October; ten Effect Size converters and a design-effect calculator have been added since), each with its formula, a worked example and a
-citable source, checked against a published value, a real package or a simulation. The app is called **Epidemiological
-suite**; the R package is `epidemiologysuite`. There are three ways to use it (see below): the browser build on GitHub Pages,
-the phone / server version on Posit Connect Cloud, and the R package, in which **every calculation is an exported function
-with its own help page**. 102 test files plus browser-driven UI tests, an accessibility scan (axe-core, WCAG A/AA, light and
-dark mode, desktop and phone width) and `R CMD check --as-cran` back it. What is done and what is next:
-[`docs/PLAN.md`](docs/PLAN.md); the reasoning and evidence: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+**Current state (6 November 2026):** 215 designs in 67 calculators -- sample size and power (*Plan*), analysis of counts you
+already have (*Analyze*), effect-size converters, planning, survey, outbreak and surveillance tools -- each with its formula, a worked
+example and a citable source, checked against a published value, a real package or a simulation. The app is called **Epidemiological
+suite**; the R package is `epidemiologysuite`. There are three ways to use it (see below): the browser build on GitHub Pages, the phone /
+server version on Posit Connect Cloud, and the R package, in which **every calculation is an exported function with its own help page**.
+Unit tests, browser-driven UI tests, an accessibility scan (axe-core, WCAG A/AA, light and dark, desktop and phone) and
+`R CMD check --as-cran` back it.
 
 | Document | What it's for |
 |---|---|
-| **Documentation site** (pkgdown, `tools/docs/`) | One page per calculator -- formula, explanation, worked example, citation, how it is computed -- plus the roadmap and design documents. Built from the package's own text on every push; published to GitHub Pages from `main` (see below) |
-| [`docs/PLAN.md`](docs/PLAN.md) | The plan at a glance: what is done (struck through) and what is next |
-| [`docs/hosting.md`](docs/hosting.md) | The three versions (browser, phone / server, R package), how each is built, Connect Cloud steps, adding the Zenodo DOI |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Priorities, review findings, suite/package/deployment plans, and every open or blocked item |
-| [`docs/checklist_by_design.md`](docs/checklist_by_design.md) · [`docs/checklist_by_test.md`](docs/checklist_by_test.md) | Per-design build status and the verification evidence behind each one |
-| [`docs/to_do_later.md`](docs/to_do_later.md) | Everything not finished yet, in roadmap order, as a checklist (owner decisions marked) |
-| [`docs/SDD.md`](docs/SDD.md) | Architecture, module contract, conventions |
-| [`docs/design_identification_algorithm.md`](docs/design_identification_algorithm.md) | The logic behind the "Which calculator?" wizard |
-| [`docs/project-brief.md`](docs/project-brief.md) | The original project brief (historical) |
+| [`docs/PENDING.md`](docs/PENDING.md) | **What is still open**, owner steps first (generated from the checklist) |
+| [`docs/CHECKLIST.md`](docs/CHECKLIST.md) | Everything, done or open, by the app's groups: every design with its source and the package it is checked against |
+| [`NEWS.md`](NEWS.md) | What changed, by date |
+| [`docs/SDD.md`](docs/SDD.md) | The design as built: architecture, module contract, verification, decisions, how these documents are kept |
+| [`docs/design_identification_algorithm.md`](docs/design_identification_algorithm.md) | The logic behind the guide ("Which calculator?") |
+| [`docs/hosting.md`](docs/hosting.md) | The three versions, how each is built, Connect Cloud steps, the Zenodo DOI |
+| [`docs/upstream_reports.md`](docs/upstream_reports.md) | Bug reports for upstream packages, drafted for the owner to file |
+| [`docs/archive/`](docs/archive/) | The earlier roadmap, plan, to-do list and checklists, frozen on 6 November 2026 |
+| **Documentation site** (pkgdown, `tools/docs/`) | One page per calculator (formula, explanation, worked example, citation, how it is computed), the vignettes, and the checklist, pending list and design documents |
 
 ---
 
 ## What's inside
 
-The top navbar has one item per **workbench** -- *Home*, *Plan: Sample Size* and *Analyze* -- and each
-workbench lists its modules in a sidebar, under group headers ordered roughly simple → advanced.
+The navbar has one item per **workbench**: *Home*, *Find* (search, the guide, browse lists, glossary), *Plan: Sample Size*,
+*Analyze*, *Studies* (a record of calculations, downloadable as a Word file) and *Cite*. Each workbench lists its calculators under
+group headers, roughly simple to advanced:
 
-| Group | Module | Designs |
-|---|---|---|
-| **Descriptive & Estimation** | Proportions | precision-based (Cochran, optional FPC); vs. known value; two independent; Bonferroni post-hoc pairwise |
-| | Means | precision-based; vs. known value; two independent (equal/unequal n); Welch (unequal variances); paired; 3+ groups (ANOVA); planned linear contrast; Bonferroni post-hoc pairwise |
-| | Incidence Rate | precision-based; two rates; Poisson regression (continuous predictor); two negative-binomial rates |
-| | Ratio Estimation | precision-based risk ratio, odds ratio, rate ratio |
-| **Survey & Cross-Sectional** | Stratified Sampling | total n + proportional/Neyman allocation |
-| | Cluster / Design Effect | DEFF inflation; DEFF with variable cluster size; WHO EPI-style cluster survey; two-stage PPS optimal allocation (take b) |
-| | LQAS | lot quality assurance sampling decision rule |
-| | Capture-Recapture | two-sample Chapman-Petersen, precision-based |
-| **Observational Studies** | Case-Control | unmatched; matched 1:m; case-crossover; nested case-control; case-cohort |
-| | Cohort / RR | cohort / cross-sectional relative risk |
-| | Self-Controlled Case Series | SCCS with optional age effects |
-| | Ecological Study Guidance | guidance panel (no formula) |
-| **Diagnostic & Screening** | Diagnostic Accuracy | Se/Sp precision-based; vs. reference value; two tests unpaired/paired; PPV/NPV; LR+/LR−; diagnostic odds ratio |
-| | ROC / AUC | single AUC vs. 0.5; two correlated AUCs |
-| **Agreement & Reliability** | Agreement / Reliability | Cohen's kappa; ICC; Cronbach's alpha; Bland-Altman limits of agreement; Lin's CCC |
-| **Several Measurements per Patient** | Eyes / Lesions per Patient | both eyes, several lesions, patches or teeth per patient: patients needed when a patient's units are correlated, with the same treatment in all of a patient's units (two means, two proportions, fixed or varying units per patient) or both treatments in each patient (split-face, one eye per arm; two means); units per patient needed for a fixed number of patients; the floor on patients that extra units cannot get below |
-| **Clinical Trials** | Pilot / Feasibility | 12/arm rule; precision of a pilot SD |
-| | Simon Two-Stage | minimax and optimal phase II designs |
-| | Equivalence (TOST) | two means; two proportions; PK bioequivalence (2×2, 2×2×4, 2×3×3); bioequivalence by expected power |
-| | Non-Inferiority | means; proportions; odds ratio; hazard ratio |
-| | Crossover Trial (2×2) | continuous outcome, difference |
-| | Group Sequential Design | continuous/binary/survival boundaries; Lan-DeMets alpha spending (2 looks) with conditional power and sample-size re-estimation |
-| | Subgroup / Interaction Testing | interaction-test inflation ("4× rule") |
-| | Monte Carlo Mixed Models | cluster-randomized trial, continuous (LMM) or binary (GLMM); growth-curve slope difference |
-| | Trial Sequential Analysis | required information size: RR, OR, RD, MD |
-| | Stepped-Wedge CRT | continuous outcome (Hooper et al. 2016) |
-| **Survival Analysis** | Log-Rank / Survival | log-rank; Cox PH (binary/continuous covariate); stratified log-rank; accrual + noncompliance; weighted log-rank for non-proportional hazards |
-| | Competing Risks | joint cause-specific / any-cause hazard test |
-| | RMST Comparison | restricted mean survival time, superiority or non-inferiority |
-| **Prediction Models** | Prediction Model | development (binary, continuous, survival); external validation (binary) |
-| **Study Planning Tools** | Randomization List | reproducible allocation lists from a seed: permuted blocks (fixed or random block sizes, any allocation ratio), blocks within strata, simple randomization; CSV download and a methods paragraph |
-| | Attrition and Non-response | enrol n / prod(1 - loss) over several stages (not n x (1 + loss)), per-arm losses, drop-out / drop-in dilution n / (1 - R_E - R_C)^2 |
-| **Survey & Field Tools** | Survey Sample Selection | reproducible selection from a list: simple random, systematic (fractional interval), PPS systematic with certainty units, and the WHO EPI 30 x 7 clusters; CSV and a methods paragraph |
-| | Survey Weights and Non-response | design weights, nonresponse adjustment by weighting class, response rates, Kish effective sample size and design effect of weighting |
-| **Infectious Disease Models** | Epidemic Models and Herd Immunity | herd-immunity threshold and coverage needed with an imperfect vaccine; deterministic SIR / SEIR epidemic with vaccination (final size, peak, infections averted, plotted); R0 from a growth rate or a final attack fraction |
-| **Surveillance** | Rule of Three | upper bound for zero events; n to see ≥ 1 event; disease freedom with an imperfect test |
-| **Preclinical / Animal Studies** | Resource Equation | Mead's E = N − T rule |
-| **Qualitative / Mixed Methods** | Qualitative Sample Size Guidance | saturation, information power, purposive sampling (no formula) |
-| **Psychometrics / Scale Development** | Psychometrics Sample Size Guidance | EFA/CFA subjects-per-item; CFA/SEM RMSEA test of close fit; IRT calibration by model type |
-| **Health Economics** | Value of Information | EVPI; EVSI and ENBS-optimal sample size |
-| **Analyze Summary Data** | 2x2 Table Analysis | analyze counts you already have: risk/prevalence ratio, odds ratio, risk/prevalence difference, attributable fractions, number needed (NNT/NNH) with confidence intervals; cohort, cross-sectional or case-control layout |
-| | Diagnostic Test Evaluation | sensitivity, specificity, PPV, NPV, likelihood ratios with 95% CIs from a 2x2 table (exact or Wilson; PPV/NPV from the counts or at a stated prevalence); serial and parallel combination of 2-6 tests |
-| | Confidence Intervals | proportion: Wilson, Clopper-Pearson, Agresti-Coull, Jeffreys, mid-P, Wald side by side; mean (t) and standard deviation (chi-square) from n, mean, SD |
-| | Stratified Analysis (Mantel-Haenszel) | 2-8 strata of 2x2 tables: crude vs Mantel-Haenszel adjusted OR / RR / RD with CIs, Cochran-Mantel-Haenszel test, Woolf / Breslow-Day / Tarone homogeneity tests; cohort or case-control |
-| | Rates and Rate Ratios | incidence rate with exact / mid-P / Byar / Wald intervals; two groups: rate ratio (exact, mid-P, Wald), rate difference, attributable fractions, exact / mid-P / score tests, from events and person-time; 2-8 strata: Mantel-Haenszel rate ratio and rate difference with homogeneity tests |
-| | Paired, Agreement and Trend Tests | McNemar's test and matched-pair OR (exact/Wald), Cohen's kappa (unweighted/linear/quadratic, 2-6 categories) with CI and PABAK, Cochran-Armitage chi-square for trend |
-| | Vaccine Efficacy | VE = 1 - relative risk with CIs from attack rates (Koopman / Katz / adjusted log), person-time rates (exact / mid-P / Wald) or case-control / test-negative counts (Woolf / exact) |
-| | Outbreak Measures | attack rate; exposure-specific attack rates with risk ratios, risk differences and Fisher's test (the food-specific table); secondary attack rate; case fatality crude and among resolved cases, all with exact / Wilson / mid-P / other intervals |
-| | Aberration Detection | CDC EARS C1, C2, C3 and a normal or Poisson CUSUM on a pasted series of counts, with a plot |
-| | Compare Two Groups | difference / ratio / odds ratio of two proportions (Wald, Agresti-Caffo, Newcombe, Miettinen-Nurminen, Mee, Koopman, Katz, exact side by side) and two means (Welch, pooled, variance ratio, Cohen's d / Hedges' g) |
-| | Standardization and SMR | direct standardization (Fay-Feuer gamma CI, optional two-group comparison), indirect standardization with expected events, SMR with exact and mid-P intervals |
-| **General Statistical Tests** | Correlation | Pearson; two independent r; two dependent r; point-biserial; regression slope; partial; Spearman |
-| | Chi-Square Tests | goodness of fit; R×C independence; McNemar; Mantel-Haenszel; Cochran-Armitage trend; Cochran's Q |
-| | Multiple Regression | R² vs. zero; R² increase |
-| | Factorial ANOVA / ANCOVA | general F-test |
-| | Logistic Regression | binary/continuous predictor, simple or covariate-adjusted; ordinal (proportional odds) |
-| | Exact Tests | binomial; Fisher; Boschloo; exact Poisson; sign test |
-| | RM-ANOVA / Mixed ANOVA | between, within, group × time interaction |
-| | Nonparametric Tests | Wilcoxon rank-sum and signed-rank; Kendall's tau; Kruskal-Wallis; Jonckheere-Terpstra; Friedman; Kolmogorov-Smirnov; Wald-Wolfowitz runs; animal K-sample rank test |
-| | Variance Tests | one variance; two variances; SD precision |
-| | Multiplicity Adjustment | Bonferroni/Šidák for proportions and means; FDR (BH) for means; exact microarray FDR (Liu & Hwang); Dunnett multi-arm vs. control |
-| | MANOVA / Hotelling's T² | two-group Hotelling's T² |
-| | Bayesian Design Analysis | assurance (prior-averaged power); Bayes factor design analysis |
-| | Longitudinal / MMRM | slope difference (Liu & Liang, Diggle, Ard & Edland, Hu et al.); MMRM with dropout, AR(1) |
-| | Multilevel / Hierarchical Model | two-level and three-level slope difference |
-| | Meta-Analysis Power | number of studies for fixed/random-effects meta-analysis |
+- **Plan: Sample Size** -- Effect Sizes; Descriptive & Estimation; Survey & Cross-Sectional; Observational Studies; Diagnostic &
+  Screening; Agreement & Reliability; Several Measurements per Patient; Clinical Trials; Survival Analysis; Prediction Models;
+  Surveillance; Preclinical / Animal Studies; Qualitative / Mixed Methods; Psychometrics / Scale Development; Health Economics / Value
+  of Information; Study Planning Tools; Survey & Field Tools; Infectious Disease Models; General Statistical Tests.
+- **Analyze** -- from summary counts (2x2 tables, stratified analysis, confidence intervals, rates, standardisation, diagnostic tests,
+  agreement, vaccine effectiveness, test comparisons) and outbreaks and surveillance (attack rates, case fatality, EARS, CUSUM).
 
-Design-level detail — formula, backend, worked example and citation — is in each
-module's **Formula / Help** and **Reference** tabs, and the verification evidence is
-recorded against each item in the two checklists.
+The full list, one line per design with its source, is [`docs/CHECKLIST.md`](docs/CHECKLIST.md) section 2. Design-level detail --
+formula, backend, worked example and citation -- is in each calculator's **Formula / Help** and **Reference** tabs.
 
 ### How results are verified
 
@@ -118,7 +55,7 @@ A design only ships once its numbers are checked by at least one of:
 
 When a formula can't be traced to a citable source and checked numerically, the item
 stays open rather than being approximated. Open and blocked items are listed, with
-what would unblock them, in [`docs/ROADMAP.md`](docs/ROADMAP.md) §4.
+what would unblock them, in [`docs/PENDING.md`](docs/PENDING.md).
 
 **Vendoring rule.** Packages discovered during development (installed from the
 `github.com/cran/<pkg>` source mirror, since `cran.r-project.org` is blocked in the
@@ -129,20 +66,15 @@ reimplements the verified formula instead of adding a runtime dependency.
 
 ## Finding a calculator
 
-The **Home** page is task-first:
-
-- **Search** — one box over every built design (it matches the design's name, the question it answers and the calculator
-  it lives in; "two means", "kappa", "stepped wedge", "eyes per patient"). Choosing a result opens that calculator on that
-  design. A smaller copy of the box sits in the navbar, so it works from every page.
-- **Quick links and task cards** — the six most-used calculators, and four cards: *Plan a study*, *Analyze counts I have*,
-  *Outbreak and surveillance*, *Survey and field work*.
-- **Not sure which calculator?** — opens the guided wizard: one question at a time (aim, experimental vs. observational,
-  selection basis, outcome, groups) with its reasoning, plus an optional free-text box that pre-fills the answers from a
-  one-sentence description of the study. Every one of the 159 designs can be reached from it, either through the study-design
-  questions or through its last option, "I already know which statistical test I'll use". Designs that are not built yet say
-  so and say what would unblock them (`docs/ROADMAP.md` §4). Tests enforce both.
-- **Browse all calculators, the guided wizard, formulas** (one folded section) — the accordion of every built design,
-  switchable between *by study design* and *by test family* (G*Power-style), the wizard, and a live LaTeX sandbox.
+- **Search** -- one box over every built design (its name, the question it answers and the calculator it lives in: "two means",
+  "kappa", "stepped wedge", "eyes per patient"), on Home and in the navbar of every page. Choosing a result opens that calculator on
+  that design.
+- **Quick links and task cards** on Home -- the most-used calculators, and cards for planning a study, analysing counts, outbreaks and
+  surveillance, and survey work.
+- **The guide** (Find tab, "Which calculator?") -- one question at a time (aim, experimental or observational, selection, outcome,
+  groups) with its reasoning, plus a free-text box that reads a one-sentence description or a research question and answers what it
+  can. Every built design can be reached from it; designs not built yet say so and what would unblock them. Tests enforce both.
+- **Browse** (Find tab) -- every built design by study design or by test family (G*Power-style), and a glossary.
 
 From R, without opening the app: `ss_find("eyes per patient")` returns the matching designs, and
 `run_app(calculator = "eyes per patient")` opens the app on one (a design key from `ss_find()` or a few words). An RStudio /
@@ -285,7 +217,7 @@ testthat::test_local()   # loads the package from the working directory first
 The tests call internal functions, so they must run inside the package namespace:
 use `test_local()` (or `devtools::test()`), not `test_dir()` on its own.
 
-The default run (102 files) skips the slowest tests (Monte Carlo simulations, ≥ 5 s
+The default run skips the slowest tests (Monte Carlo simulations, ≥ 5 s
 each) and takes about ten minutes with the browser tests, about a minute without them. To run everything (~13 minutes more, mostly `test-calc_glmm.R`):
 
 ```sh
@@ -341,7 +273,7 @@ R/                     the package (flat, as R requires; grouped by file-name pr
 man/                   help pages (199: every exported function)
 inst/                  CITATION (what citation("epidemiologysuite") prints), rstudio/addins.dcf
 tests/testthat/        unit tests, browser (shinytest2) tests, help-page, citation, phone-layout and plot-description tests
-docs/                  PLAN.md, ROADMAP.md, SDD.md, hosting.md, to_do_later.md, checklists, design-mockups/
+docs/                  SDD.md, CHECKLIST.md, PENDING.md (generated), the guide's algorithm, hosting.md, upstream_reports.md, archive/
 .claude/               SessionStart hook that rebuilds the R environment
 .github/workflows/     CI (tests.yml), documentation site and browser build (docs.yml), phone-version bundle (connect-bundle.yml), container image (docker.yml), memory and browser spikes
 Dockerfile, docker-compose.yml, .dockerignore   container image (tools/docker/ holds its browser smoke test)
@@ -349,85 +281,12 @@ tools/                 docs/ (site generator, help-page tools), pages/ (browser 
 renv.lock              locked package versions
 ```
 
-## Module contract
+## For developers
 
-Every calculator is three files plus registry entries.
-
-1. **`R/calc_<name>.R`** — pure R, no Shiny. Validate inputs with the shared
-   helpers in `calc_utils.R` (`.validate_number()`, `.validate_positive()`,
-   `.validate_unit_interval()`, `.validate_population()`), call a runtime package or
-   a verified closed form, and return a plain list. Directly unit-testable.
-   Monte Carlo designs share the search helper `.mc_search_n1()` and take a fixed
-   `seed` so results are reproducible.
-
-2. **`R/content_<name>.R`** — a list (one per design) with `title`,
-   `formula_latex`, `explanation`, `worked_example`, `citation`, `backend`.
-   `formula_latex` is one or more `$$...$$` blocks joined with `paste0()`; every
-   LaTeX backslash is doubled because it's an R string (`\\frac`, `\\alpha`).
-
-3. **`R/mod_<name>.R`** — `mod_<name>_ui(id)` (a `tabsetPanel()` with
-   **Calculate / Formula / Help / Reference**), `mod_<name>_server(id)` (calls the
-   `calc_*` function inside `reactive()` + `tryCatch()` and renders the result or the
-   validation message), and `<name>_meta <- list(id =, nav_title =)`. Render
-   formulas with `render_formula_block()` from `mod_shared_ui.R` (MathJax plus a
-   copyable LaTeX view). Families with several designs use a `design`
-   `radioButtons()` plus one `conditionalPanel()` per design.
-
-### Adding a module
-
-1. Copy the three files of a similar module and adapt them.
-2. Add a `module_registry()` entry and put its id in the right `module_groups` entry
-   (`R/registry.R`). `R/run_app.R` does not change. If the new file calls a package
-   with `pkg::`, add that package to `DESCRIPTION` `Imports`.
-3. Add one `calculator_catalog` entry per design in `R/home_catalog.R`
-   (`built = TRUE`, `nav_target`, `module_input_id`, `design_value`) and list the
-   keys in a `study_design_families` and a `test_families` entry.
-4. Route to it from the wizard (`R/home_design_tree.R`): add an option and a
-   `.term()` terminal where a study-design branch fits. The "browse by test" branch
-   picks up new `test_families` keys automatically. `test-design_tree.R` fails if
-   any built catalog entry is unreachable, and `test-catalog_consistency.R` fails if
-   the catalog, the navbar and the module's `design` radio values disagree.
-5. Add `tests/testthat/test-calc_<name>.R` with a published worked example, and, where a package computes the same thing, a
-   comparison with it (guarded by `skip_if_not_installed()`).
-6. Document the `calc_*` function for users: a roxygen block with a title, one `@param` per argument, `@return`, `@examples`
-   (a real worked example, literal values) and `@export`; add `export(calc_<name>)` to `NAMESPACE`; rebuild the help pages with
-   `roxygen2::roxygenise(roclets = "rd")`. `tests/testthat/test-help_pages.R` fails if any of that is missing. Plain-text roxygen
-   comments use markdown: write interval notation as `\[0, 1)`.
-7. Check the new page with `tools/ui-audit/audit.R` and `tools/ui-audit/a11y.R` (no horizontal scroll, no accessibility rule violations).
-8. Tick the item in both checklists with a short verification note.
-
----
-
-## Non-idiomatic-for-plain-R patterns used here
-
-- **`conditionalPanel()` conditions are JavaScript**, evaluated in the browser.
-  Because modules namespace input ids (`proportion-design`, not `design`), the
-  condition string is built with `ns("design")` so it stays correct under any
-  module id.
-- **`do.call()` builds the navbar.** `epidemiologysuite_app()` creates one navbar item per
-  `module_workbenches` entry (a `navset_pill_list()` sidebar of grouped modules inside it) and
-  passes the variable-length list to `page_navbar()` via `do.call()`, which calls a function with
-  an argument list assembled at runtime. `jump_to_module()` selects the workbench and then the module.
-- **`moduleServer()` / `NS()`** give each module an isolated input/output namespace.
-- **Dependencies are declared, not installed at runtime.** The app used to call
-  `pacman::p_load()` from `global.R`; as a package it declares them in
-  `DESCRIPTION` `Imports` and calls them with `pkg::`, which is what makes
-  `remotes::install_github()` install everything it needs.
-- **Load order.** Package files load alphabetically, so nothing may use another
-  file's objects at load time. `module_registry()` is therefore a function, and
-  `home_design_tree.R` is named to sort after `home_catalog.R`, whose
-  `test_families` it reads when it loads.
-- **Updating a module's input from outside it.** The Home hub runs at the top level
-  and calls `updateRadioButtons(session, "proportion-design", ...)` with the
-  already-namespaced id; `ns()` is only needed *inside* a module.
-- **`bslib::nav_select("main_nav", <title>)`** switches tabs programmatically; it
-  works whether the panel sits on the navbar or inside a nested list; use `jump_to_module()`
-  (registry.R), which selects the workbench first and then the module.
-- **`numericInput(..., value = NA)`** renders an empty optional field; the server
-  treats `NULL`/`NA` as "not supplied".
-- **`session$ns()` for inputs created in `renderUI()`** — the server-side equivalent
-  of the UI's `ns()` closure (used where the number of inputs is itself a user
-  choice, e.g. kappa categories).
+The module contract (a `calc_*()` function, a `*_content` list, a Shiny module and their registry and catalog entries), the steps
+for adding a module, and the Shiny patterns that are not plain R are in [`docs/SDD.md`](docs/SDD.md) section 8. Every finished
+piece of work ticks its items in [`docs/CHECKLIST.md`](docs/CHECKLIST.md), regenerates `docs/PENDING.md`
+(`Rscript tools/docs/build_pending.R`) and adds a line to [`NEWS.md`](NEWS.md) (SDD section 18).
 
 ---
 
@@ -442,5 +301,5 @@ it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty o
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 The project was relicensed from MIT to GPL-3 on 28 September 2026, because several
-modules reimplement code read from GPL-licensed packages (see
-[`docs/ROADMAP.md`](docs/ROADMAP.md), finding F8 and decision D2).
+modules reimplement code read from GPL-licensed packages (decision D2 in
+[`docs/SDD.md`](docs/SDD.md) section 17).

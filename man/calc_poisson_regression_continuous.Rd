@@ -42,13 +42,13 @@ list(n_total, inputs)
 The design above (calc_rate_comparison()) covers Poisson regression
 with a single BINARY predictor (comparing two groups' rates); this
 covers the continuous-predictor case named in the same
-checklist_by_test.md item ("Poisson regression -- rate ratio, exposure
+docs/archive/checklist_by_test.md item ("Poisson regression -- rate ratio, exposure
 distribution"), for a normally distributed predictor (e.g. a
 continuous exposure or biomarker level) rather than an exposed/
 unexposed group indicator. Wraps powerMediation::sizePoisson() --
 already a project dependency (used by the Logistic Regression module)
 -- which directly implements Signorini (1991)'s closed-form Wald-test
-formula, exactly the source this app's own docs/checklist_by_test.md
+formula, exactly the source this app's own docs/archive/checklist_by_test.md
 cites for this item (via \code{WebPower::wp.poisson}, which itself wraps
 the same Signorini formula; \code{powerMediation} is used here instead
 since it is already a project dependency with zero package

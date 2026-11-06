@@ -1,6 +1,6 @@
 # The guide's free-text reader on research questions phrased by topic (R/design_free_text.R, R/design_wizard.R; ROADMAP "Expanding the
 # guide's free-text reader"). These are typical community-medicine and public-health questions written for this test (4 Nov 2026), not
-# the owner's list of real thesis titles, which is still to come (to_do_later.md C2).
+# the owner's list of real thesis titles, which is still to come (docs/CHECKLIST.md FIND-09).
 
 rq <- function(text) walk_free_text(text)
 

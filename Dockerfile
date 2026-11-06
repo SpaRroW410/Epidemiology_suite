@@ -1,4 +1,4 @@
-# epidemiologysuite as a container (docs/ROADMAP.md item 18, Track D1).
+# epidemiologysuite as a container (docs/archive/ROADMAP.md item 18, Track D1).
 #   docker build -t epidemiologysuite .
 #   docker run --rm -p 3838:3838 epidemiologysuite       # then open http://localhost:3838
 # The app listens on 0.0.0.0:$PORT (default 3838) and needs no internet at run time: the theme uses a local font
