@@ -243,11 +243,73 @@ test_that("estimation -> single mean precision and incidence rate precision now 
   expect_true(isTRUE(catalog_entry(res_rate$node$catalog_key)$built))
 })
 
-test_that("qualitative branch is a guidance terminal pointing at the guidance module", {
-  res <- .walk(c("Explore experiences or meanings (qualitative)"))
-  expect_true(isTRUE(res$node$terminal))
-  expect_true(isTRUE(res$node$guidance))
-  expect_equal(res$node$catalog_key, "qualitative_guidance")
+test_that("qualitative branch asks the approach; every approach is a guidance terminal pointing at the guidance module", {
+  q <- "Explore experiences or meanings (qualitative)"
+  expect_equal(.walk(q)$node$id, "qual_approach")
+  for (o in design_nodes$qual_approach$options) {
+    res <- .walk(c(q, o$label))
+    expect_true(isTRUE(res$node$terminal), info = o$label)
+    expect_true(isTRUE(res$node$guidance), info = o$label)
+    expect_equal(res$node$catalog_key, "qualitative_guidance", info = o$label)
+  }
+})
+
+# --- Branches merged from the owner's routing material (docs/find_routing/, FIND-16/17) ---
+
+test_that("reviews: pooling goes to the meta-analysis calculators, the other reviews are guidance with no sample size", {
+  r <- "Review published studies (systematic or scoping review, umbrella review, qualitative evidence synthesis)"
+  opts <- vapply(design_nodes$review_type$options, function(o) o$label, "")
+  expect_equal(.walk(c(r, opts[1]))$node$id, "meta_type")
+  expect_equal(.walk(c(r, opts[4]))$node$id, "term_nma")
+  for (i in c(2, 3, 5, 6)) {
+    res <- .walk(c(r, opts[i]))
+    expect_true(isTRUE(res$node$guidance) && is.null(res$node$catalog_key), info = opts[i])
+    expect_match(res$node$design, "no sample size")
+  }
+})
+
+test_that("mixed methods: each sequence is guidance that names the two samples", {
+  m <- "Combine a qualitative and a quantitative part (mixed methods)"
+  for (o in design_nodes$mm_sequence$options) {
+    res <- .walk(c(m, o$label))
+    expect_true(isTRUE(res$node$guidance), info = o$label)
+    expect_match(res$node$note, "quantitative|trial", info = o$label)
+  }
+})
+
+test_that("case report and case series are guidance with nothing to calculate", {
+  for (o in design_nodes$case_desc$options) {
+    res <- .walk(c("Describe one patient or a short series of patients (case report, case series)", o$label))
+    expect_true(isTRUE(res$node$guidance) && is.null(res$node$catalog_key))
+    expect_match(res$node$note, "nothing to calculate")
+  }
+})
+
+test_that("who assigned it: the team without randomisation, or a programme / policy, both reach the quasi-experimental designs", {
+  cmp <- "Compare groups / test an association or hypothesis"
+  team <- design_nodes$allocation$options[[3]]$label
+  other <- design_nodes$allocation$options[[4]]$label
+  expect_equal(.walk(c(cmp, team))$flags$assigned, "team")
+  expect_equal(.walk(c(cmp, other))$flags$assigned, "other")
+  q <- vapply(design_nodes$quasi_type$options, function(o) o$label, "")
+  expect_equal(.walk(c(cmp, other, q[1]))$node$id, "term_its")
+  expect_equal(.walk(c(cmp, other, q[2]))$node$id, "term_did")
+  expect_equal(.walk(c(cmp, team, q[3]))$node$id, "term_rdd")
+  pp <- vapply(design_nodes$prepost_outcome$options, function(o) o$label, "")
+  expect_equal(.walk(c(cmp, team, q[4], pp[1]))$node$catalog_key, "means_two_dep")
+  expect_equal(.walk(c(cmp, team, q[4], pp[2]))$node$catalog_key, "proportion_two_dep")
+})
+
+test_that("ecological designs ask snapshot or trend, both carry the ecological fallacy; Mendelian randomisation is an open item", {
+  obs <- c("Compare groups / test an association or hypothesis", "I only observe what happened naturally")
+  eco <- design_nodes$selection_basis$options[[8]]$label
+  expect_match(design_nodes$eco_time$help, "ecological fallacy")
+  for (o in design_nodes$eco_time$options) {
+    res <- .walk(c(obs, eco, o$label))
+    expect_equal(res$node$catalog_key, "ecological_guidance")
+  }
+  expect_equal(.walk(c(obs, design_nodes$selection_basis$options[[11]]$label))$node$id, "term_mr")
+  expect_null(design_nodes$term_mr$catalog_key)
 })
 
 test_that("diagnostic -> PPV/NPV now routes to a built module", {
@@ -339,7 +401,8 @@ test_that("every not-built terminal is an open item of docs/CHECKLIST.md", {
                term_dose_finding = "Dose-finding", term_platform = "Platform / basket",
                term_surv_one_sample = "One-sample survival", term_psm = "Propensity-score",
                term_time_varying = "Time-varying exposure", term_gwas = "GWAS",
-               term_gxe = "environment interaction")
+               term_gxe = "environment interaction", term_its = "Interrupted time series",
+               term_did = "difference-in-differences", term_rdd = "Regression discontinuity", term_mr = "Mendelian randomisation")
   open_terms <- names(Filter(function(n) isTRUE(n$terminal) && is.null(n$catalog_key) && !isTRUE(n$guidance), design_nodes))
   expect_setequal(open_terms, names(tracked))
   for (id in names(tracked)) {

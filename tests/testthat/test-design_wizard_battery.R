@@ -50,7 +50,7 @@ wizard_battery <- list(
   list("Linear regression to study predictors of birth weight", "reg_type"),
   list("Logistic regression with 5 predictors, events per variable", "logit_type"),
   list("Develop a prognostic model to predict mortality", "pred_type"),
-  list("Qualitative study with in-depth interviews", "term_qualitative"),
+  list("Qualitative study with in-depth interviews", "qual_approach"),   # interviews are a method, not an approach: asked
   list("Systematic review and meta-analysis", "meta_type"),
   list("Survival analysis comparing two treatments, log-rank", "allocation"),
   list("Cox regression with a binary covariate", "cox_type"),
@@ -70,7 +70,7 @@ wizard_battery <- list(
   list("Case-cohort design with a random sub-cohort", "term_case_cohort"),
   list("Case-crossover study of air pollution and asthma attacks", "term_case_crossover"),
   list("Self-controlled case series of vaccine safety", "term_sccs"),
-  list("Ecological study of regions comparing mortality", "term_ecological"),
+  list("Ecological study of regions comparing mortality", "eco_time"),   # one period or a trend: asked
   list("Prospective cohort of nurses, relative risk of breast cancer in exposed vs unexposed", "term_cohort_rr"),
   list("Cohort study of exposed and unexposed children, mean difference in IQ score", "indep_cont"),
   list("Cohort study comparing mean birth weight of babies of smoking and non-smoking mothers", "indep_cont"),
@@ -109,7 +109,20 @@ wizard_battery <- list(
   list("genome wide association study", "other_purpose"),
   list("Effect of a diet on cholesterol in mice", "animal_type"),
   list("Number of studies needed for a meta-analysis", "term_meta_power"),
-  list("network meta-analysis of antidepressants", "term_nma")
+  list("network meta-analysis of antidepressants", "term_nma"),
+  # branches merged from the owner's routing material (docs/find_routing/, 6 Nov 2026)
+  list("Interrupted time series of monthly institutional deliveries before and after the JSY scheme was launched", "term_its"),
+  list("Impact of the tobacco tax introduced in 2017 on cigarette sales, with neighbouring states as comparison states", "term_did"),
+  list("A quasi-experimental study of a school feeding programme, eligibility decided by a cut-off on family income", "term_rdd"),
+  list("Pre-post study of an educational intervention on knowledge score among ASHA workers, non-randomised", "term_prepost_means"),
+  list("Effectiveness of a mobile phone reminder on immunisation completion", "allocation"),   # who assigns it is not stated: asked
+  list("A systematic review of the prevalence of anaemia in India", "review_type"),            # pooled or narrative not stated: asked
+  list("A scoping review of community health worker programmes", "term_scoping"),
+  list("A grounded theory study of how mothers decide where to deliver", "term_qual_grounded"),
+  list("Convergent mixed methods study of tuberculosis treatment adherence", "term_mm_convergent"),
+  list("Case series of patients with snakebite admitted to a district hospital", "term_case_series"),
+  list("Ecological study of state-level trends in neonatal mortality from 2005 to 2020", "term_ecological_trend"),
+  list("Mendelian randomisation study of alcohol and blood pressure", "term_mr")
 )
 
 test_that("plain-language study descriptions reach the expected terminal or question", {

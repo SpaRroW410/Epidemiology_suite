@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**98 open** of 359 items (261 done).
+**93 open** of 359 items (266 done).
 
 ## Waiting for the owner
 
@@ -120,7 +120,7 @@
 - [ ] **GEN-77** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to Bonferroni /
   Sidak).
 
-## 3. Finding a calculator: the guide, search and Find tab (FIND) -- 15 open
+## 3. Finding a calculator: the guide, search and Find tab (FIND) -- 10 open
 
 - [ ] **FIND-09** **[owner]** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the
   reader against.
@@ -132,23 +132,6 @@
   determinants question, is done).
 - [ ] **FIND-14** **[optional]** A language-model reader, only by a separate decision (no API, nothing sent anywhere in the browser
   version). Not now: decision F1 (6 Nov 2026) keeps the reader deterministic.
-- [ ] **FIND-16** New branches merged into the guide (F2): literature reviews (with and without meta-analysis, scoping, network,
-  umbrella, qualitative evidence synthesis), mixed methods (explanatory, exploratory, convergent, embedded), the five qualitative
-  approaches, quasi-experiments (controlled before-after / difference-in-differences, interrupted time series, regression discontinuity,
-  single-arm pre-post), ecological snapshot or time trend, case report and case series, Mendelian randomisation. Every end point opens a
-  calculator or names its open item; `test-design_tree.R` covers them.
-- [ ] **FIND-17** Who assigned the intervention: the study team (trial or quasi-experiment), or someone else such as a programme or a
-  policy (a natural experiment, studied from routine data by interrupted time series, difference-in-differences or regression
-  discontinuity). The source tree reaches quasi-experiments only when the team assigns.
-- [ ] **FIND-18** A study state asked one question at a time: each answer known or missing, with the words that set it; the guide asks the
-  first missing question that blocks the route; a later answer that contradicts an earlier one is shown and asked about, never replaced
-  silently.
-- [ ] **FIND-19** Warnings that ask, never silent changes: a harmful exposure proposed for assignment (suggest an observational design);
-  group-level data with an individual-level question (ecological fallacy, with the two ways out: individual data or a group-level
-  question); a rare outcome or long latency (case-control, nested case-control); existing records with a prospective design.
-- [ ] **FIND-20** The keyword reader fills the new questions (F1): existing records, registries or national surveys (secondary data);
-  review, qualitative and mixed-methods words; "we will assign / randomise"; group-level data; Mendelian randomisation only from
-  "Mendelian randomi[sz]ation" or "genetic instrument" (not "variant"). Each rule gets cases in the FIND-10 battery.
 - [ ] **FIND-21** A design card at every end point of the guide (F3): fallback design and what it costs, three threats to validity with
   mitigations, reporting guideline, effect measure, workflow. From the registry text, edited (row 18 completed, row 21 rewritten);
   each claim cited (SRC-06) or marked with a warning sign whose hover reads "Suggestion only -- no confirmed source". Cards also for

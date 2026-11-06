@@ -64,12 +64,30 @@ design_wizard_server <- function(input, output, session) {
         p(class = "mb-0", "Answer the questions below instead, or add a few words, for example: \"cross-sectional survey of the prevalence of ... ",
           "and the factors associated with it\".")))
     }
-    if (length(state$trace) == 0) return(NULL)
-    tags$ul(class = "text-muted small",
-      lapply(state$trace, function(t) tags$li(paste0(
-        t$question, " -> ", t$answer,
-        if (!is.null(t$confidence)) paste0(" (auto-suggested, ", t$confidence, " confidence)") else ""
-      ))))
+    conflict <- state$flags$conflict
+    warnings <- state$flags$warnings
+    if (length(state$trace) == 0 && is.null(conflict) && !length(warnings)) return(NULL)
+    tagList(
+      if (length(state$trace)) tags$ul(class = "text-muted small",
+        lapply(state$trace, function(t) tags$li(paste0(
+          t$question, " -> ", t$answer,
+          if (!is.null(t$confidence)) paste0(" (auto-suggested", if (!is.null(t$words)) paste0(" from \"", t$words, "\""), ", ",
+                                             t$confidence, " confidence)") else ""
+        )))),
+      # the description fits two answers of the next question: say which words point where, and let the user choose (FIND-18)
+      if (!is.null(conflict)) {
+        opts <- design_nodes[[conflict$node_id]]$options
+        div(class = "alert alert-info small", role = "status",
+          p(class = "mb-1", strong("Your description fits more than one answer to the question below:")),
+          tags$ul(class = "mb-1", lapply(seq_along(conflict$words), function(i)
+            tags$li(paste0("\"", conflict$words[[i]], "\" suggests: ", opts[[conflict$options[[i]]]]$label)))),
+          p(class = "mb-0", "Choose the one that describes how your study is run."))
+      },
+      # warnings that ask, never a silent change of the route (FIND-19)
+      if (length(warnings)) div(class = "alert alert-warning small", role = "status",
+        p(class = "mb-1", strong("Please check:")),
+        tags$ul(class = "mb-0", lapply(warnings, tags$li)))
+    )
   })
 
   output$design_wizard_body <- renderUI({

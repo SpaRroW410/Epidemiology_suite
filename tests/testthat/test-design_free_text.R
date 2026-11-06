@@ -155,3 +155,83 @@ test_that("outbreak, surveillance and epidemic-model phrasing reaches its termin
   expect_equal(walk_free_text("estimate R0 from the doubling time")$node_id, "term_epi_model_r0")
   expect_equal(walk_free_text("sample size for a vaccine trial with an attack rate of 5% in the control group")$trace[[1]]$answer, design_nodes$root$options[[2]]$label)
 })
+
+# --- Branches merged from the owner's routing material (docs/find_routing/, FIND-16 to FIND-20) ---
+
+test_that("new phrasings reach the new branches", {
+  cases <- list(
+    c("An interrupted time series of hospital admissions before and after the smoking ban was introduced", "term_its"),
+    c("Effect of the national health mission launched in 2005 on institutional deliveries, before and after, with comparison districts", "term_did"),
+    c("A non-randomised study of a school programme where a cut-off score decided who received it", "term_rdd"),
+    c("A scoping review of mHealth interventions for diabetes", "term_scoping"),
+    c("An umbrella review of systematic reviews on yoga", "term_umbrella"),
+    c("A systematic review and meta-analysis of statins and mortality", "meta_type"),
+    c("A mixed methods study, explanatory sequential design", "term_mm_explanatory"),
+    c("A phenomenological study of the lived experience of mothers of children with autism", "term_qual_phenomenology"),
+    c("Case series of 20 patients with mucormycosis", "term_case_series"),
+    c("Mendelian randomisation of BMI and depression", "term_mr"),
+    c("Ecological study of district-level trends in TB notification 2010-2020", "term_ecological_trend"))
+  for (x in cases) expect_equal(walk_free_text(x[1])$node_id, x[2], info = x[1])
+})
+
+test_that("near misses keep their old routes: a self-controlled case series, a trial's case report form", {
+  expect_equal(walk_free_text("self-controlled case series of vaccination and febrile seizures")$node_id, "term_sccs")
+  expect_false(identical(walk_free_text("randomised trial; data entered on a case report form")$node_id, "case_desc"))
+})
+
+test_that("effect / effectiveness words alone never decide who assigns the intervention: the guide asks", {
+  for (t in c("effectiveness of yoga on blood pressure", "impact of a health education intervention on knowledge"))
+    expect_equal(walk_free_text(t)$node_id, "allocation", info = t)
+})
+
+test_that("a programme introduced by others is a natural experiment; a randomised programme stays a trial", {
+  r <- walk_free_text("An interrupted time series of hospital admissions before and after the smoking ban was introduced")
+  expect_equal(r$flags$assigned, "other")
+  expect_equal(walk_free_text("a randomised trial of an exercise program implemented in schools")$node_id, "exp_intent")
+})
+
+test_that("every pre-filled answer records the words that set it", {
+  r <- walk_free_text("Followed up a cohort of exposed and unexposed workers for incidence of lung disease")
+  expect_true(all(vapply(r$trace, function(t) is.character(t$words) && nzchar(t$words), logical(1))))
+  expect_equal(r$trace[[1]]$words, "Followed up")   # the first words in the text that the rule matched
+})
+
+test_that("a description that is both randomised and observational stops at 'who assigns' and names both cues", {
+  r <- walk_free_text("A randomised trial nested in a prospective cohort study of pregnant women")
+  expect_equal(r$node_id, "allocation")
+  expect_setequal(r$flags$conflict$options, c(1, 2))
+  expect_true(all(c("randomised", "cohort study") %in% r$flags$conflict$words))
+  expect_null(walk_free_text("A non-randomised trial in a cohort study")$flags$conflict)
+})
+
+test_that("warnings ask and never change the route", {
+  w <- function(t) walk_free_text(t)$flags$warnings
+  expect_match(paste(w("We will randomise adults to smoking or not and follow them for lung function"), collapse = " "), "not ethical")
+  expect_length(w("We will randomise smokers to a smoking cessation programme"), 0)
+  expect_match(paste(w("Prospective cohort from hospital records of patients with cancer"), collapse = " "), "retrospective")
+  expect_match(paste(w("Prospective cohort from hospital records of patients with cancer"), collapse = " "), "case-control")
+  expect_match(paste(w("Ecological study: are people who smoke more likely to get TB, using district data"), collapse = " "), "ecological fallacy")
+  r <- walk_free_text("Prospective cohort from hospital records of patients with cancer")
+  expect_equal(r$node_id, walk_free_text("Prospective cohort of patients with cancer")$node_id)
+})
+
+test_that("the guide shows the words behind each answer, the two cues of a contradiction, and the warnings", {
+  shiny::testServer(function(input, output, session) design_wizard_server(input, output, session), {
+    session$setInputs(design_wizard_freetext = "A randomised trial nested in a prospective cohort study of pregnant women")
+    session$setInputs(design_wizard_parse = 1)
+    html <- as.character(output$design_wizard_trace$html)
+    expect_match(html, "auto-suggested from")
+    expect_match(html, "fits more than one answer")
+    expect_match(html, "randomised")
+    expect_match(html, "cohort study")
+    expect_match(as.character(output$design_wizard_body$html), "Who determines who receives")   # the question is asked, not answered
+    session$setInputs(design_wizard_freetext = "Prospective cohort from hospital records of patients with cancer")
+    session$setInputs(design_wizard_parse = 2)
+    html <- as.character(output$design_wizard_trace$html)
+    expect_match(html, "Please check")
+    expect_match(html, "retrospective")
+    session$setInputs(design_wizard_freetext = "A scoping review of mHealth interventions")
+    session$setInputs(design_wizard_parse = 3)
+    expect_match(as.character(output$design_wizard_body$html), "no sample size")
+  })
+})

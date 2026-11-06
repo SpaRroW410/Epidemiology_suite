@@ -1,5 +1,23 @@
 # epidemiologysuite (development version)
 
+## Find: reviews, mixed methods, quasi-experiments and more in the guide (6 Nov 2026)
+
+* **New branches** in "Which calculator?", merged from the owner's routing material (decisions F1-F2): reviews (pooling goes to the
+  meta-analysis calculators; narrative, scoping, umbrella reviews and qualitative evidence syntheses say there is no sample size to
+  plan); the five qualitative approaches; mixed methods (each sequence says which part needs a calculator); case reports and series;
+  ecological studies at one time or over time, with the ecological fallacy spelled out; Mendelian randomisation.
+* **Who assigned it:** besides "I assign it" and "I only observe", the guide now asks about an intervention the team assigns without
+  randomisation, and one a programme, a policy or a law assigned (a natural experiment). Both lead to interrupted time series,
+  difference-in-differences, regression discontinuity and the single-arm pre-post study; the last opens the paired-means or
+  paired-proportions calculator, the other three are listed as not yet built (CHECKLIST OBS-12 to OBS-14, and OBS-15 for Mendelian
+  randomisation).
+* **The reader** (still keyword rules, nothing sent anywhere) knows the new designs' words; "effect", "effectiveness" or "impact" alone
+  never decide who assigns the intervention. Each pre-filled answer shows the words that set it; a description that is both randomised
+  and observational ("a randomised trial nested in a cohort study") stops at that question and names both; warnings ask and never
+  change the route (a harmful exposure taken as assigned, existing records with a prospective or an assigned design, a rare or slow
+  outcome on the cohort route, individual-level wording on the ecological route).
+* `docs/design_identification_algorithm.md` updated; FIND-16 to FIND-20 done.
+
 ## Package release workflow (6 Nov 2026)
 
 * **The tarball from GitHub:** a new workflow (`.github/workflows/package.yml`) builds `epidemiologysuite_<version>.tar.gz` once and

@@ -425,23 +425,28 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [x] **FIND-15** The owner's routing material (drafted with Gemini, shared from Google Drive) stored in `docs/find_routing/` with a
   review: the tree and guardrails summarised, the problems found, its 46 MeSH headings checked against NLM (4 do not exist or are
   misnamed); decisions F1-F4 (6 Nov 2026).
-- [ ] **FIND-16** New branches merged into the guide (F2): literature reviews (with and without meta-analysis, scoping, network,
-  umbrella, qualitative evidence synthesis), mixed methods (explanatory, exploratory, convergent, embedded), the five qualitative
-  approaches, quasi-experiments (controlled before-after / difference-in-differences, interrupted time series, regression discontinuity,
-  single-arm pre-post), ecological snapshot or time trend, case report and case series, Mendelian randomisation. Every end point opens a
-  calculator or names its open item; `test-design_tree.R` covers them.
-- [ ] **FIND-17** Who assigned the intervention: the study team (trial or quasi-experiment), or someone else such as a programme or a
+- [x] **FIND-16** New branches merged into the guide (F2): literature reviews (with and without meta-analysis, scoping, network, umbrella,
+  qualitative evidence synthesis), mixed methods (explanatory, exploratory, convergent, embedded), the five qualitative approaches,
+  quasi-experiments (controlled before-after / difference-in-differences, interrupted time series, regression discontinuity, single-arm
+  pre-post), ecological snapshot or time trend, case report and case series, Mendelian randomisation. Every end point opens a calculator
+  or names its open item; `test-design_tree.R` covers them. Built 6 Nov 2026.
+- [x] **FIND-17** Who assigned the intervention: the study team (trial or quasi-experiment), or someone else such as a programme or a
   policy (a natural experiment, studied from routine data by interrupted time series, difference-in-differences or regression
-  discontinuity). The source tree reaches quasi-experiments only when the team assigns.
-- [ ] **FIND-18** A study state asked one question at a time: each answer known or missing, with the words that set it; the guide asks the
+  discontinuity). The source tree reaches quasi-experiments only when the team assigns. Built 6 Nov 2026 (two answers at "who determines",
+  both to the quasi-experimental question).
+- [x] **FIND-18** A study state asked one question at a time: each answer known or missing, with the words that set it; the guide asks the
   first missing question that blocks the route; a later answer that contradicts an earlier one is shown and asked about, never replaced
-  silently.
-- [ ] **FIND-19** Warnings that ask, never silent changes: a harmful exposure proposed for assignment (suggest an observational design);
+  silently. Built 6 Nov 2026: the guide was already one question at a time; each pre-filled answer now shows the words that set it, and a
+  description that states two answers of "who determines" outright stops there and names both (`.free_text_conflicts` takes more
+  questions).
+- [x] **FIND-19** Warnings that ask, never silent changes: a harmful exposure proposed for assignment (suggest an observational design);
   group-level data with an individual-level question (ecological fallacy, with the two ways out: individual data or a group-level
-  question); a rare outcome or long latency (case-control, nested case-control); existing records with a prospective design.
-- [ ] **FIND-20** The keyword reader fills the new questions (F1): existing records, registries or national surveys (secondary data);
+  question); a rare outcome or long latency (case-control, nested case-control); existing records with a prospective design. Built 6 Nov
+  2026, plus an assigned intervention in existing data.
+- [x] **FIND-20** The keyword reader fills the new questions (F1): existing records, registries or national surveys (secondary data);
   review, qualitative and mixed-methods words; "we will assign / randomise"; group-level data; Mendelian randomisation only from
-  "Mendelian randomi[sz]ation" or "genetic instrument" (not "variant"). Each rule gets cases in the FIND-10 battery.
+  "Mendelian randomi[sz]ation" or "genetic instrument" (not "variant"). Each rule gets cases in the FIND-10 battery. Built 6 Nov 2026; the
+  cases are in `test-design_free_text.R` until the FIND-10 battery exists.
 - [ ] **FIND-21** A design card at every end point of the guide (F3): fallback design and what it costs, three threats to validity with
   mitigations, reporting guideline, effect measure, workflow. From the registry text, edited (row 18 completed, row 21 rewritten);
   each claim cited (SRC-06) or marked with a warning sign whose hover reads "Suggestion only -- no confirmed source". Cards also for
