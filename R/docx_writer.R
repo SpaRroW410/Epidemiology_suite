@@ -1,6 +1,7 @@
 # A small Word (.docx) writer in base R (Studies, decision S2 of 3 Nov 2026: no new runtime package, and it has to work in the browser
 # build, where there is no zip program). A .docx is a zip archive of a few XML files (ECMA-376 / ISO/IEC 29500 "Office Open XML"):
-# [Content_Types].xml, _rels/.rels, word/document.xml, word/styles.xml and word/_rels/document.xml.rels. The archive is written with
+# [Content_Types].xml, _rels/.rels, word/document.xml, word/styles.xml, word/settings.xml and word/_rels/document.xml.rels (settings
+# marks the file as current Word format, so Word does not open it in compatibility mode; officer >= 0.7 requires the part). The archive is written with
 # "stored" (uncompressed) entries, which every zip reader accepts; that needs only the CRC-32 of each part (the zip format's own check,
 # polynomial 0xEDB88320, written here and checked against the standard check value CRC-32("123456789") = 0xCBF43926).
 # What it supports is what a study needs: headings, paragraphs with bold / italic / monospace runs, and tables with a header row.
@@ -148,7 +149,7 @@ docx_document <- function(body, title = "Document", time = Sys.time()) {
   stamp <- format(as.POSIXct(time), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
   parts <- list(
     "[Content_Types].xml" = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>',
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>',
     "_rels/.rels" = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>',
     "docProps/core.xml" = paste0('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -156,9 +157,12 @@ docx_document <- function(body, title = "Document", time = Sys.time()) {
       .xml_esc(title), '</dc:title><dc:creator>Epidemiological suite</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">', stamp,
       '</dcterms:created></cp:coreProperties>'),
     "word/_rels/document.xml.rels" = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>',
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/></Relationships>',
     "word/document.xml" = document,
-    "word/styles.xml" = .docx_styles
+    "word/styles.xml" = .docx_styles,
+    "word/settings.xml" = paste0('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:settings ', ns, '>',
+                                 '<w:defaultTabStop w:val="720"/><w:compat><w:compatSetting w:name="compatibilityMode" ',
+                                 'w:uri="http://schemas.microsoft.com/office/word" w:val="15"/></w:compat></w:settings>')
   )
   .zip_stored(lapply(parts, function(x) charToRaw(enc2utf8(x))), time = time)
 }

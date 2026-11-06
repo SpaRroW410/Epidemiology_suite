@@ -14,6 +14,17 @@
   4 Nov) removed; the names mirai binds in the background workers (`lib`, `pkg`, `rng_kind`) declared for the code check; four example
   comments shortened below 100 characters; a formula in a help page that R read as a link rewritten; `digest`, `later`, `officer`
   and `xml2`, used by the tests, added to Suggests.
+* **Checked against the current CRAN versions** (the new workflow installs them; the test workflow uses the older versions in
+  `renv.lock`), which broke 51 tests on Windows and macOS:
+  * officer 0.7 requires a `word/settings.xml` part: the Word writer now includes one (it also marks the file as current Word format,
+    so Word does not open it in compatibility mode).
+  * epiR 3.0.0 changed two conventions: the finite population correction (n / (1 + n/N) instead of n N / (n + N - 1)) and the rounding
+    of controls in the matched case-control design; and for a single 2 x 2 table it now reports other intervals for the attributable
+    fractions. The app keeps its methods (the correction epiR used before, Rothman-Greenland-Lash for the exposed fraction, Jewell 2004
+    for the population fraction); the tests now compare epiR where both versions agree (unrounded, no population size, point
+    estimates) and check the rest against the published formulas, so they pass with epiR 2.0.67 and 3.0.0.
+  * lme4 2.1-0 (a new major version, imported by the app): the mixed-model calculators give the same results, slow Monte Carlo tests
+    included.
 
 ## Find: the owner's routing material reviewed and planned (6 Nov 2026)
 

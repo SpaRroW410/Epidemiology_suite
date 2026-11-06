@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**97 open** of 357 items (260 done).
+**99 open** of 359 items (260 done).
 
 ## Waiting for the owner
 
@@ -176,7 +176,7 @@
 - [ ] **UI-14** **[optional]** Two-column layout on wide screens (inputs left, result right).
 - [ ] **UI-15** Revisit with real usage: Home quick links and cards, the background loading order and the four start-up calculators.
 
-## 6. The R package (PKG) -- 5 open
+## 6. The R package (PKG) -- 6 open
 
 - [ ] **PKG-06** **[owner]** Release on r-universe, then submit to CRAN: the steps are in `docs/release.md` (a new version number first;
   `v1.0.0` is the release Zenodo archived on 31 Oct 2026).
@@ -188,6 +188,8 @@
 - [ ] **PKG-11** A GitHub Action for the tarball (`.github/workflows/package.yml`): `R CMD build` once, `R CMD check --as-cran` of that
   file on Linux (R release and devel), Windows and macOS, an informational Windows-on-ARM install, and the tarball attached to the
   release on a version tag (6 Nov 2026).
+- [ ] **PKG-12** **[optional]** Ask epiR's maintainer about 3.0.0's population attributable fraction interval for a single 2 x 2 table:
+  it is built from the limits of the two risks' intervals, where 2.0.67 reported Jewell's (2004) interval (this app keeps Jewell's).
 
 ## 7. Versions, hosting and distribution (DIST) -- 10 open
 
@@ -207,11 +209,13 @@
 - [ ] **DIST-14** HTTPS and a domain; then the installable web app (PWA), the Android wrapper (TWA), iOS via the PWA, a desktop wrapper.
 - [ ] **DIST-15** **[optional]** Test a real shinyapps.io deploy, if still wanted.
 
-## 8. Engineering and quality (ENG) -- 2 open
+## 8. Engineering and quality (ENG) -- 3 open
 
 - [ ] **ENG-07** Re-snapshot `renv.lock` when convenient (it lists packages removed from the runtime and not the test-only ones).
 - [ ] **ENG-08** The sandbox's `R CMD check` ends with a locale warning and a clock note that are not the package's; confirm on a normal
   machine or in CI.
+- [ ] **ENG-10** Bring `renv.lock` up to the current CRAN versions (lme4 2.1-0, mvtnorm 1.4-2, epiR 3.0.0, officer 0.7.7, ...): the suite
+  passes with them (6 Nov 2026, PKG-11); the test workflow, the server version and the browser build still use the locked ones.
 
 ## 9. Sources not yet read (SRC) -- 6 open
 

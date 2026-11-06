@@ -515,6 +515,8 @@ Decisions S1-S5 are in `SDD.md`, section 17.
 - [ ] **PKG-11** A GitHub Action for the tarball (`.github/workflows/package.yml`): `R CMD build` once, `R CMD check --as-cran` of that
   file on Linux (R release and devel), Windows and macOS, an informational Windows-on-ARM install, and the tarball attached to the
   release on a version tag (6 Nov 2026).
+- [ ] **PKG-12** **[optional]** Ask epiR's maintainer about 3.0.0's population attributable fraction interval for a single 2 x 2 table:
+  it is built from the limits of the two risks' intervals, where 2.0.67 reported Jewell's (2004) interval (this app keeps Jewell's).
 
 ## 7. Versions, hosting and distribution (DIST)
 
@@ -557,6 +559,8 @@ Decisions S1-S5 are in `SDD.md`, section 17.
 - [ ] **ENG-07** Re-snapshot `renv.lock` when convenient (it lists packages removed from the runtime and not the test-only ones).
 - [ ] **ENG-08** The sandbox's `R CMD check` ends with a locale warning and a clock note that are not the package's; confirm on a normal
   machine or in CI.
+- [ ] **ENG-10** Bring `renv.lock` up to the current CRAN versions (lme4 2.1-0, mvtnorm 1.4-2, epiR 3.0.0, officer 0.7.7, ...): the suite
+  passes with them (6 Nov 2026, PKG-11); the test workflow, the server version and the browser build still use the locked ones.
 
 ## 9. Sources not yet read (SRC)
 

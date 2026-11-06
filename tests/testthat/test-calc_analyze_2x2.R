@@ -40,10 +40,20 @@ test_that("cohort and cross-sectional estimates equal epiR::epi.2by2() (the veri
       expect_equal(c(r$odds_ratio, r$odds_ratio_lower, r$odds_ratio_upper), get("odds ratio"), tolerance = 1e-6)
       expect_equal(100 * c(r$risk_difference, r$risk_difference_lower, r$risk_difference_upper),
                    get("^Attrib (inc risk|prev) \\*"), tolerance = 1e-6)
-      expect_equal(100 * c(r$attributable_fraction_exposed, r$attributable_fraction_exposed_lower, r$attributable_fraction_exposed_upper),
-                   get("fraction in exposed"), tolerance = 1e-6)
-      expect_equal(100 * c(r$population_attributable_fraction, r$population_attributable_fraction_lower, r$population_attributable_fraction_upper),
-                   get("fraction in population"), tolerance = 1e-6)
+      # Attributable fractions. epiR 3.0.0 changed the intervals it reports for a single table (the exposed fraction from a score
+      # interval of the RR, the population fraction from the limits of the two risks' intervals); up to 2.0.67 it reported the ones
+      # this app computes. So the point estimates are compared with epiR, the intervals with their published definitions:
+      # (RR - 1)/RR at the limits of epiR's RR interval (Rothman, Greenland & Lash 2008), and Jewell's (2004) log(1 - PAF) interval.
+      rr <- get("risk ratio")
+      expect_equal(c(r$attributable_fraction_exposed, r$attributable_fraction_exposed_lower, r$attributable_fraction_exposed_upper),
+                   (rr - 1) / rr, tolerance = 1e-6)
+      expect_equal(100 * r$attributable_fraction_exposed, get("fraction in exposed")[1], tolerance = 1e-6)
+      expect_equal(100 * r$population_attributable_fraction, get("fraction in population")[1], tolerance = 1e-6)
+      a <- tb[1]; b <- tb[2]; c <- tb[3]; d <- tb[4]; n <- sum(tb)
+      paf <- (a * d - b * c) / ((a + c) * (c + d))
+      se <- sqrt((b + paf * (a + d)) / (n * c))
+      expect_equal(c(r$population_attributable_fraction_lower, r$population_attributable_fraction_upper),
+                   1 - (1 - paf) * exp(c(1, -1) * qnorm(0.975) * se), tolerance = 1e-9)
     }
   }
 })
@@ -55,9 +65,16 @@ test_that("case-control: OR as in the cohort layout, population attributable fra
   expect_null(r$risk_ratio)
   expect_null(r$number_needed)
   expect_equal(c(r$odds_ratio, r$odds_ratio_lower, r$odds_ratio_upper), as.numeric(e[1, c("est", "lower", "upper")]), tolerance = 1e-6)
-  expect_equal(100 * c(r$population_attributable_fraction, r$population_attributable_fraction_lower,
-                       r$population_attributable_fraction_upper),
-               as.numeric(e[3, c("est", "lower", "upper")]), tolerance = 1e-6)
+  # Point estimate as epiR's; the interval is Jewell's (2004) for case-control data, which epiR reported up to 2.0.67 (3.7% to 78.3%
+  # here; epiR 3.0.0 reports another interval for a single table, see the cohort test above).
+  pafrow <- e[grepl("fraction.*in population", e$var), c("est", "lower", "upper")][1, ]
+  expect_equal(100 * r$population_attributable_fraction, as.numeric(pafrow[1]), tolerance = 1e-6)
+  a <- fus[["a"]]; b <- fus[["b"]]; c <- fus[["c"]]; d <- fus[["d"]]
+  paf <- (a * d - b * c) / (d * (a + c))
+  se <- sqrt(a / (c * (a + c)) + b / (d * (b + d)))
+  expect_equal(c(r$population_attributable_fraction_lower, r$population_attributable_fraction_upper),
+               1 - (1 - paf) * exp(c(1, -1) * qnorm(0.975) * se), tolerance = 1e-9)
+  expect_equal(round(100 * c(r$population_attributable_fraction_lower, r$population_attributable_fraction_upper), 1), c(3.7, 78.3))
   # (OR - 1)/OR from the sample OR; epiR's exposed fraction uses the conditional MLE of the OR instead
   expect_equal(r$attributable_fraction_exposed, (r$odds_ratio - 1) / r$odds_ratio)
 })

@@ -31,18 +31,35 @@ test_that("non-inferiority (means and proportions) and proportion equivalence eq
   expect_error(.cf_ssequb_equivalence(0.6, 0.6, 0, 0.8, 1, 0.05), "greater than zero")
 })
 
+# epiR changed two conventions after 2.0.67, the version these functions were transcribed from (its NEWS, 2.0.93 and 3.0.0): the
+# finite population correction became n / (1 + n/N), where this app keeps n N / (n + N - 1) = n / (1 + (n - 1)/N) (the form epiR used
+# before, usually credited to Cochran's Sampling Techniques; the book was not checked here), and in the
+# matched case-control design the controls are now rounded on their own, where this app keeps r times the rounded cases. Its unrounded
+# results without a population size are the same in both versions, so the tests compare those and apply the app's rounding and
+# correction explicitly; the rounded results are compared directly where the conventions agree (no population size, unmatched).
+cochran <- function(n, N) if (is.na(N)) n else n * N / (n + N - 1)
+
 test_that("case-control sample sizes (unmatched and matched) equal epi.sscc()", {
   for (OR in c(1.5, 2, 3.5, 0.5)) for (p0 in c(0.1, 0.3)) for (r in c(1, 2, 4)) for (sd in c(1, 2)) for (N in list(NA, 3000)) {
     a <- .cf_sscc_unmatched(N, OR, p0, 0.8, r, 1, sd, 0.95)
-    b <- epiR::epi.sscc(N = N, OR = OR, p1 = NA, p0 = p0, n = NA, power = 0.8, r = r, phi.coef = 0, design = 1, sided.test = sd,
-                        nfractional = FALSE, conf.level = 0.95, method = "unmatched", fleiss = FALSE)
-    near(a, b[c("n.total", "n.case", "n.control")], paste("unmatched", OR, p0, r, sd))
+    b <- epiR::epi.sscc(N = NA, OR = OR, p1 = NA, p0 = p0, n = NA, power = 0.8, r = r, phi.coef = 0, design = 1, sided.test = sd,
+                        nfractional = TRUE, conf.level = 0.95, method = "unmatched", fleiss = FALSE)
+    tot <- b$n.case + b$n.control
+    share <- cochran(tot, N) / tot
+    n1 <- ceiling(b$n.case * share); n0 <- ceiling(b$n.control * share)
+    near(a, list(n1 + n0, n1, n0), paste("unmatched", OR, p0, r, sd, N))
+    if (is.na(N)) {
+      b <- epiR::epi.sscc(N = NA, OR = OR, p1 = NA, p0 = p0, n = NA, power = 0.8, r = r, phi.coef = 0, design = 1, sided.test = sd,
+                          nfractional = FALSE, conf.level = 0.95, method = "unmatched", fleiss = FALSE)
+      near(a, b[c("n.total", "n.case", "n.control")], paste("unmatched, rounded", OR, p0, r, sd))
+    }
   }
   for (OR in c(2, 3)) for (p0 in c(0.2, 0.4)) for (r in c(1, 2, 3)) for (phi in c(0, 0.2)) {
     a <- .cf_sscc_matched(NA, OR, p0, 0.9, r, phi, 1, 2, 0.95)
     b <- epiR::epi.sscc(N = NA, OR = OR, p1 = NA, p0 = p0, n = NA, power = 0.9, r = r, phi.coef = phi, design = 1, sided.test = 2,
-                        nfractional = FALSE, conf.level = 0.95, method = "matched", fleiss = FALSE)
-    near(a, b[c("n.total", "n.case", "n.control")], paste("matched", OR, p0, r, phi))
+                        nfractional = TRUE, conf.level = 0.95, method = "matched", fleiss = FALSE)
+    n1 <- ceiling(b$n.case)
+    near(a, list(n1 + r * n1, n1, r * n1), paste("matched", OR, p0, r, phi))
   }
 })
 
@@ -59,13 +76,18 @@ test_that("two-stage cluster survey sizes equal epi.ssclus2estb(), constant and 
   for (b in list(10, 20, c(15, 5), c(8, 8))) for (err in c("relative", "absolute")) for (rho in c(0.02, 0.2)) for (Npsu in list(NA, 400)) {
     eps <- if (err == "relative") 0.2 else 0.05
     a <- suppressWarnings(.cf_ssclus2estb(Npsu, b, 0.3, eps, err, rho, 0.95))
-    f <- suppressWarnings(epiR::epi.ssclus2estb(N.psu = Npsu, b = b, Py = 0.3, epsilon = eps, error = err, rho = rho, conf.level = 0.95))
-    near(a[c("n.psu", "n.ssu", "DEF")], f[c("n.psu", "n.ssu", "DEF")], paste(b, err, rho, Npsu))
+    f <- suppressWarnings(epiR::epi.ssclus2estb(N.psu = NA, b = b, Py = 0.3, epsilon = eps, error = err, rho = rho, nfractional = TRUE,
+                                                conf.level = 0.95))
+    psu <- cochran(f$n.psu, Npsu)
+    near(a[c("n.psu", "n.ssu", "DEF")], list(ceiling(psu), ceiling(psu * b[1]), f$DEF), paste(b, err, rho, Npsu))
   }
   expect_warning(.cf_ssclus2estb(NA, 10, 0.5, 0.5, "relative", 0.01, 0.95), "recommended")
 })
 
 test_that("detecting a case with an imperfect test equals epi.ssdetect() (hypergeometric and binomial sizes, combined Se/Sp)", {
+  # The interface transcribed here (prev, finite.correction, conf.level) is epiR 2.0.x's; 3.0.0 replaced it (pstar, se.psu, ss.se) and
+  # is compared in the next test.
+  skip_if(utils::packageVersion("epiR") >= "3.0.0", "epiR >= 3.0.0 has a different epi.ssdetect() interface (next test)")
   for (N in c(100, 1000, 20000)) for (prev in c(0.01, 0.05)) for (cl in c(0.9, 0.95)) {
     for (cfg in list(list(0.9, 1), list(c(0.9, 0.95), c(1, 0.85)))) for (int in c("series", "parallel")) {
       a <- .cf_ssdetect(N, prev, cfg[[1]], cfg[[2]], int, cl)
@@ -151,6 +173,13 @@ test_that("detecting a case: agreement with epiR 3.0.0's epi.ssdetect() where th
   # single-stage design. N x prev is a whole number in the first three, so both give the same n.
   v3 <- list(list(1000, 0.05, 0.9, 0.95, 65), list(200, 0.2, 1, 0.95, 15), list(5000, 0.02, 0.95, 0.99, 237))
   for (x in v3) expect_equal(.cf_ssdetect(x[[1]], x[[2]], x[[3]], 1, "series", x[[4]])$sample.size[["hypergeo"]], x[[5]])
+  if (utils::packageVersion("epiR") >= "3.0.0") {
+    for (x in v3) {
+      b <- epiR::epi.ssdetect(N = x[[1]], pstar = x[[2]], se = x[[3]], sp = 1, interpretation = "series", covar = c(0, 0),
+                              nfractional = FALSE, ss.se = x[[4]])
+      expect_equal(b$sample.size$SUs, x[[5]], info = paste(unlist(x), collapse = " "))
+    }
+  }
   # N x prev = 2.5: this app rounds the 2.5 affected units up to 3 (as epiR 2.0.67), epiR 3.0.0 does not and gives 38
   expect_equal(.cf_ssdetect(50, 0.05, 0.8, 1, "series", 0.90)$sample.size[["hypergeo"]], 34)
 })

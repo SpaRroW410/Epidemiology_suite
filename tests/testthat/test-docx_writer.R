@@ -28,7 +28,8 @@ test_that("a document is a valid zip with valid XML, and officer reads back its 
   f <- tempfile(fileext = ".docx"); on.exit(unlink(f))
   writeBin(docx_document(body, "Test"), f)
   parts <- utils::unzip(f, list = TRUE)$Name
-  expect_setequal(parts, c("[Content_Types].xml", "_rels/.rels", "docProps/core.xml", "word/_rels/document.xml.rels", "word/document.xml", "word/styles.xml"))
+  expect_setequal(parts, c("[Content_Types].xml", "_rels/.rels", "docProps/core.xml", "word/_rels/document.xml.rels", "word/document.xml", "word/styles.xml",
+                          "word/settings.xml"))
   if (nzchar(Sys.which("unzip"))) expect_match(paste(system2("unzip", c("-t", shQuote(f)), stdout = TRUE), collapse = "\n"), "No errors detected")
   skip_if_not_installed("xml2")
   d <- tempfile(); on.exit(unlink(d, recursive = TRUE), add = TRUE)
