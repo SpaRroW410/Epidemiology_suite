@@ -312,7 +312,9 @@ free_text_rules <- list(
   ),
 
   cc_cont_matching = list(
-    list(pattern = "individually matched|1:1|1:m|1-to-1|paired",           option_index = 2, confidence = "High"),
+    list(pattern = "1:[2-9m]|1-to-[2-9]|(two|three|four|five|several|multiple|2|3|4|5) controls (per|for each|to each) case|controls per case",
+         option_index = 4, confidence = "High"),
+    list(pattern = "individually matched|1:1|1-to-1|paired",                 option_index = 2, confidence = "High"),
     list(pattern = "frequency.matched|frequency matched",                  option_index = 3, confidence = "High"),
     list(pattern = "unmatched|no matching|not matched",                    option_index = 1, confidence = "High")
   ),

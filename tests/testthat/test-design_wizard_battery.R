@@ -62,6 +62,8 @@ wizard_battery <- list(
   list("case control study with continuous outcome", "cont_summary"),
   list("I want to compare average age between two cohorts", "indep_cont"),
   list("Matched case-control study (1:1) comparing mean cholesterol between cases and controls", "term_two_groups_paired_cont"),
+  list("Matched case-control study (1:3) comparing mean serum vitamin D between cases and controls", "term_cc_matched_measured"),
+  list("Case-control study, 4 controls per case matched on age and sex, difference in mean blood lead", "term_cc_matched_measured"),
   list("Unmatched case-control study, difference in mean serum zinc between cases and controls", "indep_cont"),
   list("Frequency-matched case-control study of diet and colon cancer, odds ratio", "term_cc_freq_matched"),
   list("Nested case-control study within a cohort", "term_nested_cc"),

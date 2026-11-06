@@ -109,8 +109,7 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
     # opened from run_app(calculator = ...): go to that calculator once the page is connected (the navbar's value arrives first)
     if (!is.null(start_key)) observeEvent(input$main_nav, {
       entry <- catalog_entry(start_key)
-      jump_to_module(session, entry$nav_target)
-      if (!is.na(entry$module_input_id)) updateRadioButtons(session, entry$module_input_id, selected = entry$design_value)
+      catalog_open(session, entry)
     }, once = TRUE)
     for (m in registry[names(registry_by_id) %in% core_ids]) {
       m$server(m$id)

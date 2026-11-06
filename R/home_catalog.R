@@ -22,6 +22,8 @@
 #   module_input_id - fully-qualified (namespaced) input id of the module's
 #                      internal design selector, updated on jump (NA if none)
 #   design_value - value to preset that input to (NA if none)
+#   also_set     - optional: more radio inputs to preset (named list, fully-qualified input id -> value), e.g. a sub-choice
+#                  inside the design (catalog_open() applies both)
 
 calculator_catalog <- list(
 
@@ -767,6 +769,18 @@ calculator_catalog <- list(
        outcome_type = "case_control", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Case-Control",
        module_input_id = "case_control-design", design_value = "matched"),
+
+  list(key = "case_control_matched_measured",
+       label = "Matched case-control study, measured exposure (1:1 or 1:m)",
+       answers = paste(
+         "Answers: \"How many cases (each with one or more matched controls) do I need to detect a difference in a measured",
+         "exposure -- a level, a score, a dose -- between cases and their controls, analysed by conditional logistic",
+         "regression?\" (Lachin 2008; with one control per case, the same as comparing paired means)"
+       ),
+       outcome_type = "case_control", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Case-Control",
+       module_input_id = "case_control-design", design_value = "nested",
+       also_set = list(`case_control-exposure_type` = "continuous")),
 
   list(key = "case_crossover",
        label = "Case-crossover study",
@@ -2365,7 +2379,7 @@ study_design_families <- list(
   list(id = "case_control", label = "Case-Control",
        hint = "Case-control study (unmatched, matched, nested, case-cohort, or case-crossover), odds ratio or hazard ratio based.",
        catalog_keys = c("case_control_unmatched", "case_control_matched",
-                         "case_control_nested", "case_control_case_cohort",
+                         "case_control_nested", "case_control_matched_measured", "case_control_case_cohort",
                          "case_crossover")),
   list(id = "cohort", label = "Cohort / Relative Risk",
        hint = "Cohort or cross-sectional study estimating relative risk.",
@@ -2658,4 +2672,15 @@ test_families <- list(
 
 catalog_entry <- function(key) {
   Find(function(e) identical(e$key, key), calculator_catalog)
+}
+
+# Open an entry's calculator: the navbar jump, then its design and any further presets.
+catalog_open <- function(session, entry) {
+  jump_to_module(session, entry$nav_target)
+  catalog_presets(session, entry)
+}
+catalog_presets <- function(session, entry) {
+  if (!is.na(entry$module_input_id)) updateRadioButtons(session, entry$module_input_id, selected = entry$design_value)
+  for (id in names(entry$also_set)) updateRadioButtons(session, id, selected = entry$also_set[[id]])
+  invisible(NULL)
 }

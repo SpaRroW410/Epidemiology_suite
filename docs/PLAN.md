@@ -96,7 +96,7 @@ suite of 102 files with 0 failures; 206 calculation functions exported with help
 
 - ~~Public function API for the calculations themselves: all 206 `calc_*()` functions are exported (195 on 29 Oct), each with a help page (every argument described, the value described, a worked example taken from a verified test); `tests/testthat/test-help_pages.R` keeps it so~~ (29 Oct; owner decision: export all). The names stay `calc_*` (the planned `ss_*()` family was dropped); a smaller friendlier set of wrappers (`ss_text()`, `ss_curve()`, `ss_export()`) is still possible
 - ~~RStudio / Positron addin "Find a sample size calculator", `ss_find()` search from the console, and `run_app(calculator = ...)` to open the app on one calculator~~ (29 Oct)
-- ~~Vignettes: Getting started, Sample sizes from R, Analysing summary data from R (built with the package; also on the documentation site under "Using it from R")~~ (30 Oct). More per-family vignettes can follow
+- ~~Vignettes: Getting started, Sample sizes from R, Analysing summary data from R (built with the package; also on the documentation site under "Using it from R")~~ (30 Oct). ~~Per-topic vignettes: survival, trials, diagnostic accuracy, surveillance~~ (5 Nov)
 - ~~Bug found and fixed while writing them: `print()` of a result showed a raw list in an installed package (the S3 methods were not registered in `NAMESPACE`)~~ (30 Oct)
 - ~~CRAN groundwork: ASCII-only source, fast examples, browser tests skipped on CRAN, `R CMD check --as-cran` clean apart from check-machine notes, `cran-comments.md`~~ (30 Oct)
 - [ ] Release: r-universe (binaries, including WebAssembly), then CRAN submission by the owner (computation core split from the app is optional)

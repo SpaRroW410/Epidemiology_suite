@@ -59,6 +59,37 @@ test_that("calc_case_control_nested_continuous matches Lachin (2008) Sec 3.1 exa
   expect_equal(res$n_total, 375)
 })
 
+test_that("matched sets, measured exposure: Lachin (2008) sec. 4.1, the three ways of giving the effect, and 1:1 = paired", {
+  # Lachin JM, Stat Med 2008;27:2509-2523 (PMC3626499), sec. 4.1: 125 cases, 2 controls each, 85% power, two-sided 0.05,
+  # detect an odds ratio of 1.39 per SD (eq. 27 solved for theta). Per unit of a biomarker with SD 8.41: 1.39^(1/8.41).
+  per_sd <- calc_case_control_nested_continuous(OR_sd = 1.39, sigma = 8.41, nD = 1, nH = 2, power = 0.85)
+  expect_equal(per_sd$n_sets, 125); expect_equal(per_sd$n_controls, 250); expect_equal(per_sd$n_total, 375)
+  expect_equal(per_sd$OR, 1.39^(1 / 8.41))
+  per_unit <- calc_case_control_nested_continuous(OR = 1.39^(1 / 8.41), sigma = 8.41, nD = 1, nH = 2, power = 0.85)
+  expect_equal(per_unit$n_sets, 125)
+  # eq. 32: theta = (mu1 - mu2) / sigma^2, so the mean difference with the same theta is log(1.39) * 8.41 = 2.769
+  means <- calc_case_control_nested_continuous(mean_diff = log(1.39) * 8.41, sigma = 8.41, nD = 1, nH = 2, power = 0.85)
+  expect_equal(means$n_sets, 125); expect_equal(means$OR_sd, 1.39)
+  # the paper's rounded version (theta = 0.038, mean difference 2.69) asks for a few more cases
+  expect_equal(calc_case_control_nested_continuous(mean_diff = 2.69, sigma = 8.41, nD = 1, nH = 2, power = 0.85)$n_sets, 132)
+  # eq. 34 written out: N = [(z_a + z_b) sigma / delta]^2 (m + 1) / m
+  for (m in 1:5) {
+    n34 <- ceiling(((qnorm(0.975) + qnorm(0.9)) * 3 / 1.2)^2 * (m + 1) / m)
+    expect_equal(calc_case_control_nested_continuous(mean_diff = 1.2, sigma = 3, nD = 1, nH = m, power = 0.9)$n_sets, n34)
+  }
+  # 1:1 is the paired comparison: SD of the case-control differences = sigma * sqrt(2); the paired t-test asks for 1-2 more
+  one <- calc_case_control_nested_continuous(mean_diff = 1.2, sigma = 3, nD = 1, nH = 1, power = 0.9)
+  paired <- calc_means_paired(mean_diff = 1.2, sd_diff = 3 * sqrt(2), power = 0.9)
+  expect_true(paired$n - one$n_sets >= 0 && paired$n - one$n_sets <= 2)
+  # several cases per set: the mean difference gives theta = delta / sigma^2 for any nD (see .cf_pse_conlogistic_bin)
+  expect_equal(calc_case_control_nested_continuous(mean_diff = 0.4, sigma = 1, nD = 2, nH = 3)$n_sets,
+               calc_case_control_nested_continuous(OR = exp(0.4), sigma = 1, nD = 2, nH = 3)$n_sets)
+  expect_equal(calc_case_control_nested_continuous(mean_diff = 0.4, sigma = 1, nD = 2, nH = 3)$n_sets, 41)
+  expect_error(calc_case_control_nested_continuous(OR = 1.2, OR_sd = 1.3, sigma = 1, nD = 1, nH = 2), "one way")
+  expect_error(calc_case_control_nested_continuous(sigma = 1, nD = 1, nH = 2), "one way")
+  expect_error(calc_case_control_nested_continuous(mean_diff = 0, sigma = 1, nD = 1, nH = 2), "differ")
+})
+
 test_that("nested case-control functions reject invalid inputs", {
   expect_error(calc_case_control_nested_binary(OR = 1, pE = 0.15, nD = 1, nH = 2), "must differ")
   expect_error(calc_case_control_nested_binary(OR = 3.5, pE = 0.15, nD = 0, nH = 2), "positive integer")

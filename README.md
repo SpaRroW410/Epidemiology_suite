@@ -224,7 +224,8 @@ ss_find("eyes per patient")            # a data frame: key, design, calculator, 
 run_app(calculator = "eyes per patient")   # a design key from ss_find(), or words (the best match opens)
 ```
 
-Three vignettes (`vignette("getting-started")`, `"sample-size-from-r"`, `"analyze-from-r"`) show the functions at work. Every calculation is also an exported function (195 `calc_*()` functions) with its own help page, every argument described and a
+Seven vignettes show the functions at work: `vignette("getting-started")`, `"sample-size-from-r"`, `"analyze-from-r"`, and one per
+topic -- `"survival-from-r"`, `"trials-from-r"`, `"diagnostic-accuracy-from-r"`, `"surveillance-from-r"`. Every calculation is also an exported function (195 `calc_*()` functions) with its own help page, every argument described and a
 worked example taken from a verified test, for scripts, Quarto and R Markdown:
 
 ```r

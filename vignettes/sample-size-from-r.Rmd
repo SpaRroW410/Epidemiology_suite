@@ -53,6 +53,20 @@ A log-rank comparison: event probabilities of 40% (experimental) and 60% (contro
 calc_logrank(pE = 0.4, pC = 0.6, hr = log(1 - 0.4) / log(1 - 0.6))
 ```
 
+More in `vignette("survival-from-r")`.
+
+## Matched case-control, measured exposure
+
+Cases each matched to two controls, comparing a biomarker (SD 8.41 within matched sets) that is on average 2.77 higher in the cases:
+conditional logistic regression, 85% power (Lachin 2008, section 4.1).
+
+```{r matched-measured}
+mm <- calc_case_control_nested_continuous(mean_diff = 2.77, sigma = 8.41, nD = 1, nH = 2, power = 0.85)
+c(cases = mm$n_cases, controls = mm$n_controls, odds_ratio_per_SD = round(mm$OR_sd, 3))
+```
+
+With one control per case this is the comparison of paired means (`calc_means_paired()`, SD of the differences = sigma x sqrt(2)).
+
 ## Clustered data
 
 When people are sampled or treated in clusters (villages, clinics), the sample size is inflated by the design effect

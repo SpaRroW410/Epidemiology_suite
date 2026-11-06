@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc_case_control.R
 \name{calc_case_control_nested_binary}
 \alias{calc_case_control_nested_binary}
-\title{Sample size for a nested case-control study, binary exposure}
+\title{Sample size for matched sets (nested or matched case-control), binary exposure}
 \usage{
 calc_case_control_nested_binary(
   OR,
@@ -15,9 +15,9 @@ calc_case_control_nested_binary(
 )
 }
 \arguments{
-\item{OR}{Expected odds ratio per unit change in the binary exposure (> 0, != 1)}
+\item{OR}{Expected odds ratio, exposed vs unexposed (> 0, != 1)}
 
-\item{pE}{Prevalence of exposure among the matched set (0,1)}
+\item{pE}{Probability of exposure under the null hypothesis (0,1)}
 
 \item{nD}{Number of cases per matched set (>= 1)}
 
@@ -26,21 +26,25 @@ calc_case_control_nested_binary(
 \item{R2}{Proportion of variation in exposure explained by other covariates
 in the conditional logistic model (0,1); 0 = no adjustment covariates}
 
-\item{alpha}{Significance level (0,1)}
+\item{alpha}{Significance level (0,1), two-sided}
 
 \item{power}{Desired power (0,1)}
 }
 \value{
-list(n, inputs) where n is the number of matched sets required
-(each set = nD cases + nH controls)
+list(n_sets, n_cases, n_controls, n_total, inputs)
 }
 \description{
-Wraps powerSurvEpi::powerConLogistic.bin() (conditional logistic
-regression for a matched/nested case-control set), rather than
-reimplementing the underlying math (project convention -- powerSurvEpi
-is already a project dependency, so this adds zero new packages).
+Number of matched sets, each of nD cases and nH controls, for the score test of a binary exposure in a conditional logistic
+regression (Lachin 2008, eq. 25 and 35, with the information per set nD * nH / (nD + nH); see the comment above
+\code{.cf_pse_conlogistic_bin()}). Applies to a nested case-control study and to any individually matched case-control study, 1:1 or
+1:m. Written out in the app; equal to powerSurvEpi::powerConLogistic.bin().
 }
 \examples{
-calc_case_control_nested_binary(OR = 3.5, pE = 0.15, nD = 1, nH = 2, R2 = 0, alpha = 0.05, 
+calc_case_control_nested_binary(OR = 3.5, pE = 0.15, nD = 1, nH = 2, R2 = 0, alpha = 0.05,
     power = 0.8)
+}
+\references{
+Lachin JM. Sample size evaluation for a multiply matched case-control study using the score test from a conditional
+logistic (discrete Cox PH) regression model. Stat Med 2008;27(14):2509-2523. doi:10.1002/sim.3057. Erratum: Stat Med
+2018;37(10):1765-1766. doi:10.1002/sim.7598.
 }

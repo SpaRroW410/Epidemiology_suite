@@ -2,23 +2,25 @@
 % Please edit documentation in R/calc_case_control.R
 \name{calc_case_control_nested_continuous}
 \alias{calc_case_control_nested_continuous}
-\title{Sample size for a nested case-control study, continuous exposure}
+\title{Sample size for matched sets (nested or matched case-control), measured exposure}
 \usage{
 calc_case_control_nested_continuous(
-  OR,
+  OR = NULL,
   sigma,
   nD,
   nH,
   R2 = 0,
   alpha = 0.05,
-  power = 0.8
+  power = 0.8,
+  OR_sd = NULL,
+  mean_diff = NULL
 )
 }
 \arguments{
-\item{OR}{Expected odds ratio per one-unit (one-SD, if standardized) change
-in the continuous exposure (> 0, != 1)}
+\item{OR}{Odds ratio per one unit of the exposure (> 0, != 1), or NULL}
 
-\item{sigma}{Standard deviation of the exposure (> 0)}
+\item{sigma}{Standard deviation of the exposure within matched sets (> 0); without strong matching on factors related to the
+exposure, the SD among controls is a usual (slightly conservative) choice}
 
 \item{nD}{Number of cases per matched set (>= 1)}
 
@@ -26,17 +28,42 @@ in the continuous exposure (> 0, != 1)}
 
 \item{R2}{Proportion of variation in exposure explained by other covariates (0,1)}
 
-\item{alpha}{Significance level (0,1)}
+\item{alpha}{Significance level (0,1), two-sided}
 
 \item{power}{Desired power (0,1)}
+
+\item{OR_sd}{Odds ratio per one standard deviation of the exposure, or NULL}
+
+\item{mean_diff}{Mean exposure of cases minus that of their matched controls (!= 0), or NULL}
 }
 \value{
-list(n_sets, n_total, inputs)
+list(n_sets, n_cases, n_controls, n_total, OR (per unit), OR_sd, theta, inputs)
 }
 \description{
-Wraps powerSurvEpi::powerConLogistic.con().
+Number of matched sets, each of nD cases and nH controls, for the score test of a measured (continuous) exposure in a
+conditional logistic regression (Lachin 2008, eq. 25; eq. 27 and 34 for one case per set). Applies to a nested case-control study
+and to any individually matched case-control study, 1:1 or 1:m: with one control per case it gives the z-test version of the paired
+comparison of means, since the SD of the case-control differences is sigma * sqrt(2). For two or more cases per set the
+information per set is nD * nH / (nD + nH), not the paper's nD * \link{1 - 1 / choose(nD + nH, nD)} (which powerSurvEpi's
+powerConLogistic.con() uses): see the comment above \code{.cf_pse_conlogistic_bin()}.
+}
+\details{
+The effect is given in one of three ways (exactly one):
+\itemize{
+\item \code{OR}, the odds ratio per one unit of the exposure (Lachin's O; theta = log(OR));
+\item \code{OR_sd}, the odds ratio per one standard deviation (theta = log(OR_sd) / sigma);
+\item \code{mean_diff}, the difference between the mean exposure of the cases and of their matched controls (theta =
+mean_diff / sigma^2, eq. 32; for several cases per set the paper's eq. 28-30 add a constant that comes from its information
+factor and is 1 with the factor used here).
+}
 }
 \examples{
-calc_case_control_nested_continuous(OR = 1.39, sigma = 1, nD = 1, nH = 2, R2 = 0, 
-    alpha = 0.05, power = 0.85)
+# Lachin (2008), sec. 4.1: OR 1.39 per SD, 2 controls per case, 85\% power -> 125 cases
+calc_case_control_nested_continuous(OR_sd = 1.39, sigma = 8.41, nD = 1, nH = 2, power = 0.85)
+# the same, from the means: cases 2.77 above their controls on a biomarker with SD 8.41
+calc_case_control_nested_continuous(mean_diff = 2.77, sigma = 8.41, nD = 1, nH = 2, power = 0.85)
+}
+\references{
+Lachin JM. Stat Med 2008;27(14):2509-2523. doi:10.1002/sim.3057 (sec. 3.2, 4.1). Erratum: Stat Med
+2018;37(10):1765-1766. doi:10.1002/sim.7598.
 }

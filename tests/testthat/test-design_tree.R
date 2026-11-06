@@ -171,7 +171,9 @@ test_that("case-control: a yes/no exposure gives the odds-ratio calculators, a m
   cont <- c(base, "A measurement compared between cases and controls (a difference in mean levels, e.g. serum lead, vitamin D)", "Mean and standard deviation (roughly symmetric)")
   expect_equal(.key(.walk(c(cont, "No -- unmatched (two independent groups)", "No -- equal group sizes and similar variances (t-test)"))),
                "means_two_indep")
-  expect_equal(.key(.walk(c(cont, "Yes -- individually matched (analysed as paired differences)"))), "means_two_dep")
+  expect_equal(.key(.walk(c(cont, "Yes -- individually matched, one control per case (analysed as paired differences)"))), "means_two_dep")
+  expect_equal(.key(.walk(c(cont, "Yes -- individually matched, two or more controls per case (conditional logistic regression)"))),
+               "case_control_matched_measured")
   expect_equal(.key(.walk(c(cont, "Frequency-matched (analysed as two independent groups, adjusting for the matching factors)",
                             "Clearly unequal variances (Welch's t-test)"))), "means_welch")
 })
@@ -385,7 +387,7 @@ test_that("a continuous outcome summarised by median and IQR reaches the same pa
   cc <- .walk(c("Compare groups / test an association or hypothesis", "I only observe what happened naturally",
                 "Their outcome/disease status (exposure ascertained backwards)",
                 "A measurement compared between cases and controls (a difference in mean levels, e.g. serum lead, vitamin D)",
-                "Median and interquartile range (skewed)", "Yes -- individually matched (analysed as paired differences)"))
+                "Median and interquartile range (skewed)", "Yes -- individually matched, one control per case (analysed as paired differences)"))
   expect_equal(.key(cc), "means_two_dep")
   # the free-text parser answers the new question from the words used
   expect_equal(walk_free_text("Cohort study, difference in median length of stay (IQR) between exposed and unexposed")$flags$summary, "median")

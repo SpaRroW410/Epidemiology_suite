@@ -39,6 +39,18 @@ test_that("every catalog design preset is a real radio choice in its module", {
   }
 })
 
+test_that("every further preset (also_set) is a real radio choice in the entry's module", {
+  n <- 0
+  for (e in .built) for (id in names(e$also_set)) {
+    n <- n + 1
+    mid <- sub("-[^-]+$", "", e$module_input_id)
+    expect_identical(sub("-[^-]+$", "", id), mid, info = paste(e$key, id))
+    expect_true(e$also_set[[id]] %in% .radio_values(.ui_html[[mid]], id),
+                info = paste0(e$key, ": '", e$also_set[[id]], "' is not a choice of ", id))
+  }
+  expect_gt(n, 0)
+})
+
 test_that("every design radio choice in a module has a catalog entry", {
   # Only "<module>-design" selectors: other preset inputs (e.g. the resource
   # equation's size/check "mode") switch between views of one calculation.

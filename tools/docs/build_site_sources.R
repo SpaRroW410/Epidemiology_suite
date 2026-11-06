@@ -86,6 +86,8 @@ pages <- function(ids) paste0("      - articles/", ids)
 art <- c("articles:",
          "  - title: Start here", "    contents:", "      - articles/calculators",
          "  - title: Using it from R", "    contents:", "      - getting-started", "      - sample-size-from-r", "      - analyze-from-r",
+         "  - title: Using it from R, by topic", "    contents:", "      - survival-from-r", "      - trials-from-r",
+         "      - diagnostic-accuracy-from-r", "      - surveillance-from-r",
          "  - title: Project", "    contents:", "      - articles/roadmap", "      - articles/design", "      - articles/algorithm")
 for (wb in module_workbenches) for (g in wb$groups) {
   art <- c(art, paste0("  - title: ", yq(paste0(wb$title, ": ", g$title))), "    contents:", pages(g$module_ids))

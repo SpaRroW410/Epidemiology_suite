@@ -45,7 +45,7 @@ something outside the code (a paper, a package, an account). Work is collected o
 - [ ] S-4 **[owner]** real-phone check on Connect Cloud (sleep, switch apps, reload) and the browser build.
 - [ ] Check: Word on phones, Google Docs and LibreOffice (whether pasted LaTeX can be turned into an equation there; table styles); a long study on a phone.
 
-## C. Small items (cleared on 4 Nov 2026 unless marked open)
+## C. Small items (cleared on 4-5 Nov 2026)
 
 - [x] **About the three versions:** a table comparing the phone / server version, the browser version and the R package (where it runs,
   what you type, internet, start-up, simulations, devices, Studies, how to open it, how to cite it), folded on Home and on the Cite tab,
@@ -65,14 +65,22 @@ something outside the code (a paper, a package, an account). Work is collected o
   beyond alpha and power, or (Longitudinal) were left as they are on 30 Oct.
 - [x] Wizard: a cohort with the exposure in ordered levels (trend, Cochran-Armitage) or on a scale (logistic regression), and a
   case-control with the exposure in unordered categories (chi-square) or ordered levels (trend; approximate, the help says why).
-- [ ] Open: a case-control with several controls per case and a measured exposure still uses the paired test (1:m is approximate).
+- [x] A case-control with several controls per case and a measured exposure (5 Nov 2026): the guide asks "one control per case, or
+  two or more" and sends 1:m to the matched-sets design (conditional logistic regression, Lachin 2008, read with its 2018 erratum),
+  which now takes the effect as the mean exposure in cases and controls, an odds ratio per SD or per unit. Found on the way: for sets
+  with two or more cases the paper's information per set, nD [1 - 1/C(nD + nH, nD)], is too large; simulation with `survival::clogit`
+  gives the planned power with nD nH / (nD + nH) (what powerSurvEpi's binary function uses) and 51-66% with the paper's. The app uses
+  nD nH / (nD + nH) for both exposures (the measured one gave too few sets before, for 2+ cases per set). One case per set unchanged.
+- [ ] Optional: tell powerSurvEpi's maintainer that `powerConLogistic.con()` uses the paper's factor (the simulation is in the
+  NEWS entry of 5 Nov 2026); Tang's 2009 comment on the paper (Stat Med 28:175-177) was not read and may say the same.
 - [x] `epi.ssdetect()` against epiR 3.0.0 (its source): the same n whenever N x prevalence is a whole number (148 of 153); otherwise 3.0.0
   does not round the number of affected units up and asks for a few more; where even testing everyone falls short, this app says so and
   3.0.0 returns N. Kept as it was (epiR 2.0.67), the difference written in the help; 3.0.0's two-stage version is not in the app.
 - [x] `kappaSize` re-derived and dropped from the runtime (equal to the package in 200 random cases; now only a test oracle).
 - [x] `ss_text()`, `ss_export()`, `ss_curve()` exported (the paragraph, the CSV / JSON, the curve), with help pages and a section in the
-  "Sample sizes from R" vignette. The naming: `calc_*()` compute, `ss_*()` work with results. [ ] Open, optional: per-family vignettes
-  (survival, trials, diagnostic accuracy, surveillance).
+  "Sample sizes from R" vignette. The naming: `calc_*()` compute, `ss_*()` work with results. Per-topic vignettes (5 Nov
+  2026): `survival-from-r`, `trials-from-r`, `diagnostic-accuracy-from-r`, `surveillance-from-r`, each with the tested published
+  examples.
 - [x] The justification paragraph no longer shows inputs that were not given ("N = NULL").
 
 ## C2. Guide: research questions (plan at the end of `ROADMAP.md`)
