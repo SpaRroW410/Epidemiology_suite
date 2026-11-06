@@ -235,3 +235,16 @@ test_that("the guide shows the words behind each answer, the two cues of a contr
     expect_match(as.character(output$design_wizard_body$html), "no sample size")
   })
 })
+
+test_that("near misses of the new rules: 'its', 'impact', a team's own programme, 'a case of' in a diagnostic question", {
+  # "its" is not an interrupted time series
+  r <- walk_free_text("Controlled before and after study of a policy introduced in 2015 and its effect, with comparison districts")
+  expect_equal(r$node_id, "term_did")
+  # a team's own programme (and "impact", which contains "act") is not a natural experiment: who assigns it is asked
+  expect_equal(walk_free_text("impact of a health education programme implemented by ASHA workers")$node_id, "allocation")
+  expect_equal(walk_free_text("Evaluation of the national tuberculosis elimination programme implemented in 2020, interrupted time series")$node_id,
+               "term_its")
+  # "a case of" in a diagnostic question is not a case report
+  expect_false(identical(walk_free_text("accuracy of a rapid test in a case of fever against a gold standard")$node_id, "term_case_report"))
+  expect_equal(walk_free_text("We report a rare case of Kikuchi disease")$node_id, "term_case_report")
+})

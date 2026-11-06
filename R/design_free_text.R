@@ -52,6 +52,11 @@
   )
 }
 
+# A policy, law or government programme, and the words for it starting (the natural-experiment rule at "who determines").
+.free_text_actor <- paste0("\\b(polic(y|ies)|laws?|act|schemes?|bans?|tax(es)?|mandates?|regulations?|mission|",
+                           "(national|government|state|public|nationwide|countrywide)\\s+(\\w+\\s+){0,3}(programmes?|programs?|campaigns?|initiatives?))\\b")
+.free_text_enact <- "\\b(introduc|implement|launch|roll.?out|enact|came into)"
+
 free_text_rules <- list(
 
   # Analysis of counts the user already has. Checked first, but only on phrases that
@@ -73,7 +78,7 @@ free_text_rules <- list(
     list(pattern = "(have|with) (the |some |my |our )?(summary )?(counts|numbers) (already|i|we|and)|analy[sz]e (the |my |our )?(counts|summary|data (i|we) (already )?(have|collected))|already (have|collected) (the )?(counts|data|numbers)|from (the )?(summary )?counts|\\b2\\s?x\\s?2 table|mantel.?haenszel|standardi[sz]ed mortality ratio|\\bsmr\\b|confidence interval (for|of) (a |the |an )?(proportion|mean|rate|incidence)",
          option_index = 10, confidence = "Medium"),
     # a case report or case series (not a self-controlled case series, not a trial's case report form)
-    list(pattern = "(?<!controlled )(?<!controlled-)\\bcase.?series\\b|\\bcase report(?!\\s*form)|\\ba (rare )?case of\\b",
+    list(pattern = "(?<!controlled )(?<!controlled-)\\bcase.?series\\b|\\bcase report(?!\\s*form)|\\ba rare case of\\b|\\bwe (report|present|describe) a (rare )?case\\b",
          option_index = 15, confidence = "High"),
     # mixed methods before qualitative: a mixed-methods description usually also says "qualitative"
     list(pattern = "mixed.?methods?|explanatory sequential|exploratory sequential|convergent (parallel )?design|multi.?method",
@@ -246,10 +251,10 @@ free_text_rules <- list(
   ),
 
   allocation = list(
-    # assigned by a programme, a policy or a law, and studied afterwards (a natural experiment); not when the text says randomised
-    list(pattern = paste0("(?s)^(?!.*\\brandomi[sz]).*(natural experiment|(policy|programme|program|law|act|scheme|ban|tax|mandate|regulation|mission|campaign)\\b.{0,60}\\b",
-                          "(introduc|implement|launch|roll.?out|enact|came into)|(introduc|implement|launch|roll.?out|enact)\\w*\\b.{0,40}\\b(policy|programme|program|law|scheme|ban|tax|mandate|regulation)|",
-                          "(before and after|since) the (ban|policy|law|programme|program|scheme|mandate))"),
+    # assigned by a programme, a policy or a law, and studied afterwards (a natural experiment); not when the text says randomised.
+    # A programme counts only when it is national / government / state: a team's own "programme implemented" is not a natural experiment.
+    list(pattern = paste0("(?s)^(?!.*\\brandomi[sz]).*(natural experiment|", .free_text_actor, ".{0,60}", .free_text_enact, "|",
+                          .free_text_enact, "\\w*\\b.{0,40}", .free_text_actor, "|(before and after|since) the (ban|policy|law|scheme|mandate|tax)\\b)"),
          option_index = 4, confidence = "Medium"),
     # assigned by the team without randomisation; before the next rule, whose "randomised" also matches "non-randomised"
     list(pattern = "non.?randomi[sz]ed|not (be )?randomi[sz]ed|without randomi[sz]ation|quasi.?experiment",
@@ -261,7 +266,7 @@ free_text_rules <- list(
   ),
 
   quasi_type = list(
-    list(pattern = "interrupted time.?series|segmented regression|\\bits\\b|time.?series",           option_index = 1, confidence = "High"),
+    list(pattern = "interrupted time.?series|segmented regression|time.?series",           option_index = 1, confidence = "High"),
     list(pattern = "regression discontinuity|\\brdd\\b|cut.?off|threshold",                         option_index = 3, confidence = "High"),
     list(pattern = "difference.?in.?differences?|controlled before|comparison (group|district|area|village|block|state)s?|control (group|district|area|village|block)s?",
          option_index = 2, confidence = "High"),
