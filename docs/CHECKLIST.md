@@ -447,10 +447,12 @@ The guide's end points for designs not built yet are tested to be listed here (`
   review, qualitative and mixed-methods words; "we will assign / randomise"; group-level data; Mendelian randomisation only from
   "Mendelian randomi[sz]ation" or "genetic instrument" (not "variant"). Each rule gets cases in the FIND-10 battery. Built 6 Nov 2026; the
   cases are in `test-design_free_text.R` until the FIND-10 battery exists.
-- [ ] **FIND-21** A design card at every end point of the guide (F3): fallback design and what it costs, three threats to validity with
-  mitigations, reporting guideline, effect measure, workflow. From the registry text, edited (row 18 completed, row 21 rewritten);
-  each claim cited (SRC-06) or marked with a warning sign whose hover reads "Suggestion only -- no confirmed source". Cards also for
-  the guide's end points the registry lacks (diagnostic accuracy, agreement, prediction, estimation, SCCS, case-cohort, ...).
+- [x] **FIND-21** A design card at the guide's end points (F3): fallback design and what it costs, three threats to validity with
+  mitigations, reporting guideline, effect measure, workflow; from the registry text, edited; each statement cites a source checked for it
+  (SRC-06) or carries a warning sign whose hover reads "Suggestion only -- no confirmed source". Built 7 Nov 2026 (`R/design_cards.R`): 35
+  cards (reviews, qualitative approaches, mixed methods, trials, quasi-experiments, observational and descriptive designs, Mendelian
+  randomisation), shown by the end point's own design or by the answer that decided the design; the registry's factorial row has no end
+  point in the guide yet.
 - [ ] **FIND-22** A PubMed search builder (F4): the design's filter from a published validated filter where one exists (for example the
   Cochrane highly sensitive search strategy for randomised trials), otherwise marked "simple filter, not validated"; the user's concepts
   as `[tiab]` terms plus the MeSH headings they choose; the four wrong headings of the source corrected.
@@ -458,6 +460,9 @@ The guide's end points for designs not built yet are tested to be listed here (`
   `tools/` script that refreshes the list.
 - [ ] **FIND-24** **[optional]** Clinical codes for record-based studies (WHO ICD-10, ICD-10-CM, SNOMED CT, LOINC, RxNorm), taken only
   from the official code lists and never generated; needs a decision on which lists and their licence terms.
+- [ ] **FIND-25** Design cards for the guide's end points the registry lacks: diagnostic accuracy (STARD), agreement and reliability,
+  prediction models (TRIPOD), self-controlled case series, case-cohort, propensity-score and time-varying designs, phase II and
+  dose-finding trials; each with its sources checked as in SRC-06.
 
 ## 4. Studies: a working record of calculations (STUDY)
 
@@ -579,12 +584,16 @@ help text says so.
 - [ ] **SRC-03** A source for "design effect 1.5 or 2 when nothing is known" (the owner's wording; no source checked).
 - [ ] **SRC-04** Regidor et al. 1993 (epiR's source for the Byar SMR interval) could not be found; not cited.
 - [ ] **SRC-05** **[blocked]** Tang Y. Comments on Lachin (2008). Stat Med 2009;28:175-177, and the author's reply.
-- [ ] **SRC-06** Sources for the design-card claims (FIND-21): an interaction needs about four times the sample size (factorial);
-  washout longer than five half-lives (crossover); 8-12 time points before and after (interrupted time series); the prevalence ratio
-  when the prevalence is above 10%; a non-inferiority margin preserving at least half the control effect; F < 10 and p < 5e-8
-  (Mendelian randomisation); the corrected covered area and Jadad's algorithm (umbrella reviews); and the citation of each reporting
-  guideline named (PRISMA and its extensions, PRIOR, ENTREQ, eMERGe, COREQ, SRQR, GRAMMS, CONSORT and its extensions, TREND, STROBE,
-  RECORD, CARE, PROCESS, STROBE-MR).
+- [x] **SRC-06** Sources for the design-card claims (FIND-21), checked in PubMed 6-7 Nov 2026 (list in `R/design_cards.R`): the 23
+  reporting guidelines resolve to their statements (CONSORT 2025 replaces 2010 for parallel trials); factorial interaction needs four
+  times the sample size: confirmed in the full text of Montgomery, Peters & Little 2003 (not yet shown: no factorial end point);
+  prevalence ratio when the outcome is common (Zhang & Yu 1998; Barros & Hirakata 2003); p < 5e-8 (Pe'er et al. 2008); corrected covered
+  area (Pieper et al. 2014); Jadad's algorithm (1997). Contradicted by their sources and corrected: F > 10 for Mendelian randomisation
+  (Burgess & Thompson 2011: misleading) and 8-12 time points for an interrupted time series (Bernal, Cummins & Gasparrini 2017: no fixed
+  minimum).
+- [ ] **SRC-07** **[blocked]** Two card statements stay marked as suggestions: a crossover washout of more than five half-lives and a
+  non-inferiority margin preserving at least half the control effect; both come from regulatory guidance (bioequivalence; FDA 2016
+  non-inferiority) that is not in PubMed and was not read. *Unblock:* reading the guidance documents.
 
 ## 10. Bigger workbenches and extensions (WB)
 

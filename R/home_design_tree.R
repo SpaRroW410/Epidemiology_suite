@@ -66,7 +66,7 @@ design_nodes <- list(
       list(label = "Assess the accuracy of a diagnostic test", next_id = "diag_type"),
       list(label = "Assess agreement/reliability between raters or methods", next_id = "agree_scale"),
       list(label = "Explore experiences or meanings (qualitative)", next_id = "qual_approach"),
-      list(label = "Plan a meta-analysis (number of studies, or trial sequential analysis)", next_id = "meta_type"),
+      list(label = "Plan a meta-analysis (number of studies, or trial sequential analysis)", next_id = "meta_type", set = list(design = "sr_meta")),
       list(label = "Study the relationship between variables (correlation / regression)", next_id = "rel_type"),
       list(label = "Something else: survey sampling, scale development, rare events, animal studies, pilots, health economics, genetics", next_id = "other_purpose"),
       list(label = "Analyze counts I already have (a 2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_type"),
@@ -324,15 +324,15 @@ design_nodes <- list(
     question = "What are you estimating?",
     help = "No comparison group and no hypothesis here -- just a target precision (confidence interval width) and a confidence level.",
     options = list(
-      list(label = "A proportion / prevalence", next_id = "term_prop_precision"),
-      list(label = "A mean", next_id = "term_mean_precision"),
+      list(label = "A proportion / prevalence", next_id = "term_prop_precision", set = list(design = "descriptive_cs")),
+      list(label = "A mean", next_id = "term_mean_precision", set = list(design = "descriptive_cs")),
       list(label = "An incidence rate", next_id = "term_rate_precision"),
       list(label = "A ratio (risk ratio / odds ratio / rate ratio)", next_id = "ratio_type"),
       list(label = "Sensitivity or specificity of a test", next_id = "diag_type"),
       list(label = "An ICC or kappa (agreement)", next_id = "agree_scale"),
       list(label = "A standard deviation / variance", next_id = "term_sd_precision"),
       list(label = "The size of a hidden or hard-to-count population (capture-recapture)", next_id = "term_capture_recapture"),
-      list(label = "A prevalence from a cluster, multistage or stratified survey", next_id = "survey_type"),
+      list(label = "A prevalence from a cluster, multistage or stratified survey", next_id = "survey_type", set = list(design = "descriptive_cs")),
       list(label = "An upper bound on a rare event rate when no events were seen", next_id = "term_rule3_bound")
     )
   ),
@@ -539,7 +539,7 @@ design_nodes <- list(
     question = "Who determines who receives the exposure or intervention?",
     help = "If you assign it yourself, the study is experimental (a trial). If you only observe what happened naturally, it's observational.",
     options = list(
-      list(label = "I (the investigator) assign it", next_id = "exp_unit"),
+      list(label = "I (the investigator) assign it", next_id = "exp_unit", set = list(design = "parallel_rct")),
       list(label = "I only observe what happened naturally", next_id = "selection_basis"),
       list(label = "I (my team) assign it, but not at random (quasi-experiment)", next_id = "quasi_type", set = list(assigned = "team")),
       list(label = "Someone else assigned it -- a programme, a policy or a law -- and I study its effect (natural experiment)",
@@ -553,11 +553,11 @@ design_nodes <- list(
     question = "What is the unit of allocation?",
     options = list(
       list(label = "Individual subjects", next_id = "exp_intent", set = list(cluster = FALSE)),
-      list(label = "Groups/clusters (villages, schools, PHCs, wards)", next_id = "exp_intent", set = list(cluster = TRUE)),
+      list(label = "Groups/clusters (villages, schools, PHCs, wards)", next_id = "exp_intent", set = list(cluster = TRUE, design = "cluster_rct")),
       list(label = "Same subject receives both, in sequence (crossover)", next_id = "term_crossover"),
       list(label = "Clusters cross over in sequence (stepped-wedge)", next_id = "term_stepped_wedge"),
       list(label = "Single subject, repeated periods (N-of-1)", next_id = "term_n_of_1"),
-      list(label = "Groups/clusters, and I want to simulate the mixed-model analysis directly (Monte Carlo)", next_id = "glmm_outcome", set = list(cluster = TRUE)),
+      list(label = "Groups/clusters, and I want to simulate the mixed-model analysis directly (Monte Carlo)", next_id = "glmm_outcome", set = list(cluster = TRUE, design = "cluster_rct")),
       list(label = "Each patient has several eyes, lesions or patches, and all of a patient's units get the same treatment", next_id = "pu_outcome"),
       list(label = "Each patient has several eyes, lesions or patches, and gets both treatments (split-face, one eye per arm)", next_id = "term_pu_within")
     )
@@ -587,16 +587,16 @@ design_nodes <- list(
     question = "What is the comparison intent of the trial?",
     options = list(
       list(label = "Show one arm is better (superiority)", next_id = "outcome_type"),
-      list(label = "Show it's not unacceptably worse (non-inferiority)", next_id = "noninf_outcome"),
-      list(label = "Show both arms are practically equivalent (equivalence)", next_id = "equiv_outcome"),
-      list(label = "Show pharmacokinetic equivalence of formulations (bioequivalence)", next_id = "be_type"),
-      list(label = "Single-arm, response rate vs. a historical control (Phase II)", next_id = "term_simon"),
+      list(label = "Show it's not unacceptably worse (non-inferiority)", next_id = "noninf_outcome", set = list(design = "noninferiority")),
+      list(label = "Show both arms are practically equivalent (equivalence)", next_id = "equiv_outcome", set = list(design = "noninferiority")),
+      list(label = "Show pharmacokinetic equivalence of formulations (bioequivalence)", next_id = "be_type", set = list(design = "none")),
+      list(label = "Single-arm, response rate vs. a historical control (Phase II)", next_id = "term_simon", set = list(design = "none")),
       list(label = "Interim analyses planned (group sequential)", next_id = "gs_type"),
       list(label = "Several primary endpoints or comparisons (multiplicity adjustment)", next_id = "mult_type"),
       list(label = "Detect whether the effect differs between subgroups (interaction)", next_id = "term_subgroup"),
       list(label = "A Bayesian design (assurance, or a Bayes-factor target)", next_id = "bayes_type"),
-      list(label = "Phase I dose-finding (3+3, continual reassessment method)", next_id = "term_dose_finding"),
-      list(label = "Platform / basket / umbrella trial", next_id = "term_platform")
+      list(label = "Phase I dose-finding (3+3, continual reassessment method)", next_id = "term_dose_finding", set = list(design = "none")),
+      list(label = "Platform / basket / umbrella trial", next_id = "term_platform", set = list(design = "none"))
     )
   ),
 
@@ -675,12 +675,12 @@ design_nodes <- list(
       "were selected)."
     ),
     options = list(
-      list(label = "Their exposure status (outcome measured/ascertained later)", next_id = "cohort_outcome"),
-      list(label = "Their outcome/disease status (exposure ascertained backwards)", next_id = "cc_exposure_type"),
-      list(label = "Neither -- both exposure and outcome measured at the same time (cross-sectional)", next_id = "outcome_type"),
-      list(label = "Cases drawn from within a defined cohort, controls sampled from it (nested case-control)", next_id = "term_nested_cc"),
+      list(label = "Their exposure status (outcome measured/ascertained later)", next_id = "cohort_outcome", set = list(design = "cohort")),
+      list(label = "Their outcome/disease status (exposure ascertained backwards)", next_id = "cc_exposure_type", set = list(design = "case_control")),
+      list(label = "Neither -- both exposure and outcome measured at the same time (cross-sectional)", next_id = "outcome_type", set = list(design = "analytic_cs")),
+      list(label = "Cases drawn from within a defined cohort, controls sampled from it (nested case-control)", next_id = "term_nested_cc", set = list(design = "nested_cc")),
       list(label = "Cases + a randomly sampled sub-cohort from a defined cohort (case-cohort)", next_id = "term_case_cohort"),
-      list(label = "Each case is their own control, compared across different time windows (case-crossover)", next_id = "term_case_crossover"),
+      list(label = "Each case is their own control, compared across different time windows (case-crossover)", next_id = "term_case_crossover", set = list(design = "case_crossover")),
       list(label = "Repeated events within the same individuals, self-controlled (SCCS)", next_id = "term_sccs"),
       list(label = "The unit of observation is a group/area, not a person (ecological)", next_id = "eco_time"),
       list(label = "Exposed and unexposed matched on a propensity score", next_id = "term_psm"),
@@ -1223,7 +1223,7 @@ design_nodes <- list(
     question = "What kind of review is it?",
     help = "A review's size is the number of studies its search finds, so most reviews have no sample size to plan. A planned meta-analysis can be checked for power (the number of studies), and a cumulative one for the information size (trial sequential analysis).",
     options = list(
-      list(label = "A systematic review that pools similar studies (meta-analysis)", next_id = "meta_type"),
+      list(label = "A systematic review that pools similar studies (meta-analysis)", next_id = "meta_type", set = list(design = "sr_meta")),
       list(label = "A systematic review without pooling (narrative synthesis)", next_id = "term_sr_narrative"),
       list(label = "A scoping review or evidence map (what has been studied, not how well it works)", next_id = "term_scoping"),
       list(label = "Several treatments compared directly and indirectly (network meta-analysis)", next_id = "term_nma"),
@@ -1395,6 +1395,39 @@ design_nodes <- list(
       "Changes in how cases are counted or coded over the years also change the trend. If a programme or policy started at a known",
       "date, an interrupted time series (Compare groups -> Someone else assigned it) asks the question more directly."))
 )
+
+
+# Design cards (R/design_cards.R) for end points that are always one design; the others show the card of the `design` flag
+# set by the answer that decided the design.
+.terminal_cards <- c(
+  term_crossover = "crossover",
+  term_stepped_wedge = "stepped_wedge",
+  term_nma = "nma",
+  term_sr_narrative = "sr_narrative",
+  term_scoping = "scoping",
+  term_umbrella = "umbrella",
+  term_qes = "qes",
+  term_qual_phenomenology = "phenomenology",
+  term_qual_grounded = "grounded",
+  term_qual_ethnography = "ethnography",
+  term_qual_case_study = "case_study",
+  term_qual_descriptive = "qual_descriptive",
+  term_mm_explanatory = "mm_explanatory",
+  term_mm_exploratory = "mm_exploratory",
+  term_mm_convergent = "mm_convergent",
+  term_mm_embedded = "mm_embedded",
+  term_case_report = "case_report",
+  term_case_series = "case_series",
+  term_ecological = "ecological",
+  term_ecological_trend = "ecological_trend",
+  term_its = "its",
+  term_did = "did",
+  term_rdd = "rdd",
+  term_prepost_means = "prepost",
+  term_prepost_props = "prepost",
+  term_mr = "mr")
+for (.id in names(.terminal_cards)) design_nodes[[.id]]$card <- .terminal_cards[[.id]]
+rm(.id)
 
 # "I already know which test" branch, generated from home_catalog.R's
 # test_families so a new calculator added to a family appears here without
