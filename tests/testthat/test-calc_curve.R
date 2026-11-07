@@ -149,7 +149,9 @@ test_that("curve_scale_about reproduces the input at m = 1 and scales deviations
 
 test_that("ss_curve_points abandons a point that exceeds its time budget, counts it, and carries on", {
   slow_at_2 <- function(x) {
-    if (x == 2) while (TRUE) sqrt(2) # a busy loop: setTimeLimit() cannot interrupt Sys.sleep()
+    # A busy loop (setTimeLimit() cannot interrupt Sys.sleep()), capped at 5 s so that a missed interrupt fails the
+    # expectations below instead of hanging the test run.
+    if (x == 2) { t_start <- Sys.time(); while (Sys.time() - t_start < 5) sqrt(2) }
     new_ss_result(list(n = x * 10, inputs = list()))
   }
   t0 <- Sys.time()
