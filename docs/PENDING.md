@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**93 open** of 359 items (266 done).
+**93 open** of 361 items (268 done).
 
 ## Waiting for the owner
 
@@ -132,10 +132,6 @@
   determinants question, is done).
 - [ ] **FIND-14** **[optional]** A language-model reader, only by a separate decision (no API, nothing sent anywhere in the browser
   version). Not now: decision F1 (6 Nov 2026) keeps the reader deterministic.
-- [ ] **FIND-21** A design card at every end point of the guide (F3): fallback design and what it costs, three threats to validity with
-  mitigations, reporting guideline, effect measure, workflow. From the registry text, edited (row 18 completed, row 21 rewritten);
-  each claim cited (SRC-06) or marked with a warning sign whose hover reads "Suggestion only -- no confirmed source". Cards also for
-  the guide's end points the registry lacks (diagnostic accuracy, agreement, prediction, estimation, SCCS, case-cohort, ...).
 - [ ] **FIND-22** A PubMed search builder (F4): the design's filter from a published validated filter where one exists (for example the
   Cochrane highly sensitive search strategy for randomised trials), otherwise marked "simple filter, not validated"; the user's concepts
   as `[tiab]` terms plus the MeSH headings they choose; the four wrong headings of the source corrected.
@@ -143,6 +139,9 @@
   `tools/` script that refreshes the list.
 - [ ] **FIND-24** **[optional]** Clinical codes for record-based studies (WHO ICD-10, ICD-10-CM, SNOMED CT, LOINC, RxNorm), taken only
   from the official code lists and never generated; needs a decision on which lists and their licence terms.
+- [ ] **FIND-25** Design cards for the guide's end points the registry lacks: diagnostic accuracy (STARD), agreement and reliability,
+  prediction models (TRIPOD), self-controlled case series, case-cohort, propensity-score and time-varying designs, phase II and
+  dose-finding trials; each with its sources checked as in SRC-06.
 
 ## 4. Studies: a working record of calculations (STUDY) -- 4 open
 
@@ -206,12 +205,9 @@
 - [ ] **SRC-03** A source for "design effect 1.5 or 2 when nothing is known" (the owner's wording; no source checked).
 - [ ] **SRC-04** Regidor et al. 1993 (epiR's source for the Byar SMR interval) could not be found; not cited.
 - [ ] **SRC-05** **[blocked]** Tang Y. Comments on Lachin (2008). Stat Med 2009;28:175-177, and the author's reply.
-- [ ] **SRC-06** Sources for the design-card claims (FIND-21): an interaction needs about four times the sample size (factorial);
-  washout longer than five half-lives (crossover); 8-12 time points before and after (interrupted time series); the prevalence ratio
-  when the prevalence is above 10%; a non-inferiority margin preserving at least half the control effect; F < 10 and p < 5e-8
-  (Mendelian randomisation); the corrected covered area and Jadad's algorithm (umbrella reviews); and the citation of each reporting
-  guideline named (PRISMA and its extensions, PRIOR, ENTREQ, eMERGe, COREQ, SRQR, GRAMMS, CONSORT and its extensions, TREND, STROBE,
-  RECORD, CARE, PROCESS, STROBE-MR).
+- [ ] **SRC-07** **[blocked]** Two card statements stay marked as suggestions: a crossover washout of more than five half-lives and a
+  non-inferiority margin preserving at least half the control effect; both come from regulatory guidance (bioequivalence; FDA 2016
+  non-inferiority) that is not in PubMed and was not read. *Unblock:* reading the guidance documents.
 
 ## 10. Bigger workbenches and extensions (WB) -- 9 open
 

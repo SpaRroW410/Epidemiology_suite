@@ -1,5 +1,20 @@
 # epidemiologysuite (development version)
 
+## Find: design cards, with their sources checked (7 Nov 2026)
+
+* **A design card** under the guide's end points (35 designs: reviews, qualitative approaches, mixed methods, trials,
+  quasi-experiments, observational and descriptive designs, Mendelian randomisation): what to do if the design is not feasible, the
+  three main threats with what to do about them, the reporting guideline, the main effect measure and a workflow. It opens from a
+  collapsed "Design card" line.
+* **Every statement is sourced or marked.** The text comes from the owner's routing material, edited. A statement names a source only
+  when that source was read for it (PubMed); every other statement carries a warning sign whose hover reads "Suggestion only -- no
+  confirmed source". The 23 reporting guidelines were checked against their records (CONSORT 2025 now for parallel trials).
+* **Two figures in the material were wrong and are corrected:** Mendelian randomisation's "F > 10" (Burgess & Thompson 2011 call that
+  rule of thumb misleading) and "8-12 time points" for an interrupted time series (Bernal, Cummins & Gasparrini 2017: there is no fixed
+  minimum; simulate the power). Two others (a crossover washout of more than five half-lives, a non-inferiority margin keeping half the
+  control effect) come from regulatory guidance not read here and stay marked as suggestions (CHECKLIST SRC-07).
+* FIND-21 and SRC-06 done; cards for the guide's other end points listed as FIND-25.
+
 ## Find: reviews, mixed methods, quasi-experiments and more in the guide (6 Nov 2026)
 
 * **New branches** in "Which calculator?", merged from the owner's routing material (decisions F1-F2): reviews (pooling goes to the

@@ -146,6 +146,8 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
 html[data-bs-theme='dark'] nav.navbar.navbar-default { background-color: var(--bs-tertiary-bg) !important; }
 html[data-bs-theme='dark'] nav.navbar .navbar-brand, html[data-bs-theme='dark'] nav.navbar .nav-link { color: var(--bs-body-color) !important; }
 html[data-bs-theme='dark'] nav.navbar .nav-link.active { color: var(--bs-primary-text-emphasis) !important; }
+.design-card summary { cursor: pointer; }
+.dc-unsourced { color: var(--bs-warning-text-emphasis); cursor: help; }   /* the design cards' mark for a statement with no confirmed source */
 .navbar-extras { display: flex; align-items: center; gap: .5rem; margin-left: auto; }   /* the search box and the dark-mode switch, at the right end */
 .navbar-extras .form-group { margin-bottom: 0; }
 .navbar .selectize-input { padding: .2rem .6rem; min-height: 0; font-size: .85rem; border-radius: 1rem; }
