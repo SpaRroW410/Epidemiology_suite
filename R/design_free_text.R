@@ -36,12 +36,26 @@
 #   determinants  the question asks what is associated with the outcome, so the association needs its own sample size too
 #   population    a population named by place or setting (city, district, village, schools ...), so cluster sampling is likely
 .free_text_flags <- function(text) {
+  has <- function(p) grepl(p, text, ignore.case = TRUE, perl = TRUE)
   list(
+    # FIND-19 signals (warnings in the guide, never a change of route): a harmful exposure, unless the text is about treating or
+    # preventing it; an outcome that is rare or takes years to develop; data that already exist; individual-level wording
+    harmful = has("smok|tobacco|alcohol|toxin|pesticide|arsenic|\\blead (exposure|poisoning)|heavy metal|radiation|air pollution|trauma|abuse|violence|poverty") &&
+      !has("cessation|quit|stop(ping)?|reduc|prevent|control|treat|counsel|educat|awareness|intervention (to|for|on)|spray|vector|insecticid|bed.?net"),
+    rare_outcome = has("\\brare\\b|cancer|carcinoma|leuk(a)?emia|lymphoma|mesothelioma|birth defect|congenital|anomal|motor neuron|\\bals\\b|dementia|decades|long latency"),
+    existing_data = has("records|registry|register\\b|database|claims|charts|\\bnfhs\\b|\\bdhs\\b|national (family )?(health )?survey|secondary (data|analysis)|existing data|routine(ly collected)? data"),
+    prospective = has("prospective"),
+    individual = has("\\b(individuals?|patients?|persons?|people|men|women|children|mothers)\\b.{0,40}\\b(who|with|risk|more likely|odds)\\b"),
     determinants = grepl(.free_text_determinants_pattern, text, ignore.case = TRUE, perl = TRUE),
     population = grepl("\\b(city|cities|town|district|block|villages?|communit(y|ies)|slums?|urban|rural|wards?|schools?|colleges?|universit(y|ies)|households?|state|province|region)\\b",
                        text, ignore.case = TRUE, perl = TRUE)
   )
 }
+
+# A policy, law or government programme, and the words for it starting (the natural-experiment rule at "who determines").
+.free_text_actor <- paste0("\\b(polic(y|ies)|laws?|act|schemes?|bans?|tax(es)?|mandates?|regulations?|mission|",
+                           "(national|government|state|public|nationwide|countrywide)\\s+(\\w+\\s+){0,3}(programmes?|programs?|campaigns?|initiatives?))\\b")
+.free_text_enact <- "\\b(introduc|implement|launch|roll.?out|enact|came into)"
 
 free_text_rules <- list(
 
@@ -63,7 +77,13 @@ free_text_rules <- list(
          option_index = 10, confidence = "Medium"),
     list(pattern = "(have|with) (the |some |my |our )?(summary )?(counts|numbers) (already|i|we|and)|analy[sz]e (the |my |our )?(counts|summary|data (i|we) (already )?(have|collected))|already (have|collected) (the )?(counts|data|numbers)|from (the )?(summary )?counts|\\b2\\s?x\\s?2 table|mantel.?haenszel|standardi[sz]ed mortality ratio|\\bsmr\\b|confidence interval (for|of) (a |the |an )?(proportion|mean|rate|incidence)",
          option_index = 10, confidence = "Medium"),
-    list(pattern = "qualitative|in-depth interview|\\bfgd\\b|focus group|thematic",
+    # a case report or case series (not a self-controlled case series, not a trial's case report form)
+    list(pattern = "(?<!controlled )(?<!controlled-)\\bcase.?series\\b|\\bcase report(?!\\s*form)|\\ba rare case of\\b|\\bwe (report|present|describe) a (rare )?case\\b",
+         option_index = 15, confidence = "High"),
+    # mixed methods before qualitative: a mixed-methods description usually also says "qualitative"
+    list(pattern = "mixed.?methods?|explanatory sequential|exploratory sequential|convergent (parallel )?design|multi.?method",
+         option_index = 14, confidence = "High"),
+    list(pattern = "qualitative|in-depth interview|\\bfgd\\b|focus group|thematic|phenomenolog|grounded theory|ethnograph",
          option_index = 6, confidence = "High"),
     list(pattern = "validity of|accuracy of|diagnostic (accuracy|test|study)|screening test|predictive value|\\bppv\\b|\\bnpv\\b|sensitivity|specificity|gold standard|index test|\\bauc\\b|\\broc\\b",
          option_index = 4, confidence = "High"),
@@ -76,13 +96,18 @@ free_text_rules <- list(
     # groups/arms, "compare", "between X and Y") governs even when an
     # estimation-sounding word like "proportion of" also appears in the same
     # sentence (e.g. "comparing the proportion of X between two groups").
-    list(pattern = "meta.?analys|systematic review|trial sequential|pooled (effect|estimate)",
+    list(pattern = "meta.?analys|trial sequential|pooled (effect|estimate)",
          option_index = 7, confidence = "High"),
+    list(pattern = "systematic review|scoping review|umbrella review|overview of (systematic )?reviews|evidence (gap )?map|meta.?synthesis|meta.?ethnograph|qualitative evidence synthesis|literature review|review of (the )?literature",
+         option_index = 13, confidence = "High"),
+    # Mendelian randomisation is a comparison (an exposure's effect), not the genetics branch below
+    list(pattern = "mendelian randomi[sz]ation|genetic instruments?|genetic variants? as (an? )?(instrument|proxy|proxies)",
+         option_index = 2, confidence = "High"),
     list(pattern = "\\blqas\\b|lot quality|\\bpilot\\b|feasibility|rare events?|\\banimal|\\bmice\\b|\\brats\\b|preclinical|psychometric|factor analysis|questionnaire development|\\bgwas\\b|genetic|genomic|genome.?wide|value of information|\\bevpi\\b",
          option_index = 9, confidence = "Medium"),
     list(pattern = "(?<!intracluster )(?<!intra-cluster )(?<!intraclass )(?<!intra-class )correlat(?!es\\s+of)|\\bregression\\b|\\bancova\\b|linear model",
          option_index = 8, confidence = "High"),
-    list(pattern = "compar(e|ed|es|ing|ison)|dose.?finding|phase (i|ii|iii|1|2|3)\\b|multiplicity|multiple (primary )?(endpoints|comparisons)|interim analys|group.?sequential|bayesian|non.?inferior|equivalen|stepped.?wedge|cross.?over|case.?crossover|self.?controlled|\\bsccs\\b|nested case|case.?cohort|ecological study|case.?control|cases and controls|\\bcohorts?\\b|exposed (and|versus|vs\\.?) unexposed|\\bt-?tests?\\b|\\banova\\b|chi.?square|mann.?whitney|wilcoxon|\\blog.?rank|\\bhazard ratio|survival analysis|difference (in|of|between)|\\bversus\\b|\\bvs\\.?\\b|association between|effect of|efficacy of|impact of|randomi[sz]ed|allocated|\\btrial\\b|\\barm\\b|followed up|incidence of|developed over|cases and controls|case-control|non-inferior|equivalent|bioequivalence|between (two|2|three|3) (groups|arms)",
+    list(pattern = "compar(e|ed|es|ing|ison)|dose.?finding|phase (i|ii|iii|1|2|3)\\b|multiplicity|multiple (primary )?(endpoints|comparisons)|interim analys|group.?sequential|bayesian|non.?inferior|equivalen|stepped.?wedge|cross.?over|case.?crossover|self.?controlled|\\bsccs\\b|nested case|case.?cohort|ecological study|case.?control|cases and controls|\\bcohorts?\\b|exposed (and|versus|vs\\.?) unexposed|\\bt-?tests?\\b|\\banova\\b|chi.?square|mann.?whitney|wilcoxon|\\blog.?rank|\\bhazard ratio|survival analysis|difference (in|of|between)|\\bversus\\b|\\bvs\\.?\\b|association between|\\brandomi[sz]e\\b|effect of|effectiveness of|efficacy of|impact of|randomi[sz]ed|allocated|\\btrial\\b|\\barm\\b|followed up|incidence of|developed over|cases and controls|case-control|non-inferior|equivalent|bioequivalence|between (two|2|three|3) (groups|arms)|interrupted time.?series|segmented regression|difference.?in.?differences?|regression discontinuity|natural experiment|quasi.?experiment|controlled before|pre.?post|before.?(and|&)?.?after",
          option_index = 2, confidence = "Medium"),
     # Descriptive research questions phrased by topic (knowledge-attitude-practice, awareness, utilization, pattern of ...) name no design;
     # with no comparison or follow-up words (the rule above wins when there are) they are surveys of a population. Determinants questions
@@ -226,10 +251,65 @@ free_text_rules <- list(
   ),
 
   allocation = list(
-    list(pattern = "randomi[sz]ed|allocated|assigned|\\btrial\\b|\\barm\\b|placebo|(?<!case)(?<!case-)(?<!case )cross.?over|stepped.?wedge|bioequivalen|non.?inferior|equivalen|multiplicity|interim|group.?sequential|bayesian|platform|basket|umbrella|phase (i|ii|2|1)\\b|dose.?finding|single.?arm",
+    # assigned by a programme, a policy or a law, and studied afterwards (a natural experiment); not when the text says randomised.
+    # A programme counts only when it is national / government / state: a team's own "programme implemented" is not a natural experiment.
+    list(pattern = paste0("(?s)^(?!.*\\brandomi[sz]).*(natural experiment|", .free_text_actor, ".{0,60}", .free_text_enact, "|",
+                          .free_text_enact, "\\w*\\b.{0,40}", .free_text_actor, "|(before and after|since) the (ban|policy|law|scheme|mandate|tax)\\b)"),
+         option_index = 4, confidence = "Medium"),
+    # assigned by the team without randomisation; before the next rule, whose "randomised" also matches "non-randomised"
+    list(pattern = "non.?randomi[sz]ed|not (be )?randomi[sz]ed|without randomi[sz]ation|quasi.?experiment",
+         option_index = 3, confidence = "High"),
+    list(pattern = "\\brandomi[sz]e\\b|we (will )?(allocate|assign)\\b|randomi[sz]ed|allocated|assigned|\\btrial\\b|\\barm\\b|placebo|(?<!case)(?<!case-)(?<!case )cross.?over|stepped.?wedge|bioequivalen|non.?inferior|equivalen|multiplicity|interim|group.?sequential|bayesian|platform|basket|umbrella|phase (i|ii|2|1)\\b|dose.?finding|single.?arm",
          option_index = 1, confidence = "High"),
-    list(pattern = "cohort|followed up|incidence of|developed over|cases and controls|case.?control|cross.?sectional|exposed (and|versus|vs\\.?|or) unexposed|observational|registry|retrospective|prospective|case.?crossover|self.?controlled|\\bsccs\\b|nested|case.?cohort|ecological|propensity",
+    list(pattern = "cohort|followed up|incidence of|developed over|cases and controls|case.?control|cross.?sectional|exposed (and|versus|vs\\.?|or) unexposed|observational|registry|retrospective|prospective|case.?crossover|self.?controlled|\\bsccs\\b|nested|case.?cohort|ecological|propensity|mendelian|genetic instrument",
          option_index = 2, confidence = "Medium")
+  ),
+
+  quasi_type = list(
+    list(pattern = "interrupted time.?series|segmented regression|time.?series",           option_index = 1, confidence = "High"),
+    list(pattern = "regression discontinuity|\\brdd\\b|cut.?off|threshold",                         option_index = 3, confidence = "High"),
+    list(pattern = "difference.?in.?differences?|controlled before|comparison (group|district|area|village|block|state)s?|control (group|district|area|village|block)s?",
+         option_index = 2, confidence = "High"),
+    list(pattern = "pre.?post|pre.?test|before.?(and|&)?.?after|baseline and (end|follow)",           option_index = 4, confidence = "High")
+  ),
+
+  prepost_outcome = list(
+    list(pattern = "\\bmean\\b|score|level of|blood pressure|weight|h(a)?emoglobin|\\bbmi\\b",         option_index = 1, confidence = "Medium"),
+    list(pattern = "proportion|prevalence|percentage|practi[cs]e|uptake|coverage|yes.?no",           option_index = 2, confidence = "Medium")
+  ),
+
+  review_type = list(
+    list(pattern = "scoping|evidence (gap )?map|mapping review",                                     option_index = 3, confidence = "High"),
+    list(pattern = "umbrella|overview of (systematic )?reviews|review of (systematic )?reviews",      option_index = 5, confidence = "High"),
+    list(pattern = "meta.?synthesis|meta.?ethnograph|qualitative (evidence )?synthesis|qualitative systematic", option_index = 6, confidence = "High"),
+    list(pattern = "network",                                                                        option_index = 4, confidence = "High"),
+    list(pattern = "narrative synthesis|without (a )?meta.?analysis|\\bswim\\b",                        option_index = 2, confidence = "High"),
+    list(pattern = "meta.?analys|pool",                                                              option_index = 1, confidence = "High")
+  ),
+
+  qual_approach = list(
+    list(pattern = "phenomenolog|lived experience",                                                  option_index = 1, confidence = "High"),
+    list(pattern = "grounded theory|constant comparative|theoretical sampling",                     option_index = 2, confidence = "High"),
+    list(pattern = "ethnograph|participant observation|field ?work",                                 option_index = 3, confidence = "High"),
+    list(pattern = "case study",                                                                     option_index = 4, confidence = "High"),
+    list(pattern = "thematic|qualitative descriptive|content analysis",                              option_index = 5, confidence = "High")
+  ),
+
+  mm_sequence = list(
+    list(pattern = "explanatory",                                                                    option_index = 1, confidence = "High"),
+    list(pattern = "exploratory|instrument development|develop (a |an )?(scale|questionnaire|tool)", option_index = 2, confidence = "High"),
+    list(pattern = "convergent|parallel|concurrent|triangulat",                                      option_index = 3, confidence = "High"),
+    list(pattern = "embedded|nested|process evaluation|within (a|the) trial",                        option_index = 4, confidence = "High")
+  ),
+
+  case_desc = list(
+    list(pattern = "case.?series|series of",                                                         option_index = 2, confidence = "High"),
+    list(pattern = "case report|a (rare )?case of|one patient|single patient",                       option_index = 1, confidence = "High")
+  ),
+
+  eco_time = list(
+    list(pattern = "trend|over time|over (the )?(years|decades?)|time.?series|panel|longitudinal|\\b(19|20)\\d\\d\\s?(-|to)\\s?(19|20)\\d\\d\\b", option_index = 2, confidence = "High"),
+    list(pattern = "cross.?sectional|single (year|period)|at one time|snapshot",                     option_index = 1, confidence = "High")
   ),
 
   exp_unit = list(
@@ -269,6 +349,7 @@ free_text_rules <- list(
   ),
 
   selection_basis = list(
+    list(pattern = "mendelian randomi[sz]ation|genetic instruments?|genetic variants? as (an? )?(instrument|proxy|proxies)", option_index = 11, confidence = "High"),
     list(pattern = "nested case",                                         option_index = 4, confidence = "High"),
     list(pattern = "case.?cohort",                                        option_index = 5, confidence = "High"),
     list(pattern = "case.?crossover",                                     option_index = 6, confidence = "High"),
@@ -388,6 +469,59 @@ free_text_rules <- list(
   list(node_id = node_id, trace = trace, flags = flags)
 }
 
+# The words a rule matched, as shown in the guide's trail: trimmed, at most 60 characters.
+.free_text_words <- function(w) {
+  if (!length(w)) return(NULL)
+  w <- trimws(gsub("\\s+", " ", w))
+  if (nchar(w) > 60) w <- paste0(substr(w, 1, 57), "...")
+  w
+}
+
+# Questions where a description can state two answers outright. Each cue is deliberately narrow (a design named, not a word such as
+# "followed up" that trials share): when cues of two answers both occur, the guide asks.
+.free_text_conflicts <- list(
+  allocation = list(
+    list(option_index = 1, pattern = "(?<!non-)(?<!non )(?<!not )(?<!not be )\\brandomi[sz](ed|e)\\b|\\brandomly (allocated|assigned)\\b"),
+    list(option_index = 2, pattern = "\\bcohort study\\b|\\bcase.?control\\b|\\bcross.?sectional\\b|\\bregistry\\b|\\bobservational\\b|\\bsecondary (data|analysis)\\b")
+  )
+)
+
+.free_text_conflict <- function(node_id, text) {
+  cues <- .free_text_conflicts[[node_id]]
+  if (is.null(cues)) return(NULL)
+  hit <- Filter(function(cue) grepl(cue$pattern, text, ignore.case = TRUE, perl = TRUE), cues)
+  if (length(unique(vapply(hit, function(cue) cue$option_index, numeric(1)))) < 2) return(NULL)
+  list(node_id = node_id,
+       words = vapply(hit, function(cue) .free_text_words(regmatches(text, regexpr(cue$pattern, text, ignore.case = TRUE, perl = TRUE))), ""),
+       options = vapply(hit, function(cue) cue$option_index, numeric(1)))
+}
+
+# Warnings for the guide (FIND-19): shown with the trail; the route is never changed by them. Each names what in the description
+# raised it and what to check.
+.free_text_warnings <- function(flags, trace, nodes = design_nodes) {
+  answers <- vapply(trace, function(t) t$answer, "")
+  said <- function(node, i) nodes[[node]]$options[[i]]$label %in% answers
+  out <- character()
+  if (isTRUE(flags$harmful) && said("allocation", 1))
+    out <- c(out, paste("The description names an exposure that harms people, and the guide took it as assigned by the study team.",
+                        "Assigning people to a harmful exposure is not ethical; if you are studying people who already have it, choose",
+                        "\"I only observe what happened naturally\" instead. If the team assigns a treatment or prevention for it, ignore this."))
+  if (isTRUE(flags$existing_data) && said("allocation", 1))
+    out <- c(out, paste("The description mentions data that already exist (records, a registry or a survey), and the guide took the",
+                        "intervention as assigned by the study team. Existing data are observational: check the answer to \"Who determines who",
+                        "receives the exposure\"."))
+  if (isTRUE(flags$existing_data) && isTRUE(flags$prospective))
+    out <- c(out, paste("The description says prospective and also mentions existing records. A cohort assembled from records that already",
+                        "exist is retrospective (historical): the sample-size calculation is the same, but the follow-up is what the records hold."))
+  if (isTRUE(flags$rare_outcome) && said("selection_basis", 1))
+    out <- c(out, paste("The outcome looks rare or slow to develop, and the route is a cohort. A cohort then needs many people or many years;",
+                        "a case-control or nested case-control study usually needs far fewer (selected on their outcome)."))
+  if (isTRUE(flags$individual) && said("selection_basis", 8))
+    out <- c(out, paste("The design is ecological (group-level data), but the description speaks of individuals. Group data cannot show",
+                        "which individuals have the outcome (the ecological fallacy): use individual data, or phrase the question about the groups."))
+  out
+}
+
 walk_free_text <- function(text, nodes = design_nodes) {
   node_id <- "root"
   trace <- list()
@@ -404,6 +538,10 @@ walk_free_text <- function(text, nodes = design_nodes) {
     rule_set <- free_text_rules[[node_id]]
     if (is.null(rule_set)) break
 
+    # a description that fits two answers of this question outright: stop and ask instead of picking one (FIND-12, FIND-18)
+    conflict <- .free_text_conflict(node_id, text)
+    if (!is.null(conflict)) { flags$conflict <- conflict; break }
+
     matched <- NULL
     for (r in rule_set) {
       if (grepl(r$pattern, text, ignore.case = TRUE, perl = TRUE)) {
@@ -412,12 +550,13 @@ walk_free_text <- function(text, nodes = design_nodes) {
       }
     }
     if (is.null(matched)) break
+    words <- regmatches(text, regexpr(matched$pattern, text, ignore.case = TRUE, perl = TRUE))
 
     opt <- node$options[[matched$option_index]]
     if (!is.null(opt$set)) for (nm in names(opt$set)) flags[[nm]] <- opt$set[[nm]]
 
     trace <- c(trace, list(list(question = node$question, answer = opt$label,
-                                 confidence = matched$confidence)))
+                                 confidence = matched$confidence, words = .free_text_words(words))))
     node_id <- if (is.function(opt$next_id)) opt$next_id(flags) else opt$next_id
   }
 
@@ -425,6 +564,7 @@ walk_free_text <- function(text, nodes = design_nodes) {
   for (nm in names(tf <- .free_text_flags(text))) if (isTRUE(tf[[nm]]) && is.null(flags[[nm]])) flags[[nm]] <- TRUE
   # a determinants question that named no design: the guide shows the candidate designs instead of choosing one
   if (length(trace) == 0 && isTRUE(flags$determinants)) flags$ambiguous <- "determinants"
+  flags$warnings <- .free_text_warnings(flags, trace, nodes)
   list(node_id = node_id, trace = trace, flags = flags,
        reached_terminal = isTRUE(nodes[[node_id]]$terminal))
 }

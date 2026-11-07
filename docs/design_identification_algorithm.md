@@ -81,7 +81,14 @@ common misrouting.
 | "mean level of", "average", "to determine the level" | Estimation, single mean | High |
 | "compare", "difference between", "versus", "association between" | Comparative | High |
 | "risk factors for", "determinants of", "predictors of" | Case-control OR cohort OR prediction model — **ambiguous, must ask** | Low |
-| "effect of", "efficacy of", "impact of [intervention]" | Experimental (RCT) | Medium |
+| "effect of", "effectiveness of", "efficacy of", "impact of [intervention]" | Comparative only; **who assigns it is asked**, never assumed from these words | Medium |
+| "non-randomised", "quasi-experimental" | Assigned by the team, not at random → Q2.1b | High |
+| a policy, programme, law, ban or tax "introduced / implemented / launched", "natural experiment" (and not "randomised") | Assigned by someone else → Q2.1b | Medium |
+| "interrupted time series", "segmented regression"; "difference-in-differences", "comparison districts"; "regression discontinuity", "cut-off"; "pre-post", "before and after" | The Q2.1b design | High |
+| "systematic review", "scoping review", "umbrella review", "meta-synthesis" ("meta-analysis" goes to the meta-analysis branch) | Review (§1G) | High |
+| "mixed methods", "explanatory / exploratory sequential", "convergent design" | Mixed methods (§1H), checked before "qualitative" | High |
+| "case series", "case report" (not "self-controlled case series", not "case report form") | §1I | High |
+| "Mendelian randomisation", "genetic instrument" | Q2.4, Mendelian randomisation | High |
 | "randomised", "allocated", "trial", "arm" | RCT | High |
 | "followed up", "incidence of", "developed over" | Cohort | Medium |
 | "cases and controls", "patients with X and without X" | Case-control | High |
@@ -101,6 +108,12 @@ deterministic — never let a language model choose the final formula, only popu
 slots. If offline/no-API operation matters, keyword heuristics degrade gracefully to
 "couldn't infer, please use guided mode."
 
+**As built** (decision F1, 6 Nov 2026): keyword rules only, no language model, nothing sent anywhere. Each pre-filled answer shows the
+words that set it. Where a description states two answers of one question outright (at Q2.1: "randomised" and "cohort study"), the
+reader stops there and names both instead of choosing. Warnings ask and never change the route: a harmful exposure taken as assigned
+by the team, existing records with a prospective design or with an assigned intervention, a rare or slow outcome on the cohort route,
+and individual-level wording on the ecological route.
+
 ---
 
 ## STAGE 1 — Primary aim (root branch)
@@ -115,6 +128,13 @@ slots. If offline/no-API operation matters, keyword heuristics degrade gracefull
 | D. Assess diagnostic accuracy of a test | **DIAGNOSTIC** | §1D |
 | E. Assess agreement / reliability between raters or methods | **AGREEMENT** | §1E |
 | F. Explore experiences/meanings (qualitative) | **QUALITATIVE** | §1F |
+| G. Review published studies | **REVIEW** | §1G |
+| H. Combine a qualitative and a quantitative part | **MIXED METHODS** | §1H |
+| I. Describe one patient or a short series | **CASE REPORT / SERIES** | §1I |
+
+Branches G-I, the qualitative approaches in §1F, the quasi-experimental route in Q2.1 and the ecological and Mendelian-randomisation
+rows of Q2.4 come from the owner's routing material (`docs/find_routing/`, 6 Nov 2026; decisions F1-F2 in `SDD.md`), merged into this
+tree rather than replacing it.
 
 > **Disambiguation rule:** if the user states a *hypothesis* (H₀/H₁), branch B.
 > If they state an *objective to describe/estimate*, branch A. If both appear,
@@ -190,6 +210,32 @@ Route to a **guidance panel, not a calculator**. Output: information power dimen
 justification template. **Emit no numeric N** — false precision here is worse than
 no answer.
 
+The guide first asks the approach (phenomenology: lived experience; grounded theory: a theory of a process; ethnography: a group's
+culture, by immersion; qualitative case study: one or a few bounded cases; qualitative descriptive / thematic analysis; or not decided),
+and each ends on the same guidance module with a note on how that approach samples.
+
+### §1G — REVIEW branch
+
+| Answer | → |
+|---|---|
+| Systematic review that pools studies (meta-analysis) | the meta-analysis branch (power in number of studies, trial sequential analysis) |
+| Systematic review without pooling (narrative synthesis) | guidance: no sample size |
+| Scoping review / evidence map | guidance: no sample size |
+| Network meta-analysis | not built (CHECKLIST GEN-69) |
+| Umbrella review (review of reviews) | guidance: no sample size |
+| Qualitative evidence synthesis (meta-ethnography) | guidance: no sample size |
+
+### §1H — MIXED METHODS branch
+
+Explanatory sequential (quantitative, then qualitative), exploratory sequential (qualitative, then quantitative), convergent (both at
+once) and embedded (qualitative work inside a trial). Each ends on guidance that says the two parts have separate samples: the
+quantitative part from a calculator (start the guide again with its aim), the qualitative part justified as in §1F.
+
+### §1I — CASE REPORT / CASE SERIES
+
+Guidance: nothing to calculate; to test an association, add a comparison group (case-control); to estimate a proportion with a set
+precision, use branch A.
+
 ---
 
 ## STAGE 2 — Design identification (COMPARISON branch only)
@@ -202,6 +248,20 @@ Four sequential discriminators, in this order:
 |---|---|
 | Investigator assigns it | **EXPERIMENTAL** → Q2.2 |
 | Investigator only observes it | **OBSERVATIONAL** → Q2.4 |
+| The team assigns it, but not at random | **QUASI-EXPERIMENTAL** → Q2.1b |
+| Someone else assigned it (a programme, a policy, a law) and the study looks at its effect | **NATURAL EXPERIMENT** → Q2.1b |
+
+### Q2.1b — (Quasi-experimental) How is the effect measured?
+
+| Answer | Design | Status |
+|---|---|---|
+| Many measurements before and after a start date | **Interrupted time series** | not built (CHECKLIST OBS-12) |
+| Before and after, in the group that received it and a comparison group | **Controlled before-after / difference-in-differences** | not built (OBS-13) |
+| A cut-off on a score, an age or a date decided who received it | **Regression discontinuity** | not built (OBS-14) |
+| One group, before and after, no comparison group | **Single-arm pre-post** | paired means (measured outcome) or paired proportions (yes/no) |
+
+The source tree reached these designs only when the investigator assigned the intervention, which leaves out their commonest use: a
+policy or programme evaluated from routine data.
 
 ### Q2.2 — (Experimental) Unit of allocation?
 
@@ -238,7 +298,8 @@ Four sequential discriminators, in this order:
 | Cases + random subcohort from a cohort | **Case-cohort** | HR | `mod_case_cohort` |
 | Each case serves as own control, different time windows | **Case-crossover** | OR | `mod_case_crossover` |
 | Repeated events within individuals, self-controlled | **SCCS** | IRR | `mod_sccs` |
-| Unit of observation is a group, not a person | **Ecological** | — | guidance panel + caveat |
+| Unit of observation is a group, not a person | **Ecological** | — | guidance panel + caveat; asks one period or a time trend, and warns of the ecological fallacy |
+| Genetic variants stand in for the exposure | **Mendelian randomisation** | causal OR / beta | not built (CHECKLIST OBS-15) |
 
 > **The single most useful discriminator in this whole algorithm** is Q2.4's phrasing.
 > Asking "is it prospective or retrospective?" produces wrong answers constantly —

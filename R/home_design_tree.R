@@ -49,6 +49,10 @@
   function(flags) if (identical(flags$outcome, "continuous")) continuous else binary
 }
 
+.qual_note <- paste(
+  "Sample size in qualitative research is justified, not calculated: the guidance module explains information power (Malterud,",
+      "Siersma & Guassora 2016) and saturation (Guest, Bunce & Johnson 2006).")
+
 design_nodes <- list(
 
   root = list(
@@ -61,13 +65,16 @@ design_nodes <- list(
       list(label = "Build or validate a prediction/prognostic model", next_id = "pred_type"),
       list(label = "Assess the accuracy of a diagnostic test", next_id = "diag_type"),
       list(label = "Assess agreement/reliability between raters or methods", next_id = "agree_scale"),
-      list(label = "Explore experiences or meanings (qualitative)", next_id = "term_qualitative"),
+      list(label = "Explore experiences or meanings (qualitative)", next_id = "qual_approach"),
       list(label = "Plan a meta-analysis (number of studies, or trial sequential analysis)", next_id = "meta_type"),
       list(label = "Study the relationship between variables (correlation / regression)", next_id = "rel_type"),
       list(label = "Something else: survey sampling, scale development, rare events, animal studies, pilots, health economics, genetics", next_id = "other_purpose"),
       list(label = "Analyze counts I already have (a 2x2 table: risk ratio, odds ratio, ...)", next_id = "analyze_type"),
       list(label = "Plan study logistics: a randomization list, enrolling extra for attrition, selecting a survey sample, or survey weights", next_id = "planning_type"),
-      list(label = "I already know which statistical test I'll use -- browse by test family", next_id = "bytest_family")
+      list(label = "I already know which statistical test I'll use -- browse by test family", next_id = "bytest_family"),
+      list(label = "Review published studies (systematic or scoping review, umbrella review, qualitative evidence synthesis)", next_id = "review_type"),
+      list(label = "Combine a qualitative and a quantitative part (mixed methods)", next_id = "mm_sequence"),
+      list(label = "Describe one patient or a short series of patients (case report, case series)", next_id = "case_desc")
     )
   ),
 
@@ -521,7 +528,8 @@ design_nodes <- list(
     options = list(
       list(label = "Genome-wide or candidate-gene association study", next_id = "term_gwas"),
       list(label = "Gene-environment interaction", next_id = "term_gxe"),
-      list(label = "Two-group gene-expression (microarray) study with FDR control", next_id = "term_microarray")
+      list(label = "Two-group gene-expression (microarray) study with FDR control", next_id = "term_microarray"),
+      list(label = "Genetic variants as a stand-in for an exposure, to estimate its effect (Mendelian randomisation)", next_id = "term_mr")
     )
   ),
 
@@ -532,7 +540,10 @@ design_nodes <- list(
     help = "If you assign it yourself, the study is experimental (a trial). If you only observe what happened naturally, it's observational.",
     options = list(
       list(label = "I (the investigator) assign it", next_id = "exp_unit"),
-      list(label = "I only observe what happened naturally", next_id = "selection_basis")
+      list(label = "I only observe what happened naturally", next_id = "selection_basis"),
+      list(label = "I (my team) assign it, but not at random (quasi-experiment)", next_id = "quasi_type", set = list(assigned = "team")),
+      list(label = "Someone else assigned it -- a programme, a policy or a law -- and I study its effect (natural experiment)",
+           next_id = "quasi_type", set = list(assigned = "other"))
     )
   ),
 
@@ -671,9 +682,10 @@ design_nodes <- list(
       list(label = "Cases + a randomly sampled sub-cohort from a defined cohort (case-cohort)", next_id = "term_case_cohort"),
       list(label = "Each case is their own control, compared across different time windows (case-crossover)", next_id = "term_case_crossover"),
       list(label = "Repeated events within the same individuals, self-controlled (SCCS)", next_id = "term_sccs"),
-      list(label = "The unit of observation is a group/area, not a person (ecological)", next_id = "term_ecological"),
+      list(label = "The unit of observation is a group/area, not a person (ecological)", next_id = "eco_time"),
       list(label = "Exposed and unexposed matched on a propensity score", next_id = "term_psm"),
-      list(label = "Exposure changes over time within the same people (time-varying exposure)", next_id = "term_time_varying")
+      list(label = "Exposure changes over time within the same people (time-varying exposure)", next_id = "term_time_varying"),
+      list(label = "Genetic variants stand in for the exposure (Mendelian randomisation)", next_id = "term_mr")
     )
   ),
 
@@ -1200,6 +1212,106 @@ design_nodes <- list(
   term_gxe = .term_open("term_gxe", "Gene-environment interaction",
     would_use = "genpwr as a verification oracle (same engine as GWAS)"),
 
+
+  # ================================================================== #
+  # Reviews, qualitative approaches, mixed methods, quasi-experiments, ecological designs, case reports and Mendelian randomisation
+  # (docs/find_routing/, decisions F1-F2, CHECKLIST FIND-16/17). Merged into this tree rather than replacing it.
+  # ================================================================== #
+
+  review_type = list(
+    id = "review_type", stage = 1,
+    question = "What kind of review is it?",
+    help = "A review's size is the number of studies its search finds, so most reviews have no sample size to plan. A planned meta-analysis can be checked for power (the number of studies), and a cumulative one for the information size (trial sequential analysis).",
+    options = list(
+      list(label = "A systematic review that pools similar studies (meta-analysis)", next_id = "meta_type"),
+      list(label = "A systematic review without pooling (narrative synthesis)", next_id = "term_sr_narrative"),
+      list(label = "A scoping review or evidence map (what has been studied, not how well it works)", next_id = "term_scoping"),
+      list(label = "Several treatments compared directly and indirectly (network meta-analysis)", next_id = "term_nma"),
+      list(label = "A review of existing systematic reviews (umbrella review, overview of reviews)", next_id = "term_umbrella"),
+      list(label = "A synthesis of qualitative studies (meta-ethnography, qualitative evidence synthesis)", next_id = "term_qes")
+    )
+  ),
+
+  qual_approach = list(
+    id = "qual_approach", stage = 1,
+    question = "Which qualitative approach fits your question?",
+    options = list(
+      list(label = "What an experience is like for the people who live it (phenomenology)", next_id = "term_qual_phenomenology"),
+      list(label = "Build a theory of a process from the data (grounded theory)", next_id = "term_qual_grounded"),
+      list(label = "The shared culture and practices of a group, by spending time with it (ethnography)", next_id = "term_qual_ethnography"),
+      list(label = "One or a few bounded cases -- a programme, a clinic, a village -- in depth (qualitative case study)", next_id = "term_qual_case_study"),
+      list(label = "Describe views and experiences in plain terms (qualitative descriptive, thematic analysis)", next_id = "term_qual_descriptive"),
+      list(label = "Not decided yet", next_id = "term_qualitative")
+    )
+  ),
+
+  mm_sequence = list(
+    id = "mm_sequence", stage = 1,
+    question = "How are the two parts combined?",
+    help = "Each part has its own sample size: the quantitative part from a calculator (start the guide again with that part's aim), the qualitative part justified by information power or saturation.",
+    options = list(
+      list(label = "Quantitative first, then interviews to explain its results (explanatory sequential)", next_id = "term_mm_explanatory"),
+      list(label = "Qualitative first, then a survey or a scale built on it (exploratory sequential)", next_id = "term_mm_exploratory"),
+      list(label = "Both at the same time, merged at the end (convergent)", next_id = "term_mm_convergent"),
+      list(label = "Qualitative work inside a trial, such as a process evaluation (embedded)", next_id = "term_mm_embedded")
+    )
+  ),
+
+  case_desc = list(
+    id = "case_desc", stage = 1,
+    question = "One patient or several?",
+    options = list(
+      list(label = "One patient (case report)", next_id = "term_case_report"),
+      list(label = "A series of patients with the same condition or treatment (case series)", next_id = "term_case_series")
+    )
+  ),
+
+  quasi_type = list(
+    id = "quasi_type", stage = 2,
+    question = "How is the effect measured?",
+    help = "Without randomisation the comparison carries the weight: a group that did not receive it, or many measurements over time, or a cut-off that decided who received it.",
+    options = list(
+      list(label = "Many measurements before and after a start date, e.g. monthly counts for two years either side (interrupted time series)", next_id = "term_its"),
+      list(label = "Before and after, in the group that received it and in a comparison group that did not (controlled before-after / difference-in-differences)", next_id = "term_did"),
+      list(label = "A cut-off on a score, an age or a date decided who received it (regression discontinuity)", next_id = "term_rdd"),
+      list(label = "One group, measured before and after, with no comparison group (single-arm pre-post)", next_id = "prepost_outcome")
+    )
+  ),
+
+  prepost_outcome = list(
+    id = "prepost_outcome", stage = 3,
+    question = "Is the outcome a measurement or a yes/no?",
+    help = "Each person is their own comparison, so the before and after values are paired.",
+    options = list(
+      list(label = "A measurement (a score, blood pressure, ...)", next_id = "term_prepost_means"),
+      list(label = "Yes / no (present or absent, practises it or not)", next_id = "term_prepost_props")
+    )
+  ),
+
+  eco_time = list(
+    id = "eco_time", stage = 2,
+    question = "Are the areas or groups compared at one time, or followed over time?",
+    help = "Group-level data answer group-level questions (are districts with more X also districts with more Y?). They cannot say whether the individuals with X are the ones with Y: that is the ecological fallacy. If your question is about individuals, use individual data (a cross-sectional, cohort or case-control design) instead.",
+    options = list(
+      list(label = "At one time: areas or groups compared in the same period", next_id = "term_ecological"),
+      list(label = "Over time: the same areas or groups followed through several years (time trend)", next_id = "term_ecological_trend")
+    )
+  ),
+
+  term_prepost_means = .term("term_prepost_means", "Single-arm pre-post study, measured outcome (paired means)", "means_two_dep",
+    note = "Without a comparison group a before-after change also contains whatever else changed over the same time; a comparison group or several baseline measurements make the result easier to interpret."),
+  term_prepost_props = .term("term_prepost_props", "Single-arm pre-post study, yes/no outcome (paired proportions)", "proportion_two_dep",
+    note = "Without a comparison group a before-after change also contains whatever else changed over the same time; a comparison group or several baseline measurements make the result easier to interpret."),
+
+  term_its = .term_open("term_its", "Interrupted time series (segmented regression)",
+    would_use = "a power calculation for segmented regression with autocorrelation (simulation-based: Zhang, Wagner & Ross-Degnan 2011, not yet read)"),
+  term_did = .term_open("term_did", "Controlled before-after study / difference-in-differences",
+    would_use = "a sample-size method for difference-in-differences with a cited worked example (none found yet)"),
+  term_rdd = .term_open("term_rdd", "Regression discontinuity design",
+    would_use = "a power calculation for regression discontinuity (Schochet 2009; Cattaneo, Titiunik & Vazquez-Bare 2019, not yet read)"),
+  term_mr = .term_open("term_mr", "Mendelian randomisation",
+    would_use = "a power calculation for Mendelian randomisation (Brion, Shakhbazov & Visscher 2013; Burgess 2014, not yet read)"),
+
   # ================================================================== #
   # Guidance terminals -- deliberately no numeric N
   # ================================================================== #
@@ -1220,7 +1332,68 @@ design_nodes <- list(
       "The unit of analysis here is the group (e.g. district, PHC catchment),",
       "not the individual -- none of this app's individual-level calculators",
       "apply directly, and ecological analyses carry their own inference",
-      "caveats (the ecological fallacy). The guidance module linked below explains how to plan one."))
+      "caveats (the ecological fallacy). The guidance module linked below explains how to plan one.")),
+
+  term_qual_phenomenology = list(id = "term_qual_phenomenology", terminal = TRUE, guidance = TRUE,
+    design = "Phenomenological study -- no numeric sample size", catalog_key = "qualitative_guidance",
+    note = paste("A small number of people who have lived the experience, interviewed in depth.", .qual_note)),
+  term_qual_grounded = list(id = "term_qual_grounded", terminal = TRUE, guidance = TRUE,
+    design = "Grounded theory study -- no numeric sample size", catalog_key = "qualitative_guidance",
+    note = paste("Sampling follows the emerging theory (theoretical sampling) and stops when new data add nothing to it.", .qual_note)),
+  term_qual_ethnography = list(id = "term_qual_ethnography", terminal = TRUE, guidance = TRUE,
+    design = "Ethnography -- no numeric sample size", catalog_key = "qualitative_guidance",
+    note = paste("The unit is a setting and the time spent in it (observation, field notes, informal interviews), more than a number of people.", .qual_note)),
+  term_qual_case_study = list(id = "term_qual_case_study", terminal = TRUE, guidance = TRUE,
+    design = "Qualitative case study -- no numeric sample size", catalog_key = "qualitative_guidance",
+    note = paste("Define the case's boundaries (place, time, organisation) first; the sources within it (interviews, documents, observation) are chosen to cover it.", .qual_note)),
+  term_qual_descriptive = list(id = "term_qual_descriptive", terminal = TRUE, guidance = TRUE,
+    design = "Qualitative descriptive study (thematic analysis) -- no numeric sample size", catalog_key = "qualitative_guidance",
+    note = paste("Interviews or focus groups with people chosen to cover the range of views (purposive sampling).", .qual_note)),
+
+  term_mm_explanatory = list(id = "term_mm_explanatory", terminal = TRUE, guidance = TRUE,
+    design = "Explanatory sequential mixed methods (quantitative, then qualitative)", catalog_key = "qualitative_guidance",
+    note = paste("The quantitative phase needs its own sample size: start the guide again with that phase's aim. The interviews are then",
+                 "sampled from its respondents (ask for consent to re-contact them).", .qual_note)),
+  term_mm_exploratory = list(id = "term_mm_exploratory", terminal = TRUE, guidance = TRUE,
+    design = "Exploratory sequential mixed methods (qualitative, then quantitative)", catalog_key = "qualitative_guidance",
+    note = paste("The quantitative phase needs its own sample, apart from the interviewees; if it validates a new scale, see",
+                 "Scale development (Something else -> Developing or validating a scale).", .qual_note)),
+  term_mm_convergent = list(id = "term_mm_convergent", terminal = TRUE, guidance = TRUE,
+    design = "Convergent mixed methods (both parts at the same time)", catalog_key = "qualitative_guidance",
+    note = paste("Each part has its own sample size: the quantitative part from a calculator (start the guide again with its aim), the",
+                 "qualitative part justified separately.", .qual_note)),
+  term_mm_embedded = list(id = "term_mm_embedded", terminal = TRUE, guidance = TRUE,
+    design = "Embedded mixed methods (qualitative work inside a trial)", catalog_key = "qualitative_guidance",
+    note = paste("The trial's sample size comes first: Compare groups -> I (the investigator) assign it. The qualitative part (for example",
+                 "a process evaluation) samples from the trial's participants or staff.", .qual_note)),
+
+  term_sr_narrative = list(id = "term_sr_narrative", terminal = TRUE, guidance = TRUE,
+    design = "Systematic review without meta-analysis -- no sample size",
+    note = "A review includes the studies its search finds; there is no sample size to plan. Register the protocol before searching."),
+  term_scoping = list(id = "term_scoping", terminal = TRUE, guidance = TRUE,
+    design = "Scoping review -- no sample size",
+    note = "A scoping review maps what has been studied; it includes the studies its search finds and has no sample size to plan."),
+  term_umbrella = list(id = "term_umbrella", terminal = TRUE, guidance = TRUE,
+    design = "Umbrella review (review of reviews) -- no sample size",
+    note = "An umbrella review includes the systematic reviews its search finds; there is no sample size to plan. Check how far the reviews include the same primary studies."),
+  term_qes = list(id = "term_qes", terminal = TRUE, guidance = TRUE,
+    design = "Qualitative evidence synthesis -- no sample size",
+    note = "A synthesis of qualitative studies includes the studies its search finds (or a purposive sample of them); there is no numeric sample size to plan."),
+
+  term_case_report = list(id = "term_case_report", terminal = TRUE, guidance = TRUE,
+    design = "Case report -- no sample size",
+    note = "A case report describes one patient; there is nothing to calculate. To test whether an exposure is linked to the condition, add a comparison group: Compare groups -> I only observe -> selected on their outcome (case-control)."),
+  term_case_series = list(id = "term_case_series", terminal = TRUE, guidance = TRUE,
+    design = "Case series -- no sample size",
+    note = "A case series reports the patients there are (ideally all consecutive ones in a stated period); there is nothing to calculate. To estimate a proportion with a set precision, use Estimate a parameter instead; to test an association, add a comparison group (case-control)."),
+
+  term_ecological_trend = list(id = "term_ecological_trend", terminal = TRUE, guidance = TRUE,
+    design = "Ecological time-trend study (areas or groups followed over time)",
+    catalog_key = "ecological_guidance",
+    note = paste(
+      "Group-level data followed over time: the trend describes the groups, not the individuals in them (the ecological fallacy).",
+      "Changes in how cases are counted or coded over the years also change the trend. If a programme or policy started at a known",
+      "date, an interrupted time series (Compare groups -> Someone else assigned it) asks the question more directly."))
 )
 
 # "I already know which test" branch, generated from home_catalog.R's
