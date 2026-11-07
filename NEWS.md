@@ -1,5 +1,13 @@
 # epidemiologysuite (development version)
 
+## A start-up screen for the browser version (7 Nov 2026)
+
+* While the browser version starts (about a minute or two: R is downloaded and started in the page), it now shows a start-up screen
+  instead of Shinylive's spinner: what the app is and what is inside, the start-up progress with plain advice if it is slow, rotating
+  "Did you know?" tips about the app's features, how to cite it, and an About section with the author's papers (from the public ORCID
+  record), workshops and other projects (public GitHub repositories), and a link to report a problem. It follows the light or dark
+  setting of the device, stacks on a phone, and goes as soon as the app is on screen. The diagnostic log for problem reports is kept.
+
 ## Find: design cards, with their sources checked (7 Nov 2026)
 
 * **A design card** under the guide's end points (35 designs: reviews, qualitative approaches, mixed methods, trials,

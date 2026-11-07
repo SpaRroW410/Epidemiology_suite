@@ -502,6 +502,10 @@ Decisions S1-S5 are in `SDD.md`, section 17.
 - [ ] **UI-13** Phone: the dark-mode switch is hidden on phones; a layout pass on a real phone; **[optional]** a slimmer phone-only app.
 - [ ] **UI-14** **[optional]** Two-column layout on wide screens (inputs left, result right).
 - [ ] **UI-15** Revisit with real usage: Home quick links and cards, the background loading order and the four start-up calculators.
+- [x] **UI-16** A start-up screen for the browser build instead of Shinylive's spinner (`tools/pages/status_overlay.html`): what the app
+  is and what is inside, the start-up progress, rotating feature tips, how to cite it, the author's papers (public ORCID record),
+  workshops and other projects (public GitHub), a link to report a problem; light and dark, phone layout; it goes as soon as the app is on
+  screen (7 Nov 2026). Conferences: none listed yet (a commented block in the file shows where to add them).
 
 ## 6. The R package (PKG)
 

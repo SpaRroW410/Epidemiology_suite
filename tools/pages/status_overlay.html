@@ -1,30 +1,155 @@
-<!-- Status overlay for the browser build (injected into the exported index.html by tools/pages/inject_status.py).
-     Shinylive shows only a spinner while it downloads about 60 MB, starts R and builds the page; on a phone that can take minutes,
-     and when something goes wrong it stays a spinner. This explains what is happening, keeps a small log, and tells people what to
-     try. It removes itself when the app is on screen. -->
+<!-- Start-up screen for the browser build (injected into the exported index.html by tools/pages/inject_status.py).
+     Shinylive shows only a spinner while it downloads about 60 MB, starts R and builds the page (a minute or two on a computer,
+     longer on a phone). This screen says what the app is, shows tips about it, how to cite it and who made it, keeps a small log for
+     problem reports, and removes itself as soon as the app is on screen (tools/webr-spike/boot_test.mjs checks that it does).
+
+     To edit: the tips are the TIPS list in the script below; the About section is plain HTML (papers and projects from the owner's
+     public ORCID record and GitHub account, 7 Nov 2026). A section with nothing to show is left out: add conference talks or other
+     workshops by copying a list item. -->
 <style>
-  #s2r-status { position: fixed; left: 0; right: 0; bottom: 0; z-index: 2147483647; font: 13px/1.45 system-ui, sans-serif;
-    background: #1f2933; color: #f5f7fa; padding: 10px 14px; box-shadow: 0 -2px 8px rgba(0,0,0,.35); }
-  #s2r-status b { color: #fff; } #s2r-status a { color: #8ecbff; }
-  #s2r-status summary { cursor: pointer; color: #9fb3c8; margin-top: 4px; }
-  #s2r-status pre { white-space: pre-wrap; word-break: break-word; max-height: 32vh; overflow: auto; margin: 6px 0 0; font-size: 11px; color: #cbd2d9; }
-  #s2r-status button { margin-top: 6px; font: inherit; padding: 4px 10px; border-radius: 4px; border: 1px solid #52606d; background: #323f4b; color: #fff; }
-  #s2r-bar { height: 3px; background: #52606d; margin: 6px 0; overflow: hidden; }
-  #s2r-bar i { display: block; height: 100%; width: 35%; background: #4aa3ff; animation: s2r-run 1.4s ease-in-out infinite; }
+  #s2r-status { position: fixed; inset: 0; z-index: 2147483647; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f6f8fa; color: #1f2933;
+    transition: opacity .35s ease; }
+  #s2r-status.s2r-leaving { opacity: 0; }
+  #s2r-status .s2r-wrap { max-width: 780px; margin: 0 auto; padding: 28px 18px 40px; }
+  #s2r-status h1 { font-size: 1.7rem; margin: 0 0 .2rem; line-height: 1.2; }
+  #s2r-status h2 { font-size: 1.02rem; margin: 0 0 .5rem; }
+  #s2r-status .s2r-sub { color: #52606d; margin: 0 0 1.2rem; }
+  #s2r-status .s2r-card { background: #fff; border: 1px solid #d9e2ec; border-radius: 10px; padding: 14px 16px; margin: 0 0 14px; }
+  #s2r-status .s2r-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  #s2r-status .s2r-grid .s2r-card { margin: 0; }
+  #s2r-status ul { margin: .2rem 0 .4rem; padding-left: 1.2rem; }
+  #s2r-status li { margin: .15rem 0; }
+  #s2r-status a { color: #0b69c7; }
+  #s2r-status small, #s2r-status .s2r-muted { color: #616e7c; }
+  #s2r-status .s2r-msg { font-weight: 600; }
+  #s2r-bar { height: 6px; background: #d9e2ec; border-radius: 3px; margin: 8px 0 4px; overflow: hidden; }
+  #s2r-bar i { display: block; height: 100%; width: 35%; background: #2f80ed; border-radius: 3px; animation: s2r-run 1.4s ease-in-out infinite; }
   @keyframes s2r-run { 0% { margin-left: -35%; } 100% { margin-left: 100%; } }
-  @media (prefers-reduced-motion: reduce) { #s2r-bar i { animation: none; width: 100%; } }
+  #s2r-status .s2r-tip { min-height: 4.5em; margin: 0; }
+  #s2r-status .s2r-tipnav { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+  #s2r-status button { font: inherit; font-size: .85rem; padding: 3px 10px; border-radius: 5px; border: 1px solid #bcccdc;
+    background: #fff; color: #1f2933; cursor: pointer; }
+  #s2r-status summary { cursor: pointer; color: #52606d; }
+  #s2r-status pre { white-space: pre-wrap; word-break: break-word; max-height: 30vh; overflow: auto; margin: 6px 0 0; font-size: 11px;
+    background: #f0f4f8; padding: 6px; border-radius: 6px; }
+  #s2r-status .s2r-cite { font-size: .9rem; }
+  @media (max-width: 640px) { #s2r-status .s2r-grid { grid-template-columns: 1fr; } #s2r-status h1 { font-size: 1.4rem; } }
+  @media (prefers-color-scheme: dark) {
+    #s2r-status { background: #12171d; color: #e4e7eb; }
+    #s2r-status .s2r-card, #s2r-status button { background: #1c232b; border-color: #323f4b; color: #e4e7eb; }
+    #s2r-status .s2r-sub, #s2r-status small, #s2r-status .s2r-muted, #s2r-status summary { color: #9aa5b1; }
+    #s2r-status a { color: #6cb4ff; }
+    #s2r-bar { background: #323f4b; }
+    #s2r-status pre { background: #0d1117; color: #cbd2d9; }
+  }
+  @media (prefers-reduced-motion: reduce) { #s2r-bar i { animation: none; width: 100%; } #s2r-status { transition: none; } }
 </style>
-<div id="s2r-status" role="status" aria-live="polite">
-  <div><b>Epidemiological suite is starting.</b> <span id="s2r-msg"></span></div>
-  <div id="s2r-bar"><i></i></div>
-  <details><summary>Details</summary><pre id="s2r-log"></pre><button type="button" id="s2r-copy">Copy details</button></details>
+<div id="s2r-status" role="region" aria-label="Epidemiological suite is starting">
+  <div class="s2r-wrap">
+    <h1>Epidemiological suite</h1>
+    <p class="s2r-sub">Sample size, power and analysis for community medicine, epidemiology and clinical research.</p>
+
+    <div class="s2r-card">
+      <div class="s2r-msg" id="s2r-msg" role="status" aria-live="polite">Starting the app in your browser&hellip;</div>
+      <div id="s2r-bar"><i></i></div>
+      <small id="s2r-time"></small>
+    </div>
+
+    <div class="s2r-card" aria-roledescription="carousel" aria-label="Tips">
+      <h2>Did you know?</h2>
+      <p class="s2r-tip" id="s2r-tip"></p>
+      <div class="s2r-tipnav">
+        <button type="button" id="s2r-prev" aria-label="Previous tip">&larr;</button>
+        <button type="button" id="s2r-next" aria-label="Next tip">&rarr;</button>
+        <small id="s2r-count"></small>
+      </div>
+    </div>
+
+    <div class="s2r-grid">
+      <div class="s2r-card">
+        <h2>What's inside</h2>
+        <ul>
+          <li>215 study designs in 67 sample-size and power calculators</li>
+          <li>A guide from your research question to the design and its calculator</li>
+          <li>Analysis of counts you already have, effect-size converters, a glossary</li>
+          <li>Studies: your calculations kept together, as a Word file</li>
+        </ul>
+        <small>Everything runs in your browser: nothing you type is sent to a server.</small>
+      </div>
+      <div class="s2r-card">
+        <h2>How to cite</h2>
+        <p class="s2r-cite">Maheshwari, M. (2026). <i>Epidemiological suite</i> (Version 1.0.0) [Computer software]. Zenodo.
+          <a href="https://doi.org/10.5281/zenodo.23794230" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.23794230</a></p>
+        <small>Other formats (BibTeX, RIS) are in the app's Cite tab. Please also cite the method each calculator names.</small>
+      </div>
+    </div>
+
+    <div class="s2r-card" style="margin-top:14px">
+      <h2>About the author</h2>
+      <p>Built by <b>Dr. Mukul Maheshwari</b>
+        (<a href="https://orcid.org/0000-0002-1918-5100" target="_blank" rel="noopener">ORCID 0000-0002-1918-5100</a>).</p>
+
+      <p class="s2r-muted" style="margin:.4rem 0 .1rem">Papers</p>
+      <ul>
+        <li>In depth exploration of drivers of community health workers' performance in maternal and child health services: a
+          multistakeholder perspective from rural Indian setting. <i>BMC Primary Care</i>, 2025.
+          <a href="https://doi.org/10.1186/s12875-025-02851-9" target="_blank" rel="noopener">doi:10.1186/s12875-025-02851-9</a></li>
+        <li>A cross sectional survey about knowledge, attitude and practice towards face mask use in Indian population during Covid-19
+          pandemic. <i>International Journal of Medical Science and Current Research</i>, 2022.</li>
+      </ul>
+
+      <p class="s2r-muted" style="margin:.4rem 0 .1rem">Workshops</p>
+      <ul>
+        <li><a href="https://sparrow410.github.io/data_visualization/" target="_blank" rel="noopener">Data Visualization Workshop</a>
+          &mdash; evidence-based data visualization in R (a Quarto site)</li>
+        <li><a href="https://sparrow410.github.io/workshop_extensive_r/" target="_blank" rel="noopener">workshop_extensive_r</a>
+          &mdash; workshop site</li>
+      </ul>
+
+      <p class="s2r-muted" style="margin:.4rem 0 .1rem">Other projects</p>
+      <ul>
+        <li><a href="https://github.com/SpaRroW410/Forecast_dashboard" target="_blank" rel="noopener">Forecast dashboard</a>
+          &mdash; a Shiny app for time-series forecasting with Prophet, ARIMA and SARIMA</li>
+        <li><a href="https://github.com/SpaRroW410/Easy_analysis" target="_blank" rel="noopener">easyanalysis</a>
+          &mdash; R functions for "Table 1"-style summary tables and normality checks for manuscripts</li>
+        <li><a href="https://github.com/SpaRroW410/practical_exam" target="_blank" rel="noopener">Exam presentation system</a>
+          &mdash; a browser-based system for community medicine practical exams</li>
+        <li><a href="https://github.com/SpaRroW410/Curriculum" target="_blank" rel="noopener">Curriculum</a> &mdash; teaching lectures</li>
+      </ul>
+      <!-- Conferences: none listed yet. Copy this block to add them:
+      <p class="s2r-muted" style="margin:.4rem 0 .1rem">Conferences</p>
+      <ul><li>Title. Conference, place, year.</li></ul>
+      -->
+    </div>
+
+    <p><a href="https://github.com/SpaRroW410/Epidemiology_suite/issues" target="_blank" rel="noopener">Report a problem or suggest something</a>
+      &middot; <a href="../">Project page</a></p>
+
+    <details><summary>Details (for problem reports)</summary><pre id="s2r-log"></pre><button type="button" id="s2r-copy">Copy details</button></details>
+  </div>
 </div>
 <noscript>This app needs JavaScript. The R package runs without a browser: see the install instructions on the project page.</noscript>
 <script>
 (function () {
   var MOBILE_URL = "__MOBILE_URL__";
+  // Tips: what the app does, as it is built (each one checked against the app, 7 Nov 2026).
+  var TIPS = [
+    "Not sure which calculator you need? In Find a calculator, describe your study in a sentence: the guide fills in the answers it is sure of and shows the words it used.",
+    "Every result comes with its formula, the source it follows, and a justification paragraph you can paste into a protocol.",
+    "Studies keep all the calculations for one study together, with your notes, and download them as a Word file with the formulas and references.",
+    "The Effect Size tab converts between common effect measures, and \"Use this value\" carries the result into a calculator.",
+    "Each design the guide reaches has a design card: what to do if the design is not feasible, the main threats, and the reporting guideline to follow.",
+    "Already have the counts? The Analyze tab gives risk and odds ratios from a 2 x 2 table, Mantel-Haenszel estimates, standardised mortality ratios and outbreak attack rates.",
+    "Precision calculators can add extra participants for expected non-response or loss to follow-up, so you know how many to enrol, not only how many to analyse.",
+    "The glossary explains 43 terms, and the info tips next to the inputs explain them where you need them.",
+    "Prefer a dark screen? Use the switch at the top right of the app.",
+    "The same calculations are in the R package epidemiologysuite, as calc_* functions you can use in your own scripts.",
+    "The Cite tab gives the citation in several formats, including BibTeX and RIS for reference managers."
+  ];
   var t0 = Date.now(), lines = [];
-  var box = document.getElementById("s2r-status"), msg = document.getElementById("s2r-msg"), pre = document.getElementById("s2r-log");
+  var box = document.getElementById("s2r-status"), msg = document.getElementById("s2r-msg"), pre = document.getElementById("s2r-log"),
+      time = document.getElementById("s2r-time"), tipEl = document.getElementById("s2r-tip"), countEl = document.getElementById("s2r-count");
   function secs() { return Math.round((Date.now() - t0) / 1000); }
   function add(s) { lines.push(secs() + " s  " + s); if (lines.length > 60) lines.shift(); pre.textContent = lines.join("\n"); }
   document.title = "Epidemiological suite";
@@ -41,11 +166,34 @@
       return o.apply(console, arguments);
     };
   });
+
+  // tips: one at a time, every 9 seconds; paused while the pointer or keyboard focus is on them
+  var tip = Math.floor(Math.random() * TIPS.length), paused = false;
+  function showTip() { tipEl.textContent = TIPS[tip]; countEl.textContent = (tip + 1) + " of " + TIPS.length; }
+  function step(d) { tip = (tip + d + TIPS.length) % TIPS.length; showTip(); }
+  document.getElementById("s2r-prev").onclick = function () { step(-1); };
+  document.getElementById("s2r-next").onclick = function () { step(1); };
+  var tipCard = tipEl.parentNode;
+  tipCard.addEventListener("mouseenter", function () { paused = true; });
+  tipCard.addEventListener("mouseleave", function () { paused = false; });
+  tipCard.addEventListener("focusin", function () { paused = true; });
+  tipCard.addEventListener("focusout", function () { paused = false; });
+  showTip();
+  var tipTimer = setInterval(function () { if (!paused) step(1); }, 9000);
+
   // a tab that the phone kills for memory reloads by itself: count consecutive starts that never finished
   var tries = 1;
   try { tries = (Number(sessionStorage.getItem("s2r-tries")) || 0) + 1; sessionStorage.setItem("s2r-tries", String(tries)); } catch (e) {}
   if (tries > 2) add("this page has now been started " + tries + " times in this tab without finishing (the browser may be stopping it for lack of memory)");
-  function done() { clearInterval(iv); try { sessionStorage.removeItem("s2r-tries"); } catch (e) {} box.parentNode.removeChild(box); }
+
+  // the screen goes as soon as the app is on screen (a short fade; removed from the page so it never covers the app)
+  function done() {
+    clearInterval(iv); clearInterval(tipTimer);
+    try { sessionStorage.removeItem("s2r-tries"); } catch (e) {}
+    box.className += " s2r-leaving";
+    setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 400);
+  }
+  var shown = -1;
   var iv = setInterval(function () {
     var s = secs(), ready = false;
     try {
@@ -53,12 +201,17 @@
       ready = !!(d && d.querySelector(".navbar, nav.navbar, .bslib-page-navbar"));
     } catch (e) {}
     if (ready) return done();
-    if (s < 20) msg.textContent = "First visit: about 60 MB is downloaded and R is started in your browser. Nothing is sent anywhere.";
-    else if (s < 150) msg.textContent = "Still starting (" + s + " s). On a phone the first visit can take two to five minutes; later visits are faster.";
-    else msg.innerHTML = "Still starting (" + s + " s). If this never finishes: close other tabs and apps, turn off Private browsing / Lockdown mode, " +
+    time.textContent = s + " s";
+    // the message is a live region: change it only when the text changes, so screen readers announce each stage once
+    var stage = s < 20 ? 0 : s < 150 ? 1 : 2;
+    if (stage === shown) return;
+    shown = stage;
+    if (stage === 0) msg.textContent = "Starting the app in your browser. The first visit downloads about 60 MB and starts R; later visits are faster.";
+    else if (stage === 1) msg.textContent = "Still starting. This usually takes one to two minutes on a computer, longer on a phone.";
+    else msg.innerHTML = "Still starting. If this never finishes: close other tabs and apps, turn off Private browsing / Lockdown mode, " +
       "or open the page on a computer. The app needs about 1 GB of free memory. " +
       (MOBILE_URL ? "<a href=\"" + MOBILE_URL + "\">Open the phone version</a> (runs on a server, nothing to download). " : "") +
-      "The R package runs without a browser (install instructions on the <a href=\"../\">project page</a>). Open <i>Details</i> and send them if you report this.";
+      "The R package runs without a browser (install instructions on the <a href=\"../\">project page</a>). Open <i>Details</i> below and send them if you report this.";
   }, 1000);
   document.getElementById("s2r-copy").onclick = function () {
     var text = lines.join("\n");
