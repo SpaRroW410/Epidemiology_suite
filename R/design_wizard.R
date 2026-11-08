@@ -90,6 +90,11 @@ design_wizard_server <- function(input, output, session) {
     )
   })
 
+  pubmed_builder_server(input, output, session, reactive({
+    node <- design_nodes[[state$node_id]]
+    if (isTRUE(node$terminal)) .design_card_key(node, state$flags) else NULL
+  }))
+
   output$design_wizard_body <- renderUI({
     node <- design_nodes[[state$node_id]]
     can_back <- length(state$history) > 0
@@ -313,6 +318,8 @@ design_wizard_server <- function(input, output, session) {
     body,
     # planning notes for the design (R/design_cards.R): fallback, threats, reporting guideline; sourced or marked as a suggestion
     .render_design_card(.design_card_key(node, flags)),
+    # a PubMed search for studies of this design (R/pubmed_search.R): published filters where they exist, labelled
+    .render_pubmed_builder(.design_card_key(node, flags)),
     # Studies (R/mod_studies.R): keep this design choice, with the answers that led to it, in a study
     div(class = "study-add d-flex flex-wrap gap-2 align-items-center mt-3",
       tags$label(class = "small mb-0", `for` = "design_wizard_study_target", "Add this design choice to"),

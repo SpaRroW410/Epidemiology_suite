@@ -1,5 +1,14 @@
 # epidemiologysuite (development version)
 
+## A PubMed search builder in the guide (8 Nov 2026)
+
+* At each design's end point in the guide, "Search PubMed for studies like this" turns your words for the population, the exposure
+  or intervention and the outcome into a PubMed search, with a study-design filter, and links to PubMed (nothing is sent until you
+  open the link). Where a published, validated filter exists it is used exactly as printed and named: the Cochrane highly sensitive
+  strategies for randomised trials and PubMed's Clinical Queries (Therapy, Etiology). Any other filter says it is not validated.
+* Every MeSH heading the builder prints has been checked against NLM's MeSH 2026 (`tools/find/check_mesh.R`); a test fails if one is
+  added unchecked.
+
 ## A start-up screen for the browser version (7 Nov 2026)
 
 * While the browser version starts (about a minute or two: R is downloaded and started in the page), it now shows a start-up screen
