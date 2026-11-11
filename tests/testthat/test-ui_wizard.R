@@ -58,3 +58,24 @@ test_that("wizard: the case-control question offers a measured exposure, and its
   app$wait_for_js("Shiny.shinyapp.$inputValues['means-design'] !== undefined", timeout = 60000)
   expect_equal(ui_output_errors(app), 0)
 })
+
+test_that("wizard: the PubMed builder at an end point writes the search from the user's words and links to PubMed", {
+  skip_if_no_ui()
+  app <- ui_driver()
+  .wizard_open(app)
+  if (app$get_js("!!document.getElementById('design_wizard_restart')")) { app$click("design_wizard_restart"); app$wait_for_idle(500, timeout = 30000) }
+  app$set_inputs(design_wizard_freetext = "An interrupted time series of hospital admissions before and after the smoking ban was introduced")
+  app$click("design_wizard_parse"); app$wait_for_idle(800, timeout = 30000)
+  expect_match(ui_output_text(app, "design_wizard_body"), "Search PubMed for studies like this")
+  app$run_js("document.querySelector('.pubmed-builder').open = true;")
+  ui_wait_bound(app, "design_pubmed_c1")
+  app$set_inputs(design_pubmed_c1 = "asthma, wheez*", design_pubmed_c2 = "smoke-free legislation", wait_ = FALSE)
+  app$wait_for_js("!!document.getElementById('design_pubmed_query')", timeout = 30000)
+  q <- app$get_js("document.getElementById('design_pubmed_query').value")
+  expect_equal(q, paste("(asthma[tiab] OR wheez*[tiab]) AND (\"smoke-free legislation\"[tiab]) AND",
+                        .pubmed_designs$its$terms))
+  expect_match(ui_output_text(app, "design_pubmed_result"), "A simple filter, not validated")
+  href <- app$get_js("document.querySelector('#design_pubmed_result a.btn-primary').href")
+  expect_equal(href, pubmed_url(q))
+  expect_equal(ui_output_errors(app), 0)
+})

@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**93 open** of 362 items (269 done).
+**91 open** of 362 items (271 done).
 
 ## Waiting for the owner
 
@@ -120,7 +120,7 @@
 - [ ] **GEN-77** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to Bonferroni /
   Sidak).
 
-## 3. Finding a calculator: the guide, search and Find tab (FIND) -- 10 open
+## 3. Finding a calculator: the guide, search and Find tab (FIND) -- 8 open
 
 - [ ] **FIND-09** **[owner]** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the
   reader against.
@@ -132,11 +132,6 @@
   determinants question, is done).
 - [ ] **FIND-14** **[optional]** A language-model reader, only by a separate decision (no API, nothing sent anywhere in the browser
   version). Not now: decision F1 (6 Nov 2026) keeps the reader deterministic.
-- [ ] **FIND-22** A PubMed search builder (F4): the design's filter from a published validated filter where one exists (for example the
-  Cochrane highly sensitive search strategy for randomised trials), otherwise marked "simple filter, not validated"; the user's concepts
-  as `[tiab]` terms plus the MeSH headings they choose; the four wrong headings of the source corrected.
-- [ ] **FIND-23** A test that every MeSH heading the app prints is in a stored list checked against NLM (with the MeSH year), and a
-  `tools/` script that refreshes the list.
 - [ ] **FIND-24** **[optional]** Clinical codes for record-based studies (WHO ICD-10, ICD-10-CM, SNOMED CT, LOINC, RxNorm), taken only
   from the official code lists and never generated; needs a decision on which lists and their licence terms.
 - [ ] **FIND-25** Design cards for the guide's end points the registry lacks: diagnostic accuracy (STARD), agreement and reliability,

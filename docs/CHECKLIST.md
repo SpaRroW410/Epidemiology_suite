@@ -453,11 +453,19 @@ The guide's end points for designs not built yet are tested to be listed here (`
   cards (reviews, qualitative approaches, mixed methods, trials, quasi-experiments, observational and descriptive designs, Mendelian
   randomisation), shown by the end point's own design or by the answer that decided the design; the registry's factorial row has no end
   point in the guide yet.
-- [ ] **FIND-22** A PubMed search builder (F4): the design's filter from a published validated filter where one exists (for example the
+- [x] **FIND-22** A PubMed search builder (F4): the design's filter from a published validated filter where one exists (for example the
   Cochrane highly sensitive search strategy for randomised trials), otherwise marked "simple filter, not validated"; the user's concepts
-  as `[tiab]` terms plus the MeSH headings they choose; the four wrong headings of the source corrected.
-- [ ] **FIND-23** A test that every MeSH heading the app prints is in a stored list checked against NLM (with the MeSH year), and a
-  `tools/` script that refreshes the list.
+  as `[tiab]` terms plus the MeSH headings they choose; the four wrong headings of the source corrected. Built 8 Nov 2026
+  (`R/pubmed_search.R`), under the design card at each end point: Cochrane Boxes 3.a / 3.b (Handbook 6.5 technical supplement,
+  section 3.6.1, read in full) for trials; PubMed Clinical Queries Therapy and Etiology (Haynes et al., copied from the PubMed help
+  page with their sensitivity and specificity); PubMed's Systematic Review filter labelled as built into PubMed, not validated; design
+  terms for every design labelled as not validated. All 78 filter choices were run through PubMed (E-utilities): results, no
+  warnings. "Network Meta-Analysis" is used as the publication type it is.
+- [x] **FIND-23** A test that every MeSH heading the app prints is in a stored list checked against NLM (with the MeSH year), and a
+  `tools/` script that refreshes the list. Built 8 Nov 2026: `inst/extdata/mesh_checked.csv` (38 headings, publication types and
+  subheadings with their NLM identifiers, MeSH 2026, including the example headings shown in the boxes), `tools/find/check_mesh.R`
+  (NLM's MeSH SPARQL service, the chosen year only, names not entry terms), `test-pubmed_search.R`. Re-run the script when the terms
+  change and after each year's MeSH is published.
 - [ ] **FIND-24** **[optional]** Clinical codes for record-based studies (WHO ICD-10, ICD-10-CM, SNOMED CT, LOINC, RxNorm), taken only
   from the official code lists and never generated; needs a decision on which lists and their licence terms.
 - [ ] **FIND-25** Design cards for the guide's end points the registry lacks: diagnostic accuracy (STARD), agreement and reliability,
