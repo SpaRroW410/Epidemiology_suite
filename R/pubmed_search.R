@@ -78,6 +78,28 @@
     query = paste("((relative[Title/Abstract] AND risk*[Title/Abstract]) OR (relative risk[Text Word]) OR risks[Text Word] OR",
                   "cohort studies[MeSH:noexp] OR (cohort[Title/Abstract] AND study[Title/Abstract]) OR (cohort[Title/Abstract]",
                   "AND studies[Title/Abstract]))")),
+  cq_diagnosis_broad = list(
+    status = "validated", source = "clinical_queries",
+    label = "Clinical Queries: Diagnosis, broad (sensitivity 98%, specificity 74%)", note = NULL,
+    query = paste("(sensitiv*[Title/Abstract] OR sensitivity and specificity[MeSH Terms] OR diagnose[Title/Abstract] OR",
+                  "diagnosed[Title/Abstract] OR diagnoses[Title/Abstract] OR diagnosing[Title/Abstract] OR diagnosis[Title/Abstract] OR",
+                  "diagnostic[Title/Abstract] OR diagnosis[MeSH:noexp] OR (diagnostic equipment[MeSH:noexp] OR diagnostic errors[MeSH:noexp]",
+                  "OR diagnostic imaging[MeSH:noexp] OR diagnostic services[MeSH:noexp]) OR diagnosis, differential[MeSH:noexp] OR",
+                  "diagnosis[Subheading:noexp])")),
+  cq_diagnosis_narrow = list(
+    status = "validated", source = "clinical_queries",
+    label = "Clinical Queries: Diagnosis, narrow (sensitivity 64%, specificity 98%)", note = NULL,
+    query = "(specificity[Title/Abstract])"),
+  cq_prediction_broad = list(
+    status = "validated", source = "clinical_queries",
+    label = "Clinical Queries: Clinical Prediction Guides, broad (sensitivity 96%, specificity 79%)", note = NULL,
+    query = paste("(predict*[Title/Abstract] OR predictive value of tests[MeSH Terms] OR score[Title/Abstract] OR scores[Title/Abstract]",
+                  "OR scoring system[Title/Abstract] OR scoring systems[Title/Abstract] OR observ*[Title/Abstract] OR observer",
+                  "variation[MeSH Terms])")),
+  cq_prediction_narrow = list(
+    status = "validated", source = "clinical_queries",
+    label = "Clinical Queries: Clinical Prediction Guides, narrow (sensitivity 54%, specificity 99%)", note = NULL,
+    query = "(validation[Title/Abstract] OR validate[Title/Abstract])"),
   pubmed_sr = list(
     status = "pubmed", source = "pubmed_help",
     label = "PubMed's Systematic Review filter",
@@ -169,7 +191,33 @@
   case_crossover   = list(filters = c("cq_etiology_broad", "cq_etiology_narrow"), combine = FALSE,
                           terms = "(\"case-crossover\"[tiab] OR \"case crossover\"[tiab])"),
   mr               = list(filters = NULL, combine = FALSE,
-                          terms = "(\"Mendelian Randomization Analysis\"[Mesh] OR \"mendelian randomi*\"[tiab])")
+                          terms = "(\"Mendelian Randomization Analysis\"[Mesh] OR \"mendelian randomi*\"[tiab])"),
+  # FIND-25
+  diagnostic_accuracy = list(filters = c("cq_diagnosis_broad", "cq_diagnosis_narrow"), combine = FALSE,
+                          terms = paste("(\"Sensitivity and Specificity\"[Mesh] OR \"diagnostic accuracy\"[tiab] OR (sensitivity[tiab] AND",
+                                        "specificity[tiab]))")),
+  agreement        = list(filters = NULL, combine = FALSE,
+                          terms = paste("(\"Observer Variation\"[Mesh] OR \"Reproducibility of Results\"[Mesh] OR interrater[tiab] OR",
+                                        "\"inter-rater\"[tiab] OR interobserver[tiab] OR \"inter-observer\"[tiab] OR kappa[tiab] OR",
+                                        "\"intraclass correlation\"[tiab] OR \"limits of agreement\"[tiab] OR \"Bland-Altman\"[tiab])")),
+  prediction       = list(filters = c("cq_prediction_broad", "cq_prediction_narrow"), combine = TRUE,
+                          terms = paste("(\"prediction model*\"[tiab] OR \"prognostic model*\"[tiab] OR \"risk prediction\"[tiab] OR",
+                                        "\"risk score*\"[tiab] OR \"clinical prediction rule*\"[tiab] OR nomogram*[tiab])")),
+  sccs             = list(filters = NULL, combine = FALSE,
+                          terms = "(\"self-controlled case series\"[tiab] OR \"self controlled case series\"[tiab] OR SCCS[tiab])"),
+  case_cohort      = list(filters = NULL, combine = FALSE,
+                          terms = "(\"case-cohort\"[tiab] OR \"case cohort\"[tiab])"),
+  psm              = list(filters = NULL, combine = FALSE,
+                          terms = paste("(\"Propensity Score\"[Mesh] OR \"propensity score*\"[tiab] OR \"inverse probability\"[tiab] OR",
+                                        "\"target trial\"[tiab])")),
+  time_varying     = list(filters = NULL, combine = FALSE,
+                          terms = paste("(\"time-varying\"[tiab] OR \"time-dependent\"[tiab] OR \"marginal structural\"[tiab] OR",
+                                        "\"immortal time\"[tiab])")),
+  phase2           = list(filters = NULL, combine = FALSE,
+                          terms = "(\"Clinical Trial, Phase II\"[pt] OR \"phase II\"[tiab] OR \"phase 2\"[tiab] OR \"two-stage design\"[tiab])"),
+  dose_finding     = list(filters = NULL, combine = FALSE,
+                          terms = paste("(\"Clinical Trial, Phase I\"[pt] OR \"Maximum Tolerated Dose\"[Mesh] OR \"dose-finding\"[tiab] OR",
+                                        "\"dose finding\"[tiab] OR \"dose escalation\"[tiab] OR \"phase I\"[tiab] OR \"phase 1\"[tiab])"))
 )
 
 # The filter choices for a design, in order: each published filter (and, where useful, the same AND the design terms), then the

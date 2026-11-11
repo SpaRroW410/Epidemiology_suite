@@ -1,5 +1,14 @@
 # epidemiologysuite (development version)
 
+## Design cards for diagnostic, agreement, prediction and other end points (11 Nov 2026)
+
+* The guide now shows a design card at 28 more end points: diagnostic accuracy, agreement and reliability, prediction models,
+  self-controlled case series, case-cohort, propensity-score and time-varying designs, single-arm phase II and phase I dose-finding
+  trials. Each statement names the source checked for it (22 new sources, from STARD 2015 and TRIPOD+AI to the TARGET statement), or
+  carries the "Suggestion only" mark.
+* The PubMed search builder covers these designs, with PubMed's validated Clinical Queries filters for diagnosis and clinical
+  prediction guides.
+
 ## A PubMed search builder in the guide (8 Nov 2026)
 
 * At each design's end point in the guide, "Search PubMed for studies like this" turns your words for the population, the exposure

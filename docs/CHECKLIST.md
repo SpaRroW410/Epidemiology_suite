@@ -468,9 +468,14 @@ The guide's end points for designs not built yet are tested to be listed here (`
   change and after each year's MeSH is published.
 - [ ] **FIND-24** **[optional]** Clinical codes for record-based studies (WHO ICD-10, ICD-10-CM, SNOMED CT, LOINC, RxNorm), taken only
   from the official code lists and never generated; needs a decision on which lists and their licence terms.
-- [ ] **FIND-25** Design cards for the guide's end points the registry lacks: diagnostic accuracy (STARD), agreement and reliability,
+- [x] **FIND-25** Design cards for the guide's end points the registry lacks: diagnostic accuracy (STARD), agreement and reliability,
   prediction models (TRIPOD), self-controlled case series, case-cohort, propensity-score and time-varying designs, phase II and
-  dose-finding trials; each with its sources checked as in SRC-06.
+  dose-finding trials; each with its sources checked as in SRC-06. Built 11 Nov 2026: 9 cards on 28 end points, 22 sources checked in
+  PubMed (abstracts; STARD 2015, QUADAS-2, Lijmer 1999, GRRAS, Bland & Altman 1986, Feinstein & Cicchetti 1990, Koo & Li 2016,
+  TRIPOD+AI, PROBAST, Riley 2019, Collins 2016, Whitaker 2006, Sharp 2014, Austin 2011, Hernan & Robins 2016, VanderWeele & Ding 2017,
+  TARGET 2025, Suissa 2008, Robins 2000, Simon 1989, CONSORT-DEFINE, Le Tourneau 2009); statements without a checked source carry the
+  "Suggestion only" mark. The PubMed builder covers them, with the Clinical Queries Diagnosis and Clinical Prediction Guides filters
+  (validated); 55 MeSH headings checked. The single-arm phase II card names no reporting guideline (none found for that design).
 
 ## 4. Studies: a working record of calculations (STUDY)
 

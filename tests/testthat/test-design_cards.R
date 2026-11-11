@@ -20,7 +20,8 @@ test_that("every card is complete: a fallback, three threats with mitigations, a
     expect_true(nzchar(card$title) && nzchar(card$fallback$text) && nzchar(card$measure) && nzchar(card$workflow), info = k)
     expect_length(card$threats, 3)
     for (t in card$threats) expect_true(nzchar(t$threat) && nzchar(t$mitigation), info = k)
-    expect_true(length(card$guideline) >= 1, info = k)
+    # a reporting guideline, or a note that none specific to the design is listed (single-arm phase II)
+    expect_true(length(card$guideline) >= 1 || nzchar(if (is.null(card$guideline_note)) "" else card$guideline_note), info = k)
   }
 })
 
@@ -49,13 +50,19 @@ test_that("the right card follows the path: the answer that decided the design, 
   expect_equal(key(c(cmp, assign, "Individual subjects", "Show one arm is better (superiority)")), "parallel_rct")
   expect_equal(key(c(cmp, assign, "Groups/clusters (villages, schools, PHCs, wards)", "Show one arm is better (superiority)")), "cluster_rct")
   expect_equal(key(c(cmp, assign, "Individual subjects", "Show it's not unacceptably worse (non-inferiority)")), "noninferiority")
-  expect_null(key(c(cmp, assign, "Individual subjects", "Single-arm, response rate vs. a historical control (Phase II)")))   # no card
+  expect_equal(key(c(cmp, assign, "Individual subjects", "Single-arm, response rate vs. a historical control (Phase II)")), "phase2")
+  expect_null(key(c(cmp, assign, "Individual subjects", "Platform / basket / umbrella trial")))   # no card
   expect_equal(key(c(cmp, assign, "Same subject receives both, in sequence (crossover)")), "crossover")
   obs <- c(cmp, "I only observe what happened naturally")
   expect_equal(key(c(obs, "Their exposure status (outcome measured/ascertained later)",
                      "Whether the disease/event occurred (a risk: relative risk)")), "cohort")
   expect_equal(key(c(obs, design_nodes$selection_basis$options[[11]]$label)), "mr")
   expect_equal(key(c("Estimate a parameter with precision (prevalence, mean, rate...)", "A proportion / prevalence")), "descriptive_cs")
+  expect_equal(key(c(cmp, assign, "Individual subjects", "Phase I dose-finding (3+3, continual reassessment method)")), "dose_finding")
+  expect_equal(.design_card_key(design_nodes$term_sccs, list()), "sccs")
+  expect_equal(.design_card_key(design_nodes$term_kappa, list(design = "cohort")), "agreement")   # the end point's own card wins
+  for (id in c("term_diag_precision", "term_auc_paired", "term_mrmc")) expect_equal(.design_card_key(design_nodes[[id]], list()), "diagnostic_accuracy")
+  for (id in c("term_pred_binary", "term_pred_extval", "term_pred_updating")) expect_equal(.design_card_key(design_nodes[[id]], list()), "prediction")
   expect_equal(key(c("Plan a meta-analysis (number of studies, or trial sequential analysis)",
                      "How many studies a planned pairwise meta-analysis needs (power)")), "sr_meta")
 })
@@ -85,5 +92,9 @@ test_that("a card renders with the mark's hover text, the sources it cites, and 
   expect_match(h, 'aria-label="Suggestion only -- no confirmed source"', fixed = TRUE)
   expect_match(h, "Dwan K et al.", fixed = TRUE)
   expect_null(.render_design_card(NULL))
+  h <- as.character(.render_design_card("phase2"))
+  expect_match(h, "No reporting guideline specific to single-arm phase II trials", fixed = TRUE)
+  expect_match(h, "Simon 1989", fixed = TRUE)
+  expect_match(as.character(.render_design_card("diagnostic_accuracy")), "relative diagnostic odds ratio 3.0", fixed = TRUE)
   expect_match(as.character(.render_design_terminal(design_nodes$term_its, list())), "Design card: Interrupted time series")
 })

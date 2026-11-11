@@ -1425,7 +1425,17 @@ design_nodes <- list(
   term_rdd = "rdd",
   term_prepost_means = "prepost",
   term_prepost_props = "prepost",
-  term_mr = "mr")
+  term_mr = "mr",
+  # FIND-25: the guide's own end points that the registry lacked
+  term_diag_precision = "diagnostic_accuracy", term_diag_vs_ref = "diagnostic_accuracy", term_diag_two_indep = "diagnostic_accuracy",
+  term_diag_two_paired = "diagnostic_accuracy", term_ppv_npv = "diagnostic_accuracy", term_diag_lr = "diagnostic_accuracy",
+  term_diag_dor = "diagnostic_accuracy", term_auc_single = "diagnostic_accuracy", term_auc_paired = "diagnostic_accuracy",
+  term_auc_unpaired = "diagnostic_accuracy", term_mrmc = "diagnostic_accuracy",
+  term_kappa = "agreement", term_icc = "agreement", term_bland_altman = "agreement", term_ccc = "agreement", term_deming = "agreement",
+  term_pred_binary = "prediction", term_pred_continuous = "prediction", term_pred_survival = "prediction",
+  term_pred_extval = "prediction", term_pred_extval_tte = "prediction", term_pred_updating = "prediction",
+  term_sccs = "sccs", term_case_cohort = "case_cohort", term_psm = "psm", term_time_varying = "time_varying",
+  term_simon = "phase2", term_dose_finding = "dose_finding")
 for (.id in names(.terminal_cards)) design_nodes[[.id]]$card <- .terminal_cards[[.id]]
 rm(.id)
 

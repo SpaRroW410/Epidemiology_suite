@@ -40,7 +40,30 @@
   peer2008     = list(short = "Pe'er et al. 2008", cite = "Pe'er I et al. Estimation of the multiple testing burden for genomewide association studies of nearly all common variants. Genet Epidemiol 2008;32:381-385", pmid = "18348202", doi = "10.1002/gepi.20303", read = "abstract"),
   pieper2014   = list(short = "Pieper et al. 2014", cite = "Pieper D et al. Systematic review finds overlapping reviews were not mentioned in every other overview. J Clin Epidemiol 2014;67:368-375", pmid = "24581293", doi = "10.1016/j.jclinepi.2013.11.007", read = "abstract"),
   jadad1997    = list(short = "Jadad et al. 1997", cite = "Jadad AR, Cook DJ, Browman GP. A guide to interpreting discordant systematic reviews. CMAJ 1997;156:1411-1416", pmid = "9164400", read = "abstract"),
-  bernal2017   = list(short = "Bernal et al. 2017", cite = "Bernal JL, Cummins S, Gasparrini A. Interrupted time series regression for the evaluation of public health interventions: a tutorial. Int J Epidemiol 2017;46:348-355", pmid = "27283160", doi = "10.1093/ije/dyw098", read = "full text")
+  bernal2017   = list(short = "Bernal et al. 2017", cite = "Bernal JL, Cummins S, Gasparrini A. Interrupted time series regression for the evaluation of public health interventions: a tutorial. Int J Epidemiol 2017;46:348-355", pmid = "27283160", doi = "10.1093/ije/dyw098", read = "full text"),
+  # FIND-25 (11 Nov 2026): the guide's end points the registry lacked
+  stard2015    = list(short = "STARD 2015", cite = "Bossuyt PM et al. STARD 2015: an updated list of essential items for reporting diagnostic accuracy studies. BMJ 2015;351:h5527", pmid = "26511519", doi = "10.1136/bmj.h5527", read = "abstract"),
+  quadas2      = list(short = "QUADAS-2", cite = "Whiting PF et al. QUADAS-2: a revised tool for the quality assessment of diagnostic accuracy studies. Ann Intern Med 2011;155:529-536", pmid = "22007046", doi = "10.7326/0003-4819-155-8-201110180-00009", read = "abstract"),
+  lijmer1999   = list(short = "Lijmer et al. 1999", cite = "Lijmer JG et al. Empirical evidence of design-related bias in studies of diagnostic tests. JAMA 1999;282:1061-1066", pmid = "10493205", doi = "10.1001/jama.282.11.1061", read = "abstract"),
+  grras        = list(short = "GRRAS", cite = "Kottner J et al. Guidelines for Reporting Reliability and Agreement Studies (GRRAS) were proposed. J Clin Epidemiol 2011;64:96-106", pmid = "21130355", doi = "10.1016/j.jclinepi.2010.03.002", read = "abstract"),
+  bland1986    = list(short = "Bland & Altman 1986", cite = "Bland JM, Altman DG. Statistical methods for assessing agreement between two methods of clinical measurement. Lancet 1986;1:307-310", pmid = "2868172", read = "abstract"),
+  feinstein1990 = list(short = "Feinstein & Cicchetti 1990", cite = "Feinstein AR, Cicchetti DV. High agreement but low kappa: I. The problems of two paradoxes. J Clin Epidemiol 1990;43:543-549", pmid = "2348207", doi = "10.1016/0895-4356(90)90158-l", read = "abstract"),
+  koo2016      = list(short = "Koo & Li 2016", cite = "Koo TK, Li MY. A guideline of selecting and reporting intraclass correlation coefficients for reliability research. J Chiropr Med 2016;15:155-163", pmid = "27330520", doi = "10.1016/j.jcm.2016.02.012", read = "abstract"),
+  tripod_ai    = list(short = "TRIPOD+AI", cite = "Collins GS et al. TRIPOD+AI statement: updated guidance for reporting clinical prediction models that use regression or machine learning methods. BMJ 2024;385:e078378", pmid = "38626948", doi = "10.1136/bmj-2023-078378", read = "abstract"),
+  probast      = list(short = "PROBAST", cite = "Wolff RF et al. PROBAST: a tool to assess the risk of bias and applicability of prediction model studies. Ann Intern Med 2019;170:51-58", pmid = "30596875", doi = "10.7326/M18-1376", read = "abstract"),
+  riley2019    = list(short = "Riley et al. 2019", cite = "Riley RD et al. Minimum sample size for developing a multivariable prediction model: PART II - binary and time-to-event outcomes. Stat Med 2019;38:1276-1296", pmid = "30357870", doi = "10.1002/sim.7992", read = "abstract"),
+  collins2016  = list(short = "Collins et al. 2016", cite = "Collins GS, Ogundimu EO, Altman DG. Sample size considerations for the external validation of a multivariable prognostic model: a resampling study. Stat Med 2016;35:214-226", pmid = "26553135", doi = "10.1002/sim.6787", read = "abstract"),
+  whitaker2006 = list(short = "Whitaker et al. 2006", cite = "Whitaker HJ, Farrington CP, Spiessens B, Musonda P. Tutorial in biostatistics: the self-controlled case series method. Stat Med 2006;25:1768-1797", pmid = "16220518", doi = "10.1002/sim.2302", read = "abstract"),
+  sharp2014    = list(short = "Sharp et al. 2014", cite = "Sharp SJ et al. A review of published analyses of case-cohort studies and recommendations for future reporting. PLoS One 2014;9:e101176", pmid = "24972092", doi = "10.1371/journal.pone.0101176", read = "abstract"),
+  austin2011   = list(short = "Austin 2011", cite = "Austin PC. An introduction to propensity score methods for reducing the effects of confounding in observational studies. Multivariate Behav Res 2011;46:399-424", pmid = "21818162", doi = "10.1080/00273171.2011.568786", read = "abstract"),
+  hernan2016   = list(short = "Hernan & Robins 2016", cite = "Hernan MA, Robins JM. Using big data to emulate a target trial when a randomized trial is not available. Am J Epidemiol 2016;183:758-764", pmid = "26994063", doi = "10.1093/aje/kwv254", read = "abstract"),
+  vanderweele2017 = list(short = "VanderWeele & Ding 2017", cite = "VanderWeele TJ, Ding P. Sensitivity analysis in observational research: introducing the E-value. Ann Intern Med 2017;167:268-274", pmid = "28693043", doi = "10.7326/M16-2607", read = "abstract"),
+  target2025   = list(short = "TARGET", cite = "Cashin AG et al. Transparent reporting of observational studies emulating a target trial: the TARGET Statement. BMJ 2025;390:e087179", pmid = "40903028", doi = "10.1136/bmj-2025-087179", read = "abstract"),
+  suissa2008   = list(short = "Suissa 2008", cite = "Suissa S. Immortal time bias in pharmaco-epidemiology. Am J Epidemiol 2008;167:492-499", pmid = "18056625", doi = "10.1093/aje/kwm324", read = "abstract"),
+  robins2000   = list(short = "Robins et al. 2000", cite = "Robins JM, Hernan MA, Brumback B. Marginal structural models and causal inference in epidemiology. Epidemiology 2000;11:550-560", pmid = "10955408", doi = "10.1097/00001648-200009000-00011", read = "abstract"),
+  simon1989    = list(short = "Simon 1989", cite = "Simon R. Optimal two-stage designs for phase II clinical trials. Control Clin Trials 1989;10:1-10", pmid = "2702835", doi = "10.1016/0197-2456(89)90015-9", read = "abstract"),
+  consort_define = list(short = "CONSORT-DEFINE", cite = "Yap C et al. Enhancing reporting quality and impact of early phase dose-finding clinical trials: CONSORT Dose-finding Extension (CONSORT-DEFINE) guidance. BMJ 2023;383:e076387", pmid = "37863501", doi = "10.1136/bmj-2023-076387", read = "abstract"),
+  letourneau2009 = list(short = "Le Tourneau et al. 2009", cite = "Le Tourneau C, Lee JJ, Siu LL. Dose escalation methods in phase I cancer clinical trials. J Natl Cancer Inst 2009;101:708-720", pmid = "19436029", doi = "10.1093/jnci/djp079", read = "abstract")
 )
 
 # --- cards ---------------------------------------------------------------------------------------------------------------------
@@ -370,7 +393,110 @@ design_cards <- list(
       .threat("Population stratification", "Restrict to one ancestry; adjust for genetic principal components.")),
     guideline = "strobe_mr", measure = "Causal OR or beta per unit (or SD) of the exposure",
     workflow = "Variants (genome-wide significant, p < 5e-8) -> associated with exposure -> effect on outcome -> IVW + sensitivity",
-    workflow_src = "peer2008")
+    workflow_src = "peer2008"),
+
+  # ---- FIND-25 (11 Nov 2026): diagnostic, agreement, prediction, and the designs the registry lacked ----
+  diagnostic_accuracy = list(title = "Diagnostic accuracy study",
+    fallback = .s(paste("If a consecutive series of patients is not feasible, a two-gate (case-control) sample of people known to have and not to have",
+                        "the disease is quicker, but it overestimates accuracy (relative diagnostic odds ratio 3.0)."), "lijmer1999"),
+    threats = list(
+      .threat("Spectrum bias: participants unlike the patients the test is meant for",
+              "Enrol a consecutive or random series of patients in whom the test would be used in practice.", "lijmer1999"),
+      .threat("Differential verification: a different reference standard for test-positives and test-negatives",
+              "Give every participant the same reference standard; report the flow of participants and the timing of the tests.", c("lijmer1999", "quadas2")),
+      .threat("Review bias: the reference standard read with knowledge of the index test",
+              "Interpret the reference standard and the index test blind to each other's results.", "lijmer1999")),
+    guideline = "stard2015", measure = "Sensitivity and specificity with 95% CIs; predictive values at the study's prevalence; likelihood ratios; AUC for a continuous test",
+    workflow = "Consecutive patients with suspected disease -> index test -> same reference standard for all, blinded -> 2x2 table -> sensitivity, specificity, CIs"),
+
+  agreement = list(title = "Agreement or reliability study",
+    fallback = .s("If a reference method exists, compare against it as a diagnostic accuracy or method-comparison study rather than agreement alone."),
+    threats = list(
+      .threat("Correlation reported as agreement", "Use limits of agreement (Bland-Altman) to compare two methods of measurement; correlation is misleading here.", "bland1986"),
+      .threat("Kappa distorted by prevalence and rater bias (high agreement but low kappa)",
+              "Report the observed agreement and the table's marginal totals alongside kappa.", "feinstein1990"),
+      .threat("An ICC form that does not match the design", "State the ICC model, type and definition, and interpret from its 95% CI.", "koo2016")),
+    guideline = "grras", measure = "Kappa (categorical), ICC (continuous) or limits of agreement, with 95% CIs",
+    workflow = "Define raters, subjects and occasions -> independent, blinded ratings -> kappa / ICC (stated form) or limits of agreement -> CIs"),
+
+  prediction = list(title = "Prediction model study (development or validation)",
+    fallback = .s(paste("If too few outcome events are available to develop a new model, externally validate an existing one; validation needs",
+                        "a minimum of 100 events and ideally 200 or more."), "collins2016"),
+    threats = list(
+      .threat("Overfitting: too many candidate predictors for the number of events",
+              paste("Calculate the sample size from the criteria of Riley et al. (global shrinkage factor of at least 0.9, small optimism in",
+                    "R-squared, precise overall risk), not a rule of thumb such as 10 events per predictor."), "riley2019"),
+      .threat("Optimistic performance judged on the development data",
+              "Validate internally by bootstrapping and report calibration as well as discrimination."),
+      .threat("Bias in the participants, predictors, outcome or analysis",
+              "Check the design against PROBAST's four domains before collecting data.", "probast")),
+    guideline = "tripod_ai", measure = "Discrimination (C-statistic) and calibration (calibration slope, calibration-in-the-large), with CIs",
+    workflow = "Outcome and candidate predictors -> sample size (Riley criteria) -> fit -> internal validation (bootstrap) -> calibration and discrimination",
+    workflow_src = NULL),
+
+  sccs = list(title = "Self-controlled case series",
+    fallback = .s("If the outcome is not acute or the exposure is not transient, a cohort or case-control design.", "whitaker2006"),
+    threats = list(
+      .threat("Confounding by characteristics that change over time (age, season)",
+              "Include them as time-varying terms; characteristics that do not change are controlled because each case is compared with itself."),
+      .threat("The event changes later exposure (for example vaccination deferred after the event)",
+              "Exclude a pre-exposure period from the baseline or start observation at exposure; check the assumption."),
+      .threat("The event ends or shortens observation (for example death)",
+              "Use the extension of the method for event-dependent observation periods.")),
+    guideline = "strobe", measure = "Relative incidence (incidence rate ratio) in the risk windows compared with the rest of the observation period",
+    workflow = "Cases only -> observation period and risk windows -> conditional Poisson model -> relative incidence"),
+
+  case_cohort = list(title = "Case-cohort study",
+    fallback = .s("If only one outcome is studied, a nested case-control study (controls sampled at each case's event time)."),
+    threats = list(
+      .threat("An analysis that ignores the sampling (an ordinary Cox model)", "Use a weighted Cox model for case-cohort data with a robust variance."),
+      .threat("An unclear subcohort", "Report how the random subcohort was sampled, its size and sampling fraction, and the numbers in the cohort and subcohort.", "sharp2014"),
+      .threat("Drift in measurements of stored samples", "Measure cases' and subcohort members' samples together, in random order, blind to case status.")),
+    guideline = c("strobe", "sharp2014"), measure = "Hazard ratio (weighted Cox model)",
+    workflow = "Full cohort -> random subcohort plus all cases -> measure exposure in stored samples -> weighted Cox model"),
+
+  psm = list(title = "Propensity-score analysis of an observational comparison",
+    fallback = .s("If the treated and untreated groups barely overlap, restrict the question to patients who could have received either treatment."),
+    threats = list(
+      .threat("Unmeasured confounding", "Report an E-value for the estimate and for the confidence limit closest to the null.", "vanderweele2017"),
+      .threat("Covariates still unbalanced", "Check balance diagnostics after matching, stratification or weighting.", "austin2011"),
+      .threat("Design flaws such as immortal time", "Write the protocol of the target trial (eligibility, time zero, treatment strategies) and emulate it.",
+              c("hernan2016", "suissa2008"))),
+    guideline = c("target2025", "strobe"), measure = "Average treatment effect (in the treated or overall): risk difference, risk ratio or hazard ratio",
+    workflow = "Target trial protocol -> propensity model on baseline covariates -> match or weight -> balance check -> outcome model -> E-value"),
+
+  time_varying = list(title = "Time-varying exposure (treatment that starts, stops or changes)",
+    fallback = .s("If the exposure is fixed at the start of follow-up, a standard cohort analysis."),
+    threats = list(
+      .threat("Immortal time bias", "Count the time before exposure starts as unexposed (exposure as a time-varying variable), never as exposed.", "suissa2008"),
+      .threat("Time-dependent confounders affected by earlier treatment",
+              "Marginal structural models fitted by inverse-probability-of-treatment weighting; standard adjustment is biased here.", "robins2000"),
+      .threat("Exposure recorded with error over time", "Use dispensing or administration records and define exposure windows in advance.")),
+    guideline = "strobe", measure = "Hazard ratio or risk difference for a sustained treatment strategy",
+    workflow = "Time zero -> exposure as time-varying -> weights for time-varying confounders -> marginal structural model"),
+
+  phase2 = list(title = "Single-arm phase II trial (two-stage)",
+    fallback = .s("If no reliable historical response rate is available, a randomised phase II trial with a control arm."),
+    threats = list(
+      .threat("Too many patients given an inactive treatment",
+              "A two-stage design that stops after the first stage when responses are too few (Simon's optimal or minimax design).", "simon1989"),
+      .threat("A wrong historical response rate (the null value)", "Justify it from recent data in a similar population."),
+      .threat("Response judged inconsistently", "Fix the response criteria in advance and use independent review.")),
+    guideline = character(0),
+    guideline_note = "No reporting guideline specific to single-arm phase II trials is listed here; search the EQUATOR Network library.",
+    measure = "Response proportion with an exact confidence interval",
+    workflow = "Null and target response rates -> Simon design (n1, r1, n, r) -> stage 1 -> stop or continue -> stage 2 -> conclusion",
+    workflow_src = "simon1989"),
+
+  dose_finding = list(title = "Phase I dose-finding trial",
+    fallback = .s("If a model-based design cannot be supported (no one to refit the model between cohorts), a rule-based design such as 3+3."),
+    threats = list(
+      .threat("Many patients treated at doses too low to work",
+              "Escalation that moves quickly through low doses; model-based designs such as the continual reassessment method.", "letourneau2009"),
+      .threat("Late toxicities missed by a short assessment window", "A design that uses time to toxicity rather than a fixed window.", "letourneau2009"),
+      .threat("Escalation decisions not fixed in advance", "Write the escalation and stopping rules and the target toxicity level in the protocol, and report them.", "consort_define")),
+    guideline = "consort_define", measure = "Recommended phase II dose (maximum tolerated dose) and the dose-limiting toxicity rate at each dose",
+    workflow = "Starting dose -> cohort -> dose-limiting toxicity window -> escalate or de-escalate by the rules -> recommended dose")
 )
 
 # Cards that rest on statements of one source each, listed for the tests: none of the numbers the draft gave without a source is
@@ -409,7 +535,8 @@ design_cards <- list(
     tags$ul(class = "mb-2", lapply(card$threats, function(t)
       tags$li(strong(paste0(t$threat, ": ")), t$mitigation, .design_card_mark(t$src)))),
     p(class = "mb-1", strong("Report with: "),
-      paste(vapply(card$guideline, function(k) .design_card_sources[[k]]$cite, ""), collapse = "; ")),
+      if (length(card$guideline)) paste(vapply(card$guideline, function(k) .design_card_sources[[k]]$cite, ""), collapse = "; ")
+      else card$guideline_note),
     p(class = "mb-1", strong("Main effect measure: "), card$measure),
     p(class = "mb-2", strong("Workflow: "), code(card$workflow), if (!is.null(card$workflow_src)) .design_card_mark(card$workflow_src)),
     tags$details(class = "small",
