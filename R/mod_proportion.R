@@ -1,0 +1,310 @@
+# Proportions module: Calculate / Formula-Help / Reference sub-tabs.
+# Follows the module contract in docs/SDD.md #8 -- UI + server + metadata,
+# so a future module (e.g. mod_means.R) can copy this file and swap the
+# calculation call, content list, and input fields.
+
+proportion_meta <- list(
+  id = "proportion",
+  nav_title = "Proportions"
+)
+
+mod_proportion_ui <- function(id) {
+  ns <- NS(id)
+
+  # Non-idiomatic-for-plain-R note: conditionalPanel() evaluates a JS
+  # expression in the browser, so a module input id must be referenced as
+  # input['<namespaced id>'] rather than the bare R variable name. ns("design")
+  # returns the namespaced id (e.g. "proportion-design") as a string.
+  design_is <- function(...) {
+    values <- c(...)
+    paste(sprintf("input['%s'] == '%s'", ns("design"), values), collapse = " || ")
+  }
+
+  tabsetPanel(
+    tabPanel(
+      "Calculate",
+      br(),
+      radioButtons(
+        ns("design"), "Design",
+        choices = c(
+          "Single proportion - precision-based (no reference value)" = "precision",
+          "Single proportion vs. known/reference value (hypothesis test)" = "single",
+          "Two independent proportions" = "two_sample",
+          "Post-hoc pairwise comparison (Bonferroni-adjusted)" = "posthoc_pairwise"
+        ),
+        selected = "precision"
+      ),
+      conditionalPanel(
+        condition = design_is("precision"),
+        numericInput(ns("p_precision"), "p (expected proportion; use 0.5 if unknown and the precision is absolute)",
+                     value = 0.5, min = 0, max = 1, step = 0.01),
+        precision_type_input(ns("error_precision"),
+                             absolute = "Absolute (+/- d on the 0-1 scale of p)",
+                             relative = "Relative (+/- a fraction of p)"),
+        conditionalPanel(
+          condition = sprintf("input['%s'] != 'relative'", ns("error_precision")),
+          numericInput(ns("d_precision"), "d (absolute margin of error, e.g. 0.05 = +/- 5 percentage points)",
+                       value = 0.05, min = 0.001, max = 0.5, step = 0.01)
+        ),
+        conditionalPanel(
+          condition = sprintf("input['%s'] == 'relative'", ns("error_precision")),
+          numericInput(ns("eps_precision"), "Relative margin of error (fraction of p, e.g. 0.10 = +/- 10% of p)",
+                       value = 0.10, min = 0.001, max = 0.99, step = 0.01)
+        ),
+        numericInput(ns("conf_level"), "Confidence level",
+                     value = 0.95, min = 0.5, max = 0.999, step = 0.01),
+        nonresponse_input(ns("nonresponse_precision")),
+        uiOutput(ns("precision_equiv")),
+        precision_guidance_ui("proportion")
+      ),
+      conditionalPanel(
+        condition = design_is("single"),
+        numericInput(ns("p0"), "p0 (reference proportion)", value = 0.20, min = 0, max = 1, step = 0.01),
+        numericInput(ns("p1_single"), "p1 (expected proportion)", value = 0.30, min = 0, max = 1, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("two_sample"),
+        numericInput(ns("p2_two"), "p2 (group 2 / reference proportion)", value = 0.25, min = 0, max = 1, step = 0.01),
+        p(class = "text-muted small mb-1", "Fill in ONE of the following for group 1; the others are calculated."),
+        prop_given_ui(ns, "two", "p1_two", "p1 (group 1 proportion)", 0.10, ref_label = "group 2", min = 0)
+      ),
+      conditionalPanel(
+        condition = design_is("posthoc_pairwise"),
+        numericInput(ns("tau_posthoc"), "Number of pairwise comparisons planned (tau)",
+                     value = 3, min = 1, step = 1),
+        numericInput(ns("p1_posthoc"), "p1 (this pair's first group proportion)",
+                     value = 0.2, min = 0, max = 1, step = 0.01),
+        numericInput(ns("p2_posthoc"), "p2 (this pair's second group proportion)",
+                     value = 0.4, min = 0, max = 1, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("single", "two_sample", "posthoc_pairwise"),
+        numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
+        numericInput(ns("power"), "Desired power", value = 0.8, min = 0.5, max = 0.999, step = 0.01)
+      ),
+      advanced_options_ui(
+        ns, condition = design_is("precision", "single", "two_sample"),
+        conditionalPanel(
+          condition = design_is("precision"),
+          numericInput(ns("N_precision"),
+                       "Population size N (optional; leave blank for a large/community population)",
+                       value = NA, min = 1)
+        ),
+        conditionalPanel(
+          condition = design_is("single", "two_sample"),
+          selectInput(
+            ns("alternative"), "Alternative hypothesis",
+            choices = c("Two-sided" = "two.sided", "Less" = "less", "Greater" = "greater")
+          )
+        )
+      ),
+      hr(),
+      h5("Result"),
+      uiOutput(ns("result")),
+      export_controls_ui(ns),
+      power_curves_ui(ns)
+    ),
+    tabPanel(
+      "Formula / Help",
+      br(),
+      h4(proportion_content$precision$title),
+      render_formula_block(proportion_content$precision$formula_latex),
+      shiny::markdown(proportion_content$precision$explanation),
+      h5("Worked example"),
+      shiny::markdown(proportion_content$precision$worked_example),
+      hr(),
+      h4(proportion_content$single$title),
+      render_formula_block(proportion_content$single$formula_latex),
+      shiny::markdown(proportion_content$single$explanation),
+      h5("Worked example"),
+      shiny::markdown(proportion_content$single$worked_example),
+      hr(),
+      h4(proportion_content$two_sample$title),
+      render_formula_block(proportion_content$two_sample$formula_latex),
+      shiny::markdown(proportion_content$two_sample$explanation),
+      h5("Worked example"),
+      shiny::markdown(proportion_content$two_sample$worked_example),
+      hr(),
+      h4(proportion_content$posthoc_pairwise$title),
+      render_formula_block(proportion_content$posthoc_pairwise$formula_latex),
+      shiny::markdown(proportion_content$posthoc_pairwise$explanation),
+      h5("Worked example"),
+      shiny::markdown(proportion_content$posthoc_pairwise$worked_example)
+    ),
+    tabPanel(
+      "Reference",
+      br(),
+      h4(proportion_content$precision$title),
+      p(strong("Citation: "), proportion_content$precision$citation),
+      p(strong("Implemented via: "), code(proportion_content$precision$backend)),
+      hr(),
+      h4(proportion_content$single$title),
+      p(strong("Citation: "), proportion_content$single$citation),
+      p(strong("Implemented via: "), code(proportion_content$single$backend)),
+      hr(),
+      h4(proportion_content$two_sample$title),
+      p(strong("Citation: "), proportion_content$two_sample$citation),
+      p(strong("Implemented via: "), code(proportion_content$two_sample$backend)),
+      hr(),
+      h4(proportion_content$posthoc_pairwise$title),
+      p(strong("Citation: "), proportion_content$posthoc_pairwise$citation),
+      p(strong("Implemented via: "), code(proportion_content$posthoc_pairwise$backend))
+    )
+  )
+}
+
+mod_proportion_server <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    prop_given_server(input, output, "two", "p1_two", ref = function() input$p2_two, ref_name = "group 2")
+    precision_error <- reactive(if (identical(input$error_precision, "relative")) "relative" else "absolute")
+    precision_value <- reactive(if (precision_error() == "relative") input$eps_precision else input$d_precision)
+    output$precision_equiv <- renderUI({
+      precision_equivalents_ui(precision_equivalents_text(input$p_precision, precision_value(), precision_error(),
+                                                          input$conf_level, "proportion", "p"))
+    })
+
+    result <- reactive({
+      req(input$design)
+
+      if (input$design == "precision") {
+        req(input$p_precision, precision_value(), input$conf_level)
+        # N_precision is optional: numericInput(value = NA) renders an empty
+        # field, which Shiny reports as NULL (untouched) or NA (cleared) --
+        # either means "no finite population correction".
+        N <- .input_or_null(input$N_precision)
+        tryCatch(
+          list(ok = TRUE, value = calc_proportion_precision(
+            p = input$p_precision, d = precision_value(),
+            conf_level = input$conf_level, N = N, error = precision_error(),
+            nonresponse = .nonresponse_value(input$nonresponse_precision)
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else if (input$design == "single") {
+        req(input$p0, input$p1_single, input$alpha, input$power, input$alternative)
+        tryCatch(
+          list(ok = TRUE, value = calc_proportion_1s(
+            p0 = input$p0, p1 = input$p1_single,
+            alpha = input$alpha, power = input$power,
+            alternative = input$alternative
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else if (input$design == "two_sample") {
+        req(input$p2_two, input$alpha, input$power, input$alternative)
+        tryCatch(
+          list(ok = TRUE, value = do.call(calc_proportion_2s, c(list(
+            p2 = input$p2_two,
+            alpha = input$alpha, power = input$power,
+            alternative = input$alternative
+          ), prop_given_args(input, "two", "p1_two")))),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      } else {
+        req(input$tau_posthoc, input$p1_posthoc, input$p2_posthoc, input$alpha, input$power)
+        tryCatch(
+          list(ok = TRUE, value = calc_proportion_posthoc_pairwise(
+            tau = input$tau_posthoc, p1 = input$p1_posthoc, p2 = input$p2_posthoc,
+            alpha = input$alpha, power = input$power
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        )
+      }
+    })
+
+    output$result <- renderUI({
+      res <- result()
+      if (!res$ok) {
+        return(div(class = "text-danger", res$message))
+      }
+
+      v <- res$value
+      if (input$design == "precision") {
+        tagList(
+          p(strong("Required sample size (to analyze): "), v$n),
+          if (!is.null(v$N)) {
+            p(sprintf("(before finite population correction: %d, for population N = %s)",
+                      v$n_unadjusted, v$N))
+          },
+          nonresponse_result_ui(v$n_enrolled, v$n, v$inputs$nonresponse),
+          p(sprintf("Precision (%s): +/- %s on the 0-1 scale = +/- %s of p. Z = %.4f", v$inputs$error,
+                    .prec_fmt(v$d_absolute), .prec_pct(v$epsilon_relative), v$z)),
+          precision_notes_ui(v$precision_notes)
+        )
+      } else if (input$design == "single") {
+        tagList(
+          p(strong("Required sample size: "), v$n),
+          p(sprintf("Effect size h = %.4f", v$h))
+        )
+      } else if (input$design == "two_sample") {
+        tagList(
+          p(strong("Required sample size per group: "), v$n_per_group),
+          p(strong("Total sample size: "), v$n_total),
+          p(sprintf("Effect size h = %.4f", v$h))
+        )
+      } else {
+        tagList(
+          p(strong("Required sample size per group (this pair): "), v$n_per_group)
+        )
+      }
+    })
+
+    render_export_handlers(output, result, function() proportion_content[[input$design]])
+
+    # Power curves (ROADMAP P1 item 10): wired for the two designs with a
+    # single scalar effect parameter and a power argument to vary.
+    # "precision" has no power argument (it isn't a hypothesis test);
+    # "posthoc_pairwise" is left for a later batch, same incremental
+    # rollout as items 8/9.
+    render_power_curves(output, function() {
+      if (input$design == "single") {
+        req(input$p0, input$p1_single, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_proportion_1s,
+          args = list(p0 = input$p0, p1 = input$p1_single, alpha = input$alpha,
+                       power = input$power, alternative = input$alternative),
+          effect = list(param = "p1", values = curve_range_proportion(), label = "p1 (expected proportion)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "two_sample") {
+        p1 <- prop_given_p1(input, "two", "p1_two", input$p2_two)
+        req(p1, input$p2_two, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_proportion_2s,
+          args = list(p1 = p1, p2 = input$p2_two, alpha = input$alpha,
+                       power = input$power, alternative = input$alternative),
+          effect = list(param = "p2", values = curve_range_proportion(), label = "p2 (group 2 proportion)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "posthoc_pairwise") {
+        req(input$tau_posthoc, input$p1_posthoc, input$p2_posthoc, input$alpha, input$power)
+        list(
+          calc_fn = calc_proportion_posthoc_pairwise,
+          args = list(tau = input$tau_posthoc, p1 = input$p1_posthoc, p2 = input$p2_posthoc,
+                       alpha = input$alpha, power = input$power),
+          effect = list(param = "p2", values = curve_range_proportion(), label = "p2 (this pair's second group proportion)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "precision") {
+        # Precision-based: there is no power, so the two curves are n against
+        # the key assumption (p) and against the precision target (d).
+        req(input$p_precision, precision_value(), input$conf_level)
+        N <- .input_or_null(input$N_precision)
+        rel <- precision_error() == "relative"
+        list(
+          calc_fn = calc_proportion_precision,
+          args = list(p = input$p_precision, d = precision_value(), conf_level = input$conf_level, N = N,
+                      error = precision_error()),
+          effect = list(param = "p", values = curve_range_proportion(),
+                      label = "p (expected proportion)",
+                      title = "Required n vs. expected proportion"),
+          power = list(param = "d", values = curve_range_multiplicative(precision_value(), 0.25, 2),
+                      label = if (rel) "Relative margin of error (fraction of p)" else "d (desired margin of error)",
+                      title = if (rel) "Required n vs. relative precision" else "Required n vs. precision (margin of error d)")
+        )
+      } else {
+        NULL
+      }
+    })
+  })
+}
