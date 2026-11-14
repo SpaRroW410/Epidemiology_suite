@@ -169,7 +169,7 @@ test_that("new phrasings reach the new branches", {
     c("A mixed methods study, explanatory sequential design", "term_mm_explanatory"),
     c("A phenomenological study of the lived experience of mothers of children with autism", "term_qual_phenomenology"),
     c("Case series of 20 patients with mucormycosis", "term_case_series"),
-    c("Mendelian randomisation of BMI and depression", "term_mr"),
+    c("Mendelian randomisation of BMI and depression", "mr_outcome"),   # the outcome type is asked, never guessed
     c("Ecological study of district-level trends in TB notification 2010-2020", "term_ecological_trend"))
   for (x in cases) expect_equal(walk_free_text(x[1])$node_id, x[2], info = x[1])
 })

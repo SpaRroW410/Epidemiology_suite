@@ -308,8 +308,11 @@ test_that("ecological designs ask snapshot or trend, both carry the ecological f
     res <- .walk(c(obs, eco, o$label))
     expect_equal(res$node$catalog_key, "ecological_guidance")
   }
-  expect_equal(.walk(c(obs, design_nodes$selection_basis$options[[11]]$label))$node$id, "term_mr")
-  expect_null(design_nodes$term_mr$catalog_key)
+  # Mendelian randomisation: built 14 Nov 2026 (OBS-15); one question on the outcome decides between its two designs
+  mr <- design_nodes$selection_basis$options[[11]]$label
+  expect_equal(.walk(c(obs, mr))$node$id, "mr_outcome")
+  expect_equal(.walk(c(obs, mr, design_nodes$mr_outcome$options[[1]]$label))$node$catalog_key, "mendelian_continuous")
+  expect_equal(.walk(c(obs, mr, design_nodes$mr_outcome$options[[2]]$label))$node$catalog_key, "mendelian_binary")
 })
 
 test_that("diagnostic -> PPV/NPV now routes to a built module", {
@@ -402,7 +405,7 @@ test_that("every not-built terminal is an open item of docs/CHECKLIST.md", {
                term_surv_one_sample = "One-sample survival", term_psm = "Propensity-score",
                term_time_varying = "Time-varying exposure", term_gwas = "GWAS",
                term_gxe = "environment interaction", term_its = "Interrupted time series",
-               term_did = "difference-in-differences", term_rdd = "Regression discontinuity", term_mr = "Mendelian randomisation")
+               term_did = "difference-in-differences", term_rdd = "Regression discontinuity")
   open_terms <- names(Filter(function(n) isTRUE(n$terminal) && is.null(n$catalog_key) && !isTRUE(n$guidance), design_nodes))
   expect_setequal(open_terms, names(tracked))
   for (id in names(tracked)) {

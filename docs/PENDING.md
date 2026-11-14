@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**90 open** of 362 items (272 done).
+**89 open** of 362 items (273 done).
 
 ## Waiting for the owner
 
@@ -21,7 +21,7 @@
 
 - [ ] **OWN-04** **[owner]** Decision D6: when to reopen the paused items (PRED, section 2).
 
-## 2. Calculators (Plan: Sample Size and Analyze) -- 40 open
+## 2. Calculators (Plan: Sample Size and Analyze) -- 39 open
 
 ### Plan: Survey & Cross-Sectional (SVY)
 
@@ -38,8 +38,6 @@
 - [ ] **OBS-13** Controlled before-after / difference-in-differences, reached by FIND-16: sample size. No source found yet.
 - [ ] **OBS-14** Regression discontinuity, reached by FIND-16: sample size. Candidate sources, not read: Schochet 2009; Cattaneo,
   Titiunik & Vazquez-Bare 2019.
-- [ ] **OBS-15** Mendelian randomisation, reached by FIND-16: power. Candidate sources, not read: Brion, Shakhbazov & Visscher 2013;
-  Burgess 2014.
 
 ### Plan: Diagnostic & Screening (DX)
 

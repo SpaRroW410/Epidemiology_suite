@@ -299,7 +299,7 @@ policy or programme evaluated from routine data.
 | Each case serves as own control, different time windows | **Case-crossover** | OR | `mod_case_crossover` |
 | Repeated events within individuals, self-controlled | **SCCS** | IRR | `mod_sccs` |
 | Unit of observation is a group, not a person | **Ecological** | — | guidance panel + caveat; asks one period or a time trend, and warns of the ecological fallacy |
-| Genetic variants stand in for the exposure | **Mendelian randomisation** | causal OR / beta | not built (CHECKLIST OBS-15) |
+| Genetic variants stand in for the exposure | **Mendelian randomisation** (then: measured or yes/no outcome) | causal beta / OR | `mod_mendelian` |
 
 > **The single most useful discriminator in this whole algorithm** is Q2.4's phrasing.
 > Asking "is it prospective or retrospective?" produces wrong answers constantly —

@@ -1,5 +1,15 @@
 # epidemiologysuite (development version)
 
+## Mendelian randomisation calculator (14 Nov 2026)
+
+* New calculator, **Plan: Sample Size > Observational Studies > Mendelian Randomisation**: the sample size, or the power at a sample
+  size you have, when genetic variants stand in for the exposure. Two designs: a measured (continuous) outcome, and a disease (yes /
+  no) outcome with cases and controls. You enter the effect to detect and the share of the exposure's variance the variants explain
+  (R-squared). From Burgess 2014 (Int J Epidemiol), reproducing all 54 values of the paper's validation table. New functions
+  `calc_mr_continuous()` and `calc_mr_binary()`.
+* The guide's Mendelian randomisation answer now asks the outcome type and opens the matching design (it used to end at "not yet
+  built").
+
 ## Design cards for diagnostic, agreement, prediction and other end points (11 Nov 2026)
 
 * The guide now shows a design card at 28 more end points: diagnostic accuracy, agreement and reliability, prediction models,

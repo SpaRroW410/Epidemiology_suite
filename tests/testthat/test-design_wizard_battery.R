@@ -122,7 +122,7 @@ wizard_battery <- list(
   list("Convergent mixed methods study of tuberculosis treatment adherence", "term_mm_convergent"),
   list("Case series of patients with snakebite admitted to a district hospital", "term_case_series"),
   list("Ecological study of state-level trends in neonatal mortality from 2005 to 2020", "term_ecological_trend"),
-  list("Mendelian randomisation study of alcohol and blood pressure", "term_mr")
+  list("Mendelian randomisation study of alcohol and blood pressure", "mr_outcome")   # the outcome type is asked
 )
 
 test_that("plain-language study descriptions reach the expected terminal or question", {

@@ -844,6 +844,26 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Self-Controlled Case Series",
        module_input_id = NA, design_value = NA),
 
+  list(key = "mendelian_continuous",
+       label = "Mendelian randomisation, continuous outcome (single genetic instrument)",
+       answers = paste(
+         "Answers: \"Genetic variants stand in for my exposure (Mendelian randomisation) and the outcome is a measurement -- how many",
+         "participants do I need, or what power do I have, given how much of the exposure the variants explain?\""
+       ),
+       outcome_type = "mendelian", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Mendelian Randomisation",
+       module_input_id = "mendelian-design", design_value = "continuous"),
+
+  list(key = "mendelian_binary",
+       label = "Mendelian randomisation, binary outcome (cases and controls, single genetic instrument)",
+       answers = paste(
+         "Answers: \"Genetic variants stand in for my exposure (Mendelian randomisation) and the outcome is a disease, yes or no -- how",
+         "many cases and controls do I need to detect a causal odds ratio, or what power do I have?\""
+       ),
+       outcome_type = "mendelian", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Mendelian Randomisation",
+       module_input_id = "mendelian-design", design_value = "binary"),
+
   list(key = "patient_units_between_continuous",
        label = "Several units per patient (eyes, lesions, patches), same treatment in all of a patient's units -- two means",
        answers = paste(
@@ -2387,6 +2407,9 @@ study_design_families <- list(
   list(id = "sccs", label = "Self-Controlled Case Series",
        hint = "Cases only, comparing each case's own event rate during a risk period to their own rate at other times.",
        catalog_keys = c("sccs_samplesize")),
+  list(id = "mendelian", label = "Mendelian Randomisation",
+       hint = "Genetic variants as a stand-in for an exposure: sample size or power for a continuous or a binary outcome, from the share of the exposure the variants explain.",
+       catalog_keys = c("mendelian_continuous", "mendelian_binary")),
   list(id = "diagnostic", label = "Diagnostic Accuracy",
        hint = "Estimating sensitivity/specificity given expected prevalence.",
        catalog_keys = c("diagnostic_precision", "diagnostic_vs_reference",
