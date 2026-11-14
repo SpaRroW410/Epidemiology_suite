@@ -160,7 +160,7 @@ test_that("outbreak, surveillance and epidemic-model phrasing reaches its termin
 
 test_that("new phrasings reach the new branches", {
   cases <- list(
-    c("An interrupted time series of hospital admissions before and after the smoking ban was introduced", "term_its"),
+    c("An interrupted time series of hospital admissions before and after the smoking ban was introduced", "its_effect"),   # level or slope is asked
     c("Effect of the national health mission launched in 2005 on institutional deliveries, before and after, with comparison districts", "term_did"),
     c("A non-randomised study of a school programme where a cut-off score decided who received it", "term_rdd"),
     c("A scoping review of mHealth interventions for diabetes", "term_scoping"),
@@ -243,7 +243,7 @@ test_that("near misses of the new rules: 'its', 'impact', a team's own programme
   # a team's own programme (and "impact", which contains "act") is not a natural experiment: who assigns it is asked
   expect_equal(walk_free_text("impact of a health education programme implemented by ASHA workers")$node_id, "allocation")
   expect_equal(walk_free_text("Evaluation of the national tuberculosis elimination programme implemented in 2020, interrupted time series")$node_id,
-               "term_its")
+               "its_effect")
   # "a case of" in a diagnostic question is not a case report
   expect_false(identical(walk_free_text("accuracy of a rapid test in a case of fever against a gold standard")$node_id, "term_case_report"))
   expect_equal(walk_free_text("We report a rare case of Kikuchi disease")$node_id, "term_case_report")

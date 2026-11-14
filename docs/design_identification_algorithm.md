@@ -255,7 +255,7 @@ Four sequential discriminators, in this order:
 
 | Answer | Design | Status |
 |---|---|---|
-| Many measurements before and after a start date | **Interrupted time series** | not built (CHECKLIST OBS-12) |
+| Many measurements before and after a start date | **Interrupted time series** (then: change in level or in slope) | `mod_its` |
 | Before and after, in the group that received it and a comparison group | **Controlled before-after / difference-in-differences** | not built (OBS-13) |
 | A cut-off on a score, an age or a date decided who received it | **Regression discontinuity** | not built (OBS-14) |
 | One group, before and after, no comparison group | **Single-arm pre-post** | paired means (measured outcome) or paired proportions (yes/no) |

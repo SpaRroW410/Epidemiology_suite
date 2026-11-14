@@ -111,7 +111,7 @@ wizard_battery <- list(
   list("Number of studies needed for a meta-analysis", "term_meta_power"),
   list("network meta-analysis of antidepressants", "term_nma"),
   # branches merged from the owner's routing material (docs/find_routing/, 6 Nov 2026)
-  list("Interrupted time series of monthly institutional deliveries before and after the JSY scheme was launched", "term_its"),
+  list("Interrupted time series of monthly institutional deliveries before and after the JSY scheme was launched", "its_effect"),
   list("Impact of the tobacco tax introduced in 2017 on cigarette sales, with neighbouring states as comparison states", "term_did"),
   list("A quasi-experimental study of a school feeding programme, eligibility decided by a cut-off on family income", "term_rdd"),
   list("Pre-post study of an educational intervention on knowledge score among ASHA workers, non-randomised", "term_prepost_means"),

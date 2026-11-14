@@ -1271,7 +1271,7 @@ design_nodes <- list(
     question = "How is the effect measured?",
     help = "Without randomisation the comparison carries the weight: a group that did not receive it, or many measurements over time, or a cut-off that decided who received it.",
     options = list(
-      list(label = "Many measurements before and after a start date, e.g. monthly counts for two years either side (interrupted time series)", next_id = "term_its"),
+      list(label = "Many measurements before and after a start date, e.g. monthly counts for two years either side (interrupted time series)", next_id = "its_effect"),
       list(label = "Before and after, in the group that received it and in a comparison group that did not (controlled before-after / difference-in-differences)", next_id = "term_did"),
       list(label = "A cut-off on a score, an age or a date decided who received it (regression discontinuity)", next_id = "term_rdd"),
       list(label = "One group, measured before and after, with no comparison group (single-arm pre-post)", next_id = "prepost_outcome")
@@ -1303,8 +1303,18 @@ design_nodes <- list(
   term_prepost_props = .term("term_prepost_props", "Single-arm pre-post study, yes/no outcome (paired proportions)", "proportion_two_dep",
     note = "Without a comparison group a before-after change also contains whatever else changed over the same time; a comparison group or several baseline measurements make the result easier to interpret."),
 
-  term_its = .term_open("term_its", "Interrupted time series (segmented regression)",
-    would_use = "a power calculation for segmented regression with autocorrelation (simulation-based: Zhang, Wagner & Ross-Degnan 2011, not yet read)"),
+  # Interrupted time series (OBS-12, built 14 Nov 2026): one question, the kind of change, decides between the calculator's designs
+  its_effect = list(
+    id = "its_effect", stage = 3,
+    question = "What kind of change do you expect at the start date?",
+    help = "An immediate step (a change in level) is typical when a rule takes effect on one day; a change in slope when the effect builds up, for example as a programme is taken up. The usual segmented regression estimates both; choose the one your main hypothesis is about.",
+    options = list(
+      list(label = "An immediate, lasting step up or down (change in level)", next_id = "term_its"),
+      list(label = "A gradual change: the trend afterwards differs from the trend before (change in slope)", next_id = "term_its_slope")
+    )
+  ),
+  term_its = .term("term_its", "Interrupted time series, change in level (segmented regression)", "its_level"),
+  term_its_slope = .term("term_its_slope", "Interrupted time series, change in slope (segmented regression)", "its_slope"),
   term_did = .term_open("term_did", "Controlled before-after study / difference-in-differences",
     would_use = "a sample-size method for difference-in-differences with a cited worked example (none found yet)"),
   term_rdd = .term_open("term_rdd", "Regression discontinuity design",
@@ -1430,7 +1440,7 @@ design_nodes <- list(
   term_case_series = "case_series",
   term_ecological = "ecological",
   term_ecological_trend = "ecological_trend",
-  term_its = "its",
+  term_its = "its", term_its_slope = "its",
   term_did = "did",
   term_rdd = "rdd",
   term_prepost_means = "prepost",

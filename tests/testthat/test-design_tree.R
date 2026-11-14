@@ -292,7 +292,10 @@ test_that("who assigned it: the team without randomisation, or a programme / pol
   expect_equal(.walk(c(cmp, team))$flags$assigned, "team")
   expect_equal(.walk(c(cmp, other))$flags$assigned, "other")
   q <- vapply(design_nodes$quasi_type$options, function(o) o$label, "")
-  expect_equal(.walk(c(cmp, other, q[1]))$node$id, "term_its")
+  # interrupted time series: built 14 Nov 2026 (OBS-12); one question on the kind of change decides between its two designs
+  expect_equal(.walk(c(cmp, other, q[1]))$node$id, "its_effect")
+  expect_equal(.walk(c(cmp, other, q[1], design_nodes$its_effect$options[[1]]$label))$node$catalog_key, "its_level")
+  expect_equal(.walk(c(cmp, other, q[1], design_nodes$its_effect$options[[2]]$label))$node$catalog_key, "its_slope")
   expect_equal(.walk(c(cmp, other, q[2]))$node$id, "term_did")
   expect_equal(.walk(c(cmp, team, q[3]))$node$id, "term_rdd")
   pp <- vapply(design_nodes$prepost_outcome$options, function(o) o$label, "")
@@ -404,7 +407,7 @@ test_that("every not-built terminal is an open item of docs/CHECKLIST.md", {
                term_dose_finding = "Dose-finding", term_platform = "Platform / basket",
                term_surv_one_sample = "One-sample survival", term_psm = "Propensity-score",
                term_time_varying = "Time-varying exposure", term_gwas = "GWAS",
-               term_gxe = "environment interaction", term_its = "Interrupted time series",
+               term_gxe = "environment interaction",
                term_did = "difference-in-differences", term_rdd = "Regression discontinuity")
   open_terms <- names(Filter(function(n) isTRUE(n$terminal) && is.null(n$catalog_key) && !isTRUE(n$guidance), design_nodes))
   expect_setequal(open_terms, names(tracked))
