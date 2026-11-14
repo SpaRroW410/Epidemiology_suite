@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**91 open** of 362 items (271 done).
+**90 open** of 362 items (272 done).
 
 ## Waiting for the owner
 
@@ -120,7 +120,7 @@
 - [ ] **GEN-77** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to Bonferroni /
   Sidak).
 
-## 3. Finding a calculator: the guide, search and Find tab (FIND) -- 8 open
+## 3. Finding a calculator: the guide, search and Find tab (FIND) -- 7 open
 
 - [ ] **FIND-09** **[owner]** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the
   reader against.
@@ -134,9 +134,6 @@
   version). Not now: decision F1 (6 Nov 2026) keeps the reader deterministic.
 - [ ] **FIND-24** **[optional]** Clinical codes for record-based studies (WHO ICD-10, ICD-10-CM, SNOMED CT, LOINC, RxNorm), taken only
   from the official code lists and never generated; needs a decision on which lists and their licence terms.
-- [ ] **FIND-25** Design cards for the guide's end points the registry lacks: diagnostic accuracy (STARD), agreement and reliability,
-  prediction models (TRIPOD), self-controlled case series, case-cohort, propensity-score and time-varying designs, phase II and
-  dose-finding trials; each with its sources checked as in SRC-06.
 
 ## 4. Studies: a working record of calculations (STUDY) -- 4 open
 

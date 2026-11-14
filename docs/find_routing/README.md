@@ -95,3 +95,7 @@ checking: the F > 10 rule for Mendelian randomisation and the 8-12 time points f
 (Cochrane Handbook 6.5 technical supplement, Boxes 3.a and 3.b; PubMed Clinical Queries) and every other filter labelled as not
 validated; the MeSH headings it prints are checked against NLM by `tools/find/check_mesh.R` (FIND-23). Of Part B's headings, the
 four that do not exist are not used, and "Network Meta-Analysis" is a publication type (since MeSH 2025), not a subject heading.
+
+**Built (11 Nov 2026):** cards for the end points the registry lacked (FIND-25): diagnostic accuracy, agreement and reliability,
+prediction models, self-controlled case series, case-cohort, propensity-score and time-varying designs, single-arm phase II and
+dose-finding trials, with their sources checked in PubMed, and search terms for each.
