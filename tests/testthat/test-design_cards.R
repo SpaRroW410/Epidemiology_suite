@@ -56,7 +56,8 @@ test_that("the right card follows the path: the answer that decided the design, 
   obs <- c(cmp, "I only observe what happened naturally")
   expect_equal(key(c(obs, "Their exposure status (outcome measured/ascertained later)",
                      "Whether the disease/event occurred (a risk: relative risk)")), "cohort")
-  expect_equal(key(c(obs, design_nodes$selection_basis$options[[11]]$label)), "mr")
+  for (o in design_nodes$mr_outcome$options)   # Mendelian randomisation: the outcome question, then the same card at both end points
+    expect_equal(key(c(obs, design_nodes$selection_basis$options[[11]]$label, o$label)), "mr")
   expect_equal(key(c("Estimate a parameter with precision (prevalence, mean, rate...)", "A proportion / prevalence")), "descriptive_cs")
   expect_equal(key(c(cmp, assign, "Individual subjects", "Phase I dose-finding (3+3, continual reassessment method)")), "dose_finding")
   expect_equal(.design_card_key(design_nodes$term_sccs, list()), "sccs")

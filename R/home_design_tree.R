@@ -529,7 +529,7 @@ design_nodes <- list(
       list(label = "Genome-wide or candidate-gene association study", next_id = "term_gwas"),
       list(label = "Gene-environment interaction", next_id = "term_gxe"),
       list(label = "Two-group gene-expression (microarray) study with FDR control", next_id = "term_microarray"),
-      list(label = "Genetic variants as a stand-in for an exposure, to estimate its effect (Mendelian randomisation)", next_id = "term_mr")
+      list(label = "Genetic variants as a stand-in for an exposure, to estimate its effect (Mendelian randomisation)", next_id = "mr_outcome")
     )
   ),
 
@@ -685,7 +685,7 @@ design_nodes <- list(
       list(label = "The unit of observation is a group/area, not a person (ecological)", next_id = "eco_time"),
       list(label = "Exposed and unexposed matched on a propensity score", next_id = "term_psm"),
       list(label = "Exposure changes over time within the same people (time-varying exposure)", next_id = "term_time_varying"),
-      list(label = "Genetic variants stand in for the exposure (Mendelian randomisation)", next_id = "term_mr")
+      list(label = "Genetic variants stand in for the exposure (Mendelian randomisation)", next_id = "mr_outcome")
     )
   ),
 
@@ -1271,7 +1271,7 @@ design_nodes <- list(
     question = "How is the effect measured?",
     help = "Without randomisation the comparison carries the weight: a group that did not receive it, or many measurements over time, or a cut-off that decided who received it.",
     options = list(
-      list(label = "Many measurements before and after a start date, e.g. monthly counts for two years either side (interrupted time series)", next_id = "term_its"),
+      list(label = "Many measurements before and after a start date, e.g. monthly counts for two years either side (interrupted time series)", next_id = "its_effect"),
       list(label = "Before and after, in the group that received it and in a comparison group that did not (controlled before-after / difference-in-differences)", next_id = "term_did"),
       list(label = "A cut-off on a score, an age or a date decided who received it (regression discontinuity)", next_id = "term_rdd"),
       list(label = "One group, measured before and after, with no comparison group (single-arm pre-post)", next_id = "prepost_outcome")
@@ -1303,14 +1303,34 @@ design_nodes <- list(
   term_prepost_props = .term("term_prepost_props", "Single-arm pre-post study, yes/no outcome (paired proportions)", "proportion_two_dep",
     note = "Without a comparison group a before-after change also contains whatever else changed over the same time; a comparison group or several baseline measurements make the result easier to interpret."),
 
-  term_its = .term_open("term_its", "Interrupted time series (segmented regression)",
-    would_use = "a power calculation for segmented regression with autocorrelation (simulation-based: Zhang, Wagner & Ross-Degnan 2011, not yet read)"),
+  # Interrupted time series (OBS-12, built 14 Nov 2026): one question, the kind of change, decides between the calculator's designs
+  its_effect = list(
+    id = "its_effect", stage = 3,
+    question = "What kind of change do you expect at the start date?",
+    help = "An immediate step (a change in level) is typical when a rule takes effect on one day; a change in slope when the effect builds up, for example as a programme is taken up. The usual segmented regression estimates both; choose the one your main hypothesis is about.",
+    options = list(
+      list(label = "An immediate, lasting step up or down (change in level)", next_id = "term_its"),
+      list(label = "A gradual change: the trend afterwards differs from the trend before (change in slope)", next_id = "term_its_slope")
+    )
+  ),
+  term_its = .term("term_its", "Interrupted time series, change in level (segmented regression)", "its_level"),
+  term_its_slope = .term("term_its_slope", "Interrupted time series, change in slope (segmented regression)", "its_slope"),
   term_did = .term_open("term_did", "Controlled before-after study / difference-in-differences",
     would_use = "a sample-size method for difference-in-differences with a cited worked example (none found yet)"),
   term_rdd = .term_open("term_rdd", "Regression discontinuity design",
     would_use = "a power calculation for regression discontinuity (Schochet 2009; Cattaneo, Titiunik & Vazquez-Bare 2019, not yet read)"),
-  term_mr = .term_open("term_mr", "Mendelian randomisation",
-    would_use = "a power calculation for Mendelian randomisation (Brion, Shakhbazov & Visscher 2013; Burgess 2014, not yet read)"),
+  # Mendelian randomisation (OBS-15, built 14 Nov 2026): one question, the outcome, decides between the two designs of the calculator
+  mr_outcome = list(
+    id = "mr_outcome", stage = 3,
+    question = "In your Mendelian randomisation study, what kind of outcome is it?",
+    help = "Both calculators need the share of the exposure's variance that your genetic variants explain (R-squared), from a published genome-wide association study or your own data. A yes/no outcome needs far more people than a measured one.",
+    options = list(
+      list(label = "A measurement (continuous outcome, e.g. blood pressure)", next_id = "term_mr"),
+      list(label = "A disease or event, yes / no (cases and controls)", next_id = "term_mr_binary")
+    )
+  ),
+  term_mr = .term("term_mr", "Mendelian randomisation, continuous outcome (single genetic instrument)", "mendelian_continuous"),
+  term_mr_binary = .term("term_mr_binary", "Mendelian randomisation, binary outcome (single genetic instrument)", "mendelian_binary"),
 
   # ================================================================== #
   # Guidance terminals -- deliberately no numeric N
@@ -1420,12 +1440,12 @@ design_nodes <- list(
   term_case_series = "case_series",
   term_ecological = "ecological",
   term_ecological_trend = "ecological_trend",
-  term_its = "its",
+  term_its = "its", term_its_slope = "its",
   term_did = "did",
   term_rdd = "rdd",
   term_prepost_means = "prepost",
   term_prepost_props = "prepost",
-  term_mr = "mr",
+  term_mr = "mr", term_mr_binary = "mr",
   # FIND-25: the guide's own end points that the registry lacked
   term_diag_precision = "diagnostic_accuracy", term_diag_vs_ref = "diagnostic_accuracy", term_diag_two_indep = "diagnostic_accuracy",
   term_diag_two_paired = "diagnostic_accuracy", term_ppv_npv = "diagnostic_accuracy", term_diag_lr = "diagnostic_accuracy",

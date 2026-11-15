@@ -76,8 +76,11 @@ test_that("two-stage cluster survey sizes equal epi.ssclus2estb(), constant and 
   for (b in list(10, 20, c(15, 5), c(8, 8))) for (err in c("relative", "absolute")) for (rho in c(0.02, 0.2)) for (Npsu in list(NA, 400)) {
     eps <- if (err == "relative") 0.2 else 0.05
     a <- suppressWarnings(.cf_ssclus2estb(Npsu, b, 0.3, eps, err, rho, 0.95))
-    f <- suppressWarnings(epiR::epi.ssclus2estb(N.psu = NA, b = b, Py = 0.3, epsilon = eps, error = err, rho = rho, nfractional = TRUE,
-                                                conf.level = 0.95))
+    # epiR 3.0.1 added the sensitivity and specificity of the test used to find positives (se, sp; Humphry et al. 2004); a perfect
+    # test (1, 1) is the earlier formula, which is what the app's calculator implements
+    perfect <- if ("se" %in% names(formals(epiR::epi.ssclus2estb))) list(se = 1, sp = 1) else list()
+    f <- suppressWarnings(do.call(epiR::epi.ssclus2estb, c(list(N.psu = NA, b = b, Py = 0.3, epsilon = eps, error = err, rho = rho,
+                                                               nfractional = TRUE, conf.level = 0.95), perfect)))
     psu <- cochran(f$n.psu, Npsu)
     near(a[c("n.psu", "n.ssu", "DEF")], list(ceiling(psu), ceiling(psu * b[1]), f$DEF), paste(b, err, rho, Npsu))
   }

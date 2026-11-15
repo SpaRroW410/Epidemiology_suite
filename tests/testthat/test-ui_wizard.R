@@ -66,6 +66,10 @@ test_that("wizard: the PubMed builder at an end point writes the search from the
   if (app$get_js("!!document.getElementById('design_wizard_restart')")) { app$click("design_wizard_restart"); app$wait_for_idle(500, timeout = 30000) }
   app$set_inputs(design_wizard_freetext = "An interrupted time series of hospital admissions before and after the smoking ban was introduced")
   app$click("design_wizard_parse"); app$wait_for_idle(800, timeout = 30000)
+  # the reader stops at the one question it cannot answer from the text: a change in level or in slope
+  expect_match(ui_output_text(app, "design_wizard_body"), "What kind of change do you expect")
+  ui_wait_bound(app, "design_wizard_choice"); app$set_inputs(design_wizard_choice = "1"); app$click("design_wizard_next"); app$wait_for_idle(800, timeout = 30000)
+  expect_match(ui_output_text(app, "design_wizard_body"), "Go to: Interrupted Time Series")
   expect_match(ui_output_text(app, "design_wizard_body"), "Search PubMed for studies like this")
   app$run_js("document.querySelector('.pubmed-builder').open = true;")
   ui_wait_bound(app, "design_pubmed_c1")

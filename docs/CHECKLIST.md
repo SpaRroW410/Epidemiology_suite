@@ -25,7 +25,7 @@ Steps only the owner can take that belong to no section below; the section items
 
 ## 2. Calculators (Plan: Sample Size and Analyze)
 
-All 215 designs of the app's catalog are built (6 Nov 2026); the open items are designs not built yet, or the open half of a built one.
+All 219 designs of the app's catalog are built (14 Nov 2026); the open items are designs not built yet, or the open half of a built one.
 The guide's end points for designs not built yet are tested to be listed here (`tests/testthat/test-design_tree.R`).
 
 ### Plan: Effect Sizes (ES)
@@ -95,13 +95,24 @@ The guide's end points for designs not built yet are tested to be listed here (`
   efficiency depends on each data set's overlap. *Unblock:* a published planning heuristic with a worked example.
 - [ ] **OBS-11** **[blocked]** Time-varying exposure (OPTITXS; Basagana & Spiegelman 2010, 2011): not on CRAN, papers not reachable.
   *Unblock:* paper access or the OPTITXS source.
-- [ ] **OBS-12** Interrupted time series (segmented regression), reached by FIND-16: sample size or power. Candidate source, not read:
-  Zhang, Wagner & Ross-Degnan 2011 (simulation-based power).
+- [x] **OBS-12** Interrupted time series (segmented regression), reached by FIND-16: sample size or power. Built 14 Nov 2026
+  (`R/calc_its.R`, the Interrupted Time Series calculator): time points needed, or power, for a change in level or in slope, with
+  AR(1) errors, a baseline trend and both changes in the model by default. A calculation (generalised least squares variance,
+  noncentral t), not a simulation. Checked against Beard, Brown & Shahab 2026 (Addiction 121:695-712, read in full): within 0.06 of
+  its simulated Table 1 (level) from 100 time points; a simulation of fitted `arima()` models here reproduces its Table 3 (slope,
+  0.54 against 0.55) and shows why the calculation is lower (0.45): the fitted test rejects 6-12% of the time when nothing changed.
+  The help text says so and warns under 50 time points. Zhang, Wagner & Ross-Degnan 2011 has no free full text; not read, not cited.
+  Not covered: seasonality, a control series, count models, several interruptions.
 - [ ] **OBS-13** Controlled before-after / difference-in-differences, reached by FIND-16: sample size. No source found yet.
 - [ ] **OBS-14** Regression discontinuity, reached by FIND-16: sample size. Candidate sources, not read: Schochet 2009; Cattaneo,
   Titiunik & Vazquez-Bare 2019.
-- [ ] **OBS-15** Mendelian randomisation, reached by FIND-16: power. Candidate sources, not read: Brion, Shakhbazov & Visscher 2013;
-  Burgess 2014.
+- [x] **OBS-15** Mendelian randomisation, reached by FIND-16: power. Built 14 Nov 2026 (`R/calc_mendelian.R`, the Mendelian
+  Randomisation calculator): sample size or power with a single genetic instrument, for a continuous and for a binary outcome, from
+  Burgess 2014 (Int J Epidemiol 43:922-929; read in full, equations 4-6 and 9-12 from the article's equation images). Reproduces
+  all 54 formula values of the paper's validation table; the continuous formula was also checked by a two-stage least squares
+  simulation here (80.0% by formula, 79.6% simulated without confounding). The guide asks the outcome type and opens the matching
+  design. Brion, Shakhbazov & Visscher 2013 could not be read in full (no full text through PubMed Central) and is not cited.
+
 ### Plan: Diagnostic & Screening (DX)
 
 - [x] **DX-01** Sensitivity & specificity -- precision-based (no reference value) -- Buderer 1996
