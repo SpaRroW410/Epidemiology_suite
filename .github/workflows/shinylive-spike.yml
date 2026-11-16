@@ -1,6 +1,8 @@
 # Shinylive / webR feasibility spike (docs/archive/ROADMAP.md item 15, Track D3).
 # Runs on GitHub's runners because the development sandbox cannot reach
-# repo.r-wasm.org. Triggered by changes to the spike itself, or by hand.
+# repo.r-wasm.org. Triggered by changes to the browser build's own files (it is the check that the exported app boots and
+# the start-up screen goes away), by hand, and once a week, so that a change in webR, Shinylive or the WebAssembly package
+# repository that breaks the browser build is noticed without waiting for the next change here (CHECKLIST DIST-10).
 name: shinylive-spike
 
 on:
@@ -9,6 +11,8 @@ on:
       - "tools/webr-spike/**"
       - "tools/pages/**"
       - ".github/workflows/shinylive-spike.yml"
+  schedule:
+    - cron: "17 3 * * 1"   # Mondays 03:17 UTC
   workflow_dispatch:
 
 jobs:

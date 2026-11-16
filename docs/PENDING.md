@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**86 open** of 362 items (276 done).
+**85 open** of 362 items (277 done).
 
 ## Waiting for the owner
 
@@ -159,7 +159,7 @@
 - [ ] **PKG-12** **[optional]** Ask epiR's maintainer about 3.0.0's population attributable fraction interval for a single 2 x 2 table:
   it is built from the limits of the two risks' intervals, where 2.0.67 reported Jewell's (2004) interval (this app keeps Jewell's).
 
-## 7. Versions, hosting and distribution (DIST) -- 10 open
+## 7. Versions, hosting and distribution (DIST) -- 9 open
 
 - [ ] **DIST-06** **[owner]** Republish on Connect Cloud after each merge; try the redirect, Find, Effect Size, the links, the server
   notice and dark mode on a real phone (Android and iPhone / Safari).
@@ -169,7 +169,6 @@
   `EPIDEMIOLOGYSUITE_OPEN` on Connect if it was set there.
 - [ ] **DIST-09** Browser build: about 64 MB on first visit; trim it and measure first load and memory on a real phone connection (desktop,
   3 Nov 2026: 38.9 s until Home is usable; `tools/ui-audit/live_timing.js`). The offline / Android route waits on that measurement.
-- [ ] **DIST-10** Park the `shinylive-spike` workflow (`if: false`) or move it to a weekly schedule.
 - [ ] **DIST-11** Documentation site: look at it once (navigation, search, MathJax); custom domain; "Try it online" links; a link from each
   calculator page to the app.
 - [ ] **DIST-12** Docker: first publish to GHCR, image size, an arm64 build.

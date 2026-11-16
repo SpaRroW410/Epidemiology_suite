@@ -577,7 +577,9 @@ Decisions S1-S5 are in `SDD.md`, section 17.
   `EPIDEMIOLOGYSUITE_OPEN` on Connect if it was set there.
 - [ ] **DIST-09** Browser build: about 64 MB on first visit; trim it and measure first load and memory on a real phone connection (desktop,
   3 Nov 2026: 38.9 s until Home is usable; `tools/ui-audit/live_timing.js`). The offline / Android route waits on that measurement.
-- [ ] **DIST-10** Park the `shinylive-spike` workflow (`if: false`) or move it to a weekly schedule.
+- [x] **DIST-10** Park the `shinylive-spike` workflow (`if: false`) or move it to a weekly schedule. Done 16 Nov 2026: it now also
+  runs every Monday; it is not parked and keeps running on changes to `tools/pages/` and `tools/webr-spike/`, because it is the check
+  that the exported browser build boots and its start-up screen goes away.
 - [ ] **DIST-11** Documentation site: look at it once (navigation, search, MathJax); custom domain; "Try it online" links; a link from each
   calculator page to the app.
 - [ ] **DIST-12** Docker: first publish to GHCR, image size, an arm64 build.
