@@ -87,6 +87,11 @@ ui_open_module <- function(app, title) {
   # a calculator that was not loaded at start-up is inserted after the click: wait for its placeholder to go
   app$wait_for_js(sprintf("!document.querySelector('#%s > .lazy-note')", lazy_container_id(module_id_of(title))), timeout = 120000)
   app$wait_for_idle(800, timeout = 120000)
+  # the calculator's result is drawn after its inputs are bound; on a slow machine "idle" can be reached before that, and a test
+  # that reads the result at once finds it empty (seen in CI, 16 Nov 2026). Wait for the result box to hold text when it has one.
+  try(app$wait_for_js(sprintf(
+    "(function(){var e=document.getElementById('%s-result'); return !e || e.innerText.trim().length > 0;})()", module_id_of(title)),
+    timeout = 60000), silent = TRUE)
 }
 
 module_id_of <- function(title) {
