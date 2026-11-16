@@ -522,7 +522,10 @@ Decisions S1-S5 are in `SDD.md`, section 17.
 - [x] **UI-09** "Advanced options" folded in the calculators that have optional settings (30 Oct, 4 Nov 2026).
 - [x] **UI-10** A table comparing the three versions, on Home and the Cite tab, with the one in use marked (4 Nov 2026).
 - [ ] **UI-11** A person's keyboard and screen-reader walk-through (a scan cannot judge reading order or whether names make sense).
-- [ ] **UI-12** Dark-mode plots (plots stay white); text-resize and reduced-motion checks.
+- [x] **UI-12** Dark-mode plots (plots stay white); text-resize and reduced-motion checks. Done 16 Nov 2026: the power curves, the
+  surveillance charts and the epidemic chart take their colours from one light / dark palette (`.plot_palette()`, every colour at
+  least 3:1 against its background, tested) and redraw when the switch is used. Checked in a browser on one calculator page: with
+  text at 200% nothing is clipped and the page does not scroll sideways; with reduced motion set, no animation runs.
 - [ ] **UI-13** Phone: the dark-mode switch is hidden on phones; a layout pass on a real phone; **[optional]** a slimmer phone-only app.
 - [ ] **UI-14** **[optional]** Two-column layout on wide screens (inputs left, result right).
 - [ ] **UI-15** Revisit with real usage: Home quick links and cards, the background loading order and the four start-up calculators.

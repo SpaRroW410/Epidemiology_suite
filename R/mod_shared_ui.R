@@ -220,6 +220,31 @@ power_curves_ui <- function(ns) {
 #'     `input`.
 #' @param input The module's own `input`; needed only for gated designs.
 #' @noRd
+# --- plot colours for light and dark mode (CHECKLIST UI-12) ------------------------------------------------------------------
+# Base-graphics plots are images, so the page's dark mode does not reach them: each plot asks which mode the page is in (the
+# navbar switch, input$dark_mode of the root session; reading it also redraws the plot when the switch is used) and takes its
+# colours from here. Every colour has a contrast of at least 3:1 against its background (tests/testthat/test-plot_palette.R).
+.plot_palette <- function(dark = FALSE) {
+  if (isTRUE(dark)) list(bg = "#212529", fg = "#dee2e6", muted = "#adb5bd", line = "#dee2e6", accent = "#ea868f", grey = "#9aa4ad",
+                         series = c(susceptible = "#6ea8fe", exposed = "#ffc107", infectious = "#ea868f", removed = "#adb5bd"))
+  else list(bg = "#ffffff", fg = "#212529", muted = "#5d6770", line = "#212529", accent = "#b22222", grey = "#6c757d",
+            series = c(susceptible = "#2C7BB6", exposed = "#9a6700", infectious = "#C0392B", removed = "#6c757d"))
+}
+
+.plot_is_dark <- function(session = shiny::getDefaultReactiveDomain()) {
+  if (is.null(session)) return(FALSE)
+  mode <- tryCatch(session$rootScope()$input$dark_mode, error = function(e) NULL)
+  identical(mode, "dark")
+}
+
+# Sets the page-matching background and text colours for the plot being drawn and returns the palette; the caller restores par().
+.plot_start <- function(..., dark = .plot_is_dark()) {
+  pal <- .plot_palette(dark)
+  op <- graphics::par(bg = pal$bg, fg = pal$fg, col = pal$line, col.axis = pal$fg, col.lab = pal$fg, col.main = pal$fg,
+                      col.sub = pal$fg, ...)
+  list(pal = pal, op = op)
+}
+
 render_power_curves <- function(output, curve_spec, input = NULL) {
   gated_store <- reactiveVal(NULL)
 
@@ -270,12 +295,14 @@ render_power_curves <- function(output, curve_spec, input = NULL) {
 
   .draw_curve <- function(pts, spec, which) {
     axis <- spec[[which]]
+    st <- .plot_start(); pal <- st$pal
+    on.exit(graphics::par(st$op), add = TRUE)
     if (nrow(pts) == 0) {
       # Every grid point was rejected by the design's own validation (e.g.
       # a contrast of all zeros): say so rather than leave a blank box.
       plot.new()
       text(0.5, 0.5, "No valid points for the current inputs\n(the design's own validation rejected every value)",
-           cex = 0.9, col = "grey40")
+           cex = 0.9, col = pal$muted)
       return(invisible())
     }
     label <- if (!is.null(axis$label)) axis$label else axis$param
@@ -285,14 +312,14 @@ render_power_curves <- function(output, curve_spec, input = NULL) {
     skipped <- attr(pts, "timeouts")
     if (!is.null(skipped) && skipped > 0) {
       mtext(sprintf("%d point(s) left out: too slow to compute (typically where the effect is close to zero)", skipped),
-            side = 1, line = 4, cex = 0.7, col = "firebrick")
+            side = 1, line = 4, cex = 0.7, col = pal$accent)
     }
 
     current <- tryCatch(do.call(spec$calc_fn, spec$args), error = function(e) NULL)
     if (!is.null(current)) {
       fname <- .ss_curve_n_field(current)
       if (!is.null(fname)) {
-        points(spec$args[[axis$param]], current[[fname]], pch = 19, col = "firebrick")
+        points(spec$args[[axis$param]], current[[fname]], pch = 19, col = pal$accent)
       }
     }
   }

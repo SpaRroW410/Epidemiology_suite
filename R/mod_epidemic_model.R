@@ -151,7 +151,8 @@ mod_epidemic_model_server <- function(id) {
       res <- result()
       req(res$ok, res$design == "sim")
       s <- attr(res$value, "series")
-      cols <- c(susceptible = "#2C7BB6", exposed = "#E69F00", infectious = "#C0392B", removed = "#7F8C8D")
+      st <- .plot_start(); cols <- st$pal$series
+      on.exit(graphics::par(st$op))
       keep <- names(cols)[c(TRUE, res$value$model == "SEIR", TRUE, TRUE)]
       graphics::matplot(s$day, s[, keep, drop = FALSE], type = "l", lty = 1, lwd = 2, col = cols[keep], xlab = "Day", ylab = "People",
                         main = sprintf("%s epidemic", res$value$model))

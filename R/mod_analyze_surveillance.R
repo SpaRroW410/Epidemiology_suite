@@ -117,14 +117,14 @@ mod_analyze_surveillance_server <- function(id) {
       res <- result()
       req(res$ok)
       s <- attr(res$value, "series")
-      op <- graphics::par(mfrow = c(2, 1), mar = c(3.2, 4.2, 2, 1), mgp = c(2.2, 0.7, 0))
-      on.exit(graphics::par(op))
+      st <- .plot_start(mfrow = c(2, 1), mar = c(3.2, 4.2, 2, 1), mgp = c(2.2, 0.7, 0)); pal <- st$pal
+      on.exit(graphics::par(st$op))
       al <- s$alarm
-      graphics::plot(s$t, s$count, type = "h", lwd = 3, col = ifelse(al, "#C0392B", "#7F8C8D"), xlab = "", ylab = "Count", main = "Counts (signals in red)")
-      graphics::points(s$t[al], s$count[al], pch = 19, col = "#C0392B")
-      graphics::plot(s$t, s$statistic, type = "b", pch = 16, cex = 0.6, col = "#2C3E50", xlab = "Observation", ylab = "Statistic", main = "Detection statistic and threshold")
-      graphics::abline(h = s$threshold[1], lty = 2, col = "#C0392B")
-      graphics::points(s$t[al], s$statistic[al], pch = 19, col = "#C0392B")
+      graphics::plot(s$t, s$count, type = "h", lwd = 3, col = ifelse(al, pal$accent, pal$grey), xlab = "", ylab = "Count", main = "Counts (signals in red)")
+      graphics::points(s$t[al], s$count[al], pch = 19, col = pal$accent)
+      graphics::plot(s$t, s$statistic, type = "b", pch = 16, cex = 0.6, col = pal$line, xlab = "Observation", ylab = "Statistic", main = "Detection statistic and threshold")
+      graphics::abline(h = s$threshold[1], lty = 2, col = pal$accent)
+      graphics::points(s$t[al], s$statistic[al], pch = 19, col = pal$accent)
     }, res = 96, alt = function() {
       res <- result()
       req(res$ok)

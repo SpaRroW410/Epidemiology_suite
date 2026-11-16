@@ -1,5 +1,10 @@
 # epidemiologysuite (development version)
 
+## Plots follow dark mode (16 Nov 2026)
+
+* The power curves under each result, the surveillance charts and the epidemic chart are now drawn in the page's colours: dark
+  background and light lines in dark mode, redrawn when you use the switch. Every colour keeps a contrast of at least 3:1.
+
 ## Mendelian randomisation and interrupted time series calculators (14 Nov 2026)
 
 * New calculator, **Plan: Sample Size > Observational Studies > Mendelian Randomisation**: the sample size, or the power at a sample

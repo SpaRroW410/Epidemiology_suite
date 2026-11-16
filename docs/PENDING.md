@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**88 open** of 362 items (274 done).
+**87 open** of 362 items (275 done).
 
 ## Waiting for the owner
 
@@ -138,10 +138,9 @@
 - [ ] **STUDY-08** Readable names for more calculators (only names with one meaning are labelled now).
 - [ ] **STUDY-09** Check Word on phones, Google Docs and LibreOffice (pasted LaTeX, table styles); a long study on a phone.
 
-## 5. Interface and accessibility (UI) -- 5 open
+## 5. Interface and accessibility (UI) -- 4 open
 
 - [ ] **UI-11** A person's keyboard and screen-reader walk-through (a scan cannot judge reading order or whether names make sense).
-- [ ] **UI-12** Dark-mode plots (plots stay white); text-resize and reduced-motion checks.
 - [ ] **UI-13** Phone: the dark-mode switch is hidden on phones; a layout pass on a real phone; **[optional]** a slimmer phone-only app.
 - [ ] **UI-14** **[optional]** Two-column layout on wide screens (inputs left, result right).
 - [ ] **UI-15** Revisit with real usage: Home quick links and cards, the background loading order and the four start-up calculators.
