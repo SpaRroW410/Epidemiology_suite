@@ -4,6 +4,8 @@
 
 * The power curves under each result, the surveillance charts and the epidemic chart are now drawn in the page's colours: dark
   background and light lines in dark mode, redrawn when you use the switch. Every colour keeps a contrast of at least 3:1.
+* Trial sequential analysis: enter the heterogeneity you anticipate between trials and the calculator also gives the
+  heterogeneity-adjusted (random-effects) information size, the fixed-effect size divided by 1 - D-squared (Wetterslev et al. 2009).
 * The cluster calculator's advice to use a design effect of 1.5 or 2 when nothing is known now names its sources (Kaiser et al.
   2006; Hulland et al. 2021) and says they are nutrition and mortality surveys.
 

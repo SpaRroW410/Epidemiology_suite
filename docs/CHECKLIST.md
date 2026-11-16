@@ -188,7 +188,10 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [ ] **TRIAL-28** Stepped-wedge, open half: binary outcome (`clusterPower::cpa.sw.binary()` is a numerical GEE procedure, no closed form).
 - [ ] **TRIAL-29** Group sequential / Lan-DeMets, open half: the spending-function design with 3+ looks and for binary / survival
   outcomes; blinded sample-size re-estimation (`spass`-style).
-- [ ] **TRIAL-30** Trial sequential analysis, open half: the heterogeneity-adjusted (random-effects / diversity-adjusted) information size.
+- [x] **TRIAL-30** Trial sequential analysis, open half: the heterogeneity-adjusted (random-effects / diversity-adjusted) information size.
+  Built 16 Nov 2026: an anticipated heterogeneity (diversity D-squared, or I-squared) multiplies the fixed-effect size by
+  1 / (1 - D-squared); Wetterslev, Thorlund, Brok & Gluud 2009 (BMC Med Res Methodol 9:86, read in full), whose Table 2 (seven
+  meta-analyses, both adjustments) the tests reproduce to within the rounding of its printed percentages.
 - [ ] **TRIAL-31** **[blocked]** Non-inferiority, open half: a true relative-risk-scale margin (`TrialSize::RelativeRisk.NIS()` is
   odds-ratio based, so it ships as the OR design). *Unblock:* a verified RR-scale source.
 - [ ] **TRIAL-32** Bioequivalence, open half: reference-scaled designs for highly variable drugs (RSABE / ABEL); simulation-based in

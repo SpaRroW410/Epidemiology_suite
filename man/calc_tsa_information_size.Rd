@@ -12,7 +12,8 @@ calc_tsa_information_size(
   sd_mc = NULL,
   alpha = 0.05,
   beta = 0.1,
-  side = 2
+  side = 2,
+  heterogeneity = 0
 )
 }
 \arguments{
@@ -31,9 +32,15 @@ calc_tsa_information_size(
 \item{beta}{Type II error rate, strictly between 0 and 1 (power = 1 - beta); default 0.1.}
 
 \item{side}{1 for a one-sided or 2 for a two-sided test (default 2).}
+
+\item{heterogeneity}{Anticipated between-trial heterogeneity as a proportion in [0, 1): the diversity D-squared (preferred) or
+the inconsistency I-squared. The adjusted information size is the fixed-effect one divided by \code{1 - heterogeneity} (Wetterslev et
+al. 2009). Default 0 (no adjustment).}
 }
 \value{
-A named list of class \code{ss_result} (printed by \code{print()}) with the components \code{n_total}, \code{var_mc}, \code{mc_nf} and \code{inputs}, the arguments the result was calculated from.
+A named list of class \code{ss_result} (printed by \code{print()}) with the components \code{n_total} (fixed-effect information size),
+\code{n_total_adjusted} (heterogeneity-adjusted), \code{adjustment_factor}, \code{var_mc}, \code{mc_nf} and \code{inputs}, the arguments the result was
+calculated from.
 }
 \description{
 The number of participants a meta-analysis needs before its evidence is adequately powered for the anticipated effect, the

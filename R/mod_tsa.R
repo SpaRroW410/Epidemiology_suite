@@ -50,6 +50,8 @@ mod_tsa_ui <- function(id) {
       hr(),
       numericInput(ns("alpha"), "Significance level (alpha)", value = 0.05, min = 0.001, max = 0.5, step = 0.01),
       numericInput(ns("power"), "Desired power", value = 0.9, min = 0.5, max = 0.999, step = 0.01),
+      numericInput(ns("heterogeneity"), "Anticipated heterogeneity between trials, % (diversity D-squared, or I-squared; 0 = none)",
+                   value = 0, min = 0, max = 99, step = 5),
       advanced_options_ui(ns, id = "adv_tsa",
         selectInput(ns("side"), "Test sidedness",
                     choices = c("Two-sided" = "2", "One-sided" = "1"))),
@@ -94,25 +96,26 @@ mod_tsa_server <- function(id) {
       req(input$outcome, input$alpha, input$power, input$side)
       side <- as.integer(input$side)
       beta <- 1 - input$power
+      het <- if (is.null(input$heterogeneity) || is.na(input$heterogeneity)) 0 else input$heterogeneity / 100
 
       tryCatch({
         value <- if (input$outcome %in% c("RR", "OR")) {
           req(input$pC_ratio, input$mc_ratio)
           calc_tsa_information_size(
             outcome = input$outcome, mc = input$mc_ratio, pC = input$pC_ratio,
-            alpha = input$alpha, beta = beta, side = side
+            alpha = input$alpha, beta = beta, side = side, heterogeneity = het
           )
         } else if (input$outcome == "RD") {
           req(input$pC_rd, input$p1_rd, input$mc_rd)
           calc_tsa_information_size(
             outcome = "RD", mc = input$mc_rd, pC = input$pC_rd, p1 = input$p1_rd,
-            alpha = input$alpha, beta = beta, side = side
+            alpha = input$alpha, beta = beta, side = side, heterogeneity = het
           )
         } else {
           req(input$mc_md, input$sd_md)
           calc_tsa_information_size(
             outcome = "MD", mc = input$mc_md, sd_mc = input$sd_md,
-            alpha = input$alpha, beta = beta, side = side
+            alpha = input$alpha, beta = beta, side = side, heterogeneity = het
           )
         }
         list(ok = TRUE, value = value)
@@ -128,6 +131,8 @@ mod_tsa_server <- function(id) {
       v <- res$value
       tagList(
         p(strong("Required (fixed-effect) information size: "), v$n_total, " participants total"),
+        if (v$adjustment_factor > 1) p(strong("Heterogeneity-adjusted information size: "), v$n_total_adjusted, " participants total",
+          sprintf(" (the fixed-effect size x %.2f, for %s%% heterogeneity)", v$adjustment_factor, format(100 * v$inputs$heterogeneity))),
         p(class = "text-muted",
           "Divide by the anticipated number of participants per trial to estimate",
           "the minimum number of trials the meta-analysis needs.")
