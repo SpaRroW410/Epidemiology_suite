@@ -421,6 +421,26 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Stratified Analysis (Mantel-Haenszel)",
        module_input_id = "analyze_mh-design", design_value = "case_control"),
 
+  list(key = "analyze_meta_ratio",
+       label = "Meta-analysis: pool odds ratios, risk ratios or hazard ratios from several studies (fixed and random effects, forest plot)",
+       answers = paste(
+         "Answers: \"Several studies each report a ratio with its confidence interval -- what is the pooled estimate, how much do the",
+         "studies disagree (Q, I-squared), and what does the forest plot look like?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Meta-Analysis (pooling study results)",
+       module_input_id = "analyze_meta-design", design_value = "ratio"),
+
+  list(key = "analyze_meta_difference",
+       label = "Meta-analysis: pool mean differences or risk differences from several studies (fixed and random effects, forest plot)",
+       answers = paste(
+         "Answers: \"Several studies each report a difference with its confidence interval or standard error -- what is the pooled",
+         "estimate and how much do the studies disagree?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Meta-Analysis (pooling study results)",
+       module_input_id = "analyze_meta-design", design_value = "difference"),
+
 
   list(key = "analyze_ci_proportion",
        label = "Confidence interval for a proportion (Wilson, exact, Agresti-Coull, Jeffreys, mid-P, Wald)",
@@ -2405,7 +2425,8 @@ study_design_families <- list(
                          "analyze_std_direct", "analyze_std_indirect", "analyze_std_smr",
                          "analyze_compare_proportions", "analyze_compare_means",
                          "analyze_outbreak_attack", "analyze_outbreak_exposure", "analyze_outbreak_secondary", "analyze_outbreak_cfr",
-                         "analyze_surveillance_ears", "analyze_surveillance_cusum")),
+                         "analyze_surveillance_ears", "analyze_surveillance_cusum",
+                         "analyze_meta_ratio", "analyze_meta_difference")),
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",

@@ -134,6 +134,8 @@ module_registry <- function() {
          ui = mod_analyze_outbreak_ui, server = mod_analyze_outbreak_server),
     list(id = analyze_surveillance_meta$id, title = analyze_surveillance_meta$nav_title,
          ui = mod_analyze_surveillance_ui, server = mod_analyze_surveillance_server),
+    list(id = analyze_meta_meta$id, title = analyze_meta_meta$nav_title,
+         ui = mod_analyze_meta_ui, server = mod_analyze_meta_server),
     list(id = attrition_meta$id, title = attrition_meta$nav_title,
          ui = mod_attrition_ui, server = mod_attrition_server),
     list(id = effect_size_meta$id, title = effect_size_meta$nav_title,
@@ -212,7 +214,7 @@ module_workbenches <- list(
   list(id = "analyze", title = "Analyze", nav_id = "analyze_nav",
        groups = list(
          list(title = "From summary counts",
-              module_ids = c("analyze_2x2", "analyze_mh", "analyze_rates", "analyze_std", "analyze_dx", "analyze_tests", "analyze_ci", "analyze_compare", "analyze_vaccine")),
+              module_ids = c("analyze_2x2", "analyze_mh", "analyze_rates", "analyze_std", "analyze_dx", "analyze_tests", "analyze_ci", "analyze_compare", "analyze_vaccine", "analyze_meta")),
          list(title = "Outbreaks and surveillance",
               module_ids = c("analyze_outbreak", "analyze_surveillance"))
        ))

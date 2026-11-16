@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**84 open** of 362 items (278 done).
+**83 open** of 362 items (279 done).
 
 ## Waiting for the owner
 
@@ -195,9 +195,8 @@
   non-inferiority margin preserving at least half the control effect; both come from regulatory guidance (bioequivalence; FDA 2016
   non-inferiority) that is not in PubMed and was not read. *Unblock:* reading the guidance documents.
 
-## 10. Bigger workbenches and extensions (WB) -- 9 open
+## 10. Bigger workbenches and extensions (WB) -- 8 open
 
-- [ ] **WB-01** Evidence synthesis from study summaries (fixed / random effects, forest plot), base R, checked against `metafor`.
 - [ ] **WB-02** Teaching mode: interactive power curves, sampling-distribution and CI-coverage demos.
 - [ ] **WB-03** **[optional]** Survey extras: post-stratification / raking, weight trimming, variance estimation for the selected design,
   two-stage selection inside clusters, an AAPOR-style response-rate table.

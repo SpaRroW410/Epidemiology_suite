@@ -93,7 +93,8 @@ design_nodes <- list(
       list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined"),
       list(label = "A confidence interval for a proportion, or for a mean and standard deviation", next_id = "analyze_ci_type"),
       list(label = "An outbreak investigation: attack rates, which food or exposure, secondary attack rate, case fatality", next_id = "analyze_outbreak_type"),
-      list(label = "A series of case counts over time: has there been an unusual rise (aberration detection)?", next_id = "analyze_surv_type")
+      list(label = "A series of case counts over time: has there been an unusual rise (aberration detection)?", next_id = "analyze_surv_type"),
+      list(label = "The results of several studies, to pool them (meta-analysis: fixed and random effects, forest plot)", next_id = "analyze_meta_type")
     )
   ),
 
@@ -256,6 +257,19 @@ design_nodes <- list(
     )
   ),
 
+  # Meta-analysis of study results (WB-01, built 16 Nov 2026)
+  analyze_meta_type = list(
+    id = "analyze_meta_type", stage = 1,
+    question = "What does each study report?",
+    help = "Pool only results of the same kind. Each study needs its estimate with a confidence interval or a standard error.",
+    options = list(
+      list(label = "A ratio: odds ratio, risk ratio, rate ratio or hazard ratio", next_id = "term_analyze_meta_ratio"),
+      list(label = "A difference: mean difference or risk difference", next_id = "term_analyze_meta_difference")
+    )
+  ),
+  term_analyze_meta_ratio = .term("term_analyze_meta_ratio", "Meta-analysis of ratios", "analyze_meta_ratio"),
+  term_analyze_meta_difference = .term("term_analyze_meta_difference", "Meta-analysis of differences", "analyze_meta_difference"),
+
   analyze_ci_type = list(
     id = "analyze_ci_type", stage = 1,
     question = "Which summary figures do you have?",
@@ -297,7 +311,8 @@ design_nodes <- list(
     options = list(
       list(label = "How many studies a planned pairwise meta-analysis needs (power)", next_id = "term_meta_power"),
       list(label = "Required information size for a cumulative meta-analysis of trials (trial sequential analysis)", next_id = "tsa_outcome"),
-      list(label = "Network meta-analysis (several treatments compared indirectly)", next_id = "term_nma")
+      list(label = "Network meta-analysis (several treatments compared indirectly)", next_id = "term_nma"),
+      list(label = "Pool the results of studies I already have (pooled estimate, heterogeneity, forest plot)", next_id = "analyze_meta_type")
     )
   ),
 

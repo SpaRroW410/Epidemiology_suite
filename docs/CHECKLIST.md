@@ -25,7 +25,7 @@ Steps only the owner can take that belong to no section below; the section items
 
 ## 2. Calculators (Plan: Sample Size and Analyze)
 
-All 219 designs of the app's catalog are built (14 Nov 2026); the open items are designs not built yet, or the open half of a built one.
+All 221 designs of the app's catalog are built (16 Nov 2026); the open items are designs not built yet, or the open half of a built one.
 The guide's end points for designs not built yet are tested to be listed here (`tests/testthat/test-design_tree.R`).
 
 ### Plan: Effect Sizes (ES)
@@ -641,7 +641,13 @@ help text says so.
 
 Scope decision D1 (`SDD.md`, section 17): calculators from summary data only; raw data goes to a later full (server) app.
 
-- [ ] **WB-01** Evidence synthesis from study summaries (fixed / random effects, forest plot), base R, checked against `metafor`.
+- [x] **WB-01** Evidence synthesis from study summaries (fixed / random effects, forest plot), base R, checked against `metafor`.
+  Built 16 Nov 2026 (`R/calc_analyze_meta.R`, Analyze > Meta-Analysis): studies typed one per line (estimate with its confidence
+  interval or standard error), ratios pooled on the log scale; fixed-effect and DerSimonian-Laird random-effects estimates, Q,
+  I-squared, tau-squared, weights and a forest plot. Equal to `metafor::rma()` (5.2.1; `FE` and `DL`) on the BCG trials and on other
+  data. Review read for the estimator: Veroniki et al. 2016; the original DerSimonian & Laird 1986 and Higgins & Thompson 2002
+  papers were not read. Not covered: pooling from raw counts, REML / Paule-Mandel, Hartung-Knapp, prediction intervals, subgroups,
+  meta-regression, funnel plots.
 - [ ] **WB-02** Teaching mode: interactive power curves, sampling-distribution and CI-coverage demos.
 - [ ] **WB-03** **[optional]** Survey extras: post-stratification / raking, weight trimming, variance estimation for the selected design,
   two-stage selection inside clusters, an AAPOR-style response-rate table.
