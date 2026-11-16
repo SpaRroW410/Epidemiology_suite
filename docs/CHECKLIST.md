@@ -365,8 +365,9 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [ ] **GEN-74** Two dependent correlations, open half: the non-common-index case.
 - [ ] **GEN-75** Ordinal / multinomial regression, open half: the nominal (multinomial) model.
 - [ ] **GEN-76** Multiplicity, open half: Holm's step-down as its own design (no single planning alpha; needs simulation).
-- [ ] **GEN-77** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to Bonferroni /
-  Sidak).
+- [ ] **GEN-77** **[blocked]** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to
+  Bonferroni / Sidak). Candidate sources found 16 Nov 2026, no free full text, not read: Piegorsch 1991-type many-to-one comparisons
+  in Stat Med 1995;14:2547 (PMID 8746885) and Stat Med 2003;22:2031 (PMID 12802814). *Unblock:* paper access.
 ### Analyze: From summary counts (AN)
 
 - [x] **AN-01** Compare two proportions: difference, risk ratio, odds ratio (several interval methods) -- Newcombe 1998;
@@ -506,7 +507,10 @@ Decisions S1-S5 are in `SDD.md`, section 17.
 - [x] **STUDY-05** Add to study for the Analyze tools, the randomization list and survey selection (3 Nov 2026).
 - [ ] **STUDY-06** **[owner]** Open one downloaded file in Word (desktop and phone) and try Insert > Equation > LaTeX on a formula.
 - [ ] **STUDY-07** **[owner]** Real-phone check on Connect Cloud and the browser build: sleep, switch apps, reload.
-- [ ] **STUDY-08** Readable names for more calculators (only names with one meaning are labelled now).
+- [ ] **STUDY-08** Readable names for more calculators (only names with one meaning are labelled now). 16 Nov 2026: 23 more calculators
+  labelled (29 of 70), with the wording of each function's help page, and the results of the newer calculators; a test checks every
+  labelled name is an argument of that calculator. Still unlabelled: the larger families (chi-square, survival, prediction, ROC,
+  longitudinal, multiplicity, effect size and others), where one name has several meanings within the calculator.
 - [ ] **STUDY-09** Check Word on phones, Google Docs and LibreOffice (pasted LaTeX, table styles); a long study on a phone.
 
 ## 5. Interface and accessibility (UI)

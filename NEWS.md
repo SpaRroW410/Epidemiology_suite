@@ -10,6 +10,7 @@
   results equal those of the metafor package. New function `calc_analyze_meta()`.
 * Trial sequential analysis: enter the heterogeneity you anticipate between trials and the calculator also gives the
   heterogeneity-adjusted (random-effects) information size, the fixed-effect size divided by 1 - D-squared (Wetterslev et al. 2009).
+* Studies: the inputs of 23 more calculators are shown with readable names next to their short names.
 * The cluster calculator's advice to use a design effect of 1.5 or 2 when nothing is known now names its sources (Kaiser et al.
   2006; Hulland et al. 2021) and says they are nutrition and mortality surveys.
 
