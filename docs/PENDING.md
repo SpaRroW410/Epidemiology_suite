@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**87 open** of 362 items (275 done).
+**86 open** of 362 items (276 done).
 
 ## Waiting for the owner
 
@@ -11,6 +11,7 @@
 - **FIND-09** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the reader against.
 - **STUDY-06** Open one downloaded file in Word (desktop and phone) and try Insert > Equation > LaTeX on a formula.
 - **STUDY-07** Real-phone check on Connect Cloud and the browser build: sleep, switch apps, reload.
+- **UI-13** Phone: a layout pass on a real phone; **[optional]** a slimmer phone-only app. (The dark-mode switch is in the phone's bottom bar and tested, `test-phone_shell.R`; checked 16 Nov 2026.)
 - **PKG-06** Release on r-universe, then submit to CRAN: the steps are in `docs/release.md` (a new version number first; `v1.0.0` is the release Zenodo archived on 31 Oct 2026).
 - **PKG-07** File the two upstream bug reports drafted in `docs/upstream_reports.md`: presize as an issue on its GitHub tracker, pmsampsize by e-mail to its maintainer (it has no tracker); both still unfixed on CRAN on 6 Nov 2026.
 - **DIST-06** Republish on Connect Cloud after each merge; try the redirect, Find, Effect Size, the links, the server notice and dark mode on a real phone (Android and iPhone / Safari).
@@ -141,7 +142,8 @@
 ## 5. Interface and accessibility (UI) -- 4 open
 
 - [ ] **UI-11** A person's keyboard and screen-reader walk-through (a scan cannot judge reading order or whether names make sense).
-- [ ] **UI-13** Phone: the dark-mode switch is hidden on phones; a layout pass on a real phone; **[optional]** a slimmer phone-only app.
+- [ ] **UI-13** **[owner]** Phone: a layout pass on a real phone; **[optional]** a slimmer phone-only app. (The dark-mode switch is in
+  the phone's bottom bar and tested, `test-phone_shell.R`; checked 16 Nov 2026.)
 - [ ] **UI-14** **[optional]** Two-column layout on wide screens (inputs left, result right).
 - [ ] **UI-15** Revisit with real usage: Home quick links and cards, the background loading order and the four start-up calculators.
 
@@ -183,13 +185,12 @@
 - [ ] **ENG-10** Bring `renv.lock` up to the current CRAN versions (lme4 2.1-0, mvtnorm 1.4-2, epiR 3.0.0, officer 0.7.7, ...): the suite
   passes with them (6 Nov 2026, PKG-11); the test workflow, the server version and the browser build still use the locked ones.
 
-## 9. Sources not yet read (SRC) -- 6 open
+## 9. Sources not yet read (SRC) -- 5 open
 
 - [ ] **SRC-01** **[blocked]** Rothman & Boice 1979, Greenland & Robins 1985, Newcombe 1998, Miettinen & Nurminen 1985, Mee 1984, Koopman
   1984, Orenstein 1985, Lachin 1981, Rouder et al. 2009, Matts & Lachin 1988, Lachin & Foulkes 1986, and the others named in the
   archived ROADMAP. *Unblock:* paper access.
 - [ ] **SRC-02** **[blocked]** Kish 1965 (design effect); Killip et al. 2004 and Chinn 2000 in full (only the abstracts were read).
-- [ ] **SRC-03** A source for "design effect 1.5 or 2 when nothing is known" (the owner's wording; no source checked).
 - [ ] **SRC-04** Regidor et al. 1993 (epiR's source for the Byar SMR interval) could not be found; not cited.
 - [ ] **SRC-05** **[blocked]** Tang Y. Comments on Lachin (2008). Stat Med 2009;28:175-177, and the author's reply.
 - [ ] **SRC-07** **[blocked]** Two card statements stay marked as suggestions: a crossover washout of more than five half-lives and a

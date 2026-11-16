@@ -134,8 +134,9 @@ glossary <- list(
     short = "How many times larger a cluster sample must be than a simple random sample for the same precision. Often taken as 1.5 or 2 if unknown.",
     long = paste("DEFF = 1 + (m - 1) x ICC, for m people per cluster. A DEFF of 2 means twice as many people are needed. It applies to any cluster design:",
                  "a survey of villages or schools, a cluster-randomised trial, or a quasi-experimental community trial. If the ICC is not known, a",
-                 "design effect of 1.5 or 2 is commonly assumed (a planning habit; no source checked); it can also be worked out from the variance",
-                 "between clusters."),
+                 "design effect of 1.5 or 2 is commonly assumed: a review of nutrition and mortality surveys in emergencies recommended 1.5 for",
+                 "child malnutrition and 2 or less for mortality (Kaiser et al. 2006, Disasters 30:199-211). It can also be worked out from the",
+                 "variance between clusters."),
     formula = "DEFF = 1 + (m - 1) ICC"),
   allocation_ratio = list(
     label = "Allocation ratio",

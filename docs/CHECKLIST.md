@@ -526,7 +526,8 @@ Decisions S1-S5 are in `SDD.md`, section 17.
   surveillance charts and the epidemic chart take their colours from one light / dark palette (`.plot_palette()`, every colour at
   least 3:1 against its background, tested) and redraw when the switch is used. Checked in a browser on one calculator page: with
   text at 200% nothing is clipped and the page does not scroll sideways; with reduced motion set, no animation runs.
-- [ ] **UI-13** Phone: the dark-mode switch is hidden on phones; a layout pass on a real phone; **[optional]** a slimmer phone-only app.
+- [ ] **UI-13** **[owner]** Phone: a layout pass on a real phone; **[optional]** a slimmer phone-only app. (The dark-mode switch is in
+  the phone's bottom bar and tested, `test-phone_shell.R`; checked 16 Nov 2026.)
 - [ ] **UI-14** **[optional]** Two-column layout on wide screens (inputs left, result right).
 - [ ] **UI-15** Revisit with real usage: Home quick links and cards, the background loading order and the four start-up calculators.
 - [x] **UI-16** A start-up screen for the browser build instead of Shinylive's spinner (`tools/pages/status_overlay.html`): what the app
@@ -612,7 +613,12 @@ help text says so.
   1984, Orenstein 1985, Lachin 1981, Rouder et al. 2009, Matts & Lachin 1988, Lachin & Foulkes 1986, and the others named in the
   archived ROADMAP. *Unblock:* paper access.
 - [ ] **SRC-02** **[blocked]** Kish 1965 (design effect); Killip et al. 2004 and Chinn 2000 in full (only the abstracts were read).
-- [ ] **SRC-03** A source for "design effect 1.5 or 2 when nothing is known" (the owner's wording; no source checked).
+- [x] **SRC-03** A source for "design effect 1.5 or 2 when nothing is known" (the owner's wording). Found 16 Nov 2026 (PubMed,
+  abstracts read): Kaiser et al. 2006 (Disasters 30:199-211) reviewed nine cluster surveys in emergencies and recommend assuming 1.5
+  for acute malnutrition in children and 2 or less for crude mortality; Hulland et al. 2021 (PLoS One 16:e0254031) suggest 1.4-1.8
+  with about 20 per cluster and 1.2-1.4 with about 10 for anaemia. Cited in the cluster calculator's help and the glossary, with
+  the caveat that these are nutrition and mortality surveys. Henderson & Sundaresan 1982 (the EPI 30 x 7 design's assumed design
+  effect of 2) is a scanned article without text; not read, not cited.
 - [ ] **SRC-04** Regidor et al. 1993 (epiR's source for the Byar SMR interval) could not be found; not cited.
 - [ ] **SRC-05** **[blocked]** Tang Y. Comments on Lachin (2008). Stat Med 2009;28:175-177, and the author's reply.
 - [x] **SRC-06** Sources for the design-card claims (FIND-21), checked in PubMed 6-7 Nov 2026 (list in `R/design_cards.R`): the 23
