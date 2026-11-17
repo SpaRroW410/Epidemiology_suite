@@ -904,6 +904,17 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Interrupted Time Series",
        module_input_id = "its-design", design_value = "slope"),
 
+  list(key = "did_repeated",
+       label = "Difference-in-differences (controlled before-after) with repeated measures, continuous outcome",
+       answers = paste(
+         "Answers: \"One group gets a programme and a comparison group does not, and I measure the same outcome before and after in",
+         "both -- how many units do I need in each group, or what power do I have, given how strongly a unit's measurements are",
+         "correlated?\""
+       ),
+       outcome_type = "did", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Difference-in-Differences",
+       module_input_id = NA, design_value = NA),
+
   list(key = "patient_units_between_continuous",
        label = "Several units per patient (eyes, lesions, patches), same treatment in all of a patient's units -- two means",
        answers = paste(
@@ -2454,6 +2465,9 @@ study_design_families <- list(
   list(id = "its", label = "Interrupted Time Series",
        hint = "Many time points before and after a policy, programme or event: time points needed or power to detect a change in level or slope, allowing for autocorrelation.",
        catalog_keys = c("its_level", "its_slope")),
+  list(id = "did", label = "Difference-in-Differences",
+       hint = "An intervention group and a comparison group, each measured before and after: units needed or power, from the correlation between a unit's repeated measurements.",
+       catalog_keys = c("did_repeated")),
   list(id = "diagnostic", label = "Diagnostic Accuracy",
        hint = "Estimating sensitivity/specificity given expected prevalence.",
        catalog_keys = c("diagnostic_precision", "diagnostic_vs_reference",

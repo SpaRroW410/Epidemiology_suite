@@ -1,5 +1,12 @@
 # epidemiologysuite (development version)
 
+## Difference-in-differences calculator (17 Nov 2026)
+
+* New calculator, **Plan: Sample Size > Observational Studies > Difference-in-Differences**: the units needed in the intervention
+  and comparison groups, or the power with the units you have, when a continuous outcome is measured on every unit before and after
+  the intervention starts. From Hu & Hoover 2018, equation 6. Their printed sample-size formula and example are a factor 2 too small;
+  a simulation confirms the variance formula used here, and the help text explains the correction. New function `calc_did()`.
+
 ## Meta-analysis in Analyze, dark-mode plots and smaller items (16 Nov 2026)
 
 * The power curves under each result, the surveillance charts and the epidemic chart are now drawn in the page's colours: dark

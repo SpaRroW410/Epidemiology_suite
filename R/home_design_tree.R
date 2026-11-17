@@ -1330,8 +1330,10 @@ design_nodes <- list(
   ),
   term_its = .term("term_its", "Interrupted time series, change in level (segmented regression)", "its_level"),
   term_its_slope = .term("term_its_slope", "Interrupted time series, change in slope (segmented regression)", "its_slope"),
-  term_did = .term_open("term_did", "Controlled before-after study / difference-in-differences",
-    would_use = "a sample-size method for difference-in-differences with a cited worked example (none found yet)"),
+  term_did = .term("term_did", "Controlled before-after study / difference-in-differences", "did_repeated",
+    note = paste(
+      "The calculator is for a continuous outcome measured on the same units before and after (people, clinics, districts). For a",
+      "yes/no outcome, or when different people are sampled each time, it gives only a rough guide.")),
   term_rdd = .term_open("term_rdd", "Regression discontinuity design",
     would_use = "a power calculation for regression discontinuity (Schochet 2009; Cattaneo, Titiunik & Vazquez-Bare 2019, not yet read)"),
   # Mendelian randomisation (OBS-15, built 14 Nov 2026): one question, the outcome, decides between the two designs of the calculator

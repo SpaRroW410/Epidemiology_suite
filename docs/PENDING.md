@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**83 open** of 362 items (279 done).
+**82 open** of 362 items (280 done).
 
 ## Waiting for the owner
 
@@ -22,7 +22,7 @@
 
 - [ ] **OWN-04** **[owner]** Decision D6: when to reopen the paused items (PRED, section 2).
 
-## 2. Calculators (Plan: Sample Size and Analyze) -- 37 open
+## 2. Calculators (Plan: Sample Size and Analyze) -- 36 open
 
 ### Plan: Survey & Cross-Sectional (SVY)
 
@@ -34,7 +34,6 @@
   efficiency depends on each data set's overlap. *Unblock:* a published planning heuristic with a worked example.
 - [ ] **OBS-11** **[blocked]** Time-varying exposure (OPTITXS; Basagana & Spiegelman 2010, 2011): not on CRAN, papers not reachable.
   *Unblock:* paper access or the OPTITXS source.
-- [ ] **OBS-13** Controlled before-after / difference-in-differences, reached by FIND-16: sample size. No source found yet.
 - [ ] **OBS-14** Regression discontinuity, reached by FIND-16: sample size. Candidate sources, not read: Schochet 2009; Cattaneo,
   Titiunik & Vazquez-Bare 2019.
 

@@ -25,7 +25,7 @@ Steps only the owner can take that belong to no section below; the section items
 
 ## 2. Calculators (Plan: Sample Size and Analyze)
 
-All 221 designs of the app's catalog are built (16 Nov 2026); the open items are designs not built yet, or the open half of a built one.
+All 222 designs of the app's catalog are built (17 Nov 2026); the open items are designs not built yet, or the open half of a built one.
 The guide's end points for designs not built yet are tested to be listed here (`tests/testthat/test-design_tree.R`).
 
 ### Plan: Effect Sizes (ES)
@@ -103,7 +103,13 @@ The guide's end points for designs not built yet are tested to be listed here (`
   0.54 against 0.55) and shows why the calculation is lower (0.45): the fitted test rejects 6-12% of the time when nothing changed.
   The help text says so and warns under 50 time points. Zhang, Wagner & Ross-Degnan 2011 has no free full text; not read, not cited.
   Not covered: seasonality, a control series, count models, several interruptions.
-- [ ] **OBS-13** Controlled before-after / difference-in-differences, reached by FIND-16: sample size. No source found yet.
+- [x] **OBS-13** Controlled before-after / difference-in-differences, reached by FIND-16: sample size. Built 17 Nov 2026
+  (`R/calc_did.R`, the Difference-in-Differences calculator): units needed or power for a continuous outcome measured b times before
+  and k times after on every unit, compound-symmetry correlation; Hu & Hoover 2018 (J Biom Biostat 9:415, PMC6663085, read in full),
+  equation 6. **The source's equation 7 and worked example are a factor 2 too small** (they omit the 2 of 1/n0 + 1/n1 = 2/n): a
+  simulation of 20 000 studies per setting agrees with equation 6 and the calculator (its 19 per group give 49% power, not 80%; 39
+  are needed), and the calculator equals `power.t.test()` on the units' changes. The help text states the correction. Not covered:
+  clusters sampled afresh each time, covariates, binary outcomes.
 - [ ] **OBS-14** Regression discontinuity, reached by FIND-16: sample size. Candidate sources, not read: Schochet 2009; Cattaneo,
   Titiunik & Vazquez-Bare 2019.
 - [x] **OBS-15** Mendelian randomisation, reached by FIND-16: power. Built 14 Nov 2026 (`R/calc_mendelian.R`, the Mendelian
