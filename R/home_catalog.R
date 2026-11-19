@@ -1443,7 +1443,17 @@ calculator_catalog <- list(
        ),
        outcome_type = "means", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Stepped-Wedge CRT",
-       module_input_id = NA, design_value = NA),
+       module_input_id = "stepped_wedge-outcome", design_value = "continuous"),
+
+  list(key = "stepped_wedge_binary",
+       label = "Stepped-wedge cluster-randomized trial (binary outcome)",
+       answers = paste(
+         "Answers: \"How many clusters do I need for a stepped-wedge trial where the outcome is yes / no (an odds ratio), given the",
+         "risk on control, the risk on the intervention, the people per cluster and period, and how much clusters differ?\""
+       ),
+       outcome_type = "cluster", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Stepped-Wedge CRT",
+       module_input_id = "stepped_wedge-outcome", design_value = "binary"),
 
   list(key = "stratified_sampling",
        label = "Stratified sampling -- total size and per-stratum allocation",
@@ -2554,7 +2564,7 @@ study_design_families <- list(
                          "noninferiority_or", "noninferiority_hr",
                          "group_sequential_normal", "group_sequential_binary",
                          "group_sequential_survival", "lan_demets_normal",
-                         "stepped_wedge_normal")),
+                         "stepped_wedge_normal", "stepped_wedge_binary")),
   list(id = "regression", label = "Regression",
        hint = "Testing whether a multiple regression model explains more variance than chance, whether adding predictors increases R-squared, a logistic regression predictor's effect (simple or covariate-adjusted), or two groups on an ordinal outcome (proportional odds).",
        catalog_keys = c("regression_r2", "regression_r2_increase", "logistic_binary",

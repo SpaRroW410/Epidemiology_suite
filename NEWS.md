@@ -1,5 +1,12 @@
 # epidemiologysuite (development version)
 
+## Stepped-wedge trial with a yes / no outcome (19 Nov 2026)
+
+* **Plan: Trials > Stepped-Wedge CRT** now has an Outcome switch: Continuous (as before) or Binary. The binary design gives the clusters
+  needed per step, or the power for the clusters you have, on the log odds scale with a cluster effect of SD tau. The method is Xia et
+  al. 2021 (Trials 22:598); its power equals the authors' R function `swCRTdesign::swGlmPwr()` to 10 digits in the tests. The guide asks
+  continuous or binary at the stepped-wedge end point. New function `calc_stepped_wedge_binary()`.
+
 ## Difference-in-differences calculator (17 Nov 2026)
 
 * New calculator, **Plan: Sample Size > Observational Studies > Difference-in-Differences**: the units needed in the intervention

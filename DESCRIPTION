@@ -43,6 +43,7 @@ Suggests:
     jsonlite,
     lmerTest,
     sampling,
+    swCRTdesign,
     shinytest2,
     surveillance,
     testthat (>= 3.0.0),

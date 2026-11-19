@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**82 open** of 362 items (280 done).
+**81 open** of 362 items (281 done).
 
 ## Waiting for the owner
 
@@ -22,7 +22,7 @@
 
 - [ ] **OWN-04** **[owner]** Decision D6: when to reopen the paused items (PRED, section 2).
 
-## 2. Calculators (Plan: Sample Size and Analyze) -- 36 open
+## 2. Calculators (Plan: Sample Size and Analyze) -- 35 open
 
 ### Plan: Survey & Cross-Sectional (SVY)
 
@@ -48,7 +48,8 @@
 
 - [ ] **AGR-06** **[blocked]** Method comparison by Deming / Passing-Bablok regression: `deming`, `mcr`, `MethComp` are analysis-only; the
   literature is simulation-based. *Unblock:* a citable simulation protocol (e.g. Linnet) to reproduce.
-- [ ] **AGR-07** Agreement, open half: weighted kappa.
+- [ ] **AGR-07** **[blocked]** Agreement, open half: weighted kappa. No source with a formula and a worked example that I could read
+  (19 Nov 2026). *Unblock:* a readable paper with the sample-size formula for weighted kappa (e.g. a PMC article).
 
 ### Plan: Several Measurements per Patient (UNIT)
 
@@ -64,7 +65,6 @@
   group-sequential design verified against `rpact`.
 - [ ] **TRIAL-27** **[blocked]** N-of-1 trials: `nof1` / `Nof1` not reachable, no single accepted formula. *Unblock:* a citable
   period-count formula with a worked example.
-- [ ] **TRIAL-28** Stepped-wedge, open half: binary outcome (`clusterPower::cpa.sw.binary()` is a numerical GEE procedure, no closed form).
 - [ ] **TRIAL-29** Group sequential / Lan-DeMets, open half: the spending-function design with 3+ looks and for binary / survival
   outcomes; blinded sample-size re-estimation (`spass`-style).
 - [ ] **TRIAL-31** **[blocked]** Non-inferiority, open half: a true relative-risk-scale margin (`TrialSize::RelativeRisk.NIS()` is

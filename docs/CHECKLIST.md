@@ -25,7 +25,7 @@ Steps only the owner can take that belong to no section below; the section items
 
 ## 2. Calculators (Plan: Sample Size and Analyze)
 
-All 222 designs of the app's catalog are built (17 Nov 2026); the open items are designs not built yet, or the open half of a built one.
+All 223 designs of the app's catalog are built (17 Nov 2026); the open items are designs not built yet, or the open half of a built one.
 The guide's end points for designs not built yet are tested to be listed here (`tests/testthat/test-design_tree.R`).
 
 ### Plan: Effect Sizes (ES)
@@ -145,7 +145,8 @@ The guide's end points for designs not built yet are tested to be listed here (`
 
 - [ ] **AGR-06** **[blocked]** Method comparison by Deming / Passing-Bablok regression: `deming`, `mcr`, `MethComp` are analysis-only; the
   literature is simulation-based. *Unblock:* a citable simulation protocol (e.g. Linnet) to reproduce.
-- [ ] **AGR-07** Agreement, open half: weighted kappa.
+- [ ] **AGR-07** **[blocked]** Agreement, open half: weighted kappa. No source with a formula and a worked example that I could read
+  (19 Nov 2026). *Unblock:* a readable paper with the sample-size formula for weighted kappa (e.g. a PMC article).
 ### Plan: Several Measurements per Patient (UNIT)
 
 - [x] **UNIT-01** Several units per patient (eyes, lesions, patches), same treatment in all of a patient's units -- two means -- Donner &
@@ -191,7 +192,10 @@ The guide's end points for designs not built yet are tested to be listed here (`
   group-sequential design verified against `rpact`.
 - [ ] **TRIAL-27** **[blocked]** N-of-1 trials: `nof1` / `Nof1` not reachable, no single accepted formula. *Unblock:* a citable
   period-count formula with a worked example.
-- [ ] **TRIAL-28** Stepped-wedge, open half: binary outcome (`clusterPower::cpa.sw.binary()` is a numerical GEE procedure, no closed form).
+- [x] **TRIAL-28** Stepped-wedge, binary outcome (logit scale, cross-sectional, constant cluster effect). Built 19 Nov 2026 from Xia et al.
+  2021 (Trials 22:598, PMC8419932); the paper's equations were not readable, so the power is matched to the authors' function
+  `swCRTdesign::swGlmPwr()` (10 digits over random settings, test skips without the package). Open: a conversion from ICC to tau,
+  time-varying cluster effects, closed cohort.
 - [ ] **TRIAL-29** Group sequential / Lan-DeMets, open half: the spending-function design with 3+ looks and for binary / survival
   outcomes; blinded sample-size re-estimation (`spass`-style).
 - [x] **TRIAL-30** Trial sequential analysis, open half: the heterogeneity-adjusted (random-effects / diversity-adjusted) information size.

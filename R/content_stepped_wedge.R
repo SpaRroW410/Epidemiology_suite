@@ -93,12 +93,55 @@ stepped_wedge_content <- list(
       "via the github.com/cran mirror (`cran.r-project.org` itself is",
       "network-blocked here), used only as a verification oracle. Per this",
       "project's vendoring policy, the shipped calculator has no new",
-      "runtime dependency. The companion binary-outcome case",
-      "(`clusterPower::cpa.sw.binary()`) is a Gauss-Legendre-quadrature/",
-      "Fortran-backed numerical GEE procedure with no closed form to",
-      "extract -- out of scope for reimplementation, so only the",
-      "continuous-outcome case is covered here."
+      "runtime dependency. The binary outcome has its own section."
     ),
     backend = "closed-form reimplementation (Hooper, Teerenstra, de Hoop & Woertman 2016)"
   )
+  ,
+  binary = list(
+    title = "Stepped-Wedge Cluster-Randomised Trial (Binary Outcome)",
+    formula_latex = paste0(
+      "$$V_i = \\operatorname{diag}\\!\\left(\\frac{1}{n\\,\\mu_{it}(1-\\mu_{it})}\\right) + \\tau^2 J, \\qquad ",
+      "\\operatorname{logit}\\,\\mu_{it} = \\beta_0 + \\gamma_t + \\theta\\,x_{it}$$",
+      "$$\\operatorname{Var}(\\hat\\theta) = \\Big[\\big(\\textstyle\\sum_i X_i^{\\top} V_i^{-1} X_i\\big)^{-1}\\Big]_{\\theta\\theta}, \\qquad ",
+      "\\text{power} = \\Phi\\!\\left(\\frac{\\theta - z\\,s_0}{s_1}\\right) + 1 - \\Phi\\!\\left(\\frac{\\theta + z\\,s_0}{s_1}\\right)$$"
+    ),
+    explanation = paste(
+      "For a **yes / no outcome** the effect is a **log odds ratio**, and the amount of information a cluster gives depends on the",
+      "outcome risk in each period, so the variance has no simple design-effect form. The calculator builds each cluster's working",
+      "covariance (the binomial variance of its period means on the log odds scale, plus the cluster effect with SD tau), adds up",
+      "the information over the clusters, and reads the variance of the treatment effect from it -- once under no effect (s0) and",
+      "once under the effect you give (s1).",
+      "",
+      "- **Risks on control and on the intervention** give the log odds ratio and the baseline.",
+      "- **People per cluster in each period** and **number of steps**: one cluster group crosses at each step, so there are steps + 1",
+      "  periods, and the first is control for everyone. Different people are measured in each period (cross-sectional).",
+      "- **tau** is the SD of the cluster effect on the log odds scale. A conversion from the intracluster correlation is not built",
+      "  in (I have no source for one); enter tau and try a few values.",
+      "- **Change in log odds in each later period**: the same shift for every period after the first (0 means no time trend).",
+      "- The result is the **clusters per step** (the smallest whole number reaching the power), and the total.",
+      "",
+      "Limits: equal clusters per step, equal people per cluster and period, a cluster effect that is constant over time, no",
+      "closed cohort, no cluster-by-treatment effect. This is a large-sample approximation; with few clusters (say under 10 in all)",
+      "the true power is usually lower, so check with a simulation (the Monte Carlo cluster trial calculator).",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Risk 0.20 on control and 0.14 on the intervention (odds ratio 0.65), 50 people per cluster in each period, 3 steps",
+      "(4 periods), tau = 0.2, no time trend, alpha = 0.05, power 0.80 -> **6 clusters per step (18 in all)**, power 0.846; with 5",
+      "per step the power is 0.780. The power matches `swCRTdesign::swGlmPwr()` to 10 digits (tests).",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Xia F, Hughes JP, Voldal EC, Heagerty PJ. Power and sample size calculation for stepped-wedge designs with discrete",
+      "outcomes. Trials. 2021;22:598. doi:10.1186/s13063-021-05542-9 (PMC8419932). The method uses the covariance of the estimates",
+      "from the Laplace approximation of Breslow NE, Clayton DG, J Am Stat Assoc 1993;88:9-25 (not read).",
+      "",
+      "I read the paper's description of the method; its equations did not come through in the text available to me, so the",
+      "calculation is checked against the authors' own function, swCRTdesign::swGlmPwr() (R package swCRTdesign 4.2, used only to",
+      "check, not at run time)."
+    ),
+    backend = "base R; power equals swCRTdesign::swGlmPwr() (Xia et al. 2021)"
+  )
+
 )
