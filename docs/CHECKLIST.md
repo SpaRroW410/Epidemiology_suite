@@ -442,7 +442,11 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [ ] **FIND-10** A test battery of those questions with the route each should take; the hit rate before and after each change.
 - [ ] **FIND-11** More phrasings once the list is in: "effect / effectiveness / impact of" without a design word (trial or
   quasi-experimental: ask), "association between" (ask which design), "incidence / follow-up", "survival / time to", "accuracy / screening".
-- [ ] **FIND-12** Ask instead of guessing when a phrase fits several designs (offer two or three starting points).
+- [x] **FIND-12** Ask instead of guessing when a phrase fits several designs (offer two or three starting points). Built 20 Nov 2026:
+  four phrases that name a topic but no design -- incidence / follow-up, survival / time to an event, screening, "association between"
+  -- are not routed; the guide shows two or three starting points and the user chooses (`.free_text_ambiguities`, `.rq_routes`). A
+  description that names a design (cohort, trial, log-rank, a 2x2 table ...) is routed as before. Joins the determinants question.
+  "Effect / effectiveness / impact of" already ends at the question who assigns the intervention, so it asks.
 - [ ] **FIND-13** A guide that asks for each objective of a study in turn (the first step, buttons to the association calculators after a
   determinants question, is done).
 - [ ] **FIND-14** **[optional]** A language-model reader, only by a separate decision (no API, nothing sent anywhere in the browser

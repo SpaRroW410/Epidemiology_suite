@@ -48,13 +48,13 @@ design_wizard_server <- function(input, output, session) {
     state$flags <- res$flags
     # nothing recognised: say so, instead of leaving the guide as it was (a research question such as "determinants of ... among
     # youth" names no design; ROADMAP: expanding the free-text reader)
-    state$parse_note <- if (identical(res$flags$ambiguous, "determinants")) "choose"
+    state$parse_note <- if (!is.null(res$flags$ambiguous)) "choose"
                         else if (length(res$trace) == 0 && !is.null(input$design_wizard_freetext) && nzchar(trimws(input$design_wizard_freetext))) "none"
                         else NULL
   }, ignoreInit = TRUE)
 
   output$design_wizard_trace <- renderUI({
-    if (identical(state$parse_note, "choose")) return(.render_rq_choices())
+    if (identical(state$parse_note, "choose")) return(.render_rq_choices(state$flags$ambiguous))
     if (identical(state$parse_note, "none")) {
       return(div(class = "alert alert-warning small", role = "status",
         p(class = "mb-1", strong("Nothing in this description could be matched to a study design yet.")),
@@ -239,13 +239,32 @@ design_wizard_server <- function(input, output, session) {
                 answers = c(2, 2, 1)),
   prediction = list(label = "A model to predict who will have the outcome (prediction model)",
                     when = "The aim is a score or model that predicts the outcome for an individual, not the role of each factor.",
-                    answers = c(3))
+                    answers = c(3)),
+  # more starting points for the other ambiguous phrases (.free_text_ambiguities, FIND-12); each ends at a question or a calculator
+  incidence = list(label = "How common new cases are (an incidence rate)",
+                   when = "One group, and you want the rate of new cases with a stated precision.",
+                   answers = c(1, 3)),
+  compare = list(label = "Two groups compared",
+                 when = "You compare an outcome between two groups (for example exposed and not exposed, or treated and not treated). The next questions ask how the groups arise and what the outcome is.",
+                 answers = c(2)),
+  cox = list(label = "Time to the event related to a factor (Cox regression)",
+             when = "The outcome is the time until an event and you want the hazard ratio for a factor, adjusted for others if needed.",
+             answers = c(8, 6)),
+  corr = list(label = "Two measured variables (correlation or regression)",
+              when = "Both are measurements on each person, and you want the strength of their relationship, or a regression of one on the other(s).",
+              answers = c(8)),
+  dx = list(label = "How well a test finds the disease (diagnostic accuracy)",
+            when = "A screening test is compared with a reference standard: sensitivity, specificity, predictive values.",
+            answers = c(4))
 )
-.render_rq_choices <- function() {
+.render_rq_choices <- function(id = "determinants") {
+  a <- .free_text_ambiguities[[id]]
+  routes <- if (is.null(a)) names(.rq_routes)[1:4] else a$routes
   div(class = "card card-body mb-3", role = "group", `aria-label` = "Which design is your study?",
-    p(class = "mb-2", strong("Your question asks about determinants or risk factors. "), info_tip("determinants"), " ",
-      "That can mean different designs, and the sample size depends on which. Choose the one you plan:"),
-    lapply(names(.rq_routes), function(r) {
+    if (is.null(a)) p(class = "mb-2", strong("Your question asks about determinants or risk factors. "), info_tip("determinants"), " ",
+      "That can mean different designs, and the sample size depends on which. Choose the one you plan:")
+    else p(class = "mb-2", strong("The description does not say which design you plan. "), a$intro),
+    lapply(routes, function(r) {
       x <- .rq_routes[[r]]
       div(class = "mb-2",
           actionButton(paste0("design_wizard_rq_", r), x$label, class = "btn-outline-primary btn-sm text-start"),

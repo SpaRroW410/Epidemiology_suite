@@ -1,5 +1,11 @@
 # epidemiologysuite (development version)
 
+## The guide asks when a phrase fits several designs (20 Nov 2026)
+
+* Typing a description such as "incidence of dengue followed up for a year", "survival of patients with ...", "screening for diabetes" or
+  "association between smoking and asthma" no longer sends the guide down one route. It shows two or three starting points (for
+  example: an incidence rate, a cohort, a Cox regression) and lets you choose. Descriptions that name a design are routed as before.
+
 ## Stepped-wedge trial with a yes / no outcome (19 Nov 2026)
 
 * **Plan: Trials > Stepped-Wedge CRT** now has an Outcome switch: Continuous (as before) or Binary. The binary design gives the clusters

@@ -248,3 +248,50 @@ test_that("near misses of the new rules: 'its', 'impact', a team's own programme
   expect_false(identical(walk_free_text("accuracy of a rapid test in a case of fever against a gold standard")$node_id, "term_case_report"))
   expect_equal(walk_free_text("We report a rare case of Kikuchi disease")$node_id, "term_case_report")
 })
+
+# FIND-12: a description that names a topic but no design fits several designs: the guide asks, offering two or three starting points
+test_that("a topic that fits several designs is not routed: the guide offers the starting points", {
+  ask <- list(
+    incidence   = c("Incidence of dengue in a district followed up for one year", "New cases of malaria over a year in a village"),
+    survival    = c("Survival of patients with breast cancer in a hospital", "Time to relapse after treatment"),
+    screening   = c("Screening for diabetes in rural women"),
+    association = c("Association between smoking and asthma in adults", "Relationship between sleep and exam scores")
+  )
+  for (id in names(ask)) for (t in ask[[id]]) {
+    w <- walk_free_text(t)
+    expect_equal(w$flags$ambiguous, id, info = t)
+    expect_equal(w$node_id, "root", info = t)
+    expect_length(w$trace, 0)
+  }
+})
+
+test_that("a description that names a design, or asks for something else, is routed as before", {
+  for (t in c("Cohort study of the incidence of dengue in exposed and unexposed households",
+              "Estimate incidence rate of dengue per 1000 person-years",
+              "Survival compared between two arms, log-rank test",
+              "Cox regression for the hazard of death",
+              "Screening test accuracy: sensitivity and specificity of a rapid test",
+              "Factors associated with anaemia among adolescent girls",
+              "association between exposure and outcome, odds ratio from a 2x2 table I already have",
+              "Case-control study of the association between smoking and asthma")) {
+    a <- walk_free_text(t)$flags$ambiguous
+    expect_true(is.null(a) || identical(a, "determinants"), info = t)
+    expect_false(identical(a, "determinants") && !grepl("factors associated", t, ignore.case = TRUE), info = t)
+  }
+  expect_equal(walk_free_text("Determinants of anaemia among adolescent girls")$flags$ambiguous, "determinants")
+})
+
+test_that("every starting point offered exists and leads somewhere in the guide; two or three are offered", {
+  for (id in names(.free_text_ambiguities)) {
+    r <- .free_text_ambiguities[[id]]$routes
+    expect_true(length(r) %in% 2:3, info = id)
+    expect_true(all(r %in% names(.rq_routes)), info = id)
+    for (x in r) {
+      w <- .walk_answers(.rq_routes[[x]]$answers)
+      expect_true(w$node_id %in% names(design_nodes), info = paste(id, x))
+      expect_gt(length(w$trace), 0)
+    }
+    h <- as.character(.render_rq_choices(id))
+    for (x in r) expect_match(h, paste0("design_wizard_rq_", x), fixed = TRUE)
+  }
+})
