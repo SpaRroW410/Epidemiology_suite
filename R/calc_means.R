@@ -1,0 +1,504 @@
+# Pure calculation functions for mean-comparison (t-test based) sample size.
+# No Shiny dependency here so these are directly unit-testable (see tests/testthat).
+#
+# Inputs are raw means and SD (units the user actually has), converted
+# internally to Cohen's d before calling pwr::pwr.t.test -- same pattern as
+# calc_proportion.R converting raw proportions to Cohen's h.
+
+#' Sample size for a single mean vs. a known/reference value (one-sample t-test)
+#'
+#' @param mu0 Reference/hypothesized mean
+#' @param mu1 Expected/anticipated true mean
+#' @param sd Expected standard deviation (> 0)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided", "less", or "greater"
+#' @return list(n, d, inputs)
+#' @examples
+#' calc_means_1s(mu0 = 0, mu1 = 0.5, sd = 1, alpha = 0.05, power = 0.8)
+#' @export
+calc_means_1s <- function(mu0, mu1, sd, alpha = 0.05, power = 0.8,
+                           alternative = c("two.sided", "less", "greater")) {
+  alternative <- match.arg(alternative)
+
+  .validate_number(mu0, "mu0")
+  .validate_number(mu1, "mu1")
+  .validate_positive(sd, "sd")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (isTRUE(all.equal(mu0, mu1))) {
+    stop("mu0 and mu1 must differ (no effect to detect).")
+  }
+
+  d <- (mu1 - mu0) / sd
+  fit <- .cf_pwr_t_test(d = d, sig.level = alpha, power = power,
+                          type = "one.sample", alternative = alternative)
+
+  new_ss_result(list(
+    n = ceiling(fit$n),
+    d = d,
+    inputs = list(mu0 = mu0, mu1 = mu1, sd = sd, alpha = alpha, power = power,
+                  alternative = alternative)
+  ))
+}
+
+# Alternative ways to give the effect of a two-group means calculation (as OpenEpi's mean-difference form does): the two means or their
+# difference, and a standard deviation or a variance. Both return plain numbers and stop with a plain message.
+.means_delta <- function(mu1, mu2, diff) {
+  if (!is.null(diff)) {
+    if (!is.null(mu1) || !is.null(mu2)) stop("Give either the two means or their difference, not both.", call. = FALSE)
+    .validate_number(diff, "diff")
+    if (isTRUE(all.equal(diff, 0))) stop("The difference between the means must not be 0 (no effect to detect).", call. = FALSE)
+    return(diff)
+  }
+  if (is.null(mu1) || is.null(mu2)) stop("Give the two means, or their difference.", call. = FALSE)
+  .validate_number(mu1, "mu1")
+  .validate_number(mu2, "mu2")
+  if (isTRUE(all.equal(mu1, mu2))) stop("mu1 and mu2 must differ (no effect to detect).", call. = FALSE)
+  mu1 - mu2
+}
+.means_spread <- function(sd, variance, label) {
+  if (!is.null(sd) && !is.null(variance)) stop(sprintf("Give either the SD or the variance of %s, not both.", label), call. = FALSE)
+  if (!is.null(variance)) { .validate_positive(variance, paste("the variance of", label)); return(sqrt(variance)) }
+  if (is.null(sd)) stop(sprintf("Give the standard deviation (or the variance) of %s.", label), call. = FALSE)
+  .validate_positive(sd, paste("the SD of", label))
+  sd
+}
+
+#' Sample size for two independent means (equal allocation, common SD)
+#'
+#' @param mu1 Expected mean in group 1
+#' @param mu2 Expected mean in group 2
+#' @param sd Common/pooled standard deviation (> 0)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided", "less", or "greater"
+#' @param diff Difference between the means, instead of `mu1` and `mu2`
+#' @param variance Common variance, instead of `sd`
+#' @param d Cohen's d, instead of the means and the SD
+#' @return list(n_per_group, n_total, d, inputs)
+#' @examples
+#' calc_means_2s_indep(mu1 = 0.5, mu2 = 0, sd = 1, alpha = 0.05, power = 0.8)
+#' calc_means_2s_indep(diff = 0.5, variance = 1)
+#' @export
+calc_means_2s_indep <- function(mu1 = NULL, mu2 = NULL, sd = NULL, alpha = 0.05, power = 0.8,
+                                 alternative = c("two.sided", "less", "greater"),
+                                 diff = NULL, variance = NULL, d = NULL) {
+  alternative <- match.arg(alternative)
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  d_given <- d
+  if (!is.null(d)) {
+    if (!is.null(mu1) || !is.null(mu2) || !is.null(diff) || !is.null(sd) || !is.null(variance)) {
+      stop("Give either Cohen's d, or the means (or their difference) and the SD (or variance), not both.", call. = FALSE)
+    }
+    .validate_number(d, "d")
+    if (isTRUE(all.equal(d, 0))) stop("d must not be 0 (no effect to detect).", call. = FALSE)
+  } else {
+    d <- .means_delta(mu1, mu2, diff) / .means_spread(sd, variance, "the groups")
+  }
+  fit <- .cf_pwr_t_test(d = d, sig.level = alpha, power = power,
+                          type = "two.sample", alternative = alternative)
+  n_per_group <- ceiling(fit$n)
+
+  new_ss_result(list(
+    n_per_group = n_per_group,
+    n_total = n_per_group * 2,
+    d = d,
+    inputs = list(mu1 = mu1, mu2 = mu2, diff = diff, sd = sd, variance = variance, d = d_given, alpha = alpha, power = power,
+                  alternative = alternative)
+  ))
+}
+
+#' Sample size for paired means (paired t-test, e.g. pre-post)
+#'
+#' @param mean_diff Expected mean of the paired differences
+#' @param sd_diff Standard deviation of the paired differences (> 0)
+#' @param sd1,sd2,r Instead of `sd_diff`: the SDs of the two measurements and their correlation; the SD of the differences is then
+#'   sqrt(sd1^2 + sd2^2 - 2 r sd1 sd2)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided", "less", or "greater"
+#' @return list(n, d, inputs)
+#' @examples
+#' calc_means_paired(mean_diff = 0.5, sd_diff = 1, alpha = 0.05, power = 0.8)
+#' @export
+calc_means_paired <- function(mean_diff, sd_diff = NULL, alpha = 0.05, power = 0.8,
+                               alternative = c("two.sided", "less", "greater"),
+                               sd1 = NULL, sd2 = NULL, r = NULL) {
+  alternative <- match.arg(alternative)
+
+  .validate_number(mean_diff, "mean_diff")
+  if (is.null(sd_diff)) {
+    if (is.null(sd1) || is.null(sd2) || is.null(r)) stop("Give the SD of the differences, or both SDs and their correlation.", call. = FALSE)
+    sd_diff <- calc_es_paired(mean_diff, sd1 = sd1, sd2 = sd2, r = r)$sd_diff
+  } else if (!is.null(sd1) || !is.null(sd2) || !is.null(r)) {
+    stop("Give either the SD of the differences, or both SDs and their correlation, not both.", call. = FALSE)
+  }
+  .validate_positive(sd_diff, "sd_diff")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (isTRUE(all.equal(mean_diff, 0))) {
+    stop("mean_diff must not be zero (no effect to detect).")
+  }
+
+  d <- mean_diff / sd_diff
+  fit <- .cf_pwr_t_test(d = d, sig.level = alpha, power = power,
+                          type = "paired", alternative = alternative)
+
+  new_ss_result(list(
+    n = ceiling(fit$n),
+    d = d,
+    sd_diff = sd_diff,
+    inputs = list(mean_diff = mean_diff, sd_diff = sd_diff, sd1 = sd1, sd2 = sd2, r = r, alpha = alpha,
+                  power = power, alternative = alternative)
+  ))
+}
+
+#' Sample size for three or more independent group means (one-way ANOVA)
+#'
+#' Wraps pwr::pwr.anova.test() (Cohen 1988). Converts raw group means and a
+#' common/pooled SD to Cohen's f -- the population SD of the group means
+#' divided by the common SD -- same pattern as calc_means_2s_indep()
+#' converting raw means to Cohen's d.
+#'
+#' @param group_means Numeric vector of expected means, one per group (length >= 3)
+#' @param sd Common/pooled standard deviation shared by all groups (> 0)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n_per_group, n_total, f, inputs)
+#' @examples
+#' calc_means_anova(group_means = c(9, 10, 11), sd = 4, alpha = 0.05, power = 0.8)
+#' @export
+calc_means_anova <- function(group_means, sd, alpha = 0.05, power = 0.8) {
+  if (!is.numeric(group_means) || length(group_means) < 3 || anyNA(group_means)) {
+    stop("group_means must be a numeric vector of at least 3 values.")
+  }
+  .validate_positive(sd, "sd")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  if (isTRUE(all.equal(stats::sd(group_means), 0))) {
+    stop("group_means must not all be equal (no effect to detect).")
+  }
+
+  k <- length(group_means)
+  sigma_m <- sqrt(sum((group_means - mean(group_means))^2) / k)
+  f <- sigma_m / sd
+
+  fit <- .cf_pwr_anova_test(k = k, f = f, sig.level = alpha, power = power)
+  n_per_group <- ceiling(fit$n)
+
+  new_ss_result(list(
+    n_per_group = n_per_group,
+    n_total = n_per_group * k,
+    f = f,
+    inputs = list(group_means = group_means, sd = sd, alpha = alpha, power = power)
+  ))
+}
+
+#' Sample size for a single mean, precision-based (no hypothesis test)
+#'
+#' Wraps epiR::epi.sssimpleestc() rather than reimplementing the underlying
+#' math (project convention). Note this formula is built around a
+#' *relative*-variance framing (Vsq = sigma^2/mean^2) and so requires a
+#' non-zero mean -- appropriate for physical/clinical measurements that are
+#' inherently positive (BP, Hb, BMI, weight), not for values that can
+#' legitimately be zero or negative (e.g. a symmetric change score).
+#'
+#' @param mean Expected mean of the variable to be estimated (!= 0)
+#' @param sd Expected standard deviation of the variable (> 0)
+#' @param epsilon Desired precision: the maximum acceptable difference
+#'   between the estimate and the true population value, in absolute or
+#'   relative terms per `error`
+#' @param error "relative" (epsilon as a fraction of mean) or "absolute"
+#' @param conf_level Confidence level (0,1)
+#' @param N Optional finite eligible-population size. NULL (default) =
+#'   effectively infinite population.
+#' @param nonresponse Expected fraction not analyzable (non-response, refusal or loss to follow-up), in \[0, 1); the number to enrol
+#'   is n / (1 - nonresponse), rounded up
+#' @details A relative precision of 100% or more is refused (the interval would reach 0). A relative precision above 20%, and an
+#'   absolute precision at least as large as the mean, give a warning in `precision_notes`.
+#' @return A named list of class `ss_result` with `n` (to analyze), `n_enrolled` (when `nonresponse` > 0), `d_absolute`,
+#'   `epsilon_relative`, `N`, `precision_notes` (warnings) and `inputs`.
+#' @examples
+#' calc_means_single_precision(mean = 1500 * 0.05, sd = 300 * 0.05, epsilon = 0.2, 
+#'     error = "relative", conf_level = 0.95, N = 20)
+#' @export
+calc_means_single_precision <- function(mean, sd, epsilon,
+                                         error = c("relative", "absolute"),
+                                         conf_level = 0.95, N = NULL, nonresponse = 0) {
+  error <- match.arg(error)
+  .validate_number(mean, "mean")
+  if (isTRUE(all.equal(mean, 0))) {
+    stop("mean must not be zero (this method's relative-variance formulation requires mean != 0).")
+  }
+  .validate_positive(sd, "sd")
+  .validate_positive(epsilon, "epsilon")
+  .validate_unit_interval(conf_level, "conf_level")
+  if (!is.null(N)) .validate_population(N)
+  .validate_nonresponse(nonresponse)
+  chk <- .precision_checks_mean(mean, epsilon, error)
+
+  n <- .cf_sssimpleestc(
+    N = if (is.null(N)) NA else N,
+    xbar = mean, sigma = sd, epsilon = epsilon, error = error,
+    conf.level = conf_level
+  )
+
+  out <- list(n = n)
+  if (nonresponse > 0) out$n_enrolled <- .inflate_nonresponse(n, nonresponse)
+  new_ss_result(c(out, list(
+    d_absolute = chk$d,
+    epsilon_relative = chk$epsilon,
+    N = N,
+    precision_notes = chk$notes,
+    inputs = list(mean = mean, sd = sd, epsilon = epsilon, error = error,
+                  conf_level = conf_level, N = N, nonresponse = nonresponse)
+  )))
+}
+
+#' Sample size for two independent means with unequal group sizes
+#'
+#' Solves the required size of group 2 given group 1's size is already
+#' fixed (e.g. a constrained comparison group) -- wraps
+#' pwr::pwr.t2n.test().
+#'
+#' @param mu1 Expected mean in group 1
+#' @param mu2 Expected mean in group 2
+#' @param sd Common/pooled standard deviation (> 0)
+#' @param n1 Fixed size of group 1 (whole number >= 2)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided", "less", or "greater"
+#' @param diff Difference between the means, instead of `mu1` and `mu2`
+#' @param variance Common variance, instead of `sd`
+#' @param d Cohen's d, instead of the means and the SD
+#' @return list(n1, n2, n_total, d, inputs)
+#' @examples
+#' calc_means_2s_unequal_n(mu1 = 10, mu2 = 9.4, sd = 1, n1 = 90, alpha = 0.05, power = 0.8, 
+#'     alternative = "two.sided")
+#' @export
+calc_means_2s_unequal_n <- function(mu1 = NULL, mu2 = NULL, sd = NULL, n1, alpha = 0.05, power = 0.8,
+                                     alternative = c("two.sided", "less", "greater"),
+                                     diff = NULL, variance = NULL, d = NULL) {
+  alternative <- match.arg(alternative)
+  if (!is.numeric(n1) || length(n1) != 1 || is.na(n1) || n1 < 2 || n1 != round(n1)) {
+    stop("n1 must be a single whole number >= 2.")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  d_given <- d
+  if (!is.null(d)) {
+    if (!is.null(mu1) || !is.null(mu2) || !is.null(diff) || !is.null(sd) || !is.null(variance)) {
+      stop("Give either Cohen's d, or the means (or their difference) and the SD (or variance), not both.", call. = FALSE)
+    }
+    .validate_number(d, "d")
+    if (isTRUE(all.equal(d, 0))) stop("d must not be 0 (no effect to detect).", call. = FALSE)
+  } else {
+    d <- .means_delta(mu1, mu2, diff) / .means_spread(sd, variance, "the groups")
+  }
+  fit <- .cf_pwr_t2n_test(n1 = n1, n2 = NULL, d = d, sig.level = alpha,
+                            power = power, alternative = alternative)
+  n2 <- ceiling(fit$n2)
+
+  new_ss_result(list(
+    n1 = n1,
+    n2 = n2,
+    n_total = n1 + n2,
+    d = d,
+    inputs = list(mu1 = mu1, mu2 = mu2, diff = diff, sd = sd, variance = variance, d = d_given, n1 = n1, alpha = alpha,
+                  power = power, alternative = alternative)
+  ))
+}
+
+#' Sample size for a planned linear contrast among k group means
+#'
+#' Wraps TrialSize::Dose.Response.Linear() rather than reimplementing the
+#' underlying math (project convention) -- TrialSize already a
+#' zero-dependency project dependency, used elsewhere in this app
+#' (McNemar's test, Mantel-Haenszel, non-inferiority OR/HR,
+#' non-parametric tests). Despite the package's function name (written
+#' for a dose-response trial), the underlying formula is the general
+#' sample size for testing a single pre-specified ("planned") linear
+#' contrast of k group means against zero -- e.g. a linear dose-response
+#' trend, or any other a priori weighted comparison across groups -- not
+#' the k-group omnibus F-test the ANOVA design above already covers.
+#'
+#' Note: the closely related TrialSize::Dose.Response.binary() (the
+#' proportions/Cochran-Armitage-trend analog) was investigated for this
+#' app and found NOT to reproduce its own package's documented example
+#' from its own source code under any tested variant (its doc claims
+#' n=382, but running the function on that exact example gives n=337) --
+#' so it is deliberately not wrapped here, consistent with this
+#' project's practice of skipping formulas that can't be confidently
+#' verified (see also TrialSize::Stuart.Maxwell.Test(), which is
+#' similarly unusable).
+#'
+#' @param mu Numeric vector of length k (>= 2): the assumed/expected mean
+#'   for each group
+#' @param sigma Common/pooled standard deviation (> 0)
+#' @param ci Numeric vector of length k: the contrast coefficients,
+#'   summing to 0 (e.g. c(-3,-1,1,3) for an equally-spaced linear trend
+#'   across 4 ordered groups)
+#' @param fi Numeric vector of length k: each group's share of the total
+#'   sample (ni/n), summing to 1
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @return list(n_total, n_per_group, inputs)
+#' @examples
+#' calc_means_planned_contrast(mu = c(0.05, 0.12, 0.14, 0.16), sigma = 0.22, ci = c(-6, 
+#'     1, 2, 3), fi = rep(0.25, 4), alpha = 0.05, power = 0.8)
+#' @export
+calc_means_planned_contrast <- function(mu, sigma, ci, fi, alpha = 0.05, power = 0.8) {
+  k <- length(mu)
+  if (!is.numeric(mu) || k < 2 || anyNA(mu)) {
+    stop("mu must be a numeric vector of at least 2 values.")
+  }
+  if (length(ci) != k || length(fi) != k) {
+    stop("mu, ci, and fi must all have the same length (one value per group).")
+  }
+  .validate_positive(sigma, "sigma")
+  if (abs(sum(ci)) > 1e-6) stop("ci (contrast coefficients) must sum to 0.")
+  if (isTRUE(all.equal(sum(ci * mu), 0))) {
+    stop("the contrast sum(ci * mu) must differ from 0 (no effect to detect).")
+  }
+  if (any(fi <= 0) || any(fi >= 1)) stop("each value in fi must be strictly between 0 and 1.")
+  if (abs(sum(fi) - 1) > 1e-6) stop("fi (group sample-size fractions) must sum to 1.")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  n_solved <- .cf_ts_dose_response_linear(
+    alpha = alpha, beta = 1 - power, sigma = sigma, mui = mu, ci = ci, fi = fi
+  )
+  n_total <- ceiling(n_solved)
+
+  new_ss_result(list(
+    n_total = n_total,
+    n_per_group = ceiling(n_total * fi),
+    inputs = list(mu = mu, sigma = sigma, ci = ci, fi = fi, alpha = alpha, power = power)
+  ))
+}
+
+#' Sample size for a Bonferroni-adjusted post-hoc pairwise comparison of
+#' two group means
+#'
+#' Wraps TrialSize::OneWayANOVA.pairwise() rather than reimplementing the
+#' underlying math (project convention) -- TrialSize already a
+#' zero-dependency project dependency. The formula is the standard
+#' two-sample z-test sample size, with the significance level Bonferroni-
+#' corrected for `tau` simultaneous pairwise comparisons (alpha/tau in
+#' place of alpha) -- independently re-derived here and confirmed to
+#' reproduce the package's own function exactly, since its Rd file's own
+#' examples don't print a numeric answer.
+#'
+#' This is the multiplicity-adjusted complement to the "Planned linear
+#' contrast" design above: that design tests one pre-specified
+#' combination of all k means, while this one sizes one specific pairwise
+#' comparison (mean i vs. mean j) out of `tau` such comparisons planned
+#' across the study, correcting for running several tests at once.
+#'
+#' @param tau Number of pairwise comparisons planned across the whole
+#'   study (whole number >= 1); e.g. tau = choose(k, 2) for all pairs
+#'   among k groups, or a smaller number if only some pairs are planned
+#' @param sigma Common/pooled standard deviation (> 0)
+#' @param margin Assumed true difference between the two group means
+#'   being compared in this specific pair (!= 0)
+#' @param alpha Family-wise significance level (0,1), before Bonferroni
+#'   correction
+#' @param power Desired power (0,1)
+#' @return list(n_per_group, inputs)
+#' @examples
+#' calc_means_posthoc_pairwise(tau = 3, sigma = 4, margin = 3, alpha = 0.05, power = 0.8)
+#' @export
+calc_means_posthoc_pairwise <- function(tau, sigma, margin, alpha = 0.05, power = 0.8) {
+  if (!is.numeric(tau) || length(tau) != 1 || is.na(tau) || tau < 1 || tau != round(tau)) {
+    stop("tau must be a single whole number >= 1.")
+  }
+  .validate_positive(sigma, "sigma")
+  .validate_number(margin, "margin")
+  if (isTRUE(all.equal(margin, 0))) {
+    stop("margin must differ from 0 (no effect to detect).")
+  }
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  n_solved <- .cf_ts_anova_pairwise(
+    alpha = alpha, beta = 1 - power, tau = tau, sigma = sigma, margin = margin
+  )
+
+  new_ss_result(list(
+    n_per_group = ceiling(n_solved),
+    inputs = list(tau = tau, sigma = sigma, margin = margin, alpha = alpha, power = power)
+  ))
+}
+
+#' Sample size for two independent means with unequal variances (Welch's
+#' t-test)
+#'
+#' No installed package wraps Welch's (unequal-variance) two-sample t-test
+#' sample size directly (MESS::power_t_test would, but MESS is not
+#' installed in this sandbox and has no CRAN access to add it). This
+#' implements the standard large-sample normal approximation used
+#' throughout the sample-size literature (e.g. Julious 2004, Stat Med;
+#' Rosner, Fundamentals of Biostatistics): unlike the pooled-variance
+#' formula in calc_means_2s_indep()/TrialSize::TwoSampleMean.Equality(),
+#' this keeps the two group variances separate in the noncentrality
+#' calculation rather than pooling them, exactly the same way Welch's
+#' t-test itself keeps them separate (Satterthwaite-adjusted df) rather
+#' than assuming equal variances. When sigma1 = sigma2, this formula
+#' reduces algebraically to exactly the pooled-variance formula (confirmed
+#' directly: sigma1=sigma2=0.1, ratio=1, margin=0.05, alpha=0.05, power=
+#' 0.8 reproduces TrialSize::TwoSampleMean.Equality()'s own documented
+#' example, n=63, exactly). For genuinely unequal variances, verified by
+#' simulation using R's own Welch t-test (stats::t.test(var.equal=FALSE)):
+#' mean1=0, mean2=0.5, sd1=1, sd2=2, alpha=0.05, power=0.8, equal
+#' allocation -> n=157/group, empirical Welch-test power 0.793 (closely
+#' matching the 0.80 target).
+#'
+#' @param mu1 Expected mean in group 1
+#' @param mu2 Expected mean in group 2
+#' @param sd1 Expected standard deviation in group 1 (> 0)
+#' @param sd2 Expected standard deviation in group 2 (> 0)
+#' @param diff Difference between the means, instead of `mu1` and `mu2`
+#' @param var1,var2 Variances instead of standard deviations (as in OpenEpi's mean-difference form: "enter Std. Deviation OR Variance")
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param ratio Group 2 size divided by group 1 size (> 0)
+#' @param alternative "two.sided", "less", or "greater"
+#' @return list(n1, n2, n_total, inputs)
+#' @examples
+#' calc_means_welch(mu1 = 0.05, mu2 = 0.1, sd1 = 0.1, sd2 = 0.1, alpha = 0.05, power = 0.8, 
+#'     ratio = 1)
+#' @export
+calc_means_welch <- function(mu1 = NULL, mu2 = NULL, sd1 = NULL, sd2 = NULL, alpha = 0.05, power = 0.8,
+                              ratio = 1,
+                              alternative = c("two.sided", "less", "greater"),
+                              diff = NULL, var1 = NULL, var2 = NULL) {
+  alternative <- match.arg(alternative)
+  delta <- .means_delta(mu1, mu2, diff)
+  s1 <- .means_spread(sd1, var1, "group 1")
+  s2 <- .means_spread(sd2, var2, "group 2")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+  .validate_positive(ratio, "ratio")
+
+  za <- if (identical(alternative, "two.sided")) stats::qnorm(1 - alpha / 2) else stats::qnorm(1 - alpha)
+  zb <- stats::qnorm(power)
+
+  n1 <- ceiling((za + zb)^2 * (s1^2 + s2^2 / ratio) / delta^2)
+  n2 <- ceiling(ratio * n1)
+
+  new_ss_result(list(
+    n1 = n1,
+    n2 = n2,
+    n_total = n1 + n2,
+    delta = delta,
+    sd1 = s1,
+    sd2 = s2,
+    inputs = list(mu1 = mu1, mu2 = mu2, diff = diff, sd1 = sd1, sd2 = sd2, var1 = var1, var2 = var2, alpha = alpha,
+                  power = power, ratio = ratio, alternative = alternative)
+  ))
+}
+
+# Shared .validate_number() / .validate_positive() / .validate_unit_interval()
+# live in calc_utils.R (same package namespace).
