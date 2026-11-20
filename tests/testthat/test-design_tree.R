@@ -297,6 +297,7 @@ test_that("who assigned it: the team without randomisation, or a programme / pol
   expect_equal(.walk(c(cmp, other, q[1], design_nodes$its_effect$options[[1]]$label))$node$catalog_key, "its_level")
   expect_equal(.walk(c(cmp, other, q[1], design_nodes$its_effect$options[[2]]$label))$node$catalog_key, "its_slope")
   expect_equal(.walk(c(cmp, other, q[2]))$node$id, "term_did")
+  expect_equal(design_nodes$term_did$catalog_key, "did_repeated")   # built 17 Nov 2026 (OBS-13)
   expect_equal(.walk(c(cmp, team, q[3]))$node$id, "term_rdd")
   pp <- vapply(design_nodes$prepost_outcome$options, function(o) o$label, "")
   expect_equal(.walk(c(cmp, team, q[4], pp[1]))$node$catalog_key, "means_two_dep")
@@ -408,7 +409,7 @@ test_that("every not-built terminal is an open item of docs/CHECKLIST.md", {
                term_surv_one_sample = "One-sample survival", term_psm = "Propensity-score",
                term_time_varying = "Time-varying exposure", term_gwas = "GWAS",
                term_gxe = "environment interaction",
-               term_did = "difference-in-differences", term_rdd = "Regression discontinuity")
+               term_rdd = "Regression discontinuity")
   open_terms <- names(Filter(function(n) isTRUE(n$terminal) && is.null(n$catalog_key) && !isTRUE(n$guidance), design_nodes))
   expect_setequal(open_terms, names(tracked))
   for (id in names(tracked)) {

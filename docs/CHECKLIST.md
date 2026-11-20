@@ -25,7 +25,7 @@ Steps only the owner can take that belong to no section below; the section items
 
 ## 2. Calculators (Plan: Sample Size and Analyze)
 
-All 219 designs of the app's catalog are built (14 Nov 2026); the open items are designs not built yet, or the open half of a built one.
+All 223 designs of the app's catalog are built (17 Nov 2026); the open items are designs not built yet, or the open half of a built one.
 The guide's end points for designs not built yet are tested to be listed here (`tests/testthat/test-design_tree.R`).
 
 ### Plan: Effect Sizes (ES)
@@ -103,7 +103,13 @@ The guide's end points for designs not built yet are tested to be listed here (`
   0.54 against 0.55) and shows why the calculation is lower (0.45): the fitted test rejects 6-12% of the time when nothing changed.
   The help text says so and warns under 50 time points. Zhang, Wagner & Ross-Degnan 2011 has no free full text; not read, not cited.
   Not covered: seasonality, a control series, count models, several interruptions.
-- [ ] **OBS-13** Controlled before-after / difference-in-differences, reached by FIND-16: sample size. No source found yet.
+- [x] **OBS-13** Controlled before-after / difference-in-differences, reached by FIND-16: sample size. Built 17 Nov 2026
+  (`R/calc_did.R`, the Difference-in-Differences calculator): units needed or power for a continuous outcome measured b times before
+  and k times after on every unit, compound-symmetry correlation; Hu & Hoover 2018 (J Biom Biostat 9:415, PMC6663085, read in full),
+  equation 6. **The source's equation 7 and worked example are a factor 2 too small** (they omit the 2 of 1/n0 + 1/n1 = 2/n): a
+  simulation of 20 000 studies per setting agrees with equation 6 and the calculator (its 19 per group give 49% power, not 80%; 39
+  are needed), and the calculator equals `power.t.test()` on the units' changes. The help text states the correction. Not covered:
+  clusters sampled afresh each time, covariates, binary outcomes.
 - [ ] **OBS-14** Regression discontinuity, reached by FIND-16: sample size. Candidate sources, not read: Schochet 2009; Cattaneo,
   Titiunik & Vazquez-Bare 2019.
 - [x] **OBS-15** Mendelian randomisation, reached by FIND-16: power. Built 14 Nov 2026 (`R/calc_mendelian.R`, the Mendelian
@@ -139,7 +145,8 @@ The guide's end points for designs not built yet are tested to be listed here (`
 
 - [ ] **AGR-06** **[blocked]** Method comparison by Deming / Passing-Bablok regression: `deming`, `mcr`, `MethComp` are analysis-only; the
   literature is simulation-based. *Unblock:* a citable simulation protocol (e.g. Linnet) to reproduce.
-- [ ] **AGR-07** Agreement, open half: weighted kappa.
+- [ ] **AGR-07** **[blocked]** Agreement, open half: weighted kappa. No source with a formula and a worked example that I could read
+  (19 Nov 2026). *Unblock:* a readable paper with the sample-size formula for weighted kappa (e.g. a PMC article).
 ### Plan: Several Measurements per Patient (UNIT)
 
 - [x] **UNIT-01** Several units per patient (eyes, lesions, patches), same treatment in all of a patient's units -- two means -- Donner &
@@ -185,10 +192,16 @@ The guide's end points for designs not built yet are tested to be listed here (`
   group-sequential design verified against `rpact`.
 - [ ] **TRIAL-27** **[blocked]** N-of-1 trials: `nof1` / `Nof1` not reachable, no single accepted formula. *Unblock:* a citable
   period-count formula with a worked example.
-- [ ] **TRIAL-28** Stepped-wedge, open half: binary outcome (`clusterPower::cpa.sw.binary()` is a numerical GEE procedure, no closed form).
+- [x] **TRIAL-28** Stepped-wedge, binary outcome (logit scale, cross-sectional, constant cluster effect). Built 19 Nov 2026 from Xia et al.
+  2021 (Trials 22:598, PMC8419932); the paper's equations were not readable, so the power is matched to the authors' function
+  `swCRTdesign::swGlmPwr()` (10 digits over random settings, test skips without the package). Open: a conversion from ICC to tau,
+  time-varying cluster effects, closed cohort.
 - [ ] **TRIAL-29** Group sequential / Lan-DeMets, open half: the spending-function design with 3+ looks and for binary / survival
   outcomes; blinded sample-size re-estimation (`spass`-style).
-- [ ] **TRIAL-30** Trial sequential analysis, open half: the heterogeneity-adjusted (random-effects / diversity-adjusted) information size.
+- [x] **TRIAL-30** Trial sequential analysis, open half: the heterogeneity-adjusted (random-effects / diversity-adjusted) information size.
+  Built 16 Nov 2026: an anticipated heterogeneity (diversity D-squared, or I-squared) multiplies the fixed-effect size by
+  1 / (1 - D-squared); Wetterslev, Thorlund, Brok & Gluud 2009 (BMC Med Res Methodol 9:86, read in full), whose Table 2 (seven
+  meta-analyses, both adjustments) the tests reproduce to within the rounding of its printed percentages.
 - [ ] **TRIAL-31** **[blocked]** Non-inferiority, open half: a true relative-risk-scale margin (`TrialSize::RelativeRisk.NIS()` is
   odds-ratio based, so it ships as the OR design). *Unblock:* a verified RR-scale source.
 - [ ] **TRIAL-32** Bioequivalence, open half: reference-scaled designs for highly variable drugs (RSABE / ABEL); simulation-based in
@@ -362,8 +375,9 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [ ] **GEN-74** Two dependent correlations, open half: the non-common-index case.
 - [ ] **GEN-75** Ordinal / multinomial regression, open half: the nominal (multinomial) model.
 - [ ] **GEN-76** Multiplicity, open half: Holm's step-down as its own design (no single planning alpha; needs simulation).
-- [ ] **GEN-77** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to Bonferroni /
-  Sidak).
+- [ ] **GEN-77** **[blocked]** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to
+  Bonferroni / Sidak). Candidate sources found 16 Nov 2026, no free full text, not read: Piegorsch 1991-type many-to-one comparisons
+  in Stat Med 1995;14:2547 (PMID 8746885) and Stat Med 2003;22:2031 (PMID 12802814). *Unblock:* paper access.
 ### Analyze: From summary counts (AN)
 
 - [x] **AN-01** Compare two proportions: difference, risk ratio, odds ratio (several interval methods) -- Newcombe 1998;
@@ -503,7 +517,10 @@ Decisions S1-S5 are in `SDD.md`, section 17.
 - [x] **STUDY-05** Add to study for the Analyze tools, the randomization list and survey selection (3 Nov 2026).
 - [ ] **STUDY-06** **[owner]** Open one downloaded file in Word (desktop and phone) and try Insert > Equation > LaTeX on a formula.
 - [ ] **STUDY-07** **[owner]** Real-phone check on Connect Cloud and the browser build: sleep, switch apps, reload.
-- [ ] **STUDY-08** Readable names for more calculators (only names with one meaning are labelled now).
+- [ ] **STUDY-08** Readable names for more calculators (only names with one meaning are labelled now). 16 Nov 2026: 23 more calculators
+  labelled (29 of 70), with the wording of each function's help page, and the results of the newer calculators; a test checks every
+  labelled name is an argument of that calculator. Still unlabelled: the larger families (chi-square, survival, prediction, ROC,
+  longitudinal, multiplicity, effect size and others), where one name has several meanings within the calculator.
 - [ ] **STUDY-09** Check Word on phones, Google Docs and LibreOffice (pasted LaTeX, table styles); a long study on a phone.
 
 ## 5. Interface and accessibility (UI)
@@ -522,8 +539,12 @@ Decisions S1-S5 are in `SDD.md`, section 17.
 - [x] **UI-09** "Advanced options" folded in the calculators that have optional settings (30 Oct, 4 Nov 2026).
 - [x] **UI-10** A table comparing the three versions, on Home and the Cite tab, with the one in use marked (4 Nov 2026).
 - [ ] **UI-11** A person's keyboard and screen-reader walk-through (a scan cannot judge reading order or whether names make sense).
-- [ ] **UI-12** Dark-mode plots (plots stay white); text-resize and reduced-motion checks.
-- [ ] **UI-13** Phone: the dark-mode switch is hidden on phones; a layout pass on a real phone; **[optional]** a slimmer phone-only app.
+- [x] **UI-12** Dark-mode plots (plots stay white); text-resize and reduced-motion checks. Done 16 Nov 2026: the power curves, the
+  surveillance charts and the epidemic chart take their colours from one light / dark palette (`.plot_palette()`, every colour at
+  least 3:1 against its background, tested) and redraw when the switch is used. Checked in a browser on one calculator page: with
+  text at 200% nothing is clipped and the page does not scroll sideways; with reduced motion set, no animation runs.
+- [ ] **UI-13** **[owner]** Phone: a layout pass on a real phone; **[optional]** a slimmer phone-only app. (The dark-mode switch is in
+  the phone's bottom bar and tested, `test-phone_shell.R`; checked 16 Nov 2026.)
 - [ ] **UI-14** **[optional]** Two-column layout on wide screens (inputs left, result right).
 - [ ] **UI-15** Revisit with real usage: Home quick links and cards, the background loading order and the four start-up calculators.
 - [x] **UI-16** A start-up screen for the browser build instead of Shinylive's spinner (`tools/pages/status_overlay.html`): what the app
@@ -573,7 +594,9 @@ Decisions S1-S5 are in `SDD.md`, section 17.
   `EPIDEMIOLOGYSUITE_OPEN` on Connect if it was set there.
 - [ ] **DIST-09** Browser build: about 64 MB on first visit; trim it and measure first load and memory on a real phone connection (desktop,
   3 Nov 2026: 38.9 s until Home is usable; `tools/ui-audit/live_timing.js`). The offline / Android route waits on that measurement.
-- [ ] **DIST-10** Park the `shinylive-spike` workflow (`if: false`) or move it to a weekly schedule.
+- [x] **DIST-10** Park the `shinylive-spike` workflow (`if: false`) or move it to a weekly schedule. Done 16 Nov 2026: it now also
+  runs every Monday; it is not parked and keeps running on changes to `tools/pages/` and `tools/webr-spike/`, because it is the check
+  that the exported browser build boots and its start-up screen goes away.
 - [ ] **DIST-11** Documentation site: look at it once (navigation, search, MathJax); custom domain; "Try it online" links; a link from each
   calculator page to the app.
 - [ ] **DIST-12** Docker: first publish to GHCR, image size, an arm64 build.
@@ -609,7 +632,12 @@ help text says so.
   1984, Orenstein 1985, Lachin 1981, Rouder et al. 2009, Matts & Lachin 1988, Lachin & Foulkes 1986, and the others named in the
   archived ROADMAP. *Unblock:* paper access.
 - [ ] **SRC-02** **[blocked]** Kish 1965 (design effect); Killip et al. 2004 and Chinn 2000 in full (only the abstracts were read).
-- [ ] **SRC-03** A source for "design effect 1.5 or 2 when nothing is known" (the owner's wording; no source checked).
+- [x] **SRC-03** A source for "design effect 1.5 or 2 when nothing is known" (the owner's wording). Found 16 Nov 2026 (PubMed,
+  abstracts read): Kaiser et al. 2006 (Disasters 30:199-211) reviewed nine cluster surveys in emergencies and recommend assuming 1.5
+  for acute malnutrition in children and 2 or less for crude mortality; Hulland et al. 2021 (PLoS One 16:e0254031) suggest 1.4-1.8
+  with about 20 per cluster and 1.2-1.4 with about 10 for anaemia. Cited in the cluster calculator's help and the glossary, with
+  the caveat that these are nutrition and mortality surveys. Henderson & Sundaresan 1982 (the EPI 30 x 7 design's assumed design
+  effect of 2) is a scanned article without text; not read, not cited.
 - [ ] **SRC-04** Regidor et al. 1993 (epiR's source for the Byar SMR interval) could not be found; not cited.
 - [ ] **SRC-05** **[blocked]** Tang Y. Comments on Lachin (2008). Stat Med 2009;28:175-177, and the author's reply.
 - [x] **SRC-06** Sources for the design-card claims (FIND-21), checked in PubMed 6-7 Nov 2026 (list in `R/design_cards.R`): the 23
@@ -627,7 +655,13 @@ help text says so.
 
 Scope decision D1 (`SDD.md`, section 17): calculators from summary data only; raw data goes to a later full (server) app.
 
-- [ ] **WB-01** Evidence synthesis from study summaries (fixed / random effects, forest plot), base R, checked against `metafor`.
+- [x] **WB-01** Evidence synthesis from study summaries (fixed / random effects, forest plot), base R, checked against `metafor`.
+  Built 16 Nov 2026 (`R/calc_analyze_meta.R`, Analyze > Meta-Analysis): studies typed one per line (estimate with its confidence
+  interval or standard error), ratios pooled on the log scale; fixed-effect and DerSimonian-Laird random-effects estimates, Q,
+  I-squared, tau-squared, weights and a forest plot. Equal to `metafor::rma()` (5.2.1; `FE` and `DL`) on the BCG trials and on other
+  data. Review read for the estimator: Veroniki et al. 2016; the original DerSimonian & Laird 1986 and Higgins & Thompson 2002
+  papers were not read. Not covered: pooling from raw counts, REML / Paule-Mandel, Hartung-Knapp, prediction intervals, subgroups,
+  meta-regression, funnel plots.
 - [ ] **WB-02** Teaching mode: interactive power curves, sampling-distribution and CI-coverage demos.
 - [ ] **WB-03** **[optional]** Survey extras: post-stratification / raking, weight trimming, variance estimation for the selected design,
   two-stage selection inside clusters, an AAPOR-style response-rate table.

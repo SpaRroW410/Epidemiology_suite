@@ -53,7 +53,8 @@ mod_cluster_ui <- function(id) {
           condition = sprintf("input['%s'] == 'deff'", ns("deff_route")),
           numericInput(ns("deff_direct"), "Design effect (DEFF)", value = 1.5, min = 0.1, step = 0.1),
           p(class = "text-muted small",
-            "If the ICC and the variance between clusters are not known, the design effect is most commonly taken as 1.5 or 2.",
+            "If the ICC and the variance between clusters are not known, the design effect is most commonly taken as 1.5 or 2",
+            "(recommended for nutrition and mortality surveys by Kaiser et al. 2006; see Formula / Help).",
             "The design-effect calculator in this module works it out from the variance between clusters.")
         )
       ),

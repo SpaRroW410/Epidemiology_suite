@@ -107,6 +107,26 @@ test_that("names that mean one thing everywhere get a label; names whose meaning
   expect_equal(.study_label("p1", "cohort"), "Risk in the exposed group (p1)")
   expect_equal(.study_label("pE", "logrank"), "Event probability, experimental group (pE)")
   expect_equal(.study_label("pE", "case_control"), "Probability of exposure (pE)")
+  # STUDY-08: more calculators; the same name still means different things in different ones, and "k" stays unlabelled as a result
+  expect_equal(.study_label("beta", "mendelian"), "Causal effect, SD of outcome per SD of exposure (beta)")
+  expect_equal(.study_label("beta", "simon"), "Type II error rate (beta)")
+  expect_equal(.study_label("beta"), "beta")
+  expect_equal(.study_label("n", "pilot"), "Pilot sample size per arm (n)")
+  expect_equal(.study_label("rho", "its"), "Autocorrelation (rho)")
+  expect_equal(.study_label("rho", "cluster"), "Intracluster correlation (rho)")
+  expect_equal(.study_label("heterogeneity", "tsa"), "Anticipated heterogeneity between trials (heterogeneity)")
+  expect_equal(.study_label("n_total_adjusted", kind = "result"), "Heterogeneity-adjusted information size (n_total_adjusted)")
+  expect_equal(.study_label("k", kind = "result"), "k")
+  # every labelled name is an argument of one of the calculator's own functions
+  ns <- asNamespace("epidemiologysuite"); fns <- grep("^calc_", ls(ns), value = TRUE)
+  for (id in names(.study_labels_module)) {
+    f <- file.path(testthat::test_path("..", ".."), "R", paste0("calc_", id, ".R"))
+    if (!file.exists(f)) next
+    src <- readLines(f, warn = FALSE)
+    mine <- fns[vapply(fns, function(x) any(grepl(paste0("^", x, " <- function"), src)), TRUE)]
+    args <- unique(unlist(lapply(mine, function(x) names(formals(get(x, ns))))))
+    expect_equal(setdiff(names(.study_labels_module[[id]]), args), character(0), info = id)
+  }
   expect_equal(names(.study_relabel(list(alpha = "0.05", zz = "1"))), c("Significance level (alpha)", "zz"))
   # every per-calculator entry names a real calculator
   ids <- vapply(module_registry(), `[[`, character(1), "id")

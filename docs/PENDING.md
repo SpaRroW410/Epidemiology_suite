@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**88 open** of 362 items (274 done).
+**81 open** of 362 items (281 done).
 
 ## Waiting for the owner
 
@@ -11,6 +11,7 @@
 - **FIND-09** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the reader against.
 - **STUDY-06** Open one downloaded file in Word (desktop and phone) and try Insert > Equation > LaTeX on a formula.
 - **STUDY-07** Real-phone check on Connect Cloud and the browser build: sleep, switch apps, reload.
+- **UI-13** Phone: a layout pass on a real phone; **[optional]** a slimmer phone-only app. (The dark-mode switch is in the phone's bottom bar and tested, `test-phone_shell.R`; checked 16 Nov 2026.)
 - **PKG-06** Release on r-universe, then submit to CRAN: the steps are in `docs/release.md` (a new version number first; `v1.0.0` is the release Zenodo archived on 31 Oct 2026).
 - **PKG-07** File the two upstream bug reports drafted in `docs/upstream_reports.md`: presize as an issue on its GitHub tracker, pmsampsize by e-mail to its maintainer (it has no tracker); both still unfixed on CRAN on 6 Nov 2026.
 - **DIST-06** Republish on Connect Cloud after each merge; try the redirect, Find, Effect Size, the links, the server notice and dark mode on a real phone (Android and iPhone / Safari).
@@ -21,7 +22,7 @@
 
 - [ ] **OWN-04** **[owner]** Decision D6: when to reopen the paused items (PRED, section 2).
 
-## 2. Calculators (Plan: Sample Size and Analyze) -- 38 open
+## 2. Calculators (Plan: Sample Size and Analyze) -- 35 open
 
 ### Plan: Survey & Cross-Sectional (SVY)
 
@@ -33,7 +34,6 @@
   efficiency depends on each data set's overlap. *Unblock:* a published planning heuristic with a worked example.
 - [ ] **OBS-11** **[blocked]** Time-varying exposure (OPTITXS; Basagana & Spiegelman 2010, 2011): not on CRAN, papers not reachable.
   *Unblock:* paper access or the OPTITXS source.
-- [ ] **OBS-13** Controlled before-after / difference-in-differences, reached by FIND-16: sample size. No source found yet.
 - [ ] **OBS-14** Regression discontinuity, reached by FIND-16: sample size. Candidate sources, not read: Schochet 2009; Cattaneo,
   Titiunik & Vazquez-Bare 2019.
 
@@ -48,7 +48,8 @@
 
 - [ ] **AGR-06** **[blocked]** Method comparison by Deming / Passing-Bablok regression: `deming`, `mcr`, `MethComp` are analysis-only; the
   literature is simulation-based. *Unblock:* a citable simulation protocol (e.g. Linnet) to reproduce.
-- [ ] **AGR-07** Agreement, open half: weighted kappa.
+- [ ] **AGR-07** **[blocked]** Agreement, open half: weighted kappa. No source with a formula and a worked example that I could read
+  (19 Nov 2026). *Unblock:* a readable paper with the sample-size formula for weighted kappa (e.g. a PMC article).
 
 ### Plan: Several Measurements per Patient (UNIT)
 
@@ -64,10 +65,8 @@
   group-sequential design verified against `rpact`.
 - [ ] **TRIAL-27** **[blocked]** N-of-1 trials: `nof1` / `Nof1` not reachable, no single accepted formula. *Unblock:* a citable
   period-count formula with a worked example.
-- [ ] **TRIAL-28** Stepped-wedge, open half: binary outcome (`clusterPower::cpa.sw.binary()` is a numerical GEE procedure, no closed form).
 - [ ] **TRIAL-29** Group sequential / Lan-DeMets, open half: the spending-function design with 3+ looks and for binary / survival
   outcomes; blinded sample-size re-estimation (`spass`-style).
-- [ ] **TRIAL-30** Trial sequential analysis, open half: the heterogeneity-adjusted (random-effects / diversity-adjusted) information size.
 - [ ] **TRIAL-31** **[blocked]** Non-inferiority, open half: a true relative-risk-scale margin (`TrialSize::RelativeRisk.NIS()` is
   odds-ratio based, so it ships as the OR design). *Unblock:* a verified RR-scale source.
 - [ ] **TRIAL-32** Bioequivalence, open half: reference-scaled designs for highly variable drugs (RSABE / ABEL); simulation-based in
@@ -113,8 +112,9 @@
 - [ ] **GEN-74** Two dependent correlations, open half: the non-common-index case.
 - [ ] **GEN-75** Ordinal / multinomial regression, open half: the nominal (multinomial) model.
 - [ ] **GEN-76** Multiplicity, open half: Holm's step-down as its own design (no single planning alpha; needs simulation).
-- [ ] **GEN-77** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to Bonferroni /
-  Sidak).
+- [ ] **GEN-77** **[blocked]** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to
+  Bonferroni / Sidak). Candidate sources found 16 Nov 2026, no free full text, not read: Piegorsch 1991-type many-to-one comparisons
+  in Stat Med 1995;14:2547 (PMID 8746885) and Stat Med 2003;22:2031 (PMID 12802814). *Unblock:* paper access.
 
 ## 3. Finding a calculator: the guide, search and Find tab (FIND) -- 7 open
 
@@ -135,14 +135,17 @@
 
 - [ ] **STUDY-06** **[owner]** Open one downloaded file in Word (desktop and phone) and try Insert > Equation > LaTeX on a formula.
 - [ ] **STUDY-07** **[owner]** Real-phone check on Connect Cloud and the browser build: sleep, switch apps, reload.
-- [ ] **STUDY-08** Readable names for more calculators (only names with one meaning are labelled now).
+- [ ] **STUDY-08** Readable names for more calculators (only names with one meaning are labelled now). 16 Nov 2026: 23 more calculators
+  labelled (29 of 70), with the wording of each function's help page, and the results of the newer calculators; a test checks every
+  labelled name is an argument of that calculator. Still unlabelled: the larger families (chi-square, survival, prediction, ROC,
+  longitudinal, multiplicity, effect size and others), where one name has several meanings within the calculator.
 - [ ] **STUDY-09** Check Word on phones, Google Docs and LibreOffice (pasted LaTeX, table styles); a long study on a phone.
 
-## 5. Interface and accessibility (UI) -- 5 open
+## 5. Interface and accessibility (UI) -- 4 open
 
 - [ ] **UI-11** A person's keyboard and screen-reader walk-through (a scan cannot judge reading order or whether names make sense).
-- [ ] **UI-12** Dark-mode plots (plots stay white); text-resize and reduced-motion checks.
-- [ ] **UI-13** Phone: the dark-mode switch is hidden on phones; a layout pass on a real phone; **[optional]** a slimmer phone-only app.
+- [ ] **UI-13** **[owner]** Phone: a layout pass on a real phone; **[optional]** a slimmer phone-only app. (The dark-mode switch is in
+  the phone's bottom bar and tested, `test-phone_shell.R`; checked 16 Nov 2026.)
 - [ ] **UI-14** **[optional]** Two-column layout on wide screens (inputs left, result right).
 - [ ] **UI-15** Revisit with real usage: Home quick links and cards, the background loading order and the four start-up calculators.
 
@@ -158,7 +161,7 @@
 - [ ] **PKG-12** **[optional]** Ask epiR's maintainer about 3.0.0's population attributable fraction interval for a single 2 x 2 table:
   it is built from the limits of the two risks' intervals, where 2.0.67 reported Jewell's (2004) interval (this app keeps Jewell's).
 
-## 7. Versions, hosting and distribution (DIST) -- 10 open
+## 7. Versions, hosting and distribution (DIST) -- 9 open
 
 - [ ] **DIST-06** **[owner]** Republish on Connect Cloud after each merge; try the redirect, Find, Effect Size, the links, the server
   notice and dark mode on a real phone (Android and iPhone / Safari).
@@ -168,7 +171,6 @@
   `EPIDEMIOLOGYSUITE_OPEN` on Connect if it was set there.
 - [ ] **DIST-09** Browser build: about 64 MB on first visit; trim it and measure first load and memory on a real phone connection (desktop,
   3 Nov 2026: 38.9 s until Home is usable; `tools/ui-audit/live_timing.js`). The offline / Android route waits on that measurement.
-- [ ] **DIST-10** Park the `shinylive-spike` workflow (`if: false`) or move it to a weekly schedule.
 - [ ] **DIST-11** Documentation site: look at it once (navigation, search, MathJax); custom domain; "Try it online" links; a link from each
   calculator page to the app.
 - [ ] **DIST-12** Docker: first publish to GHCR, image size, an arm64 build.
@@ -184,22 +186,20 @@
 - [ ] **ENG-10** Bring `renv.lock` up to the current CRAN versions (lme4 2.1-0, mvtnorm 1.4-2, epiR 3.0.0, officer 0.7.7, ...): the suite
   passes with them (6 Nov 2026, PKG-11); the test workflow, the server version and the browser build still use the locked ones.
 
-## 9. Sources not yet read (SRC) -- 6 open
+## 9. Sources not yet read (SRC) -- 5 open
 
 - [ ] **SRC-01** **[blocked]** Rothman & Boice 1979, Greenland & Robins 1985, Newcombe 1998, Miettinen & Nurminen 1985, Mee 1984, Koopman
   1984, Orenstein 1985, Lachin 1981, Rouder et al. 2009, Matts & Lachin 1988, Lachin & Foulkes 1986, and the others named in the
   archived ROADMAP. *Unblock:* paper access.
 - [ ] **SRC-02** **[blocked]** Kish 1965 (design effect); Killip et al. 2004 and Chinn 2000 in full (only the abstracts were read).
-- [ ] **SRC-03** A source for "design effect 1.5 or 2 when nothing is known" (the owner's wording; no source checked).
 - [ ] **SRC-04** Regidor et al. 1993 (epiR's source for the Byar SMR interval) could not be found; not cited.
 - [ ] **SRC-05** **[blocked]** Tang Y. Comments on Lachin (2008). Stat Med 2009;28:175-177, and the author's reply.
 - [ ] **SRC-07** **[blocked]** Two card statements stay marked as suggestions: a crossover washout of more than five half-lives and a
   non-inferiority margin preserving at least half the control effect; both come from regulatory guidance (bioequivalence; FDA 2016
   non-inferiority) that is not in PubMed and was not read. *Unblock:* reading the guidance documents.
 
-## 10. Bigger workbenches and extensions (WB) -- 9 open
+## 10. Bigger workbenches and extensions (WB) -- 8 open
 
-- [ ] **WB-01** Evidence synthesis from study summaries (fixed / random effects, forest plot), base R, checked against `metafor`.
 - [ ] **WB-02** Teaching mode: interactive power curves, sampling-distribution and CI-coverage demos.
 - [ ] **WB-03** **[optional]** Survey extras: post-stratification / raking, weight trimming, variance estimation for the selected design,
   two-stage selection inside clusters, an AAPOR-style response-rate table.

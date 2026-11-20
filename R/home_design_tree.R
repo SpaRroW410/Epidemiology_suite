@@ -93,7 +93,8 @@ design_nodes <- list(
       list(label = "Two or more diagnostic tests used together (serial / parallel testing)", next_id = "term_analyze_dx_combined"),
       list(label = "A confidence interval for a proportion, or for a mean and standard deviation", next_id = "analyze_ci_type"),
       list(label = "An outbreak investigation: attack rates, which food or exposure, secondary attack rate, case fatality", next_id = "analyze_outbreak_type"),
-      list(label = "A series of case counts over time: has there been an unusual rise (aberration detection)?", next_id = "analyze_surv_type")
+      list(label = "A series of case counts over time: has there been an unusual rise (aberration detection)?", next_id = "analyze_surv_type"),
+      list(label = "The results of several studies, to pool them (meta-analysis: fixed and random effects, forest plot)", next_id = "analyze_meta_type")
     )
   ),
 
@@ -256,6 +257,19 @@ design_nodes <- list(
     )
   ),
 
+  # Meta-analysis of study results (WB-01, built 16 Nov 2026)
+  analyze_meta_type = list(
+    id = "analyze_meta_type", stage = 1,
+    question = "What does each study report?",
+    help = "Pool only results of the same kind. Each study needs its estimate with a confidence interval or a standard error.",
+    options = list(
+      list(label = "A ratio: odds ratio, risk ratio, rate ratio or hazard ratio", next_id = "term_analyze_meta_ratio"),
+      list(label = "A difference: mean difference or risk difference", next_id = "term_analyze_meta_difference")
+    )
+  ),
+  term_analyze_meta_ratio = .term("term_analyze_meta_ratio", "Meta-analysis of ratios", "analyze_meta_ratio"),
+  term_analyze_meta_difference = .term("term_analyze_meta_difference", "Meta-analysis of differences", "analyze_meta_difference"),
+
   analyze_ci_type = list(
     id = "analyze_ci_type", stage = 1,
     question = "Which summary figures do you have?",
@@ -297,7 +311,8 @@ design_nodes <- list(
     options = list(
       list(label = "How many studies a planned pairwise meta-analysis needs (power)", next_id = "term_meta_power"),
       list(label = "Required information size for a cumulative meta-analysis of trials (trial sequential analysis)", next_id = "tsa_outcome"),
-      list(label = "Network meta-analysis (several treatments compared indirectly)", next_id = "term_nma")
+      list(label = "Network meta-analysis (several treatments compared indirectly)", next_id = "term_nma"),
+      list(label = "Pool the results of studies I already have (pooled estimate, heterogeneity, forest plot)", next_id = "analyze_meta_type")
     )
   ),
 
@@ -555,7 +570,7 @@ design_nodes <- list(
       list(label = "Individual subjects", next_id = "exp_intent", set = list(cluster = FALSE)),
       list(label = "Groups/clusters (villages, schools, PHCs, wards)", next_id = "exp_intent", set = list(cluster = TRUE, design = "cluster_rct")),
       list(label = "Same subject receives both, in sequence (crossover)", next_id = "term_crossover"),
-      list(label = "Clusters cross over in sequence (stepped-wedge)", next_id = "term_stepped_wedge"),
+      list(label = "Clusters cross over in sequence (stepped-wedge)", next_id = "sw_outcome"),
       list(label = "Single subject, repeated periods (N-of-1)", next_id = "term_n_of_1"),
       list(label = "Groups/clusters, and I want to simulate the mixed-model analysis directly (Monte Carlo)", next_id = "glmm_outcome", set = list(cluster = TRUE, design = "cluster_rct")),
       list(label = "Each patient has several eyes, lesions or patches, and all of a patient's units get the same treatment", next_id = "pu_outcome"),
@@ -569,6 +584,15 @@ design_nodes <- list(
     options = list(
       list(label = "Continuous (a measurement, a score)", next_id = "term_pu_between_cont"),
       list(label = "Binary (event or no event, healed or not)", next_id = "term_pu_between_bin")
+    )
+  ),
+
+  sw_outcome = list(
+    id = "sw_outcome", stage = 3,
+    question = "Is the outcome continuous or binary?",
+    options = list(
+      list(label = "Continuous (a measurement)", next_id = "term_stepped_wedge"),
+      list(label = "Binary (yes / no, an odds ratio)", next_id = "term_stepped_wedge_binary")
     )
   ),
 
@@ -1008,7 +1032,9 @@ design_nodes <- list(
 
   term_crossover = .term("term_crossover", "Crossover trial (2x2, continuous)", "crossover_2x2"),
   term_stepped_wedge = .term("term_stepped_wedge", "Stepped-wedge cluster-randomised trial", "stepped_wedge_normal",
-    note = "Continuous outcome (Hooper et al. 2016). The binary-outcome version is still open (docs/PENDING.md, TRIAL-28)."),
+    note = "Continuous outcome (Hooper et al. 2016)."),
+  term_stepped_wedge_binary = .term("term_stepped_wedge_binary", "Stepped-wedge cluster-randomised trial, binary outcome", "stepped_wedge_binary",
+    note = "Logit scale, cross-sectional, constant cluster effect (Xia et al. 2021; power equals the authors' R function). Needs the SD of the cluster effect on the log odds scale."),
   term_glmm_cont = .term("term_glmm_cont", "Cluster-randomised trial, continuous outcome (Monte Carlo LMM)", "glmm_lmm_continuous"),
   term_glmm_binary = .term("term_glmm_binary", "Cluster-randomised trial, binary outcome (Monte Carlo GLMM)", "glmm_binary"),
 
@@ -1315,8 +1341,10 @@ design_nodes <- list(
   ),
   term_its = .term("term_its", "Interrupted time series, change in level (segmented regression)", "its_level"),
   term_its_slope = .term("term_its_slope", "Interrupted time series, change in slope (segmented regression)", "its_slope"),
-  term_did = .term_open("term_did", "Controlled before-after study / difference-in-differences",
-    would_use = "a sample-size method for difference-in-differences with a cited worked example (none found yet)"),
+  term_did = .term("term_did", "Controlled before-after study / difference-in-differences", "did_repeated",
+    note = paste(
+      "The calculator is for a continuous outcome measured on the same units before and after (people, clinics, districts). For a",
+      "yes/no outcome, or when different people are sampled each time, it gives only a rough guide.")),
   term_rdd = .term_open("term_rdd", "Regression discontinuity design",
     would_use = "a power calculation for regression discontinuity (Schochet 2009; Cattaneo, Titiunik & Vazquez-Bare 2019, not yet read)"),
   # Mendelian randomisation (OBS-15, built 14 Nov 2026): one question, the outcome, decides between the two designs of the calculator
@@ -1422,6 +1450,7 @@ design_nodes <- list(
 .terminal_cards <- c(
   term_crossover = "crossover",
   term_stepped_wedge = "stepped_wedge",
+  term_stepped_wedge_binary = "stepped_wedge",
   term_nma = "nma",
   term_sr_narrative = "sr_narrative",
   term_scoping = "scoping",

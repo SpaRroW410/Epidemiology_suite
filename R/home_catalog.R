@@ -421,6 +421,26 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Stratified Analysis (Mantel-Haenszel)",
        module_input_id = "analyze_mh-design", design_value = "case_control"),
 
+  list(key = "analyze_meta_ratio",
+       label = "Meta-analysis: pool odds ratios, risk ratios or hazard ratios from several studies (fixed and random effects, forest plot)",
+       answers = paste(
+         "Answers: \"Several studies each report a ratio with its confidence interval -- what is the pooled estimate, how much do the",
+         "studies disagree (Q, I-squared), and what does the forest plot look like?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Meta-Analysis (pooling study results)",
+       module_input_id = "analyze_meta-design", design_value = "ratio"),
+
+  list(key = "analyze_meta_difference",
+       label = "Meta-analysis: pool mean differences or risk differences from several studies (fixed and random effects, forest plot)",
+       answers = paste(
+         "Answers: \"Several studies each report a difference with its confidence interval or standard error -- what is the pooled",
+         "estimate and how much do the studies disagree?\""
+       ),
+       outcome_type = "analysis", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Meta-Analysis (pooling study results)",
+       module_input_id = "analyze_meta-design", design_value = "difference"),
+
 
   list(key = "analyze_ci_proportion",
        label = "Confidence interval for a proportion (Wilson, exact, Agresti-Coull, Jeffreys, mid-P, Wald)",
@@ -883,6 +903,17 @@ calculator_catalog <- list(
        outcome_type = "its", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Interrupted Time Series",
        module_input_id = "its-design", design_value = "slope"),
+
+  list(key = "did_repeated",
+       label = "Difference-in-differences (controlled before-after) with repeated measures, continuous outcome",
+       answers = paste(
+         "Answers: \"One group gets a programme and a comparison group does not, and I measure the same outcome before and after in",
+         "both -- how many units do I need in each group, or what power do I have, given how strongly a unit's measurements are",
+         "correlated?\""
+       ),
+       outcome_type = "did", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Difference-in-Differences",
+       module_input_id = NA, design_value = NA),
 
   list(key = "patient_units_between_continuous",
        label = "Several units per patient (eyes, lesions, patches), same treatment in all of a patient's units -- two means",
@@ -1412,7 +1443,17 @@ calculator_catalog <- list(
        ),
        outcome_type = "means", groups = NA, dependency = NA, reference_based = NA,
        built = TRUE, nav_target = "Stepped-Wedge CRT",
-       module_input_id = NA, design_value = NA),
+       module_input_id = "stepped_wedge-outcome", design_value = "continuous"),
+
+  list(key = "stepped_wedge_binary",
+       label = "Stepped-wedge cluster-randomized trial (binary outcome)",
+       answers = paste(
+         "Answers: \"How many clusters do I need for a stepped-wedge trial where the outcome is yes / no (an odds ratio), given the",
+         "risk on control, the risk on the intervention, the people per cluster and period, and how much clusters differ?\""
+       ),
+       outcome_type = "cluster", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Stepped-Wedge CRT",
+       module_input_id = "stepped_wedge-outcome", design_value = "binary"),
 
   list(key = "stratified_sampling",
        label = "Stratified sampling -- total size and per-stratum allocation",
@@ -2405,7 +2446,8 @@ study_design_families <- list(
                          "analyze_std_direct", "analyze_std_indirect", "analyze_std_smr",
                          "analyze_compare_proportions", "analyze_compare_means",
                          "analyze_outbreak_attack", "analyze_outbreak_exposure", "analyze_outbreak_secondary", "analyze_outbreak_cfr",
-                         "analyze_surveillance_ears", "analyze_surveillance_cusum")),
+                         "analyze_surveillance_ears", "analyze_surveillance_cusum",
+                         "analyze_meta_ratio", "analyze_meta_difference")),
   list(id = "proportions", label = "Proportions",
        hint = "Prevalence/frequency studies, or comparing proportions/rates between groups.",
        catalog_keys = c("proportion_single_precision", "proportion_single",
@@ -2433,6 +2475,9 @@ study_design_families <- list(
   list(id = "its", label = "Interrupted Time Series",
        hint = "Many time points before and after a policy, programme or event: time points needed or power to detect a change in level or slope, allowing for autocorrelation.",
        catalog_keys = c("its_level", "its_slope")),
+  list(id = "did", label = "Difference-in-Differences",
+       hint = "An intervention group and a comparison group, each measured before and after: units needed or power, from the correlation between a unit's repeated measurements.",
+       catalog_keys = c("did_repeated")),
   list(id = "diagnostic", label = "Diagnostic Accuracy",
        hint = "Estimating sensitivity/specificity given expected prevalence.",
        catalog_keys = c("diagnostic_precision", "diagnostic_vs_reference",
@@ -2519,7 +2564,7 @@ study_design_families <- list(
                          "noninferiority_or", "noninferiority_hr",
                          "group_sequential_normal", "group_sequential_binary",
                          "group_sequential_survival", "lan_demets_normal",
-                         "stepped_wedge_normal")),
+                         "stepped_wedge_normal", "stepped_wedge_binary")),
   list(id = "regression", label = "Regression",
        hint = "Testing whether a multiple regression model explains more variance than chance, whether adding predictors increases R-squared, a logistic regression predictor's effect (simple or covariate-adjusted), or two groups on an ordinal outcome (proportional odds).",
        catalog_keys = c("regression_r2", "regression_r2_increase", "logistic_binary",

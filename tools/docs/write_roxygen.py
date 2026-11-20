@@ -88,6 +88,7 @@ PARAMS = {  # function -> {argument: description}
         "sd_mc": "Standard deviation of the outcome (`MD` only; greater than 0).",
         "alpha": STD["alpha"], "beta": "Type II error rate, strictly between 0 and 1 (power = 1 - beta); default 0.1.",
         "side": "1 for a one-sided or 2 for a two-sided test (default 2).",
+        "heterogeneity": "Anticipated between-trial heterogeneity as a proportion in \\[0, 1): the diversity D-squared (preferred) or the inconsistency I-squared. The adjusted information size is the fixed-effect one divided by `1 - heterogeneity` (Wetterslev et al. 2009). Default 0 (no adjustment).",
     },
 }
 INHERIT = {  # function -> functions whose @param texts it reuses for arguments of the same name

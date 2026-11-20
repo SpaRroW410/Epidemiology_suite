@@ -26,15 +26,23 @@
 #' @param alpha Significance level (type I error rate), strictly between 0 and 1.
 #' @param beta Type II error rate, strictly between 0 and 1 (power = 1 - beta); default 0.1.
 #' @param side 1 for a one-sided or 2 for a two-sided test (default 2).
-#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_total`, `var_mc`, `mc_nf` and `inputs`, the arguments the result was calculated from.
+#' @param heterogeneity Anticipated between-trial heterogeneity as a proportion in \[0, 1): the diversity D-squared (preferred) or
+#'   the inconsistency I-squared. The adjusted information size is the fixed-effect one divided by `1 - heterogeneity` (Wetterslev et
+#'   al. 2009). Default 0 (no adjustment).
+#' @return A named list of class `ss_result` (printed by `print()`) with the components `n_total` (fixed-effect information size),
+#'   `n_total_adjusted` (heterogeneity-adjusted), `adjustment_factor`, `var_mc`, `mc_nf` and `inputs`, the arguments the result was
+#'   calculated from.
 #' @examples
 #' calc_tsa_information_size(outcome = "RR", mc = 0.8, pC = 0.12, alpha = 0.05, beta = 0.1, 
 #'     side = 2)
 #' @export
 calc_tsa_information_size <- function(outcome = c("RR", "OR", "RD", "MD"),
                                        mc, pC = NULL, p1 = NULL, sd_mc = NULL,
-                                       alpha = 0.05, beta = 0.1, side = 2) {
+                                       alpha = 0.05, beta = 0.1, side = 2, heterogeneity = 0) {
   outcome <- match.arg(outcome)
+  if (!is.numeric(heterogeneity) || length(heterogeneity) != 1 || is.na(heterogeneity) || heterogeneity < 0 || heterogeneity >= 1) {
+    stop("heterogeneity must be a single proportion of at least 0 and below 1 (for example 0.25 for 25%).")
+  }
   .validate_number(mc, "mc")
   .validate_unit_interval(alpha, "alpha")
   .validate_unit_interval(beta, "beta")
@@ -69,15 +77,22 @@ calc_tsa_information_size <- function(outcome = c("RR", "OR", "RD", "MD"),
     stop("mc implies no difference between arms; information size is undefined.")
   }
 
-  n_total <- ceiling(2 * (qnorm(1 - alpha / side) + qnorm(1 - beta))^2 * 2 * var_mc / mc_nf^2)
+  n_raw <- 2 * (qnorm(1 - alpha / side) + qnorm(1 - beta))^2 * 2 * var_mc / mc_nf^2
+  n_total <- ceiling(n_raw)
+  # Heterogeneity-adjusted (random-effects) information size: the fixed-effect size times 1 / (1 - D^2), D^2 the diversity
+  # (Wetterslev, Thorlund, Brok & Gluud 2009, BMC Med Res Methodol 9:86, read in full; its Table 2 is reproduced in the tests).
+  # The same factor with I^2 in place of D^2 is the paper's "heterogeneity-adjusted" size, which it shows is never larger.
+  adjustment_factor <- 1 / (1 - heterogeneity)
 
   new_ss_result(list(
     n_total = n_total,
+    n_total_adjusted = ceiling(n_raw * adjustment_factor),
+    adjustment_factor = adjustment_factor,
     var_mc = var_mc,
     mc_nf = mc_nf,
     inputs = list(
       outcome = outcome, mc = mc, pC = pC, p1 = p1, sd_mc = sd_mc,
-      alpha = alpha, beta = beta, side = side
+      alpha = alpha, beta = beta, side = side, heterogeneity = heterogeneity
     )
   ))
 }

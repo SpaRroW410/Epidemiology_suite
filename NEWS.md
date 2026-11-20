@@ -1,5 +1,33 @@
 # epidemiologysuite (development version)
 
+## Stepped-wedge trial with a yes / no outcome (19 Nov 2026)
+
+* **Plan: Trials > Stepped-Wedge CRT** now has an Outcome switch: Continuous (as before) or Binary. The binary design gives the clusters
+  needed per step, or the power for the clusters you have, on the log odds scale with a cluster effect of SD tau. The method is Xia et
+  al. 2021 (Trials 22:598); its power equals the authors' R function `swCRTdesign::swGlmPwr()` to 10 digits in the tests. The guide asks
+  continuous or binary at the stepped-wedge end point. New function `calc_stepped_wedge_binary()`.
+
+## Difference-in-differences calculator (17 Nov 2026)
+
+* New calculator, **Plan: Sample Size > Observational Studies > Difference-in-Differences**: the units needed in the intervention
+  and comparison groups, or the power with the units you have, when a continuous outcome is measured on every unit before and after
+  the intervention starts. From Hu & Hoover 2018, equation 6. Their printed sample-size formula and example are a factor 2 too small;
+  a simulation confirms the variance formula used here, and the help text explains the correction. New function `calc_did()`.
+
+## Meta-analysis in Analyze, dark-mode plots and smaller items (16 Nov 2026)
+
+* The power curves under each result, the surveillance charts and the epidemic chart are now drawn in the page's colours: dark
+  background and light lines in dark mode, redrawn when you use the switch. Every colour keeps a contrast of at least 3:1.
+* New in **Analyze**: **Meta-Analysis (pooling study results)**. Type each study's estimate with its confidence interval or
+  standard error, one per line, and get the fixed-effect and random-effects (DerSimonian-Laird) pooled estimates, the heterogeneity
+  statistics (Q, I-squared, tau-squared), each study's weight and a forest plot. Ratios (odds, risk, hazard) or differences. The
+  results equal those of the metafor package. New function `calc_analyze_meta()`.
+* Trial sequential analysis: enter the heterogeneity you anticipate between trials and the calculator also gives the
+  heterogeneity-adjusted (random-effects) information size, the fixed-effect size divided by 1 - D-squared (Wetterslev et al. 2009).
+* Studies: the inputs of 23 more calculators are shown with readable names next to their short names.
+* The cluster calculator's advice to use a design effect of 1.5 or 2 when nothing is known now names its sources (Kaiser et al.
+  2006; Hulland et al. 2021) and says they are nutrition and mortality surveys.
+
 ## Mendelian randomisation and interrupted time series calculators (14 Nov 2026)
 
 * New calculator, **Plan: Sample Size > Observational Studies > Mendelian Randomisation**: the sample size, or the power at a sample

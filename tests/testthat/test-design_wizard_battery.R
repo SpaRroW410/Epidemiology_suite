@@ -30,7 +30,7 @@ wizard_battery <- list(
   list("Cluster randomised trial of schools, mean test score difference", "groups_count"),
   list("Cluster randomized trial in villages, proportion vaccinated", "exp_intent"),
   list("Crossover trial of two inhalers, FEV1", "term_crossover"),
-  list("Stepped wedge trial across hospitals", "term_stepped_wedge"),
+  list("Stepped wedge trial across hospitals", "sw_outcome"),
   list("Single arm phase II trial response rate", "term_simon"),
   list("Trial with time to recurrence as outcome, hazard ratio", "surv_type"),
   list("Compare the mean difference in weight loss between diet and exercise groups", "allocation"),

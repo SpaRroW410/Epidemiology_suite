@@ -41,10 +41,16 @@ cluster_content <- list(
       "variation in cluster size, which is adequate for planning purposes.",
       "",
       "**If the ICC is not known**, enter the design effect itself. When",
-      "nothing is known it is most commonly taken as 1.5 or 2 (a common",
-      "planning habit; no source for these values was checked), and the",
-      "calculator below works it out from the variance between clusters",
-      "when that is known.",
+      "nothing is known it is most commonly taken as 1.5 or 2. A review of",
+      "cluster surveys in emergencies found most design effects below 2 and",
+      "recommended assuming 1.5 for acute malnutrition in children and 2 or",
+      "less for crude mortality (Kaiser et al. 2006); for anaemia in refugee",
+      "surveys, 1.4 to 1.8 with about 20 people per cluster and 1.2 to 1.4",
+      "with about 10 (Hulland et al. 2021). These are values for nutrition",
+      "and mortality surveys: for other outcomes use a design effect from an",
+      "earlier survey of the same outcome where one exists. The calculator",
+      "below works it out from the variance between clusters when that is",
+      "known.",
       sep = "\n"
     ),
     worked_example = paste(
@@ -60,7 +66,15 @@ cluster_content <- list(
       "Kish L. Survey Sampling. New York: John Wiley & Sons; 1965;",
       "Killip S, Mahfoud Z, Pearce K. What is an intracluster correlation",
       "coefficient? Crucial concepts for primary care researchers. Ann Fam",
-      "Med. 2004;2(3):204-208."
+      "Med. 2004;2(3):204-208.",
+      "Design effect when nothing is known: Kaiser R, Woodruff BA, Bilukha O,",
+      "Spiegel PB, Salama P. Using design effects from previous cluster",
+      "surveys to guide sample size calculation in emergency settings.",
+      "Disasters. 2006;30(2):199-211. doi:10.1111/j.0361-3666.2006.00315.x;",
+      "Hulland EN, Leidman E, Wilkinson C, Tondeur M, Bilukha O. Anemia design",
+      "effects in cluster surveys of women and young children in refugee",
+      "settings. PLoS One. 2021;16(7):e0254031.",
+      "doi:10.1371/journal.pone.0254031 (abstracts read)."
     ),
     backend = "closed-form (Kish 1965)"
   ),
