@@ -1065,6 +1065,16 @@ calculator_catalog <- list(
        built = TRUE, nav_target = "Correlation",
        module_input_id = "correlation-design", design_value = "two_dependent"),
 
+  list(key = "correlation_two_nonoverlap",
+       label = "Compare two dependent, non-overlapping correlations (four variables, same people)",
+       answers = paste(
+         "Answers: \"How many subjects do I need to show that the correlation between two variables differs from the correlation",
+         "between two other variables, when all four are measured on the SAME people?\""
+       ),
+       outcome_type = "correlation", groups = NA, dependency = NA, reference_based = NA,
+       built = TRUE, nav_target = "Correlation",
+       module_input_id = "correlation-design", design_value = "two_nonoverlap"),
+
   list(key = "correlation_point_biserial",
        label = "Point-biserial correlation",
        answers = paste(
@@ -2487,7 +2497,7 @@ study_design_families <- list(
   list(id = "correlation", label = "Correlation",
        hint = "Detecting a Pearson correlation between two continuous variables, comparing correlation strength between two independent or two dependent (overlapping) groups, a point-biserial correlation, a simple regression slope, a partial correlation, or a Spearman rank correlation.",
        catalog_keys = c("correlation_pearson", "correlation_two_independent",
-                         "correlation_two_dependent", "correlation_point_biserial",
+                         "correlation_two_dependent", "correlation_two_nonoverlap", "correlation_point_biserial",
                          "correlation_regression_slope", "correlation_partial",
                          "correlation_spearman")),
   list(id = "agreement", label = "Agreement / Reliability",

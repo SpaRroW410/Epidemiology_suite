@@ -6,7 +6,7 @@ epidemiology and clinical research. Every calculator comes with its formula
 example, the original methodological citation, and the name of the package or
 formula that implements it.
 
-**Current state (17 November 2026):** 223 designs in 71 calculators -- sample size and power (*Plan*), analysis of counts you
+**Current state (17 November 2026):** 224 designs in 71 calculators -- sample size and power (*Plan*), analysis of counts you
 already have (*Analyze*), effect-size converters, planning, survey, outbreak and surveillance tools -- each with its formula, a worked
 example and a citable source, checked against a published value, a real package or a simulation. The app is called **Epidemiological
 suite**; the R package is `epidemiologysuite`. There are three ways to use it (see below): the browser build on GitHub Pages, the phone /

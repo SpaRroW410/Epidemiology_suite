@@ -25,7 +25,7 @@ Steps only the owner can take that belong to no section below; the section items
 
 ## 2. Calculators (Plan: Sample Size and Analyze)
 
-All 223 designs of the app's catalog are built (17 Nov 2026); the open items are designs not built yet, or the open half of a built one.
+All 224 designs of the app's catalog are built (17 Nov 2026); the open items are designs not built yet, or the open half of a built one.
 The guide's end points for designs not built yet are tested to be listed here (`tests/testthat/test-design_tree.R`).
 
 ### Plan: Effect Sizes (ES)
@@ -372,7 +372,10 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [ ] **GEN-71** MMRM, open half: general missing-data patterns beyond the AR(1) / dropout design.
 - [ ] **GEN-72** GEE marginal models, open half: the damped-exponential correlation.
 - [ ] **GEN-73** MANOVA, open half: the global test for k > 2 groups and special-effect contrasts.
-- [ ] **GEN-74** Two dependent correlations, open half: the non-common-index case.
+- [x] **GEN-74** Two dependent correlations, non-overlapping case (four variables, six correlations). Built 24 Nov 2026 from Steiger's
+  (1980) form as implemented in the R package cocor (formula read from its code; the paper itself was not read): the Z statistic
+  equals cocor's to 10 digits on random matrices and a 1,500-study simulation reaches the target power. Open: the other tests
+  (Raghunathan, Silver) and the paper's text.
 - [ ] **GEN-75** Ordinal / multinomial regression, open half: the nominal (multinomial) model.
 - [ ] **GEN-76** Multiplicity, open half: Holm's step-down as its own design (no single planning alpha; needs simulation).
 - [ ] **GEN-77** **[blocked]** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to

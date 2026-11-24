@@ -149,3 +149,42 @@ test_that("calc_correlation_spearman rejects invalid inputs the same way as calc
   expect_error(calc_correlation_spearman(r = 0.3, alpha = 0), "between 0 and 1")
   expect_error(calc_correlation_spearman(r = 0.3, power = 0), "between 0 and 1")
 })
+
+# GEN-74: two dependent correlations that share no variable (Steiger 1980 form; cocor is the check)
+test_that("calc_correlation_two_nonoverlap: the Z statistic equals cocor's Steiger (1980) statistic", {
+  skip_if_not_installed("cocor")
+  set.seed(7)
+  done <- 0
+  while (done < 6) {
+    r <- round(c(runif(2, 0.2, 0.7), runif(4, 0, 0.35)), 2)
+    R <- matrix(c(1, r[1], r[3], r[4], r[1], 1, r[5], r[6], r[3], r[5], 1, r[2], r[4], r[6], r[2], 1), 4, 4)
+    if (min(eigen(R)$values) <= 0.05 || abs(r[1] - r[2]) < 0.05) next
+    done <- done + 1
+    res <- calc_correlation_two_nonoverlap(r[1], r[2], r[3], r[4], r[5], r[6])
+    n <- 120
+    z_mine <- (atanh(r[1]) - atanh(r[2])) * sqrt(n - 3) / sqrt(2 - 2 * res$c)
+    co <- cocor::cocor.dep.groups.nonoverlap(r.jk = r[1], r.hm = r[2], r.jh = r[3], r.jm = r[4], r.kh = r[5], r.km = r[6],
+                                             n = n, test = "steiger1980")
+    expect_equal(z_mine, co@steiger1980$statistic, tolerance = 1e-10)
+  }
+})
+
+test_that("calc_correlation_two_nonoverlap reaches its power in a simulation", {
+  skip_on_cran(); skip_if_not_installed("cocor"); skip_if_not_installed("MASS")
+  r <- c(0.6, 0.4, 0.3, 0.2, 0.2, 0.3)
+  res <- calc_correlation_two_nonoverlap(r[1], r[2], r[3], r[4], r[5], r[6], power = 0.8)
+  R <- matrix(c(1, r[1], r[3], r[4], r[1], 1, r[5], r[6], r[3], r[5], 1, r[2], r[4], r[6], r[2], 1), 4, 4)
+  set.seed(11)
+  rej <- replicate(1500, {
+    x <- MASS::mvrnorm(res$n, rep(0, 4), R); cr <- stats::cor(x)
+    abs(cocor::cocor.dep.groups.nonoverlap(cr[1, 2], cr[3, 4], cr[1, 3], cr[1, 4], cr[2, 3], cr[2, 4], res$n,
+                                           test = "steiger1980")@steiger1980$statistic) > qnorm(0.975)
+  })
+  expect_equal(mean(rej), 0.8, tolerance = 0.05)
+})
+
+test_that("calc_correlation_two_nonoverlap rejects inconsistent or equal inputs", {
+  expect_error(calc_correlation_two_nonoverlap(0.5, 0.5, 0.1, 0.1, 0.1, 0.1), "differ")
+  expect_error(calc_correlation_two_nonoverlap(0.9, 0.9 - 0.2, 0.9, -0.9, 0.9, -0.9), "valid correlation matrix")
+  expect_error(calc_correlation_two_nonoverlap(1.2, 0.4, 0.1, 0.1, 0.1, 0.1), "r_jk")
+})

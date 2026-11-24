@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**80 open** of 362 items (282 done).
+**79 open** of 362 items (283 done).
 
 ## Waiting for the owner
 
@@ -22,7 +22,7 @@
 
 - [ ] **OWN-04** **[owner]** Decision D6: when to reopen the paused items (PRED, section 2).
 
-## 2. Calculators (Plan: Sample Size and Analyze) -- 35 open
+## 2. Calculators (Plan: Sample Size and Analyze) -- 34 open
 
 ### Plan: Survey & Cross-Sectional (SVY)
 
@@ -109,7 +109,6 @@
 - [ ] **GEN-71** MMRM, open half: general missing-data patterns beyond the AR(1) / dropout design.
 - [ ] **GEN-72** GEE marginal models, open half: the damped-exponential correlation.
 - [ ] **GEN-73** MANOVA, open half: the global test for k > 2 groups and special-effect contrasts.
-- [ ] **GEN-74** Two dependent correlations, open half: the non-common-index case.
 - [ ] **GEN-75** Ordinal / multinomial regression, open half: the nominal (multinomial) model.
 - [ ] **GEN-76** Multiplicity, open half: Holm's step-down as its own design (no single planning alpha; needs simulation).
 - [ ] **GEN-77** **[blocked]** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to

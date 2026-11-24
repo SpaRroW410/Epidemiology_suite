@@ -23,6 +23,7 @@ mod_correlation_ui <- function(id) {
           "Single correlation vs. zero" = "single",
           "Compare two independent correlations" = "two_independent",
           "Compare two dependent (overlapping) correlations" = "two_dependent",
+          "Compare two dependent, non-overlapping correlations" = "two_nonoverlap",
           "Point-biserial correlation" = "point_biserial",
           "Regression coefficient (bivariate slope)" = "regression_slope",
           "Partial correlation (controlling for k covariates)" = "partial",
@@ -44,6 +45,15 @@ mod_correlation_ui <- function(id) {
         numericInput(ns("r_yx1"), "Correlation between Y and X1 (r_yx1)", value = 0.4, min = -0.99, max = 0.99, step = 0.01),
         numericInput(ns("r_yx2"), "Correlation between Y and X2 (r_yx2)", value = 0.6, min = -0.99, max = 0.99, step = 0.01),
         numericInput(ns("r_x1x2"), "Correlation between X1 and X2 (r_x1x2)", value = 0.3, min = -0.99, max = 0.99, step = 0.01)
+      ),
+      conditionalPanel(
+        condition = design_is("two_nonoverlap"),
+        numericInput(ns("r_jk"), "Correlation between j and k (r_jk)", value = 0.6, min = -0.99, max = 0.99, step = 0.01),
+        numericInput(ns("r_hm"), "Correlation between h and m (r_hm)", value = 0.4, min = -0.99, max = 0.99, step = 0.01),
+        numericInput(ns("r_jh"), "Correlation between j and h (r_jh)", value = 0.3, min = -0.99, max = 0.99, step = 0.01),
+        numericInput(ns("r_jm"), "Correlation between j and m (r_jm)", value = 0.2, min = -0.99, max = 0.99, step = 0.01),
+        numericInput(ns("r_kh"), "Correlation between k and h (r_kh)", value = 0.2, min = -0.99, max = 0.99, step = 0.01),
+        numericInput(ns("r_km"), "Correlation between k and m (r_km)", value = 0.3, min = -0.99, max = 0.99, step = 0.01)
       ),
       conditionalPanel(
         condition = design_is("point_biserial"),
@@ -101,6 +111,12 @@ mod_correlation_ui <- function(id) {
       h5("Worked example"),
       shiny::markdown(correlation_content$two_dependent$worked_example),
       hr(),
+      h4(correlation_content$two_nonoverlap$title),
+      render_formula_block(correlation_content$two_nonoverlap$formula_latex),
+      shiny::markdown(correlation_content$two_nonoverlap$explanation),
+      h5("Worked example"),
+      shiny::markdown(correlation_content$two_nonoverlap$worked_example),
+      hr(),
       h4(correlation_content$point_biserial$title),
       render_formula_block(correlation_content$point_biserial$formula_latex),
       shiny::markdown(correlation_content$point_biserial$explanation),
@@ -139,6 +155,10 @@ mod_correlation_ui <- function(id) {
       h4(correlation_content$two_dependent$title),
       p(strong("Citation: "), correlation_content$two_dependent$citation),
       p(strong("Implemented via: "), code(correlation_content$two_dependent$backend)),
+      hr(),
+      h4(correlation_content$two_nonoverlap$title),
+      p(strong("Citation: "), correlation_content$two_nonoverlap$citation),
+      p(strong("Implemented via: "), code(correlation_content$two_nonoverlap$backend)),
       hr(),
       h4(correlation_content$point_biserial$title),
       p(strong("Citation: "), correlation_content$point_biserial$citation),
@@ -184,6 +204,12 @@ mod_correlation_server <- function(id) {
             r_yx1 = input$r_yx1, r_yx2 = input$r_yx2, r_x1x2 = input$r_x1x2,
             alpha = input$alpha, power = input$power,
             alternative = input$alternative
+          )
+        } else if (input$design == "two_nonoverlap") {
+          req(input$r_jk, input$r_hm, input$r_jh, input$r_jm, input$r_kh, input$r_km)
+          calc_correlation_two_nonoverlap(
+            r_jk = input$r_jk, r_hm = input$r_hm, r_jh = input$r_jh, r_jm = input$r_jm, r_kh = input$r_kh, r_km = input$r_km,
+            alpha = input$alpha, power = input$power, alternative = input$alternative
           )
         } else if (input$design == "point_biserial") {
           req(input$r_pb)
@@ -231,6 +257,11 @@ mod_correlation_server <- function(id) {
           p(sprintf("Cohen's q = %.4f", v$q))
         )
       } else if (res$design == "two_dependent") {
+        tagList(
+          p(strong("Required sample size: "), v$n),
+          p(sprintf("Fisher z' covariance c = %.4f", v$c))
+        )
+      } else if (res$design == "two_nonoverlap") {
         tagList(
           p(strong("Required sample size: "), v$n),
           p(sprintf("Fisher z' covariance c = %.4f", v$c))
@@ -330,6 +361,15 @@ mod_correlation_server <- function(id) {
                        alpha = input$alpha, power = input$power, alternative = input$alternative),
           effect = list(param = "r_yx2", values = curve_range_within(mid - half, mid + half),
                         label = "r_yx2 (within the range a valid correlation matrix allows)"),
+          power = list(param = "power", values = curve_range_power())
+        )
+      } else if (input$design == "two_nonoverlap") {
+        req(input$r_jk, input$r_hm, input$r_jh, input$r_jm, input$r_kh, input$r_km, input$alpha, input$power, input$alternative)
+        list(
+          calc_fn = calc_correlation_two_nonoverlap,
+          args = list(r_jk = input$r_jk, r_hm = input$r_hm, r_jh = input$r_jh, r_jm = input$r_jm, r_kh = input$r_kh, r_km = input$r_km,
+                       alpha = input$alpha, power = input$power, alternative = input$alternative),
+          effect = list(param = "r_hm", values = curve_range_correlation(), label = "r_hm (values that make an invalid matrix are skipped)"),
           power = list(param = "power", values = curve_range_power())
         )
       } else {

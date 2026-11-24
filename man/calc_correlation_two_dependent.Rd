@@ -58,9 +58,8 @@ r_yx2=0.6, r_x1x2=0.3 and testing each replicate with the exact
 psych::r.test() t-test, gives an empirical power of 0.816 at the
 computed n=183 (target power 0.80).
 
-The "non-overlapping" case (comparing two correlations that share NO
-variable, e.g. r_yx1 vs r_zx2, needing all six pairwise correlations
-among \{Y, X1, Z, X2\}) is not covered here.
+The "non-overlapping" case (two correlations that share NO variable) is
+calc_correlation_two_nonoverlap().
 }
 \examples{
 calc_correlation_two_dependent(r_yx1 = 0.4, r_yx2 = 0.6, r_x1x2 = 0.3, alpha = 0.05, 

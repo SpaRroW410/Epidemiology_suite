@@ -243,6 +243,43 @@ correlation_content <- list(
     backend = "closed form written out in the app, equal to closed-form (Cohen 1988) via pwr::pwr.r.test() (compared with the package in the tests; the package is not a dependency)"
   ),
 
+  two_nonoverlap = list(
+    title = "Compare Two Dependent, Non-Overlapping Pearson Correlations",
+    formula_latex = paste0(
+      "$$r_p = \\frac{r_{jk}+r_{hm}}{2}, \\quad c = \\frac{(r_{jh}-r_p r_{kh})(r_{km}-r_{kh}r_p)+(r_{jm}-r_{jh}r_p)(r_{kh}-r_p r_{jh})+(r_{jh}-r_{jm}r_p)(r_{km}-r_p r_{jm})+(r_{jm}-r_p r_{km})(r_{kh}-r_{km}r_p)}{2(1-r_p^2)^2}$$",
+      "$$n = \\left(\\frac{(Z_{1-\\alpha/2}+Z_{1-\\beta})\\sqrt{2-2c}}{|Z'_{jk}-Z'_{hm}|}\\right)^2 + 3$$"
+    ),
+    explanation = paste(
+      "Use this to test whether the correlation between two variables (j and k) differs from the correlation between two other",
+      "variables (h and m), when all four are measured on the SAME people and the two correlations share no variable -- for example, is",
+      "a test's correlation with the outcome at baseline different from another test's correlation with the outcome at follow-up? The",
+      "two correlations are dependent because the same people give all four variables, so the test needs the four cross correlations.",
+      "",
+      "- **r_jk, r_hm** - the two correlations to compare; they must differ.",
+      "- **r_jh, r_jm, r_kh, r_km** - the expected correlations between the two pairs (j with h, j with m, k with h, k with m).",
+      "  All six together must form a valid (positive-definite) 4x4 correlation matrix; the calculator says when they do not.",
+      "- **alpha, power, Alternative hypothesis** - as elsewhere.",
+      "",
+      "This is Steiger (1980)'s Fisher z' test, in the form implemented by the R package cocor. The sample size solves the Z-test for n.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "r_jk = 0.6, r_hm = 0.4, r_jh = 0.3, r_jm = 0.2, r_kh = 0.2, r_km = 0.3, alpha = 0.05 (two-sided), 80% power -> n = 203.",
+      "Checked: the Z statistic equals cocor's Steiger (1980) statistic to 10 digits for random correlation matrices, and a simulation of",
+      "1,500 studies at the computed n (four-variable normal data, each tested with cocor's Steiger test) gives power close to 0.80",
+      "(tests).",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Steiger JH. Tests for comparing elements of a correlation matrix. Psychol Bull. 1980;87(2):245-251 (not read; the formula is",
+      "read from the R package cocor).",
+      "",
+      "Diedenhofen B, Musch J. cocor: a comprehensive solution for the statistical comparison of correlations. PLoS ONE.",
+      "2015;10(4):e0121945 (not read). The package's Steiger (1980) implementation is used only to check this calculator."
+    ),
+    backend = "base R, Steiger (1980) form as in cocor; Z statistic equals cocor::cocor.dep.groups.nonoverlap()"
+  ),
+
   two_dependent = list(
     title = "Compare Two Dependent (Overlapping) Pearson Correlations",
     formula_latex = paste0(
@@ -278,9 +315,8 @@ correlation_content <- list(
       "(c does not itself depend on n).",
       "",
       "Only the \"one variable in common\" case is covered here (comparing",
-      "r_yx1 to r_yx2). Comparing two correlations that share NO variable",
-      "at all (e.g. r_yx1 vs r_zx2, needing all six pairwise correlations",
-      "among four variables) is not covered.",
+      "r_yx1 to r_yx2). Two correlations that share NO variable have their",
+      "own design (\"Compare two dependent, non-overlapping correlations\").",
       sep = "\n"
     ),
     worked_example = paste(

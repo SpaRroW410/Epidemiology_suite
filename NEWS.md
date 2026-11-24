@@ -1,5 +1,11 @@
 # epidemiologysuite (development version)
 
+## Two correlations that share no variable (24 Nov 2026)
+
+* **Plan > Correlation** has a new design: compare two dependent, non-overlapping correlations (four variables measured on the same
+  people). Steiger's (1980) Fisher z test, in the form used by the R package cocor, which the tests compare against. New function
+  `calc_correlation_two_nonoverlap()`; the guide's correlation question offers it.
+
 ## The guide asks when a phrase fits several designs (20 Nov 2026)
 
 * Typing a description such as "incidence of dengue followed up for a year", "survival of patients with ...", "screening for diabetes" or

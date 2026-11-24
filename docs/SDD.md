@@ -193,7 +193,7 @@ Epidemiology_suite/
 ## 7. Functional Design — Calculator Catalog
 
 Every design of the catalog, with its source and the package it is tested against, is listed by group in
-[`CHECKLIST.md`](CHECKLIST.md) section 2 (223 designs built on 17 Nov 2026), together with the designs not built yet and the open halves
+[`CHECKLIST.md`](CHECKLIST.md) section 2 (224 designs built on 17 Nov 2026), together with the designs not built yet and the open halves
 of built ones, each with what would unblock it. The module list in `R/registry.R` and the catalog in `R/home_catalog.R` are
 authoritative; every built design is reachable from the Find tab's browse lists, the search box and, where the decision tree has a
 branch, from the guide (consistency tests: section 12). The two checklists the catalog was first built from (by study design; by

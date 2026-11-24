@@ -442,7 +442,8 @@ design_nodes <- list(
       list(label = "Point-biserial (one binary, one continuous variable)", next_id = "term_corr_pb"),
       list(label = "Partial correlation (controlling for covariates)", next_id = "term_corr_partial"),
       list(label = "Compare two correlations from independent samples", next_id = "term_corr_two_indep"),
-      list(label = "Compare two overlapping correlations in the same sample", next_id = "term_corr_two_dep")
+      list(label = "Compare two overlapping correlations in the same sample", next_id = "term_corr_two_dep"),
+      list(label = "Compare two correlations in the same sample that share no variable (four variables)", next_id = "term_corr_two_nonoverlap")
     )
   ),
 
@@ -983,6 +984,7 @@ design_nodes <- list(
   term_corr_partial = .term("term_corr_partial", "Partial correlation", "correlation_partial"),
   term_corr_two_indep = .term("term_corr_two_indep", "Two independent correlations", "correlation_two_independent"),
   term_corr_two_dep = .term("term_corr_two_dep", "Two dependent (overlapping) correlations", "correlation_two_dependent"),
+  term_corr_two_nonoverlap = .term("term_corr_two_nonoverlap", "Two dependent, non-overlapping correlations", "correlation_two_nonoverlap"),
   term_reg_slope = .term("term_reg_slope", "Simple linear regression slope", "correlation_regression_slope"),
   term_reg_r2 = .term("term_reg_r2", "Multiple regression, R-squared", "regression_r2"),
   term_reg_r2_increase = .term("term_reg_r2_increase", "Hierarchical regression, R-squared increase", "regression_r2_increase"),
