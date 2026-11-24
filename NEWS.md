@@ -1,5 +1,11 @@
 # epidemiologysuite (development version)
 
+## The guide keeps the objectives of a study (24 Nov 2026)
+
+* At a design end point the guide now offers **Save as an objective and plan another**. The saved objectives are listed above the
+  guide, each with a button to its calculator, so a study with several aims (a prevalence and its determinants, a comparison and a
+  diagnostic test) can be planned one after another.
+
 ## Two correlations that share no variable (24 Nov 2026)
 
 * **Plan > Correlation** has a new design: compare two dependent, non-overlapping correlations (four variables measured on the same

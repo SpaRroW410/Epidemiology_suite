@@ -28,13 +28,14 @@ design_wizard_body <- function() {
                     placeholder = "e.g. \"We compared cases and controls, individually matched, for exposure to pesticide.\""),
       actionButton("design_wizard_parse", "Suggest from this text", class = "btn-outline-primary btn-sm")
     ),
+    uiOutput("design_wizard_objectives"),
     uiOutput("design_wizard_trace"),
     uiOutput("design_wizard_body")
   )
 }
 
 design_wizard_server <- function(input, output, session) {
-  state <- reactiveValues(node_id = "root", trace = list(), flags = list(), history = list())
+  state <- reactiveValues(node_id = "root", trace = list(), flags = list(), history = list(), objectives = list())
   # one step back: every move first saves where the user was
   remember <- function() {
     state$history <- c(state$history, list(list(node_id = state$node_id, trace = state$trace, flags = state$flags)))
@@ -172,6 +173,30 @@ design_wizard_server <- function(input, output, session) {
     }, ignoreInit = TRUE)
   })
 
+  # FIND-13: a study has several objectives, each with its own design: save this one, then answer the questions again for the next
+  .max_objectives <- 12L
+  observeEvent(input$design_wizard_objective_add, {
+    node <- design_nodes[[state$node_id]]
+    req(isTRUE(node$terminal), length(state$objectives) < .max_objectives)
+    key <- .terminal_catalog_key(node, state$flags)
+    state$objectives <- c(state$objectives, list(list(design = node$design, key = key)))
+    state$parse_note <- NULL; state$node_id <- "root"; state$trace <- list(); state$flags <- list(); state$history <- list()
+    updateTextAreaInput(session, "design_wizard_freetext", value = "")
+  }, ignoreInit = TRUE)
+  observeEvent(input$design_wizard_objectives_clear, state$objectives <- list(), ignoreInit = TRUE)
+  output$design_wizard_objectives <- renderUI(.render_objectives(state$objectives))
+  for (i in seq_len(.max_objectives)) local({
+    k <- i
+    observeEvent(input[[paste0("design_wizard_objective_go_", k)]], {
+      o <- state$objectives[[k]]
+      req(!is.null(o$key))
+      .design_wizard_go(session, o$key)
+    }, ignoreInit = TRUE)
+    observeEvent(input[[paste0("design_wizard_objective_rm_", k)]], {
+      if (k <= length(state$objectives)) state$objectives <- state$objectives[-k]
+    }, ignoreInit = TRUE)
+  })
+
   # research questions: the association part, and the design effect for a population named by place (.render_research_question_notes())
   rq_key <- function() .terminal_catalog_key(design_nodes[[state$node_id]], state$flags)
   observeEvent(input$design_wizard_jump_assoc_two, .design_wizard_go(session, .rq_assoc_keys(rq_key())[["two"]]), ignoreInit = TRUE)
@@ -180,6 +205,24 @@ design_wizard_server <- function(input, output, session) {
   observeEvent(input$design_wizard_jump_glmm, {
     .design_wizard_go(session, if (identical(state$flags$outcome, "binary")) "glmm_binary" else "glmm_lmm_continuous")
   }, ignoreInit = TRUE)
+}
+
+# The objectives saved so far in this guide session (FIND-13).
+.render_objectives <- function(objectives) {
+  if (!length(objectives)) return(NULL)
+  div(class = "card card-body mb-3", role = "region", `aria-label` = "Objectives of your study",
+    p(class = "mb-2", strong("Objectives of your study so far")),
+    tags$ol(class = "mb-2", lapply(seq_along(objectives), function(i) {
+      o <- objectives[[i]]
+      entry <- if (!is.null(o$key)) catalog_entry(o$key) else NULL
+      tags$li(
+        o$design, " ",
+        if (!is.null(entry) && isTRUE(entry$built))
+          actionButton(paste0("design_wizard_objective_go_", i), paste("Go to:", entry$nav_target), class = "btn-light btn-sm"),
+        " ", actionButton(paste0("design_wizard_objective_rm_", i), "Remove", class = "btn-link btn-sm"))
+    })),
+    div(class = "small text-muted", "Plan each objective, use the largest sample size, and add each to your study in Studies."),
+    actionButton("design_wizard_objectives_clear", "Clear the list", class = "btn-link btn-sm"))
 }
 
 .render_design_question <- function(node, can_back = FALSE) {
@@ -346,6 +389,8 @@ design_wizard_server <- function(input, output, session) {
       tags$button(type = "button", class = "btn btn-sm btn-outline-primary",
                   onclick = "esStudies.request('design_wizard_study_add', this.previousElementSibling.value);", "Add")),
     br(),
+    actionButton("design_wizard_objective_add", "Save as an objective and plan another", class = "btn-outline-primary btn-sm"),
+    " ",
     if (can_back) tagList(actionButton("design_wizard_back", "Back one question", class = "btn-outline-secondary btn-sm"), " "),
     actionButton("design_wizard_restart", "Start over / this isn't my design", class = "btn-link")
   )

@@ -295,3 +295,15 @@ test_that("every starting point offered exists and leads somewhere in the guide;
     for (x in r) expect_match(h, paste0("design_wizard_rq_", x), fixed = TRUE)
   }
 })
+
+# FIND-11: the phrasings the checklist lists. "Effect / effectiveness / impact of" without a design word stops at the question who
+# assigns the intervention (trial or quasi-experiment: it asks); the other four ask which design (FIND-12) or go to the right branch.
+test_that("effect / effectiveness / impact of, without a design word, ends at the question who assigns the intervention", {
+  for (t in c("Effect of yoga on blood pressure in adults", "Effectiveness of a school health programme on anaemia in girls",
+              "Impact of a cash transfer on child nutrition")) {
+    w <- walk_free_text(t)
+    expect_equal(w$node_id, "allocation", info = t)
+    expect_null(w$flags$ambiguous)
+  }
+  expect_equal(walk_free_text("Accuracy of a rapid test for malaria")$node_id, "diag_type")
+})

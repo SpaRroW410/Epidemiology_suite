@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**79 open** of 362 items (283 done).
+**77 open** of 362 items (285 done).
 
 ## Waiting for the owner
 
@@ -53,9 +53,12 @@
 
 ### Plan: Several Measurements per Patient (UNIT)
 
-- [ ] **UNIT-04** Eyes / lesions per patient, open half: binary outcome with both treatments in each patient (clustered McNemar; needs a
-  checked source), a patient-by-treatment variance part for the split designs, unequal allocation, different numbers of units in the two
-  arms, and the analysis side (Rosner-Milton / Obuchowski tests).
+- [ ] **UNIT-04** **[blocked]** Eyes / lesions per patient, open half: binary outcome with both treatments in each patient (clustered
+  McNemar), a patient-by-treatment variance part for the split designs, unequal allocation, different numbers of units in the two arms,
+  and the analysis side. 24 Nov 2026: searched PubMed. Found the analysis tests only, as abstracts with no formula and no free full text:
+  Obuchowski, Stat Med 1998 (PMID 9695194); Yang, Sun & Hardin, Biom J 2010 (PMID 20976694); Rosner & Milton, Biometrics 1988 (PMID
+  3390508). None gives a sample-size formula. *Unblock:* a readable paper with a sample-size formula for clustered paired binary data
+  (e.g. Eliasziw & Donner 1991, not found in PubMed Central).
 
 ### Plan: Clinical Trials (TRIAL)
 
@@ -115,15 +118,11 @@
   Bonferroni / Sidak). Candidate sources found 16 Nov 2026, no free full text, not read: Piegorsch 1991-type many-to-one comparisons
   in Stat Med 1995;14:2547 (PMID 8746885) and Stat Med 2003;22:2031 (PMID 12802814). *Unblock:* paper access.
 
-## 3. Finding a calculator: the guide, search and Find tab (FIND) -- 6 open
+## 3. Finding a calculator: the guide, search and Find tab (FIND) -- 4 open
 
 - [ ] **FIND-09** **[owner]** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the
   reader against.
 - [ ] **FIND-10** A test battery of those questions with the route each should take; the hit rate before and after each change.
-- [ ] **FIND-11** More phrasings once the list is in: "effect / effectiveness / impact of" without a design word (trial or
-  quasi-experimental: ask), "association between" (ask which design), "incidence / follow-up", "survival / time to", "accuracy / screening".
-- [ ] **FIND-13** A guide that asks for each objective of a study in turn (the first step, buttons to the association calculators after a
-  determinants question, is done).
 - [ ] **FIND-14** **[optional]** A language-model reader, only by a separate decision (no API, nothing sent anywhere in the browser
   version). Not now: decision F1 (6 Nov 2026) keeps the reader deterministic.
 - [ ] **FIND-24** **[optional]** Clinical codes for record-based studies (WHO ICD-10, ICD-10-CM, SNOMED CT, LOINC, RxNorm), taken only
