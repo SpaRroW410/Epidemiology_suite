@@ -47,7 +47,9 @@ five short lists. Analyze keeps its two groups.
 3. One-line description for each calculator. **Done 27 Nov 2026**, shown on hover (the owner's choice, so the sidebar keeps its length);
    wording agreed with the owner (`R/content_module_blurbs.R`, 71 lines, Analyze included). The Studies Word file now also names the
    group of each section.
-4. Filter box over the sidebar list (client-side; works in the browser build and on phones).
+4. Filter box over the sidebar list. **Done 27 Nov 2026** (`R/sidebar_filter.R`): matches the name and the one-line description,
+   every word typed; lists the matches in the other workbench with a link that opens them (owner's choices). Runs in the browser
+   only, so it works in the browser build; hidden on phones, where the sidebar is a drop-down.
 5. Recently used / favourites (browser storage with try/catch; the page must work without it).
 6. Merge Home and Find into one start page with three doors: I have a question (guide), I know the test or name (search), I want
    to browse.

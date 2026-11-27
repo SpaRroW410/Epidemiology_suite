@@ -144,3 +144,12 @@ test_that("every calculator has a one-line description, shown on hover in the si
   expect_match(html, '<span title="Stepped-wedge cluster trial, continuous or binary">Stepped-Wedge CRT</span>', fixed = TRUE)
   expect_match(html, 'data-value="Stepped-Wedge CRT"', fixed = TRUE)   # the value the jumps and tests use is still the title
 })
+
+test_that("the sidebar filter box is part of the page and matches names and descriptions (remap step 4)", {
+  html <- htmltools::renderTags(attr(epidemiologysuite_app(lazy = TRUE), "ui_tags"))
+  page <- paste(html$head, html$html)
+  expect_match(page, "Filter calculators (name or what it does)", fixed = TRUE)
+  expect_match(page, "span[title]", fixed = TRUE)          # the description (hover text) is part of what is matched
+  expect_match(page, "Also in ", fixed = TRUE)             # matches in the other workbench are listed
+  expect_match(page, ".sidebar-filter { display: none; }", fixed = TRUE)   # hidden on phones (the drop-down is used there)
+})
