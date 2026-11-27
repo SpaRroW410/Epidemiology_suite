@@ -3,7 +3,7 @@
 > Generated from `docs/CHECKLIST.md` by `tools/docs/build_pending.R`; do not edit by hand. Tick an item in the checklist when
 > it is done and run the script again (a test fails while this file is out of date).
 
-**77 open** of 362 items (285 done).
+**77 open** of 363 items (286 done).
 
 ## Waiting for the owner
 

@@ -574,6 +574,11 @@ Decisions S1-S5 are in `SDD.md`, section 17.
   is and what is inside, the start-up progress, rotating feature tips, how to cite it, the author's papers (public ORCID record),
   workshops and other projects (public GitHub), a link to report a problem; light and dark, phone layout; it goes as soon as the app is on
   screen (7 Nov 2026). Conferences: none listed yet (a commented block in the file shows where to add them).
+- [x] **UI-17** Finding a calculator, remapped (`docs/ui_remap_plan.md`, owner's decisions 24 and 27 Nov 2026), built 27-28 Nov 2026:
+  the Plan sidebar in seven groups led by study design (Effect Sizes first); Browse and Studies use the same group names; a one-line
+  description of each calculator on hover; a filter box over the sidebars (name or description, both workbenches); favourites (star)
+  and the last five calculators at the top of the sidebars, also saved to a file when run from the R package on one's own computer;
+  Home as the one start page with three doors (the "Find a calculator" top tab became a section of Home). Every calculator kept.
 
 ## 6. The R package (PKG)
 
