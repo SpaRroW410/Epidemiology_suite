@@ -101,3 +101,14 @@ test_that("every built catalog entry's target module resolves to a workbench", {
   }
   expect_null(module_workbench_of("No such module"))
 })
+
+test_that("the Plan sidebar has the groups agreed for the remap (docs/ui_remap_plan.md, 27 Nov 2026)", {
+  plan <- Filter(function(wb) identical(wb$id, "plan"), module_workbenches)[[1]]
+  titles <- vapply(plan$groups, `[[`, character(1), "title")
+  expect_equal(titles, c("Effect Sizes", "Estimate: Surveys and Descriptive Studies", "Trials and Experiments",
+                         "Observational Studies and Natural Experiments", "Survival", "Tests, Relationships and Models",
+                         "Diagnosis, Agreement, Prediction and Measurement", "Other Designs and General Tools"))
+  expect_equal(plan$groups[[1]]$module_ids, "effect_size")
+  expect_true("attrition" %in% plan$groups[[8]]$module_ids)
+  expect_equal(length(unlist(lapply(plan$groups, `[[`, "module_ids"))), 59)
+})

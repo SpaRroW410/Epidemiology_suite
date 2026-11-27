@@ -24,43 +24,11 @@
 
 ## 2. Calculators (Plan: Sample Size and Analyze) -- 34 open
 
-### Plan: Survey & Cross-Sectional (SVY)
+### Plan, Estimate: Surveys and Descriptive Studies: Survey & Cross-Sectional (SVY)
 
 - [ ] **SVY-09** **[blocked]** LQAS, open half: cluster-LQAS (heterogeneity-adjusted). *Unblock:* a citable formula with a worked example.
 
-### Plan: Observational Studies (OBS)
-
-- [ ] **OBS-10** **[blocked]** Propensity-score-matched designs (matching efficiency): `MatchIt` / `Matching` are analysis-only and the
-  efficiency depends on each data set's overlap. *Unblock:* a published planning heuristic with a worked example.
-- [ ] **OBS-11** **[blocked]** Time-varying exposure (OPTITXS; Basagana & Spiegelman 2010, 2011): not on CRAN, papers not reachable.
-  *Unblock:* paper access or the OPTITXS source.
-- [ ] **OBS-14** Regression discontinuity, reached by FIND-16: sample size. Candidate sources, not read: Schochet 2009; Cattaneo,
-  Titiunik & Vazquez-Bare 2019.
-
-### Plan: Diagnostic & Screening (DX)
-
-- [ ] **DX-10** **[blocked]** Multi-reader multi-case (MRMC) studies, Obuchowski-Rockette / DBM: `iMRMC`'s Roe-Metz model (6 fixed
-  effects, 18 variance components) is too large for one batch. *Unblock:* a multi-batch effort with `iMRMC` as the reference.
-- [ ] **DX-11** **[blocked]** ROC comparison, open half: Unpaired AUCs (two independent AUCs; `pROC::power.roc.test` does not support
-  them). *Unblock:* a separately verified formula.
-
-### Plan: Agreement & Reliability (AGR)
-
-- [ ] **AGR-06** **[blocked]** Method comparison by Deming / Passing-Bablok regression: `deming`, `mcr`, `MethComp` are analysis-only; the
-  literature is simulation-based. *Unblock:* a citable simulation protocol (e.g. Linnet) to reproduce.
-- [ ] **AGR-07** **[blocked]** Agreement, open half: weighted kappa. No source with a formula and a worked example that I could read
-  (19 Nov 2026). *Unblock:* a readable paper with the sample-size formula for weighted kappa (e.g. a PMC article).
-
-### Plan: Several Measurements per Patient (UNIT)
-
-- [ ] **UNIT-04** **[blocked]** Eyes / lesions per patient, open half: binary outcome with both treatments in each patient (clustered
-  McNemar), a patient-by-treatment variance part for the split designs, unequal allocation, different numbers of units in the two arms,
-  and the analysis side. 24 Nov 2026: searched PubMed. Found the analysis tests only, as abstracts with no formula and no free full text:
-  Obuchowski, Stat Med 1998 (PMID 9695194); Yang, Sun & Hardin, Biom J 2010 (PMID 20976694); Rosner & Milton, Biometrics 1988 (PMID
-  3390508). None gives a sample-size formula. *Unblock:* a readable paper with a sample-size formula for clustered paired binary data
-  (e.g. Eliasziw & Donner 1991, not found in PubMed Central).
-
-### Plan: Clinical Trials (TRIAL)
+### Plan, Trials and Experiments: Clinical Trials (TRIAL)
 
 - [ ] **TRIAL-25** **[blocked]** Dose-finding / phase I (3+3, CRM): the output is operating characteristics at a fixed n. *Unblock:* an
   operating-characteristics simulator, verified against `dfcrm::crmsim()`.
@@ -75,24 +43,30 @@
 - [ ] **TRIAL-32** Bioequivalence, open half: reference-scaled designs for highly variable drugs (RSABE / ABEL); simulation-based in
   `PowerTOST`, not wired in.
 
-### Plan: Survival Analysis (SURV)
+### Plan, Trials and Experiments: Several Measurements per Patient (UNIT)
+
+- [ ] **UNIT-04** **[blocked]** Eyes / lesions per patient, open half: binary outcome with both treatments in each patient (clustered
+  McNemar), a patient-by-treatment variance part for the split designs, unequal allocation, different numbers of units in the two arms,
+  and the analysis side. 24 Nov 2026: searched PubMed. Found the analysis tests only, as abstracts with no formula and no free full text:
+  Obuchowski, Stat Med 1998 (PMID 9695194); Yang, Sun & Hardin, Biom J 2010 (PMID 20976694); Rosner & Milton, Biometrics 1988 (PMID
+  3390508). None gives a sample-size formula. *Unblock:* a readable paper with a sample-size formula for clustered paired binary data
+  (e.g. Eliasziw & Donner 1991, not found in PubMed Central).
+
+### Plan, Observational Studies and Natural Experiments: Observational Studies (OBS)
+
+- [ ] **OBS-10** **[blocked]** Propensity-score-matched designs (matching efficiency): `MatchIt` / `Matching` are analysis-only and the
+  efficiency depends on each data set's overlap. *Unblock:* a published planning heuristic with a worked example.
+- [ ] **OBS-11** **[blocked]** Time-varying exposure (OPTITXS; Basagana & Spiegelman 2010, 2011): not on CRAN, papers not reachable.
+  *Unblock:* paper access or the OPTITXS source.
+- [ ] **OBS-14** Regression discontinuity, reached by FIND-16: sample size. Candidate sources, not read: Schochet 2009; Cattaneo,
+  Titiunik & Vazquez-Bare 2019.
+
+### Plan, Survival: Survival Analysis (SURV)
 
 - [ ] **SURV-09** **[blocked]** One-sample survival vs. a historical control (Finkelstein et al. 2003; Schmidt et al. 2015): the sources
   with the equations were not reachable. *Unblock:* the paper or the NCSS / PASS manual, and one worked example.
 
-### Plan: Prediction Models (PRED)
-
-- [ ] **PRED-05** **[paused]** External validation, time-to-event (Riley et al. 2022): paused by the owner pending paper access
-  (`pmvalsampsize` may have a time-to-event branch worth checking first). Reopen: decision D6.
-- [ ] **PRED-06** **[paused]** Model updating / recalibration; machine-learning model sample size; calibration-assessment sample size:
-  paused by the owner, same reason.
-
-### Plan: Health Economics / Value of Information (HE)
-
-- [ ] **HE-03** Value of information, open half: multi-parameter EVPPI and non-normal outcomes (only the single-parameter, known-SD case
-  ships).
-
-### Plan: General Statistical Tests (GEN)
+### Plan, Tests, Relationships and Models: General Statistical Tests (GEN)
 
 - [ ] **GEN-62** **[blocked]** GWAS / candidate-gene association: `genpwr` / `Haplin` are numerical-MLE engines. *Unblock:* a multi-batch
   effort with `genpwr` as the reference.
@@ -117,6 +91,32 @@
 - [ ] **GEN-77** **[blocked]** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to
   Bonferroni / Sidak). Candidate sources found 16 Nov 2026, no free full text, not read: Piegorsch 1991-type many-to-one comparisons
   in Stat Med 1995;14:2547 (PMID 8746885) and Stat Med 2003;22:2031 (PMID 12802814). *Unblock:* paper access.
+
+### Plan, Diagnosis, Agreement, Prediction and Measurement: Diagnostic & Screening (DX)
+
+- [ ] **DX-10** **[blocked]** Multi-reader multi-case (MRMC) studies, Obuchowski-Rockette / DBM: `iMRMC`'s Roe-Metz model (6 fixed
+  effects, 18 variance components) is too large for one batch. *Unblock:* a multi-batch effort with `iMRMC` as the reference.
+- [ ] **DX-11** **[blocked]** ROC comparison, open half: Unpaired AUCs (two independent AUCs; `pROC::power.roc.test` does not support
+  them). *Unblock:* a separately verified formula.
+
+### Plan, Diagnosis, Agreement, Prediction and Measurement: Agreement & Reliability (AGR)
+
+- [ ] **AGR-06** **[blocked]** Method comparison by Deming / Passing-Bablok regression: `deming`, `mcr`, `MethComp` are analysis-only; the
+  literature is simulation-based. *Unblock:* a citable simulation protocol (e.g. Linnet) to reproduce.
+- [ ] **AGR-07** **[blocked]** Agreement, open half: weighted kappa. No source with a formula and a worked example that I could read
+  (19 Nov 2026). *Unblock:* a readable paper with the sample-size formula for weighted kappa (e.g. a PMC article).
+
+### Plan, Diagnosis, Agreement, Prediction and Measurement: Prediction Models (PRED)
+
+- [ ] **PRED-05** **[paused]** External validation, time-to-event (Riley et al. 2022): paused by the owner pending paper access
+  (`pmvalsampsize` may have a time-to-event branch worth checking first). Reopen: decision D6.
+- [ ] **PRED-06** **[paused]** Model updating / recalibration; machine-learning model sample size; calibration-assessment sample size:
+  paused by the owner, same reason.
+
+### Plan, Other Designs and General Tools: Health Economics / Value of Information (HE)
+
+- [ ] **HE-03** Value of information, open half: multi-parameter EVPPI and non-normal outcomes (only the single-parameter, known-SD case
+  ships).
 
 ## 3. Finding a calculator: the guide, search and Find tab (FIND) -- 4 open
 

@@ -200,15 +200,15 @@ branch, from the guide (consistency tests: section 12). The two checklists the c
 statistical test, mirroring G*Power) are in `docs/archive/`.
 
 **Navigation (workbenches).** The top navbar has one item per workbench -- Home, *Plan:
-Sample Size* (the 49 sample-size and power calculators) and *Analyze* (calculators that
+Sample Size* (the 59 sample-size and power calculators) and *Analyze* (calculators that
 work on counts the user already has) -- and each workbench shows its modules in a
 sticky, scrollable `bslib::navset_pill_list()` sidebar under small group headers.
-`R/registry.R`'s `module_workbenches` defines the workbenches, their groups and the order;
-the Plan groups are ordered roughly simple -> advanced: Descriptive & Estimation; Survey &
-Cross-Sectional; Observational Studies; Diagnostic & Screening; Agreement & Reliability;
-Clinical Trials; Survival Analysis; Prediction Models; Surveillance; Preclinical / Animal
-Studies; Qualitative / Mixed Methods; Psychometrics / Scale Development; Health Economics /
-Value of Information; General Statistical Tests. The earlier one-dropdown-per-group navbar
+`R/registry.R`'s `module_workbenches` defines the workbenches, their groups and the order.
+Since 27 Nov 2026 the Plan groups follow study design (`docs/ui_remap_plan.md`): Effect Sizes;
+Estimate: Surveys and Descriptive Studies; Trials and Experiments; Observational Studies and
+Natural Experiments; Survival; Tests, Relationships and Models; Diagnosis, Agreement, Prediction
+and Measurement; Other Designs and General Tools. Before that there were 20 groups.
+The earlier one-dropdown-per-group navbar
 (14 dropdowns, then 15) could not hold a third workbench because bslib dropdowns cannot nest.
 `jump_to_module()` opens a module from the Home hub or wizard by selecting its workbench
 (`input$main_nav`) and then the module in the workbench's list (`input$<nav_id>`). On phones

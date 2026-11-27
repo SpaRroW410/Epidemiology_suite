@@ -1,7 +1,8 @@
 # UI remap: finding a calculator (proposal, 24 Nov 2026)
 
-Status: decided with the owner on 24 Nov 2026 (grouping, one set of names, four front-door changes). Not built yet; build in the
-order below, one commit each, tests after each.
+Status: decided with the owner on 24 Nov 2026 (grouping, one set of names, four front-door changes) and 27 Nov 2026 (Effect Sizes
+stays first; Attrition goes to group 7; the checklist is regrouped too). Step 1 built 27 Nov 2026; the rest in the order below, one
+commit each, tests after each, and any open question cleared with the owner first.
 
 ## What is wrong now
 
@@ -19,22 +20,25 @@ order below, one commit each, tests after each.
 
 ## The seven groups (every calculator once; ids unchanged, so links, Studies and the guide keep working)
 
+Effect Sizes stays first, above the seven groups, because many calculators link to it (owner, 27 Nov 2026).
+
 | Group | Calculators |
 |---|---|
 | 1. Estimate (surveys and descriptive) | proportion, means, rate, ratio, stratified, cluster, lqas, capture_recapture, rule_of_three, survey_selection, survey_weights |
-| 2. Trials and experiments | pilot, simon, tost, noninferiority, crossover, group_sequential, subgroup_interaction, glmm, tsa, stepped_wedge, patient_units, resource_equation, randomization, attrition |
+| 2. Trials and experiments | pilot, simon, tost, noninferiority, crossover, group_sequential, subgroup_interaction, glmm, tsa, stepped_wedge, patient_units, resource_equation, randomization |
 | 3. Observational and natural experiments | case_control, cohort, sccs, mendelian, its, did, ecological |
 | 4. Survival | logrank, competing_risks, rmst |
 | 5. Tests, relationships and models | correlation, chisq, regression, anova_general, logistic, exact_tests, rm_anova, nonparametric, variance, multiplicity, manova, bayesian, longitudinal, multilevel, meta_power |
 | 6. Diagnosis, agreement, prediction and measurement | diagnostic, roc, agreement, prediction, efa_cfa |
-| 7. Other | effect_size, qualitative, evpi, epidemic_model |
+| 7. Other designs and general tools | attrition, qualitative, evpi, epidemic_model |
 
 Group 5 stays long (15). Inside it, Browse's families (Correlation, Chi-square, Regression, ...) become sub-headings so it reads as
 five short lists. Analyze keeps its two groups.
 
 ## Build order
 
-1. Regroup (`module_workbenches` in `R/registry.R`); a test that every module is in exactly one group and the counts add up.
+1. Regroup (`module_workbenches` in `R/registry.R`); a test that every module is in exactly one group and the counts add up. **Done 27 Nov
+   2026**; the checklist's calculator sections were regrouped in the same order (every line kept; old section names stay in the headings).
 2. Browse and Studies use the same group names (`study_design_families` get a `group` field).
 3. One-line description under each calculator (from the catalogue's `answers` text, shortened; a test that every module has one).
 4. Filter box over the sidebar list (client-side; works in the browser build and on phones).
