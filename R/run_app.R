@@ -51,10 +51,9 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
     items <- unlist(lapply(wb$groups, function(g) {
       c(list(g$title), lapply(g$module_ids, function(mid) {
         m <- registry_by_id[[mid]]
-        # the one-line description shows on hover (R/content_module_blurbs.R; docs/ui_remap_plan.md, step 3); the value stays the title
-        blurb <- unname(module_blurbs[mid])
-        nav_panel(title = if (is.na(blurb)) m$title else tags$span(title = blurb, m$title), value = m$title,
-                  if (m$id %in% core_ids) m$ui(m$id) else lazy_placeholder(m$id))
+        # the one-line description shows on hover: set as the link's title attribute by sidebar_filter_assets() (R/sidebar_filter.R),
+        # so the link's text stays exactly the calculator's title (the phone drop-down and the browser tests read it)
+        nav_panel(title = m$title, if (m$id %in% core_ids) m$ui(m$id) else lazy_placeholder(m$id))
       }))
     }), recursive = FALSE)
     # a workbench opens on its first module unless it names another (Plan lists Effect Sizes first and opens on Proportions)

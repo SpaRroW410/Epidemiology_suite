@@ -3,6 +3,15 @@
 # the matches in the other workbench too (Plan and Analyze), with a link that opens them. One box per sidebar, kept in step. Runs in
 # the browser only (no round trip to R), so it works in the browser build; hidden on phones, where the sidebar is a drop-down. The words
 # "star", "fav", "favourite", "favorite" and the star symbols show only the favourites (R/sidebar_personal.R).
+# The descriptions as a JavaScript object literal {title: description} (ASCII text; quotes and backslashes escaped).
+.blurbs_json <- function() {
+  reg <- module_registry()
+  titles <- vapply(reg, `[[`, character(1), "title"); ids <- vapply(reg, `[[`, character(1), "id")
+  esc <- function(x) gsub('"', '\\\\"', gsub("\\\\", "\\\\\\\\", x))
+  keep <- ids %in% names(module_blurbs)
+  paste0("{", paste0('"', esc(titles[keep]), '": "', esc(unname(module_blurbs[ids[keep]])), '"', collapse = ", "), "}")
+}
+
 sidebar_filter_assets <- function() {
   tagList(
     tags$style(HTML("
@@ -13,11 +22,16 @@ sidebar_filter_assets <- function() {
 .sidebar-filter .sf-none { font-size: .8rem; color: var(--bs-secondary-color); margin-top: .35rem; }
 @media (max-width: 575.98px) { .sidebar-filter { display: none; } }
 ")),
-    tags$script(HTML("
+    tags$script(HTML(sprintf("
 (function () {
+  function links_title() {
+    document.querySelectorAll('ul.nav-stacked a[data-value]').forEach(function (a) {
+      var b = BLURBS[a.getAttribute('data-value')]; if (b && !a.getAttribute('title')) a.setAttribute('title', b);
+    });
+  }
   function lists() { return Array.prototype.slice.call(document.querySelectorAll('ul.nav-stacked')); }
   function words(s) { return s.toLowerCase().replace(/\\ufe0f/g, '').replace(/([\\u2605\\u2606\\u2b50])/g, ' $1 ').split(/\\s+/).filter(function (w) { return w.length; }); }
-  function text(a) { var sp = a.querySelector('span[title]'); return (a.textContent + ' ' + (sp ? sp.getAttribute('title') : '')).toLowerCase(); }
+  function text(a) { return (a.textContent + ' ' + (a.getAttribute('title') || '')).toLowerCase(); }
   // 'star', 'fav', 'favourite', 'favorite' or a star symbol stand for: one of my favourites (R/sidebar_personal.R)
   var FAV = ['star', 'stars', 'starred', 'fav', 'favs', 'favourite', 'favourites', 'favorite', 'favorites', '\u2605', '\u2b50', '\u2606'];
   function matches(a, ws) {
@@ -73,7 +87,10 @@ sidebar_filter_assets <- function() {
       if (!shown && !other.childNodes.length) none.textContent = 'No calculator matches. Try fewer words, or the guide on Home.';
     });
   }
+  // the one-line descriptions (R/content_module_blurbs.R), keyed by calculator title: shown on hover as each link's title
+  var BLURBS = %s;
   function build() {
+    links_title();
     lists().forEach(function (ul) {
       if (ul.getAttribute('data-sidebar-filter')) return;
       ul.setAttribute('data-sidebar-filter', '1');
@@ -95,6 +112,6 @@ sidebar_filter_assets <- function() {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
   document.addEventListener('shiny:connected', build);
 })();
-"))
+", .blurbs_json())))
   )
 }
