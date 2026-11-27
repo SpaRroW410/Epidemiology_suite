@@ -97,7 +97,7 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
       header = tagList(browser_notice_ui(), server_notice_ui(), studies_assets(), tags$style(HTML(.workbench_css)), accessibility_script(), phone_shell_assets(), sidebar_filter_assets(), sidebar_personal_assets(),
                        if (length(pending_titles)) lazy_sidebar_assets(pending_titles, show_progress = .background_load_enabled()))
     ),
-    list(home_panel, nav_panel("Find a calculator", find_panel_ui())),
+    list(home_panel),   # "Find a calculator" is a section of Home since 28 Nov 2026 (docs/ui_remap_plan.md, step 6)
     workbench_panels,
     list(nav_panel("Studies", studies_ui()), nav_panel("Cite", cite_ui())),
     # light / dark switch (starts from the viewer's operating-system setting)

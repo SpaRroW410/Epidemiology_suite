@@ -438,7 +438,8 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [x] **FIND-02** Free-text reader: a description of the study is read for design, outcome and matching words and walks the tree as far as
   it can (`R/design_free_text.R`).
 - [x] **FIND-03** Search box on Home and in the navbar, over every built design by name and description (29 Oct 2026).
-- [x] **FIND-04** The Find tab: the guide and the browse lists (by design, by test) moved out of Home (1 Nov 2026).
+- [x] **FIND-04** The Find tab: the guide and the browse lists (by design, by test) moved out of Home (1 Nov 2026). Back on Home since
+  28 Nov 2026 as its "Find a calculator" section, opened by the three doors at the top (UI remap step 6, `docs/ui_remap_plan.md`).
 - [x] **FIND-05** The guide says when nothing in a description was recognised, and how to rephrase (3 Nov 2026).
 - [x] **FIND-06** Research questions phrased by topic: knowledge-attitude-practice, awareness, utilization reach a survey estimate;
   "determinants / risk factors of X" offer four candidate designs (survey, case-control, cohort, prediction model); the last step points to

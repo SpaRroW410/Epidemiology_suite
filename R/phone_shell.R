@@ -83,7 +83,7 @@ phone_shell_assets <- function() {
     document.querySelectorAll('nav.navbar .navbar-nav > li.nav-item > a.nav-link').forEach(function (a) {
       var full = a.getAttribute('data-full-label') || a.textContent.trim();
       a.setAttribute('data-full-label', full);
-      var short = { 'Plan: Sample Size': 'Plan', 'Find a calculator': 'Find' }[full];
+      var short = { 'Plan: Sample Size': 'Plan' }[full];
       if (short) {
         a.textContent = phone.matches ? short : full;
         a.setAttribute('aria-label', full);

@@ -19,7 +19,7 @@ test_that("on a phone the navbar is a bottom tab bar and the calculators are one
   app$run_js("var s = document.querySelector('.phone-picker'); s.value = 'Means'; s.dispatchEvent(new Event('change'));")
   app$wait_for_js("(document.querySelector('#plan_nav a.active') || {}).textContent === 'Means'", timeout = 30000)
   expect_equal(app$get_js("document.querySelector('.phone-picker').value"), "Means")
-  expect_equal(unlist(app$get_js("Array.from(document.querySelectorAll('nav.navbar .navbar-nav > li.nav-item > a[aria-label]')).map(function(a){return a.getAttribute('aria-label')})")), c("Find a calculator", "Plan: Sample Size"))
+  expect_equal(unlist(app$get_js("Array.from(document.querySelectorAll('nav.navbar .navbar-nav > li.nav-item > a[aria-label]')).map(function(a){return a.getAttribute('aria-label')})")), "Plan: Sample Size")
 })
 
 test_that("on a wide screen the navbar stays at the top and the calculator list is shown (browser test)", {
@@ -30,6 +30,6 @@ test_that("on a wide screen the navbar stays at the top and the calculator list 
   ui_select_tab(app, "main_nav", "Plan: Sample Size")
   expect_equal(app$get_js("getComputedStyle(document.querySelector('ul.nav-stacked')).display"), "flex")
   expect_equal(app$get_js("getComputedStyle(document.querySelector('.phone-picker')).display"), "none")
-  expect_equal(app$get_js("document.querySelector('nav.navbar .navbar-nav > li.nav-item:nth-child(2) > a').textContent.trim()"), "Find a calculator")
-  expect_equal(app$get_js("document.querySelector('nav.navbar .navbar-nav > li.nav-item:nth-child(3) > a').textContent.trim()"), "Plan: Sample Size")
+  expect_equal(app$get_js("document.querySelector('nav.navbar .navbar-nav > li.nav-item:nth-child(2) > a').textContent.trim()"), "Plan: Sample Size")
+  expect_equal(app$get_js("document.querySelector('nav.navbar .navbar-nav > li.nav-item:nth-child(3) > a').textContent.trim()"), "Analyze")
 })

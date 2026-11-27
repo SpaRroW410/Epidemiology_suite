@@ -57,7 +57,10 @@ five short lists. Analyze keeps its two groups.
    `tools::R_user_dir("epidemiologysuite", "data")` and read back at start (never on a server, never in the browser build). Hidden on
    phones, like the filter.
 6. Merge Home and Find into one start page with three doors: I have a question (guide), I know the test or name (search), I want
-   to browse.
+   to browse. **Done 28 Nov 2026**: the "Find a calculator" top tab is gone; Home opens with the three doors, then the most-used
+   links and the task cards, then a "Find a calculator" section with the same four tabs (guided questions, browse, glossary,
+   formulas). A door selects its tab and scrolls the section into view (the reason the guide had once been moved to a tab of its
+   own was that a button lower on Home seemed to do nothing). Same input ids, so links, Studies and the tests keep working.
 
 Risks: the phone shell and the browser tests open calculators by title (`ui_open_module()`), so titles must not change; lazy loading
 (`lazy_modules.R`) lists modules by id, so only the groups move. Each step ships on its own so any can be dropped.
