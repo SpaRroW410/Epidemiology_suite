@@ -462,7 +462,8 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [x] **FIND-13** A guide that asks for each objective of a study in turn. Built 24 Nov 2026: at a design end point, "Save as an objective
   and plan another" keeps the design and returns the guide to the first question; the saved objectives are listed above the guide, each
   with a button to its calculator and a remove button (up to 12; kept for the session). Earlier: buttons to the association
-  calculators after a determinants question. Open: carrying the list into Studies in one step.
+  calculators after a determinants question. 28 Nov 2026: "Add all" puts every saved objective into a chosen study at once, each as
+  a design choice with the answers that led to it.
 - [ ] **FIND-14** **[optional]** A language-model reader, only by a separate decision (no API, nothing sent anywhere in the browser
   version). Not now: decision F1 (6 Nov 2026) keeps the reader deterministic.
 - [x] **FIND-15** The owner's routing material (drafted with Gemini, shared from Google Drive) stored in `docs/find_routing/` with a

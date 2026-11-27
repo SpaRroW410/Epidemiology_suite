@@ -8,6 +8,7 @@ test_that("the objectives list shows each saved design and is empty when nothing
   expect_match(h, "design_wizard_objective_go_1", fixed = TRUE)
   expect_false(grepl("design_wizard_objective_go_2", h, fixed = TRUE))    # no calculator to go to for an unbuilt design
   expect_match(h, "design_wizard_objective_rm_2", fixed = TRUE)
+  expect_match(h, "design_wizard_objectives_study_add", fixed = TRUE)   # all of them into a study at once
 })
 
 test_that("a design end point offers to save the objective and plan another", {
@@ -29,6 +30,7 @@ test_that("saving an objective keeps it and returns the guide to the first quest
     session$setInputs(design_wizard_restart = 0)
     session$setInputs(design_wizard_restart = 1)                                                 # start over keeps the list
     expect_match(html(output$design_wizard_objectives), "design_wizard_objective_rm_1", fixed = TRUE)
+    session$setInputs(design_wizard_objectives_study_add = list(study = "s1", nonce = 1))  # sends one design entry per objective
     session$setInputs(design_wizard_objective_rm_1 = 0)
     session$setInputs(design_wizard_objective_rm_1 = 1)
     expect_false(grepl("Objectives of your study", html(output$design_wizard_objectives), fixed = TRUE))

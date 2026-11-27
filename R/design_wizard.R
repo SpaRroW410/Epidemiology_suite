@@ -179,11 +179,22 @@ design_wizard_server <- function(input, output, session) {
     node <- design_nodes[[state$node_id]]
     req(isTRUE(node$terminal), length(state$objectives) < .max_objectives)
     key <- .terminal_catalog_key(node, state$flags)
-    state$objectives <- c(state$objectives, list(list(design = node$design, key = key)))
+    state$objectives <- c(state$objectives, list(list(design = node$design, key = key, trace = state$trace)))
     state$parse_note <- NULL; state$node_id <- "root"; state$trace <- list(); state$flags <- list(); state$history <- list()
     updateTextAreaInput(session, "design_wizard_freetext", value = "")
   }, ignoreInit = TRUE)
   observeEvent(input$design_wizard_objectives_clear, state$objectives <- list(), ignoreInit = TRUE)
+  # all the objectives into a study at once, each as a design choice with the answers that led to it (FIND-13 follow-up)
+  observeEvent(input$design_wizard_objectives_study_add, {
+    req(length(state$objectives))
+    for (o in state$objectives) {
+      entry <- if (!is.null(o$key)) catalog_entry(o$key) else NULL
+      calc <- if (!is.null(entry) && isTRUE(entry$built)) paste0(entry$nav_target, ": ", entry$label) else NULL
+      e <- study_design_entry(o$design, if (is.null(o$trace)) list() else o$trace, calc)
+      session$sendCustomMessage("study_add", list(study = input$design_wizard_objectives_study_add$study, entry = e,
+                                                  summary = study_entry_summary(e)))
+    }
+  }, ignoreInit = TRUE)
   output$design_wizard_objectives <- renderUI(.render_objectives(state$objectives))
   for (i in seq_len(.max_objectives)) local({
     k <- i
@@ -222,6 +233,11 @@ design_wizard_server <- function(input, output, session) {
         " ", actionButton(paste0("design_wizard_objective_rm_", i), "Remove", class = "btn-link btn-sm"))
     })),
     div(class = "small text-muted", "Plan each objective, use the largest sample size, and add each to your study in Studies."),
+    div(class = "study-add d-flex flex-wrap gap-2 align-items-center mt-2",
+      tags$label(class = "small mb-0", `for` = "design_wizard_objectives_study_target", "Add all the objectives to"),
+      tags$select(id = "design_wizard_objectives_study_target", class = "form-select form-select-sm study-target w-auto"),
+      tags$button(type = "button", class = "btn btn-sm btn-outline-primary",
+                  onclick = "esStudies.request('design_wizard_objectives_study_add', this.previousElementSibling.value);", "Add all")),
     actionButton("design_wizard_objectives_clear", "Clear the list", class = "btn-link btn-sm"))
 }
 
