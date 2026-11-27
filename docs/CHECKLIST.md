@@ -539,7 +539,10 @@ Decisions S1-S5 are in `SDD.md`, section 17.
 - [ ] **STUDY-08** Readable names for more calculators (only names with one meaning are labelled now). 16 Nov 2026: 23 more calculators
   labelled (29 of 70), with the wording of each function's help page, and the results of the newer calculators; a test checks every
   labelled name is an argument of that calculator. Still unlabelled: the larger families (chi-square, survival, prediction, ROC,
-  longitudinal, multiplicity, effect size and others), where one name has several meanings within the calculator.
+  longitudinal, multiplicity, effect size and others), where one name has several meanings within the calculator. 28 Nov 2026: 27
+  more (56 of 71), again from each function's help page, leaving out any name with two meanings in one calculator (e.g. p1 in
+  Nonparametric Tests, theta in Log-Rank). Still unlabelled: longitudinal, multilevel, Monte Carlo mixed models, psychometrics,
+  meta-analysis power, effect size, survey selection and weights, five Analyze calculators, and the two guidance pages.
 - [ ] **STUDY-09** Check Word on phones, Google Docs and LibreOffice (pasted LaTeX, table styles); a long study on a phone.
 
 ## 5. Interface and accessibility (UI)
