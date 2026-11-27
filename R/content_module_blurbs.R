@@ -1,6 +1,6 @@
 # One line under each calculator in the sidebars (docs/ui_remap_plan.md, step 3): what question it answers, in plain words. Drawn
-# from the calculator's catalogue entries ("Answers: ..."), shortened; drafted 27 Nov 2026 for the owner to correct. Keep each under
-# about 60 characters, plain ASCII. A test checks that every module has one.
+# from the calculator's catalogue entries ("Answers: ..."), shortened; wording agreed with the owner on 27 Nov 2026. Shown on hover
+# (the owner's choice). Keep each under about 60 characters, plain ASCII. A test checks that every module has one.
 module_blurbs <- c(
   effect_size          = "Work out d, f, h, w, OR, HR from what you know",
   proportion           = "Prevalence with precision, or two proportions",

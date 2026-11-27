@@ -44,7 +44,9 @@ five short lists. Analyze keeps its two groups.
    already have)" last; "Study planning tools" became four families (survey field tools, randomization list, attrition, epidemic
    models), the same 15 designs; Proportions and Precision-based stay whole under Estimate; Browse by test family is unchanged. Each
    Studies section shows its group name above its title (on screen; the Word file is unchanged).
-3. One-line description under each calculator (from the catalogue's `answers` text, shortened; a test that every module has one).
+3. One-line description for each calculator. **Done 27 Nov 2026**, shown on hover (the owner's choice, so the sidebar keeps its length);
+   wording agreed with the owner (`R/content_module_blurbs.R`, 71 lines, Analyze included). The Studies Word file now also names the
+   group of each section.
 4. Filter box over the sidebar list (client-side; works in the browser build and on phones).
 5. Recently used / favourites (browser storage with try/catch; the page must work without it).
 6. Merge Home and Find into one start page with three doors: I have a question (guide), I know the test or name (search), I want

@@ -133,3 +133,14 @@ test_that("Browse by study design uses the sidebar's group names, and every fami
   expect_equal(module_group_title("analyze_2x2"), "Analyze: From summary counts")
   expect_null(module_group_title("no_such_module"))
 })
+
+test_that("every calculator has a one-line description, shown on hover in the sidebar (remap step 3)", {
+  ids <- vapply(module_registry(), `[[`, character(1), "id")
+  expect_setequal(names(module_blurbs), ids)
+  expect_true(all(nchar(module_blurbs) <= 60))
+  expect_true(all(nzchar(module_blurbs)))
+  expect_false(any(grepl("[^ -~]", module_blurbs)))                 # plain ASCII
+  html <- htmltools::renderTags(attr(epidemiologysuite_app(lazy = TRUE), "ui_tags"))$html
+  expect_match(html, '<span title="Stepped-wedge cluster trial, continuous or binary">Stepped-Wedge CRT</span>', fixed = TRUE)
+  expect_match(html, 'data-value="Stepped-Wedge CRT"', fixed = TRUE)   # the value the jumps and tests use is still the title
+})

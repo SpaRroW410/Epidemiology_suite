@@ -625,7 +625,9 @@ study_docx <- function(study, time = Sys.time()) {
   }
   for (k in seq_along(groups)) {
     g <- groups[[k]]; first <- g[[1]]
-    body <- c(body, docx_p(sprintf("%d. %s: %s", k, first$module_title, first$design), style = "Heading1"))
+    grp <- module_group_title(first$module)
+    body <- c(body, docx_p(sprintf("%d. %s: %s", k, first$module_title, first$design), style = "Heading1"),
+              if (!is.null(grp)) docx_p(docx_run(grp, italic = TRUE)))
     if (length(g) == 1) {
       res <- first$results; h <- intersect(unlist(first$headline), names(res))
       body <- c(body, docx_p("Result", style = "Heading2"), .study_kv_table(res[c(h, setdiff(names(res), h))], module = first$module),
