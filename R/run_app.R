@@ -173,6 +173,7 @@ html[data-bs-theme='dark'] .text-warning { color: #ffda6a !important; }
   display: block; margin: .9rem 0 .2rem 0; padding: 0;
   font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
   color: var(--bs-secondary-color, #6c757d);
+  white-space: normal; overflow-wrap: anywhere; line-height: 1.3;   /* a long group name wraps instead of being cut off */
 }
 .tab-pane > .row > .col-sm-3 > ul.nav-stacked > li > a { padding: .3rem .6rem; font-size: .9rem; }
 @media (max-width: 575.98px) {
