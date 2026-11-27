@@ -1,7 +1,8 @@
 # Filter box over the calculator lists (docs/ui_remap_plan.md, step 4; owner's choices 27 Nov 2026): typing narrows the sidebar to
 # the calculators whose name or one-line description (the hover text, R/content_module_blurbs.R) contains every word typed, and lists
 # the matches in the other workbench too (Plan and Analyze), with a link that opens them. One box per sidebar, kept in step. Runs in
-# the browser only (no round trip to R), so it works in the browser build; hidden on phones, where the sidebar is a drop-down.
+# the browser only (no round trip to R), so it works in the browser build; hidden on phones, where the sidebar is a drop-down. The words
+# "star", "fav", "favourite", "favorite" and the star symbols show only the favourites (R/sidebar_personal.R).
 sidebar_filter_assets <- function() {
   tagList(
     tags$style(HTML("
@@ -15,9 +16,17 @@ sidebar_filter_assets <- function() {
     tags$script(HTML("
 (function () {
   function lists() { return Array.prototype.slice.call(document.querySelectorAll('ul.nav-stacked')); }
-  function words(s) { return s.toLowerCase().split(/\\s+/).filter(function (w) { return w.length; }); }
+  function words(s) { return s.toLowerCase().replace(/\\ufe0f/g, '').replace(/([\\u2605\\u2606\\u2b50])/g, ' $1 ').split(/\\s+/).filter(function (w) { return w.length; }); }
   function text(a) { var sp = a.querySelector('span[title]'); return (a.textContent + ' ' + (sp ? sp.getAttribute('title') : '')).toLowerCase(); }
-  function matches(a, ws) { var t = text(a); return ws.every(function (w) { return t.indexOf(w) >= 0; }); }
+  // 'star', 'fav', 'favourite', 'favorite' or a star symbol stand for: one of my favourites (R/sidebar_personal.R)
+  var FAV = ['star', 'stars', 'starred', 'fav', 'favs', 'favourite', 'favourites', 'favorite', 'favorites', '\u2605', '\u2b50', '\u2606'];
+  function matches(a, ws) {
+    var t = text(a);
+    return ws.every(function (w) {
+      if (FAV.indexOf(w) >= 0) return !!(window.esPersonal && window.esPersonal.isFav(a.getAttribute('data-value')));
+      return t.indexOf(w) >= 0;
+    });
+  }
   function paneOf(ul) { return ul.closest('.tab-pane'); }
   function tabFor(pane) {
     return pane && document.querySelector('nav.navbar a[data-bs-target=\"#' + pane.id + '\"], nav.navbar a[href=\"#' + pane.id + '\"]');

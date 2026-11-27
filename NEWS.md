@@ -1,5 +1,16 @@
 # epidemiologysuite (development version)
 
+## Finding a calculator: regrouped sidebar, filter, favourites (27 Nov 2026)
+
+* The Plan sidebar has seven groups led by study design (Effect Sizes stays first); Browse by study design and Studies use the same
+  group names. Every calculator is still listed once, with the same name.
+* Resting the pointer on a calculator shows a one-line description of what it answers.
+* A filter box over each sidebar narrows the list to the calculators whose name or description contains the words typed, and lists
+  matches in the other workbench.
+* A star beside each calculator marks it as a favourite; favourites and the last five calculators opened are listed at the top of
+  the sidebar. Type "star", "fav" or a star symbol in the filter box to see only favourites. They are kept in the browser, and when
+  the app is run from the R package on your own computer, also in a small file in R's user folder.
+
 ## The guide keeps the objectives of a study (24 Nov 2026)
 
 * At a design end point the guide now offers **Save as an objective and plan another**. The saved objectives are listed above the

@@ -50,7 +50,12 @@ five short lists. Analyze keeps its two groups.
 4. Filter box over the sidebar list. **Done 27 Nov 2026** (`R/sidebar_filter.R`): matches the name and the one-line description,
    every word typed; lists the matches in the other workbench with a link that opens them (owner's choices). Runs in the browser
    only, so it works in the browser build; hidden on phones, where the sidebar is a drop-down.
-5. Recently used / favourites (browser storage with try/catch; the page must work without it).
+5. Recently used / favourites. **Done 27 Nov 2026** (`R/sidebar_personal.R`): a short "Favourites" and "Recent" (last 5) list at the
+   top of each sidebar; a star beside each calculator, shown on hover (always shown for a favourite); in the filter box "star", "fav",
+   "favourite", "favorite" or a star symbol show only the favourites. Kept in the browser (localStorage, with try/catch); when the app
+   runs from the R package in an interactive session on the user's own computer, also saved to `favourites.txt` in
+   `tools::R_user_dir("epidemiologysuite", "data")` and read back at start (never on a server, never in the browser build). Hidden on
+   phones, like the filter.
 6. Merge Home and Find into one start page with three doors: I have a question (guide), I know the test or name (search), I want
    to browse.
 

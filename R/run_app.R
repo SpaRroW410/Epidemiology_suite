@@ -95,7 +95,7 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
         heading_font = font_collection("Source Serif 4", "Georgia", "Cambria", "Times New Roman", "serif"),
         "font-size-base" = "0.95rem"
       ),
-      header = tagList(browser_notice_ui(), server_notice_ui(), studies_assets(), tags$style(HTML(.workbench_css)), accessibility_script(), phone_shell_assets(), sidebar_filter_assets(),
+      header = tagList(browser_notice_ui(), server_notice_ui(), studies_assets(), tags$style(HTML(.workbench_css)), accessibility_script(), phone_shell_assets(), sidebar_filter_assets(), sidebar_personal_assets(),
                        if (length(pending_titles)) lazy_sidebar_assets(pending_titles, show_progress = .background_load_enabled()))
     ),
     list(home_panel, nav_panel("Find a calculator", find_panel_ui())),
@@ -107,6 +107,7 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
 
   server <- function(input, output, session) {
     home_server(input, output, session)
+    sidebar_personal_server(input, session)    # favourites and recent: also saved to a file when run on the user's own computer
     cite_server(input, output, session)
     studies_server(input, output, session)
     # opened from run_app(calculator = ...): go to that calculator once the page is connected (the navbar's value arrives first)
