@@ -39,7 +39,11 @@ five short lists. Analyze keeps its two groups.
 
 1. Regroup (`module_workbenches` in `R/registry.R`); a test that every module is in exactly one group and the counts add up. **Done 27 Nov
    2026**; the checklist's calculator sections were regrouped in the same order (every line kept; old section names stay in the headings).
-2. Browse and Studies use the same group names (`study_design_families` get a `group` field).
+2. Browse and Studies use the same group names. **Done 27 Nov 2026**: Browse by study design shows the families under the sidebar's
+   group headings (each family's group is where most of its calculators sit, `study_design_family_group()`), with "Analyze (data you
+   already have)" last; "Study planning tools" became four families (survey field tools, randomization list, attrition, epidemic
+   models), the same 15 designs; Proportions and Precision-based stay whole under Estimate; Browse by test family is unchanged. Each
+   Studies section shows its group name above its title (on screen; the Word file is unchanged).
 3. One-line description under each calculator (from the catalogue's `answers` text, shortened; a test that every module has one).
 4. Filter box over the sidebar list (client-side; works in the browser build and on phones).
 5. Recently used / favourites (browser storage with try/catch; the page must work without it).

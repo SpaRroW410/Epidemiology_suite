@@ -112,3 +112,24 @@ test_that("the Plan sidebar has the groups agreed for the remap (docs/ui_remap_p
   expect_true("attrition" %in% plan$groups[[8]]$module_ids)
   expect_equal(length(unlist(lapply(plan$groups, `[[`, "module_ids"))), 59)
 })
+
+test_that("Browse by study design uses the sidebar's group names, and every family and design is still listed (remap step 2)", {
+  g <- study_design_family_groups()
+  plan <- Filter(function(wb) identical(wb$id, "plan"), module_workbenches)[[1]]
+  expect_true(all(names(g) %in% c(vapply(plan$groups, `[[`, character(1), "title"), "Analyze")))
+  expect_setequal(unlist(g), seq_along(study_design_families))          # every family under exactly one heading
+  expect_false(anyDuplicated(unlist(g)) > 0)
+  ids <- vapply(study_design_families, `[[`, character(1), "id")
+  expect_false(anyDuplicated(ids) > 0)
+  expect_false("planning_tools" %in% ids)                                 # split into four on 27 Nov 2026
+  fam <- function(id) study_design_families[[which(ids == id)]]
+  expect_equal(study_design_family_group(fam("survey_field_tools")), "Estimate: Surveys and Descriptive Studies")
+  expect_equal(study_design_family_group(fam("randomization_list")), "Trials and Experiments")
+  expect_equal(study_design_family_group(fam("attrition")), "Other Designs and General Tools")
+  expect_equal(study_design_family_group(fam("epidemic_models")), "Other Designs and General Tools")
+  expect_equal(study_design_family_group(fam("proportions")), "Estimate: Surveys and Descriptive Studies")
+  expect_equal(study_design_family_group(fam("analyze_counts")), "Analyze")
+  expect_equal(module_group_title("stepped_wedge"), "Trials and Experiments")
+  expect_equal(module_group_title("analyze_2x2"), "Analyze: From summary counts")
+  expect_null(module_group_title("no_such_module"))
+})

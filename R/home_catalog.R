@@ -2437,13 +2437,20 @@ study_design_families <- list(
   list(id = "effect_sizes", label = "Effect sizes (the numbers the calculators ask for)",
        hint = "Not a sample-size calculation: work out Cohen's d, f, h or w, an odds ratio, a hazard ratio, or a mean and SD from a median and IQR, from what you already know.",
        catalog_keys = c("effect_size_two_means", "effect_size_from_t", "effect_size_paired", "effect_size_anova_f", "effect_size_proportions", "effect_size_chisq_w", "effect_size_hazard_ratio", "effect_size_convert", "effect_size_median_iqr", "effect_size_matched_pairs")),
-  list(id = "planning_tools", label = "Study planning tools (randomization, attrition)",
-       hint = "Not a sample-size calculation: reproducible randomization lists, and inflating a required sample size for attrition, non-response and non-compliance.",
-       catalog_keys = c("plan_randomization_block", "plan_randomization_stratified", "plan_randomization_simple",
-                         "plan_attrition_stages", "plan_attrition_arms", "plan_attrition_noncompliance",
-                         "survey_select_srs", "survey_select_systematic", "survey_select_pps", "survey_select_epi",
-                         "survey_weights_classes", "survey_weights_kish",
-                         "epi_model_herd", "epi_model_sim", "epi_model_r0")),
+  # "Study planning tools" was split by group on 27 Nov 2026 (docs/ui_remap_plan.md, step 2): the same 15 designs, in four families
+  list(id = "survey_field_tools", label = "Survey field tools (selecting the sample, survey weights)",
+       hint = "Not a sample-size calculation: draw a survey sample from a list (simple random, systematic, PPS, the WHO EPI 30 x 7 clusters) and weight the respondents.",
+       catalog_keys = c("survey_select_srs", "survey_select_systematic", "survey_select_pps", "survey_select_epi",
+                         "survey_weights_classes", "survey_weights_kish")),
+  list(id = "randomization_list", label = "Randomization list",
+       hint = "Not a sample-size calculation: a reproducible randomization list (simple, permuted blocks, or blocks within strata).",
+       catalog_keys = c("plan_randomization_block", "plan_randomization_stratified", "plan_randomization_simple")),
+  list(id = "attrition", label = "Attrition and non-response",
+       hint = "Not a sample-size calculation on its own: inflate a required sample size for attrition, non-response and non-compliance.",
+       catalog_keys = c("plan_attrition_stages", "plan_attrition_arms", "plan_attrition_noncompliance")),
+  list(id = "epidemic_models", label = "Epidemic models and herd immunity",
+       hint = "Herd-immunity threshold and the vaccination coverage needed, SIR / SEIR epidemic simulation, and R0 from a growth rate or a final attack fraction.",
+       catalog_keys = c("epi_model_herd", "epi_model_sim", "epi_model_r0")),
   list(id = "analyze_counts", label = "Analyze data you already have (summary counts)",
        hint = "Not a sample-size calculation: effect measures and confidence intervals from counts you already have, starting with the 2x2 table.",
        catalog_keys = c("analyze_2x2_cohort", "analyze_2x2_cross_sectional", "analyze_2x2_case_control",
@@ -2639,6 +2646,31 @@ study_design_families <- list(
 # are included; a calculator with no natural single-test-family home (e.g.
 # most observational-study designs) simply doesn't appear here, only under
 # study_design_families.
+
+# The group of the Plan sidebar a study-design family belongs to (docs/ui_remap_plan.md, step 2): the group where most of its
+# calculators sit, so Browse and the sidebar use one set of names. Families of the Analyze workbench go under "Analyze".
+study_design_family_group <- function(fam) {
+  reg <- module_registry()
+  id_of <- setNames(vapply(reg, `[[`, character(1), "id"), vapply(reg, `[[`, character(1), "title"))
+  group_of <- character()
+  for (wb in module_workbenches) for (g in wb$groups) group_of[g$module_ids] <- if (identical(wb$id, "plan")) g$title else "Analyze"
+  mods <- vapply(fam$catalog_keys, function(k) { e <- catalog_entry(k); if (is.null(e)) NA_character_ else unname(id_of[e$nav_target]) }, "")
+  gs <- group_of[stats::na.omit(mods)]
+  if (!length(gs)) return(NA_character_)
+  tab <- table(factor(gs, levels = unique(gs)))
+  names(tab)[which.max(tab)]
+}
+
+# The headings Browse shows, in sidebar order, and the families under each (indices into study_design_families).
+study_design_family_groups <- function(families = study_design_families) {
+  plan <- Filter(function(wb) identical(wb$id, "plan"), module_workbenches)[[1]]
+  heads <- c(vapply(plan$groups, `[[`, character(1), "title"), "Analyze")
+  g <- vapply(families, study_design_family_group, character(1))
+  out <- lapply(heads, function(h) which(g == h))
+  names(out) <- heads
+  Filter(length, out)
+}
+
 test_families <- list(
   list(id = "effect_size_tests", label = "Effect sizes (the numbers the calculators ask for)",
        hint = "Not a sample-size calculation: work out Cohen's d, f, h or w, an odds ratio, a hazard ratio, or a mean and SD from a median and IQR, from what you already know.",

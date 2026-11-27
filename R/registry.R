@@ -214,6 +214,14 @@ module_workbench_of <- function(module_title) {
   NULL
 }
 
+# The sidebar group a module is listed under ("Trials and Experiments", ...; for Analyze, "Analyze: <group>"), or NULL. Studies shows it
+# on each section so the names match the sidebar (docs/ui_remap_plan.md, step 2).
+module_group_title <- function(module_id) {
+  for (wb in module_workbenches) for (g in wb$groups) if (module_id %in% g$module_ids)
+    return(if (identical(wb$id, "plan")) g$title else paste0(wb$title, ": ", g$title))
+  NULL
+}
+
 # Open a module from anywhere (Home hub buttons, the wizard): select its
 # workbench in the top navbar, then the module inside it.
 jump_to_module <- function(session, module_title) {

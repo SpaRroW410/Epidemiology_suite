@@ -253,7 +253,9 @@ study_view_ui <- function(study) {
         )
       }
       div(class = "card mb-3",
-        div(class = "card-header d-flex flex-wrap justify-content-between gap-2", span(strong(first$module_title), " -- ", first$design), section_moves),
+        div(class = "card-header d-flex flex-wrap justify-content-between gap-2",
+            span(if (!is.null(grp <- module_group_title(first$module))) div(class = "small text-uppercase text-body-secondary", grp),
+                 strong(first$module_title), " -- ", first$design), section_moves),
         div(class = "card-body",
           body,
           if (nzchar(first$formula_latex)) tags$details(class = "small mt-2", tags$summary("Formula (LaTeX, for Word's Insert > Equation)"),

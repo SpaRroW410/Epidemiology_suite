@@ -48,7 +48,7 @@ home_finder_server <- function(input, output, session) {
   output$home_browse_result <- renderUI({
     axis <- if (identical(input$home_browse_axis, "test")) "test" else "design"
     families <- if (axis == "test") test_families else study_design_families
-    panels <- lapply(seq_along(families), function(i) {
+    panel_of <- function(i) {
       fam <- families[[i]]
       body <- if (length(fam$catalog_keys) == 0) {
         .coming_soon_note()
@@ -62,8 +62,15 @@ home_finder_server <- function(input, output, session) {
         )
       }
       accordion_panel(fam$label, body)
-    })
-    do.call(accordion, c(list(id = "home_browse_accordion", open = FALSE), panels))
+    }
+    if (axis == "test")
+      return(do.call(accordion, c(list(id = "home_browse_accordion", open = FALSE), lapply(seq_along(families), panel_of))))
+    # by study design: the families under the sidebar's group names (docs/ui_remap_plan.md, step 2)
+    groups <- study_design_family_groups(families)
+    tagList(lapply(seq_along(groups), function(j) tagList(
+      h6(class = "text-uppercase text-body-secondary small fw-bold mt-3 mb-2",
+         if (identical(names(groups)[j], "Analyze")) "Analyze (data you already have)" else names(groups)[j]),
+      do.call(accordion, c(list(id = paste0("home_browse_accordion_", j), open = FALSE), lapply(groups[[j]], panel_of))))))
   })
 
   # One click-observer per jump button of a built calculator (see
