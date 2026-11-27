@@ -136,9 +136,10 @@
   labelled (29 of 70), with the wording of each function's help page, and the results of the newer calculators; a test checks every
   labelled name is an argument of that calculator. Still unlabelled: the larger families (chi-square, survival, prediction, ROC,
   longitudinal, multiplicity, effect size and others), where one name has several meanings within the calculator. 28 Nov 2026: 27
-  more (56 of 71), again from each function's help page, leaving out any name with two meanings in one calculator (e.g. p1 in
-  Nonparametric Tests, theta in Log-Rank). Still unlabelled: longitudinal, multilevel, Monte Carlo mixed models, psychometrics,
-  meta-analysis power, effect size, survey selection and weights, five Analyze calculators, and the two guidance pages.
+  more, then 9 more (65 of 71), again from each function's help page, leaving out any name with two meanings in one calculator (e.g.
+  p1 in Nonparametric Tests, theta in Log-Rank, lambda in Longitudinal, whose two functions define the ratio in opposite directions).
+  Still unlabelled: the two guidance pages (qualitative, ecological), Diagnostic Test Evaluation, Standardization, Survey Sample
+  Selection and Survey Weights (no help page wording found for their inputs yet).
 - [ ] **STUDY-09** Check Word on phones, Google Docs and LibreOffice (pasted LaTeX, table styles); a long study on a phone.
 
 ## 5. Interface and accessibility (UI) -- 4 open
