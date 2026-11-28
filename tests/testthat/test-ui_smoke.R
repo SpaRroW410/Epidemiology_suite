@@ -34,8 +34,8 @@ test_that("a Home 'Browse calculators' button that shares its calculator with an
   entry <- catalog_entry(key)
   btn <- tail(names(lens)[lens == key], 1)
   ui_select_tab(app, "main_nav", "Home")
-  app$run_js("document.getElementById('home_go_browse').click()")   # "Browse all calculators": the Find a calculator tab
-  app$wait_for_js("Shiny.shinyapp.$inputValues['main_nav'] === 'Find a calculator' && Shiny.shinyapp.$inputValues['home_helper'] === 'Browse all calculators'", timeout = 30000)
+  app$run_js("document.getElementById('home_go_browse').click()")   # "Browse all calculators": the Find a calculator section of Home
+  app$wait_for_js("Shiny.shinyapp.$inputValues['main_nav'] === 'Home' && Shiny.shinyapp.$inputValues['home_helper'] === 'Browse all calculators'", timeout = 30000)
   app$wait_for_js("!!document.getElementById('home_browse_axis')", timeout = 30000)
   app$set_inputs(home_browse_axis = axis, wait_ = FALSE)
   app$wait_for_idle(800, timeout = 30000)

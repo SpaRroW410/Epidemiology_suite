@@ -496,6 +496,47 @@ free_text_rules <- list(
        options = vapply(hit, function(cue) cue$option_index, numeric(1)))
 }
 
+# A description that names a topic but no design fits several designs (FIND-12): the guide does not pick one, it offers two or three
+# starting points (`routes`, defined in R/design_wizard.R as .rq_routes) and the user chooses. A phrase counts only when no design is
+# named: `unless` lists the words that name one (the rules above and below then handle the description). The determinants question
+# (.free_text_determinants_pattern) is the first of these and is handled after the rules; the others are checked before them.
+.free_text_design_cue <- paste0(
+  "cohort|case.?control|cross.?sectional|\\btrials?\\b|randomi[sz]|compar|versus|\\bvs\\b|\\bexposed|unexposed|survey|prevalence|regression|",
+  "correlat|log.?rank|\\bcox\\b|hazard|sensitivity|specificity|diagnostic|accuracy|\\bppv\\b|\\bnpv\\b|predict|prognos|mean level|",
+  "estimate the|incidence rate|person.?(years|time)|before.?(and|&)?.?after|pre.?post|interrupted|natural experiment|meta.?analys|",
+  "systematic review|kappa|agreement|qualitative|interview|screening test|odds ratio|risk ratio|relative risk|2 ?x ?2|contingency|already (have|collected)|effect size|sample size|", .free_text_topic_pattern)
+.free_text_ambiguities <- list(
+  incidence = list(
+    pattern = "\\bincidence\\b|followed?.?up (for|over)|\\bnew cases",
+    unless = .free_text_design_cue,
+    intro = "Your description speaks of incidence or follow-up but does not say what you want to do with it. The sample size depends on which. Choose the one you plan:",
+    routes = c("incidence", "cohort", "cox")),
+  survival = list(
+    pattern = "surviv(al|e|ed)\\b|time.to.(event|relapse|recurrence|death|failure|progression)|kaplan",
+    unless = .free_text_design_cue,
+    intro = "Your description is about survival or time to an event but does not say what you want to do with it. Choose the one you plan:",
+    routes = c("cox", "compare", "prediction")),
+  screening = list(
+    pattern = "\\bscreen(ing|ed)\\b",
+    unless = .free_text_design_cue,
+    intro = "Screening can be studied in different ways, and the sample size depends on which. Choose the one you plan:",
+    routes = c("dx", "survey", "compare")),
+  association = list(
+    pattern = "\\bassociat(ion|ed) (between|of|with)|relationship (between|of)|relation between|link between",
+    unless = paste0(.free_text_design_cue, "|", .free_text_determinants_pattern),
+    intro = "An association between two things can be studied in different ways. Choose the one you plan:",
+    routes = c("compare", "corr", "prediction"))
+)
+
+# The first ambiguity a description raises (NULL when it names a design or none applies).
+.free_text_ambiguity <- function(text) {
+  for (id in names(.free_text_ambiguities)) {
+    a <- .free_text_ambiguities[[id]]
+    if (grepl(a$pattern, text, ignore.case = TRUE, perl = TRUE) && !grepl(a$unless, text, ignore.case = TRUE, perl = TRUE)) return(id)
+  }
+  NULL
+}
+
 # Warnings for the guide (FIND-19): shown with the trail; the route is never changed by them. Each names what in the description
 # raised it and what to check.
 .free_text_warnings <- function(flags, trace, nodes = design_nodes) {
@@ -531,7 +572,10 @@ walk_free_text <- function(text, nodes = design_nodes) {
     return(list(node_id = node_id, trace = trace, flags = flags, reached_terminal = FALSE))
   }
 
-  repeat {
+  # a topic that fits several designs and names none: ask which (FIND-12) instead of walking the rules
+  ambiguous <- .free_text_ambiguity(text)
+
+  while (is.null(ambiguous)) {
     node <- nodes[[node_id]]
     if (isTRUE(node$terminal)) break
 
@@ -564,6 +608,7 @@ walk_free_text <- function(text, nodes = design_nodes) {
   for (nm in names(tf <- .free_text_flags(text))) if (isTRUE(tf[[nm]]) && is.null(flags[[nm]])) flags[[nm]] <- TRUE
   # a determinants question that named no design: the guide shows the candidate designs instead of choosing one
   if (length(trace) == 0 && isTRUE(flags$determinants)) flags$ambiguous <- "determinants"
+  if (!is.null(ambiguous)) flags$ambiguous <- ambiguous
   flags$warnings <- .free_text_warnings(flags, trace, nodes)
   list(node_id = node_id, trace = trace, flags = flags,
        reached_terminal = isTRUE(nodes[[node_id]]$terminal))

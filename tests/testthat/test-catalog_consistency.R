@@ -92,7 +92,7 @@ test_that("workbench ids, titles and navigation ids are unique and do not collid
   wb_titles <- vapply(module_workbenches, `[[`, character(1), "title")
   expect_false(anyDuplicated(wb_titles) > 0)
   expect_false(anyDuplicated(vapply(module_workbenches, `[[`, character(1), "nav_id")) > 0)
-  expect_equal(intersect(c("Home", "Find a calculator", wb_titles), .titles), character(0))
+  expect_equal(intersect(c("Home", wb_titles), .titles), character(0))
 })
 
 test_that("every built catalog entry's target module resolves to a workbench", {
@@ -100,4 +100,58 @@ test_that("every built catalog entry's target module resolves to a workbench", {
     expect_false(is.null(module_workbench_of(e$nav_target)), info = e$key)
   }
   expect_null(module_workbench_of("No such module"))
+})
+
+test_that("the Plan sidebar has the groups agreed for the remap (docs/ui_remap_plan.md, 27 Nov 2026)", {
+  plan <- Filter(function(wb) identical(wb$id, "plan"), module_workbenches)[[1]]
+  titles <- vapply(plan$groups, `[[`, character(1), "title")
+  expect_equal(titles, c("Effect Sizes", "Estimate: Surveys and Descriptive Studies", "Trials and Experiments",
+                         "Observational Studies and Natural Experiments", "Survival", "Tests, Relationships and Models",
+                         "Diagnosis, Agreement, Prediction and Measurement", "Other Designs and General Tools"))
+  expect_equal(plan$groups[[1]]$module_ids, "effect_size")
+  expect_true("attrition" %in% plan$groups[[8]]$module_ids)
+  expect_equal(length(unlist(lapply(plan$groups, `[[`, "module_ids"))), 59)
+})
+
+test_that("Browse by study design uses the sidebar's group names, and every family and design is still listed (remap step 2)", {
+  g <- study_design_family_groups()
+  plan <- Filter(function(wb) identical(wb$id, "plan"), module_workbenches)[[1]]
+  expect_true(all(names(g) %in% c(vapply(plan$groups, `[[`, character(1), "title"), "Analyze")))
+  expect_setequal(unlist(g), seq_along(study_design_families))          # every family under exactly one heading
+  expect_false(anyDuplicated(unlist(g)) > 0)
+  ids <- vapply(study_design_families, `[[`, character(1), "id")
+  expect_false(anyDuplicated(ids) > 0)
+  expect_false("planning_tools" %in% ids)                                 # split into four on 27 Nov 2026
+  fam <- function(id) study_design_families[[which(ids == id)]]
+  expect_equal(study_design_family_group(fam("survey_field_tools")), "Estimate: Surveys and Descriptive Studies")
+  expect_equal(study_design_family_group(fam("randomization_list")), "Trials and Experiments")
+  expect_equal(study_design_family_group(fam("attrition")), "Other Designs and General Tools")
+  expect_equal(study_design_family_group(fam("epidemic_models")), "Other Designs and General Tools")
+  expect_equal(study_design_family_group(fam("proportions")), "Estimate: Surveys and Descriptive Studies")
+  expect_equal(study_design_family_group(fam("analyze_counts")), "Analyze")
+  expect_equal(module_group_title("stepped_wedge"), "Trials and Experiments")
+  expect_equal(module_group_title("analyze_2x2"), "Analyze: From summary counts")
+  expect_null(module_group_title("no_such_module"))
+})
+
+test_that("every calculator has a one-line description, shown on hover in the sidebar (remap step 3)", {
+  ids <- vapply(module_registry(), `[[`, character(1), "id")
+  expect_setequal(names(module_blurbs), ids)
+  expect_true(all(nchar(module_blurbs) <= 60))
+  expect_true(all(nzchar(module_blurbs)))
+  expect_false(any(grepl("[^ -~]", module_blurbs)))                 # plain ASCII
+  tg <- htmltools::renderTags(attr(epidemiologysuite_app(lazy = TRUE), "ui_tags")); html <- paste(tg$head, tg$html)
+  # the description is set as the link's title attribute in the browser, so the link text stays exactly the calculator's title
+  expect_match(html, '"Stepped-Wedge CRT": "Stepped-wedge cluster trial, continuous or binary"', fixed = TRUE)
+  expect_match(html, 'data-value="Stepped-Wedge CRT"', fixed = TRUE)
+  expect_false(grepl('<span title="Stepped-wedge', html, fixed = TRUE))
+})
+
+test_that("the sidebar filter box is part of the page and matches names and descriptions (remap step 4)", {
+  html <- htmltools::renderTags(attr(epidemiologysuite_app(lazy = TRUE), "ui_tags"))
+  page <- paste(html$head, html$html)
+  expect_match(page, "Filter calculators (name or what it does)", fixed = TRUE)
+  expect_match(page, "a.getAttribute('title')", fixed = TRUE)   # the description (hover text) is part of what is matched
+  expect_match(page, "Also in ", fixed = TRUE)             # matches in the other workbench are listed
+  expect_match(page, ".sidebar-filter { display: none; }", fixed = TRUE)   # hidden on phones (the drop-down is used there)
 })

@@ -25,10 +25,10 @@ Steps only the owner can take that belong to no section below; the section items
 
 ## 2. Calculators (Plan: Sample Size and Analyze)
 
-All 223 designs of the app's catalog are built (17 Nov 2026); the open items are designs not built yet, or the open half of a built one.
+All 225 designs of the app's catalog are built (17 Nov 2026); the open items are designs not built yet, or the open half of a built one.
 The guide's end points for designs not built yet are tested to be listed here (`tests/testthat/test-design_tree.R`).
 
-### Plan: Effect Sizes (ES)
+### Plan, Effect Sizes: Effect Sizes (ES)
 
 - [x] **ES-01** Effect size: Cohen's d and Hedges' g from two means (SDs or variances) -- Cohen 1988
 - [x] **ES-02** Effect size: Cohen's d from a t statistic -- Cohen 1988; `stats::t.test`
@@ -42,7 +42,7 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [x] **ES-09** Effect size: mean and SD from a median and interquartile range -- Wan et al. 2014
 - [x] **ES-10** Effect size: phi from a table of matched case-control pairs -- Dupont 1988
 
-### Plan: Descriptive & Estimation (DESC)
+### Plan, Estimate: Surveys and Descriptive Studies: Descriptive & Estimation (DESC)
 
 - [x] **DESC-01** Single proportion -- precision-based (no reference value) -- Cochran 1977; `epiR::epi.sssimpleestb`
 - [x] **DESC-02** Single proportion vs. known/reference value -- Cohen 1988; `pwr::pwr.p.test`, `pwr::ES.h`
@@ -66,7 +66,7 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [x] **DESC-19** Odds ratio -- precision-based -- Gart & Zweifel 1967; `presize::prec_or`
 - [x] **DESC-20** Rate ratio -- precision-based -- Rothman & Greenland 2018; `presize::prec_rateratio`
 
-### Plan: Survey & Cross-Sectional (SVY)
+### Plan, Estimate: Surveys and Descriptive Studies: Survey & Cross-Sectional (SVY)
 
 - [x] **SVY-01** Two-sample mark-recapture (Chapman-Petersen), precision-based -- Chapman 1951
 - [x] **SVY-02** Cluster / multistage sampling -- design effect (DEFF) -- Kish 1965
@@ -78,7 +78,98 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [x] **SVY-08** Lot Quality Assurance Sampling (LQAS) -- Robertson & Valadez 1984
 
 - [ ] **SVY-09** **[blocked]** LQAS, open half: cluster-LQAS (heterogeneity-adjusted). *Unblock:* a citable formula with a worked example.
-### Plan: Observational Studies (OBS)
+### Plan, Estimate: Surveys and Descriptive Studies: Surveillance (SURVL)
+
+- [x] **SURVL-01** Upper bound on an unseen event rate (rule of three) -- Hanley & Lippman-Hand 1983
+- [x] **SURVL-02** Sample size to detect at least one event -- Hanley & Lippman-Hand 1983
+- [x] **SURVL-03** Detect at least one case, imperfect test (finite population) -- Cannon 2001
+
+### Plan, Estimate: Surveys and Descriptive Studies: Survey & Field Tools (FIELD)
+
+- [x] **FIELD-01** Survey sample selection: simple random sample from a list (reproducible) -- Madow 1949
+- [x] **FIELD-02** Survey sample selection: systematic sample, every k-th unit from a random start -- Madow 1949
+- [x] **FIELD-03** Survey sample selection: PPS systematic (probability proportional to size), e.g. choosing clusters -- Madow 1949;
+  `sampling::UPsystematic`
+- [x] **FIELD-04** WHO EPI cluster survey (30 x 7): choose the clusters from a village list -- Madow 1949
+- [x] **FIELD-05** Survey design weights and nonresponse adjustment by weighting class -- Madow 1949
+- [x] **FIELD-06** Effective sample size and design effect of a set of survey weights (Kish) -- Kish 1965
+
+### Plan, Trials and Experiments: Clinical Trials (TRIAL)
+
+- [x] **TRIAL-01** Stepped-wedge cluster-randomized trial (continuous outcome) -- Hooper et al. 2016
+- [x] **TRIAL-02** Subgroup / interaction testing sample-size inflation (4x rule) -- Brookes et al. 2004
+- [x] **TRIAL-03** Cluster-randomized trial, continuous outcome (Monte Carlo LMM) -- Bolker et al. 2009; `lme4::lmer`
+- [x] **TRIAL-04** Cluster-randomized trial, binary outcome (Monte Carlo GLMM) -- Bolker et al. 2009; `lme4::glmer`
+- [x] **TRIAL-05** Growth curve model, group difference in slope (Monte Carlo LMM) -- Green & MacLeod 2016; `lme4::lmer`, `simr::doTest`
+- [x] **TRIAL-06** 2x2 crossover trial (continuous outcome) -- test for a difference -- Chow et al. 2003;
+  `TrialSize::TwoSampleCrossOver.Equality`
+- [x] **TRIAL-07** Pilot / feasibility study -- Julious 2005
+- [x] **TRIAL-08** Simon two-stage Phase II design -- Simon 1989; `clinfun::ph2simon`
+- [x] **TRIAL-09** Equivalence of two means (TOST) -- Phillips 1990; `PowerTOST::sampleN.TOST`
+- [x] **TRIAL-10** Equivalence of two proportions (TOST) -- Bennett et al. 1979; `epiR::epi.ssequb`
+- [x] **TRIAL-11** Pharmacokinetic bioequivalence crossover (TOST) -- Phillips 1990; `PowerTOST::sampleN.TOST`
+- [x] **TRIAL-12** Bioequivalence crossover, expected power (assurance) -- Julious & Owen 2006; `PowerTOST::expsampleN.TOST`
+- [x] **TRIAL-13** Non-inferiority trial, two means -- Chow et al. 2008; `epiR::epi.ssninfc`
+- [x] **TRIAL-14** Non-inferiority trial, two proportions -- Chow et al. 2008; `epiR::epi.ssninfb`
+- [x] **TRIAL-15** Non-inferiority trial, odds ratio -- Chow et al. 2003; `TrialSize::RelativeRisk.NIS`
+- [x] **TRIAL-16** Non-inferiority trial, hazard ratio (Cox PH) -- Chow et al. 2003; `TrialSize::Cox.NIS`
+- [x] **TRIAL-17** Group sequential design, continuous outcome -- Wang & Tsiatis 1987; `clinfun::gsdesign.normal`
+- [x] **TRIAL-18** Group sequential design, binary outcome -- Casagrande et al. 1978; `clinfun::gsdesign.binomial`
+- [x] **TRIAL-19** Group sequential design, time-to-event outcome -- Schoenfeld 1983; `clinfun::gsdesign.survival`
+- [x] **TRIAL-20** Lan-DeMets alpha-spending design, continuous outcome (2 looks) -- Lan & DeMets 1983
+- [x] **TRIAL-21** Trial sequential analysis, risk ratio
+- [x] **TRIAL-22** Trial sequential analysis, odds ratio
+- [x] **TRIAL-23** Trial sequential analysis, risk difference
+- [x] **TRIAL-24** Trial sequential analysis, mean difference
+
+- [ ] **TRIAL-25** **[blocked]** Dose-finding / phase I (3+3, CRM): the output is operating characteristics at a fixed n. *Unblock:* an
+  operating-characteristics simulator, verified against `dfcrm::crmsim()`.
+- [ ] **TRIAL-26** **[blocked]** Platform / basket / umbrella trials. *Unblock:* the same simulator framework, or a multi-arm
+  group-sequential design verified against `rpact`.
+- [ ] **TRIAL-27** **[blocked]** N-of-1 trials: `nof1` / `Nof1` not reachable, no single accepted formula. *Unblock:* a citable
+  period-count formula with a worked example.
+- [x] **TRIAL-28** Stepped-wedge, binary outcome (logit scale, cross-sectional, constant cluster effect). Built 19 Nov 2026 from Xia et al.
+  2021 (Trials 22:598, PMC8419932); the paper's equations were not readable, so the power is matched to the authors' function
+  `swCRTdesign::swGlmPwr()` (10 digits over random settings, test skips without the package). Open: a conversion from ICC to tau,
+  time-varying cluster effects, closed cohort.
+- [ ] **TRIAL-29** Group sequential / Lan-DeMets, open half: blinded sample-size re-estimation (`spass`-style). Built 28 Nov 2026: the
+  spending-function design with any number of looks, for a continuous, binary or time-to-event outcome (`calc_lan_demets_k()`):
+  boundaries and inflation factors equal gsDesign to 6-7 digits (2 to 5 looks, OF- and Pocock-type), events equal gsDesign's
+  for n.fix = nEvents(); the binary design was simulated (20,000 trials: power 0.793, one-sided error 0.026). Efficacy boundaries
+  only (no futility).
+- [x] **TRIAL-30** Trial sequential analysis, open half: the heterogeneity-adjusted (random-effects / diversity-adjusted) information size.
+  Built 16 Nov 2026: an anticipated heterogeneity (diversity D-squared, or I-squared) multiplies the fixed-effect size by
+  1 / (1 - D-squared); Wetterslev, Thorlund, Brok & Gluud 2009 (BMC Med Res Methodol 9:86, read in full), whose Table 2 (seven
+  meta-analyses, both adjustments) the tests reproduce to within the rounding of its printed percentages.
+- [ ] **TRIAL-31** **[blocked]** Non-inferiority, open half: a true relative-risk-scale margin (`TrialSize::RelativeRisk.NIS()` is
+  odds-ratio based, so it ships as the OR design). *Unblock:* a verified RR-scale source.
+- [ ] **TRIAL-32** Bioequivalence, open half: reference-scaled designs for highly variable drugs (RSABE / ABEL); simulation-based in
+  `PowerTOST`, not wired in.
+### Plan, Trials and Experiments: Several Measurements per Patient (UNIT)
+
+- [x] **UNIT-01** Several units per patient (eyes, lesions, patches), same treatment in all of a patient's units -- two means -- Donner &
+  Klar 2000; `clusterPower::cpa.normal`
+- [x] **UNIT-02** Several units per patient (eyes, lesions, patches), same treatment in all of a patient's units -- two proportions --
+  Donner & Klar 2000; `clusterPower::cpa.binary`
+- [x] **UNIT-03** Both treatments in every patient (split-face, split-body, one eye per arm) -- two means -- Cohen 1988
+
+- [ ] **UNIT-04** **[blocked]** Eyes / lesions per patient, open half: binary outcome with both treatments in each patient (clustered
+  McNemar), a patient-by-treatment variance part for the split designs, unequal allocation, different numbers of units in the two arms,
+  and the analysis side. 24 Nov 2026: searched PubMed. Found the analysis tests only, as abstracts with no formula and no free full text:
+  Obuchowski, Stat Med 1998 (PMID 9695194); Yang, Sun & Hardin, Biom J 2010 (PMID 20976694); Rosner & Milton, Biometrics 1988 (PMID
+  3390508). None gives a sample-size formula. *Unblock:* a readable paper with a sample-size formula for clustered paired binary data
+  (e.g. Eliasziw & Donner 1991, not found in PubMed Central).
+### Plan, Trials and Experiments: Preclinical / Animal Studies (PRE)
+
+- [x] **PRE-01** Resource equation method (animal studies) -- Mead 1988
+
+### Plan, Trials and Experiments: Study Planning Tools, randomization (PLAN)
+
+- [x] **PLAN-04** Randomization list: permuted blocks (reproducible from a seed) -- Altman & Bland 1999
+- [x] **PLAN-05** Randomization list: permuted blocks within strata (sites, prognostic groups) -- Altman & Bland 1999
+- [x] **PLAN-06** Randomization list: simple (unrestricted) randomization -- Altman & Bland 1999
+
+### Plan, Observational Studies and Natural Experiments: Observational Studies (OBS)
 
 - [x] **OBS-01** Unmatched case-control study -- Dupont 1988; `epiR::epi.sscc`
 - [x] **OBS-02** Matched case-control study (1:1 or 1:m) -- Dupont 1988; `epiR::epi.sscc`
@@ -119,94 +210,7 @@ The guide's end points for designs not built yet are tested to be listed here (`
   simulation here (80.0% by formula, 79.6% simulated without confounding). The guide asks the outcome type and opens the matching
   design. Brion, Shakhbazov & Visscher 2013 could not be read in full (no full text through PubMed Central) and is not cited.
 
-### Plan: Diagnostic & Screening (DX)
-
-- [x] **DX-01** Sensitivity & specificity -- precision-based (no reference value) -- Buderer 1996
-- [x] **DX-02** Sensitivity & specificity vs. known/reference value -- Akoglu 2022
-- [x] **DX-03** Two independent (unpaired) diagnostic tests -- Casagrande & Pike 1978
-- [x] **DX-04** Two paired diagnostic tests (same subjects) -- Connor 1987
-- [x] **DX-05** Predictive values (PPV/NPV), precision-based -- Altman & Bland 1994
-- [x] **DX-06** Likelihood ratios (LR+/LR-), precision-based -- Simel et al. 1991; `presize::prec_lr`, `presize::prec_pos_lr`
-- [x] **DX-07** Diagnostic odds ratio (DOR) -- Glas et al. 2003
-- [x] **DX-08** Single ROC AUC vs. chance (0.5) -- Obuchowski et al. 2004; `pROC::power.roc.test`
-- [x] **DX-09** Compare two correlated (paired) ROC AUCs
-
-- [ ] **DX-10** **[blocked]** Multi-reader multi-case (MRMC) studies, Obuchowski-Rockette / DBM: `iMRMC`'s Roe-Metz model (6 fixed
-  effects, 18 variance components) is too large for one batch. *Unblock:* a multi-batch effort with `iMRMC` as the reference.
-- [ ] **DX-11** **[blocked]** ROC comparison, open half: Unpaired AUCs (two independent AUCs; `pROC::power.roc.test` does not support
-  them). *Unblock:* a separately verified formula.
-### Plan: Agreement & Reliability (AGR)
-
-- [x] **AGR-01** Cohen's kappa (categorical agreement, no gold standard) -- Donner & Eliasziw 1987; `presize::prec_kappa`
-- [x] **AGR-02** Intraclass correlation - ICC (continuous agreement, no gold standard) -- Bonett 2002; `presize::prec_icc`
-- [x] **AGR-03** Cronbach's alpha (scale internal consistency) -- Bonett & Wright 2015; `presize::prec_cronb`
-- [x] **AGR-04** Bland-Altman limits of agreement -- Bland & Altman 1986; `presize::prec_lim_agree`
-- [x] **AGR-05** Lin's concordance correlation coefficient (CCC) -- Lin 1989; `epiR::epi.ccc`
-
-- [ ] **AGR-06** **[blocked]** Method comparison by Deming / Passing-Bablok regression: `deming`, `mcr`, `MethComp` are analysis-only; the
-  literature is simulation-based. *Unblock:* a citable simulation protocol (e.g. Linnet) to reproduce.
-- [ ] **AGR-07** **[blocked]** Agreement, open half: weighted kappa. No source with a formula and a worked example that I could read
-  (19 Nov 2026). *Unblock:* a readable paper with the sample-size formula for weighted kappa (e.g. a PMC article).
-### Plan: Several Measurements per Patient (UNIT)
-
-- [x] **UNIT-01** Several units per patient (eyes, lesions, patches), same treatment in all of a patient's units -- two means -- Donner &
-  Klar 2000; `clusterPower::cpa.normal`
-- [x] **UNIT-02** Several units per patient (eyes, lesions, patches), same treatment in all of a patient's units -- two proportions --
-  Donner & Klar 2000; `clusterPower::cpa.binary`
-- [x] **UNIT-03** Both treatments in every patient (split-face, split-body, one eye per arm) -- two means -- Cohen 1988
-
-- [ ] **UNIT-04** Eyes / lesions per patient, open half: binary outcome with both treatments in each patient (clustered McNemar; needs a
-  checked source), a patient-by-treatment variance part for the split designs, unequal allocation, different numbers of units in the two
-  arms, and the analysis side (Rosner-Milton / Obuchowski tests).
-### Plan: Clinical Trials (TRIAL)
-
-- [x] **TRIAL-01** Stepped-wedge cluster-randomized trial (continuous outcome) -- Hooper et al. 2016
-- [x] **TRIAL-02** Subgroup / interaction testing sample-size inflation (4x rule) -- Brookes et al. 2004
-- [x] **TRIAL-03** Cluster-randomized trial, continuous outcome (Monte Carlo LMM) -- Bolker et al. 2009; `lme4::lmer`
-- [x] **TRIAL-04** Cluster-randomized trial, binary outcome (Monte Carlo GLMM) -- Bolker et al. 2009; `lme4::glmer`
-- [x] **TRIAL-05** Growth curve model, group difference in slope (Monte Carlo LMM) -- Green & MacLeod 2016; `lme4::lmer`, `simr::doTest`
-- [x] **TRIAL-06** 2x2 crossover trial (continuous outcome) -- test for a difference -- Chow et al. 2003;
-  `TrialSize::TwoSampleCrossOver.Equality`
-- [x] **TRIAL-07** Pilot / feasibility study -- Julious 2005
-- [x] **TRIAL-08** Simon two-stage Phase II design -- Simon 1989; `clinfun::ph2simon`
-- [x] **TRIAL-09** Equivalence of two means (TOST) -- Phillips 1990; `PowerTOST::sampleN.TOST`
-- [x] **TRIAL-10** Equivalence of two proportions (TOST) -- Bennett et al. 1979; `epiR::epi.ssequb`
-- [x] **TRIAL-11** Pharmacokinetic bioequivalence crossover (TOST) -- Phillips 1990; `PowerTOST::sampleN.TOST`
-- [x] **TRIAL-12** Bioequivalence crossover, expected power (assurance) -- Julious & Owen 2006; `PowerTOST::expsampleN.TOST`
-- [x] **TRIAL-13** Non-inferiority trial, two means -- Chow et al. 2008; `epiR::epi.ssninfc`
-- [x] **TRIAL-14** Non-inferiority trial, two proportions -- Chow et al. 2008; `epiR::epi.ssninfb`
-- [x] **TRIAL-15** Non-inferiority trial, odds ratio -- Chow et al. 2003; `TrialSize::RelativeRisk.NIS`
-- [x] **TRIAL-16** Non-inferiority trial, hazard ratio (Cox PH) -- Chow et al. 2003; `TrialSize::Cox.NIS`
-- [x] **TRIAL-17** Group sequential design, continuous outcome -- Wang & Tsiatis 1987; `clinfun::gsdesign.normal`
-- [x] **TRIAL-18** Group sequential design, binary outcome -- Casagrande et al. 1978; `clinfun::gsdesign.binomial`
-- [x] **TRIAL-19** Group sequential design, time-to-event outcome -- Schoenfeld 1983; `clinfun::gsdesign.survival`
-- [x] **TRIAL-20** Lan-DeMets alpha-spending design, continuous outcome (2 looks) -- Lan & DeMets 1983
-- [x] **TRIAL-21** Trial sequential analysis, risk ratio
-- [x] **TRIAL-22** Trial sequential analysis, odds ratio
-- [x] **TRIAL-23** Trial sequential analysis, risk difference
-- [x] **TRIAL-24** Trial sequential analysis, mean difference
-
-- [ ] **TRIAL-25** **[blocked]** Dose-finding / phase I (3+3, CRM): the output is operating characteristics at a fixed n. *Unblock:* an
-  operating-characteristics simulator, verified against `dfcrm::crmsim()`.
-- [ ] **TRIAL-26** **[blocked]** Platform / basket / umbrella trials. *Unblock:* the same simulator framework, or a multi-arm
-  group-sequential design verified against `rpact`.
-- [ ] **TRIAL-27** **[blocked]** N-of-1 trials: `nof1` / `Nof1` not reachable, no single accepted formula. *Unblock:* a citable
-  period-count formula with a worked example.
-- [x] **TRIAL-28** Stepped-wedge, binary outcome (logit scale, cross-sectional, constant cluster effect). Built 19 Nov 2026 from Xia et al.
-  2021 (Trials 22:598, PMC8419932); the paper's equations were not readable, so the power is matched to the authors' function
-  `swCRTdesign::swGlmPwr()` (10 digits over random settings, test skips without the package). Open: a conversion from ICC to tau,
-  time-varying cluster effects, closed cohort.
-- [ ] **TRIAL-29** Group sequential / Lan-DeMets, open half: the spending-function design with 3+ looks and for binary / survival
-  outcomes; blinded sample-size re-estimation (`spass`-style).
-- [x] **TRIAL-30** Trial sequential analysis, open half: the heterogeneity-adjusted (random-effects / diversity-adjusted) information size.
-  Built 16 Nov 2026: an anticipated heterogeneity (diversity D-squared, or I-squared) multiplies the fixed-effect size by
-  1 / (1 - D-squared); Wetterslev, Thorlund, Brok & Gluud 2009 (BMC Med Res Methodol 9:86, read in full), whose Table 2 (seven
-  meta-analyses, both adjustments) the tests reproduce to within the rounding of its printed percentages.
-- [ ] **TRIAL-31** **[blocked]** Non-inferiority, open half: a true relative-risk-scale margin (`TrialSize::RelativeRisk.NIS()` is
-  odds-ratio based, so it ships as the OR design). *Unblock:* a verified RR-scale source.
-- [ ] **TRIAL-32** Bioequivalence, open half: reference-scaled designs for highly variable drugs (RSABE / ABEL); simulation-based in
-  `PowerTOST`, not wired in.
-### Plan: Survival Analysis (SURV)
+### Plan, Survival: Survival Analysis (SURV)
 
 - [x] **SURV-01** Log-rank test (comparing two survival curves) -- Freedman 1982; `powerSurvEpi::ssizeCT.default`
 - [x] **SURV-02** Cox proportional-hazards regression -- binary covariate -- Latouche et al. 2004; `powerSurvEpi::ssizeEpi.default`
@@ -220,73 +224,7 @@ The guide's end points for designs not built yet are tested to be listed here (`
 
 - [ ] **SURV-09** **[blocked]** One-sample survival vs. a historical control (Finkelstein et al. 2003; Schmidt et al. 2015): the sources
   with the equations were not reachable. *Unblock:* the paper or the NCSS / PASS manual, and one worked example.
-### Plan: Prediction Models (PRED)
-
-- [x] **PRED-01** Prediction model development -- binary outcome -- Riley et al. 2019; `pmsampsize::pmsampsize`
-- [x] **PRED-02** Prediction model development -- continuous outcome -- Riley et al. 2019; `pmsampsize::pmsampsize`
-- [x] **PRED-03** Prediction model development -- survival outcome -- Riley et al. 2020; `pmsampsize::pmsampsize`
-- [x] **PRED-04** Prediction model external validation -- binary outcome -- Riley et al. 2021; `pmvalsampsize::pmvalsampsize`,
-  `pROC::ci.auc`
-
-- [ ] **PRED-05** **[paused]** External validation, time-to-event (Riley et al. 2022): paused by the owner pending paper access
-  (`pmvalsampsize` may have a time-to-event branch worth checking first). Reopen: decision D6.
-- [ ] **PRED-06** **[paused]** Model updating / recalibration; machine-learning model sample size; calibration-assessment sample size:
-  paused by the owner, same reason.
-### Plan: Surveillance (SURVL)
-
-- [x] **SURVL-01** Upper bound on an unseen event rate (rule of three) -- Hanley & Lippman-Hand 1983
-- [x] **SURVL-02** Sample size to detect at least one event -- Hanley & Lippman-Hand 1983
-- [x] **SURVL-03** Detect at least one case, imperfect test (finite population) -- Cannon 2001
-
-### Plan: Preclinical / Animal Studies (PRE)
-
-- [x] **PRE-01** Resource equation method (animal studies) -- Mead 1988
-
-### Plan: Qualitative / Mixed Methods (QUAL)
-
-- [x] **QUAL-01** Qualitative / mixed methods sample size guidance -- Guest et al. 2006
-
-### Plan: Psychometrics / Scale Development (PSY)
-
-- [x] **PSY-01** EFA/CFA subjects-per-item sample size guidance -- Costello & Osborne 2005
-- [x] **PSY-02** CFA/SEM test of close fit via RMSEA -- MacCallum et al. 1996
-- [x] **PSY-03** IRT item calibration -- minimum sample size by model type -- Linacre 1994
-
-### Plan: Health Economics / Value of Information (HE)
-
-- [x] **HE-01** Value of information (EVPI) for a cost-effectiveness decision
-- [x] **HE-02** Value of sample information (EVSI) and optimal sample size (ENBS)
-
-- [ ] **HE-03** Value of information, open half: multi-parameter EVPPI and non-normal outcomes (only the single-parameter, known-SD case
-  ships).
-### Plan: Study Planning Tools (PLAN)
-
-- [x] **PLAN-01** Inflate a sample size for attrition and non-response (one or several stages)
-- [x] **PLAN-02** Inflate each arm for different expected losses
-- [x] **PLAN-03** Inflate a sample size for drop-out and drop-in (non-compliance) -- Lachin 1981
-- [x] **PLAN-04** Randomization list: permuted blocks (reproducible from a seed) -- Altman & Bland 1999
-- [x] **PLAN-05** Randomization list: permuted blocks within strata (sites, prognostic groups) -- Altman & Bland 1999
-- [x] **PLAN-06** Randomization list: simple (unrestricted) randomization -- Altman & Bland 1999
-
-### Plan: Survey & Field Tools (FIELD)
-
-- [x] **FIELD-01** Survey sample selection: simple random sample from a list (reproducible) -- Madow 1949
-- [x] **FIELD-02** Survey sample selection: systematic sample, every k-th unit from a random start -- Madow 1949
-- [x] **FIELD-03** Survey sample selection: PPS systematic (probability proportional to size), e.g. choosing clusters -- Madow 1949;
-  `sampling::UPsystematic`
-- [x] **FIELD-04** WHO EPI cluster survey (30 x 7): choose the clusters from a village list -- Madow 1949
-- [x] **FIELD-05** Survey design weights and nonresponse adjustment by weighting class -- Madow 1949
-- [x] **FIELD-06** Effective sample size and design effect of a set of survey weights (Kish) -- Kish 1965
-
-### Plan: Infectious Disease Models (IDM)
-
-- [x] **IDM-01** Herd-immunity threshold and vaccination coverage needed (with imperfect vaccine efficacy) -- Kermack & McKendrick 1927;
-  `stats::uniroot`
-- [x] **IDM-02** SIR / SEIR epidemic simulation with vaccination (final size, peak, infections averted) -- Kermack & McKendrick 1927;
-  `deSolve::ode`
-- [x] **IDM-03** R0 from an epidemic growth rate (doubling time) or from a final attack fraction -- Kermack & McKendrick 1927
-
-### Plan: General Statistical Tests (GEN)
+### Plan, Tests, Relationships and Models: General Statistical Tests (GEN)
 
 - [x] **GEN-01** Two paired/dependent proportions (e.g. before-after, matched pairs) -- Chow et al. 2003; `TrialSize::McNemar.Test`
 - [x] **GEN-02** Three or more group proportions -- Cohen 1988; `pwr::ES.w2`, `pwr::pwr.chisq.test`
@@ -372,12 +310,86 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [ ] **GEN-71** MMRM, open half: general missing-data patterns beyond the AR(1) / dropout design.
 - [ ] **GEN-72** GEE marginal models, open half: the damped-exponential correlation.
 - [ ] **GEN-73** MANOVA, open half: the global test for k > 2 groups and special-effect contrasts.
-- [ ] **GEN-74** Two dependent correlations, open half: the non-common-index case.
+- [x] **GEN-74** Two dependent correlations, non-overlapping case (four variables, six correlations). Built 24 Nov 2026 from Steiger's
+  (1980) form as implemented in the R package cocor (formula read from its code; the paper itself was not read): the Z statistic
+  equals cocor's to 10 digits on random matrices and a 1,500-study simulation reaches the target power. Open: the other tests
+  (Raghunathan, Silver) and the paper's text.
 - [ ] **GEN-75** Ordinal / multinomial regression, open half: the nominal (multinomial) model.
 - [ ] **GEN-76** Multiplicity, open half: Holm's step-down as its own design (no single planning alpha; needs simulation).
 - [ ] **GEN-77** **[blocked]** Multi-arm vs. common control, open half: Dunnett for binary outcomes (means only; the guide falls back to
   Bonferroni / Sidak). Candidate sources found 16 Nov 2026, no free full text, not read: Piegorsch 1991-type many-to-one comparisons
   in Stat Med 1995;14:2547 (PMID 8746885) and Stat Med 2003;22:2031 (PMID 12802814). *Unblock:* paper access.
+### Plan, Diagnosis, Agreement, Prediction and Measurement: Diagnostic & Screening (DX)
+
+- [x] **DX-01** Sensitivity & specificity -- precision-based (no reference value) -- Buderer 1996
+- [x] **DX-02** Sensitivity & specificity vs. known/reference value -- Akoglu 2022
+- [x] **DX-03** Two independent (unpaired) diagnostic tests -- Casagrande & Pike 1978
+- [x] **DX-04** Two paired diagnostic tests (same subjects) -- Connor 1987
+- [x] **DX-05** Predictive values (PPV/NPV), precision-based -- Altman & Bland 1994
+- [x] **DX-06** Likelihood ratios (LR+/LR-), precision-based -- Simel et al. 1991; `presize::prec_lr`, `presize::prec_pos_lr`
+- [x] **DX-07** Diagnostic odds ratio (DOR) -- Glas et al. 2003
+- [x] **DX-08** Single ROC AUC vs. chance (0.5) -- Obuchowski et al. 2004; `pROC::power.roc.test`
+- [x] **DX-09** Compare two correlated (paired) ROC AUCs
+
+- [ ] **DX-10** **[blocked]** Multi-reader multi-case (MRMC) studies, Obuchowski-Rockette / DBM: `iMRMC`'s Roe-Metz model (6 fixed
+  effects, 18 variance components) is too large for one batch. *Unblock:* a multi-batch effort with `iMRMC` as the reference.
+- [ ] **DX-11** **[blocked]** ROC comparison, open half: Unpaired AUCs (two independent AUCs; `pROC::power.roc.test` does not support
+  them). *Unblock:* a separately verified formula.
+### Plan, Diagnosis, Agreement, Prediction and Measurement: Agreement & Reliability (AGR)
+
+- [x] **AGR-01** Cohen's kappa (categorical agreement, no gold standard) -- Donner & Eliasziw 1987; `presize::prec_kappa`
+- [x] **AGR-02** Intraclass correlation - ICC (continuous agreement, no gold standard) -- Bonett 2002; `presize::prec_icc`
+- [x] **AGR-03** Cronbach's alpha (scale internal consistency) -- Bonett & Wright 2015; `presize::prec_cronb`
+- [x] **AGR-04** Bland-Altman limits of agreement -- Bland & Altman 1986; `presize::prec_lim_agree`
+- [x] **AGR-05** Lin's concordance correlation coefficient (CCC) -- Lin 1989; `epiR::epi.ccc`
+
+- [ ] **AGR-06** **[blocked]** Method comparison by Deming / Passing-Bablok regression: `deming`, `mcr`, `MethComp` are analysis-only; the
+  literature is simulation-based. *Unblock:* a citable simulation protocol (e.g. Linnet) to reproduce.
+- [ ] **AGR-07** **[blocked]** Agreement, open half: weighted kappa. No source with a formula and a worked example that I could read
+  (19 Nov 2026). *Unblock:* a readable paper with the sample-size formula for weighted kappa (e.g. a PMC article).
+### Plan, Diagnosis, Agreement, Prediction and Measurement: Prediction Models (PRED)
+
+- [x] **PRED-01** Prediction model development -- binary outcome -- Riley et al. 2019; `pmsampsize::pmsampsize`
+- [x] **PRED-02** Prediction model development -- continuous outcome -- Riley et al. 2019; `pmsampsize::pmsampsize`
+- [x] **PRED-03** Prediction model development -- survival outcome -- Riley et al. 2020; `pmsampsize::pmsampsize`
+- [x] **PRED-04** Prediction model external validation -- binary outcome -- Riley et al. 2021; `pmvalsampsize::pmvalsampsize`,
+  `pROC::ci.auc`
+
+- [ ] **PRED-05** **[paused]** External validation, time-to-event (Riley et al. 2022): paused by the owner pending paper access
+  (`pmvalsampsize` may have a time-to-event branch worth checking first). Reopen: decision D6.
+- [ ] **PRED-06** **[paused]** Model updating / recalibration; machine-learning model sample size; calibration-assessment sample size:
+  paused by the owner, same reason.
+### Plan, Diagnosis, Agreement, Prediction and Measurement: Psychometrics / Scale Development (PSY)
+
+- [x] **PSY-01** EFA/CFA subjects-per-item sample size guidance -- Costello & Osborne 2005
+- [x] **PSY-02** CFA/SEM test of close fit via RMSEA -- MacCallum et al. 1996
+- [x] **PSY-03** IRT item calibration -- minimum sample size by model type -- Linacre 1994
+
+### Plan, Other Designs and General Tools: Study Planning Tools, attrition (PLAN)
+
+- [x] **PLAN-01** Inflate a sample size for attrition and non-response (one or several stages)
+- [x] **PLAN-02** Inflate each arm for different expected losses
+- [x] **PLAN-03** Inflate a sample size for drop-out and drop-in (non-compliance) -- Lachin 1981
+
+### Plan, Other Designs and General Tools: Qualitative / Mixed Methods (QUAL)
+
+- [x] **QUAL-01** Qualitative / mixed methods sample size guidance -- Guest et al. 2006
+
+### Plan, Other Designs and General Tools: Health Economics / Value of Information (HE)
+
+- [x] **HE-01** Value of information (EVPI) for a cost-effectiveness decision
+- [x] **HE-02** Value of sample information (EVSI) and optimal sample size (ENBS)
+
+- [ ] **HE-03** Value of information, open half: multi-parameter EVPPI and non-normal outcomes (only the single-parameter, known-SD case
+  ships).
+### Plan, Other Designs and General Tools: Infectious Disease Models (IDM)
+
+- [x] **IDM-01** Herd-immunity threshold and vaccination coverage needed (with imperfect vaccine efficacy) -- Kermack & McKendrick 1927;
+  `stats::uniroot`
+- [x] **IDM-02** SIR / SEIR epidemic simulation with vaccination (final size, peak, infections averted) -- Kermack & McKendrick 1927;
+  `deSolve::ode`
+- [x] **IDM-03** R0 from an epidemic growth rate (doubling time) or from a final attack fraction -- Kermack & McKendrick 1927
+
 ### Analyze: From summary counts (AN)
 
 - [x] **AN-01** Compare two proportions: difference, risk ratio, odds ratio (several interval methods) -- Newcombe 1998;
@@ -429,7 +441,8 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [x] **FIND-02** Free-text reader: a description of the study is read for design, outcome and matching words and walks the tree as far as
   it can (`R/design_free_text.R`).
 - [x] **FIND-03** Search box on Home and in the navbar, over every built design by name and description (29 Oct 2026).
-- [x] **FIND-04** The Find tab: the guide and the browse lists (by design, by test) moved out of Home (1 Nov 2026).
+- [x] **FIND-04** The Find tab: the guide and the browse lists (by design, by test) moved out of Home (1 Nov 2026). Back on Home since
+  28 Nov 2026 as its "Find a calculator" section, opened by the three doors at the top (UI remap step 6, `docs/ui_remap_plan.md`).
 - [x] **FIND-05** The guide says when nothing in a description was recognised, and how to rephrase (3 Nov 2026).
 - [x] **FIND-06** Research questions phrased by topic: knowledge-attitude-practice, awareness, utilization reach a survey estimate;
   "determinants / risk factors of X" offer four candidate designs (survey, case-control, cohort, prediction model); the last step points to
@@ -440,11 +453,20 @@ The guide's end points for designs not built yet are tested to be listed here (`
 - [ ] **FIND-09** **[owner]** A list of 50-100 real research questions / thesis titles (community medicine, public health) to test the
   reader against.
 - [ ] **FIND-10** A test battery of those questions with the route each should take; the hit rate before and after each change.
-- [ ] **FIND-11** More phrasings once the list is in: "effect / effectiveness / impact of" without a design word (trial or
-  quasi-experimental: ask), "association between" (ask which design), "incidence / follow-up", "survival / time to", "accuracy / screening".
-- [ ] **FIND-12** Ask instead of guessing when a phrase fits several designs (offer two or three starting points).
-- [ ] **FIND-13** A guide that asks for each objective of a study in turn (the first step, buttons to the association calculators after a
-  determinants question, is done).
+- [x] **FIND-11** More phrasings: the five the checklist names are covered (24 Nov 2026). "Effect / effectiveness / impact of" without a
+  design word ends at the question who assigns the intervention (trial or quasi-experiment: it asks); "association between", "incidence /
+  follow-up", "survival / time to" and "screening" ask which design (FIND-12); "accuracy" goes to the diagnostic branch. Cases in
+  `test-design_free_text.R`. Tuning against real questions still waits for FIND-09 and FIND-10.
+- [x] **FIND-12** Ask instead of guessing when a phrase fits several designs (offer two or three starting points). Built 20 Nov 2026:
+  four phrases that name a topic but no design -- incidence / follow-up, survival / time to an event, screening, "association between"
+  -- are not routed; the guide shows two or three starting points and the user chooses (`.free_text_ambiguities`, `.rq_routes`). A
+  description that names a design (cohort, trial, log-rank, a 2x2 table ...) is routed as before. Joins the determinants question.
+  "Effect / effectiveness / impact of" already ends at the question who assigns the intervention, so it asks.
+- [x] **FIND-13** A guide that asks for each objective of a study in turn. Built 24 Nov 2026: at a design end point, "Save as an objective
+  and plan another" keeps the design and returns the guide to the first question; the saved objectives are listed above the guide, each
+  with a button to its calculator and a remove button (up to 12; kept for the session). Earlier: buttons to the association
+  calculators after a determinants question. 28 Nov 2026: "Add all" puts every saved objective into a chosen study at once, each as
+  a design choice with the answers that led to it.
 - [ ] **FIND-14** **[optional]** A language-model reader, only by a separate decision (no API, nothing sent anywhere in the browser
   version). Not now: decision F1 (6 Nov 2026) keeps the reader deterministic.
 - [x] **FIND-15** The owner's routing material (drafted with Gemini, shared from Google Drive) stored in `docs/find_routing/` with a
@@ -520,7 +542,11 @@ Decisions S1-S5 are in `SDD.md`, section 17.
 - [ ] **STUDY-08** Readable names for more calculators (only names with one meaning are labelled now). 16 Nov 2026: 23 more calculators
   labelled (29 of 70), with the wording of each function's help page, and the results of the newer calculators; a test checks every
   labelled name is an argument of that calculator. Still unlabelled: the larger families (chi-square, survival, prediction, ROC,
-  longitudinal, multiplicity, effect size and others), where one name has several meanings within the calculator.
+  longitudinal, multiplicity, effect size and others), where one name has several meanings within the calculator. 28 Nov 2026: 27
+  more, then 9 more (65 of 71), again from each function's help page, leaving out any name with two meanings in one calculator (e.g.
+  p1 in Nonparametric Tests, theta in Log-Rank, lambda in Longitudinal, whose two functions define the ratio in opposite directions).
+  Still unlabelled: the two guidance pages (qualitative, ecological), Diagnostic Test Evaluation, Standardization, Survey Sample
+  Selection and Survey Weights (no help page wording found for their inputs yet).
 - [ ] **STUDY-09** Check Word on phones, Google Docs and LibreOffice (pasted LaTeX, table styles); a long study on a phone.
 
 ## 5. Interface and accessibility (UI)
@@ -551,6 +577,11 @@ Decisions S1-S5 are in `SDD.md`, section 17.
   is and what is inside, the start-up progress, rotating feature tips, how to cite it, the author's papers (public ORCID record),
   workshops and other projects (public GitHub), a link to report a problem; light and dark, phone layout; it goes as soon as the app is on
   screen (7 Nov 2026). Conferences: none listed yet (a commented block in the file shows where to add them).
+- [x] **UI-17** Finding a calculator, remapped (`docs/ui_remap_plan.md`, owner's decisions 24 and 27 Nov 2026), built 27-28 Nov 2026:
+  the Plan sidebar in seven groups led by study design (Effect Sizes first); Browse and Studies use the same group names; a one-line
+  description of each calculator on hover; a filter box over the sidebars (name or description, both workbenches); favourites (star)
+  and the last five calculators at the top of the sidebars, also saved to a file when run from the R package on one's own computer;
+  Home as the one start page with three doors (the "Find a calculator" top tab became a section of Home). Every calculator kept.
 
 ## 6. The R package (PKG)
 

@@ -27,7 +27,8 @@ mod_group_sequential_ui <- function(id) {
           "Continuous (means), power-family boundary" = "normal",
           "Binary (proportions), power-family boundary" = "binary",
           "Time-to-event (survival), power-family boundary" = "survival",
-          "Continuous (means), Lan-DeMets alpha spending (2 looks)" = "lan_demets_normal"
+          "Continuous (means), Lan-DeMets alpha spending (2 looks)" = "lan_demets_normal",
+          "Lan-DeMets alpha spending, any number of looks (continuous, binary or time-to-event)" = "lan_demets_k"
         ),
         selected = "normal"
       ),
@@ -59,9 +60,26 @@ mod_group_sequential_ui <- function(id) {
                      choices = c("O'Brien-Fleming-type" = "OF", "Pocock-type" = "Pocock"),
                      selected = "OF")
       ),
+      conditionalPanel(
+        condition = design_is("lan_demets_k"),
+        radioButtons(ns("outcome_k"), "Outcome", inline = TRUE,
+                     choices = c("Continuous" = "continuous", "Binary" = "binary", "Time-to-event" = "survival"), selected = "continuous"),
+        conditionalPanel(condition = sprintf("input['%s'] == 'continuous'", ns("outcome_k")),
+          numericInput(ns("delta_k"), "Assumed difference in means (delta)", value = 0.5),
+          numericInput(ns("sd_k"), "Common standard deviation (SD)", value = 1, min = 0.0001)),
+        conditionalPanel(condition = sprintf("input['%s'] == 'binary'", ns("outcome_k")),
+          numericInput(ns("pC_k"), "pC (control-arm probability)", value = 0.30, min = 0.001, max = 0.999, step = 0.01),
+          numericInput(ns("pE_k"), "pE (experimental-arm probability)", value = 0.45, min = 0.001, max = 0.999, step = 0.01)),
+        conditionalPanel(condition = sprintf("input['%s'] == 'survival'", ns("outcome_k")),
+          numericInput(ns("hr_k"), "Assumed hazard ratio (experimental vs. control)", value = 0.7, min = 0.001, step = 0.01)),
+        textInput(ns("timing_k"), "Interim analyses (information fractions, separated by commas; the final one is at 1)",
+                  value = "0.33, 0.67"),
+        radioButtons(ns("spending_k"), "Spending function",
+                     choices = c("O'Brien-Fleming-type" = "OF", "Pocock-type" = "Pocock"), selected = "OF")
+      ),
       hr(),
       conditionalPanel(
-        condition = paste0("!(", design_is("lan_demets_normal"), ")"),
+        condition = paste0("!(", design_is("lan_demets_normal"), " || ", design_is("lan_demets_k"), ")"),
         selectInput(ns("n_looks"), "Number of planned analyses (including the final one)",
                     choices = 1:6, selected = 4),
         sliderInput(ns("boundary_shape"), "Boundary shape (0 = Pocock, 0.5 = O'Brien-Fleming)",
@@ -120,6 +138,12 @@ mod_group_sequential_ui <- function(id) {
       h5("Worked example"),
       shiny::markdown(group_sequential_content$lan_demets_normal$worked_example),
       hr(),
+      h4(group_sequential_content$lan_demets_k$title),
+      render_formula_block(group_sequential_content$lan_demets_k$formula_latex),
+      shiny::markdown(group_sequential_content$lan_demets_k$explanation),
+      h5("Worked example"),
+      shiny::markdown(group_sequential_content$lan_demets_k$worked_example),
+      hr(),
       h4(group_sequential_content$conditional_power_ssr$title),
       render_formula_block(group_sequential_content$conditional_power_ssr$formula_latex),
       shiny::markdown(group_sequential_content$conditional_power_ssr$explanation),
@@ -145,6 +169,10 @@ mod_group_sequential_ui <- function(id) {
       p(strong("Citation: "), group_sequential_content$lan_demets_normal$citation),
       p(strong("Implemented via: "), code(group_sequential_content$lan_demets_normal$backend)),
       hr(),
+      h4(group_sequential_content$lan_demets_k$title),
+      p(strong("Citation: "), group_sequential_content$lan_demets_k$citation),
+      p(strong("Implemented via: "), code(group_sequential_content$lan_demets_k$backend)),
+      hr(),
       h4(group_sequential_content$conditional_power_ssr$title),
       p(strong("Citation: "), group_sequential_content$conditional_power_ssr$citation),
       p(strong("Implemented via: "), code(group_sequential_content$conditional_power_ssr$backend))
@@ -158,6 +186,19 @@ mod_group_sequential_server <- function(id) {
     result <- reactive({
       req(input$design, input$r, input$alpha, input$power)
 
+      if (input$design == "lan_demets_k") {
+        req(input$outcome_k, input$timing_k, input$spending_k)
+        tm <- suppressWarnings(as.numeric(strsplit(input$timing_k, "[,; ]+")[[1]]))
+        tm <- tm[!is.na(tm)]
+        return(tryCatch(
+          list(ok = TRUE, value = calc_lan_demets_k(
+            outcome = input$outcome_k, timing = tm, spending = input$spending_k,
+            delta = input$delta_k, sd = input$sd_k, pC = input$pC_k, pE = input$pE_k, haz_ratio = input$hr_k,
+            r = input$r, alpha = input$alpha, power = input$power
+          )),
+          error = function(e) list(ok = FALSE, message = conditionMessage(e))
+        ))
+      }
       if (input$design == "lan_demets_normal") {
         req(input$delta_ld, input$sd_ld, input$timing_ld, input$spending_ld)
         return(tryCatch(
@@ -216,6 +257,25 @@ mod_group_sequential_server <- function(id) {
       }
 
       v <- res$value
+
+      if (input$design == "lan_demets_k") {
+        surv <- !is.null(v$n_events_total)
+        tab <- data.frame(Look = seq_along(v$timing), `Information fraction` = round(v$timing, 3),
+                          check.names = FALSE)
+        tab[[if (surv) "Events by this look" else "Total sample size by this look"]] <- v$at_each_look
+        tab$`Efficacy boundary (Z)` <- round(v$boundaries, 3)
+        tab$`Cumulative alpha spent` <- signif(v$alpha_spent, 3)
+        return(tagList(
+          if (surv) p(strong("Maximum number of events: "), v$n_events_total)
+          else tagList(p(strong("Maximum total sample size: "), v$n_total),
+                       p(sprintf("Per arm: control = %d, experimental = %d", v$n_control, v$n_experimental))),
+          tags$table(class = "table table-sm", tags$thead(tags$tr(lapply(names(tab), tags$th))),
+                     tags$tbody(lapply(seq_len(nrow(tab)), function(i) tags$tr(lapply(tab[i, ], function(x) tags$td(format(x))))))),
+          p(sprintf("Inflation over a single-look design: %.1f%% (fixed design: %s).", (v$inflation_factor - 1) * 100,
+                    if (surv) sprintf("%.0f events", ceiling(v$n_fixed)) else sprintf("n = %.0f", ceiling(v$n_fixed)))),
+          if (surv) p(class = "text-muted", "Events, not people: convert with an accrual and follow-up assumption (Log-Rank / Survival).")
+        ))
+      }
 
       if (input$design == "lan_demets_normal") {
         return(tagList(
@@ -305,6 +365,7 @@ mod_group_sequential_server <- function(id) {
     # Lan-DeMets 2-look design is fast (~14ms/call) and keeps the full grid.
     render_power_curves(output, function() {
       req(input$design, input$r, input$alpha, input$power)
+      if (input$design == "lan_demets_k") return(NULL)    # no curve: each point is a full boundary search over several looks
       if (input$design == "lan_demets_normal") {
         req(input$delta_ld, input$sd_ld, input$timing_ld, input$spending_ld)
         return(list(

@@ -8,7 +8,7 @@ test_that("on a phone the navbar is a bottom tab bar and the calculators are one
   expect_equal(app$get_js(sprintf("getComputedStyle(%s).position", bar)), "fixed")
   expect_equal(app$get_js(sprintf("Math.round(%s.getBoundingClientRect().bottom) === window.innerHeight", bar)), TRUE)
   tabs <- unlist(app$get_js("Array.from(document.querySelectorAll('nav.navbar .navbar-nav > li.nav-item > a')).map(function(a){return a.textContent.trim()})"))
-  expect_equal(tabs, c("Home", "Find", "Plan", "Analyze", "Studies", "Cite"))
+  expect_equal(tabs, c("Home", "Plan", "Analyze", "Studies", "Cite"))
   # the dark-mode switch is in the bar too, inside the window (it is outside the tab list: R/accessibility.R)
   expect_true(app$get_js("(function () { var e = document.querySelector('.navbar-extras bslib-input-dark-mode'); if (!e) return false; var r = e.getBoundingClientRect(); return r.width > 0 && r.left >= 0 && r.right <= window.innerWidth + 1; })()"))
   # six tabs still fit: the bar does not scroll sideways and every tab is inside the window
@@ -19,7 +19,7 @@ test_that("on a phone the navbar is a bottom tab bar and the calculators are one
   app$run_js("var s = document.querySelector('.phone-picker'); s.value = 'Means'; s.dispatchEvent(new Event('change'));")
   app$wait_for_js("(document.querySelector('#plan_nav a.active') || {}).textContent === 'Means'", timeout = 30000)
   expect_equal(app$get_js("document.querySelector('.phone-picker').value"), "Means")
-  expect_equal(unlist(app$get_js("Array.from(document.querySelectorAll('nav.navbar .navbar-nav > li.nav-item > a[aria-label]')).map(function(a){return a.getAttribute('aria-label')})")), c("Find a calculator", "Plan: Sample Size"))
+  expect_equal(unlist(app$get_js("Array.from(document.querySelectorAll('nav.navbar .navbar-nav > li.nav-item > a[aria-label]')).map(function(a){return a.getAttribute('aria-label')})")), "Plan: Sample Size")
 })
 
 test_that("on a wide screen the navbar stays at the top and the calculator list is shown (browser test)", {
@@ -30,6 +30,6 @@ test_that("on a wide screen the navbar stays at the top and the calculator list 
   ui_select_tab(app, "main_nav", "Plan: Sample Size")
   expect_equal(app$get_js("getComputedStyle(document.querySelector('ul.nav-stacked')).display"), "flex")
   expect_equal(app$get_js("getComputedStyle(document.querySelector('.phone-picker')).display"), "none")
-  expect_equal(app$get_js("document.querySelector('nav.navbar .navbar-nav > li.nav-item:nth-child(2) > a').textContent.trim()"), "Find a calculator")
-  expect_equal(app$get_js("document.querySelector('nav.navbar .navbar-nav > li.nav-item:nth-child(3) > a').textContent.trim()"), "Plan: Sample Size")
+  expect_equal(app$get_js("document.querySelector('nav.navbar .navbar-nav > li.nav-item:nth-child(2) > a').textContent.trim()"), "Plan: Sample Size")
+  expect_equal(app$get_js("document.querySelector('nav.navbar .navbar-nav > li.nav-item:nth-child(3) > a').textContent.trim()"), "Analyze")
 })

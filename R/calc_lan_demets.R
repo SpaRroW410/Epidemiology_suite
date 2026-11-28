@@ -263,3 +263,106 @@ calc_ssr_normal <- function(z1, timing, n_max, boundary_final, target_power = 0.
     n_total_new = ceiling(n_total_new)
   ))
 }
+
+# ---------------------------------------------------------------------------------------------------------------------------------
+# Lan-DeMets alpha spending with any number of looks, for a continuous, binary or time-to-event outcome (CHECKLIST TRIAL-29, built
+# 28 Nov 2026). The same two spending functions as above (O'Brien-Fleming-type and Pocock-type, verified against rpact). With looks
+# at information fractions t_1 < ... < t_K = 1 the standardized statistics are multivariate normal with corr(Z_i, Z_j) =
+# sqrt(t_i / t_j) (i <= j); the efficacy boundary b_k solves P(Z_1 < b_1, ..., Z_{k-1} < b_{k-1}, Z_k >= b_k) = alpha(t_k) -
+# alpha(t_{k-1}) (one-sided alpha / 2 of a two-sided alpha, as in calc_lan_demets_normal()), computed with mvtnorm's exact Miwa
+# algorithm. The drift D that gives the target power is found once; the group-sequential design then needs (D / (z_a + z_b))^2
+# times the fixed-sample information (the inflation factor), whatever the outcome:
+#   continuous: the fixed-sample two-sample z-test n (as calc_lan_demets_normal());
+#   binary:     the fixed-sample n of the unpooled normal-approximation test of pE - pC, with allocation r (experimental:control);
+#   survival:   Schoenfeld's (1983) number of events, (z_a + z_b)^2 (1 + r)^2 / (r log(HR)^2) -- events, not people.
+# Verified: boundaries and inflation factors equal gsDesign::gsDesign(test.type = 1, sfu = sfLDOF / sfLDPocock) to 6-7 digits for
+# 2 to 5 looks with equal and unequal spacing, the survival events equal gsDesign's for n.fix = gsDesign::nEvents(), and a
+# simulation of the sequential binary test reaches the target power and keeps the one-sided error at alpha / 2 (tests; gsDesign is
+# used only to check, Suggests).
+
+.ld_corr <- function(t) outer(t, t, function(x, y) sqrt(pmin(x, y) / pmax(x, y)))
+
+.ld_boundaries_k <- function(alpha_one_sided, t, spending) {
+  spend_fn <- if (spending == "OF") .ld_spend_of else .ld_spend_pocock
+  cum <- spend_fn(t, alpha_one_sided); cum[length(t)] <- alpha_one_sided
+  inc <- diff(c(0, cum)); K <- length(t); S <- .ld_corr(t); b <- numeric(K)
+  b[1] <- stats::qnorm(1 - inc[1])
+  if (K > 1) for (k in 2:K) {
+    f <- function(bk) mvtnorm::pmvnorm(lower = c(rep(-Inf, k - 1), bk), upper = c(b[seq_len(k - 1)], Inf),
+                                       sigma = S[seq_len(k), seq_len(k)], algorithm = mvtnorm::Miwa(steps = 512))[1] - inc[k]
+    b[k] <- stats::uniroot(f, c(-3, 12), tol = 1e-10)$root
+  }
+  list(bounds = b, alpha_spent = cum)
+}
+
+.ld_power_k <- function(drift, t, b) {
+  S <- .ld_corr(t); m <- drift * sqrt(t); p <- 0
+  for (k in seq_along(t)) p <- p + mvtnorm::pmvnorm(lower = c(rep(-Inf, k - 1), b[k]), upper = c(b[seq_len(k - 1)], Inf),
+                                                    mean = m[seq_len(k)], sigma = S[seq_len(k), seq_len(k), drop = FALSE],
+                                                    algorithm = mvtnorm::Miwa(steps = 512))[1]
+  p
+}
+
+#' Lan-DeMets alpha-spending group-sequential design, any number of looks
+#'
+#' Efficacy boundaries and the maximum sample size (or number of events) for a group-sequential trial with interim analyses at
+#' the information fractions in `timing` and a final analysis at 1, using an O'Brien-Fleming-type or Pocock-type spending function.
+#'
+#' @param outcome "continuous" (two means), "binary" (two proportions) or "survival" (hazard ratio; gives events)
+#' @param timing Information fractions of the interim analyses, increasing, each strictly between 0 and 1 (at least one)
+#' @param spending "OF" (O'Brien-Fleming-type) or "Pocock" (Pocock-type)
+#' @param delta,sd Continuous outcome: difference in means and common SD
+#' @param pC,pE Binary outcome: probability of the outcome in the control and experimental arms
+#' @param haz_ratio Survival outcome: hazard ratio, experimental vs. control
+#' @param r Allocation ratio, experimental:control (> 0)
+#' @param alpha Two-sided significance level (the boundaries use alpha / 2 one-sided, as calc_lan_demets_normal())
+#' @param power Desired power
+#' @return list(n_total or n_events_total, n_control, n_experimental, n_fixed, inflation_factor, timing, boundaries,
+#'   alpha_spent, at_each_look, inputs)
+#' @examples
+#' calc_lan_demets_k("continuous", timing = c(1/3, 2/3), delta = 0.5, sd = 1)
+#' calc_lan_demets_k("survival", timing = c(0.25, 0.5, 0.75), haz_ratio = 0.7)
+#' @export
+calc_lan_demets_k <- function(outcome = c("continuous", "binary", "survival"), timing = c(1/3, 2/3),
+                              spending = c("OF", "Pocock"), delta = NULL, sd = NULL, pC = NULL, pE = NULL, haz_ratio = NULL,
+                              r = 1, alpha = 0.05, power = 0.8) {
+  outcome <- match.arg(outcome); spending <- match.arg(spending)
+  if (!is.numeric(timing) || !length(timing) || anyNA(timing) || any(timing <= 0) || any(timing >= 1) || any(diff(timing) <= 0))
+    stop("timing must be one or more increasing numbers strictly between 0 and 1 (the interim analyses; the final one is at 1).")
+  if (length(timing) > 9) stop("At most 9 interim analyses.")
+  .validate_positive(r, "r"); .validate_unit_interval(alpha, "alpha"); .validate_unit_interval(power, "power")
+  zz <- stats::qnorm(1 - alpha / 2) + stats::qnorm(power)
+  n_fixed <- switch(outcome,
+    continuous = {
+      .validate_number(delta, "delta"); .validate_positive(sd, "sd")
+      if (isTRUE(all.equal(delta, 0))) stop("delta must differ from 0 (no effect to detect).")
+      (1 + r)^2 / r * sd^2 * zz^2 / delta^2
+    },
+    binary = {
+      .validate_unit_interval(pC, "pC"); .validate_unit_interval(pE, "pE")
+      if (isTRUE(all.equal(pC, pE))) stop("pC and pE must differ (no effect to detect).")
+      (1 + r) * (pC * (1 - pC) + pE * (1 - pE) / r) * zz^2 / (pE - pC)^2
+    },
+    survival = {
+      .validate_positive(haz_ratio, "haz_ratio")
+      if (isTRUE(all.equal(haz_ratio, 1))) stop("haz_ratio must differ from 1 (no effect to detect).")
+      zz^2 * (1 + r)^2 / (r * log(haz_ratio)^2)
+    })
+  t <- c(timing, 1)
+  bd <- .ld_boundaries_k(alpha / 2, t, spending)
+  drift <- stats::uniroot(function(d) .ld_power_k(d, t, bd$bounds) - power, c(0.1, 20), tol = 1e-10)$root
+  inflation <- (drift / zz)^2
+  n_max <- ceiling(round(inflation * n_fixed, 8))
+  look_n <- ceiling(round(t * n_max, 8))
+  out <- list(n_fixed = n_fixed, inflation_factor = inflation, timing = t, boundaries = bd$bounds, alpha_spent = bd$alpha_spent,
+              at_each_look = look_n)
+  if (outcome == "survival") {
+    out <- c(list(n_events_total = n_max), out)
+  } else {
+    n_control <- ceiling(n_max / (1 + r)); n_experimental <- ceiling(n_control * r)
+    out <- c(list(n_total = n_control + n_experimental, n_control = n_control, n_experimental = n_experimental), out)
+  }
+  out$inputs <- list(outcome = outcome, timing = timing, spending = spending, delta = delta, sd = sd, pC = pC, pE = pE,
+                     haz_ratio = haz_ratio, r = r, alpha = alpha, power = power)
+  new_ss_result(out)
+}

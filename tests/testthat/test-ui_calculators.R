@@ -129,7 +129,7 @@ test_that("Effect Size: the converters give the published values, tips open on h
   app$run_js("document.activeElement.blur()")
   app$wait_for_js("document.querySelectorAll('.popover.show').length === 0", timeout = 10000)
   # the Glossary page lists every term and filters
-  ui_select_tab(app, "main_nav", "Find a calculator")
+  ui_select_tab(app, "main_nav", "Home")      # the glossary is a tab of Home's "Find a calculator" section
   app$run_js("document.querySelector('#home_helper a[data-value=\"Glossary\"]').click()")
   app$wait_for_js("document.querySelectorAll('.glossary-item').length > 25", timeout = 30000)
   app$set_inputs(glossary_filter = "phi")

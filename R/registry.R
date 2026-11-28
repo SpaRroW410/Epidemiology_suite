@@ -164,54 +164,33 @@ module_registry <- function() {
 # Adding a calculator = add its entry to module_registry() above and its id to a
 # group below; adding a workbench = add an entry here (run_app.R builds the rest).
 #
-# The sample-size groups mirror docs/archive/checklist_by_design.md's own Part-1
-# study-design section numbers (already simple -> difficult) so the navigation does
-# not invent a second taxonomy on top of the checklist's. Modules with no single
-# natural study-design home (general G*Power-style test families) are grouped
-# together in the last group; they remain individually discoverable by test family
-# via the Home hub's "Browse calculators" toggle (R/home_catalog.R's test_families),
-# which points at these same module ids.
+# The sample-size groups follow study design (docs/ui_remap_plan.md, 27 Nov 2026), in the same order as the calculator sections of
+# docs/CHECKLIST.md. The general test families (correlation, chi-square, regression ...) share one group; they stay findable by
+# test family through the Home hub's "Browse calculators" (R/home_catalog.R's test_families), which points at these same module ids.
 module_workbenches <- list(
   list(id = "plan", title = "Plan: Sample Size", nav_id = "plan_nav", open_on = "proportion",
+       # Seven groups led by study design (docs/ui_remap_plan.md, decided with the owner on 24 and 27 Nov 2026), with Effect Sizes kept
+       # first because many calculators link to it. Every calculator is in exactly one group; titles and ids did not change.
        groups = list(
       list(title = "Effect Sizes",
            module_ids = c("effect_size")),
-      list(title = "Descriptive & Estimation",
-           module_ids = c("proportion", "means", "rate", "ratio")),
-      list(title = "Survey & Cross-Sectional",
-           module_ids = c("stratified", "cluster", "lqas", "capture_recapture")),
-      list(title = "Observational Studies",
+      list(title = "Estimate: Surveys and Descriptive Studies",
+           module_ids = c("proportion", "means", "rate", "ratio", "stratified", "cluster", "lqas", "capture_recapture",
+                          "rule_of_three", "survey_selection", "survey_weights")),
+      list(title = "Trials and Experiments",
+           module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential", "subgroup_interaction", "glmm",
+                          "tsa", "stepped_wedge", "patient_units", "resource_equation", "randomization")),
+      list(title = "Observational Studies and Natural Experiments",
            module_ids = c("case_control", "cohort", "sccs", "mendelian", "its", "did", "ecological")),
-      list(title = "Diagnostic & Screening",
-           module_ids = c("diagnostic", "roc")),
-      list(title = "Agreement & Reliability",
-           module_ids = c("agreement")),
-      list(title = "Several Measurements per Patient",
-           module_ids = c("patient_units")),
-      list(title = "Clinical Trials",
-           module_ids = c("pilot", "simon", "tost", "noninferiority", "crossover", "group_sequential", "subgroup_interaction", "glmm", "tsa", "stepped_wedge")),
-      list(title = "Survival Analysis",
+      list(title = "Survival",
            module_ids = c("logrank", "competing_risks", "rmst")),
-      list(title = "Prediction Models",
-           module_ids = c("prediction")),
-      list(title = "Surveillance",
-           module_ids = c("rule_of_three")),
-      list(title = "Preclinical / Animal Studies",
-           module_ids = c("resource_equation")),
-      list(title = "Qualitative / Mixed Methods",
-           module_ids = c("qualitative")),
-      list(title = "Psychometrics / Scale Development",
-           module_ids = c("efa_cfa")),
-      list(title = "Health Economics / Value of Information",
-           module_ids = c("evpi")),
-      list(title = "Study Planning Tools",
-           module_ids = c("attrition", "randomization")),
-      list(title = "Survey & Field Tools",
-           module_ids = c("survey_selection", "survey_weights")),
-      list(title = "Infectious Disease Models",
-           module_ids = c("epidemic_model")),
-      list(title = "General Statistical Tests",
-           module_ids = c("correlation", "chisq", "regression", "anova_general", "logistic", "exact_tests", "rm_anova", "nonparametric", "variance", "multiplicity", "manova", "bayesian", "longitudinal", "multilevel", "meta_power"))
+      list(title = "Tests, Relationships and Models",
+           module_ids = c("correlation", "chisq", "regression", "anova_general", "logistic", "exact_tests", "rm_anova", "nonparametric",
+                          "variance", "multiplicity", "manova", "bayesian", "longitudinal", "multilevel", "meta_power")),
+      list(title = "Diagnosis, Agreement, Prediction and Measurement",
+           module_ids = c("diagnostic", "roc", "agreement", "prediction", "efa_cfa")),
+      list(title = "Other Designs and General Tools",
+           module_ids = c("attrition", "qualitative", "evpi", "epidemic_model"))
        )),
   list(id = "analyze", title = "Analyze", nav_id = "analyze_nav",
        groups = list(
@@ -232,6 +211,14 @@ module_workbench_of <- function(module_title) {
   for (wb in module_workbenches) {
     for (g in wb$groups) if (id %in% g$module_ids) return(wb)
   }
+  NULL
+}
+
+# The sidebar group a module is listed under ("Trials and Experiments", ...; for Analyze, "Analyze: <group>"), or NULL. Studies shows it
+# on each section so the names match the sidebar (docs/ui_remap_plan.md, step 2).
+module_group_title <- function(module_id) {
+  for (wb in module_workbenches) for (g in wb$groups) if (module_id %in% g$module_ids)
+    return(if (identical(wb$id, "plan")) g$title else paste0(wb$title, ": ", g$title))
   NULL
 }
 

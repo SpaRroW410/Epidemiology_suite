@@ -46,6 +46,7 @@ Suggests:
     swCRTdesign,
     shinytest2,
     surveillance,
+    gsDesign,
     testthat (>= 3.0.0),
     withr,
     epiR,

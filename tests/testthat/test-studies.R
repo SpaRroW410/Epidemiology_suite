@@ -216,3 +216,15 @@ test_that("the guide says when nothing in a description could be matched, and cl
     expect_match(as.character(output$design_wizard_trace$html), "A proportion / prevalence")
   })
 })
+
+test_that("each section of the tab and of the Word file names the sidebar group of its calculator (remap step 2)", {
+  e1 <- prop_entry(0.05, "e1")
+  html <- as.character(study_view_ui(list(id = "s1", name = "S", note = "", entries = list(e1))))
+  expect_match(html, "Estimate: Surveys and Descriptive Studies", fixed = TRUE)
+  skip_if_not_installed("officer")
+  f <- tempfile(fileext = ".docx"); on.exit(unlink(f))
+  writeBin(study_docx(list(id = "s1", name = "S", note = "", entries = list(e1))), f)
+  txt <- officer::docx_summary(officer::read_docx(f))$text
+  i <- which(grepl("^1\\. Proportions", txt))
+  expect_equal(txt[i + 1], "Estimate: Surveys and Descriptive Studies")
+})

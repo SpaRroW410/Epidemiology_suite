@@ -143,7 +143,7 @@ test_that("the guide's design choice, notes, moves and readable names reach the 
   expect_true(app$get_js("Array.from(document.querySelectorAll('#studies_view textarea')).some(function (t) { return t.value === 'From the 2019 survey'; })"))
   expect_equal(app$get_js("document.getElementById('studies_note').value"), "Pilot in two districts.")
   # move the Means section above Proportions, then the second proportion row above the first
-  sections <- function() unlist(app$get_js("Array.from(document.querySelectorAll('#studies_view .card-header > span:first-child')).map(function (h) { return h.innerText.split(' -- ')[0].trim(); })"))
+  sections <- function() unlist(app$get_js("Array.from(document.querySelectorAll('#studies_view .card-header > span:first-child')).map(function (h) { return (h.querySelector('strong') || h).innerText.trim(); })"))
   expect_equal(sections(), c("Proportions", "Means"))
   app$run_js("Array.from(document.querySelectorAll('#studies_view button')).filter(function (b) { return b.innerText === 'Move section up'; })[0].click();")
   app$wait_for_idle(800, timeout = 60000)

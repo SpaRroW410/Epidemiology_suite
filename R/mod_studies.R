@@ -253,7 +253,9 @@ study_view_ui <- function(study) {
         )
       }
       div(class = "card mb-3",
-        div(class = "card-header d-flex flex-wrap justify-content-between gap-2", span(strong(first$module_title), " -- ", first$design), section_moves),
+        div(class = "card-header d-flex flex-wrap justify-content-between gap-2",
+            span(if (!is.null(grp <- module_group_title(first$module))) div(class = "small text-uppercase text-body-secondary", grp),
+                 strong(first$module_title), " -- ", first$design), section_moves),
         div(class = "card-body",
           body,
           if (nzchar(first$formula_latex)) tags$details(class = "small mt-2", tags$summary("Formula (LaTeX, for Word's Insert > Equation)"),
@@ -623,7 +625,9 @@ study_docx <- function(study, time = Sys.time()) {
   }
   for (k in seq_along(groups)) {
     g <- groups[[k]]; first <- g[[1]]
-    body <- c(body, docx_p(sprintf("%d. %s: %s", k, first$module_title, first$design), style = "Heading1"))
+    grp <- module_group_title(first$module)
+    body <- c(body, docx_p(sprintf("%d. %s: %s", k, first$module_title, first$design), style = "Heading1"),
+              if (!is.null(grp)) docx_p(docx_run(grp, italic = TRUE)))
     if (length(g) == 1) {
       res <- first$results; h <- intersect(unlist(first$headline), names(res))
       body <- c(body, docx_p("Result", style = "Heading2"), .study_kv_table(res[c(h, setdiff(names(res), h))], module = first$module),

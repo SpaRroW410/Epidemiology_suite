@@ -1,5 +1,41 @@
 # epidemiologysuite (development version)
 
+## Group sequential: Lan-DeMets spending with any number of looks (28 Nov 2026)
+
+* **Plan > Group Sequential Design** has a new design: Lan-DeMets alpha spending (O'Brien-Fleming-type or Pocock-type) with any
+  number of interim analyses at chosen information fractions, for two means, two proportions or a hazard ratio (events). It gives
+  the maximum size, the size at each look, the boundaries and the alpha spent. Checked against gsDesign. New function
+  `calc_lan_demets_k()`.
+
+## Finding a calculator: regrouped sidebar, filter, favourites (27 Nov 2026)
+
+* The Plan sidebar has seven groups led by study design (Effect Sizes stays first); Browse by study design and Studies use the same
+  group names. Every calculator is still listed once, with the same name.
+* Resting the pointer on a calculator shows a one-line description of what it answers.
+* A filter box over each sidebar narrows the list to the calculators whose name or description contains the words typed, and lists
+  matches in the other workbench.
+* A star beside each calculator marks it as a favourite; favourites and the last five calculators opened are listed at the top of
+  the sidebar. Type "star", "fav" or a star symbol in the filter box to see only favourites. They are kept in the browser, and when
+  the app is run from the R package on your own computer, also in a small file in R's user folder.
+
+## The guide keeps the objectives of a study (24 Nov 2026)
+
+* At a design end point the guide now offers **Save as an objective and plan another**. The saved objectives are listed above the
+  guide, each with a button to its calculator, so a study with several aims (a prevalence and its determinants, a comparison and a
+  diagnostic test) can be planned one after another.
+
+## Two correlations that share no variable (24 Nov 2026)
+
+* **Plan > Correlation** has a new design: compare two dependent, non-overlapping correlations (four variables measured on the same
+  people). Steiger's (1980) Fisher z test, in the form used by the R package cocor, which the tests compare against. New function
+  `calc_correlation_two_nonoverlap()`; the guide's correlation question offers it.
+
+## The guide asks when a phrase fits several designs (20 Nov 2026)
+
+* Typing a description such as "incidence of dengue followed up for a year", "survival of patients with ...", "screening for diabetes" or
+  "association between smoking and asthma" no longer sends the guide down one route. It shows two or three starting points (for
+  example: an incidence rate, a cohort, a Cox regression) and lets you choose. Descriptions that name a design are routed as before.
+
 ## Stepped-wedge trial with a yes / no outcome (19 Nov 2026)
 
 * **Plan: Trials > Stepped-Wedge CRT** now has an Outcome switch: Continuous (as before) or Binary. The binary design gives the clusters

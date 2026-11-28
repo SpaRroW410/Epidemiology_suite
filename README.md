@@ -6,7 +6,7 @@ epidemiology and clinical research. Every calculator comes with its formula
 example, the original methodological citation, and the name of the package or
 formula that implements it.
 
-**Current state (17 November 2026):** 223 designs in 71 calculators -- sample size and power (*Plan*), analysis of counts you
+**Current state (17 November 2026):** 225 designs in 71 calculators -- sample size and power (*Plan*), analysis of counts you
 already have (*Analyze*), effect-size converters, planning, survey, outbreak and surveillance tools -- each with its formula, a worked
 example and a citable source, checked against a published value, a real package or a simulation. The app is called **Epidemiological
 suite**; the R package is `epidemiologysuite`. There are three ways to use it (see below): the browser build on GitHub Pages, the phone /
@@ -71,10 +71,10 @@ reimplements the verified formula instead of adding a runtime dependency.
   that design.
 - **Quick links and task cards** on Home -- the most-used calculators, and cards for planning a study, analysing counts, outbreaks and
   surveillance, and survey work.
-- **The guide** (Find tab, "Which calculator?") -- one question at a time (aim, experimental or observational, selection, outcome,
+- **The guide** (Home, "I have a question") -- one question at a time (aim, experimental or observational, selection, outcome,
   groups) with its reasoning, plus a free-text box that reads a one-sentence description or a research question and answers what it
   can. Every built design can be reached from it; designs not built yet say so and what would unblock them. Tests enforce both.
-- **Browse** (Find tab) -- every built design by study design or by test family (G*Power-style), and a glossary.
+- **Browse** (Home, "I want to browse") -- every built design by study design or by test family (G*Power-style), and a glossary.
 
 From R, without opening the app: `ss_find("eyes per patient")` returns the matching designs, and
 `run_app(calculator = "eyes per patient")` opens the app on one (a design key from `ss_find()` or a few words). An RStudio /

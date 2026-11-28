@@ -51,6 +51,8 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
     items <- unlist(lapply(wb$groups, function(g) {
       c(list(g$title), lapply(g$module_ids, function(mid) {
         m <- registry_by_id[[mid]]
+        # the one-line description shows on hover: set as the link's title attribute by sidebar_filter_assets() (R/sidebar_filter.R),
+        # so the link's text stays exactly the calculator's title (the phone drop-down and the browser tests read it)
         nav_panel(title = m$title, if (m$id %in% core_ids) m$ui(m$id) else lazy_placeholder(m$id))
       }))
     }), recursive = FALSE)
@@ -92,10 +94,10 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
         heading_font = font_collection("Source Serif 4", "Georgia", "Cambria", "Times New Roman", "serif"),
         "font-size-base" = "0.95rem"
       ),
-      header = tagList(browser_notice_ui(), server_notice_ui(), studies_assets(), tags$style(HTML(.workbench_css)), accessibility_script(), phone_shell_assets(),
+      header = tagList(browser_notice_ui(), server_notice_ui(), studies_assets(), tags$style(HTML(.workbench_css)), accessibility_script(), phone_shell_assets(), sidebar_filter_assets(), sidebar_personal_assets(),
                        if (length(pending_titles)) lazy_sidebar_assets(pending_titles, show_progress = .background_load_enabled()))
     ),
-    list(home_panel, nav_panel("Find a calculator", find_panel_ui())),
+    list(home_panel),   # "Find a calculator" is a section of Home since 28 Nov 2026 (docs/ui_remap_plan.md, step 6)
     workbench_panels,
     list(nav_panel("Studies", studies_ui()), nav_panel("Cite", cite_ui())),
     # light / dark switch (starts from the viewer's operating-system setting)
@@ -104,6 +106,7 @@ epidemiologysuite_app <- function(lazy = getOption("epidemiologysuite.lazy", TRU
 
   server <- function(input, output, session) {
     home_server(input, output, session)
+    sidebar_personal_server(input, session)    # favourites and recent: also saved to a file when run on the user's own computer
     cite_server(input, output, session)
     studies_server(input, output, session)
     # opened from run_app(calculator = ...): go to that calculator once the page is connected (the navbar's value arrives first)
@@ -173,6 +176,7 @@ html[data-bs-theme='dark'] .text-warning { color: #ffda6a !important; }
   display: block; margin: .9rem 0 .2rem 0; padding: 0;
   font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
   color: var(--bs-secondary-color, #6c757d);
+  white-space: normal; overflow-wrap: anywhere; line-height: 1.3;   /* a long group name wraps instead of being cut off */
 }
 .tab-pane > .row > .col-sm-3 > ul.nav-stacked > li > a { padding: .3rem .6rem; font-size: .9rem; }
 @media (max-width: 575.98px) {

@@ -251,9 +251,8 @@ calc_correlation_partial <- function(r, k, alpha = 0.05, power = 0.8,
 #' psych::r.test() t-test, gives an empirical power of 0.816 at the
 #' computed n=183 (target power 0.80).
 #'
-#' The "non-overlapping" case (comparing two correlations that share NO
-#' variable, e.g. r_yx1 vs r_zx2, needing all six pairwise correlations
-#' among \{Y, X1, Z, X2\}) is not covered here.
+#' The "non-overlapping" case (two correlations that share NO variable) is
+#' calc_correlation_two_nonoverlap().
 #'
 #' @param r_yx1 Expected correlation between Y and X1 (-1, 1)
 #' @param r_yx2 Expected correlation between Y and X2 (-1, 1); must differ from r_yx1
@@ -300,6 +299,58 @@ calc_correlation_two_dependent <- function(r_yx1, r_yx2, r_x1x2, alpha = 0.05, p
     c = c_term,
     inputs = list(r_yx1 = r_yx1, r_yx2 = r_yx2, r_x1x2 = r_x1x2, alpha = alpha,
                   power = power, alternative = alternative)
+  ))
+}
+
+#' Sample size to compare two dependent, non-overlapping Pearson correlations
+#'
+#' Tests whether r_jk (between variables j and k) differs from r_hm (between h and m) when all four variables are measured on the
+#' SAME sample and the two correlations share no variable -- for example, is the correlation between a test and its outcome at
+#' baseline different from the correlation between two other measures at follow-up? The two Fisher z values are correlated through
+#' the four cross correlations r_jh, r_jm, r_kh, r_km. Steiger (1980)'s form (as implemented in the R package cocor, which is used
+#' only to check this function): with r_p = (r_jk + r_hm) / 2, the covariance of the two Fisher z values is
+#' c = [(r_jh - r_p r_kh)(r_km - r_kh r_p) + (r_jm - r_jh r_p)(r_kh - r_p r_jh) + (r_jh - r_jm r_p)(r_km - r_p r_jm) +
+#' (r_jm - r_p r_km)(r_kh - r_km r_p)] / [2 (1 - r_p^2)^2], and Z = (z_jk - z_hm) sqrt(n - 3) / sqrt(2 - 2c).
+#' The sample size solves Z for n. The tests compare Z with cocor's Steiger statistic and the power with a simulation.
+#'
+#' @param r_jk Expected correlation between j and k (-1, 1)
+#' @param r_hm Expected correlation between h and m (-1, 1); must differ from r_jk
+#' @param r_jh,r_jm,r_kh,r_km Expected correlations between the two pairs (-1, 1)
+#' @param alpha Significance level (0,1)
+#' @param power Desired power (0,1)
+#' @param alternative "two.sided", "less", or "greater"
+#' @return list(n, c, inputs)
+#' @examples
+#' calc_correlation_two_nonoverlap(r_jk = 0.6, r_hm = 0.4, r_jh = 0.3, r_jm = 0.2, r_kh = 0.2, r_km = 0.3)
+#' @export
+calc_correlation_two_nonoverlap <- function(r_jk, r_hm, r_jh, r_jm, r_kh, r_km, alpha = 0.05, power = 0.8,
+                                            alternative = c("two.sided", "less", "greater")) {
+  alternative <- match.arg(alternative)
+  rs <- c(r_jk = r_jk, r_hm = r_hm, r_jh = r_jh, r_jm = r_jm, r_kh = r_kh, r_km = r_km)
+  for (nm in names(rs)) {
+    x <- rs[[nm]]
+    if (!is.numeric(x) || length(x) != 1 || is.na(x) || x <= -1 || x >= 1) stop(sprintf("%s must be a single number strictly between -1 and 1.", nm))
+  }
+  if (isTRUE(all.equal(r_jk, r_hm))) stop("r_jk and r_hm must differ (no effect to detect).")
+  R <- matrix(c(1, r_jk, r_jh, r_jm,
+                r_jk, 1, r_kh, r_km,
+                r_jh, r_kh, 1, r_hm,
+                r_jm, r_km, r_hm, 1), 4, 4)
+  if (min(eigen(R, symmetric = TRUE, only.values = TRUE)$values) <= 1e-8)
+    stop("The six correlations are not a valid correlation matrix for four variables (it is not positive definite) -- check that the values are consistent with each other.")
+  .validate_unit_interval(alpha, "alpha")
+  .validate_unit_interval(power, "power")
+
+  r_p <- (r_jk + r_hm) / 2
+  c_term <- ((r_jh - r_p * r_kh) * (r_km - r_kh * r_p) + (r_jm - r_jh * r_p) * (r_kh - r_p * r_jh) +
+             (r_jh - r_jm * r_p) * (r_km - r_p * r_jm) + (r_jm - r_p * r_km) * (r_kh - r_km * r_p)) / (2 * (1 - r_p^2)^2)
+  if (c_term >= 1) stop("The correlations imply a covariance of the two Fisher z values of 1 or more; check that they are consistent.")
+  z_alpha <- if (identical(alternative, "two.sided")) qnorm(1 - alpha / 2) else qnorm(1 - alpha)
+  n <- ((z_alpha + qnorm(power)) * sqrt(2 - 2 * c_term) / abs(atanh(r_jk) - atanh(r_hm)))^2 + 3
+  new_ss_result(list(
+    n = ceiling(n), c = c_term,
+    inputs = list(r_jk = r_jk, r_hm = r_hm, r_jh = r_jh, r_jm = r_jm, r_kh = r_kh, r_km = r_km, alpha = alpha, power = power,
+                  alternative = alternative)
   ))
 }
 

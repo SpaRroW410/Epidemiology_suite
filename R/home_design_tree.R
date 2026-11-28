@@ -442,7 +442,8 @@ design_nodes <- list(
       list(label = "Point-biserial (one binary, one continuous variable)", next_id = "term_corr_pb"),
       list(label = "Partial correlation (controlling for covariates)", next_id = "term_corr_partial"),
       list(label = "Compare two correlations from independent samples", next_id = "term_corr_two_indep"),
-      list(label = "Compare two overlapping correlations in the same sample", next_id = "term_corr_two_dep")
+      list(label = "Compare two overlapping correlations in the same sample", next_id = "term_corr_two_dep"),
+      list(label = "Compare two correlations in the same sample that share no variable (four variables)", next_id = "term_corr_two_nonoverlap")
     )
   ),
 
@@ -660,7 +661,8 @@ design_nodes <- list(
       list(label = "Continuous outcome, O'Brien-Fleming / Pocock boundaries", next_id = "term_gs_normal"),
       list(label = "Binary outcome", next_id = "term_gs_binary"),
       list(label = "Time-to-event outcome", next_id = "term_gs_survival"),
-      list(label = "Continuous outcome, Lan-DeMets alpha-spending function (2 looks)", next_id = "term_lan_demets")
+      list(label = "Continuous outcome, Lan-DeMets alpha-spending function (2 looks)", next_id = "term_lan_demets"),
+      list(label = "Lan-DeMets alpha spending with two or more interim looks, or a binary or time-to-event outcome", next_id = "term_lan_demets_k")
     )
   ),
 
@@ -983,6 +985,7 @@ design_nodes <- list(
   term_corr_partial = .term("term_corr_partial", "Partial correlation", "correlation_partial"),
   term_corr_two_indep = .term("term_corr_two_indep", "Two independent correlations", "correlation_two_independent"),
   term_corr_two_dep = .term("term_corr_two_dep", "Two dependent (overlapping) correlations", "correlation_two_dependent"),
+  term_corr_two_nonoverlap = .term("term_corr_two_nonoverlap", "Two dependent, non-overlapping correlations", "correlation_two_nonoverlap"),
   term_reg_slope = .term("term_reg_slope", "Simple linear regression slope", "correlation_regression_slope"),
   term_reg_r2 = .term("term_reg_r2", "Multiple regression, R-squared", "regression_r2"),
   term_reg_r2_increase = .term("term_reg_r2_increase", "Hierarchical regression, R-squared increase", "regression_r2_increase"),
@@ -1051,6 +1054,7 @@ design_nodes <- list(
   term_gs_binary = .term("term_gs_binary", "Group sequential design, binary outcome", "group_sequential_binary"),
   term_gs_survival = .term("term_gs_survival", "Group sequential design, time-to-event outcome", "group_sequential_survival"),
   term_lan_demets = .term("term_lan_demets", "Lan-DeMets alpha-spending design", "lan_demets_normal"),
+  term_lan_demets_k = .term("term_lan_demets_k", "Lan-DeMets alpha-spending design, any number of looks", "lan_demets_k"),
   term_mult_p1 = .term("term_mult_p1", "Multiplicity-adjusted, one proportion", "multiplicity_proportion_1s"),
   term_mult_p2 = .term("term_mult_p2", "Multiplicity-adjusted, two proportions", "multiplicity_proportion_2s"),
   term_mult_m1 = .term("term_mult_m1", "Multiplicity-adjusted, one mean", "multiplicity_means_1s"),

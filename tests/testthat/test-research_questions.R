@@ -45,7 +45,7 @@ test_that("each of the four candidate routes leads where its label says", {
   w <- .walk_answers(.rq_routes$survey$answers, list(determinants = TRUE, population = TRUE))
   expect_true(isTRUE(w$flags$determinants)); expect_length(w$trace, 2)
   html <- as.character(.render_rq_choices())
-  for (r in names(.rq_routes)) expect_match(html, sprintf('id="design_wizard_rq_%s"', r), fixed = TRUE)
+  for (r in c("survey", "case_control", "cohort", "prediction")) expect_match(html, sprintf('id="design_wizard_rq_%s"', r), fixed = TRUE)
 })
 
 test_that("an explicit design word still wins over the topic phrasing", {
