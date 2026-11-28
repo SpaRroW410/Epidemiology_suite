@@ -36,8 +36,11 @@
   group-sequential design verified against `rpact`.
 - [ ] **TRIAL-27** **[blocked]** N-of-1 trials: `nof1` / `Nof1` not reachable, no single accepted formula. *Unblock:* a citable
   period-count formula with a worked example.
-- [ ] **TRIAL-29** Group sequential / Lan-DeMets, open half: the spending-function design with 3+ looks and for binary / survival
-  outcomes; blinded sample-size re-estimation (`spass`-style).
+- [ ] **TRIAL-29** Group sequential / Lan-DeMets, open half: blinded sample-size re-estimation (`spass`-style). Built 28 Nov 2026: the
+  spending-function design with any number of looks, for a continuous, binary or time-to-event outcome (`calc_lan_demets_k()`):
+  boundaries and inflation factors equal gsDesign to 6-7 digits (2 to 5 looks, OF- and Pocock-type), events equal gsDesign's
+  for n.fix = nEvents(); the binary design was simulated (20,000 trials: power 0.793, one-sided error 0.026). Efficacy boundaries
+  only (no futility).
 - [ ] **TRIAL-31** **[blocked]** Non-inferiority, open half: a true relative-risk-scale margin (`TrialSize::RelativeRisk.NIS()` is
   odds-ratio based, so it ships as the OR design). *Unblock:* a verified RR-scale source.
 - [ ] **TRIAL-32** Bioequivalence, open half: reference-scaled designs for highly variable drugs (RSABE / ABEL); simulation-based in

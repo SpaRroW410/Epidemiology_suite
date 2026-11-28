@@ -1,5 +1,12 @@
 # epidemiologysuite (development version)
 
+## Group sequential: Lan-DeMets spending with any number of looks (28 Nov 2026)
+
+* **Plan > Group Sequential Design** has a new design: Lan-DeMets alpha spending (O'Brien-Fleming-type or Pocock-type) with any
+  number of interim analyses at chosen information fractions, for two means, two proportions or a hazard ratio (events). It gives
+  the maximum size, the size at each look, the boundaries and the alpha spent. Checked against gsDesign. New function
+  `calc_lan_demets_k()`.
+
 ## Finding a calculator: regrouped sidebar, filter, favourites (27 Nov 2026)
 
 * The Plan sidebar has seven groups led by study design (Effect Sizes stays first); Browse by study design and Studies use the same

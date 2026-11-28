@@ -661,7 +661,8 @@ design_nodes <- list(
       list(label = "Continuous outcome, O'Brien-Fleming / Pocock boundaries", next_id = "term_gs_normal"),
       list(label = "Binary outcome", next_id = "term_gs_binary"),
       list(label = "Time-to-event outcome", next_id = "term_gs_survival"),
-      list(label = "Continuous outcome, Lan-DeMets alpha-spending function (2 looks)", next_id = "term_lan_demets")
+      list(label = "Continuous outcome, Lan-DeMets alpha-spending function (2 looks)", next_id = "term_lan_demets"),
+      list(label = "Lan-DeMets alpha spending with two or more interim looks, or a binary or time-to-event outcome", next_id = "term_lan_demets_k")
     )
   ),
 
@@ -1053,6 +1054,7 @@ design_nodes <- list(
   term_gs_binary = .term("term_gs_binary", "Group sequential design, binary outcome", "group_sequential_binary"),
   term_gs_survival = .term("term_gs_survival", "Group sequential design, time-to-event outcome", "group_sequential_survival"),
   term_lan_demets = .term("term_lan_demets", "Lan-DeMets alpha-spending design", "lan_demets_normal"),
+  term_lan_demets_k = .term("term_lan_demets_k", "Lan-DeMets alpha-spending design, any number of looks", "lan_demets_k"),
   term_mult_p1 = .term("term_mult_p1", "Multiplicity-adjusted, one proportion", "multiplicity_proportion_1s"),
   term_mult_p2 = .term("term_mult_p2", "Multiplicity-adjusted, two proportions", "multiplicity_proportion_2s"),
   term_mult_m1 = .term("term_mult_m1", "Multiplicity-adjusted, one mean", "multiplicity_means_1s"),

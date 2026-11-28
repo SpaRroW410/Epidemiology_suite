@@ -154,6 +154,48 @@ group_sequential_content <- list(
     backend = "clinfun::gsdesign.survival()"
   ),
 
+  lan_demets_k = list(
+    title = "Lan-DeMets Alpha Spending: Any Number of Looks (Continuous, Binary or Time-to-Event)",
+    formula_latex = paste0(
+      "$$\\operatorname{corr}(Z_i, Z_j) = \\sqrt{t_i / t_j}\\ (t_i \\le t_j), \\qquad ",
+      "P(Z_1 < b_1, \\ldots, Z_{k-1} < b_{k-1}, Z_k \\ge b_k) = \\alpha^*(t_k) - \\alpha^*(t_{k-1})$$",
+      "$$n_{\\max} = \\left(\\frac{D}{z_{1-\\alpha/2} + z_{1-\\beta}}\\right)^2 n_{\\text{fixed}}, \\qquad ",
+      "D:\\ \\sum_k P(\\text{first crossing at look } k \\mid \\text{drift } D) = 1 - \\beta$$"
+    ),
+    explanation = paste(
+      "Use this when you plan **two or more interim analyses**, or a **binary** or **time-to-event** outcome, with the Lan-DeMets",
+      "alpha-spending function (the 2-look continuous design above is the special case with one interim).",
+      "",
+      "- **Interim analyses**: the information fractions at which you will look, e.g. 0.33, 0.67 (the final analysis is at 1). For a",
+      "  binary or continuous outcome the fraction is the share of the participants with an outcome; for time-to-event it is the",
+      "  share of the events.",
+      "- **Spending function**: O'Brien-Fleming-type spends very little alpha early (strict early boundaries); Pocock-type spends it",
+      "  evenly (easier early stopping, larger maximum size).",
+      "- The boundaries are found look by look so that the chance of crossing at each look, under no effect, equals the alpha the",
+      "  function allows for that look. The maximum size is the fixed-design size times the **inflation factor**, which depends only",
+      "  on the looks and the spending function.",
+      "- Fixed-design sizes: two means, the two-sample z-test; two proportions, the normal approximation without pooling; time to",
+      "  event, Schoenfeld's number of events. Boundaries are for efficacy only (no futility boundary), one-sided at alpha / 2.",
+      sep = "\n"
+    ),
+    worked_example = paste(
+      "Two means, delta = 0.5, SD = 1, looks at 1/3 and 2/3, O'Brien-Fleming-type, alpha 0.05, power 0.80 -> **128 in total** (43, 86",
+      "and 128 by each look), boundaries Z = 3.710, 2.511, 1.993, inflation 1.3%. Time to event, HR 0.7, looks at 0.25, 0.5, 0.75,",
+      "Pocock-type -> **296 events** (247 for a single look). Both equal gsDesign to 6 digits (tests). Two proportions 0.30 vs 0.45 with",
+      "looks at 1/3, 2/3 -> 324 in total; a simulation of 20,000 sequential trials gave power 0.793 and a one-sided error of 0.026.",
+      sep = "\n"
+    ),
+    citation = paste(
+      "Lan KKG, DeMets DL. Discrete sequential boundaries for clinical trials. Biometrika. 1983;70(3):659-663 (the spending",
+      "functions, as in the 2-look design; not read here). Schoenfeld D. The asymptotic properties of nonparametric tests for",
+      "comparing survival distributions. Biometrika. 1981;68:316-319 (events).",
+      "",
+      "Checked against gsDesign (Anderson K. gsDesign: Group Sequential Design. R package), used only to check: boundaries,",
+      "inflation factors and event counts for 2 to 5 looks."
+    ),
+    backend = "base R + mvtnorm (Miwa algorithm); equals gsDesign::gsDesign()"
+  ),
+
   lan_demets_normal = list(
     title = "Lan-DeMets Alpha-Spending Design: Continuous Outcome (2 Looks)",
     formula_latex = paste0(

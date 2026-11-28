@@ -25,7 +25,7 @@ Steps only the owner can take that belong to no section below; the section items
 
 ## 2. Calculators (Plan: Sample Size and Analyze)
 
-All 224 designs of the app's catalog are built (17 Nov 2026); the open items are designs not built yet, or the open half of a built one.
+All 225 designs of the app's catalog are built (17 Nov 2026); the open items are designs not built yet, or the open half of a built one.
 The guide's end points for designs not built yet are tested to be listed here (`tests/testthat/test-design_tree.R`).
 
 ### Plan, Effect Sizes: Effect Sizes (ES)
@@ -132,8 +132,11 @@ The guide's end points for designs not built yet are tested to be listed here (`
   2021 (Trials 22:598, PMC8419932); the paper's equations were not readable, so the power is matched to the authors' function
   `swCRTdesign::swGlmPwr()` (10 digits over random settings, test skips without the package). Open: a conversion from ICC to tau,
   time-varying cluster effects, closed cohort.
-- [ ] **TRIAL-29** Group sequential / Lan-DeMets, open half: the spending-function design with 3+ looks and for binary / survival
-  outcomes; blinded sample-size re-estimation (`spass`-style).
+- [ ] **TRIAL-29** Group sequential / Lan-DeMets, open half: blinded sample-size re-estimation (`spass`-style). Built 28 Nov 2026: the
+  spending-function design with any number of looks, for a continuous, binary or time-to-event outcome (`calc_lan_demets_k()`):
+  boundaries and inflation factors equal gsDesign to 6-7 digits (2 to 5 looks, OF- and Pocock-type), events equal gsDesign's
+  for n.fix = nEvents(); the binary design was simulated (20,000 trials: power 0.793, one-sided error 0.026). Efficacy boundaries
+  only (no futility).
 - [x] **TRIAL-30** Trial sequential analysis, open half: the heterogeneity-adjusted (random-effects / diversity-adjusted) information size.
   Built 16 Nov 2026: an anticipated heterogeneity (diversity D-squared, or I-squared) multiplies the fixed-effect size by
   1 / (1 - D-squared); Wetterslev, Thorlund, Brok & Gluud 2009 (BMC Med Res Methodol 9:86, read in full), whose Table 2 (seven
