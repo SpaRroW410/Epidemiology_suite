@@ -1,12 +1,23 @@
-# Container image (docs/archive/ROADMAP.md item 18). Every relevant push builds the image, starts it and drives it in
+# Container image (docs/archive/ROADMAP.md item 18). Every relevant push to main and pull request builds the image, starts it and drives it in
 # headless Chrome (open a calculator, read a result). Pushes to `main` and version tags also publish it to GHCR
 # (ghcr.io/<owner>/epidemiologysuite); that needs no setup beyond the default GITHUB_TOKEN.
 name: docker
 
+# Not on every push to a work branch (that sent a failure email per push; the pull request runs it once instead).
 on:
   push:
-    branches: [main, "claude/**"]
+    branches: [main]
     tags: ["v*"]
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "docker-compose.yml"
+      - "DESCRIPTION"
+      - "NAMESPACE"
+      - "R/**"
+      - "tools/docker/**"
+      - ".github/workflows/docker.yml"
+  pull_request:
     paths:
       - "Dockerfile"
       - ".dockerignore"
